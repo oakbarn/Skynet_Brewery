@@ -104,7 +104,7 @@ And if you have been Brewing with your tap water and making Good beer, why rock 
 
 ### Hop Stands
 
-The temperature and time of the three Hop Stands (High, Middle, Low) a new Recipe starts with ([Mash, Boil and Water Profiles](35-mash-and-boil-profiles), Skynet Rule 17.14).
+Not on Default settings any more: there are no Hop Stand defaults. A Recipe asks for the stand, its temperature and its time when a Whirlpool hop is added, with the common numbers in the Hover Help ([Mash, Boil and Water Profiles](35-mash-and-boil-profiles#the-three-hop-stands), Skynet Rule 17.14).
 
 ### Water to Grain Ratio
 
@@ -156,7 +156,7 @@ Some things have no box because they are always the same (for example the Pump a
 
 These change things already made, or how the whole panel works, so they are Settings, not Defaults. They are in **Settings > Panel settings: screen, Tabs and alerts**:
 
-- **Units** (US or Metric): every amount, temperature and Recipe shows in it. Skynet keeps every number in metric (°C, liters, kilograms, cm), so Units only changes what you see and type; switching it never changes a saved number (Skynet Rule 2.59). Mash, Boil and Equipment Profiles, Vessels and Vessel Templates show their numbers in it when they open; the Units box in each of them is greyed out and follows this one;
+- **Units** (US or Metric): every amount, temperature and Recipe shows in it. Skynet keeps every number in metric (°C, liters, kilograms, cm), so Units only changes what you see and type; switching it never changes a saved number (Skynet Rule 2.59). Mash, Boil and Equipment Profiles, Vessels and Vessel Templates show their numbers in it when they open; the Units box in each of them is greyed out and follows this one; on a running Tab every temperature shows in it too: a probe's reading (PV), its Setpoint (SV), its Dial, and the Setpoint and Offsets of a Heating Element or Fermentor Control, in their Properties and pop-ups as well. A probe kept in °C (the 3 Vessel Sample) shows 150.0 °F in US, and a probe kept in °F shows °C in Metric; what you type is saved in the probe's own units, and a number you did not change is saved exactly as it was. An Offset turns by 1.8 only (1 °C = 1.8 °F), never with the 32. Recipe items that come in their own unit keep it (an addition in grams, a yeast in Packs; hops are kept in kg and show in oz or g);
 - **Tab Style** (the look of every Tab that has no Tab Style of its own);
 - **Menu Bar**, **Sound**, **On startup** (Zoom, Full screen);
 - **\L Rich Text Code Size**;

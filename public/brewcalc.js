@@ -67,23 +67,31 @@ export const firstOfType = (p, ...types) => (p?.equipment || []).find(e => types
 // Three Hop Stands (OakBarn Brewery, 2026-11-13: "3 different Hop Stand and Times Hop Stand High with time, Hop Stand Middle with
 // Time and Hop Stand Low with Time"; "Middle 154"; "low around Pitch"; "make BOTH temperature AND time user settable"). The chill
 // stops at each stand that has Whirlpool hops, highest first, and the cooling water is off for its time. Kept in °C and minutes.
-// Each comes from: the Recipe's own, else its Boil Profile's, else ☰ Menu > Default settings, else these Skynet numbers.
-// Low has no Skynet temperature: it is the Recipe's pitch temperature (68 °F / 20 °C when none).
+// Each comes from: the Recipe's own, else its Boil Profile's, else nothing (empty).
+// No Defaults (OakBarn Brewery, 2026-11-16, Panel Updates entry 13: "Hop Questions to ask if a Hop is added to a Recipe that is
+// Whirlpool. No Defaults. The help can be with the question and what is common"; built 2026-11-19, Rule 17.14): Default settings no
+// longer has Hop Stand boxes and Skynet fills in no numbers. The numbers below are only the common ones, shown in the Hover Help.
+// Low has no common temperature: it is about the Recipe's pitch temperature.
 export const HOP_STANDS = [['High', 'High', (180 - 32) / 1.8, 10], ['Middle', 'Middle', (154 - 32) / 1.8, 20], ['Low', 'Low', null, 30]];
 export const PITCH_DEFAULT_C = 20;
 const hsNum = v => v === '' || v === null || v === undefined || !Number.isFinite(+v) ? null : +v;
-// d: Default settings (hsHighTempC, hsHighMin ...); bp: a Boil Profile (hsHighTemp in its own units, hsHighMin); rc: the Recipe
-// (rc.hopStands = { High: { tempC, min } ... }). Returns [{ key, label, tempC, min }].
-export function hopStands(rc = null, d = {}, bp = null) {
+// bp: a Boil Profile (hsHighTemp in its own units, hsHighMin); rc: the Recipe (rc.hopStands = { High: { tempC, min } ... }).
+// The second argument (Default settings) is no longer read (2026-11-19). Returns [{ key, label, tempC, min }]; null = not answered.
+export function hopStands(rc = null, _d = {}, bp = null) {
   const bpC = v => hsNum(v) === null ? null : bp?.units === 'Metric' ? +v : Math.round((+v - 32) / 1.8 * 100) / 100;
-  return HOP_STANDS.map(([key, label, tempC, min]) => {
+  return HOP_STANDS.map(([key, label]) => {
     const own = rc?.hopStands?.[key] || {};
-    const t = hsNum(own.tempC) ?? bpC(bp?.[`hs${key}Temp`]) ?? hsNum(d[`hs${key}TempC`]) ?? tempC ?? hsNum(rc?.pitchTempC) ?? PITCH_DEFAULT_C;
-    const m = hsNum(own.min) ?? hsNum(bp?.[`hs${key}Min`]) ?? hsNum(d[`hs${key}Min`]) ?? min;
-    return { key, label, tempC: t, min: m };
+    const t = hsNum(own.tempC) ?? bpC(bp?.[`hs${key}Temp`]);
+    const m = hsNum(own.min) ?? hsNum(bp?.[`hs${key}Min`]);
+    return { key, label, tempC: t ?? null, min: m ?? null };
   });
 }
-// the stand a temperature is nearest to (an imported whirlpool hop with its own temperature goes there)
-export const nearestStand = (tempC, stands) => stands.reduce((a, s) => Math.abs(s.tempC - tempC) < Math.abs(a.tempC - tempC) ? s : a, stands[0]).key;
-// the stand of a Whirlpool hop: its own pick, else nearest to its temperature, else High
-export const standOf = (hop, stands) => HOP_STANDS.some(([k]) => k === hop.stand) ? hop.stand : hsNum(hop.wpTempC) !== null ? nearestStand(+hop.wpTempC, stands) : 'High';
+// a stand the chill stops at: both its temperature and its time answered
+export const standReady = s => !!s && s.tempC !== null && s.min !== null;
+// the stand a temperature is nearest to (stands with no temperature are left out)
+export const nearestStand = (tempC, stands) => { const st = stands.filter(s => s.tempC !== null); return st.length ? st.reduce((a, s) => Math.abs(s.tempC - tempC) < Math.abs(a.tempC - tempC) ? s : a, st[0]).key : standByTemp(tempC); };
+// the stand a whirlpool temperature fits (an imported whirlpool hop with its own temperature goes there, 2026-11-19):
+// High at 170 °F (76.7 °C) and above, Middle from 140 °F (60 °C), Low below that
+export const standByTemp = tempC => tempC >= (170 - 32) / 1.8 ? 'High' : tempC >= (140 - 32) / 1.8 ? 'Middle' : 'Low';
+// the stand of a Whirlpool hop: its own pick, else the one its temperature fits, else '' (not picked yet: no Defaults, 2026-11-19)
+export const standOf = (hop, _stands) => HOP_STANDS.some(([k]) => k === hop.stand) ? hop.stand : hsNum(hop.wpTempC) !== null ? standByTemp(+hop.wpTempC) : '';

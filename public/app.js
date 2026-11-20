@@ -55,7 +55,8 @@ import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GR
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
-import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
+import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
+import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -1352,6 +1353,9 @@ const newOverlay = kind => (v => v === undefined || v === null ? OVERLAY_DEFAULT
 const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', BOLT_FLASH], ['Corner Badge Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['See Through Lightning Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
   ['Green Glow Ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
+// A Manual vessel's own Temperature units (Rule 2.59, the exception for a Vessel whose own screen has its units; OakBarn Brewery,
+// 2026-11-19: "a user can switch the Digiboil and Brewzilla back to F. I would think that is most common for US Brewers")
+const MANUAL_UNITS_TIP = 'Temperature units: the units its own screen shows, so the pop-up asks for the set point the way you read it. It starts as ☰ Menu > Settings > Units (°F in US Standard). A DigiBoil or Brewzilla screen comes back in °C after every power cycle: switch it back to °F on the vessel, or pick °C here. When this is °F, the pop-up gives the set point in °C as well. Unlike every other temperature, this one does not follow Units (Rule 2.59).';
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
 // pictures and sounds already used anywhere in the layout
@@ -2874,6 +2878,11 @@ function dialReading(e, v) {
   if (e.type === 'dutyCycle') return v.dutycycle;
   return typeof v.value === 'number' ? v.value : Number.isFinite(Number(v.value)) && v.value !== '' && v.value !== null ? Number(v.value) : null;
 }
+// a probe's Dial in the Units: its Lowest, Highest (temperatures) and its Cool and Hot bands (differences) turned too
+function dialTurn(e) {
+  const to = showUnits(), n = v => v === undefined || v === null || v === '' ? v : tShow(+v, e.units, to), d = v => v === undefined || v === null || v === '' ? v : dShow(+v, e.units, to);
+  return { ...e, units: showLetter(to), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: d(e.dialCool), dialHot: d(e.dialHot), precision: e.precision ?? 1 };
+}
 function dialSetpoint(e) {
   const sp = String(e.dialSp ?? '').trim();
   if (!sp) return null;
@@ -2882,6 +2891,17 @@ function dialSetpoint(e) {
   for (const k of ['target', 'setpoint', 'value']) if (typeof o[k] === 'number') return o[k];
   return null;
 }
+// Tab temperatures in the Units (Rule 2.59, OakBarn Brewery, 2026-11-19: "US would not understand C and Europeans not F"): a probe keeps
+// its numbers in its own units; a reading, a Setpoint and an Offset show in ☰ Menu > Settings > Units (public/tempshow.js)
+const probeOf = it => it?.input ? ((draft || S.config).elements || []).find(e => e.name === it.input) || null : null;
+function tempTxt(e, val, own = e.units) {
+  const to = showUnits();
+  if (!needsTurn(own, to)) return fmtVal(e, val) + (own ? ' ' + own : '');
+  const d = e.precision !== undefined && e.precision !== null && e.precision !== '' ? e.precision : 1;
+  return fmtVal({ ...e, precision: d }, tShow(val, own, to)) + ' ' + showLetter(to);
+}
+// a Setpoint with no °F / °C after it (an older Hysteresis, PID, Deadband or a Fermentor: "45 %  ▸ 152"), in the Units
+const spNum = (val, own) => needsTurn(own, showUnits()) && typeof val === 'number' ? fmtVal({ precision: 1 }, tShow(val, own, showUnits())) : fmtVal({}, val);
 function fmtVal(e, v) {
   if (v === undefined || v === null) return '';
   if (typeof v === 'number' && +e.digits > 0) {          // a Gauge: the whole number part padded to its digits (with figure spaces)
@@ -2926,7 +2946,7 @@ function heatSv(e0, e, v) {
   if (!SP_METHODS.includes(k)) return null;
   const t = typeof v.target === 'number' ? v.target : Number(e.target);
   const pe = e.input && S.config.elements.find(x => x.name === e.input);
-  return { prop: 'target', num: Number.isFinite(t) ? t : null, unit: pe?.units || '°F', k, sp: true };
+  return svTurn({ prop: 'target', num: Number.isFinite(t) ? t : null, unit: pe?.units || '°F', k, sp: true });
 }
 // what it is doing, without the number its SV box shows
 function svStatus(e, v, on, sv) {
@@ -2935,10 +2955,16 @@ function svStatus(e, v, on, sv) {
   if (sv.k === 'hysteresis') return v.output ? (e.onText ?? 'ON') : 'idle';
   return `${fmtVal({ precision: 0 }, v.value)} %`;
 }
+// an SV box shows its Setpoint in the Units; .own keeps the probe's units, so what is typed goes back into them (Rule 2.59)
+function svTurn(sv) {
+  const to = showUnits();
+  if (!needsTurn(sv.unit, to)) return sv;
+  return { ...sv, own: sv.unit, unit: unitShown(sv.unit, to), num: sv.num === null ? null : tShow(sv.num, sv.unit, to) };
+}
 const svFmt = sv => sv.num === null ? '' : fmtVal(sv.sp ? { precision: 1 } : {}, sv.num);      // a Setpoint to 0.1 degree (65.5556 shows 65.6)
 const svText = sv => sv.num === null ? '-' : `${svFmt(sv)}${sv.unit === '%' ? ' %' : ' ' + sv.unit}`;
 function fillSv(vl, text, sv) {
-  const box = h('span', { class: 'svBox' + (sv.sp ? ' sp' : ' dc'), 'data-prop': sv.prop, 'data-num': svFmt(sv),
+  const box = h('span', { class: 'svBox' + (sv.sp ? ' sp' : ' dc'), 'data-prop': sv.prop, 'data-num': svFmt(sv), ...(sv.own ? { 'data-own': sv.own } : {}),
     title: sv.sp ? 'SV: the Setpoint. One click to type a new one, then Enter (Esc puts it back).' : 'Duty cycle %. One click to type a new one, then Enter (0 turns it Off, above 0 turns it On).' },
     ...(sv.sp ? [h('span', { class: 'svTag' }, 'SV')] : []), h('span', { class: 'svNum' }, svText(sv)));
   const parts = [];
@@ -2957,11 +2983,15 @@ function svEdit(box) {
   let done = false;
   const finish = async ok => {
     if (done) return; done = true;
-    const x = parseFloat(String(inp.value).replace(',', '.'));
+    let x = parseFloat(String(inp.value).replace(',', '.'));
     vl._svEdit = false; updateEl(e.name);
     if (!ok) return;
     if (!Number.isFinite(x)) return toast('Enter a number', true);
     if (prop === 'dutycycle' && (x < 0 || x > 100)) return toast('Duty cycle is 0 to 100 %', true);
+    if (box.dataset.own) {      // typed in the Units: saved in the probe's own units (Rule 2.59); the same number as shown changes nothing
+      if (x === parseFloat(was)) return;
+      x = tBack(x, box.dataset.own, showUnits());
+    }
     const st = !!S.values[e.name]?.state, inDc = heatMethodKey(S.values[e.name]?.method) === 'dutyCycle';
     // a Duty cycle % above 0 turns it On (Rule 6.19): an Element set to Ask before changing by hand asks first
     if (prop === 'dutycycle' && inDc && x > 0 && !st && e.confirm) { if (!(await choose(`${S.values[e.name]?.label ?? e.label ?? e.name}: ON at ${fmtVal({}, x)} %?`, [['ON', true]]))) return; }
@@ -2992,8 +3022,8 @@ function probeSv(e0, e, v) {
   const p = e0.cloneOf ? (elByName(e0.cloneOf) || e0) : e0, t = probeHolder(p);
   const raw = t ? (S.values[t.name]?.target ?? t.target) : (v.setpoint ?? p.setpoint);
   const num = raw === '' || raw === null || raw === undefined || !Number.isFinite(Number(raw)) ? null : Number(raw);
-  return { prop: t ? 'target' : 'setpoint', tgt: t ? t.name : p.name, num, unit: e.units || '°F', k: 'probe', sp: true,
-    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '', color: v.fault ? '' : probePvColor(p, v.value) };
+  return svTurn({ prop: t ? 'target' : 'setpoint', tgt: t ? t.name : p.name, num, unit: e.units || '°F', k: 'probe', sp: true,
+    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '', color: v.fault ? '' : probePvColor(p, v.value) });
 }
 // PV's color (OakBarn Brewery, 2026-11-19: "If the process is heating and the Temperature is Below the Setpoint , Blue, at Setpoint
 // Between a Hys Green and PID (with smoothing Green) and if above Red. Opposite for Cooling. Dead Band Green in the Band and Blue if
@@ -3033,7 +3063,7 @@ function probePvColor(p, pv) {
 }
 // PV over SV, as on a panel controller: each line keeps its digits and °F / °C together, and the two are made smaller together to fit
 function fillPvSv(vl, text, sv) {
-  const box = h('span', { class: 'svBox sp pv', 'data-prop': sv.prop, 'data-tgt': sv.tgt, 'data-num': svFmt(sv),
+  const box = h('span', { class: 'svBox sp pv', 'data-prop': sv.prop, 'data-tgt': sv.tgt, 'data-num': svFmt(sv), ...(sv.own ? { 'data-own': sv.own } : {}),
     title: sv.holder ? `SV: the Setpoint of ${sv.holder}. One click to type a new one, then Enter (Esc puts it back).`
       : 'SV: this probe\'s own Setpoint (nothing heats or cools to it). One click to type a new one, then Enter (Esc puts it back).' },
     h('span', { class: 'svNum' }, sv.num === null ? `--- ${sv.unit}` : svText(sv)), h('span', { class: 'svTag' }, 'SV'));
@@ -3105,20 +3135,20 @@ function fillEl(n, e0) {
       // a Heating Element run by a control method (Rule 6.19): what it is doing, like the PID's own "45 %  ▸ 152"
       if (isHeatElem(e) && on && v.method && heatMethodKey(v.method) !== 'onoff') {
         const hm = heatMethodKey(v.method);
-        text = hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? `${v.output ? (e.onText ?? 'ON') : 'idle'}  ▸ ${fmtVal({}, v.target)}` : `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}`;
+        text = hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? `${v.output ? (e.onText ?? 'ON') : 'idle'}  ▸ ${spNum(v.target, probeOf(e)?.units)}` : `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${spNum(v.target, probeOf(e)?.units)}`;
       }
       // its SV box (Panel Updates 40): the number a person sets, one click to type a new one; the box shows it, so the text drops it
       if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
-    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + (e.type === 'temperature' ? tempTxt(e, v.value) : fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''));
       if (e.type === 'temperature') sv = probeSv(e0, e, v);      // its PV and SV (Panel Updates 41)
       break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
     case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
     // a Hydrometer (Rule 6.25): its gravity and temperature, or No signal
-    case 'hydrometer': text = v.lost ? '⚠ No signal' : `${fmtVal(hydroDec(e), v.value)} ${hydroUnitWord(e)} · ${fmtVal({ precision: 1 }, v.temperature)} ${e.tempUnits || '°F'}`; on = !v.lost; break;
+    case 'hydrometer': text = v.lost ? '⚠ No signal' : `${fmtVal(hydroDec(e), v.value)} ${hydroUnitWord(e)} · ${tempTxt({ precision: 1 }, v.temperature, e.tempUnits || '°F')}`; on = !v.lost; break;
     case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
     case 'stepper': {     // where it is, where it is going, and a warning while it has a home switch but has not found it
       const u = STEP_UNITS[e.units]?.[0] ?? e.units ?? '';
@@ -3127,9 +3157,9 @@ function fillEl(n, e0) {
     }
     case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     // the Fermentor Control (Rule 6.30): what it is doing and its Setpoint (Cooling ▸ 66.0), or OFF
-    case 'fermentor': on = !!v.state; text = on ? `${v.doing ?? ''}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); n.classList.toggle('ferm-heat', on && v.doing === 'Heating'); n.classList.toggle('ferm-cool', on && v.doing === 'Cooling'); break;
-    case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
-    case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
+    case 'fermentor': on = !!v.state; text = on ? `${v.doing ?? ''}  ▸ ${spNum(v.target, probeOf(e)?.units)}` : (e.offText ?? 'OFF'); n.classList.toggle('ferm-heat', on && v.doing === 'Heating'); n.classList.toggle('ferm-cool', on && v.doing === 'Cooling'); break;
+    case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${spNum(v.target, probeOf(e)?.units)}` : (e.offText ?? 'OFF'); break;
+    case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${spNum(v.target, probeOf(e)?.units)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: v.showas || e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
@@ -3211,7 +3241,11 @@ function fillEl(n, e0) {
   n.classList.toggle('look-dial', dial);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
-  else if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
+  else if (dial) {      // the Skynet Dial (Rule 2.40); a probe's Dial reads in the Units (Rule 2.59)
+    const dt = e.type === 'temperature' && needsTurn(e.units, showUnits()) ? dialTurn(e) : null, ed = isHeatElem(e) ? { ...e, units: '%' } : dt || e;
+    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e);
+    vl.innerHTML = dialSvg(ed, dt && rd !== null ? tShow(rd, e.units, showUnits()) : rd, dt && sp0 !== null ? tShow(sp0, e.units, showUnits()) : sp0, v.fault ? 'FAULT' : null);
+  }
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
   else if (sv?.k === 'probe') fillPvSv(vl, text, sv);      // a Temperature Probe's PV over its SV (Panel Updates 41)
   else if (sv) fillSv(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text, sv);      // a Heating Element's text and its SV box
@@ -3789,11 +3823,15 @@ function heatDialog(t) {
   const draw = () => {
     d.innerHTML = '';
     const main = HEAT_MAIN[m];
-    const inp = main ? h('input', { class: 'vdInput', value: fmtVal({}, v[main[0]]), inputmode: 'decimal', 'aria-label': main[1] }) : null;
+    // a Setpoint in the Units (Rule 2.59): typed back into its probe's units; the same number as shown changes nothing
+    const own = probeOf(t)?.units, to = showUnits(), turn = main?.[0] === 'target' && needsTurn(own, to);
+    const shown0 = turn && typeof v.target === 'number' ? fmtVal({ precision: 1 }, tShow(v.target, own, to)) : fmtVal({}, main ? v[main[0]] : '');
+    const inp = main ? h('input', { class: 'vdInput', value: shown0, inputmode: 'decimal', 'aria-label': main[1] + (main[0] === 'target' && own ? ` (${unitShown(own, to)})` : '') }) : null;
     const bump = k => { inp.value = String(+((parseFloat(inp.value) || 0) + k).toFixed(4)); };
     const done = async on => {
       let x;
       if (inp) { x = parseFloat(inp.value); if (!Number.isFinite(x)) return toast('Enter a number', true); }
+      if (turn) x = inp.value.trim() === shown0 && typeof v.target === 'number' ? v.target : tBack(x, own, to);
       d.close();
       if (heatMethodKey(v.method) !== m) await setProp(t.name, 'method', heatMethodWord(m));
       if (inp) await setProp(t.name, main[0], x);
@@ -3867,16 +3905,21 @@ function setpointDialog(p, t) {
   const now = he ? (heatMethodKey(v.method) ?? startMethod(t)) : t.type;
   // the method it uses for the Setpoint: the one in use if it holds a Setpoint, else the first allowed one that does
   const m = !he ? t.type : SP_METHODS.includes(now) ? now : allowedMethods(t).find(k => SP_METHODS.includes(k));
-  const inp = h('input', { class: 'vdInput', value: fmtVal({}, typeof v.target === 'number' ? v.target : typeof t.target === 'number' ? t.target : Math.round(pv.value ?? 0)), inputmode: 'decimal', 'aria-label': 'Setpoint' });
+  // in the Units (Rule 2.59): shown to 0.1 when the probe keeps the other units; typed back into the probe's units, and the same number
+  // as shown changes nothing
+  const to = showUnits(), turn = needsTurn(u, to), kept = typeof v.target === 'number' ? v.target : typeof t.target === 'number' ? t.target : null;
+  const shown0 = kept !== null ? (turn ? fmtVal({ precision: 1 }, tShow(kept, u, to)) : fmtVal({}, kept)) : fmtVal({}, Math.round((turn ? tShow(pv.value ?? 0, u, to) : pv.value) ?? 0));
+  const inp = h('input', { class: 'vdInput', value: shown0, inputmode: 'decimal', 'aria-label': `Setpoint (${unitShown(u, to)})` });
   const bump = k => { inp.value = String(+((parseFloat(inp.value) || 0) + k).toFixed(4)); };
   const done = async on => {
-    const x = parseFloat(inp.value); if (!Number.isFinite(x)) return toast('Enter a number', true);
+    const x0 = parseFloat(inp.value); if (!Number.isFinite(x0)) return toast('Enter a number', true);
+    const x = !turn ? x0 : kept !== null && inp.value.trim() === shown0 ? kept : tBack(x0, u, to);
     d.close();
     if (he && m && m !== now) await setProp(t.name, 'method', heatMethodWord(m));
     await setProp(t.name, 'target', x);
     if (on !== undefined) await setProp(t.name, he || isFermentor(t) ? 'state' : 'enabled', on);
   };
-  const reading = pv.fault ? 'FAULT' : `${fmtVal(p, pv.value)} ${u}`;
+  const reading = pv.fault ? 'FAULT' : tempTxt(p, pv.value, u);
   const word = he ? heatMethodWord(now) : isFermentor(t) ? `Fermentor, ${v.mode ?? 'Heat & Cool'}, ${v.doing ?? 'Off'}` : { hysteresis: 'Hysteresis', pid: 'PID', deadband: 'Deadband' }[t.type];
   const note = !m ? `${tl} has no heating method that holds a Setpoint. Tick Hysteresis, PID, Deadband or Precise in its Properties.`
     : he && m !== now ? `${tl} is on ${heatMethodWord(now)} now. Set switches it to ${heatMethodWord(m)}.` : '';
@@ -5703,6 +5746,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   if (pick === 'integratedDevice') return newIntegratedDevice(extra.template);
   if (pick === 'thermowell') return newThermowell(extra.length);
+  if (pick === 'manual') extra = { ...extra, units: showUnits() === 'Metric' ? '°C' : '°F', volumeUnits: showUnits() === 'Metric' ? 'L' : 'gal' };      // a Manual vessel starts in the Units (Rule 2.59)
   if (pick === 'probeTee') return newProbeTee(extra.tee);
   if (pick === 'mbv') {      // Motorized Ball Valve (Fritz, 2026-11-05): step 2 picks the valve, then the Add box (the Pump's drill-down)
     if (!TPL) await loadTemplates().catch(() => {});
@@ -8492,7 +8536,7 @@ const F = {
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
     ['_snote', 'Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Picture when sounding', 'path'], ['imageOff', 'Picture when quiet', 'path']],
-  manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
+  manual: [['units', 'Temperature units', 'sel', ['°F', '°C'], false, false, { tip: MANUAL_UNITS_TIP }], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
     ['_mnote', 'Processes set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
   pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num'], VOLT_FIELD()],
@@ -9100,11 +9144,14 @@ const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Hea
 // the Offset list (Integrate_4): every half degree its Hardware Controller allows (Rule 6.29), and the one saved if it is something else.
 // With a minus (OakBarn Brewery, 2026-11-10: the sign says where it turns On, Setpoint + Offset: heating turns On below it); saved
 // with the same minus, as the Brain and a Process use it (Rule 6.19: one sign everywhere).
+// A probe kept in the other units: the list is every half degree in the Units, and the saved one is shown in the Units (Rule 2.59).
 function offsetChoices(it) {
-  const r = heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input)), l = [];
+  const pr = (draft || S.config).elements.find(e => e.name === it.input), to = showUnits(), turn = needsTurn(pr?.units, to);
+  const r = heatHysRange(it, turn ? { ...pr, units: showLetter(to) } : pr), l = [];
   for (let v = r.min; v <= r.max + 1e-9; v = Math.round((v + 0.5) * 10) / 10) l.push(v);
   for (let i = 0; i < l.length; i++) l[i] = -l[i];
-  if (it.onOffset !== undefined && it.onOffset !== '' && !l.includes(+it.onOffset)) l.push(+it.onOffset);
+  const cur = turn ? boxShow('diff', it.onOffset, pr.units, to) : it.onOffset;
+  if (cur !== undefined && cur !== '' && !l.includes(+cur)) l.push(+cur);
   return l.sort((a, b) => b - a).map(v => [String(v), String(v)]);
 }
 const liveSeen = new WeakSet();      // a dialog opens on the method the Element is in now, so it shows what the Tab shows (Integrate 5)
@@ -9248,7 +9295,7 @@ function flameFields(it, x = {}) {
   const els = (draft || S.config).elements, T = FLAME_TIPS;
   const out = isHeatElem(it) ? [['gasBurner', 'Gas burner', 'bool', null, true, false, { tip: T.gasBurner, ...x }]] : [];
   if (!isGasBurner(it)) return out;
-  const probe = els.find(e => e.name === it.input), s = flameSettings(it, probe?.units), u = s.c ? '°C' : '°F', d = s.c ? FLAME_DEFAULTS_C : FLAME_DEFAULTS_F;
+  const probe = els.find(e => e.name === it.input), s = flameSettings(it, probe?.units), tc = needsTurn(probe?.units, showUnits()) ? showUnits() === 'Metric' : s.c, u = tc ? '°C' : '°F', d = tc ? FLAME_DEFAULTS_C : FLAME_DEFAULTS_F;      // in the Units (Rule 2.59)
   const temps = [['', '(none)'], ...els.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
   if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
   const igniters = [['', 'None'], ...els.filter(e => e.type === 'digitalOut' && e.typeCode === 'Ignit' && e.name !== it.name).map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
@@ -10412,7 +10459,7 @@ const DEVICE_TIPS = {
   tpPath: 'The Skynet drawing of this Thermowell or probe tee. It is set and cannot be changed.',
   pOrient: 'Turn it 90, 180 or 270 degrees clockwise, and flip it. The Graphic here and the probe on the Tab follow, and its IPs too.',
   pType: 'The kind of probe, picked first. The ⬢ beside it has its settings (wires, resistor, thermocouple type ...). To use another kind, delete it and add it again.',
-  tpUnits: 'Units the reading shows in (°F or °C), and how many decimals.',
+  tpUnits: 'Kept in: the units this probe keeps its numbers in (its reading, Setpoint and Offsets, and what a Process writes to it). What you see and type follows ☰ Menu > Settings > Units (Rule 2.59): a probe kept in °C shows in °F when Units is US Standard. Decimals: how many numbers after the point the reading shows.',
   pOffset: 'Added to every reading, to calibrate the probe (for example -0.4). The Database and .API ⬢ on its line sets what it sends to the database.',
   pSetpoint: 'The SV this probe starts with, shown in the green SV box under its reading on the Tab (one click there changes it; a Process uses .setpoint). When a Heating Element or Fermentor Control uses this probe, the SV box shows that one\'s Setpoint instead, so there is only one.',
   pCal2: 'For readings right to 0.1 degree (Precise heating). A plain offset moves every reading the same; two points (ice water and boiling water) also fix a probe that is right at one end and off at the other. The ⬢ opens it. The offset is added after it.',
@@ -10478,7 +10525,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && kind === 'text' && obj._ref && obj.type && (S.types || []).includes(obj.type) && hasSuggestion(obj) && String(obj.name ?? '').trim()) return nameChangeRows(key, label.replace(/\s*\(.*\)$/, ''), obj);
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
-  const v = obj[key];
+  const tb = kind === 'num' || kind === 'numsel' ? tempBox(key, obj) : null;      // a temperature box shows in the Units (Rule 2.59)
+  const v = tb ? boxShow(tb.kind, obj[key], tb.own, showUnits()) : obj[key];
   let input;
   if (kind === 'imgpath') {    // .backpath, _2, _3 (Fritz, 2026-11-02); changing _2 or _3 shows a heads-up once
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
@@ -10542,7 +10590,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const r = S.values[obj.name] || {};
     const spu = obj.type === 'stepper' ? (obj.units === 'steps' ? 1 : (+obj.stepsPerRev || 200) * (+obj.microsteps || 1) * (+obj.gearRatio || 1) / (+obj.unitsPerRev || (obj.units === 'deg' ? 360 : obj.units === '%' ? 100 : 1))) : 0;
     if (spu) return [h('label', {}, label), h('span', { class: 'info' }, `${fmtVal(obj, r.position)} ${obj.units || ''} = ${r.steps ?? 0} steps${r.moving ? ', moving' : ''}${r.homed ? ', homed' : ''}.  ${+spu.toFixed(3)} steps per ${obj.units || 'unit'} (from the settings above, after Save)`)];
-    const txt = obj.type === 'hydrometer' ? (r.lost ? `No signal${r.lastseen ? ' since ' + new Date(r.lastseen).toLocaleString() : ' yet'}` : `${fmtVal(hydroDec(obj), r.value)} ${hydroUnitWord(obj)}, ${r.temperature} ${obj.tempUnits || '°F'}${r.battery ? ', battery ' + r.battery : ''}${r.rssi ? ', signal ' + r.rssi : ''}${r.angle ? ', angle ' + r.angle + '°' : ''}${r.og ? ', ABV ' + r.abv + ' %' : ''}`) : obj.type === 'scale' ? `${r.raw ?? '-'}  (tare ${obj.tareRaw ?? 'not set'})` : obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
+    const txt = obj.type === 'hydrometer' ? (r.lost ? `No signal${r.lastseen ? ' since ' + new Date(r.lastseen).toLocaleString() : ' yet'}` : `${fmtVal(hydroDec(obj), r.value)} ${hydroUnitWord(obj)}, ${r.temperature} ${obj.tempUnits || '°F'}${r.battery ? ', battery ' + r.battery : ''}${r.rssi ? ', signal ' + r.rssi : ''}${r.angle ? ', angle ' + r.angle + '°' : ''}${r.og ? ', ABV ' + r.abv + ' %' : ''}`) : obj.type === 'scale' ? `${r.raw ?? '-'}  (tare ${obj.tareRaw ?? 'not set'})` : obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : obj.type === 'temperature' ? tempTxt(obj, r.value) : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
     return [h('label', {}, label), h('span', { class: 'info' }, txt)];
   }
   if (kind === 'pin') {      // free text with a list of Mega 2560 pins: A0-A15 and their BruControl numbers 54-69 mean the same pin
@@ -10919,8 +10967,25 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'fldPair' }, h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', list: id, placeholder: 'type it, or pick one Skynet heard' }), h('datalist', { id }));
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
+  if (tb && input) {
+    Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '' });
+    input.title = `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
+  }
   const full = kind === 'multi' || kind === 'area' || kind === 'ticks';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
+}
+// The boxes of a Properties dialog that hold a temperature (Rule 2.59): a Setpoint or Boil point turns with the full °F / °C formula
+// ('abs'), an Offset, band, Rise or Drop only by 9/5 ('diff'). Only when the probe keeps the other units: the box shows the Units,
+// and what is typed is saved in the probe's units. A probe's own Setpoint and Dial; a Heating Element, older Hysteresis, PID or
+// Deadband, Fermentor, Cool / Warm Pump or gas burner: its probe's (.input).
+const TEMP_HOLD_KEYS = { target: 'abs', onOffset: 'diff', deadbandOffset: 'diff', innerBandOffset: 'diff', heatOffset: 'diff', coolOffset: 'diff', flameRise: 'diff', flameDrop: 'diff', flameBoil: 'abs' };
+const TEMP_PROBE_KEYS = { setpoint: 'abs', dialMin: 'abs', dialMax: 'abs', dialCool: 'diff', dialHot: 'diff' };
+function tempBox(key, obj) {
+  if (!obj || typeof obj !== 'object') return null;
+  let kind, own;
+  if (obj.type === 'temperature') { kind = TEMP_PROBE_KEYS[key]; own = obj.units || '°F'; }
+  else if (TEMP_HOLD_KEYS[key] && (isHeatElem(obj) || SP_OLD.includes(obj.type) || isFermentor(obj) || isCoolPump(obj) || isGasBurner(obj))) { kind = TEMP_HOLD_KEYS[key]; own = probeOf(obj)?.units; }
+  return kind && needsTurn(own, showUnits()) ? { kind, own } : null;
 }
 
 // Stepper dropdowns: the built-in list, anything already used on another stepper, and "Add new ..."
@@ -10993,7 +11058,10 @@ function readFields(obj, root = $('#dlgBody')) {
       for (const r of v) { if (r.value === '' || !Number.isFinite(+r.value)) throw new Error(`Choice "${r.text}": its Value must be a number`); r.value = +r.value; }
       if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
     }
-    else if (kind === 'num' || kind === 'numsel') v = inp.value === '' ? undefined : +inp.value;
+    else if (kind === 'num' || kind === 'numsel') {
+      v = inp.value === '' ? undefined : +inp.value;
+      if (v !== undefined && inp.dataset.tk) v = boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
+    }
     else if (kind === 'owpick') {      // a 1-Wire Index: circuit_index (Rule 6.37), kept as the probe's number and its circuit
       const m = /^(\d+)_(\d+)$/.exec(inp.value), ck = k === 'probeIndex' ? 'owCircuit' : k + 'Circuit';
       if (m) obj[ck] = +m[1]; else delete obj[ck];
@@ -15743,21 +15811,23 @@ const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(mo
 // The grain weight label (skn_XML_Grain_WT_Standard_Label; OakBarn Brewery, 2026-11-13: "like any other label except Visible
 // defaulted to True / Fill with US or Metric after answer from user in New Setup"; "not user editable ... Locked True")
 const grainWtLabel = units => units === 'Metric' ? 'Kg' : 'Pounds';
-// Three Hop Stands (public/brewcalc.js HOP_STANDS): temperature and time of each, in Default settings and in a Boil Profile.
-// The boxes show the Skynet numbers (Rule 18.36); Low's temperature empty = the Recipe's pitch temperature.
+// Three Hop Stands (public/brewcalc.js HOP_STANDS): temperature and time of each, in a Boil Profile (not in Default settings since
+// 2026-11-19: "No Defaults"). Empty boxes; the Hover Help gives the common numbers.
+// The Hover Help of every Hop Stand question: what it does and what is common (OakBarn Brewery: "The help can be with the question
+// and what is common"). Common numbers from general homebrew practice.
+const HS_TEMP_TIPS = {
+  High: 'The chill stops at this temperature and the Whirlpool hops of this stand go in. Common: 170 to 185 °F (77 to 85 °C), most often 180 °F (82 °C), for hop flavor with some bitterness.',
+  Middle: 'The chill stops at this temperature and the Whirlpool hops of this stand go in. Common: 150 to 160 °F (65 to 71 °C), most often 154 °F (68 °C), for aroma with little bitterness.',
+  Low: 'The chill stops at this temperature and the Whirlpool hops of this stand go in. Common: about the pitch temperature, 60 to 70 °F (16 to 21 °C), for the most aroma and no bitterness.' };
+const HS_TIME_TIP = 'How long the cooling water stays off with the hops of this stand in. Common: High 10 to 20 minutes, Middle 20 to 30, Low 30 or more.';
+const HS_PICK_TIP = 'Which Hop Stand this hop goes in at. High (about 180 °F / 82 °C): flavor with some bitterness. Middle (about 154 °F / 68 °C): aroma with little bitterness. Low (about the pitch temperature): the most aroma. Hops in the same stand share its temperature and time.';
+const HS_BP_EMPTY = 'Empty: a Recipe using this Boil Profile asks for it when a Whirlpool hop is added.';
+const HS_WARN = 'The chill won\'t stop for this hop.';
 function hopStandFields(units, prefix = '_hs', tempTag = 'Temp') {
   const metric = units === 'Metric', T = metric ? '°C' : '°F';
   return HOP_STANDS.flatMap(([k, label, tempC, min]) => [
-    [`${prefix}${k}${tempTag}`, `Hop Stand ${label} (${T})`, 'num', null, false, false, tempC === null ? { tip: 'Empty: the Recipe\'s pitch temperature (68 °F / 20 °C when it has none).' } : { def: Math.round((metric ? tempC : tempC * 1.8 + 32) * 10) / 10 }],
-    [`hs${k}Min`, `Hop Stand ${label} time (min)`, 'num', null, false, false, { def: min, tip: 'Cooling water off for this long, with the hops of this stand in.' }]]);
-}
-function hopStandsToForm(d, tu) { for (const [k] of HOP_STANDS) if (d[`hs${k}TempC`] !== undefined && d[`hs${k}TempC`] !== null) d[`_hs${k}Temp`] = Math.round(cTo(d[`hs${k}TempC`], tu) * 10) / 10; }
-function hopStandsFromForm(d, tu) {
-  for (const [k, label] of HOP_STANDS) {
-    const v = d[`_hs${k}Temp`]; delete d[`_hs${k}Temp`];
-    if (v === undefined || v === '' || v === null) delete d[`hs${k}TempC`]; else d[`hs${k}TempC`] = Math.round(toC(v, tu) * 1000) / 1000;
-    const m = d[`hs${k}Min`]; if (m === '' || m === null) delete d[`hs${k}Min`]; else if (m !== undefined && !(+m >= 0)) throw new Error(`Hop Stand ${label} time must be 0 or more minutes`);
-  }
+    [`${prefix}${k}${tempTag}`, `Hop Stand ${label} (${T})`, 'num', null, false, false, { tip: HS_TEMP_TIPS[k] }],
+    [`hs${k}Min`, `Hop Stand ${label} time (min)`, 'num', null, false, false, { tip: HS_TIME_TIP }]]);
 }
 // the Labels and Text Boxes boxes' hover help (Rule 2.38; KISS, Rule 11.8: the name is short, the explanation is here)
 const LBL_TIPS = {
@@ -15814,7 +15884,8 @@ function renderDefaultTab(box) {
     ['mashProfile', 'Mash Profile', 'sel', [...pick(S.mashProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.mash }],
     ['boilProfile', 'Boil Profile', 'sel', [...pick(S.boilProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.boil }],
     ['waterProfile', 'Water Profile', 'sel', [...S.waterProfiles.map(x => [x.id, x.name]), PROF_ADD], false, false, { tip: DEF_TIPS.water }],
-    ...hopStandFields(w.units),
+    // the Hop Stand boxes left Default settings (Panel Updates entry 13, OakBarn Brewery: "No Defaults", 2026-11-19, Rule 17.14):
+    // a Whirlpool hop asks for its stand, temperature and time in the Recipe
     ['_w2g', `Water to Grain Ratio (${displayUnits(w).ratioUnit})`, 'num', null, false, false, { tip: DEF_TIPS.w2g }],
     // New Schema from a Skynet Template: not on Default settings any more (OakBarn Brewery, 2026-11-17: "New Schema from Skynet section
     // not needed"): its questions start with Skynet's own answers (public/schemabuild.js NS_DEFAULTS)
@@ -15847,7 +15918,6 @@ function renderDefaultTab(box) {
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
-  hopStandsToForm(d, du.tempUnit);
   const f = paneForm(fields, d, () => { }, !admin);
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   const tap = tapWaterSection(admin);
@@ -15861,7 +15931,7 @@ function renderDefaultTab(box) {
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
-    hopStandsFromForm(d, su.tempUnit);
+    for (const [k] of HOP_STANDS) { delete d[`hs${k}TempC`]; delete d[`hs${k}Min`]; }      // no Hop Stand defaults (2026-11-19, Rule 17.14)
     if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(d.units)) * 1000) / 1000;
     delete d._w2g; delete d._batch; delete d._tabPipe; delete d._tabHose; delete d._grainLabel; delete d.grainLabel;
     for (const k of ['batchSize', 'equipmentProfile', 'efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime']) delete d[k];      // not on this Tab any more (Default Tab 3)
@@ -18263,7 +18333,7 @@ function profFields(kind) {
       ['boilTime', 'Total boil time (minutes)', 'num', null, false, false, { tip: '0 = No Boil.' }],
       ['boilOffRate', `Boil off (${u} per hour)`, 'num', null, false, false, { tip: 'Empty: the Equipment Profile\'s Boil Off. With a number here, picking this profile in a Recipe asks which one to use.' }],
       ['askVolumes', 'Ask the kettle volume at the start and end of the boil', 'yn', true],
-      ['_hs', 'Hop Stands', 'head'], ...hopStandFields(w.units, 'hs', 'Temp').map(f => [...f.slice(0, 6), { tip: 'Empty: Default settings.' }]),
+      ['_hs', 'Hop Stands', 'head'], ...hopStandFields(w.units, 'hs', 'Temp').map(f => [...f.slice(0, 6), { tip: f[6].tip + ' ' + HS_BP_EMPTY }]),
       ['notes', 'Notes', 'area']];
     return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true, false, { disabled: true, tip: UNITS_SHOWN_TIP }],
       ...Array.from({ length: MASH_STEPS }, (_, i) => [['_s' + i, `Step ${i + 1}${i ? ' (leave empty if not used)' : ''}`, 'head'],
@@ -18560,12 +18630,12 @@ function rcBoilPick(rc, changed) {
 // The three Hop Stands of this Recipe (public/brewcalc.js): each box shows what is used (the Recipe's own, else its Boil Profile's,
 // else Default settings); a change here is the Recipe's own. The Whirlpool hops on the Hops tab each pick a stand.
 function rcHopStandsRow(rc, u, changed) {
-  const stands = hopStands(rc, S.config.brewDefaults || {}, S.boilProfiles.find(x => x.id === rc.boilProfile)), op = can('operator');
+  const stands = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile)), op = can('operator');
   const keep = (key, obj) => () => { rc.hopStands = { ...(rc.hopStands || {}), [key]: { tempC: obj.tempC, min: obj.min } }; changed(); };
   return h('div', { class: 'rcRow' }, ...stands.flatMap(st => {
     const o = { tempC: st.tempC, min: st.min }, k = keep(st.key, o);
-    return [rcBox('r', `Hop Stand ${st.label}`, rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ro: !op, onChange: k }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${st.key}_Temp`, tip: 'The chill stops at this temperature and the Whirlpool hops of this stand go in.' }),
-      rcBox('g', `${st.label} Minutes`, rcInput(o, 'min', { d: 0, ro: !op, onChange: k }), { unit: 'min', field: `rcp_Hop_Stand_${st.key}_Minutes`, tip: 'Cooling water off for this long.' })];
+    return [rcBox('r', `Hop Stand ${st.label}`, rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ro: !op, onChange: k }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${st.key}_Temp`, tip: HS_TEMP_TIPS[st.key] }),
+      rcBox('g', `${st.label} Minutes`, rcInput(o, 'min', { d: 0, ro: !op, onChange: k }), { unit: 'min', field: `rcp_Hop_Stand_${st.key}_Minutes`, tip: HS_TIME_TIP })];
   }));
 }
 function rcMain(pane, rc, u, changed) {
@@ -18710,7 +18780,7 @@ function rcHops(pane, rc, u, changed) {
         rcBox('c', `Hop ${i + 1} Drop`, r.drop, { field: F(i, 'Drop'), tip: 'Minutes into the boil when it goes in' }),
         rcBox('c', `Hop ${i + 1} IBU`, r.ibu, { field: F(i, 'IBU') }),
         rcBox('c', `Hop ${i + 1} Boil Group`, r.grp, { field: F(i, 'Boil_Group'), tip: 'Hops that go in at the same time are one group (the Drops tab)' }));
-    } else line.append(rcHopDialog(hop, i, u, changed));
+    } else line.append(rcHopDialog(rc, hop, i, u, changed));
     if (op) line.append(h('button', { class: 'hopDel', onclick: del(i), title: `Delete Hop ${i + 1}` }, '🗑 Delete'));
     rows.push(r); pane.append(line);
   });
@@ -18720,7 +18790,7 @@ function rcHops(pane, rc, u, changed) {
     op ? h('div', { class: 'bar' }, h('button', { class: 'rcCalcBtn', onclick: guard(() => rcCalculate(rc, changed)), title: 'Puts the hop lines in order and works out the whole Recipe. Every Actual AAU must be above 0' }, 'Calculate')) : '');
 }
 // the Outside of Boil Hops dialog of one hop line. It works on a copy; Save puts the copy in the hop, Cancel drops it.
-function rcHopDialog(hop, i, u, changed) {
+function rcHopDialog(rc, hop, i, u, changed) {      // rc: the Recipe (was missing: the dialog stopped with "rc is not defined", 2026-11-19)
   const keep = ['use', 'dryDays', 'date', 'wpTempC', 'stand', 'time', 'hopRocket'];
   const work = rcHopOpen.get(hop) ?? Object.fromEntries(keep.map(k => [k, hop[k]]));
   const box = h('div', { class: 'hopDlg' });
@@ -18728,7 +18798,7 @@ function rcHopDialog(hop, i, u, changed) {
   const draw = () => {
     box.replaceChildren();
     rcHopOpen.set(hop, work);
-    const set = (use, on) => { work.use = on ? use : null; if (on && use === 'whirlpool' && work.time == null) work.time = 0; draw(); };
+    const set = (use, on) => { work.use = on ? use : null; draw(); };      // no Defaults: a Whirlpool hop's Min starts empty (2026-11-19)
     const sw = ([use, label]) => h('div', { class: 'hopSw' }, h('b', {}, label), rcSwitch(work.use === use, on => set(use, on)));
     const one = ['secondary', 'dry hop', 'whirlpool'].includes(work.use);
     if (!one) box.append(...RC_HOP_SW.map(sw));
@@ -18738,18 +18808,34 @@ function rcHopDialog(hop, i, u, changed) {
       const date = h('input', { type: 'date', value: work.date || '' }); date.onchange = () => { work.date = date.value; };
       box.append(rcBox('g', what, date, { wide: true, field: F('Date') }), rcBox('g', 'Days', rcInput(work, 'dryDays', { d: 0 }), { field: F('Days') }));
     }
-    // the Hop Stand it goes in at (three Hop Stands, OakBarn Brewery 2026-11-13: "The whirlpool hop line picks a stand")
-    const st = hopStands(rc, S.config.brewDefaults || {}, S.boilProfiles.find(x => x.id === rc.boilProfile));
-    if (work.use === 'whirlpool') { work.stand = standOf(work, st); work.wpTempC = null; }
-    if (work.use === 'whirlpool') box.append(rcBox('g', 'Hop Stand', rcInput(work, 'stand', { kind: 'sel', list: st.map(x => [x.key, `${x.label}: ${rcRound(cTo(x.tempC, u.tempUnit), 0)} ${TU(u.tempUnit)}, ${x.min} min`]) }), { wide: true, field: F('Hop_Stand'), tip: 'The chill stops at this stand\'s temperature and this hop goes in. Each stand\'s temperature and time are on the Recipe tab.' }),
-      rcBox('g', 'Min', rcInput(work, 'time', { d: 0 }), { field: F('Min') }),
-      h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!work.hopRocket, on => { work.hopRocket = on; }, 'Skynet_Field ' + F('Hop_Rocket'))));
+    // the Hop Stand it goes in at (three Hop Stands, OakBarn Brewery 2026-11-13: "The whirlpool hop line picks a stand").
+    // The Whirlpool questions (Panel Updates entry 13, OakBarn Brewery: "Hop Questions to ask if a Hop is added to a Recipe that is
+    // Whirlpool. No Defaults. The help can be with the question and what is common", built 2026-11-19): which Hop Stand, its
+    // Temperature and its Time. All start empty unless the Recipe (or its Boil Profile) already has them; the Hover Help gives the
+    // common numbers. The stand's Temperature and Time are the Recipe's, shared by every hop in that stand.
+    const st = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile));
+    if (work.use === 'whirlpool') {
+      work.stand = standOf(work, st); work.wpTempC = null;
+      work._hs ??= Object.fromEntries(st.map(x => [x.key, { tempC: x.tempC, min: x.min }]));
+      const o = work._hs[work.stand];
+      box.append(rcBox('g', 'Hop Stand', rcInput(work, 'stand', { kind: 'sel', list: [['', ''], ...st.map(x => [x.key, x.label])], onChange: draw }), { field: F('Hop_Stand'), tip: HS_PICK_TIP }),
+        ...(o ? [rcBox('r', 'Temperature', rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit) }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${work.stand}_Temp`, tip: HS_TEMP_TIPS[work.stand] }),
+          rcBox('g', 'Time', rcInput(o, 'min', { d: 0 }), { unit: 'min', field: `rcp_Hop_Stand_${work.stand}_Minutes`, tip: HS_TIME_TIP })] : []),
+        rcBox('g', 'Min', rcInput(work, 'time', { d: 0 }), { field: F('Min'), tip: 'How long this hop steeps in the whirlpool (used for its bitterness). The Hop Stand Time is how long the cooling water stays off.' }),
+        h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!work.hopRocket, on => { work.hopRocket = on; }, 'Skynet_Field ' + F('Hop_Rocket'))));
+    }
     box.append(h('span', { class: 'spacer' }), h('div', { class: 'hopDlgBtns' },
       h('button', { onclick: () => { rcHopOpen.delete(hop); renderMenuPane(); } }, '✕ Cancel'),
       h('button', { class: 'primary', onclick: () => {
         rcHopOpen.delete(hop);
         if (!work.use) { if (hop.use !== 'boil') { hop.use = 'boil'; changed(); } return renderMenuPane(); }
         for (const k of keep) hop[k] = work[k];
+        if (work.use === 'whirlpool') {
+          // the stand's answers are the Recipe's own (only what was changed here); one warning if one is missing, and it still saves
+          const st = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile));
+          for (const x of st) { const a = work._hs?.[x.key]; if (a && (a.tempC !== x.tempC || a.min !== x.min)) rc.hopStands = { ...(rc.hopStands || {}), [x.key]: { tempC: a.tempC, min: a.min } }; }
+          if (!standReady(hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile)).find(x => x.key === work.stand))) toast(HS_WARN, true);
+        }
         changed(); renderMenuPane();
       } }, '💾 Save')));
   };
