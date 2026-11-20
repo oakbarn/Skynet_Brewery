@@ -73,7 +73,7 @@ They start empty. The Hover Help on each question gives the common numbers above
 
 The temperature and time of each stand are the **Recipe's** own (the Recipe tab shows all three). A Recipe with none of its own uses its **Boil Profile's**, if you typed them there. A recipe file (BeerSmith or BeerXML) that gives a whirlpool temperature puts that hop in the stand it fits, with the file's temperature and time: **High** at 170 °F (77 °C) and above, **Middle** from 140 °F (60 °C), **Low** below that. A whirlpool hop with no temperature in the file gets no stand, so its questions are asked when you open it.
 
-A Process reads them as `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp` and `rcp_Hop_Stand_High_Minutes` (and the same for Middle and Low). The Skynet **Chill** and **Whirlpool and Chill** Process Templates stop at each one.
+A Process reads them as `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp` and `skn_rcp_Hop_Stand_High_Minutes` (and the same for Middle and Low). The Skynet **Chill** and **Whirlpool and Chill** Process Templates stop at each one.
 
 ## Water Profile
 

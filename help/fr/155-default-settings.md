@@ -199,6 +199,6 @@ Les cases :
 
 Posez la souris sur une case (ou appuyez sur son nom) pour voir ce qu'elle fait pour la bière.
 
-Le côté technique : Tap Water est un Water Profile (☰ Menu > Water Profile le liste) créé quand le Brain démarre pour la première fois et jamais supprimé. Une recette ou les Default settings sans Water Profile choisi l'utilisent. Bicarbonate = Alcalinité (en CaCO3) x 1,22. Dureté (en CaCO3) = 2,497 x Calcium + 4,118 x Magnésium. Un Process le lit avec les Skynet_Fields `rcp_Water_...` (aide 99).
+Le côté technique : Tap Water est un Water Profile (☰ Menu > Water Profile le liste) créé quand le Brain démarre pour la première fois et jamais supprimé. Une recette ou les Default settings sans Water Profile choisi l'utilisent. Bicarbonate = Alcalinité (en CaCO3) x 1,22. Dureté (en CaCO3) = 2,497 x Calcium + 4,118 x Magnésium. Un Process le lit avec les Skynet_Fields `skn_rcp_Water_...` (aide 99).
 
 Les titres des parties de ce Tab ont un fond bleu, pour trouver chaque partie facilement. Le titre et **Save** restent en haut pendant que le reste défile (Règle Skynet 2.51).

@@ -80,6 +80,23 @@ is on (through the SSR), and if Off the SSR no longer sends power. Similar to a 
 
 **⚙ Change** in an Interface's row on the Devices page opens the same pop-up. Use it to give a pretend board its real **USB Port** or network address once it is wired, to pick another USB Port, to change its Board Settings or to **Test Communication**. The name of an Interface that has Devices on it stays as it is, and a saved ID never changes (Rule 3.2).
 
+## Removing an Interface
+
+Removing an Interface can break your whole brewery: every Device wired to it stops working. Most of the time you want **⚙ Change** instead, to pick another board, USB Port or Network address; the Devices stay on it.
+
+Resting the mouse on **Remove** shows a large warning with how many Devices, Widgets and Processes use this Interface. Nothing is removed by it.
+
+**Remove** (Admins only) opens one Skynet box. Nothing is changed until you press a button in it.
+
+- **Nothing uses it:** the box says so, and **🗑 Delete** removes it.
+- **Something uses it:** the box lists what uses it, with how many of each: the **Devices** on it (with their Ports), the **Widgets and pictures** tied to those Devices (a Clone, a Widget that names one), the **Processes** that use them, its **1-Wire Index** slots, and other items on it (a Vessel's parts, a Manifold).
+- **▶ Move them** (recommended): pick another Interface, or ➕ Add new Interface, and every Device moves to it with its name and all its settings. A Device whose Port (or 1-Wire Index) is already taken on the new Interface stays where it is, and the box lists it with the reason, so you can fix it and press Move again. When everything has moved, nothing uses the Interface and it can be removed safely.
+- **Remove anyway:** one warning. Type the Interface ID (for example BM) to light up **🗑 Delete**.
+
+A backup of the Schema is made first, every time (Rule 9.17), so a removed Interface can be put back from it.
+
+Nothing that used the Interface is deleted (Design Rule #1): the Devices, Widgets and Processes keep every setting. A Device whose Interface was removed shows **⚠ No Interface** in red in its Interface box, and does nothing until it is moved to an Interface. A Process stops at a line that uses one.
+
 ## A new empty Schema has no Interface
 
 A new Schema that is **not** a copy of another one (Schema dropdown > Add new Schema > *An empty Schema*) starts with **no Interface**. Add your boards with **Add Interface** on the Devices page, or with **➕ Add new Interface…** in the New Device box. Each Device you add carries its Interface.

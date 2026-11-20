@@ -4,11 +4,11 @@
 //Copyright © OakBarn Brewery 2026
 step "Recipe"
 [Recipe_Check]
-if rcp_Loaded == false
+if skn_rcp_Loaded == false
   ask "No Recipe is loaded.\nOpen ☰ Menu > Recipe: import a BeerSmith (.bsmx) or BeerXML (.xml) file, or make a new Recipe. Then press Done."
   goto Recipe_Check
 endif
-ask "Check the Recipe \b" + rcp_Name + "\b on ☰ Menu > Recipe (clear it and import another if this is not today's beer).\nBatch " + rcp_Batch_Volume + " " + rcp_Volume_Units + ", grain " + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ", boil " + rcp_Boil_Time + ".\nPress Done when it is right."
+ask "Check the Recipe \b" + skn_rcp_Name + "\b on ☰ Menu > Recipe (clear it and import another if this is not today's beer).\nBatch " + skn_rcp_Batch_Volume + " " + skn_rcp_Volume_Units + ", grain " + skn_rcp_Total_Grain_Weight + " " + skn_rcp_Weight_Units + ", boil " + skn_rcp_Boil_Time + ".\nPress Done when it is right."
 step "Chilling water"
 ask "Pick how you chill today:\n- just tap water (the most common)\n- tap water chilled by an ice bath\n- only ice water\n- tap water chilled by glycol\n- ice water chilled by glycol\nIf it uses ice, have the ice bath ready at the end of the boil. If it uses glycol, make sure the glycol is cold. Press Done when it is set."
 step "House cleaning: pumps off, valves closed"
@@ -18,4 +18,4 @@ close_all_valves
 step "Equipment check"
 ask "Walk the brewery:\n- hoses on and clamped, drains closed\n- vessels clean and sanitizer ready\n- power or gas on, chiller water ready\nPress Done when all is ready."
 lock_Equipment
-print "PreBrew done: " + rcp_Name
+print "PreBrew done: " + skn_rcp_Name

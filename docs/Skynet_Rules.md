@@ -157,7 +157,7 @@ constants"; names and Labels 2026-11-19, Panel Updates Sandbox entry 28; Help 94
   words. Before the first Public Production, so no old way is kept.
 
 1.18 **Skynet names: `skn_`** (Rule 3.20). **`skn_`** = a **Skynet internal Global**, set by Skynet and read only in a
-Process: `skn_Boil_Temp` (the temperature water boils at here and now, in the panel's units), `skn_Boil_Temp_C`,
+Process: `skn_Boil_Temp` (the temperature water boils at here and now: °C in a Process, shown in the Units in a message, Rule 2.59), `skn_Boil_Temp_C`,
 `skn_Boil_Temp_F`, `skn_Air_Pressure` (hPa). A **Skynet role** (`skn_` too; was `sk_` before 2026-11-19) holds one temperature probe (by its hidden
 key, so a rename keeps it): `skn_Boil_Probe_1-3`, `skn_Mash_Probe_1-3`, `skn_HLT_Probe_1-3`, `skn_Ferment_Probe_1-10`, set on
 ☰ Menu > Default > Probe roles. In a Process a role works like its probe's name. One probe per role, one role per probe.
@@ -1228,6 +1228,18 @@ never changes a saved number, so switching back and forth can never drift a numb
   the units its screen shows. It starts as Units (°F in US Standard) and can be set to °F or °C in its Properties; its Hover Help
   says the screen comes back in °C after a power cycle. In °F its pop-up gives the set point in °C as well. No other Vessel
   has its own display units.
+- **Recipe values and skn_Boil_Temp in a Process (OakBarn Brewery, 2026-11-20, picked "Metric inside, Units in messages": "I think A
+  because it follows the Rule"):** a Process reads every `skn_rcp_` temperature, volume, weight and ratio, and `skn_Boil_Temp`, in metric
+  (°C, L, kg, L/kg), so `HLT.setpoint = skn_rcp_Strike_Temp` and `wait HLT_Probe >= skn_rcp_Strike_Temp` are right in US too. In a
+  message (text joined with `+` in an `ask`, `print` or `show`, or a `print` of it alone) the number shows in the Units; `skn_rcp_Temp_Units`, `_Volume_Units` and
+  `_Weight_Units` are the Units' words. A number added in a formula is °C (`skn_rcp_Boil_Start_Temp + 5`). The Brew Process page shows
+  them in the Units. **Exception:** Recipe items in their own unit ("Other additions (Irish Moss, Yeast Nutrient ...) would have their
+  own units that do not get converted for display ... they are for display to the user and no math is needed"): adjuncts, a hop's
+  oz or g, a fermentable's Measurement, a yeast's Packs are never turned.
+- **New items start in metric (OakBarn Brewery, 2026-11-20: "Check any values anywhere stores as sae and convert to metric"):** a new
+  Temperature Probe (any kind, a Thermowell, a probe tee, the probe of a Vessel Builder), the probes Build a Schema makes (with their
+  Heating Element Setpoints, Offsets and Simulator numbers, kept in °C as in the 3 Vessel Sample) and a new hydrometer's temperature
+  are kept in °C. They still show in the Units. A probe already saved keeps its own units (never changed by this).
 - **Still to come:** the live side of a user's own Schemas (turning older °F probes, their Setpoints, PID and alarms into °C).
 - **Both programs:** the BruControl Import still makes its Vessels and Profiles in the Units picked; the Panel keeps them in metric
   when they are saved. Its probes stay in the units BruControl had until the live side is done. (Panel Updates Sandbox entry 9)
@@ -1304,6 +1316,23 @@ else associated with a Tab or any of its chilcren (Pumps, Valves....)").
      gets its copy once, the first time it is saved after this change.
 **Both programs:** the BruControl Import makes no Equipment Profiles; its import onto a Tab that is locked by lock_Equipment is stopped
 with the same message. Help 28 and 188.
+
+2.63 **Removing an Interface is safe** (OakBarn Brewery, 2026-11-18: "I clicked remove on the Interface for BM Brewery Mega. It is
+the host asking if I want to delete. I know I should not do this as it would mess up almost every Thing so a Remove needs lots of
+steps to do so"; "When you Hover the Remove Button Large Warning Pop Up"; "Pop up does not cover Button"; Panel Updates entry 29,
+approved 2026-11-20: "29 ... yes"). The browser's own OK box is never used for it. On the Devices page, Interface list:
+- **Resting the mouse on Remove** shows a **large** Hover Help warning (red border, red ⚠ heading) with this Interface's own counts
+  of Devices, Widgets and Processes that use it. It opens beside the button, never over it. It only warns; nothing is removed.
+- **Remove** (Admins only) opens **one Skynet box** (buttons 🗑 Delete · Close · ✕ upper right, Rule 2.54). Nothing changes until a
+  button is pressed. Nothing uses it: 🗑 Delete removes it. Something uses it: the box lists, by group with counts, the Devices on it
+  (with their Ports), the Widgets and pictures tied to them, the Processes that use them, its 1-Wire Index slots and other items
+  that name it.
+- **▶ Move them** (recommended): every Device moves to another Interface (or ➕ Add new Interface) with its name and settings. A
+  Device whose Port or 1-Wire Index is taken there stays and is listed with the reason. Nothing is restricted.
+- **Remove anyway: one warning only** (no tick boxes, no chain of pop-ups). Typing the Interface ID lights up 🗑 Delete.
+- A Schema backup is made first (Rule 9.17). **Nothing that used it is deleted** (Design Rule #1): its Devices keep every setting
+  and show **⚠ No Interface** in red in their Interface box until moved; a Process stops at a line that uses one.
+**Both programs:** the BruControl Import has no Interface list with Remove; its Interface step is unchanged. Help 76.
 
 ## 3. Names and file names
 
@@ -1515,7 +1544,8 @@ same"). A name Skynet owns, that a Process can read, starts **`skn_`**, lower ca
 Skynet internal Globals (`skn_Boil_Temp`, Rule 1.18), probe roles (`skn_Boil_Probe_1`, Rule 1.18, not built yet) and Skynet
 Constants (`skn_const_L_p_Gal`, Rule 1.17). A group of Skynet names gets **`skn_<group>_`** (OakBarn Brewery, 2026-11-19:
 "they could be skn_rcp_ so I will know what you are taking about"): `skn_const_` for Skynet Constants, `skn_rcp_` for Recipe values.
-Recipe values become `skn_rcp_Strike_Temp` ... (was `rcp_`, Rule 16.4) in their own PR, after the Recipe PR now open (536).
+Recipe values are `skn_rcp_Strike_Temp` ... (Rule 16.4). *Replaced:* Recipe values were `rcp_` names (2026-11-20, before the
+first Public Production, so no old way is kept).
 
 ## 4. Making things: the Build Tab
 
@@ -4732,8 +4762,8 @@ pump to the fermenter, fermenter control and probe, cleaning pump). A job left o
 one Flow Process for each step used, numbered over those steps (`Brew_1_PreBrew` ... `Brew_9_Clean`), each starting the next;
 building again keeps the old ones as .bak, and a Brew_ Process the list no longer has goes to the bin.
 
-16.4 **Recipe values are `rcp_` names, read only in a Process**, in the panel's units (`rcp_Strike_Temp`, `rcp_Boil_Time`,
-`rcp_Mash_Step_1_Temp` ...). They are read when the Process runs, so a new Recipe needs no new build. While no Recipe is loaded
+16.4 **Recipe values are `skn_rcp_` names, read only in a Process**, in metric (°C, L, kg; shown in the Units in a message, Rule 2.59) (`skn_rcp_Strike_Temp`, `skn_rcp_Boil_Time`,
+`skn_rcp_Mash_Step_1_Temp` ...). They are read when the Process runs, so a new Recipe needs no new build. While no Recipe is loaded
 they come from the ☰ Menu > Default tab's Mash and Boil Profiles. **PreBrew starts with the Recipe**: load, clear and import,
 make, or review it.
 
@@ -4831,7 +4861,7 @@ out by Skynet (Grain Wt., 1st Mash, IBU). **Calculate** works out the Total Grai
 Adjuncts, Waters, MASH. Fritz sends the fields and layout of each Daughter Tab; none are built before he does. (Help 99)
 
 17.2 **Every field on the Recipe tab or a Daughter Tab is a Skynet_Field** (Fritz, 2026-10-31): a fixed Skynet name starting
-`rcp_` (for example `rcp_Strike_Temp`), read only in a Process, never renamed by a user (Rule 3.11). The list is in
+`skn_rcp_` (for example `skn_rcp_Strike_Temp`), read only in a Process, never renamed by a user (Rule 3.11). The list is in
 public/recipecalc.js and Help 99.
 
 17.3 **Recipe import: BeerSmith .bsmx (BeerSmith 3 and 4) and BeerXML .xml**, every grain, hop, yeast, adjunct (Misc), water
@@ -4861,20 +4891,20 @@ Minutes), then Mash, 1st WORT, Secondary, DRY, Whirlpool. **Actual AAU starts at
 that every Actual AAU is above 0**; if any is 0, nothing is calculated, Skynet switches to the Hops tab, highlights each Actual
 AAU that is 0, and shows Fritz's warning (set the Actual AAU to the AAU on the Hop Package; the real IBUs come from it) with
 a **READ** button to close it. (Fritz, 2026-10-31 12:15Z) Each line's
-boxes are Skynet_Fields `rcp_Hop_N_...` plus `rcp_Hop_Count` (Rule 17.2). (Help 99)
+boxes are Skynet_Fields `skn_rcp_Hop_N_...` plus `skn_rcp_Hop_Count` (Rule 17.2). (Help 99)
 
 17.8 **Grain tab and Fermentable tab** (Fritz, 2026-10-31): the Grain tab holds the fermentables of Type Grain (Type hidden);
 the Fermentable tab holds every other Type with a Type dropdown (the BeerXML types Adjunct, Extract, Dry Extract, Sugar; a
 fixed list, so no Add new ...). Boxes: Name, amount, **Potential** (yield %), **SRM** (color), and **After
 Boil**, a switch shown only for Types added during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). No limit on
-lines. Skynet_Fields `rcp_Grain_N_...`, `rcp_Fermentable_N_...`, `rcp_Grain_Count`, `rcp_Fermentable_Count`. (Help 99)
+lines. Skynet_Fields `skn_rcp_Grain_N_...`, `skn_rcp_Fermentable_N_...`, `skn_rcp_Grain_Count`, `skn_rcp_Fermentable_Count`. (Help 99)
 **Grain tab layout (Fritz's Grain_Tab.png, 2026-10-31):** Grains, Add Grain +, then Grain N, the weight, Potential, SRM (brown
 header), **PPG>SG** (gravity points, worked out), Delete. No After Boil on the Grain tab (grain is never added after the boil).
 The weight is shown in the **grain weight standard** picked on ☰ Menu > Default (Skynet field `skn_XML_Grain_WT_Standard`,
 Pounds or Kg; a .bsmx or BeerXML import is shown in it) under a label set only on the Default tab
 (`skn_XML_Grain_WT_Standard_Label`, empty = the standard's name). The PPG>SG label is set on the Default tab too. Gravity
 points = Potential x 46.214 x pounds x efficiency (grains and adjuncts; 100% for extracts, sugars, fruit, juice) / batch
-gallons; the Recipe tab's **Expected Gravity** (`rcp_Expected_Gravity`) = 1 + all points / 1000, worked out when an amount
+gallons; the Recipe tab's **Expected Gravity** (`skn_rcp_Expected_Gravity`) = 1 + all points / 1000, worked out when an amount
 changes and by Calculate.
 **Fermentable tab layout (Fritz's Fermentable_Tab.png, 2026-10-31):** Fermentables, Fermentable +, then Fermentable N, Amount,
 **Measurement**, **Type**, Potential, SRM, PPG>SG, After Boil, Delete. Measurement (lb, oz, kg, g) and Type (Adjunct, Extract,
@@ -4886,16 +4916,16 @@ yeast nutrient, gypsum, spices). Adjuncts, Adjunct +, then Adjunct N, Amount, **
 for a Boil adjunct), **Time Unit**, Delete. The dropdowns are select only, with the BeerXML lists (Measurement: mg, g, oz, lb, kg,
 ml, tsp, tbsp, cup, pt, qt, l, gal, items; Type: Spice, Fining, Water Agent, Herb, Flavor, Other; Use: Boil, Mash, Primary,
 Secondary, Bottling; Time Unit: min, hr, day, week). Adjunct-type fermentables (flaked grains) stay on the Fermentable tab
-because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skynet_Fields `rcp_Adjunct_N_...`,
-`rcp_Adjunct_Count`. (Help 99)
+because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skynet_Fields `skn_rcp_Adjunct_N_...`,
+`skn_rcp_Adjunct_Count`. (Help 99)
 
 17.10 **MASH tab and Waters tab** (Fritz, 2026-10-31: "Mash Profile and Water Profiles can be built as well"). MASH: the
 Mash Profile dropdown (Skynet Templates, the user's own, or the Recipe's own mash). A picked profile shows read only (Step N,
 Temp, Time, then Sparge Type, Sparge Temperature, Batch Rest, Mash Out); **Copy into this Recipe** makes it the Recipe's own
 mash, which is edited here (Mash Step +, Delete, the Recipe's sparge boxes). Waters: the Water Profile dropdown, the minerals
 after the distilled or RO cut, % distilled, SO4 : Cl and pH (read only; the profile is changed on ☰ Menu > Water Profile), then
-the waters the recipe file listed. Skynet_Fields `rcp_Mash_Step_N_Name/Temp/Time`, `rcp_Water_Ca`, `_Mg`, `_Na`, `_SO4`, `_Cl`,
-`_HCO3`, `rcp_Water_Distilled_Pct`, `rcp_Water_SO4_Cl`, `rcp_Water_PH`. Two more Skynet Mash Profile Templates (Fritz):
+the waters the recipe file listed. Skynet_Fields `skn_rcp_Mash_Step_N_Name/Temp/Time`, `skn_rcp_Water_Ca`, `_Mg`, `_Na`, `_SO4`, `_Cl`,
+`_HCO3`, `skn_rcp_Water_Distilled_Pct`, `skn_rcp_Water_SO4_Cl`, `skn_rcp_Water_PH`. Two more Skynet Mash Profile Templates (Fritz):
 **Skynet Single Step, Batch Sparge** (152 °F 60 min, mash out 168 °F, batch sparge, 10 min rest) and **Skynet 3 Mash Steps, Fly
 Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly sparge at 168 °F). (Help 99)
 
@@ -4918,7 +4948,7 @@ an imported line with another Type keeps it in its own list.
 Changing the Level only hides or shows; nothing is deleted, and a hidden box keeps its value. A Level 1 Can Kit has no HOPs tab, so
 Calculate does not check its Actual AAU. The Level is saved with the Recipe as `level`, and the Recipe's BeerXML type says the same
 thing (Levels 1 and 2 Extract, 3 Partial Mash, 4 All Grain); an imported BeerSmith or BeerXML file comes in at Level 2, 3 or 4 from its
-type, and the user can change it. Skynet_Field `rcp_Level` (1 to 4) lets a Process do the steps for its Level. A NEW Recipe starts at
+type, and the user can change it. Skynet_Field `skn_rcp_Level` (1 to 4) lets a Process do the steps for its Level. A NEW Recipe starts at
 the Level picked. (Help 99)
 
 17.12 **Tap Water** (OakBarn Brewery, 2026-11-11: "Waters should be on each level defaulted to Tap Water. And maybe a Page in the
@@ -4980,8 +5010,8 @@ HAVE INFO AS AN IMPORT"):
 - Temperature and time are the Recipe's own (shared by the hops of that stand), else its Boil Profile's (own Boil Profiles keep
   their boxes: numbers the user typed), else empty.
 - Each Whirlpool hop picks its stand. The chill stops at each stand that has hops **and** its temperature and time, highest first,
-  cooling water off for its time (Skynet Chill, Whirlpool and Chill). A Process: `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`,
-  `rcp_Hop_Stand_High_Minutes` (and Middle, Low); an unanswered Temp or Minutes reads 0.
+  cooling water off for its time (Skynet Chill, Whirlpool and Chill). A Process: `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`,
+  `skn_rcp_Hop_Stand_High_Minutes` (and Middle, Low); an unanswered Temp or Minutes reads 0.
 - An imported recipe's whirlpool temperature and time go to the stand that temperature fits: **High** 170 °F (77 °C) and above,
   **Middle** from 140 °F (60 °C), **Low** below. A whirlpool hop with no temperature gets no stand (its questions are asked).
 - Design Rule #1 (Never Take Away): removing the Default settings boxes is allowed because it is before the first Public Production.
@@ -5009,8 +5039,8 @@ box, for a hot or cold brewery) belongs to the PreBrew Process (Process Updates 
 Grams rather than Oz, although most are Packs"; "Hops may be the same. I have always used OZ. But you could use grams as more accurate";
 a button to turn hop oz into grams because some scales start in grams. Yeast tab layout: "Use it and Build to keep rule"):
 - **Hops:** each hop line has a **Unit** dropdown, **oz** or **g**, whatever Units says (Rule 2.59 exception). The amount is still kept in
-  **kg**; the Unit is how that line shows and is typed, and how its Calc oz / Calc g, its alert text and `rcp_Hop_N_Amount` /
-  `_Calc_Amount` read. `rcp_Hop_N_Measurement` gives the unit. **oz → g** on the Hops tab turns every hop line in oz into g in one press
+  **kg**; the Unit is how that line shows and is typed, and how its Calc oz / Calc g, its alert text and `skn_rcp_Hop_N_Amount` /
+  `_Calc_Amount` read. `skn_rcp_Hop_N_Measurement` gives the unit. **oz → g** on the Hops tab turns every hop line in oz into g in one press
   (only the unit changes). A new line starts in the Units; a hop line saved before with no unit follows Units (nothing taken away).
 - **Imports:** a .bsmx hop is **oz**; a BeerXML hop takes the unit its DISPLAY_AMOUNT shows (oz or g), else **g**. A .bsmx yeast is a count
   of **Packs** (a unit the file names wins); a BeerXML yeast is **g** when AMOUNT_IS_WEIGHT (kg x 1000) or **ml** (liters x 1000), unless
@@ -5020,9 +5050,9 @@ a button to turn hop oz into grams because some scales start in grams. Yeast tab
   Temp** and **Max Temp** (kept in °C, shown in the Units). **▸ More** opens **Lab, Product ID, Type** (Ale, Lager, Wheat, Wine,
   Champagne), **Flocculation** (Low, Medium, High, Very High), **Starter** (a switch) with an optional **Starter Size** (kept in liters),
   **Times Cultured**, **Mfg Date** and **Notes**. Dropdowns are select only; a word from a file not in the list stays in that line's list.
-  Skynet_Fields `rcp_Yeast_Count`, `rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement`, `_Attenuation`, `_Min_Temp`, `_Max_Temp`,
+  Skynet_Fields `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement`, `_Attenuation`, `_Min_Temp`, `_Max_Temp`,
   `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`;
-  `rcp_Yeast_Name` stays the first yeast. (Help 99) **Both programs:** the BruControl Import has no recipe lines, so nothing changes there.
+  `skn_rcp_Yeast_Name` stays the first yeast. (Help 99) **Both programs:** the BruControl Import has no recipe lines, so nothing changes there.
 
 ## 18. General Dialog Rules
 
@@ -6275,6 +6305,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
 - 2026-11-19: Rule 18.43 extended (OakBarn Brewery, Panel Updates 6: "Can a User Provide a single Image and Skynet create other needed"; "90 degrees to make horizontal vertical"; "Go with A KISS"): a User Defined Motorized Ball Valve's one picture (drawn Horizontal) gives four looks: Horizontal, Horizontal Flipped, Vertical Left (turned 90 degrees) and Vertical Right (turned and mirrored); the Valve Profile offers the same; plain Vertical only where already set. Help 128 (and French) adds a what-picture-works-best guide. Checked against both programs: the BruControl Import's Build page shares the dialog; the Importer's valve list is unchanged. (thread "Build a User Defined ball valve from one picture")
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
@@ -6294,6 +6325,8 @@ import.
 - 2026-11-19: Rule 2.43 and Rule 2.44 changed, Panel Updates 41 (OakBarn Brewery: "the standard PV and SV can be intergrated into The Display"; "Forget visible option Make part of Digit Display Box. Keep all Digits an Dergee F or C fit on one line Inside the display."): every Temperature Probe's display shows PV over a green SV box (PV Blue below, Green at, Red above the Setpoint; Duty Cycle Red / Blue while ON, Grey while OFF), one click on the SV box types a new Setpoint in place; a probe a Heating Element (or Fermentor Control, older Hysteresis, PID, Deadband Device) holds shows and sets that one's Setpoint (one Setpoint), a probe nothing holds keeps its own (.setpoint, a Setpoint row in its Properties). Help 160 (and French). Checked against both programs: the BruControl Import has no running Tabs and BruControl probes have no Setpoint, so nothing changes there.
 - 2026-11-19: Added Rule 2.62 (OakBarn Brewery: "A profile is only to import to start a build. Nothing more."; "I want ZERO connection after placed on Tab."; "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Tab keeps no link to an Equipment Profile or Template. The Tab link, follow the Default Layout, save back on every Save, the locked profile freezing Tabs and Make it unique are gone; the profile numbers are copied onto the Tab (picked "Copied onto the Tab") and changed in Tab Settings or ⚙ Numbers; 💾 Save as a profile ... copies a Tab into a profile, one direction only; lock_Equipment locks the Tab. Rules 2.58, 17.13, 19.6 and question 7 changed to match. Checked against both programs: the BruControl Import has no Equipment Profiles; its import onto a locked Tab is stopped as before.
 - 2026-11-19: Rule 2.62 #7 and #8 added, Rule 5.16 changed (OakBarn Brewery: "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Skynet valve keeps its own copy of its Template's fixed attributes and pictures (the Brain puts a sent fixed attribute back to the valve's own, not the Template's); Orientation copies that picture when picked. Pipe fittings keep their own bend, body, size, upright and openings; a Skynet fitting no longer follows its Template's new picture when Edit layout opens. Help 88 (and French). Checked against both programs: the BruControl Import makes no Skynet valve User versions and only names a vessel's Template for the Panel to copy, so nothing changes there.
+- 2026-11-20: Rule 2.59, 1.18 and 16.4 (OakBarn Brewery picked "Metric inside, Units in messages": "I think A because it follows the Rule"; other additions such as Irish Moss and Yeast Nutrient keep their own units): a Process reads skn_rcp_ temperatures, volumes, weights and the grain ratio, and skn_Boil_Temp, in metric; a message shows them in the Units; recipe items in their own unit are never turned. Fixes setpoints and waits from skn_rcp_ in US (165 °F was read as 165 °C). Help 100 and 238 (and French). Checked against both programs: the BruControl Import has no running Process and its scripts use their own Globals, not skn_rcp_; nothing changes there.
+- 2026-11-20: Rule 2.59 extended (OakBarn Brewery: "Check any values anywhere stores as sae and convert to metric"): new Temperature Probes, the probes Build a Schema makes (and their Setpoints, Offsets and Simulator numbers) and a new hydrometer's temperature are kept in °C; they still show in the Units. Help 138 (and French). Checked against both programs: the BruControl Import still keeps BruControl's probe units (Rule 2.59 "Still to come"), and its Build page makes new probes the same way, in °C.
 - 2026-11-19: Rule 2.59: temperatures in a Process (OakBarn Brewery's choice: "we need the use to be able to type 152"): typed and shown in Units, kept in °C with its sign when saved; Offsets and += / -= are differences; a number with its sign is always that; one warning for a number in a formula with a temperature. Help 05 (and French). Checked against both programs: the BruControl Import marks the plain °F numbers of its scripts with °F, so they mean the same.
 - 2026-11-19: Rule 2.59 extended (OakBarn Brewery, Panel Updates Sandbox entry 9: "Fix the Dispalys as the Skynet Setting for US Metric, US would not understand C and Europeans not F"; "That should be the Rule. Keep backend data metric, display to user by choice in Skynet Settings"): Tab temperatures (PV, SV, Dial, SetPoint and Heating Element pop-ups, Setpoints and Offsets in Properties) show in Units and are saved in the probe's own units; a probe's Units box is what it keeps its numbers in. Exceptions: Recipe items in their own unit (additions, yeast Packs; per-line yeast and hop units not built) and Manual vessels (DigiBoil, Brewzilla) with fixed screen units. Help 155 and 160 (and French). Checked against both programs: the BruControl Import keeps its probes in BruControl's units, and its Build page uses the same Tab, dialogs and pop-ups, so they show in Units there too.
 - 2026-11-19: Rule 2.62 #9 and #10 added, Rule 2.39 #3 changed (OakBarn Brewery: "NO LINK NO Connect Nada 100% Links gone"): a Tab Profile is copied onto a Tab (its color into the Tab's Color, its look into the Tab's own copy) and never linked; Tab Settings' Profile box is now **Copy Profile**, and ☰ Menu > Tab Profile's list of Tabs has **Copy onto it**. A Skynet valve's Properties rows are its own copy. Help 26, 36 and 88 (and French). Checked against both programs: the BruControl Import sets no Tab Profile on a Tab and makes no Skynet valve User versions, so nothing changes there.
@@ -6939,6 +6972,7 @@ import.
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
+- 2026-11-20: Rules 3.20 and 16.4 changed (OakBarn Brewery: "Recipe values like rcp_Strike_Temp yes", "they could be skn_rcp_ so I will know what you are taking about"): Recipe values are `skn_rcp_` names (were `rcp_`) in the code, Templates, Help and these Rules; older Change log lines keep the old name as history.
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.

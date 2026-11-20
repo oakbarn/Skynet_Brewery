@@ -85,3 +85,24 @@ console.log('stepbystep wiring guides ok');
   assert.match(g, /## What the pull-up does[\s\S]*4\.7k ohm is the standard[\s\S]*2\.2k ohm/, 'the pull-up explained');
 }
 console.log('stepbystep 1-Wire ok');
+
+// Step by Step: Add a Process (Help 240, Panel Updates entry 39): the Process editor, ➕ Add New Process..., a wait, a sleep with a Skynet
+// Constant (skn_), temperatures typed in Units, Check, Save, Start and the Override pop-up, then a Process Widget; French too.
+{
+  const f = 'help/240-step-by-step-add-a-process.md', g = read(f);
+  assert.match(g, /^# Step by Step: Add a Process\n/, f + ' is a Step by Step guide');
+  for (const w of ['➕ Add New Process...', '📐 Constants', 'skn_const_Ms_p_Min', 'Settings > Units', '66.6667°C', 'Override pop-up', 'show_Override', 'Process Widget', 'Finish Build ... > Move to Tab'])
+    assert.ok(g.includes(w), f + ' covers ' + w);
+  assert.match(g, /^wait HLT_Vessel\.BM1w1_1_HLT_BH >= 152$/m, 'the wait uses the 3 Vessel sample HLT probe (Rule 11.7)');
+  assert.match(g, /^HLT_Vessel\.BM_8_DO@H_Element_HLT~element_BH\.setpoint = 152$/m, 'and its HLT element');
+  const gp = [...g.matchAll(/!\[[^\]]*\]\((help_pictures\/[^)]+)\)/g)].map(m => m[1]);
+  assert.ok(gp.length >= 12, f + ': a picture at each step');
+  for (const p of gp) assert.ok(fs.existsSync(new URL('../media/' + p, import.meta.url)), p + ' is there');
+  for (const l of [...g.matchAll(/\]\((\d+-[\w-]+)(#[\w-]+)?\)/g)].map(m => m[1])) assert.ok(fs.existsSync(new URL(`../help/${l}.md`, import.meta.url)), 'link ' + l);
+  assert.doesNotMatch(g, /Fritz|BruControl/, 'Rules 11.3 and 11.5');
+  const fr = read('help/fr/240-step-by-step-add-a-process.md');
+  assert.match(fr, /\{#step-by-step-add-a-process\}/, f + ' in French (Rule 11.11)');
+  assert.deepEqual([...fr.matchAll(/!\[[^\]]*\]\((help_pictures\/[^)]+)\)/g)].map(m => m[1]), gp, 'the French page has the same pictures');
+  for (const p of ['help/30-process-editor.md']) assert.match(read(p), /240-step-by-step-add-a-process/, p + ' links the guide');
+  console.log('stepbystep add process ok');
+}

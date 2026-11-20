@@ -56,25 +56,25 @@ A new Recipe needs no new build: the Processes read the Recipe when they run.
 
 ## Recipe values
 
-Templates read the Recipe through names that start with **`rcp_`**. They are read only in a Process (change them in the Recipe), and they are in the panel's units (☰ Menu > Default > Units).
+Templates read the Recipe through names that start with **`skn_rcp_`**. They are read only in a Process (change them in the Recipe). Behind the scenes a Process works in metric, so a temperature is in °C, a volume in liters and a weight in kilograms, whatever Units says (Skynet Rule 2.59): `{{HLT_Heater}}.setpoint = skn_rcp_Strike_Temp` is right in US too. In a message (text joined with `+` in an `ask`, `print` or `show`, or a `print` of the value alone) the number shows in your Units (☰ Menu > Settings > Units), so `"Heat to " + skn_rcp_Strike_Temp + skn_rcp_Temp_Units` reads **Heat to 165.2°F** in US. A number added to one in a formula is in °C (`skn_rcp_Boil_Start_Temp + 5` is 5 °C hotter). Recipe items in their own unit (a hop's oz or g, Irish Moss or Yeast Nutrient in grams, a yeast's Packs) are never turned: they are only for you to read.
 
 | Name | What it is |
 |---|---|
-| `rcp_Loaded` | true when a Recipe is loaded |
-| `rcp_Name`, `rcp_Yeast_Name` | the Recipe and its yeast |
-| `rcp_Batch_Volume`, `rcp_Boil_Volume` | into the fermenter, and at the start of the boil |
-| `rcp_Total_Grain_Weight` | all the grain together |
-| `rcp_Strike_Temp`, `rcp_Strike_Volume` | the strike water |
-| `rcp_Mash_Steps` | how many mash steps |
-| `rcp_Mash_Step_1_Name`, `_Temp`, `_Time` | each mash step (1, 2, 3 ...; Time is hh:mm:ss) |
-| `rcp_Mash_Out_Temp`, `rcp_Sparge_Temp` | mash out (0 = none) and sparge water |
-| `rcp_Boil_Time`, `rcp_Boil_Start_Temp` | the boil (hh:mm:ss), and the temperature it counts as boiling |
-| `rcp_Whirlpool_Minutes` | how long the whirlpool runs (0 = none) |
-| `rcp_Hop_Stand` | true when there are Whirlpool hops in a Hop Stand with its temperature and time |
-| `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`, `rcp_Hop_Stand_High_Minutes` (and `_Middle_`, `_Low_`) | true when that Hop Stand has Whirlpool hops; where the chill stops for them and how long it holds |
-| `rcp_Hop_Infuser` | true when a Whirlpool hop goes through the Hop Infuser (Hop Rocket) |
-| `rcp_Ferment_Temp` | fermentation and pitching temperature |
-| `rcp_Temp_Units`, `rcp_Volume_Units`, `rcp_Weight_Units` | °F or °C, gal or L, lb or kg |
+| `skn_rcp_Loaded` | true when a Recipe is loaded |
+| `skn_rcp_Name`, `skn_rcp_Yeast_Name` | the Recipe and its yeast |
+| `skn_rcp_Batch_Volume`, `skn_rcp_Boil_Volume` | into the fermenter, and at the start of the boil |
+| `skn_rcp_Total_Grain_Weight` | all the grain together |
+| `skn_rcp_Strike_Temp`, `skn_rcp_Strike_Volume` | the strike water |
+| `skn_rcp_Mash_Steps` | how many mash steps |
+| `skn_rcp_Mash_Step_1_Name`, `_Temp`, `_Time` | each mash step (1, 2, 3 ...; Time is hh:mm:ss) |
+| `skn_rcp_Mash_Out_Temp`, `skn_rcp_Sparge_Temp` | mash out (0 = none) and sparge water |
+| `skn_rcp_Boil_Time`, `skn_rcp_Boil_Start_Temp` | the boil (hh:mm:ss), and the temperature it counts as boiling |
+| `skn_rcp_Whirlpool_Minutes` | how long the whirlpool runs (0 = none) |
+| `skn_rcp_Hop_Stand` | true when there are Whirlpool hops in a Hop Stand with its temperature and time |
+| `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`, `skn_rcp_Hop_Stand_High_Minutes` (and `_Middle_`, `_Low_`) | true when that Hop Stand has Whirlpool hops; where the chill stops for them and how long it holds |
+| `skn_rcp_Hop_Infuser` | true when a Whirlpool hop goes through the Hop Infuser (Hop Rocket) |
+| `skn_rcp_Ferment_Temp` | fermentation and pitching temperature |
+| `skn_rcp_Temp_Units`, `skn_rcp_Volume_Units`, `skn_rcp_Weight_Units` | °F or °C, gal or L, lb or kg: the words of your Units, for messages |
 
 While no Recipe is loaded, the values come from the **☰ Menu > Default** tab: its Mash Profile and Boil Profile. The strike temperature is worked out from the first mash step (water to grain ratio 1.5 qt/lb or 3.1 L/kg, grain at 68 °F or 20 °C). PreBrew always asks for a Recipe first.
 

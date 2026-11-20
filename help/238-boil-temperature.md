@@ -72,7 +72,7 @@ These Skynet internal Globals are set by Skynet and are read only (Rule 1.18):
 
 | Name | What it is |
 |---|---|
-| `skn_Boil_Temp` | The temperature water boils at here and now, in the panel's Units (°F for US, °C for Metric) |
+| `skn_Boil_Temp` | The temperature water boils at here and now. A Process works with it in °C, like every temperature (Skynet Rule 2.59); in a message (text joined with `+`, or a `print` of it alone) it shows in your Units (°F for US, °C for Metric) |
 | `skn_Boil_Temp_C` | The same in °C |
 | `skn_Boil_Temp_F` | The same in °F |
 | `skn_Air_Pressure` | The air pressure at the brewery now, in hPa |

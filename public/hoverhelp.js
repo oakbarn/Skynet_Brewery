@@ -280,6 +280,7 @@ function start(doc = globalThis.document) {
     const text = balloonText(helpOf(el)); if (!text || !el.isConnected) return;
     tip.replaceChildren(...helpNodes(text, doc));
     tip.classList.toggle('hhWide', /⟪imgw?:/.test(text));      // a balloon with pictures is wider, so it fits on the screen
+    tip.classList.toggle('hhBig', el.dataset?.helpBig === '1');      // a large warning (Panel Updates entry 29: the Remove button of an Interface)
     tip.classList.toggle('hhHasLinks', linkify(tip, doc) > 0);      // hot spots: the mouse may go into the balloon to click one
     // inside an open dialog it stays a part of it, so its links can be clicked over a dialog that blocks the rest of the page
     (el.closest('dialog[open]') || doc.body).append(tip);

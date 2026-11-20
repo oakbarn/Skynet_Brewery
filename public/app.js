@@ -47,7 +47,8 @@ import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS,
 import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, HOP_MEASURES, hopUnitOf, YEAST_UNITS, yeastUnitOf, YEAST_FORMS, YEAST_TYPES, YEAST_FLOCS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
-import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';      // Copy a whole Tab on New tab (Rule 4.8)
+import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
+import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
@@ -5734,7 +5735,7 @@ const ADD_MENU = [
   // the Hydrometer Templates (OakBarn Brewery, 2026-11-09, Rule 6.25, public/hydrometer.js): one Hydrometer Device, its Template picks
   // which of its settings it uses (the rest are greyed out); on a virtual port 200, 201 ...
   ['Devices: hydrometers (Tilt, iSpindel, RAPT Pill ...)', HYDRO_MODEL_KEYS.map(k => [`${HYDRO_MODELS[k].label} hydrometer (${HYDRO_MODELS[k].conns.map(c => HYDRO_CONNECTIONS[c].replace(/[:(].*$/, '').trim()).join(' or ')})`, 'hydrometer', 'Hydro',
-    { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°F', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
+    { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°C', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
   ['Devices: weight', [
     ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
   ]],
@@ -5760,6 +5761,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (pick === 'thermowell') return newThermowell(extra.length);
   if (pick === 'manual') extra = { ...extra, units: showUnits() === 'Metric' ? '°C' : '°F', volumeUnits: showUnits() === 'Metric' ? 'L' : 'gal' };      // a Manual vessel starts in the Units (Rule 2.59)
   if (pick === 'probeTee') return newProbeTee(extra.tee);
+  if (pick === 'temperature') extra = { units: '°C', ...extra };      // a new probe keeps its numbers in °C; it shows in the Units (Rule 2.59)
   if (pick === 'mbv') {      // Motorized Ball Valve (Fritz, 2026-11-05): step 2 picks the valve, then the Add box (the Pump's drill-down)
     if (!TPL) await loadTemplates().catch(() => {});
     const k = await pickValve(); if (!k) return;
@@ -6872,7 +6874,7 @@ async function newProbeTee(kind) {
   const t = PROBE_TEES[kind]; if (!t) return;
   const key = await choose(`2a. Type of Temperature Probe in the ${t.label}`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
   if (key === undefined) return;
-  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: t.img, background: 1 };
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°C', precision: 1, ...clone(tempKindOf(key)), backpath: t.img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
   centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
   if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
@@ -6883,7 +6885,7 @@ async function newThermowell(length) {
   const [img, w] = THERMOWELLS[length] || THERMOWELLS.Short;
   const key = await choose(`2a. Type of Temperature Probe in the ${length} Thermowell`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
   if (key === undefined) return;
-  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: img, background: 1 };
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°C', precision: 1, ...clone(tempKindOf(key)), backpath: img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
   centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
   if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
@@ -7027,7 +7029,7 @@ function applyRims(g, w, tab, label) {
   // its Control is the method a Heating Element starts with (Rule 6.19): one Heating Element, not a separate PID or Hysteresis Device
   if (HEAT_CTL_TYPES.includes(heat.type)) { heat.heatMethod = TYPE_METHOD[heat.type]; heat.type = 'digitalOut'; heat.subtype = 'element'; }
   heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.label ??= base + ' Heat';
-  const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
+  const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°C', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
   for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
   Object.assign(temp, clone(tk));
   if (ow) { temp.probeIndex = +w.tempProbe; temp.owCircuit = owCircuitOf({ owCircuit: w.tempProbeCircuit }); delete temp.channel; } else { temp.channel = w.tempPin; delete temp.probeIndex; delete temp.owCircuit; }
@@ -10955,7 +10957,10 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     };
     input._fill(obj.device);
   }      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
+  // an Interface that was removed: the Device keeps its name and shows ⚠ No Interface in red until it is moved (Panel Updates entry 29, Rule 2.63)
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}), ...(v && !(S.config.devices || []).some(d => d.name === v) ? { class: 'devNoIface' } : {}) }, h('option', { value: '' }, '(none)'),
+    ...(v && !(S.config.devices || []).some(d => d.name === v) ? [h('option', { value: v, selected: true, class: 'devNoIface' }, `⚠ No Interface (${v} was removed)`)] : []),
+...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
     ...(String(opts).startsWith('addnew') && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
     ...controllableNames((draft || S.config).elements).map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)),
@@ -13762,9 +13767,11 @@ function renderDevices() {
       h('td', { title: sim ? 'Simulator: the panel pretends to be this board; nothing goes to the real board' : 'Real: the panel talks to the real board' }, sim ? '🧪 Simulator' : '🔌 Real'),
       h('td', { title: where || 'No USB Port or Network address yet: ⚙ Change to fill it in' }, TYPES[link] || link || ''), rateCell, h('td', {}, lostBox, ' s'),
       h('td', { title: d.info || '' }, h('span', { style: `color:${ok ? 'var(--ok)' : 'var(--bad)'}` }, d.status), infoShown ? h('div', { class: 'muted' }, d.info) : '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
-      h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its board, connection (USB, Ethernet or WiFi), USB Port or address and Board settings, and Test Communication', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its board, connection (USB, Ethernet or WiFi), USB Port or address and Board settings, and Test Communication', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only ifRmBtn', 'data-help': removeTipFor(d), 'data-help-big': '1', 'data-iface': d.name, onclick: guard(() => ifaceRemoveDialog(d.name)) }, 'Remove'))));
     tb.lastChild?.lastChild?.append(' ', h('button', { class: 'admin-only', title: 'Board Talk: every line to and from this board in plain words, and a box to send one (Rule 6.27)', onclick: () => boardTalk(d.name) }, '💬 Board Talk'));
   }
+  // the Remove buttons' warning counts the Processes too, once they are read (entry 29 Part 5)
+  if ($$('.ifRmBtn').length) procTextsSoon().then(texts => { for (const b of $$('.ifRmBtn')) { const d = S.devices.find(x => x.name === b.dataset.iface); if (d) b.dataset.help = removeTipFor(d, texts); } });
   renderProbes();
 }
 
@@ -13859,6 +13866,96 @@ $('#addOwCircuit').onclick = guard(async () => { if (await owInterview('', true)
 // Interface ID's on the Interface ID, not on the Board), the Board list has boards only, the Connection choices follow the Board, no
 // Simulator (it belongs to the panel, Rule 10.10), no Baud (it comes from the board), Test Communication in place of Pause, Lost Comm.
 const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device === name).length;
+// ---- Removing an Interface (Panel Updates entry 29, Rule 2.63, Help 76 "Removing an Interface"; public/ifaceremove.js). One Skynet box,
+// not the browser's: what uses it, ▶ Move them to another Interface, and, when something still uses it, one warning and the
+// Interface ID typed to light up 🗑 Delete. Nothing that used it is deleted (Design Rule #1); a Schema backup is made first (Rule 9.17).
+async function procTexts() {
+  try {
+    const all = (await api('GET', '/ui/scripts')).map(x => typeof x === 'string' ? x : x.name).filter(Boolean);
+    return await Promise.all(all.map(async n => [n, await api('GET', '/ui/scripts/' + encodeURIComponent(n)).catch(() => '')]));
+  } catch { return []; }
+}
+// the Remove buttons' warning reads the Processes at most once a minute (the Devices page is drawn again on every board status)
+let procCache = null;
+function procTextsSoon() {
+  if (!procCache || Date.now() - procCache.at > 60000) procCache = { at: Date.now(), p: procTexts() };
+  return procCache.p;
+}
+const IF_RM_COUNT = 12;     // longer lists show the first 12 and "and N more" (open it to see all)
+async function ifaceRemoveDialog(name) {
+  if (!can('admin')) { toast('Only an admin can remove an Interface', true); return; }
+  const texts = await procTexts();
+  const dlg = h('dialog', { class: 'ifRmDlg', 'data-nomenu': '' });
+  document.body.append(dlg);
+  const shut = () => { if (dlg.open) dlg.close(); else dlg.remove(); };
+  dlg.addEventListener('close', () => dlg.remove());
+  const draw = () => {
+    const d = S.config.devices.find(x => x.name === name); if (!d) return shut();
+    const id = d.id || ifaceIdOf(name) || '', who = `${id ? id + ': ' : ''}${name}`;
+    const use = ifaceUse(S.config, name), procs = processesUsing(texts, useNames(use, name)), busy = inUse(use, procs);
+    const list = (title, items) => {
+      if (!items.length) return '';
+      const show = items.slice(0, IF_RM_COUNT), more = items.slice(IF_RM_COUNT);
+      return h('div', { class: 'ifRmGroup' }, h('b', {}, `${title} (${items.length})`), h('ul', {}, ...show.map(t => h('li', {}, t))),
+        more.length ? h('details', {}, h('summary', {}, `and ${more.length} more`), h('ul', {}, ...more.map(t => h('li', {}, t)))) : '');
+    };
+    const want = String(id || name).toUpperCase();
+    const typed = h('input', { class: 'ifRmType', size: 6, autocomplete: 'off', 'aria-label': `Type ${want} to remove it` });
+    const del = h('button', { type: 'button', class: 'danger', title: 'Remove this Interface. A backup of the Schema is made first.' }, '🗑 Delete');
+    const ready = () => { del.disabled = busy && typed.value.trim().toUpperCase() !== want; };
+    typed.oninput = ready;
+    del.onclick = guard(async () => {
+      if (del.disabled) return;
+      await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== name) });
+      shut(); await load(); toast(`Interface ${who} removed. A backup of the Schema was made first.`);
+    });
+    const close = h('button', { type: 'button', title: 'Close. Nothing is removed.', onclick: shut }, 'Close');
+    const x = h('button', { type: 'button', class: 'boxX', title: 'Close. Nothing is removed.', 'aria-label': 'Close', onclick: shut }, '✕');
+    const body = [];
+    if (!busy) body.push(h('p', {}, 'Nothing uses this Interface, so it can be removed safely. A backup of the Schema is made first.'));
+    else {
+      body.push(h('p', {}, h('b', {}, `What uses ${want}`), ' (nothing is changed yet):'),
+        list('Devices on it', use.devices.map(e => { const p = pinsShown(e); return `${e.name}${p.length ? ` (${/^1w/.test(p[0]) ? '1-Wire Index' : 'Port'} ${p.join(', ')})` : ''}`; })),
+        list('Widgets and pictures tied to those Devices', use.widgets.map(w => w.name || w.kind || w.type || '(no name)')),
+        list('Processes that use them', procs),
+        list('1-Wire Index slots on it', use.probes.map(p => `${id}1w${owCircuitOf(p)}_${p.index}${p.name ? ' ' + p.name : ''}`)),
+        list('Other items on it (Vessel parts, Manifolds)', use.others.map(o => o.name || o.kind || o.type || '(no name)')));
+      // ▶ Move them (recommended): all to another Interface; a Device whose Port is taken there stays here and is listed
+      if (use.devices.length || use.probes.length || use.others.length) {
+        const others = S.config.devices.filter(o => o.name !== name);
+        const pick = h('select', { 'aria-label': 'Move them to' }, h('option', { value: '' }, '(pick an Interface)'),
+          ...others.map(o => { const oid = o.id || ifaceIdOf(o.name); return h('option', { value: o.name }, `${oid ? oid + ': ' : ''}${o.name}`); }),
+          h('option', { value: ADD_IFACE }, '➕ Add new Interface…'));
+        const note = h('div', { class: 'ifRmNote' });
+        const go = h('button', { type: 'button', class: 'primary', title: 'Move every Device on this Interface to the one picked. A Device whose Port is taken there stays here and is listed.', onclick: guard(async () => {
+          let to = pick.value;
+          if (to === ADD_IFACE) { to = await addInterfaceDialog({}); if (!to) return; await load(); }
+          if (!to) throw new Error('Pick the Interface to move them to');
+          const r = moveIface(S.config, name, to);
+          await api('PUT', '/ui/layout', { elements: r.elements, graphics: r.graphics, probes: r.probes });
+          await load(); draw();
+          const n2 = dlg.querySelector('.ifRmNote');
+          if (r.stay.length && n2) n2.replaceChildren(h('b', {}, `${r.moved.length} moved. These stay on ${want}: fix them, then Move again`), h('ul', {}, ...r.stay.map(s => h('li', {}, `${s.name}: ${s.why}`))));
+          else toast(`${r.moved.length} Device${r.moved.length === 1 ? '' : 's'} moved to ${to}`);
+        }) }, '▶ Move them');
+        body.push(h('div', { class: 'ifRmMove' }, h('b', {}, 'Move them (recommended): '), pick, ' ', go, note));
+      }
+      // the one warning (no nanny steps): Delete lights up when the Interface ID is typed
+      body.push(h('div', { class: 'ifRmWarn' }, h('b', {}, '⚠ Remove anyway?'),
+        h('p', {}, 'Nothing above is deleted: the Devices, Widgets and Processes keep every setting. But each Device shows ⚠ No Interface and does nothing until it is moved to an Interface, and a Process stops at a line that uses one. A backup of the Schema is made first.'),
+        h('label', {}, `Type ${want} to light up 🗑 Delete: `, typed)));
+    }
+    dlg.replaceChildren(h('div', { class: 'bar dlgBar' }, h('h3', {}, `Remove Interface ${who}`), h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' }, del, close, x)), ...body);
+    ready();
+  };
+  draw();
+  dlg.showModal();
+}
+// the large warning on the Remove button (entry 29 Part 5): counted now; the Processes once they are read
+function removeTipFor(d, texts = []) {
+  const use = ifaceUse(S.config, d.name);
+  return removeTip(d.id || ifaceIdOf(d.name) || '', d.name, { devices: use.devices.length, widgets: use.widgets.length, others: use.others.length + use.probes.length, procs: processesUsing(texts, useNames(use, d.name)).length });
+}
 // Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
 const NET_HELP_START = 'If you do not understand Networks and protocols, call a friend to help.\n\n'
   + '⟪b:What it is⟫The Network Address (IP Address) is the board\'s own number on your home network: four numbers with dots, for example 192.168.1.60. The Brain finds the board by it, the way a letter finds a house by its street address.\n\n';
@@ -16343,12 +16440,12 @@ function renderBrewProcessTab(box) {
     ft.append(h('tr', {}, h('td', {}, BP.fields[f].title), h('td', {}, sel), h('td', {}, pickBtn)));
   }
   box.append(h('h3', {}, 'Which Device does each job'), h('table', { class: 'grid' }, ft));
-  // Recipe values the Templates read (rcp_ names, read only)
+  // Recipe values the Templates read (skn_rcp_ names, read only)
   const rv = BP.recipe;
   box.append(h('h3', {}, 'Recipe values'),
-    h('p', { class: 'muted' }, rv.rcp_Loaded ? `From the loaded Recipe ${rv.rcp_Name}.` : 'No Recipe is loaded, so these come from the ☰ Menu > Default tab (its Mash Profile and Boil Profile). PreBrew asks for a Recipe first.'),
+    h('p', { class: 'muted' }, rv.skn_rcp_Loaded ? `From the loaded Recipe ${rv.skn_rcp_Name}.` : 'No Recipe is loaded, so these come from the ☰ Menu > Default tab (its Mash Profile and Boil Profile). PreBrew asks for a Recipe first.'),
     h('table', { class: 'grid' }, h('tbody', {}, ...Object.keys(BP.recipeFields).filter(k => !/Units$/.test(k)).map(k => h('tr', {}, h('td', {}, h('code', {}, k)), h('td', {}, String(rv[k])), h('td', { class: 'muted' }, BP.recipeFields[k]))),
-      ...Array.from({ length: rv.rcp_Mash_Steps }, (_, i) => h('tr', {}, h('td', {}, h('code', {}, `rcp_Mash_Step_${i + 1}_…`)), h('td', {}, `${rv[`rcp_Mash_Step_${i + 1}_Name`]}: ${rv[`rcp_Mash_Step_${i + 1}_Temp`]} for ${rv[`rcp_Mash_Step_${i + 1}_Time`]}`), h('td', { class: 'muted' }, 'Name, Temp and Time'))))));
+      ...Array.from({ length: rv.skn_rcp_Mash_Steps }, (_, i) => h('tr', {}, h('td', {}, h('code', {}, `skn_rcp_Mash_Step_${i + 1}_…`)), h('td', {}, `${rv[`skn_rcp_Mash_Step_${i + 1}_Name`]}: ${rv[`skn_rcp_Mash_Step_${i + 1}_Temp`]} for ${rv[`skn_rcp_Mash_Step_${i + 1}_Time`]}`), h('td', { class: 'muted' }, 'Name, Temp and Time'))))));
   const save = async () => { BP.setup = await api('PUT', '/ui/brewprocess', bpWork); bpWork = clone(BP.setup); };
   const names = BP.steps.filter(st => BP.setup.templates[st.key] !== '').map((st, i) => `Brew_${i + 1}_${st.key}`);
   const built = names.length > 0 && names.every(x => BP.processes.includes(x));
@@ -16434,7 +16531,7 @@ async function editProcessTemplate(st, name, copy) {
   d.append(bar(), h('h3', {}, `${st.title}: ${copy ? 'new User Process Template' : (t.cls === 'skynet' ? 'Skynet' : 'User') + ' Process Template'}`),
     h('label', {}, 'Name ', nm),
     h('p', { class: 'muted' }, ro && t.cls === 'skynet' ? 'A Skynet Process Template is never changed. To change it, pick ➕ Add new User Process Template… and change your copy.' :
-      'A Process with build lines: {{HLT_Heater}} is the Device picked for that job; @if HLT_Heater … @else … @end uses lines only when one is picked (or not); @each_mash_step … @end repeats lines for each mash step ({{n}} = 1, 2, 3 …). rcp_ names are the Recipe\'s values. See Help: Brew Process.'),
+      'A Process with build lines: {{HLT_Heater}} is the Device picked for that job; @if HLT_Heater … @else … @end uses lines only when one is picked (or not); @each_mash_step … @end repeats lines for each mash step ({{n}} = 1, 2, 3 …). skn_rcp_ names are the Recipe\'s values. See Help: Brew Process.'),
     ta, bar());
   document.body.append(d); d.showModal();
 }
@@ -18607,7 +18704,7 @@ function renderRecipeTab(box) {
   // are not shown (their values stay). It sits in the top line so the boxes keep OakBarn Brewery's layout.
   rc.level = recipeLevel(rc);
   const level = rcInput(rc, 'level', { kind: 'sel', list: RECIPE_LEVELS.map(x => [x.level, x.name]), onChange: () => { rc.level = +rc.level; rc.type = levelOf(rc).type; changed(); renderMenuPane(); } });
-  const levelBox = h('label', { class: 'rcLevel', 'data-field': 'rcp_Level', title: [...RECIPE_LEVELS.map(x => `${x.title}: ${x.about}`), 'Skynet_Field rcp_Level'].join('\n') }, h('b', {}, 'Level '), level);
+  const levelBox = h('label', { class: 'rcLevel', 'data-field': 'skn_rcp_Level', title: [...RECIPE_LEVELS.map(x => `${x.title}: ${x.about}`), 'Skynet_Field skn_rcp_Level'].join('\n') }, h('b', {}, 'Level '), level);
   if (!op) level.disabled = true;
   if (!levelShowsTab(rc, rcSub)) rcSub = 'recipe';     // a Daughter Tab this Level does not use goes back to the Recipe tab
   const sub = RC_DAUGHTERS.find(d => d[0] === rcSub);
@@ -18622,7 +18719,7 @@ function renderRecipeTab(box) {
 }
 // one box of Fritz's layout: a colored header and the value under it. kind: k black (names), g grey (times, choices),
 // b blue (volumes), r red (temperatures), c light grey (worked out by Calculate, not typed)
-// field: its Skynet_Field name (rcp_, public/recipecalc.js), shown when the mouse rests on the box
+// field: its Skynet_Field name (skn_rcp_, public/recipecalc.js), shown when the mouse rests on the box
 function rcBox(kind, title, el, { wide, unit, tip, field } = {}) {
   if (field && !recipeField(field)) console.warn('No Skynet_Field ' + field);
   return h('div', { class: `rcBox rc-${kind}${wide ? ' rcWideBox' : ''}`, title: [tip, field ? `Skynet_Field ${field}` : ''].filter(Boolean).join('\n'), ...(field ? { 'data-field': field } : {}) }, h('div', { class: 'rcBoxHead' }, title), h('div', { class: 'rcBoxVal' }, el, unit ? h('span', { class: 'rcUnit' }, unit) : ''));
@@ -18674,8 +18771,8 @@ function rcHopStandsRow(rc, u, changed) {
   const keep = (key, obj) => () => { rc.hopStands = { ...(rc.hopStands || {}), [key]: { tempC: obj.tempC, min: obj.min } }; changed(); };
   return h('div', { class: 'rcRow' }, ...stands.flatMap(st => {
     const o = { tempC: st.tempC, min: st.min }, k = keep(st.key, o);
-    return [rcBox('r', `Hop Stand ${st.label}`, rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ro: !op, onChange: k }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${st.key}_Temp`, tip: HS_TEMP_TIPS[st.key] }),
-      rcBox('g', `${st.label} Minutes`, rcInput(o, 'min', { d: 0, ro: !op, onChange: k }), { unit: 'min', field: `rcp_Hop_Stand_${st.key}_Minutes`, tip: HS_TIME_TIP })];
+    return [rcBox('r', `Hop Stand ${st.label}`, rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ro: !op, onChange: k }), { unit: TU(u.tempUnit), field: `skn_rcp_Hop_Stand_${st.key}_Temp`, tip: HS_TEMP_TIPS[st.key] }),
+      rcBox('g', `${st.label} Minutes`, rcInput(o, 'min', { d: 0, ro: !op, onChange: k }), { unit: 'min', field: `skn_rcp_Hop_Stand_${st.key}_Minutes`, tip: HS_TIME_TIP })];
   }));
 }
 function rcMain(pane, rc, u, changed) {
@@ -18696,32 +18793,32 @@ function rcMain(pane, rc, u, changed) {
   const calc = guard(() => rcCalculate(rc, changed));
   pane.append(
     h('div', { class: 'rcRow' },
-      rcBox('k', 'Beer Name', rcInput(rc, 'name', { kind: 'text', ...c }), { wide: true, field: 'rcp_Name' }),
-      rcBox('k', 'Style', style, { wide: true, field: 'rcp_Style' }),
-      rcBox('k', 'Brew Length', rcInput(rc.volumes, 'batchLiters', vol), { ...V, tip: 'The batch size, into the fermenter', field: 'rcp_Batch_Volume' }),
+      rcBox('k', 'Beer Name', rcInput(rc, 'name', { kind: 'text', ...c }), { wide: true, field: 'skn_rcp_Name' }),
+      rcBox('k', 'Style', style, { wide: true, field: 'skn_rcp_Style' }),
+      rcBox('k', 'Brew Length', rcInput(rc.volumes, 'batchLiters', vol), { ...V, tip: 'The batch size, into the fermenter', field: 'skn_rcp_Batch_Volume' }),
       rcBox('k', 'Brew on', rcBrewOnPick(rc, changed), { wide: true, tip: BREW_ON_TIP }),
-      calcBox('Grain Wt.', 'grainKg', v => rcRound(kgTo(v, u.grainUnit), 2), u.grainUnit, 'The weight of all the grains (Grain tab). Calculate works it out', 'rcp_Total_Grain_Weight'),
-      calcBox('1st Mash', 'firstMashC', v => rcRound(cTo(v, u.tempUnit), 1), TU(u.tempUnit), 'The first mash step (MASH tab). Calculate works it out', 'rcp_First_Mash_Temp'),
-      calcBox('IBU', 'ibuCalc', v => rcRound(v, 0), '', 'Bitterness from the Hops tab (Tinseth), with the Actual AAU of each hop. Calculate works it out', 'rcp_IBU'),
-      calcBox('Expected Gravity', 'expectedSG', v => rcRound(v, 3), '', 'The sum of the gravity points (PPG>SG) of every grain and fermentable, with the Brewhouse Efficiency of the Brew on Tab\'s Equipment Profile. Worked out when an amount changes, and by Calculate', 'rcp_Expected_Gravity'),
-      rcBox('b', 'Strike Volume', rcInput(rc, 'strikeLiters', vol), { ...V, field: 'rcp_Strike_Volume' }),
-      rcBox('r', 'Strike Temperature', rcInput(rc, 'strikeTempC', tmp), { ...T, field: 'rcp_Strike_Temp' }),
-      rcBox('r', 'Grain Temperature', rcInput(rc, 'grainTempC', tmp), { ...T, field: 'rcp_Grain_Temp' })),
+      calcBox('Grain Wt.', 'grainKg', v => rcRound(kgTo(v, u.grainUnit), 2), u.grainUnit, 'The weight of all the grains (Grain tab). Calculate works it out', 'skn_rcp_Total_Grain_Weight'),
+      calcBox('1st Mash', 'firstMashC', v => rcRound(cTo(v, u.tempUnit), 1), TU(u.tempUnit), 'The first mash step (MASH tab). Calculate works it out', 'skn_rcp_First_Mash_Temp'),
+      calcBox('IBU', 'ibuCalc', v => rcRound(v, 0), '', 'Bitterness from the Hops tab (Tinseth), with the Actual AAU of each hop. Calculate works it out', 'skn_rcp_IBU'),
+      calcBox('Expected Gravity', 'expectedSG', v => rcRound(v, 3), '', 'The sum of the gravity points (PPG>SG) of every grain and fermentable, with the Brewhouse Efficiency of the Brew on Tab\'s Equipment Profile. Worked out when an amount changes, and by Calculate', 'skn_rcp_Expected_Gravity'),
+      rcBox('b', 'Strike Volume', rcInput(rc, 'strikeLiters', vol), { ...V, field: 'skn_rcp_Strike_Volume' }),
+      rcBox('r', 'Strike Temperature', rcInput(rc, 'strikeTempC', tmp), { ...T, field: 'skn_rcp_Strike_Temp' }),
+      rcBox('r', 'Grain Temperature', rcInput(rc, 'grainTempC', tmp), { ...T, field: 'skn_rcp_Grain_Temp' })),
     h('div', { class: 'rcRow' },
-      rcBox('b', 'Sparge Volume', rcInput(rc, 'spargeLiters', vol), { ...V, field: 'rcp_Sparge_Volume' }),
-      rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'rcp_Sparge_Type' }),
-      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Sparge_Minutes' }),
-      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { ...T, field: 'rcp_Sparge_Temp' }),
-      rcBox('b', 'PreBoil Volume', rcInput(rc.volumes, 'boilLiters', vol), { ...V, field: 'rcp_Boil_Volume' }),
-      rcBox('g', 'Boil Profile', rcBoilPick(rc, changed), { wide: true, field: 'rcp_Boil_Profile', tip: 'A Skynet Boil Profile, one of your own (☰ Menu > Boil Profile), or none. Picking one fills in the Boil Minutes and its Hop Stands.' }),
-      rcBox('g', 'Boil Minutes', rcInput(rc, 'boilTime', { d: 0, ...c }), { unit: 'min', field: 'rcp_Boil_Minutes' }),
-      rcBox('g', 'Whirlpool Minutes', rcInput(rc, 'whirlpoolMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Whirlpool_Minutes' }),
-      rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'rcp_Pitch_Temp' }),
-      rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'rcp_Grain_Ratio' }),
+      rcBox('b', 'Sparge Volume', rcInput(rc, 'spargeLiters', vol), { ...V, field: 'skn_rcp_Sparge_Volume' }),
+      rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'skn_rcp_Sparge_Type' }),
+      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'skn_rcp_Sparge_Minutes' }),
+      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { ...T, field: 'skn_rcp_Sparge_Temp' }),
+      rcBox('b', 'PreBoil Volume', rcInput(rc.volumes, 'boilLiters', vol), { ...V, field: 'skn_rcp_Boil_Volume' }),
+      rcBox('g', 'Boil Profile', rcBoilPick(rc, changed), { wide: true, field: 'skn_rcp_Boil_Profile', tip: 'A Skynet Boil Profile, one of your own (☰ Menu > Boil Profile), or none. Picking one fills in the Boil Minutes and its Hop Stands.' }),
+      rcBox('g', 'Boil Minutes', rcInput(rc, 'boilTime', { d: 0, ...c }), { unit: 'min', field: 'skn_rcp_Boil_Minutes' }),
+      rcBox('g', 'Whirlpool Minutes', rcInput(rc, 'whirlpoolMinutes', { d: 0, ...c }), { unit: 'min', field: 'skn_rcp_Whirlpool_Minutes' }),
+      rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'skn_rcp_Pitch_Temp' }),
+      rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'skn_rcp_Grain_Ratio' }),
       can('operator') ? h('button', { class: 'rcCalcBtn', onclick: calc, title: 'Works out the Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature, IBU, and the Strike and Sparge Volume and Temperature' }, 'Calculate') : ''),
     rcHopStandsRow(rc, u, changed),
     h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'),
-      ...[['Grain Wt.', 'rcp_Total_Grain_Weight'], ['1st Mash', 'rcp_First_Mash_Temp'], ['IBU', 'rcp_IBU'], ['Expected Gravity', 'rcp_Expected_Gravity']].filter(([, f]) => levelShowsBox(rc, f)).map(([t]) => h('span', { class: 'rcMini' }, t)),
+      ...[['Grain Wt.', 'skn_rcp_Total_Grain_Weight'], ['1st Mash', 'skn_rcp_First_Mash_Temp'], ['IBU', 'skn_rcp_IBU'], ['Expected Gravity', 'skn_rcp_Expected_Gravity']].filter(([, f]) => levelShowsBox(rc, f)).map(([t]) => h('span', { class: 'rcMini' }, t)),
       h('b', {}, 'These fields are calculated from the Other Tabs.')),
     h('div', { class: 'rcLower' },
       h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.filter(([k]) => levelShowsTab(rc, k)).map(([k, t, about]) => h('div', { class: 'rcDRow' },
@@ -18765,7 +18862,7 @@ function rcSwitch(on, onChange, title = '') {
 // The square box on a line opens the "Outside of Boil" dialog: Mash, 1st WORT, Secondary, DRY and Whirlpool switches.
 // A hop with one of them on is not a Boil Hop, so the dialog stays on its line, covering Min, Drop, IBU and Boil Group,
 // until the switch is turned off. With no switch on, Cancel or Save closes the dialog. Every box is a Skynet_Field
-// (rcp_Hop_N_...). The lines are put in order (Boil Hops by drop time, then the others) on Calculate and on Save.
+// (skn_rcp_Hop_N_...). The lines are put in order (Boil Hops by drop time, then the others) on Calculate and on Save.
 const RC_HOP_SW = [['mash', 'Mash Hops'], ['first wort', '1st WORT Hops'], ['secondary', 'Secondary Hops'], ['dry hop', 'DRY Hops'], ['whirlpool', 'Whirlpool']];
 const rcHopOpen = new WeakMap();      // hop -> the dialog's work copy, while its dialog is open and not saved
 function rcHops(pane, rc, u, changed) {
@@ -18868,8 +18965,8 @@ function rcHopDialog(rc, hop, i, u, changed) {      // rc: the Recipe (was missi
       work._hs ??= Object.fromEntries(st.map(x => [x.key, { tempC: x.tempC, min: x.min }]));
       const o = work._hs[work.stand];
       box.append(rcBox('g', 'Hop Stand', rcInput(work, 'stand', { kind: 'sel', list: [['', ''], ...st.map(x => [x.key, x.label])], onChange: draw }), { field: F('Hop_Stand'), tip: HS_PICK_TIP }),
-        ...(o ? [rcBox('r', 'Temperature', rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit) }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${work.stand}_Temp`, tip: HS_TEMP_TIPS[work.stand] }),
-          rcBox('g', 'Time', rcInput(o, 'min', { d: 0 }), { unit: 'min', field: `rcp_Hop_Stand_${work.stand}_Minutes`, tip: HS_TIME_TIP })] : []),
+        ...(o ? [rcBox('r', 'Temperature', rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit) }), { unit: TU(u.tempUnit), field: `skn_rcp_Hop_Stand_${work.stand}_Temp`, tip: HS_TEMP_TIPS[work.stand] }),
+          rcBox('g', 'Time', rcInput(o, 'min', { d: 0 }), { unit: 'min', field: `skn_rcp_Hop_Stand_${work.stand}_Minutes`, tip: HS_TIME_TIP })] : []),
         rcBox('g', 'Min', rcInput(work, 'time', { d: 0 }), { field: F('Min'), tip: 'How long this hop steeps in the whirlpool (used for its bitterness). The Hop Stand Time is how long the cooling water stays off.' }),
         h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!work.hopRocket, on => { work.hopRocket = on; }, 'Skynet_Field ' + F('Hop_Rocket'))));
     }
@@ -18895,7 +18992,7 @@ function rcHopDialog(rc, hop, i, u, changed) {      // rc: the Recipe (was missi
 // ---- The Grain tab and the Fermentable tab (Fritz, 2026-10-31). One list in the Recipe (ingredients.fermentables): the
 // Grain tab shows the ones of Type Grain (the Type is hidden), the Fermentable tab every other Type, with a Type dropdown.
 // Boxes: name, amount, Potential (yield %), SRM (color), and After Boil, a switch shown only for the Types a brewer adds
-// during or after the boil. No limit on lines. Every box is a Skynet_Field (rcp_Grain_N_..., rcp_Fermentable_N_...).
+// during or after the boil. No limit on lines. Every box is a Skynet_Field (skn_rcp_Grain_N_..., skn_rcp_Fermentable_N_...).
 function rcFerms(pane, rc, u, changed, grainTab) {
   const all = rc.ingredients.fermentables, op = can('operator'), c = { onChange: changed };
   const mine = all.filter(f => isGrain(f) === grainTab), W = u.grainUnit, what = grainTab ? 'Grain' : 'Fermentable';
@@ -18918,7 +19015,7 @@ function rcFerms(pane, rc, u, changed, grainTab) {
     op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `${grainTab ? 'Add ' : ''}${what} `, h('b', {}, '+')) : ''));
   if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : (levelFermTypes(rc).includes('sugar') ? 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.' : 'No extracts yet. Press Add Fermentable for a can of extract or dry extract.')));
   mine.forEach((f, i) => {
-    const n = i + 1, F = end => `rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    const n = i + 1, F = end => `skn_rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     line.append(rcBox('g', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
     const pp = h('input', { type: 'text', disabled: true, tabIndex: -1 }); pts.push([f, pp]);
     if (grainTab) line.append(rcBox('g', wLabel, rcInput(f, 'kg', { to: v => kgTo(v, W), from: v => toKg(v, W), ...live }), { field: F('Amount'), tip: 'Amount, in the grain weight standard picked on ☰ Menu > Default' }));
@@ -18950,7 +19047,7 @@ function rcFerms(pane, rc, u, changed, grainTab) {
 // ---- The Adjuncts tab (Fritz, 2026-10-31: "in a like manner" as the Grain and Fermentable tabs). BeerSmith and BeerXML
 // call them Misc: Whirlfloc, yeast nutrient, gypsum, spices. Each line: Name, Amount, Measurement, Type, Use, Time and its
 // unit. The dropdowns are select only, with the BeerXML lists. A Boil adjunct gets hop-style alerts (the Drops tab).
-// Adjunct-type fermentables (flaked grains, they add sugar) stay on the Fermentable tab. Skynet_Fields rcp_Adjunct_N_...
+// Adjunct-type fermentables (flaked grains, they add sugar) stay on the Fermentable tab. Skynet_Fields skn_rcp_Adjunct_N_...
 function rcAdjuncts(pane, rc, changed) {
   const all = rc.ingredients.miscs, op = can('operator'), c = { onChange: changed };
   const sel = (obj, key, list, rerender) => rcInput(obj, key, { kind: 'sel', list: [...list, ...(list.some(([v]) => v === obj[key]) || !obj[key] ? [] : [[obj[key], obj[key]]])], onChange: () => { changed(); if (rerender) renderMenuPane(); } });
@@ -18959,7 +19056,7 @@ function rcAdjuncts(pane, rc, changed) {
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Adjuncts'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add an adjunct line at the bottom' }, 'Adjunct ', h('b', {}, '+')) : ''));
   if (!all.length) pane.append(h('p', { class: 'muted' }, 'No adjuncts yet. Press Adjunct + for Whirlfloc, yeast nutrient, gypsum or a spice.'));
   all.forEach((m, i) => {
-    const n = i + 1, F = end => `rcp_Adjunct_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    const n = i + 1, F = end => `skn_rcp_Adjunct_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     line.append(rcBox('g', `Adjunct ${n}`, rcInput(m, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }),
       rcBox('g', 'Amount', rcInput(m, 'amount', { d: 2, ...c }), { field: F('Amount') }),
       rcBox('g', 'Measurement', sel(m, 'unit', MISC_LINE_UNITS.map(x => [x, x])), { field: F('Measurement') }),
@@ -18975,7 +19072,7 @@ function rcAdjuncts(pane, rc, changed) {
 
 // ---- The MASH tab (Fritz, 2026-10-31: "Mash Profile and Water Profiles can be built as well"). Pick a Mash Profile
 // (Skynet Template or your own), or use the Recipe's own mash (from the recipe file or typed here). A picked profile shows
-// read only; Copy into this Recipe makes it the Recipe's own mash to change. Lines: Step N, Temp, Time (rcp_Mash_Step_N_...).
+// read only; Copy into this Recipe makes it the Recipe's own mash to change. Lines: Step N, Temp, Time (skn_rcp_Mash_Step_N_...).
 function rcMash(pane, rc, u, changed) {
   const op = can('operator'), mp = rcMashProfile(rc), TT = TU(u.tempUnit), c = { onChange: changed };
   rc.mash = rc.mash || { steps: [] }; rc.mash.steps = rc.mash.steps || [];
@@ -18994,13 +19091,13 @@ function rcMash(pane, rc, u, changed) {
   });
   const addStep = guard(() => { rc.mash.steps.push({ name: `Step ${rc.mash.steps.length + 1}`, type: 'Infusion', tempC: null, min: 0 }); changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Mash'), op && !mp ? h('button', { class: 'hopAdd', onclick: addStep, title: 'Add a mash step at the bottom' }, 'Mash Step ', h('b', {}, '+')) : ''),
-    h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', pick, { wide: true, field: 'rcp_Mash_Profile', tip: 'A Skynet Template, one of your own (☰ Menu > Mash Profile), or the Recipe\'s own mash' }),
+    h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', pick, { wide: true, field: 'skn_rcp_Mash_Profile', tip: 'A Skynet Template, one of your own (☰ Menu > Mash Profile), or the Recipe\'s own mash' }),
       mp && op ? h('button', { onclick: copy, title: 'Make this profile the Recipe\'s own mash, to change it here' }, '⧉ Copy into this Recipe') : '',
       mp?.notes ? h('span', { class: 'muted' }, mp.notes) : ''));
   const steps = mp ? mp.steps : rc.mash.steps;
   if (!steps.length) pane.append(h('p', { class: 'muted' }, 'No mash steps. Pick a Mash Profile, or press Mash Step +.'));
   steps.forEach((s, i) => {
-    const n = i + 1, F = end => `rcp_Mash_Step_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    const n = i + 1, F = end => `skn_rcp_Mash_Step_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     if (mp) line.append(rcBox('g', `Step ${n}`, ro(s.name), { wide: true, field: F('Name') }), rcBox('r', 'Temp', ro(pTemp(s.temp)), { unit: TT, field: F('Temp') }), rcBox('g', 'Time', ro(s.time), { unit: 'min', field: F('Time') }));
     else {
       line.append(rcBox('g', `Step ${n}`, rcInput(s, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }), rcBox('r', 'Temp', rcInput(s, 'tempC', tmp), { unit: TT, field: F('Temp') }),
@@ -19013,13 +19110,13 @@ function rcMash(pane, rc, u, changed) {
   pane.append(h('h3', {}, 'Sparge'), mp
     ? h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', ro(SPARGE[mp.sparge] || mp.sparge)), rcBox('r', 'Sparge Temperature', ro(pTemp(mp.spargeTemp)), { unit: TT }),
       ...(mp.sparge === 'batch' ? [rcBox('g', 'Batch Rest', ro(mp.batchRest), { unit: 'min' })] : []), rcBox('r', 'Mash Out', ro(pTemp(mp.mashOutTemp)), { unit: TT, tip: 'Empty = no mash out' }))
-    : h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'rcp_Sparge_Type' }),
-      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { unit: TT, field: 'rcp_Sparge_Temp' }),
-      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Sparge_Minutes' })));
+    : h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'skn_rcp_Sparge_Type' }),
+      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { unit: TT, field: 'skn_rcp_Sparge_Temp' }),
+      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'skn_rcp_Sparge_Minutes' })));
   pane.append(h('p', { class: 'muted' }, mp ? `${mp.skynet ? 'A Skynet Template is read only.' : 'Change your own Mash Profiles on ☰ Menu > Mash Profile.'} Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.`
     : 'The Recipe\'s own mash. Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.'));
 }
-// ---- The Waters tab: the Water Profile picked and its minerals after the distilled or RO cut (rcp_Water_...). The profile
+// ---- The Waters tab: the Water Profile picked and its minerals after the distilled or RO cut (skn_rcp_Water_...). The profile
 // itself is changed on ☰ Menu > Water Profile. Below: the waters the recipe file listed.
 function rcWaters(pane, rc, u, changed) {
   // none picked: Tap Water (Rule 17.12, its numbers on ☰ Menu > Default)
@@ -19028,7 +19125,7 @@ function rcWaters(pane, rc, u, changed) {
   const pick = rcInput({ waterProfile: wp?.id ?? '' }, 'waterProfile', { kind: 'sel', list: [...S.waterProfiles.map(x => [x.id, x.name]), ...(can('operator') ? [PROF_ADD] : [])], onChange: () => {} });
   pick.addEventListener('change', () => { if (pick.value === '__add__') { pick.value = wp?.id ?? ''; return newBrewProfile('water', true); } rc.waterProfile = pick.value; changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Waters')),
-    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes && !wp.tap ? h('span', { class: 'muted' }, wp.notes) : ''));
+    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'skn_rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes && !wp.tap ? h('span', { class: 'muted' }, wp.notes) : ''));
   if (wp) {
     const [ions, rest] = [WATER_FIELDS.slice(0, WATER_IONS.length), WATER_FIELDS.slice(WATER_IONS.length)];
     pane.append(h('div', { class: 'rcRow' }, ...ions.map(([k, , key], i) => rcBox('c', WATER_IONS[i][1], ro(b[key]), { unit: 'ppm', field: k, tip: wp.distilledPct ? `${wp[key]} ppm in the water report, cut with ${wp.distilledPct}% distilled` : '' }))),
@@ -19058,7 +19155,7 @@ function rcDaughter(pane, rc, u, changed, [k, t, about]) {
 // ---- The Yeast tab (OakBarn Brewery's Yeast layout, 2026-11-19: "Use it"). One line for each yeast, no limit: Name, Form, Amount, its own
 // Unit (Packs, g, oz or ml, Rule 17.18), Attenuation % and the temperature range. ▸ More opens the rest under the line: Lab,
 // Product ID, Type, Flocculation, Starter (and its size), Times cultured, Manufacture date, Notes. The amount is kept in its own
-// unit, like an Adjunct line; the temperatures in °C and the starter in liters, shown in the Units (Rule 2.59). rcp_Yeast_N_...
+// unit, like an Adjunct line; the temperatures in °C and the starter in liters, shown in the Units (Rule 2.59). skn_rcp_Yeast_N_...
 const rcYeastMore = new WeakSet();     // the yeast lines with More open
 function rcYeast(pane, rc, u, changed) {
   rc.ingredients.yeasts = rc.ingredients.yeasts || [];
@@ -19072,7 +19169,7 @@ function rcYeast(pane, rc, u, changed) {
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Yeast'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add a yeast line at the bottom' }, 'Yeast ', h('b', {}, '+')) : ''));
   if (!Y.length) pane.append(h('p', { class: 'muted' }, 'No yeast yet. Press Yeast +, or IMPORT a recipe on the Recipe tab.'));
   Y.forEach((y, i) => {
-    const n = i + 1, F = end => `rcp_Yeast_${n}_${end}`, open = rcYeastMore.has(y);
+    const n = i + 1, F = end => `skn_rcp_Yeast_${n}_${end}`, open = rcYeastMore.has(y);
     const ms = rcInput({ unit: yeastUnitOf(y) }, 'unit', { kind: 'sel', list: Object.entries(YEAST_UNITS), ro: !op, onChange: () => {} });
     ms.addEventListener('change', () => { y.unit = ms.value; changed(); });
     const more = h('button', { onclick: () => { if (open) rcYeastMore.delete(y); else rcYeastMore.add(y); renderMenuPane(); }, title: 'Lab, Product ID, Type, Flocculation, Starter, Times cultured, Manufacture date and Notes' }, open ? '▾ More' : '▸ More');
