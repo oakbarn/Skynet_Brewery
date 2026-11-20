@@ -2,6 +2,8 @@
 
 The **Processes** screen has a row of tools above the editor: **Find**, **All Processes**, **Go to line**, **Save to file**, the **Colors** switch and the **Color key**. The **Recycle Bin** button is under the Process list.
 
+Every step of adding a Process, with pictures: [Step by Step: Add a Process](240-step-by-step-add-a-process).
+
 ## Line numbers and Go to line
 
 Every line has its number down the left side. A red number is a line with a problem, a green one is the line a running Process is on.
