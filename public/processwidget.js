@@ -24,8 +24,10 @@ export function processState(processName, status) {
   return { word: 'Stopped', running: false };
 }
 // the button's words: what one click does now
-// word: the Stop button's word in the Help language (Rule 11.11, public/screenwords.js); the Brain and the Import use the English
-export const processButton = (st, word = w => w) => (st.running ? '■ ' + word('Stop') : '▶ Start');
+// the Stop button's word in the Help language: the Panel sets it (Rule 11.11, public/screenwords.js); the Brain and the Import keep the English
+let stopWord = w => w;
+export const setStopWord = f => { stopWord = typeof f === 'function' ? f : w => w; };
+export const processButton = st => (st.running ? '■ ' + stopWord('Stop') : '▶ Start');
 
 // The hover help of its Properties (Rule 2.38)
 export const PROCESS_TIPS = {

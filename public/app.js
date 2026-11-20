@@ -17,6 +17,8 @@ import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from 
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName, LANG_KEY } from './hoverhelp.js';
+import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
+import { setStopWord } from './processwidget.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -41,7 +43,6 @@ import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the I
 import { reportDialog } from './report.js';      // 🐞 Report a problem (Rule 2.61)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
-import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
 import { ON_PRESS, ON_PRESS_TIPS, pressProcessOf, pressNeedsProcess } from './onpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
@@ -3962,7 +3963,7 @@ function fillProcessWidget(n, e) {
   const st = processState(e.process, processStatusOf(e.process)), vl = n.querySelector('.vl');
   n.classList.add('procw');
   n.classList.toggle('scr-error', !!st.error); n.classList.toggle('scr-missing', !!st.missing);
-  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st, safetyWord)));
+  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st)));
   n.title = st.missing ? `${e.label || e.name}: ${st.word}. Pick its Process in its Properties (double-click it).` : `Process ${e.process}: ${st.word}. One click ${st.running ? 'stops' : 'starts'} it.`;
   return st.running;
 }
@@ -13330,6 +13331,7 @@ $('#scriptAutoRestart').onchange = guard(async ev => {
 });
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 // the Override and Stop buttons in the Help language (Rule 11.11): again when it is picked here or in another window
+setStopWord(safetyWord);      // a Process Widget's ■ Stop
 function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); $('#stopScript').textContent = safetyWord('Stop'); }
 function safetyRefresh() { safetyWords(); if (curWs()) renderWs(); }
 safetyWords();
