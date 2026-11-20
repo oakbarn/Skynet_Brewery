@@ -72,21 +72,21 @@ assert.equal(fx.ingredients.fermentables.length, 2, 'the grain after the typo is
 assert.deepEqual(['protein', 'maxInBatch', 'moisture', 'coarseFineDiff', 'diastaticPower', 'recommendMash'].map(k => fx.ingredients.fermentables[0][k]), [13.2, 20, 9, 1.5, 0, true]);
 const gf = recipeFieldValues({ ingredients: { fermentables: [{ name: 'Pale', type: 'grain', kg: 4.5359237, yieldPct: 80, color: 2 }, { name: 'Honey', type: 'sugar', kg: 0.45359237, yieldPct: 75, color: 1, addAfterBoil: true },
   { name: 'Flaked', type: 'adjunct', kg: 0.5, addAfterBoil: true }, { name: 'Munich', type: 'grain', kg: 1 }] } }, { units: 'US' });
-assert.equal(recipeFieldValues({ ingredients: { fermentables: [{ name: 'DME', type: 'dry extract', kg: 0.45359237, unit: 'oz' }] } }, { units: 'US' }).rcp_Fermentable_1_Amount, 16, 'the amount shows in its own Measurement');
-assert.equal(recipeFieldValues({ ingredients: { fermentables: [{ name: 'DME', type: 'dry extract', kg: 1 }] } }, { units: 'US' }).rcp_Fermentable_1_Measurement, 'lb');
+assert.equal(recipeFieldValues({ ingredients: { fermentables: [{ name: 'DME', type: 'dry extract', kg: 0.45359237, unit: 'oz' }] } }, { units: 'US' }).skn_rcp_Fermentable_1_Amount, 16, 'the amount shows in its own Measurement');
+assert.equal(recipeFieldValues({ ingredients: { fermentables: [{ name: 'DME', type: 'dry extract', kg: 1 }] } }, { units: 'US' }).skn_rcp_Fermentable_1_Measurement, 'lb');
 assert.equal(cleanRecipe({ ingredients: { fermentables: [{ name: 'x', unit: 'stone' }, { name: 'y', unit: 'g' }] } }).ingredients.fermentables.map(f => f.unit).join(), ',g');
 const av = recipeFieldValues({ ingredients: { miscs: [{ name: 'Whirlfloc', type: 'Fining', use: 'boil', amount: 1, unit: 'items', time: 15, timeUnit: 'min' }] } });
-assert.equal(av.rcp_Adjunct_Count, 1); assert.equal(av.rcp_Adjunct_1_Name, 'Whirlfloc'); assert.equal(av.rcp_Adjunct_1_Time, 15); assert.equal(av.rcp_Adjunct_1_Measurement, 'items');
-assert.equal(recipeField('rcp_Adjunct_4_Use')[1], 'Adjunct 4: Boil, Mash, Primary, Secondary or Bottling');
-assert.equal(gf.rcp_Grain_Count, 2); assert.equal(gf.rcp_Fermentable_Count, 2);
-assert.equal(gf.rcp_Grain_1_Amount, 10); assert.equal(gf.rcp_Grain_1_Potential, 80); assert.equal(gf.rcp_Grain_2_Name, 'Munich');
-assert.equal(gf.rcp_Fermentable_1_Type, 'sugar'); assert.equal(gf.rcp_Fermentable_1_After_Boil, true); assert.equal(gf.rcp_Fermentable_2_After_Boil, false, 'an adjunct is not added after the boil');
+assert.equal(av.skn_rcp_Adjunct_Count, 1); assert.equal(av.skn_rcp_Adjunct_1_Name, 'Whirlfloc'); assert.equal(av.skn_rcp_Adjunct_1_Time, 15); assert.equal(av.skn_rcp_Adjunct_1_Measurement, 'items');
+assert.equal(recipeField('skn_rcp_Adjunct_4_Use')[1], 'Adjunct 4: Boil, Mash, Primary, Secondary or Bottling');
+assert.equal(gf.skn_rcp_Grain_Count, 2); assert.equal(gf.skn_rcp_Fermentable_Count, 2);
+assert.equal(gf.skn_rcp_Grain_1_Amount, 10); assert.equal(gf.skn_rcp_Grain_1_Potential, 80); assert.equal(gf.skn_rcp_Grain_2_Name, 'Munich');
+assert.equal(gf.skn_rcp_Fermentable_1_Type, 'sugar'); assert.equal(gf.skn_rcp_Fermentable_1_After_Boil, true); assert.equal(gf.skn_rcp_Fermentable_2_After_Boil, false, 'an adjunct is not added after the boil');
 // gravity points (PPG>SG) and the Expected Gravity: 10 lb at 80% Potential, 72% efficiency, 5 gal = 53.2 points; 1 lb of honey (75%, not mashed) = 6.9
 // The efficiency is only the Brew on Tab's Equipment Profile's (Rule 17.13): it is passed in, never kept on the Recipe or a default
 const gr = { volumes: { batchLiters: 5 / 0.264172052 }, ingredients: { fermentables: [{ type: 'grain', kg: 4.5359237, yieldPct: 80 }, { type: 'sugar', kg: 0.45359237, yieldPct: 75 }] } };
 assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[0], gr, 72) * 10) / 10, 53.2); assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[1], gr, 72) * 10) / 10, 6.9);
-assert.equal(expectedGravity(gr, 72), 1.06); assert.equal(calculateRecipe(gr, {}, null, 1.0, 72).expectedSG, 1.06); assert.equal(recipeFieldValues({ ...gr, expectedSG: 1.06 }).rcp_Expected_Gravity, 1.06);
-assert.equal(recipeFieldValues(gr, { eff: 72 }).rcp_Grain_1_PPG_SG, 53.24); assert.equal(expectedGravity({ ingredients: { fermentables: [{ kg: 1, yieldPct: 80 }] } }, 72), null, 'no Brew Length, no gravity');
+assert.equal(expectedGravity(gr, 72), 1.06); assert.equal(calculateRecipe(gr, {}, null, 1.0, 72).expectedSG, 1.06); assert.equal(recipeFieldValues({ ...gr, expectedSG: 1.06 }).skn_rcp_Expected_Gravity, 1.06);
+assert.equal(recipeFieldValues(gr, { eff: 72 }).skn_rcp_Grain_1_PPG_SG, 53.24); assert.equal(expectedGravity({ ingredients: { fermentables: [{ kg: 1, yieldPct: 80 }] } }, 72), null, 'no Brew Length, no gravity');
 assert.equal(gravityPoints(gr.ingredients.fermentables[0], gr), null, 'no Efficiency: a grain has no gravity points (no hidden 72 %)');
 assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[1], gr) * 10) / 10, 6.9, 'a sugar needs no Efficiency');
 assert.equal(expectedGravity(gr), null, 'no Efficiency, no Expected Gravity'); assert.equal(calculateRecipe(gr).expectedSG, null);
@@ -120,7 +120,7 @@ assert.equal(RECIPE_DEFAULTS.efficiency, undefined, 'no overall Efficiency defau
   assert.equal(cleanRecipe({ brewOn: { _key: 'name' } }).brewOn, null);
   assert.equal(defaultBrewOn({ workspaces: [cfg.workspaces[2]] }, P), null, 'no Tab with Equipment numbers');
 }
-assert.equal(recipeField('rcp_Fermentable_7_SRM')[1], 'Fermentable 7: color in SRM');
+assert.equal(recipeField('skn_rcp_Fermentable_7_SRM')[1], 'Fermentable 7: color in SRM');
 assert.equal(readRecipeFile('<RECIPES><RECIPE><NAME>A</NAME><FERMENTABLES><FERMENTABLE><NAME>DME</NAME><TYPE>Dry Extract</TYPE><AMOUNT>1</AMOUNT><ADD_AFTER_BOIL>TRUE</ADD_AFTER_BOIL></FERMENTABLE></FERMENTABLES></RECIPE></RECIPES>', 'a.xml').recipe.ingredients.fermentables[0].addAfterBoil, true);
 assert.equal(fx.ingredients.fermentables[0].notes, 'Adds body to porters and stouts, must be mashed'); assert.equal(fx.grainKg, 4.91);
 
@@ -146,9 +146,9 @@ assert.ok(noWarn.alerts.every(a => a.kind === 'drop'), 'warning 0 = no warnings'
 const c = calculateRecipe({ ...r, spargeTempC: null }, {}, { units: 'US', steps: [{ name: 'Sacch', temp: 154, time: 60 }], spargeTemp: 170, sparge: 'fly' });
 assert.equal(c.firstMashC, 67.8, 'the Mash Profile picked wins (154 °F)'); assert.equal(c.spargeTempC, 76.7); assert.equal(c.spargeType, 'batch', 'the recipe keeps its own sparge type');
 const f = recipeFieldValues(r, { units: 'US' });
-assert.equal(f.rcp_Name, 'Test IPA'); assert.equal(f.rcp_Batch_Volume, 5.5); assert.equal(f.rcp_Total_Grain_Weight, 11); assert.equal(f.rcp_Pitch_Temp, 66);
+assert.equal(f.skn_rcp_Name, 'Test IPA'); assert.equal(f.skn_rcp_Batch_Volume, 5.5); assert.equal(f.skn_rcp_Total_Grain_Weight, 11); assert.equal(f.skn_rcp_Pitch_Temp, 66);
 assert.equal(new Set(RECIPE_FIELDS.map(x => x[0])).size, RECIPE_FIELDS.length, 'every Skynet_Field name is used once');
-assert.ok(RECIPE_FIELDS.every(([k]) => /^rcp_[A-Z][A-Za-z_]+$/.test(k)));
+assert.ok(RECIPE_FIELDS.every(([k]) => /^skn_rcp_[A-Z][A-Za-z_]+$/.test(k)));
 
 // the Hops tab: an import leaves the Actual AAU empty, Calculate needs it above zero, every hop line has its Skynet_Fields
 assert.equal(x.ingredients.hops[0].alphaActual, 0, 'the Actual AAU starts at 0: the AAU on the package is typed in');
@@ -166,14 +166,14 @@ const hs = { boilTime: 60, volumes: { batchLiters: 20 }, ingredients: { hops: [
 sortHops(hs);
 assert.deepEqual(hs.ingredients.hops.map(h => h.name), ['Magnum', 'Mid', 'Late', 'Mash', 'FW', 'Sec', 'Dry', 'WP'], 'Start of Boil first, by minutes, then Mash, 1st Wort, Secondary, Dry, Whirlpool');
 const hf = recipeFieldValues(hs, { units: 'US' });
-assert.equal(hf.rcp_Hop_Count, 8);
-assert.equal(hf.rcp_Hop_1_Name, 'Magnum'); assert.equal(hf.rcp_Hop_1_AA_Actual, 11.7); assert.equal(hf.rcp_Hop_1_Calc_Amount, 1.01); assert.equal(hf.rcp_Hop_1_Boil_Group, 1); assert.equal(hf.rcp_Hop_1_Drop, 0);
-assert.equal(hf.rcp_Hop_3_Drop, 55); assert.ok(hf.rcp_Hop_1_IBU > hf.rcp_Hop_3_IBU && hf.rcp_Hop_3_IBU > 0);
-assert.equal(hf.rcp_Hop_4_Boil_Group, 0, 'a Mash hop is not a Boil Hop'); assert.equal(hf.rcp_Hop_4_IBU, 0);
-assert.equal(hf.rcp_Hop_6_Use, 'secondary'); assert.equal(hf.rcp_Hop_6_Days, 7); assert.equal(hf.rcp_Hop_7_Date, '2026-11-05');
-assert.equal(hf.rcp_Hop_8_Hop_Stand, 'High', '80 °C fits Hop Stand High'); assert.equal(hf.rcp_Hop_8_Whirlpool_Temp, 0, 'its Hop Stand has no temperature yet (no Defaults)');
-assert.equal(recipeFieldValues({ ...hs, hopStands: { High: { tempC: 82.22, min: 10 } } }, { units: 'US' }).rcp_Hop_8_Whirlpool_Temp, 180, 'its Hop Stand\'s temperature'); assert.equal(hf.rcp_Hop_8_Hop_Rocket, true); assert.equal(hf.rcp_Hop_8_Min, 20); assert.equal(hf.rcp_Hop_8_Boil_Group, 4);
-assert.equal(recipeField('rcp_Hop_12_IBU')[1], 'Hop 12 IBU', 'any hop line number is a Skynet_Field'); assert.equal(recipeField('rcp_Hop_1_Nope'), undefined);
+assert.equal(hf.skn_rcp_Hop_Count, 8);
+assert.equal(hf.skn_rcp_Hop_1_Name, 'Magnum'); assert.equal(hf.skn_rcp_Hop_1_AA_Actual, 11.7); assert.equal(hf.skn_rcp_Hop_1_Calc_Amount, 1.01); assert.equal(hf.skn_rcp_Hop_1_Boil_Group, 1); assert.equal(hf.skn_rcp_Hop_1_Drop, 0);
+assert.equal(hf.skn_rcp_Hop_3_Drop, 55); assert.ok(hf.skn_rcp_Hop_1_IBU > hf.skn_rcp_Hop_3_IBU && hf.skn_rcp_Hop_3_IBU > 0);
+assert.equal(hf.skn_rcp_Hop_4_Boil_Group, 0, 'a Mash hop is not a Boil Hop'); assert.equal(hf.skn_rcp_Hop_4_IBU, 0);
+assert.equal(hf.skn_rcp_Hop_6_Use, 'secondary'); assert.equal(hf.skn_rcp_Hop_6_Days, 7); assert.equal(hf.skn_rcp_Hop_7_Date, '2026-11-05');
+assert.equal(hf.skn_rcp_Hop_8_Hop_Stand, 'High', '80 °C fits Hop Stand High'); assert.equal(hf.skn_rcp_Hop_8_Whirlpool_Temp, 0, 'its Hop Stand has no temperature yet (no Defaults)');
+assert.equal(recipeFieldValues({ ...hs, hopStands: { High: { tempC: 82.22, min: 10 } } }, { units: 'US' }).skn_rcp_Hop_8_Whirlpool_Temp, 180, 'its Hop Stand\'s temperature'); assert.equal(hf.skn_rcp_Hop_8_Hop_Rocket, true); assert.equal(hf.skn_rcp_Hop_8_Min, 20); assert.equal(hf.skn_rcp_Hop_8_Boil_Group, 4);
+assert.equal(recipeField('skn_rcp_Hop_12_IBU')[1], 'Hop 12 IBU', 'any hop line number is a Skynet_Field'); assert.equal(recipeField('skn_rcp_Hop_1_Nope'), undefined);
 assert.ok(HOP_FIELDS.every(([k]) => /^[A-Z][A-Za-z_]+$/.test(k)));
 assert.ok(hopSchedule(hs, { units: 'US' }).groups.some(g => g.label === 'Secondary (7 days)'));
 assert.equal(cleanRecipe({ ingredients: { hops: [{ name: 'n' }] } }).ingredients.hops[0].alphaActual, 0, 'a new hop starts at 0');
@@ -227,10 +227,10 @@ assert.equal(cleanRecipe({ name: 'P', level: 3 }).type, 'Partial Mash');
 assert.equal(cleanRecipe({ name: 'Old', type: 'Partial Mash' }).level, 3);
 assert.equal(levelShowsTab(k1, 'hops'), false); assert.equal(levelShowsTab(k1, 'fermentables'), true); assert.equal(levelShowsTab(k1, 'grain'), false);
 assert.equal(levelShowsTab({ level: 2 }, 'hops'), true); assert.equal(levelShowsTab({ level: 2 }, 'mash'), false);
-assert.equal(levelShowsBox({ level: 2 }, 'rcp_Strike_Temp'), false); assert.equal(levelShowsBox({ level: 2 }, 'rcp_IBU'), true);
-assert.equal(levelShowsBox(k1, 'rcp_IBU'), false); assert.equal(levelShowsBox({ level: 3 }, 'rcp_Strike_Temp'), true);
+assert.equal(levelShowsBox({ level: 2 }, 'skn_rcp_Strike_Temp'), false); assert.equal(levelShowsBox({ level: 2 }, 'skn_rcp_IBU'), true);
+assert.equal(levelShowsBox(k1, 'skn_rcp_IBU'), false); assert.equal(levelShowsBox({ level: 3 }, 'skn_rcp_Strike_Temp'), true);
 for (const L of RECIPE_LEVELS) for (const f of L.hide) assert.ok(recipeField(f), `${f} is a Skynet_Field`);
-assert.equal(recipeFieldValues({ level: 1 }).rcp_Level, 1); assert.equal(recipeFieldValues({ type: 'Extract' }).rcp_Level, 2);
+assert.equal(recipeFieldValues({ level: 1 }).skn_rcp_Level, 1); assert.equal(recipeFieldValues({ type: 'Extract' }).skn_rcp_Level, 2);
 for (const l of [1, 2, 3, 4]) assert.ok(levelShowsTab({ level: l }, 'waters') && levelShowsTab({ level: l }, 'fermentables'), `Level ${l} has Waters and Fermentables`);
 assert.deepEqual(levelFermTypes({ level: 1 }), ['extract', 'dry extract'], 'Levels 1 and 2: Extracts only'); assert.deepEqual(levelFermTypes({ level: 2 }), ['extract', 'dry extract']);
 assert.ok(levelFermTypes({ level: 3 }).includes('sugar'));
@@ -242,7 +242,7 @@ const tap2 = tapStore.save(tap.id, { ...tap, ca: 40, hco3: 122, tested: '2026-11
 assert.equal(tap2.tap, true); assert.equal(tap2.chlorine, 'ammonia'); assert.equal(tap2.source, 'kit');
 assert.throws(() => tapStore.save(tap.id, { ...tap, tested: '11/11/2026' }), /yyyy-mm-dd/);
 const tv = recipeValues({ recipe: { ...blankRecipe(), waterProfile: '' } }, { water: tapStore.list() });
-assert.equal(tv.rcp_Water_Ca, 40, 'no Water Profile picked: Tap Water');
+assert.equal(tv.skn_rcp_Water_Ca, 40, 'no Water Profile picked: Tap Water');
 // a whirlpool temperature goes to the stand it fits: High 170 °F and above, Middle from 140 °F, Low below (no Defaults, 2026-11-19)
 {
   const st = hopStands({ pitchTempC: 20 });

@@ -1515,7 +1515,8 @@ same"). A name Skynet owns, that a Process can read, starts **`skn_`**, lower ca
 Skynet internal Globals (`skn_Boil_Temp`, Rule 1.18), probe roles (`skn_Boil_Probe_1`, Rule 1.18, not built yet) and Skynet
 Constants (`skn_const_L_p_Gal`, Rule 1.17). A group of Skynet names gets **`skn_<group>_`** (OakBarn Brewery, 2026-11-19:
 "they could be skn_rcp_ so I will know what you are taking about"): `skn_const_` for Skynet Constants, `skn_rcp_` for Recipe values.
-Recipe values become `skn_rcp_Strike_Temp` ... (was `rcp_`, Rule 16.4) in their own PR, after the Recipe PR now open (536).
+Recipe values are `skn_rcp_Strike_Temp` ... (Rule 16.4). *Replaced:* Recipe values were `rcp_` names (2026-11-20, before the
+first Public Production, so no old way is kept).
 
 ## 4. Making things: the Build Tab
 
@@ -4732,8 +4733,8 @@ pump to the fermenter, fermenter control and probe, cleaning pump). A job left o
 one Flow Process for each step used, numbered over those steps (`Brew_1_PreBrew` ... `Brew_9_Clean`), each starting the next;
 building again keeps the old ones as .bak, and a Brew_ Process the list no longer has goes to the bin.
 
-16.4 **Recipe values are `rcp_` names, read only in a Process**, in the panel's units (`rcp_Strike_Temp`, `rcp_Boil_Time`,
-`rcp_Mash_Step_1_Temp` ...). They are read when the Process runs, so a new Recipe needs no new build. While no Recipe is loaded
+16.4 **Recipe values are `skn_rcp_` names, read only in a Process**, in the panel's units (`skn_rcp_Strike_Temp`, `skn_rcp_Boil_Time`,
+`skn_rcp_Mash_Step_1_Temp` ...). They are read when the Process runs, so a new Recipe needs no new build. While no Recipe is loaded
 they come from the ☰ Menu > Default tab's Mash and Boil Profiles. **PreBrew starts with the Recipe**: load, clear and import,
 make, or review it.
 
@@ -4808,7 +4809,7 @@ out by Skynet (Grain Wt., 1st Mash, IBU). **Calculate** works out the Total Grai
 Adjuncts, Waters, MASH. Fritz sends the fields and layout of each Daughter Tab; none are built before he does. (Help 99)
 
 17.2 **Every field on the Recipe tab or a Daughter Tab is a Skynet_Field** (Fritz, 2026-10-31): a fixed Skynet name starting
-`rcp_` (for example `rcp_Strike_Temp`), read only in a Process, never renamed by a user (Rule 3.11). The list is in
+`skn_rcp_` (for example `skn_rcp_Strike_Temp`), read only in a Process, never renamed by a user (Rule 3.11). The list is in
 public/recipecalc.js and Help 99.
 
 17.3 **Recipe import: BeerSmith .bsmx (BeerSmith 3 and 4) and BeerXML .xml**, every grain, hop, yeast, adjunct (Misc), water
@@ -4838,20 +4839,20 @@ Minutes), then Mash, 1st WORT, Secondary, DRY, Whirlpool. **Actual AAU starts at
 that every Actual AAU is above 0**; if any is 0, nothing is calculated, Skynet switches to the Hops tab, highlights each Actual
 AAU that is 0, and shows Fritz's warning (set the Actual AAU to the AAU on the Hop Package; the real IBUs come from it) with
 a **READ** button to close it. (Fritz, 2026-10-31 12:15Z) Each line's
-boxes are Skynet_Fields `rcp_Hop_N_...` plus `rcp_Hop_Count` (Rule 17.2). (Help 99)
+boxes are Skynet_Fields `skn_rcp_Hop_N_...` plus `skn_rcp_Hop_Count` (Rule 17.2). (Help 99)
 
 17.8 **Grain tab and Fermentable tab** (Fritz, 2026-10-31): the Grain tab holds the fermentables of Type Grain (Type hidden);
 the Fermentable tab holds every other Type with a Type dropdown (the BeerXML types Adjunct, Extract, Dry Extract, Sugar; a
 fixed list, so no Add new ...). Boxes: Name, amount, **Potential** (yield %), **SRM** (color), and **After
 Boil**, a switch shown only for Types added during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). No limit on
-lines. Skynet_Fields `rcp_Grain_N_...`, `rcp_Fermentable_N_...`, `rcp_Grain_Count`, `rcp_Fermentable_Count`. (Help 99)
+lines. Skynet_Fields `skn_rcp_Grain_N_...`, `skn_rcp_Fermentable_N_...`, `skn_rcp_Grain_Count`, `skn_rcp_Fermentable_Count`. (Help 99)
 **Grain tab layout (Fritz's Grain_Tab.png, 2026-10-31):** Grains, Add Grain +, then Grain N, the weight, Potential, SRM (brown
 header), **PPG>SG** (gravity points, worked out), Delete. No After Boil on the Grain tab (grain is never added after the boil).
 The weight is shown in the **grain weight standard** picked on ☰ Menu > Default (Skynet field `skn_XML_Grain_WT_Standard`,
 Pounds or Kg; a .bsmx or BeerXML import is shown in it) under a label set only on the Default tab
 (`skn_XML_Grain_WT_Standard_Label`, empty = the standard's name). The PPG>SG label is set on the Default tab too. Gravity
 points = Potential x 46.214 x pounds x efficiency (grains and adjuncts; 100% for extracts, sugars, fruit, juice) / batch
-gallons; the Recipe tab's **Expected Gravity** (`rcp_Expected_Gravity`) = 1 + all points / 1000, worked out when an amount
+gallons; the Recipe tab's **Expected Gravity** (`skn_rcp_Expected_Gravity`) = 1 + all points / 1000, worked out when an amount
 changes and by Calculate.
 **Fermentable tab layout (Fritz's Fermentable_Tab.png, 2026-10-31):** Fermentables, Fermentable +, then Fermentable N, Amount,
 **Measurement**, **Type**, Potential, SRM, PPG>SG, After Boil, Delete. Measurement (lb, oz, kg, g) and Type (Adjunct, Extract,
@@ -4863,16 +4864,16 @@ yeast nutrient, gypsum, spices). Adjuncts, Adjunct +, then Adjunct N, Amount, **
 for a Boil adjunct), **Time Unit**, Delete. The dropdowns are select only, with the BeerXML lists (Measurement: mg, g, oz, lb, kg,
 ml, tsp, tbsp, cup, pt, qt, l, gal, items; Type: Spice, Fining, Water Agent, Herb, Flavor, Other; Use: Boil, Mash, Primary,
 Secondary, Bottling; Time Unit: min, hr, day, week). Adjunct-type fermentables (flaked grains) stay on the Fermentable tab
-because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skynet_Fields `rcp_Adjunct_N_...`,
-`rcp_Adjunct_Count`. (Help 99)
+because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skynet_Fields `skn_rcp_Adjunct_N_...`,
+`skn_rcp_Adjunct_Count`. (Help 99)
 
 17.10 **MASH tab and Waters tab** (Fritz, 2026-10-31: "Mash Profile and Water Profiles can be built as well"). MASH: the
 Mash Profile dropdown (Skynet Templates, the user's own, or the Recipe's own mash). A picked profile shows read only (Step N,
 Temp, Time, then Sparge Type, Sparge Temperature, Batch Rest, Mash Out); **Copy into this Recipe** makes it the Recipe's own
 mash, which is edited here (Mash Step +, Delete, the Recipe's sparge boxes). Waters: the Water Profile dropdown, the minerals
 after the distilled or RO cut, % distilled, SO4 : Cl and pH (read only; the profile is changed on ☰ Menu > Water Profile), then
-the waters the recipe file listed. Skynet_Fields `rcp_Mash_Step_N_Name/Temp/Time`, `rcp_Water_Ca`, `_Mg`, `_Na`, `_SO4`, `_Cl`,
-`_HCO3`, `rcp_Water_Distilled_Pct`, `rcp_Water_SO4_Cl`, `rcp_Water_PH`. Two more Skynet Mash Profile Templates (Fritz):
+the waters the recipe file listed. Skynet_Fields `skn_rcp_Mash_Step_N_Name/Temp/Time`, `skn_rcp_Water_Ca`, `_Mg`, `_Na`, `_SO4`, `_Cl`,
+`_HCO3`, `skn_rcp_Water_Distilled_Pct`, `skn_rcp_Water_SO4_Cl`, `skn_rcp_Water_PH`. Two more Skynet Mash Profile Templates (Fritz):
 **Skynet Single Step, Batch Sparge** (152 °F 60 min, mash out 168 °F, batch sparge, 10 min rest) and **Skynet 3 Mash Steps, Fly
 Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly sparge at 168 °F). (Help 99)
 
@@ -4895,7 +4896,7 @@ an imported line with another Type keeps it in its own list.
 Changing the Level only hides or shows; nothing is deleted, and a hidden box keeps its value. A Level 1 Can Kit has no HOPs tab, so
 Calculate does not check its Actual AAU. The Level is saved with the Recipe as `level`, and the Recipe's BeerXML type says the same
 thing (Levels 1 and 2 Extract, 3 Partial Mash, 4 All Grain); an imported BeerSmith or BeerXML file comes in at Level 2, 3 or 4 from its
-type, and the user can change it. Skynet_Field `rcp_Level` (1 to 4) lets a Process do the steps for its Level. A NEW Recipe starts at
+type, and the user can change it. Skynet_Field `skn_rcp_Level` (1 to 4) lets a Process do the steps for its Level. A NEW Recipe starts at
 the Level picked. (Help 99)
 
 17.12 **Tap Water** (OakBarn Brewery, 2026-11-11: "Waters should be on each level defaulted to Tap Water. And maybe a Page in the
@@ -4957,8 +4958,8 @@ HAVE INFO AS AN IMPORT"):
 - Temperature and time are the Recipe's own (shared by the hops of that stand), else its Boil Profile's (own Boil Profiles keep
   their boxes: numbers the user typed), else empty.
 - Each Whirlpool hop picks its stand. The chill stops at each stand that has hops **and** its temperature and time, highest first,
-  cooling water off for its time (Skynet Chill, Whirlpool and Chill). A Process: `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`,
-  `rcp_Hop_Stand_High_Minutes` (and Middle, Low); an unanswered Temp or Minutes reads 0.
+  cooling water off for its time (Skynet Chill, Whirlpool and Chill). A Process: `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`,
+  `skn_rcp_Hop_Stand_High_Minutes` (and Middle, Low); an unanswered Temp or Minutes reads 0.
 - An imported recipe's whirlpool temperature and time go to the stand that temperature fits: **High** 170 °F (77 °C) and above,
   **Middle** from 140 °F (60 °C), **Low** below. A whirlpool hop with no temperature gets no stand (its questions are asked).
 - Design Rule #1 (Never Take Away): removing the Default settings boxes is allowed because it is before the first Public Production.
@@ -6894,6 +6895,7 @@ import.
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
+- 2026-11-20: Rules 3.20 and 16.4 changed (OakBarn Brewery: "Recipe values like rcp_Strike_Temp yes", "they could be skn_rcp_ so I will know what you are taking about"): Recipe values are `skn_rcp_` names (were `rcp_`) in the code, Templates, Help and these Rules; older Change log lines keep the old name as history.
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.

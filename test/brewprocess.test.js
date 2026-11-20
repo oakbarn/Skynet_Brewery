@@ -1,4 +1,4 @@
-// The Standard Skynet Brew Process (Fritz, 2026-10-30; the step list 2026-11-07): Process Templates for the major steps, rcp_ Recipe values,
+// The Standard Skynet Brew Process (Fritz, 2026-10-30; the step list 2026-11-07): Process Templates for the major steps, skn_rcp_ Recipe values,
 // ask "...", the Close all / Open all valve lists (a tap water valve is always on Close all, never on Open all)
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
@@ -35,16 +35,16 @@ assert.equal(strikeTemp(152, 68, 1.5, false), 163.2, 'Palmer, US');
 assert.equal(strikeTemp(67, 20, 3.1, true), 73.2, 'Palmer, metric');
 const prof = { mash: [{ id: 'm1', name: 'Two step', steps: [{ name: 'Protein', temp: 122, time: 15 }, { name: 'Sacch', temp: 152, time: 60 }], mashOutTemp: 168, spargeTemp: 170 }], boil: [{ id: 'b1', boilTime: 90 }] };
 let rv = recipeValues({ brewDefaults: { units: 'US', mashProfile: 'm1', boilProfile: 'b1' } }, prof);
-assert.equal(rv.rcp_Loaded, false); assert.equal(rv.rcp_Mash_Steps, 2); assert.equal(rv.rcp_Mash_Step_2_Temp, 152);
-assert.equal(rv.rcp_Boil_Time.s, 5400, 'boil time is a time'); assert.equal(rv.rcp_Mash_Step_1_Time.s, 900);
+assert.equal(rv.skn_rcp_Loaded, false); assert.equal(rv.skn_rcp_Mash_Steps, 2); assert.equal(rv.skn_rcp_Mash_Step_2_Temp, 152);
+assert.equal(rv.skn_rcp_Boil_Time.s, 5400, 'boil time is a time'); assert.equal(rv.skn_rcp_Mash_Step_1_Time.s, 900);
 // the Skynet Recipe (lib/recipe.js) is kept in kg, L and °C; Processes read it in the panel's units
 rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', grainKg: 12 / 2.20462262, waterToGrain: 1.5 * 2.0864, ingredients: { fermentables: [{ type: 'grain', kg: 12 / 2.20462262 }], hops: [], yeasts: [{ name: 'US-05' }] },
   mash: { steps: [{ name: 'Sacch', tempC: (152 - 32) * 5 / 9, min: 60 }] }, boilTime: 60, spargeType: 'fly', whirlpoolMinutes: 20 } }, prof);
-assert.equal(rv.rcp_Loaded, true); assert.equal(rv.rcp_Total_Grain_Weight, 12); assert.equal(rv.rcp_Strike_Volume, 4.5, '12 lb x 1.5 qt/lb = 4.5 gal');
-assert.equal(rv.rcp_Mash_Steps, 1); assert.equal(rv.rcp_Mash_Step_1_Temp, 152); assert.equal(rv.rcp_Yeast_Name, 'US-05');
-assert.equal(rv.rcp_Sparge_Type, 'fly', 'every Skynet_Field can be read'); assert.equal(rv.rcp_Whirlpool_Minutes, 20);
+assert.equal(rv.skn_rcp_Loaded, true); assert.equal(rv.skn_rcp_Total_Grain_Weight, 12); assert.equal(rv.skn_rcp_Strike_Volume, 4.5, '12 lb x 1.5 qt/lb = 4.5 gal');
+assert.equal(rv.skn_rcp_Mash_Steps, 1); assert.equal(rv.skn_rcp_Mash_Step_1_Temp, 152); assert.equal(rv.skn_rcp_Yeast_Name, 'US-05');
+assert.equal(rv.skn_rcp_Sparge_Type, 'fly', 'every Skynet_Field can be read'); assert.equal(rv.skn_rcp_Whirlpool_Minutes, 20);
 rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', mashProfile: 'm1', boilTime: 60, ingredients: { fermentables: [] }, mash: { steps: [] } } }, prof);
-assert.equal(rv.rcp_Mash_Steps, 2, 'the Mash Profile picked on the Recipe wins'); assert.equal(rv.rcp_Mash_Out_Temp, 168);
+assert.equal(rv.skn_rcp_Mash_Steps, 2, 'the Mash Profile picked on the Recipe wins'); assert.equal(rv.skn_rcp_Mash_Out_Temp, 168);
 
 // ---- the Skynet Process Templates build into Flow Processes that compile (one for each step used)
 const root = path.resolve('templates/process');
@@ -74,19 +74,19 @@ for (const fields of [{}, { HLT_Heater: 'PID_HLT', HLT_Probe: 'T_HLT', Mash_Prob
 // water off for that stand's time; Hop Rocket ones go through the Hop Infuser; numbers from the Recipe, else the Boil Profile, else
 // none (no Defaults, Panel Updates entry 13, 2026-11-19): a stand without its temperature and time is not stopped at, and reads 0
 rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, pitchTempC: 20, hopStands: { Middle: { tempC: 80, min: 30 } }, ingredients: { hops: [{ use: 'whirlpool', stand: 'Middle', hopRocket: true }], fermentables: [] }, mash: { steps: [] } } }, {});
-assert.equal(rv.rcp_Hop_Stand, true); assert.equal(rv.rcp_Hop_Stand_Middle, true); assert.equal(rv.rcp_Hop_Stand_High, false); assert.equal(rv.rcp_Hop_Stand_Low, false);
-assert.equal(rv.rcp_Hop_Stand_Middle_Temp, 176); assert.equal(rv.rcp_Hop_Stand_Middle_Minutes, 30); assert.equal(rv.rcp_Hop_Infuser, true);
-assert.equal(rv.rcp_Hop_Stand_High_Temp, 0, 'no Defaults'); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 0); assert.equal(rv.rcp_Hop_Stand_Low_Temp, 0); assert.equal(rv.rcp_Hop_Stand_Low_Minutes, 0);
+assert.equal(rv.skn_rcp_Hop_Stand, true); assert.equal(rv.skn_rcp_Hop_Stand_Middle, true); assert.equal(rv.skn_rcp_Hop_Stand_High, false); assert.equal(rv.skn_rcp_Hop_Stand_Low, false);
+assert.equal(rv.skn_rcp_Hop_Stand_Middle_Temp, 176); assert.equal(rv.skn_rcp_Hop_Stand_Middle_Minutes, 30); assert.equal(rv.skn_rcp_Hop_Infuser, true);
+assert.equal(rv.skn_rcp_Hop_Stand_High_Temp, 0, 'no Defaults'); assert.equal(rv.skn_rcp_Hop_Stand_High_Minutes, 0); assert.equal(rv.skn_rcp_Hop_Stand_Low_Temp, 0); assert.equal(rv.skn_rcp_Hop_Stand_Low_Minutes, 0);
 rv = recipeValues({ brewDefaults: { units: 'Metric', boilProfile: 'mine', hsHighTempC: 85, hsHighMin: 5 }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool' }, { use: 'whirlpool', stand: 'Low' }], fermentables: [] }, mash: { steps: [] } } },
   { boil: [{ id: 'mine', units: 'Metric', boilTime: 60, hsLowTemp: 22, hsLowMin: 40 }] });
-assert.equal(rv.rcp_Hop_Stand_High, false, 'no stand picked: no stand (no Defaults)'); assert.equal(rv.rcp_Hop_Stand_High_Temp, 0, 'Default settings Hop Stands are not read any more'); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 0);
-assert.equal(rv.rcp_Hop_Stand_Middle, false); assert.equal(rv.rcp_Hop_Stand_Middle_Temp, 0);
-assert.equal(rv.rcp_Hop_Stand, true, 'the Low stand stops');
-assert.equal(rv.rcp_Hop_Stand_Low, true); assert.equal(rv.rcp_Hop_Stand_Low_Temp, 22, 'the Boil Profile\'s'); assert.equal(rv.rcp_Hop_Stand_Low_Minutes, 40);
-assert.equal(recipeValues({ brewDefaults: {} }, {}).rcp_Hop_Stand, false, 'no Recipe: no hop stand');
+assert.equal(rv.skn_rcp_Hop_Stand_High, false, 'no stand picked: no stand (no Defaults)'); assert.equal(rv.skn_rcp_Hop_Stand_High_Temp, 0, 'Default settings Hop Stands are not read any more'); assert.equal(rv.skn_rcp_Hop_Stand_High_Minutes, 0);
+assert.equal(rv.skn_rcp_Hop_Stand_Middle, false); assert.equal(rv.skn_rcp_Hop_Stand_Middle_Temp, 0);
+assert.equal(rv.skn_rcp_Hop_Stand, true, 'the Low stand stops');
+assert.equal(rv.skn_rcp_Hop_Stand_Low, true); assert.equal(rv.skn_rcp_Hop_Stand_Low_Temp, 22, 'the Boil Profile\'s'); assert.equal(rv.skn_rcp_Hop_Stand_Low_Minutes, 40);
+assert.equal(recipeValues({ brewDefaults: {} }, {}).skn_rcp_Hop_Stand, false, 'no Recipe: no hop stand');
 rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, hopStands: { High: { tempC: 82, min: null } }, ingredients: { hops: [{ use: 'whirlpool', stand: 'High' }], fermentables: [] }, mash: { steps: [] } } }, {});
-assert.equal(rv.rcp_Hop_Stand_High, false, 'a stand with no time is not stopped at'); assert.equal(rv.rcp_Hop_Stand, false); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 0);
-for (const t of ['Chill', 'Whirlpool_and_Chill']) assert.match(pt.find(t, 'Skynet_' + t).text, /wait \{\{Wort_Probe\}\} <= rcp_Hop_Stand_High_Temp[\s\S]*sleep rcp_Hop_Stand_High_Minutes \* 60000[\s\S]*rcp_Hop_Stand_Middle_Temp[\s\S]*sleep rcp_Hop_Stand_Low_Minutes \* 60000[\s\S]*wait \{\{Wort_Probe\}\} <= rcp_Ferment_Temp/, t + ': chill to the hop stand, hold, then chill');
+assert.equal(rv.skn_rcp_Hop_Stand_High, false, 'a stand with no time is not stopped at'); assert.equal(rv.skn_rcp_Hop_Stand, false); assert.equal(rv.skn_rcp_Hop_Stand_High_Minutes, 0);
+for (const t of ['Chill', 'Whirlpool_and_Chill']) assert.match(pt.find(t, 'Skynet_' + t).text, /wait \{\{Wort_Probe\}\} <= skn_rcp_Hop_Stand_High_Temp[\s\S]*sleep skn_rcp_Hop_Stand_High_Minutes \* 60000[\s\S]*skn_rcp_Hop_Stand_Middle_Temp[\s\S]*sleep skn_rcp_Hop_Stand_Low_Minutes \* 60000[\s\S]*wait \{\{Wort_Probe\}\} <= skn_rcp_Ferment_Temp/, t + ': chill to the hop stand, hold, then chill');
 // the premade list (Rule 16.1): Clean is last; Whirlpool and Chill is skipped to start (a Brew Day uses it or Chill)
 assert.deepEqual(MAJOR_STEPS.map(s => s.key), ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor', 'Ferment', 'Clean']);
 assert.deepEqual(brewNames(brewSetup({})), ['Brew_1_PreBrew', 'Brew_2_Heat_Strike', 'Brew_3_Strike', 'Brew_4_Mash', 'Brew_5_Boil', 'Brew_6_Chill', 'Brew_7_Transfer_to_Fermentor', 'Brew_8_Ferment', 'Brew_9_Clean']);
@@ -109,7 +109,7 @@ assert.throws(() => pt.saveUser('Mash', 'Bad', '@if Nope\n@end'), /field name/);
 pt.deleteUser('Mash', 'My_Mash');
 assert.throws(() => pt.deleteUser('Mash', 'Skynet_Mash'), /No User Process Template/, 'a Skynet one is never deleted');
 
-// ---- in a running Process: rcp_ values, ask, close_all_valves, open_all_valves, all_pumps_off
+// ---- in a running Process: skn_rcp_ values, ask, close_all_valves, open_all_valves, all_pumps_off
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', boilTime: 60 }, elements: [
   ...elements.filter(e => e.type === 'digitalOut'), { name: 'V_Off_List', ...v({ closeAll: false, openAll: false }) }, { name: 'Out', type: 'gGlobal', kind: 'string', dataType: 'string' },
@@ -117,12 +117,12 @@ fs.writeFileSync(cfg, JSON.stringify({ brewDefaults: { units: 'US' }, recipe: { 
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 const until = async (f, ms = 4000) => { for (let i = 0; i < ms / 20 && !f(); i++) await new Promise(r => setTimeout(r, 20)); return f(); };
-assert.deepEqual(eng.check('x = rcp_Boil_Time').errors.length, 1, 'x is unknown');
-assert.match(eng.check('rcp_Boil_Time = 5').errors[0].msg, /read only/);
-assert.match(eng.check('Out = rcp_Nope').errors[0].msg, /not a Recipe value/);
-assert.deepEqual(eng.check('Out = rcp_Name + rcp_Mash_Step_3_Temp').errors, []);
+assert.deepEqual(eng.check('x = skn_rcp_Boil_Time').errors.length, 1, 'x is unknown');
+assert.match(eng.check('skn_rcp_Boil_Time = 5').errors[0].msg, /read only/);
+assert.match(eng.check('Out = skn_rcp_Nope').errors[0].msg, /not a Recipe value/);
+assert.deepEqual(eng.check('Out = skn_rcp_Name + skn_rcp_Mash_Step_3_Temp').errors, []);
 store.setProp('V_HLT_Out', 'state', true); store.setProp('V_Off_List', 'state', true); store.setProp('Pump_Chill', 'state', true);
-eng.write('day', 'all_pumps_off\nclose_all_valves\nask "Add the \\bgrain\\b"\nOut = rcp_Name + " " + rcp_Boil_Time\nopen_all_valves\n');
+eng.write('day', 'all_pumps_off\nclose_all_valves\nask "Add the \\bgrain\\b"\nOut = skn_rcp_Name + " " + skn_rcp_Boil_Time\nopen_all_valves\n');
 eng.start('day');
 assert.ok(await until(() => eng.valveList().some(a => a.ask)), 'ask shows a pop-up');
 assert.equal(store.getProp('Pump_Chill', 'state'), false, 'pumps off');
@@ -134,11 +134,11 @@ assert.ok(await until(() => store.getProp('Out', 'value') === 'IPA 01:00:00'), '
 assert.ok(await until(() => store.getProp('V_HLT_Out', 'state') === true), 'open all');
 assert.equal(store.getProp('V_Tap', 'state'), false, 'the tap water valve never opens with open_all_valves');
 clearTimeout(store._persistTimer);
-// the Hops tab's Skynet_Fields can be read in a Process; a hop line past rcp_Hop_Count reads as empty
-assert.ok(isKnownRecipeName('rcp_Hop_3_IBU') && isKnownRecipeName('rcp_hop_count') && !isKnownRecipeName('rcp_Hop_3_Color'));
+// the Hops tab's Skynet_Fields can be read in a Process; a hop line past skn_rcp_Hop_Count reads as empty
+assert.ok(isKnownRecipeName('skn_rcp_Hop_3_IBU') && isKnownRecipeName('skn_rcp_hop_count') && !isKnownRecipeName('skn_rcp_Hop_3_Color'));
 const hv = recipeValues({ recipe: { name: 'H', boilTime: 60, ingredients: { hops: [{ name: 'Magnum', use: 'boil', time: 60, kg: 0.028, alpha: 12, alphaActual: 12 }] } }, brewDefaults: { units: 'US' } });
-assert.equal(recipeValue(hv, 'rcp_Hop_1_Name'), 'Magnum'); assert.equal(recipeValue(hv, 'rcp_Hop_Count'), 1);
-assert.equal(recipeValue(hv, 'rcp_Hop_5_Name'), ''); assert.ok(isKnownRecipeName('rcp_Grain_2_SRM') && isKnownRecipeName('rcp_Fermentable_Count'));
-assert.equal(recipeValue(hv, 'rcp_Grain_3_Name'), ''); assert.equal(recipeValue(hv, 'rcp_Fermentable_1_After_Boil'), false); assert.equal(recipeValue(hv, 'rcp_Grain_Count'), 0); assert.equal(recipeValue(hv, 'rcp_Adjunct_2_Name'), ''); assert.ok(isKnownRecipeName('rcp_Adjunct_1_Time_Unit')); assert.equal(recipeValue(hv, 'rcp_Hop_5_Amount'), 0);
+assert.equal(recipeValue(hv, 'skn_rcp_Hop_1_Name'), 'Magnum'); assert.equal(recipeValue(hv, 'skn_rcp_Hop_Count'), 1);
+assert.equal(recipeValue(hv, 'skn_rcp_Hop_5_Name'), ''); assert.ok(isKnownRecipeName('skn_rcp_Grain_2_SRM') && isKnownRecipeName('skn_rcp_Fermentable_Count'));
+assert.equal(recipeValue(hv, 'skn_rcp_Grain_3_Name'), ''); assert.equal(recipeValue(hv, 'skn_rcp_Fermentable_1_After_Boil'), false); assert.equal(recipeValue(hv, 'skn_rcp_Grain_Count'), 0); assert.equal(recipeValue(hv, 'skn_rcp_Adjunct_2_Name'), ''); assert.ok(isKnownRecipeName('skn_rcp_Adjunct_1_Time_Unit')); assert.equal(recipeValue(hv, 'skn_rcp_Hop_5_Amount'), 0);
 console.log('brew process tests passed');
 process.exit(0);

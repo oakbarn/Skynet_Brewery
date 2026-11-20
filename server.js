@@ -241,7 +241,7 @@ try {
 } catch (e) { console.log('Metric numbers: ' + e.message); }
 engine.templates = templates;      // place_Chiller = Immersion_Chiller, BK_Vessel picks a Chiller Template (Rule 5.42)
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
-// in config/process_templates. rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
+// in config/process_templates. skn_rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
 const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
 engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list(), eff: brewOnEfficiency(store.config, profiles) });
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment

@@ -56,25 +56,25 @@ Une nouvelle recette n'a pas besoin d'une nouvelle construction : les Processes 
 
 ## Valeurs de la recette {#recipe-values}
 
-Les Templates lisent la recette par des noms qui commencent par **`rcp_`**. Ils sont en lecture seule dans un Process (changez-les dans la recette), et ils sont dans les unités du panel (☰ Menu > Default > Units).
+Les Templates lisent la recette par des noms qui commencent par **`skn_rcp_`**. Ils sont en lecture seule dans un Process (changez-les dans la recette), et ils sont dans les unités du panel (☰ Menu > Default > Units).
 
 | Nom | Ce que c'est |
 |---|---|
-| `rcp_Loaded` | true quand une recette est chargée |
-| `rcp_Name`, `rcp_Yeast_Name` | la recette et sa levure |
-| `rcp_Batch_Volume`, `rcp_Boil_Volume` | dans le fermenteur, et au début de l'ébullition |
-| `rcp_Total_Grain_Weight` | tout le grain ensemble |
-| `rcp_Strike_Temp`, `rcp_Strike_Volume` | l'eau d'empâtage |
-| `rcp_Mash_Steps` | combien de paliers d'empâtage |
-| `rcp_Mash_Step_1_Name`, `_Temp`, `_Time` | chaque palier d'empâtage (1, 2, 3 ... ; Time est en hh:mm:ss) |
-| `rcp_Mash_Out_Temp`, `rcp_Sparge_Temp` | mash out (0 = aucun) et eau de rinçage |
-| `rcp_Boil_Time`, `rcp_Boil_Start_Temp` | l'ébullition (hh:mm:ss), et la température où elle compte comme bouillante |
-| `rcp_Whirlpool_Minutes` | combien de temps tourne le whirlpool (0 = aucun) |
-| `rcp_Hop_Stand` | true quand il y a des houblons Whirlpool dans un Hop Stand qui a sa température et sa durée |
-| `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`, `rcp_Hop_Stand_High_Minutes` (et `_Middle_`, `_Low_`) | true quand ce Hop Stand a des houblons Whirlpool ; où le refroidissement s'arrête pour eux et combien de temps il tient |
-| `rcp_Hop_Infuser` | true quand un houblon Whirlpool passe par le Hop Infuser (Hop Rocket) |
-| `rcp_Ferment_Temp` | température de fermentation et d'ensemencement |
-| `rcp_Temp_Units`, `rcp_Volume_Units`, `rcp_Weight_Units` | °F ou °C, gal ou L, lb ou kg |
+| `skn_rcp_Loaded` | true quand une recette est chargée |
+| `skn_rcp_Name`, `skn_rcp_Yeast_Name` | la recette et sa levure |
+| `skn_rcp_Batch_Volume`, `skn_rcp_Boil_Volume` | dans le fermenteur, et au début de l'ébullition |
+| `skn_rcp_Total_Grain_Weight` | tout le grain ensemble |
+| `skn_rcp_Strike_Temp`, `skn_rcp_Strike_Volume` | l'eau d'empâtage |
+| `skn_rcp_Mash_Steps` | combien de paliers d'empâtage |
+| `skn_rcp_Mash_Step_1_Name`, `_Temp`, `_Time` | chaque palier d'empâtage (1, 2, 3 ... ; Time est en hh:mm:ss) |
+| `skn_rcp_Mash_Out_Temp`, `skn_rcp_Sparge_Temp` | mash out (0 = aucun) et eau de rinçage |
+| `skn_rcp_Boil_Time`, `skn_rcp_Boil_Start_Temp` | l'ébullition (hh:mm:ss), et la température où elle compte comme bouillante |
+| `skn_rcp_Whirlpool_Minutes` | combien de temps tourne le whirlpool (0 = aucun) |
+| `skn_rcp_Hop_Stand` | true quand il y a des houblons Whirlpool dans un Hop Stand qui a sa température et sa durée |
+| `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`, `skn_rcp_Hop_Stand_High_Minutes` (et `_Middle_`, `_Low_`) | true quand ce Hop Stand a des houblons Whirlpool ; où le refroidissement s'arrête pour eux et combien de temps il tient |
+| `skn_rcp_Hop_Infuser` | true quand un houblon Whirlpool passe par le Hop Infuser (Hop Rocket) |
+| `skn_rcp_Ferment_Temp` | température de fermentation et d'ensemencement |
+| `skn_rcp_Temp_Units`, `skn_rcp_Volume_Units`, `skn_rcp_Weight_Units` | °F ou °C, gal ou L, lb ou kg |
 
 Tant qu'aucune recette n'est chargée, les valeurs viennent du Tab **☰ Menu > Default** : son Mash Profile et son Boil Profile. La température d'empâtage est calculée à partir du premier palier (rapport eau/grain 1.5 qt/lb ou 3.1 L/kg, grain à 68 °F ou 20 °C). PreBrew demande toujours d'abord une recette.
 

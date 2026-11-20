@@ -3,12 +3,12 @@
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 step "Strike water to the mash tun"
-ask "Move " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of strike water into the mash tun. Press Done when it is in."
+ask "Move " + skn_rcp_Strike_Volume + " " + skn_rcp_Volume_Units + " of strike water into the mash tun. Press Done when it is in."
 step "Dough in"
-ask "Add the grain (" + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ") a little at a time and stir out every dough ball. Press Done when it is all in."
+ask "Add the grain (" + skn_rcp_Total_Grain_Weight + " " + skn_rcp_Weight_Units + ") a little at a time and stir out every dough ball. Press Done when it is all in."
 @if HLT_Heater
-{{HLT_Heater}}.target = rcp_Sparge_Temp
+{{HLT_Heater}}.target = skn_rcp_Sparge_Temp
 @end
 @if Mash_Probe
-print "Mash temperature after dough in: " + {{Mash_Probe}} + rcp_Temp_Units
+print "Mash temperature after dough in: " + {{Mash_Probe}} + skn_rcp_Temp_Units
 @end

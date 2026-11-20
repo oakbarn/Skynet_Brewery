@@ -3,9 +3,9 @@
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 step "Grain ready"
-ask "Have the grain (" + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ") milled and ready to add. Press Done when it is ready."
+ask "Have the grain (" + skn_rcp_Total_Grain_Weight + " " + skn_rcp_Weight_Units + ") milled and ready to add. Press Done when it is ready."
 step "Strike water to the mash tun"
-ask "Move " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of strike water from the Hot Liquor Tank into the mash tun. Press Done when it is in."
+ask "Move " + skn_rcp_Strike_Volume + " " + skn_rcp_Volume_Units + " of strike water from the Hot Liquor Tank into the mash tun. Press Done when it is in."
 @if Mash_Pump
 ask "Set the valves so the mash pump recirculates the mash tun (through the HERMS coil or RIMS tube). Press Done when they are set."
 {{Mash_Pump}} = true
@@ -13,10 +13,10 @@ ask "Set the valves so the mash pump recirculates the mash tun (through the HERM
 step "Dough in"
 ask "Add the grain slowly: add, stir, add, stir, and stir out every dough ball with the mash paddle. Press Done when it is all in."
 @if HLT_Heater
-{{HLT_Heater}}.setpoint = rcp_Sparge_Temp
+{{HLT_Heater}}.setpoint = skn_rcp_Sparge_Temp
 @end
 step "Vorlauf"
 ask "Recirculate the first cloudy runnings back on top of the mash until they run clear: this sets the grain bed. Press Done when it runs clear."
 @if Mash_Probe
-print "Mash temperature after dough in: " + {{Mash_Probe}} + rcp_Temp_Units
+print "Mash temperature after dough in: " + {{Mash_Probe}} + skn_rcp_Temp_Units
 @end

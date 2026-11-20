@@ -3,20 +3,20 @@
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 step "Fill the kettle"
-ask "Fill the boil kettle with " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of strike water. Press Done when it is in."
+ask "Fill the boil kettle with " + skn_rcp_Strike_Volume + " " + skn_rcp_Volume_Units + " of strike water. Press Done when it is in."
 step "Heat the strike water"
 @if HLT_Heater
-{{HLT_Heater}}.setpoint = rcp_Strike_Temp
+{{HLT_Heater}}.setpoint = skn_rcp_Strike_Temp
 {{HLT_Heater}} = on
 @else
-ask "Turn the kettle heat on and set it to " + rcp_Strike_Temp + rcp_Temp_Units + ". Press Done when it is on."
+ask "Turn the kettle heat on and set it to " + skn_rcp_Strike_Temp + skn_rcp_Temp_Units + ". Press Done when it is on."
 @end
 @if HLT_Probe
-wait {{HLT_Probe}} >= rcp_Strike_Temp
+wait {{HLT_Probe}} >= skn_rcp_Strike_Temp
 @else
-ask "Press Done when the strike water reaches " + rcp_Strike_Temp + rcp_Temp_Units + "."
+ask "Press Done when the strike water reaches " + skn_rcp_Strike_Temp + skn_rcp_Temp_Units + "."
 @end
 @if HLT_Heater
 {{HLT_Heater}} = off
 @end
-print "Strike water at " + rcp_Strike_Temp + rcp_Temp_Units
+print "Strike water at " + skn_rcp_Strike_Temp + skn_rcp_Temp_Units

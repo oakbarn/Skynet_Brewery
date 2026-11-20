@@ -34,7 +34,7 @@ Chaque niveau a l'onglet Waters, et il commence avec **Tap Water** : votre propr
 
 Un fichier de recette que vous importez (IMPORT) arrive à son propre niveau (une recette à l'extrait au niveau 2, un empâtage partiel au niveau 3, un tout-grain au niveau 4). Changez-le si c'est un kit en boîte.
 
-Le côté technique : le niveau est le Skynet_Field `rcp_Level` (1 à 4), donc un Process peut faire les étapes de son niveau. Il est enregistré avec la recette, et son type BeerXML dit la même chose (les niveaux 1 et 2 sont Extract, 3 est Partial Mash, 4 est All Grain).
+Le côté technique : le niveau est le Skynet_Field `skn_rcp_Level` (1 à 4), donc un Process peut faire les étapes de son niveau. Il est enregistré avec la recette, et son type BeerXML dit la même chose (les niveaux 1 et 2 sont Extract, 3 est Partial Mash, 4 est All Grain).
 
 ## Les cases {#the-boxes}
 
@@ -54,56 +54,56 @@ La recette est gardée en kilogrammes, litres et °C. Elle s'affiche dans les un
 
 ## Skynet_Fields
 
-Chaque case du Tab Recipe et de ses Daughter Tabs (onglets filles) est un **Skynet_Field** : elle a un nom Skynet fixe qui commence par `rcp_`, montré quand la souris se pose sur la case. Un Process les lit (ils y sont en lecture seule), par exemple `rcp_Strike_Temp`, `rcp_Boil_Minutes` ou `rcp_Pitch_Temp`. Les noms ne changent jamais.
+Chaque case du Tab Recipe et de ses Daughter Tabs (onglets filles) est un **Skynet_Field** : elle a un nom Skynet fixe qui commence par `skn_rcp_`, montré quand la souris se pose sur la case. Un Process les lit (ils y sont en lecture seule), par exemple `skn_rcp_Strike_Temp`, `skn_rcp_Boil_Minutes` ou `skn_rcp_Pitch_Temp`. Les noms ne changent jamais.
 
 | Case | Skynet_Field |
 |---|---|
-| Beer Name | `rcp_Name` |
-| Style | `rcp_Style` |
-| Level | `rcp_Level` |
-| Brew Length | `rcp_Batch_Volume` |
-| Grain Wt. | `rcp_Total_Grain_Weight` |
-| 1st Mash | `rcp_First_Mash_Temp` |
-| IBU | `rcp_IBU` |
-| Expected Gravity | `rcp_Expected_Gravity` |
-| Strike Volume | `rcp_Strike_Volume` |
-| Strike Temperature | `rcp_Strike_Temp` |
-| Grain Temperature | `rcp_Grain_Temp` |
-| Sparge Volume | `rcp_Sparge_Volume` |
-| Sparge Type | `rcp_Sparge_Type` |
-| Sparge Minutes | `rcp_Sparge_Minutes` |
-| Sparge Temperature | `rcp_Sparge_Temp` |
-| PreBoil Volume | `rcp_Boil_Volume` |
-| Boil Minutes | `rcp_Boil_Minutes` |
-| Whirlpool Minutes | `rcp_Whirlpool_Minutes` |
-| Pitch At | `rcp_Pitch_Temp` |
-| Grain Ratio | `rcp_Grain_Ratio` |
-| Waters : Water Profile | `rcp_Water_Profile` |
-| MASH : Mash Profile | `rcp_Mash_Profile` |
-| Onglet Hops : nombre de lignes de houblon | `rcp_Hop_Count` |
+| Beer Name | `skn_rcp_Name` |
+| Style | `skn_rcp_Style` |
+| Level | `skn_rcp_Level` |
+| Brew Length | `skn_rcp_Batch_Volume` |
+| Grain Wt. | `skn_rcp_Total_Grain_Weight` |
+| 1st Mash | `skn_rcp_First_Mash_Temp` |
+| IBU | `skn_rcp_IBU` |
+| Expected Gravity | `skn_rcp_Expected_Gravity` |
+| Strike Volume | `skn_rcp_Strike_Volume` |
+| Strike Temperature | `skn_rcp_Strike_Temp` |
+| Grain Temperature | `skn_rcp_Grain_Temp` |
+| Sparge Volume | `skn_rcp_Sparge_Volume` |
+| Sparge Type | `skn_rcp_Sparge_Type` |
+| Sparge Minutes | `skn_rcp_Sparge_Minutes` |
+| Sparge Temperature | `skn_rcp_Sparge_Temp` |
+| PreBoil Volume | `skn_rcp_Boil_Volume` |
+| Boil Minutes | `skn_rcp_Boil_Minutes` |
+| Whirlpool Minutes | `skn_rcp_Whirlpool_Minutes` |
+| Pitch At | `skn_rcp_Pitch_Temp` |
+| Grain Ratio | `skn_rcp_Grain_Ratio` |
+| Waters : Water Profile | `skn_rcp_Water_Profile` |
+| MASH : Mash Profile | `skn_rcp_Mash_Profile` |
+| Onglet Hops : nombre de lignes de houblon | `skn_rcp_Hop_Count` |
 
 Chaque ligne de l'onglet Hops a ses propres Skynet_Fields, N = le numéro de la ligne (1, 2, 3 ... sans limite) :
 
 | Case de l'onglet Hops | Skynet_Field |
 |---|---|
-| Hop N (son nom) | `rcp_Hop_N_Name` |
-| Ounces (ou Grams) | `rcp_Hop_N_Amount` |
-| AAU % Recipe | `rcp_Hop_N_AA_Recipe` |
-| AAU % Actual | `rcp_Hop_N_AA_Actual` |
-| Calc oz | `rcp_Hop_N_Calc_Amount` |
-| Boil, Mash, 1st Wort, Secondary, Dry Hop ou Whirlpool | `rcp_Hop_N_Use` |
-| Hop N Min | `rcp_Hop_N_Min` |
-| Hop N Drop | `rcp_Hop_N_Drop` |
-| Hop N IBU | `rcp_Hop_N_IBU` |
-| Hop N Boil Group | `rcp_Hop_N_Boil_Group` |
-| Jours Secondary ou Dry Hop | `rcp_Hop_N_Days` |
-| Date Secondary ou Dry Hop | `rcp_Hop_N_Date` |
-| Température du Whirlpool | `rcp_Hop_N_Whirlpool_Temp` |
-| Hop Rocket | `rcp_Hop_N_Hop_Rocket` |
+| Hop N (son nom) | `skn_rcp_Hop_N_Name` |
+| Ounces (ou Grams) | `skn_rcp_Hop_N_Amount` |
+| AAU % Recipe | `skn_rcp_Hop_N_AA_Recipe` |
+| AAU % Actual | `skn_rcp_Hop_N_AA_Actual` |
+| Calc oz | `skn_rcp_Hop_N_Calc_Amount` |
+| Boil, Mash, 1st Wort, Secondary, Dry Hop ou Whirlpool | `skn_rcp_Hop_N_Use` |
+| Hop N Min | `skn_rcp_Hop_N_Min` |
+| Hop N Drop | `skn_rcp_Hop_N_Drop` |
+| Hop N IBU | `skn_rcp_Hop_N_IBU` |
+| Hop N Boil Group | `skn_rcp_Hop_N_Boil_Group` |
+| Jours Secondary ou Dry Hop | `skn_rcp_Hop_N_Days` |
+| Date Secondary ou Dry Hop | `skn_rcp_Hop_N_Date` |
+| Température du Whirlpool | `skn_rcp_Hop_N_Whirlpool_Temp` |
+| Hop Rocket | `skn_rcp_Hop_N_Hop_Rocket` |
 
-Par exemple `rcp_Hop_1_Name` est le premier houblon. Une ligne que la recette n'a pas se lit comme vide (ou 0).
+Par exemple `skn_rcp_Hop_1_Name` est le premier houblon. Une ligne que la recette n'a pas se lit comme vide (ou 0).
 
-Les onglets Grain et Fermentable marchent de la même façon : `rcp_Grain_Count`, `rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, et `rcp_Fermentable_Count`, `rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, `_After_Boil`.
+Les onglets Grain et Fermentable marchent de la même façon : `skn_rcp_Grain_Count`, `skn_rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, et `skn_rcp_Fermentable_Count`, `skn_rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, `_After_Boil`.
 
 ## Les Daughter Tabs {#the-daughter-tabs}
 
@@ -159,7 +159,7 @@ Whirlfloc, nutriment pour levure, gypse, épices : ce que BeerSmith et BeerXML a
 - **Type** : Spice, Fining, Water Agent, Herb, Flavor ou Other. **Use** : Boil, Mash, Primary, Secondary ou Bottling.
 - **Time** et **Time Unit** (min, hr, day, week). Pour un adjuvant Boil, la case dit **Boil Min** : les minutes restantes d'ébullition quand il est ajouté. Un adjuvant Boil reçoit un avertissement et une alerte d'ajout comme un houblon (l'onglet Drops).
 
-Les listes sont à choix seulement, avec les listes BeerXML. Les grains en flocons et les autres adjuvants qui apportent du sucre sont sur l'onglet Fermentable, ils comptent donc dans l'Expected Gravity. Skynet_Fields : `rcp_Adjunct_Count`, `rcp_Adjunct_N_Name`, `_Amount`, `_Measurement`, `_Type`, `_Use`, `_Time`, `_Time_Unit`.
+Les listes sont à choix seulement, avec les listes BeerXML. Les grains en flocons et les autres adjuvants qui apportent du sucre sont sur l'onglet Fermentable, ils comptent donc dans l'Expected Gravity. Skynet_Fields : `skn_rcp_Adjunct_Count`, `skn_rcp_Adjunct_N_Name`, `_Amount`, `_Measurement`, `_Type`, `_Use`, `_Time`, `_Time_Unit`.
 
 ## L'onglet MASH {#the-mash-tab}
 
@@ -171,13 +171,13 @@ Choisissez le **Mash Profile** : un Template Skynet, un des vôtres (☰ Menu > 
 
 Skynet a deux Templates : **Skynet Single Step, Batch Sparge** (152 °F pendant 60 minutes, mash out à 168 °F, rinçage par batch avec un repos de 10 minutes) et **Skynet 3 Mash Steps, Fly Sparge** (122 °F pendant 15, 146 °F pendant 30, 158 °F pendant 20 minutes, mash out à 168 °F, rinçage continu avec de l'eau à 168 °F).
 
-Skynet_Fields : `rcp_Mash_Profile`, `rcp_Mash_Step_N_Name`, `rcp_Mash_Step_N_Temp`, `rcp_Mash_Step_N_Time`.
+Skynet_Fields : `skn_rcp_Mash_Profile`, `skn_rcp_Mash_Step_N_Name`, `skn_rcp_Mash_Step_N_Temp`, `skn_rcp_Mash_Step_N_Time`.
 
 ## L'onglet Waters {#the-waters-tab}
 
 Choisissez le **Water Profile** (profil d'eau). Il commence avec **Tap Water** (votre propre eau, ☰ Menu > Default settings > Tap Water). Ses minéraux s'affichent après la coupe d'eau distillée ou osmosée (calcium, magnésium, sodium, sulfate, chlorure, bicarbonate, en ppm), avec le **% Distilled / RO**, le rapport **SO4 : Cl** (au-dessus de 2 sec et houblonné, en dessous de 1 rond et malté) et le **pH**. Ils sont en lecture seule ici ; changez le profil dans ☰ Menu > Water Profile. En dessous se trouvent les eaux que listait le fichier de recette.
 
-Skynet_Fields : `rcp_Water_Profile`, `rcp_Water_Ca`, `rcp_Water_Mg`, `rcp_Water_Na`, `rcp_Water_SO4`, `rcp_Water_Cl`, `rcp_Water_HCO3`, `rcp_Water_Distilled_Pct`, `rcp_Water_SO4_Cl`, `rcp_Water_PH`.
+Skynet_Fields : `skn_rcp_Water_Profile`, `skn_rcp_Water_Ca`, `skn_rcp_Water_Mg`, `skn_rcp_Water_Na`, `skn_rcp_Water_SO4`, `skn_rcp_Water_Cl`, `skn_rcp_Water_HCO3`, `skn_rcp_Water_Distilled_Pct`, `skn_rcp_Water_SO4_Cl`, `skn_rcp_Water_PH`.
 
 ## Importer un fichier BeerSmith {#importing-a-beersmith-file}
 
