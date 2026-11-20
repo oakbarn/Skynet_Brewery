@@ -88,6 +88,7 @@ Chaque ligne de l'onglet Hops a ses propres Skynet_Fields, N = le numéro de la 
 |---|---|
 | Hop N (son nom) | `skn_rcp_Hop_N_Name` |
 | Ounces (ou Grams) | `skn_rcp_Hop_N_Amount` |
+| Unit (oz ou g) | `skn_rcp_Hop_N_Measurement` |
 | AAU % Recipe | `skn_rcp_Hop_N_AA_Recipe` |
 | AAU % Actual | `skn_rcp_Hop_N_AA_Actual` |
 | Calc oz | `skn_rcp_Hop_N_Calc_Amount` |
@@ -105,6 +106,8 @@ Par exemple `skn_rcp_Hop_1_Name` est le premier houblon. Une ligne que la recett
 
 Les onglets Grain et Fermentable marchent de la même façon : `skn_rcp_Grain_Count`, `skn_rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, et `skn_rcp_Fermentable_Count`, `skn_rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, `_After_Boil`.
 
+L'onglet Yeast aussi : `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement` (Packs, g, oz ou ml), `_Attenuation`, `_Min_Temp`, `_Max_Temp`, `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`. `skn_rcp_Yeast_Name` reste la première levure.
+
 ## Les Daughter Tabs {#the-daughter-tabs}
 
 Les boutons sous les cases ouvrent les Daughter Tabs. **◀ Back to the Recipe tab** (ou **Recipe** dans le titre) revient.
@@ -118,16 +121,19 @@ Les boutons sous les cases ouvrent les Daughter Tabs. **◀ Back to the Recipe t
 - **Waters** : le profil d'eau.
 - **MASH** : le profil d'empâtage.
 
-Les onglets Hops, Grain, Fermentable, Adjuncts, MASH et Waters sont construits (plus bas). Les cases propres aux autres onglets viendront ensuite. En attendant, chacun montre ce que la recette contient pour lui, et Waters et MASH ont les listes de profils.
+Les onglets Hops, Grain, Fermentable, Yeast, Adjuncts, MASH et Waters sont construits (plus bas). Les cases propres aux autres onglets viendront ensuite. En attendant, chacun montre ce que la recette contient pour lui, et Waters et MASH ont les listes de profils.
 
 ## L'onglet Hops {#the-hops-tab}
 
 Une ligne pour chaque houblon, sans limite. **Add Hop +** met une nouvelle ligne en bas ; **Delete** sur une ligne la retire.
 
 - **Hop N** : le nom du houblon.
-- **Ounces** (ou Grams, comme choisi sur le Tab Default) : la quantité dans la recette.
+- **Ounces** (ou Grams) : la quantité dans la recette, dans l'**Unit** propre de la ligne.
+- **Unit** : **oz** ou **g**, pour cette ligne de houblon seulement, quoi que dise Settings > Units. La changer convertit la quantité (1 oz s'affiche 28,3 g). Une nouvelle ligne commence dans les Units ; un houblon BeerSmith .bsmx arrive en oz, un houblon BeerXML comme le fichier le montre (en grammes s'il ne le dit pas).
 - **AAU % Recipe** et **Actual** (rouge) : l'acide alpha du houblon de la recette, et celui des houblons que vous avez (sur le paquet). **Tapez l'Actual pour chaque houblon.** Il commence à 0, pour un houblon importé et pour un nouveau.
-- **Calc oz** : la quantité à utiliser avec l'AAU réelle, pour que la bière ait les IBU de la recette.
+- **Calc oz** (ou **Calc g**) : la quantité à utiliser avec l'AAU réelle, pour que la bière ait les IBU de la recette, dans l'Unit de la ligne.
+
+**oz → g** (à côté de Add Hop +) passe toutes les lignes de houblon en onces en grammes d'un seul appui. Les grammes sont plus précis, et certaines balances démarrent en grammes. Seule l'unité change ; la quantité de houblon reste la même. Appuyez sur Save pour la garder.
 - **Hop N Min** : les minutes d'ébullition. Min = la durée d'ébullition, c'est un houblon de début d'ébullition.
 - **Hop N Drop** : les minutes après le début de l'ébullition où il est ajouté. **Hop N IBU** : son amertume. **Hop N Boil Group** : les houblons ajoutés en même temps forment un groupe (l'onglet Drops).
 
@@ -150,6 +156,16 @@ Les fermentescibles d'une recette sont répartis sur deux onglets. **Grain** con
 - **After Boil** (onglet Fermentable seulement) : un interrupteur, montré seulement pour les types qu'un brasseur ajoute pendant ou après l'ébullition (Extract, Dry Extract, Sugar, Fruit, Juice). Activé veut dire qu'il est ajouté après l'ébullition. Le grain n'est jamais ajouté après l'ébullition, donc l'onglet Grain n'en a pas.
 
 Chaque onglet montre son poids total. Un import fait venir chaque champ de grain (notes, protéines, humidité et le reste aussi), prêt pour plus tard.
+
+## L'onglet Yeast {#the-yeast-tab}
+
+Une ligne pour chaque levure, sans limite. **Yeast +** met une nouvelle ligne en bas ; **Delete** en retire une.
+
+- **Yeast N** (le nom), **Form** (Dry, Liquid, Slurry ou Culture), **Amount** et son **Unit** propre : **Packs**, **g**, **oz** ou **ml**. La plupart des levures viennent en sachets (Packs), certaines recettes donnent des grammes. L'Unit est celle de la ligne, quoi que dise Settings > Units.
+- **Attenuation %** : la part du sucre que la levure consomme. **Min Temp** et **Max Temp** : la plage de température où elle fermente, affichée dans les Units.
+- **▸ More** ouvre le reste sous la ligne : **Lab**, **Product ID** (par exemple US-05 de Fermentis), **Type** (Ale, Lager, Wheat, Wine, Champagne), **Flocculation** (Low, Medium, High, Very High), **Starter** (un interrupteur, avec un **Starter Size** facultatif), **Times Cultured**, **Mfg Date** (la date de fabrication sur le sachet) et **Notes**.
+
+Un import remplit ce que le fichier contient. Une levure BeerSmith .bsmx est un nombre de Packs. Une levure BeerXML est en grammes (un poids) ou en millilitres (un volume), sauf si le fichier montre « pkg », ce qui donne des Packs.
 
 ## L'onglet Adjuncts {#the-adjuncts-tab}
 

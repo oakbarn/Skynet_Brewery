@@ -88,6 +88,7 @@ Each line on the Hops tab has its own Skynet_Fields, N = the line number (1, 2, 
 |---|---|
 | Hop N (its name) | `skn_rcp_Hop_N_Name` |
 | Ounces (or Grams) | `skn_rcp_Hop_N_Amount` |
+| Unit (oz or g) | `skn_rcp_Hop_N_Measurement` |
 | AAU % Recipe | `skn_rcp_Hop_N_AA_Recipe` |
 | AAU % Actual | `skn_rcp_Hop_N_AA_Actual` |
 | Calc oz | `skn_rcp_Hop_N_Calc_Amount` |
@@ -105,6 +106,8 @@ For example `skn_rcp_Hop_1_Name` is the first hop. A line the Recipe does not ha
 
 The Grain and Fermentable tabs work the same way: `skn_rcp_Grain_Count`, `skn_rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, and `skn_rcp_Fermentable_Count`, `skn_rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, `_After_Boil`.
 
+The Yeast tab too: `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement` (Packs, g, oz or ml), `_Attenuation`, `_Min_Temp`, `_Max_Temp`, `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`. `skn_rcp_Yeast_Name` is still the first yeast.
+
 ## The Daughter Tabs
 
 The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab** (or **Recipe** in the title) comes back.
@@ -118,16 +121,19 @@ The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab
 - **Waters**: the Water Profile.
 - **MASH**: the Mash Profile.
 
-The Hops, Grain, Fermentable, Adjuncts, MASH and Waters tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+The Hops, Grain, Fermentable, Yeast, Adjuncts, MASH and Waters tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
 
 ## The Hops tab
 
 One line for each hop, with no limit. **Add Hop +** puts a new line at the bottom; **Delete** on a line takes it away.
 
 - **Hop N**: the hop's name.
-- **Ounces** (or Grams, as picked on the Default tab): the amount in the recipe.
+- **Ounces** (or Grams): the amount in the recipe, in the line's own **Unit**.
+- **Unit**: **oz** or **g**, for this hop line only, whatever Settings > Units says. Changing it turns the amount (1 oz shows as 28.3 g). A new line starts in the Units; a BeerSmith .bsmx hop comes in as oz, a BeerXML hop as the file shows it (grams when it does not say).
 - **AAU % Recipe** and **Actual** (red): the alpha acid of the hop in the recipe, and of the hops you have (on the package). **Type the Actual for every hop.** It starts at 0, for an imported hop and for a new one.
-- **Calc oz**: the amount to use with the Actual AAU, so the beer gets the IBUs of the recipe.
+- **Calc oz** (or **Calc g**): the amount to use with the Actual AAU, so the beer gets the IBUs of the recipe, in the line's Unit.
+
+**oz → g** (next to Add Hop +) turns every hop line in ounces into grams in one press. Grams are more accurate, and some scales start in grams. Only the unit changes; the amount of hops is the same. Press Save to keep it.
 - **Hop N Min**: boil minutes. Min = the Boil Time is a Start of Boil hop.
 - **Hop N Drop**: minutes into the boil when it goes in. **Hop N IBU**: its bitterness. **Hop N Boil Group**: hops that go in at the same time are one group (the Drops tab).
 
@@ -150,6 +156,16 @@ A recipe's fermentables are split over two tabs. **Grain** holds the ones of Typ
 - **After Boil** (Fermentable tab only): a switch, shown only for the Types a brewer adds during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). On means it goes in after the boil. Grain is never added after the boil, so the Grain tab has none.
 
 Each tab shows its total weight. An import brings every grain field in (notes, protein, moisture and the rest too), ready for later.
+
+## The Yeast tab
+
+One line for each yeast, with no limit. **Yeast +** puts a new line at the bottom; **Delete** takes one away.
+
+- **Yeast N** (the name), **Form** (Dry, Liquid, Slurry or Culture), **Amount** and its own **Unit**: **Packs**, **g**, **oz** or **ml**. Most yeasts come in Packs, some recipes give grams. The Unit is the line's own, whatever Settings > Units says.
+- **Attenuation %**: how much of the sugar the yeast eats. **Min Temp** and **Max Temp**: the temperature range it ferments in, shown in the Units.
+- **▸ More** opens the rest under the line: **Lab**, **Product ID** (for example US-05 from Fermentis), **Type** (Ale, Lager, Wheat, Wine, Champagne), **Flocculation** (Low, Medium, High, Very High), **Starter** (a switch, with an optional **Starter Size**), **Times Cultured**, **Mfg Date** (the manufacture date on the pack) and **Notes**.
+
+An import fills in what the file has. A BeerSmith .bsmx yeast is a count of Packs. A BeerXML yeast is in grams (a weight) or milliliters (a volume), unless the file shows "pkg", which gives Packs.
 
 ## The Adjuncts tab
 

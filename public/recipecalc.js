@@ -78,6 +78,23 @@ export const BEERXML_FERM_TYPES = ['adjunct', 'extract', 'dry extract', 'sugar']
 export const MISC_TYPES = ['Spice', 'Fining', 'Water Agent', 'Herb', 'Flavor', 'Other'];
 export const MISC_TIME_UNITS = { min: 'Minutes', hr: 'Hours', day: 'Days', week: 'Weeks' };
 export const FERM_MEASURES = { lb: 'Pounds (lb)', oz: 'Ounces (oz)', kg: 'Kilograms (kg)', g: 'Grams (g)' };
+// Each hop line and yeast line keeps its own unit, whatever Units says (Rule 2.59 exception, Rule 17.18; OakBarn Brewery, 2026-11-19:
+// "some Yeasts come as Grams rather than Oz, although most are Packs"; "Hops may be the same. I have always used OZ. But you could
+// use grams as more accurate"). A hop's amount is still kept in kg; its unit is how it shows and is typed. A hop line with no unit
+// (saved before) follows Units. A yeast amount is kept in its own unit, like an Adjunct (Misc) line.
+export const HOP_MEASURES = { oz: 'oz', g: 'g' };
+export const hopUnitOf = (h, u = {}) => HOP_MEASURES[h?.unit] ? h.unit : u.hopUnit || 'oz';
+export const YEAST_UNITS = { Packs: 'Packs', g: 'g', oz: 'oz', ml: 'ml' };
+export const yeastUnitOf = y => YEAST_UNITS[y?.unit] ? y.unit : 'Packs';
+// The Yeast tab's select-only lists (OakBarn Brewery's Yeast layout, 2026-11-19). A line from a file with another word keeps it in its list.
+export const YEAST_FORMS = ['Dry', 'Liquid', 'Slurry', 'Culture'];
+export const YEAST_TYPES = ['Ale', 'Lager', 'Wheat', 'Wine', 'Champagne'];
+export const YEAST_FLOCS = ['Low', 'Medium', 'High', 'Very High'];
+// "1 Pack", "2 Packs", "11.5 g"
+export function yeastAmountText(y) {
+  const a = y?.amount ?? 1, un = yeastUnitOf(y);
+  return `${round(n(a), 2)} ${un === 'Packs' && n(a) === 1 ? 'Pack' : un}`;
+}
 // Gravity points (the PPG>SG box, Fritz's Grain tab 2026-10-31): Potential (yield %) x 46.214 (the points of 1 lb of pure
 // sugar in 1 gallon) = PPG; points = PPG x pounds x efficiency / gallons in the batch. Grains and adjuncts are mashed, so the
 // brewhouse efficiency counts; extracts, sugars, fruit and juice give all their sugar (100%). Expected Gravity = 1 + all points / 1000.
@@ -247,7 +264,7 @@ export const hopKgToUse = h => n(h.alphaActual) > 0 && n(h.alpha) > 0 ? n(h.kg) 
 export function hopSchedule(r, d = {}) {
   const D = { ...RECIPE_DEFAULTS, ...pickNums(d) }, u = displayUnits(d);
   const boil = n(r?.boilTime) || D.boilTime, warn = Math.max(0, D.hopWarnMinutes), merge = Math.max(0, D.alertMergeMinutes);
-  const hopText = h => `${fmtW(hopKgToUse(h), u.hopUnit)} ${h.name || 'hop'}`;
+  const hopText = h => `${fmtW(hopKgToUse(h), hopUnitOf(h, u))} ${h.name || 'hop'}`;
   const groups = new Map(), hopKey = [];
   const add = (key, g, what) => { if (!groups.has(key)) groups.set(key, { ...g, items: [] }); groups.get(key).items.push(what); if (what.kind === 'hop') hopKey.push(key); };
   for (const h of r?.ingredients?.hops || []) {
@@ -364,10 +381,11 @@ const MASH_STEP_FIELD = /^skn_rcp_Mash_Step_(\d+)_(Name|Temp|Time)$/;
 function r_h_stand(r, h) { return h.use === 'whirlpool' ? standOf(h, hopStands(r)) : ''; }
 export const HOP_FIELDS = [
   ['Name', 'Hop N: the hop', (r, h) => h.name ?? ''],
-  ['Amount', 'Hop N: the amount in the recipe (oz or g)', (r, h, u) => kgTo(h.kg, u.hopUnit)],
+  ['Amount', 'Hop N: the amount in the recipe, in its Measurement (oz or g)', (r, h, u) => kgTo(h.kg, hopUnitOf(h, u))],
+  ['Measurement', 'Hop N: oz or g, the hop line\'s own unit', (r, h, u) => hopUnitOf(h, u)],
   ['AA_Recipe', 'Hop N: AAU % of the recipe', (r, h) => h.alpha],
   ['AA_Actual', 'Hop N: AAU % Actual, of the hops on hand (must be above 0)', (r, h) => h.alphaActual],
-  ['Calc_Amount', 'Hop N: Calc oz, the amount to use with the Actual AAU', (r, h, u) => kgTo(hopKgToUse(h), u.hopUnit)],
+  ['Calc_Amount', 'Hop N: Calc oz (or g), the amount to use with the Actual AAU, in its Measurement', (r, h, u) => kgTo(hopKgToUse(h), hopUnitOf(h, u))],
   ['Use', 'Hop N: Boil, Mash, 1st Wort, Secondary, Dry Hop or Whirlpool', (r, h) => HOP_USES[h.use] ? h.use : 'boil'],
   ['Min', 'Hop N Min: boil minutes (Whirlpool: whirlpool minutes)', (r, h) => h.use === 'boil' || h.use === 'whirlpool' || !HOP_USES[h.use] ? n(h.time) : 0],
   ['Drop', 'Hop N Drop: minutes into the boil when it goes in', (r, h) => h.use === 'boil' || !HOP_USES[h.use] ? Math.max(0, (n(r.boilTime) || RECIPE_DEFAULTS.boilTime) - Math.min(n(h.time), n(r.boilTime) || RECIPE_DEFAULTS.boilTime)) : 0],
@@ -407,26 +425,46 @@ export const ADJUNCT_FIELDS = [
   ['Time', 'Adjunct N: how long (Boil: minutes left in the boil when it goes in)', m => m.time],
   ['Time_Unit', 'Adjunct N: min, hr, day or week', m => m.timeUnit || 'min'],
 ];
-const LINE_FIELD = /^skn_rcp_(Grain|Fermentable|Adjunct)_(\d+)_([A-Za-z_]+)$/;
-const LINE_LISTS = { grain: () => GRAIN_FIELDS, fermentable: () => FERMENTABLE_FIELDS, adjunct: () => ADJUNCT_FIELDS };
+// The Yeast lines (Rule 17.18): skn_rcp_Yeast_N_Name, _Amount, _Measurement (Packs, g, oz or ml). skn_rcp_Yeast_Name stays the first yeast.
+export const YEAST_FIELDS = [
+  ['Name', 'Yeast N: the yeast', y => y.name ?? ''],
+  ['Form', 'Yeast N: Dry, Liquid, Slurry or Culture', y => y.form ?? ''],
+  ['Amount', 'Yeast N: the amount, in its Measurement', y => n(y.amount ?? 1)],
+  ['Measurement', 'Yeast N: Packs, g, oz or ml', y => yeastUnitOf(y)],
+  ['Attenuation', 'Yeast N: Attenuation %', y => y.attenuation ?? 0],
+  ['Min_Temp', 'Yeast N: lowest fermenting temperature', (y, u) => cTo(y.minTempC, u.tempUnit) ?? 0],
+  ['Max_Temp', 'Yeast N: highest fermenting temperature', (y, u) => cTo(y.maxTempC, u.tempUnit) ?? 0],
+  ['Lab', 'Yeast N: the lab (Fermentis, Wyeast ...)', y => y.lab ?? ''],
+  ['Product_ID', 'Yeast N: the lab\'s Product ID (US-05, 1056 ...)', y => y.productId ?? ''],
+  ['Type', 'Yeast N: Ale, Lager, Wheat, Wine or Champagne', y => y.type ?? ''],
+  ['Flocculation', 'Yeast N: Low, Medium, High or Very High', y => y.flocculation ?? ''],
+  ['Starter', 'Yeast N: a yeast starter (true or false)', y => !!y.starter],
+  ['Starter_Size', 'Yeast N: the starter size (gal or L)', (y, u) => y.starter ? lTo(y.starterL, u.volumeUnit) ?? 0 : 0],
+  ['Times_Cultured', 'Yeast N: times cultured', y => y.timesCultured ?? 0],
+  ['Mfg_Date', 'Yeast N: manufacture date (YYYY-MM-DD)', y => y.mfgDate ?? ''],
+  ['Notes', 'Yeast N: notes', y => y.notes ?? ''],
+];
+const LINE_FIELD = /^skn_rcp_(Grain|Fermentable|Adjunct|Yeast)_(\d+)_([A-Za-z_]+)$/;
+const LINE_LISTS = { grain: () => GRAIN_FIELDS, fermentable: () => FERMENTABLE_FIELDS, adjunct: () => ADJUNCT_FIELDS, yeast: () => YEAST_FIELDS };
 const GRAIN_COUNT = ['skn_rcp_Grain_Count', 'Grain tab: how many grain lines', r => (r.ingredients?.fermentables || []).filter(isGrain).length];
 // a line field (any case) of the Hops, Grain or Fermentable tab: its empty value (a line past the Count reads as this), else undefined
 export function lineFieldEmpty(name) {
   const s = String(name), h = new RegExp(HOP_FIELD.source, 'i').exec(s), g = new RegExp(LINE_FIELD.source, 'i').exec(s);
   const end = h ? HOP_FIELDS.find(x => x[0].toLowerCase() === h[2].toLowerCase())?.[0]
     : g ? LINE_LISTS[g[1].toLowerCase()]().find(x => x[0].toLowerCase() === g[3].toLowerCase())?.[0] : undefined;
-  if (!end) return /^skn_rcp_(Hop|Grain|Fermentable|Adjunct)_Count$/i.test(s) ? 0 : undefined;
-  return ['Name', 'Use', 'Date', 'Type', 'Measurement', 'Time_Unit'].includes(end) ? '' : ['Hop_Rocket', 'After_Boil'].includes(end) ? false : 0;
+  if (!end) return /^skn_rcp_(Hop|Grain|Fermentable|Adjunct|Yeast)_Count$/i.test(s) ? 0 : undefined;
+  return ['Name', 'Use', 'Date', 'Type', 'Measurement', 'Time_Unit', 'Form', 'Lab', 'Product_ID', 'Flocculation', 'Mfg_Date', 'Notes'].includes(end) ? '' : ['Hop_Rocket', 'After_Boil', 'Starter'].includes(end) ? false : 0;
 }
 const FERM_COUNT = ['skn_rcp_Fermentable_Count', 'Fermentable tab: how many lines', r => (r.ingredients?.fermentables || []).filter(f => !isGrain(f)).length];
 const ADJ_COUNT = ['skn_rcp_Adjunct_Count', 'Adjuncts tab: how many lines', r => (r.ingredients?.miscs || []).length];
+const YEAST_COUNT = ['skn_rcp_Yeast_Count', 'Yeast tab: how many yeast lines', r => (r.ingredients?.yeasts || []).length];
 export const hopFieldName = (line, end) => `skn_rcp_Hop_${line}_${end}`;
 const HOP_COUNT = ['skn_rcp_Hop_Count', 'Hops tab: how many hop lines', r => (r.ingredients?.hops || []).length];
 // a Skynet_Field by its name: the Recipe tab's, skn_rcp_Hop_Count, or one of a hop line (any line number)
 export const recipeField = name => {
   const ms = MASH_STEP_FIELD.exec(name); if (ms) return [name, `MASH: step ${ms[1]} ${ms[2].toLowerCase()}`, () => null];
   const wf = WATER_FIELDS.find(x => x[0] === name); if (wf) return [name, wf[1], () => null];
-  for (const c of [HOP_COUNT, GRAIN_COUNT, FERM_COUNT, ADJ_COUNT]) if (name === c[0]) return c;
+  for (const c of [HOP_COUNT, GRAIN_COUNT, FERM_COUNT, ADJ_COUNT, YEAST_COUNT]) if (name === c[0]) return c;
   const g = LINE_FIELD.exec(name), gf = g && LINE_LISTS[g[1].toLowerCase()]().find(x => x[0] === g[3]);
   if (gf) return [name, gf[1].replace(`${g[1]} N`, `${g[1]} ${g[2]}`), gf[2]];
   const m = HOP_FIELD.exec(name), f = m && HOP_FIELDS.find(x => x[0] === m[2]);
@@ -446,5 +484,7 @@ export function recipeFieldValues(r, d = {}) {
   ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`skn_rcp_Fermentable_${i + 1}_${end}`, get(f, u, r, d.eff) ?? (end === 'Name' ? '' : 0)); });
   put(ADJ_COUNT[0], r ? ADJ_COUNT[2](r) : 0);
   (r?.ingredients?.miscs || []).forEach((m, i) => { for (const [end, , get] of ADJUNCT_FIELDS) put(`skn_rcp_Adjunct_${i + 1}_${end}`, get(m) ?? 0); });
+  put(YEAST_COUNT[0], r ? YEAST_COUNT[2](r) : 0);
+  (r?.ingredients?.yeasts || []).forEach((y, i) => { for (const [end, , get] of YEAST_FIELDS) put(`skn_rcp_Yeast_${i + 1}_${end}`, get(y, u) ?? 0); });
   return out;
 }

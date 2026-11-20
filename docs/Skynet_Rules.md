@@ -1221,8 +1221,8 @@ never changes a saved number, so switching back and forth can never drift a numb
 - **Exceptions, kept in their own unit whatever Units says (OakBarn Brewery, 2026-11-19):** (1) **Recipe items that come in their
   own unit**: "some recipes have grams vs ounces so we will need to set what the thing added use (some Yeasts come as Grams rather
   than Oz , although most are Packs. Additions can be either"; "Hops may be the same. I have always used OZ. But you could use
-  grams as more accurate." Additions (Misc) already keep their unit on each line; a yeast is a count of Packs; a per-line unit
-  for yeast (Packs / g / oz / ml) and hops (oz / g) is a separate Panel Update, not built. (2) **A Vessel whose own screen has
+  grams as more accurate." Additions (Misc) keep their unit on each line; each **yeast** line has its own unit
+  (Packs / g / oz / ml) and each **hop** line its own unit (oz / g), with an **oz → g** button (built 2026-11-19, Rule 17.18). (2) **A Vessel whose own screen has
   fixed units** ("A digiboil always opens in Metric after a power cycle"; "a user can switch the Digiboil and Brewzilla back
   to F. I would think that is most common for US Brewers"): a Manual vessel (DigiBoil, Brewzilla) has its own Temperature units,
   the units its screen shows. It starts as Units (°F in US Standard) and can be set to °F or °C in its Properties; its Hover Help
@@ -4983,6 +4983,25 @@ Temperature; a Tab with none adds 0. It is a temperature **difference**: kept in
 below 0 (not restricted). Hover Help says 0 for an All In One or a pre-heated Mash Tun. Asking for it again on Brew Day (a confirm and a
 box, for a hot or cold brewery) belongs to the PreBrew Process (Process Updates Sandbox entry 1).
 
+17.18 **Hop and Yeast lines keep their own unit; the Yeast tab** (OakBarn Brewery, 2026-11-19, Panel Updates entry 13b: "some Yeasts come as
+Grams rather than Oz, although most are Packs"; "Hops may be the same. I have always used OZ. But you could use grams as more accurate";
+a button to turn hop oz into grams because some scales start in grams. Yeast tab layout: "Use it and Build to keep rule"):
+- **Hops:** each hop line has a **Unit** dropdown, **oz** or **g**, whatever Units says (Rule 2.59 exception). The amount is still kept in
+  **kg**; the Unit is how that line shows and is typed, and how its Calc oz / Calc g, its alert text and `skn_rcp_Hop_N_Amount` /
+  `_Calc_Amount` read. `skn_rcp_Hop_N_Measurement` gives the unit. **oz → g** on the Hops tab turns every hop line in oz into g in one press
+  (only the unit changes). A new line starts in the Units; a hop line saved before with no unit follows Units (nothing taken away).
+- **Imports:** a .bsmx hop is **oz**; a BeerXML hop takes the unit its DISPLAY_AMOUNT shows (oz or g), else **g**. A .bsmx yeast is a count
+  of **Packs** (a unit the file names wins); a BeerXML yeast is **g** when AMOUNT_IS_WEIGHT (kg x 1000) or **ml** (liters x 1000), unless
+  DISPLAY_AMOUNT names one ("1 pkg" = Packs); no AMOUNT = 1 Pack.
+- **The Yeast tab** (the layout OakBarn Brewery picked, 2026-11-19): one line per yeast, no limit, **Yeast +** and **Delete**: **Name, Form** (Dry,
+  Liquid, Slurry, Culture), **Amount**, **Unit** (Packs, g, oz, ml; kept in that unit, like an Adjunct line), **Attenuation %**, **Min
+  Temp** and **Max Temp** (kept in °C, shown in the Units). **▸ More** opens **Lab, Product ID, Type** (Ale, Lager, Wheat, Wine,
+  Champagne), **Flocculation** (Low, Medium, High, Very High), **Starter** (a switch) with an optional **Starter Size** (kept in liters),
+  **Times Cultured**, **Mfg Date** and **Notes**. Dropdowns are select only; a word from a file not in the list stays in that line's list.
+  Skynet_Fields `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement`, `_Attenuation`, `_Min_Temp`, `_Max_Temp`,
+  `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`;
+  `skn_rcp_Yeast_Name` stays the first yeast. (Help 99) **Both programs:** the BruControl Import has no recipe lines, so nothing changes there.
+
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
@@ -6897,5 +6916,6 @@ import.
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-20: Rules 3.20 and 16.4 changed (OakBarn Brewery: "Recipe values like rcp_Strike_Temp yes", "they could be skn_rcp_ so I will know what you are taking about"): Recipe values are `skn_rcp_` names (were `rcp_`) in the code, Templates, Help and these Rules; older Change log lines keep the old name as history.
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
+- 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.
