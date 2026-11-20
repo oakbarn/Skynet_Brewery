@@ -1407,7 +1407,7 @@ interfere with, Mac or Linux, MQTT are in the list"): a Device, Widget, gGlobal,
 **letters, numbers, `_`, `~`, `@` and `°`**, and starts with a letter or `_`, so it works with no quotes in a Process and is safe on
 Windows, Mac, Linux and MQTT. Tab and Interface names are shown names (Brew House) and keep only the list above; their IDs are plain.
 An Integrated Instance keeps its `VesselName.DeviceName` (Rule 6.28). A Label may have any other mark (but see below): in the Suggested Name each other mark
-becomes `~` and an accent is dropped. Older names (Rule 15.2): once per Schema, each other mark becomes `~` (an accent dropped, `_2`
+becomes `~`, an accent is dropped and ß æ ø are spelled ss ae o (2026-11-20). Older names (Rule 15.2): once per Schema, each other mark becomes `~` (an accent dropped, `_2`
 if taken) when the Schema loads; Processes and settings follow. Every mark and why: docs/Special_Characters.md.
 **° is allowed** in a name (OakBarn Brewery, 2026-11-11: the degree mark, typed with Ctrl+D, "does no interference so should be allowed
 even in a Name"): `Temp_°F`. **`@` and `~` are kept for the Suggested Name** (OakBarn Brewery, 2026-11-11: "prevent @ and ~ being used
@@ -1514,6 +1514,9 @@ it is the Label part of the Suggested Name (Rule 3.16). It is never blank (Rule 
   name or a Label to avoid confusion with the Skynet MIT License." They are taken out as you type, and a small box says so.
 - **No @ ~**: kept for the Suggested Name (Rule 3.4). Typed, they become a space, and the small box says so.
 - In the Suggested Name each space or other mark becomes `~`, an accent is dropped and ° stays (Rule 3.4, docs/Special_Characters.md).
+  **ß, æ, ø are spelled ss, ae, o** (OakBarn Brewery, 2026-11-20, option A, for the German, Danish and Norwegian Help to come):
+  *Weiß Bier* gives `Weiss~Bier`, *Mæsk* gives `Maesk`, *Søl* gives `Sol`, not `~`, which stands for a space (public/letters.js). Names
+  already saved never change (Rule #2).
 - The same words are in the Label's Hover Help (Help 115).
 
 3.18 **🏷 Suggested Names: convert all names at once** (OakBarn Brewery, 2026-11-12: "There is a Button where all Names can be
@@ -3764,17 +3767,32 @@ Both programs: the BruControl Import's Build page shows it too.
   set to, unless a **hand-made SVG** of the same name sits next to it; then that drawing is used, since it is sharp at any size.
 - Help pictures are not traced at all, so no copies are made for them.
 - **Words in a Help picture are real text, never part of the graphic** (OakBarn Brewery, 2026-11-15: "And any text has to be
-  text and not just part of a grahic"): the picture is a hand-made SVG whose words are &lt;text&gt;, so they stay sharp at any size
-  and can be translated.
+  text and not just part of a grahic"; 2026-11-20: "remove all text that is part of a graphic and add as text (maybe smaller and
+  always translate because German, Danish, Norwegian, and Italian are coming"): the picture is a hand-made SVG whose words are
+  &lt;text&gt;, so they stay sharp at any size and are translated. A drawing that has pictures in it (a pump, a board) is an SVG with the
+  picture inside (`<Name>_Art.png`, the PNG with its words taken out) and its words on top as &lt;text&gt;; the Brain puts the picture
+  inside the SVG as it sends it.
+  - **Every word is translated:** each Help language has the words of the Help pictures in `help/<lang>/_pictures.json`, English
+    text → its text in that language (French now: `help/fr/_pictures.json`). The Help page and the Hover Help balloon ask for the
+    picture in the language picked in 🌐 Help language, and the Brain sends it with its words in that language. A word much longer
+    than the English is drawn smaller so it fits where the English was. A new or changed picture word gets its French in the same PR:
+    a test (test/helppicfrench.test.js) fails and names it, and `node tools/helppics-french.js` lists them. A new Help language
+    (German, Danish, Norwegian, Italian) adds its own `_pictures.json`; nothing else changes.
+  - **Words printed on a real item stay as they are** (OakBarn Brewery, 2026-11-20: "Do not worry about parts of a graphic that are
+    model or anything in the real world cannot be translated as it is fixed and printed on the label of the item"): a board's name and
+    pin names (MEGA 2560, GND, D23), a model or brand (SSR-40 DA, Blichmann), or what is printed on an SSR or a pump stay in the
+    picture, or as a word whose "translation" is the same English. Only Skynet's own words are translated: titles, labels, callouts,
+    notes and warnings.
+  - **A screenshot of the panel stays as it is shot** (OakBarn Brewery, 2026-11-20, "lets keep a for now"): the screens, buttons and
+    labels are English in every Help language (Rule 11.11), so the words in a screenshot are what the user sees on the screen. Any word
+    Skynet adds to a screenshot (a note, a callout) is real text on top of it, translated like any other picture word; the marks
+    (a red box, red dashes) have no words. This covers the Step by Step screenshots, Greyed_Do_Not_Enter, and the two **Tab size
+    pictures** (`Tab_1600x900_on_1920x1040_Screen.png`, `Tab_1920x1040_on_1920x1040_Screen.png`, in the Width and Height of a New
+    Tab Hover Help), so this is not an exception. A whole-screen picture uses ⟪imgw:path⟫ in Hover Help, drawn as wide as the
+    balloon (⟪img:⟫ stays at most 240 px).
 - **Any Help picture taken from a PNG or a PDF is redrawn** (OakBarn Brewery, 2026-11-15: "Good rule on drawing any pix from a Png
   or pdf"), never cut out and shipped as it is. A picture cut from a markup PDF is only as sharp as it was pasted into the PDF
   (most are 96 dots per inch). The PNG may stay next to the SVG (Rule #1, Never Take Away); the SVG is what shows.
-- **One exception, waiting for OakBarn Brewery's review** (2026-11-19, Panel Updates entry 15, taken as Claude's recommendation while he
-  was away): the two **Tab size pictures** (`help_pictures/Tab_1600x900_on_1920x1040_Screen.png` and `Tab_1920x1040_on_1920x1040_Screen.png`,
-  in the Width and Height of a New Tab Hover Help) are real screenshots of the panel, as he asked ("add some graphics of a tab ...
-  highlighting the scroll bars"), so the words on the Tab are part of the picture. They show how a whole screen looks, not words to read;
-  the explanation is real text in the balloon (English and French), and the pictures add no words of their own (only red marks).
-  A whole-screen picture uses ⟪imgw:path⟫ in Hover Help, drawn as wide as the balloon (⟪img:⟫ stays at most 240 px).
 Skynet does this in the Background and needs no user input (Rule 11.13). Both programs: the BruControl Import makes no traced copies, so it already shows
 the pictures themselves (and the hand-made SVGs). Help 7.
 
@@ -4360,6 +4378,14 @@ Hover Help French"):
 - **Only the Help is translated:** the Help pages, the Hover Help balloons and the Help snippets in balloons. The screens, buttons,
   labels, menus, dropdown choices and messages stay English, in both programs, forever. A French Help page or balloon writes the name
   of a button, box or menu in English, exactly as it is on the screen (**Finish Build**, **Interface ID**), so what you read is what you see.
+- **One exception: the safety buttons follow the Help language** (OakBarn Brewery, 2026-11-20: "Maybe the skynet over ride and STop
+  Button label translate", option A, a change to this Rule): the **Override** button and the **Stop** buttons (a Process Widget's
+  ■ Stop, Stop and Stop all on the Processes page, the Ask Before box's Stop, the PID Auto-tune's ■ Stop, the Recipe alerts' ■ Stop)
+  show in the language picked in 🌐 Help language, so a brewer reads at once the button that stops or moves on a Process. French:
+  Override = **Passer**, Stop = **Arrêt**, Stop all = **Tout arrêter**. The words are in `public/screenwords.js`; a new Help
+  language adds its own. Only the Override button's own Label (**Override**) changes: a Label the user typed (**Water Override**) is
+  the user's and stays as typed. A French Help page names such a button with both words, **Passer** (Override), and an English page
+  says Override. Every other screen word stays English.
 - **Picked by 🌐 Help language** at the top of the Help page list: **English** or **Français**. The browser remembers it (the Help
   window, the panel's own Help page and the balloons follow the same choice). English is the default.
 - **French pages:** `help/fr/`, with the same file names as the English pages. They keep everything that is not words: each heading
@@ -6319,6 +6345,9 @@ import.
 - 2026-11-20: Rule 9.12 extended (OakBarn Brewery: "A for font rule", Panel Updates entry 45, Help in a User Language): fonts under the SIL Open Font License 1.1 (OFL) are allowed, with the license file shipped next to them and a row in Media_Licenses.csv.
 - 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
+- 2026-11-20: Rules 3.4 and 3.17 (OakBarn Brewery, option A "Yes: ß=ss, æ=ae, ø=o"): in a Suggested Name ß, æ, ø (and œ, đ, ł, þ) are spelled ss, ae, o instead of becoming ~ (public/letters.js), so Labels in German, Danish and Norwegian give Names that read like them; the Tab Vessel, Vessel Widget and Fermentor names now keep accented letters plain too (Café gave Caf). Names already saved never change. Help 63 (and French), docs/Special_Characters.md. Checked against both programs: the BruControl Import uses the same naming code (public/naming.js). (thread "Make all Help picture text translatable")
+- 2026-11-20: Rule 11.11 changed (OakBarn Brewery: "Maybe the skynet over ride and STop Button label translate", option A): the Override button and the Stop buttons show in the Help language (French: Passer, Arrêt, Tout arrêter; public/screenwords.js), everything else stays English; a typed Label is never translated; French Help names them with both words. Help 96, 192 and the French pages that name them. Checked against both programs: the BruControl Import's Build page has no Override or Stop buttons; its Help is on hold (Rule 11.3). (thread "Make all Help picture text translatable")
+- 2026-11-20: Rule 7.25 tightened, with no exception (OakBarn Brewery: "remove all text that is part of a graphic and add as text (maybe smaller and always translate because German, Danish, Norwegian, and Italian are coming"; "Do not worry about parts of a graphic that are model or anything in the real world"; option A "lets keep a for now"): every word Skynet draws in a Help picture is real SVG text and shows in the Help language (help/<lang>/_pictures.json, French now; the Brain sends the picture in the language picked, a longer word drawn smaller); words printed on a real item stay; a screenshot of the panel stays as shot (its words are the English screen, Rule 11.11), so the Tab size pictures are no longer an exception. Pump_Daisy_Chain, Valve_Daisy_Chain, Pump_Overlays, Pump_Cover, Hose_Bib_IP_Spots, Manual_Valve_Orientation and Hose_Bib_8_IPs are now SVGs with their words as text over the picture (<Name>_Art.png). Help 7 (and French). Checked against both programs: the BruControl Import's Build page uses the Panel's balloons; its Help is on hold (Rule 11.3). (thread "Make all Help picture text translatable")
 - 2026-11-19: Rule 18.43 extended (OakBarn Brewery, Panel Updates 6: "Can a User Provide a single Image and Skynet create other needed"; "90 degrees to make horizontal vertical"; "Go with A KISS"): a User Defined Motorized Ball Valve's one picture (drawn Horizontal) gives four looks: Horizontal, Horizontal Flipped, Vertical Left (turned 90 degrees) and Vertical Right (turned and mirrored); the Valve Profile offers the same; plain Vertical only where already set. Help 128 (and French) adds a what-picture-works-best guide. Checked against both programs: the BruControl Import's Build page shares the dialog; the Importer's valve list is unchanged. (thread "Build a User Defined ball valve from one picture")
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.

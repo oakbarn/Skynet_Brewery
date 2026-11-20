@@ -62,7 +62,7 @@ name never starts with one.
 | `[` `]` | square brackets | | | ✖ | | ✖ | A wildcard on Linux. `[Mash]` is a place a Process can `goto`. |
 | `{` `}` | curly brackets | | | ✖ | | ✖ | Expand on Linux. Group steps in a Process. `{value}` is a Code Value Widget's value. |
 | `;` | semicolon | | | ✖ | | ✖ | Ends a command on Linux. Separates two steps on one line of a Process. |
-| accents, `·` | not on the keyboard | | | | | ✖ | Hard to type, and a Process reads only plain letters. In a Label an accent is dropped (*é* is *e*), any other mark is `~`. |
+| accents, `·` | not on the keyboard | | | | | ✖ | Hard to type, and a Process reads only plain letters. In a Label an accent is dropped (*é* is *e*), ß æ ø are spelled ss ae o (2026-11-20, public/letters.js), any other mark is `~`. |
 | `©` `®` `™` | copyright, registered, trademark | | | | | ✖ | Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a name or a Label to avoid confusion with the Skynet MIT License. |
 
 Also never in a name: emoji, control characters, a space at the start or end, and the Windows names CON, PRN, AUX, NUL, COM1-9 and

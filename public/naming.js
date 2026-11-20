@@ -8,6 +8,7 @@
 import { boardOf, linkOf } from './links.js';
 import { BOARD_INFO, analogPins, analogLabel } from './boards.js';
 import { TYPE_METHOD } from './heatmethod.js';
+import { plainLetters } from './letters.js';
 
 // Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is H_Element
 // (Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we could Use MB_25_HE_HLT_BR"). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
@@ -130,7 +131,7 @@ export const COPYRIGHT_MSG = '© ® ™: Reserved for copyright and trademark no
 export const SUGGESTED_MSG = '@ ~: Kept for the Suggested Name. Not typed in a name or a Label.';
 export const labelNoMsg = s => [/[©®™]/.test(s) ? COPYRIGHT_MSG : '', /[@~]/.test(s) ? SUGGESTED_MSG : ''].filter(Boolean).join(' ');
 export const parseLabel = s => [...cleanLabel(s).replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
-  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '~').replace(/[^A-Za-z0-9_~@°]/g, '~');
+  .replace(/\S+/g, plainLetters).replace(/\s+/g, '~').replace(/[^A-Za-z0-9_~@°]/g, '~');      // ß ss, æ ae, ø o (public/letters.js)
 
 // Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). It is the Hydrometer's Port, and in its name (Rule 6.25).

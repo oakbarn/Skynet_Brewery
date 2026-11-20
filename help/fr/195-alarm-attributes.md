@@ -28,7 +28,7 @@ Une Basic Skynet Alarm (la cloche Skynet). `.fore` et `.back` colorent la cloche
 
 **Une Brew Flow Alarm retient son Process.** Quand un Process la met On, le Process attend sur cette ligne jusqu'à ce que le
 brasseur mette l'Alarm Off d'un toucher (ou qu'un autre Process la mette Off), comme si un `wait alm_Name == false` caché suivait.
-**■ Stop** et Override terminent l'attente, comme pour toute attente.
+**■ Arrêt** (Stop) et **Passer** (Override) terminent l'attente, comme pour toute attente.
 
 ## Pre-Hop Alarm
 

@@ -14,7 +14,7 @@ A Device, Widget, gGlobal, Text, pipe, vessel or other item name has only **lett
 - No name or **Label** can start or end with a space. A Label is trimmed as soon as you leave its box.
 - A **Label** may have almost any mark, but not `©` `®` `™` (reserved for copyright and trademark notices of the Skynet MIT License) or `@` `~` (kept for the Suggested Name). While you type, `©` `®` `™` are taken out and `@` `~` become a space. The full list, with why each mark is trouble: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 
-Your **Label** may have the other marks: it is only shown. In the Suggested Name each one becomes `~`, and an accent is dropped (*Würze #2* gives `Wurze~~2`).
+Your **Label** may have the other marks: it is only shown. In the Suggested Name each one becomes `~`, and an accent is dropped (*Würze #2* gives `Wurze~~2`). The letters ß, æ and ø are spelled ss, ae and o (*Weiß Bier* gives `Weiss~Bier`, *Søl* gives `Sol`).
 
 **Tab and Interface names** are shown names (*Brew House*, *Brewery Mega*), so they may have spaces; their IDs (`BH`, `BM`) are plain. (User Template names are only for picking a Template, so they are left alone.) No name can have:
 

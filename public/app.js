@@ -16,7 +16,10 @@ import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
-import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName } from './hoverhelp.js';
+import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName, LANG_KEY } from './hoverhelp.js';
+import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
+import { plainLetters } from './letters.js';      // ß ss, æ ae, ø o in a Name (Rule 3.4)
+import { setStopWord } from './processwidget.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -1717,7 +1720,7 @@ function fillOverride(n, g) {
   n.classList.toggle('vhidden', ovrWaitsForWater(g));
   const who = String(g.process ?? '').trim();
   const b = h('button', { type: 'button', class: 'ovrBtn', title: who ? `Override: ${who} moves on past the wait, sleep or loop that holds it` : 'Override: every running Process (Any) moves on past the wait, sleep or loop that holds it' });
-  setRich(b, g.label || OVR.label);
+  setRich(b, !g.label || g.label === OVR.label ? safetyWord(OVR.label) : g.label);      // its own Label Override in the Help language; a typed Label as it is
   b.style.fontSize = (+g.fontSize || OVR.fontSize) + 'px'; b.style.fontWeight = g.bold === false ? '400' : '700';
   b.style.fontFamily = tbFontCss(g.font) || g.font || '';
   b.style.color = g.color || OVR.color; b.style.backgroundColor = g.panelBg === 'none' ? 'transparent' : g.backColor || OVR.backColor;      // Background None (Rule 18.50 #2)
@@ -1743,7 +1746,7 @@ function renderOverrides(list = []) {
   box.replaceChildren(...show.map(a => h('div', { class: 'ovrPopRow' },
     h('div', { class: 'ovrPopWho' }, h('b', {}, a.process), a.text ? ` ${a.text}` : a.how === 'auto' ? ' is waiting' : ''),
     h('div', { class: 'ovrPopBar' },
-      can('operator') ? h('button', { type: 'button', class: 'ovrBtn', title: `One press: ${a.process} moves on past the wait or sleep that holds it. Only this Process moves on.`, onclick: () => pressOverride({ process: a.process }) }, OVR.label)
+      can('operator') ? h('button', { type: 'button', class: 'ovrBtn', title: `One press: ${a.process} moves on past the wait or sleep that holds it. Only this Process moves on.`, onclick: () => pressOverride({ process: a.process }) }, safetyWord(OVR.label))
         : h('span', { class: 'muted' }, 'An operator or admin can press Override.'),
       h('button', { type: 'button', class: 'ovrPopX', title: 'Hide it on this screen. It pops up again next time this Process waits.', onclick: () => { ovrHidden.set(a.process, a.since); renderOverrides(S.overrides); } }, '✕')))));
 }
@@ -3970,7 +3973,7 @@ async function processWidgetTap(e) {
   const name = String(e.process ?? '').trim();
   const st = processState(name, processStatusOf(name));
   if (st.missing) return toast(`${e.label || e.name}: ${st.word}. Double-click it to pick its Process.`, true);
-  if (e.confirm && !(await choose(`${st.running ? 'Stop' : 'Start'} Process ${name}?`, [[st.running ? 'Stop' : 'Start', true]]))) return;
+  if (e.confirm && !(await choose(`${st.running ? 'Stop' : 'Start'} Process ${name}?`, [[st.running ? safetyWord('Stop') : 'Start', true]]))) return;
   try {
     const r = await api('POST', `/ui/scripts/${encodeURIComponent(name)}/${st.running ? 'stop' : 'start'}`);
     if (!st.running && !r.ok) toast(r.msg ? `${name}: ${r.msg}` : `${name} did not start`, true);
@@ -7091,7 +7094,7 @@ async function newIntegratedDevice(tname) {
         if (!String(w.iface ?? '').trim()) throw new Error(`2. Pick the Interface the ${what} is wired to`);
         const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
         // its name comes from its Label (RIMS, RIMS_2 ...): it is one Device, not a bundle (Fritz, 2026-10-26)
-        let nm = noSpaces(w.label || lbl).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
+        let nm = noSpaces(plainLetters(w.label || lbl)).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
         const g = placeTabVessel(t, wsName, nm);
         if (w.label) g.label = String(w.label).trim();
         g.labelVisible = w.labelVisible !== false;
@@ -7551,7 +7554,7 @@ function vbBuild(t, w) {
   const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
   try {
     const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean).map(x => String(x).toLowerCase());
-    const base = String(w.label).trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
+    const base = plainLetters(String(w.label).trim()).replace(/\s+/g, '~').replace(/[^\w~]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
     let name = base; for (let n = 2; taken.includes(name.toLowerCase()); n++) name = `${base}_${n}`;
     addTemplateToTab('vessel', t, w.workspace, name);
     const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
@@ -7679,7 +7682,7 @@ function vbFermMake(g) {
     delete g.vbFerm; toast(`${g.label || g.name}: the imported Fermentor Control ${loose.name} is now built into it.`, false, 8000); return;
   }
   const taken = n => [...draft.elements, ...draft.graphics].some(x => String(x.name ?? '').toLowerCase() === n.toLowerCase());
-  const base = String(g.label || 'Fermentor').trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') || 'Fermentor';
+  const base = plainLetters(String(g.label || 'Fermentor').trim()).replace(/\s+/g, '~').replace(/[^\w~]/g, '') || 'Fermentor';
   let name = base; for (let i = 2; taken(name); i++) name = `${base}_${i}`;
   draft.elements.push({ name, type: FERM_TYPE, label: g.label || name, workspace: g.workspace, integratedIn: g.id, integratedAs: 'fv:control', input: probe.name, heat: heat?.name ?? '', cool: cool?.name ?? '',
     mode: g.vbFerm, ...Object.fromEntries(FERM_SETTINGS.map(([, k, , d]) => [k, d])), x: Math.round((g.x || 0) + (g.w || 200) + 12), y: Math.round(g.y || 0), w: 190, h: 60, offText: 'OFF' });
@@ -9273,7 +9276,7 @@ async function tuneDialog(name) {
     const start = h('button', { type: 'button', class: 'primary', onclick: async () => {
       try { await api('POST', '/ui/autotune', { name, action: 'start', highest: Number(hi.value) }); } catch (e) { return toast(e.message, true); }
     } }, '▶ Start');
-    const stop = h('button', { type: 'button', class: 'danger', onclick: async () => { try { await api('POST', '/ui/autotune', { name, action: 'stop' }); } catch (e) { toast(e.message, true); } } }, '■ Stop');
+    const stop = h('button', { type: 'button', class: 'danger', onclick: async () => { try { await api('POST', '/ui/autotune', { name, action: 'stop' }); } catch (e) { toast(e.message, true); } } }, '■ ' + safetyWord('Stop'));
     const use = async () => {
       const v = V(), now = S.config.elements.find(e => e.name === name);
       if (!now) return toast(`${name} is gone: nothing saved`, true);
@@ -13344,6 +13347,13 @@ $('#scriptAutoRestart').onchange = guard(async ev => {
   toast(ev.target.checked ? `${curScript} will restart by itself if it stops on an error` : `${curScript} will not restart by itself`);
 });
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
+// the Override and Stop buttons in the Help language (Rule 11.11): again when it is picked here or in another window
+setStopWord(safetyWord);      // a Process Widget's ■ Stop
+function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); $('#stopScript').textContent = safetyWord('Stop'); }
+function safetyRefresh() { safetyWords(); if (curWs()) renderWs(); }
+safetyWords();
+$('#hpLang')?.addEventListener('change', () => setTimeout(safetyRefresh));
+addEventListener('storage', ev => { if (ev.key === LANG_KEY) safetyRefresh(); });
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
   n = noSpaces(n);
@@ -15446,7 +15456,7 @@ function menuItems(list, go) {
   // Rule 11.11): the same switch as 🌐 in the Help page list (public/help.js), with the machine translation notice (Rule 11.14)
   { const hl = $('#hpLang'), fr = hl?.value === 'fr';
     if (hl) list.append(item(fr ? '🌐 Help in English' : '🌐 Help in Français', () => { hl.value = fr ? 'en' : 'fr'; hl.dispatchEvent(new Event('change')); },
-      { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English.' })); }
+      { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English, except the Override and Stop buttons.' })); }
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
@@ -19228,7 +19238,7 @@ function rcDrops(pane, rc) {
     h('div', { class: 'bar' }, h('span', {}, st.running ? `Running (${st.sent} of ${st.of} sent${st.timer ? `, following ${st.timer}` : ''})` : 'Not running'),
       can('operator') ? [rcInput(run, 'timer', { kind: 'sel', list: [['', 'Skynet clock (from now)'], ...timers] }),
         h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'start', timer: run.timer }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '▶ Start hop alerts'),
-        h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'stop' }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '■ Stop'),
+        h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'stop' }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '■ ' + safetyWord('Stop')),
         h('button', { title: 'Show and say the first alert now, to check the sound', onclick: () => (same ? saved : sch).alerts[0] ? hopAlert((same ? saved : sch).alerts[0]) : toast('No alerts', true) }, '🔊 Test the first alert')] : ''));
 }
 // the voice file of one alert: found, or the steps to make it by hand (a free text to voice web site, then put the file here)

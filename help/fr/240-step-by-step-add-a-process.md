@@ -125,12 +125,12 @@ Vous voyez toujours `152`. En coulisses, Skynet le garde comme `66.6667°C`, don
 
 Appuyez sur **Start**. À côté du nom du Process, vous voyez ce qu'il fait : **waiting (line 5, step S2.00000 Heat the strike water)**. Le numéro de sa ligne devient vert, et son point dans la liste devient jaune.
 
-**La fenêtre Override :** quand un Process attend depuis 3 secondes dans un `wait` ou un `sleep`, et qu'aucun **Override button** n'est réglé sur lui ou sur **Any**, une petite fenêtre s'ouvre par-dessus tous les écrans : **Heat_Strike_Water is waiting**. Un appui sur **Override** fait avancer ce Process seulement, au-delà du wait ou du sleep qui le retient, par exemple quand vous voyez que l'eau est assez chaude. **✕** la cache sur cet écran jusqu'à ce que le Process attende de nouveau. Voir [Override button](96-override-button).
+**La fenêtre Override :** quand un Process attend depuis 3 secondes dans un `wait` ou un `sleep`, et qu'aucun **Override button** n'est réglé sur lui ou sur **Any**, une petite fenêtre s'ouvre par-dessus tous les écrans : **Heat_Strike_Water is waiting**. Un appui sur **Passer** (Override) fait avancer ce Process seulement, au-delà du wait ou du sleep qui le retient, par exemple quand vous voyez que l'eau est assez chaude. **✕** la cache sur cet écran jusqu'à ce que le Process attende de nouveau. Voir [Override button](96-override-button).
 
 - Une attente **dans une boucle** ne s'ouvre jamais toute seule. Ajoutez `show_Override` dans le Process seulement là où avancer est sans danger.
 - `show_Override "Press when the water is hot"` ouvre la fenêtre avec vos propres mots ; `hide_Override` la retire.
 
-**Stop** arrête le Process. **Stop all** (à gauche) arrête tous les Process.
+**Arrêt** (Stop) arrête le Process. **Tout arrêter** (Stop all, à gauche) arrête tous les Process.
 
 ![Start: waiting, and the Override pop-up](help_pictures/Step_Add_Process_10_Start.png)
 

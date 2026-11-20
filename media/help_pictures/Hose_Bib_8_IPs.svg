@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="240" height="240" viewBox="0 0 240 240">
+<!-- Skynet's own drawing (Help picture, Rule 7.25): the picture is Hose_Bib_8_IPs_Art.png with its words taken out; the words are real text
+     here, so they stay sharp and show in the Help language (help/<lang>/_pictures.json). It is used in place of Hose_Bib_8_IPs.png. -->
+<title>Hose Bib: the 8 spots its IP can be on</title>
+<image href="Hose_Bib_8_IPs_Art.png" x="0" y="0" width="240" height="240"/>
+<g font-family="Arial, Helvetica, 'Liberation Sans', sans-serif" text-anchor="middle">
+<text x="45" y="49.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+<text x="120" y="49.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+<text x="195" y="49.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+<text x="45" y="124.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+<text x="195" y="124.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+<text x="45" y="199.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+<text x="120" y="199.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+<text x="195" y="199.5" font-size="12" font-weight="bold" fill="#000000">IP</text>
+</g>
+</svg>

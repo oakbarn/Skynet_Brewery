@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="682" height="203" viewBox="0 0 682 203">
+<!-- Skynet's own drawing (Help picture, Rule 7.25): the picture is Manual_Valve_Orientation_Art.png with its words taken out; the words are real text
+     here, so they stay sharp and show in the Help language (help/<lang>/_pictures.json). It is used in place of Manual_Valve_Orientation.png. -->
+<title>Manual Valve Orientation</title>
+<image href="Manual_Valve_Orientation_Art.png" x="0" y="0" width="682" height="203"/>
+<g font-family="Arial, Helvetica, 'Liberation Sans', sans-serif" text-anchor="middle">
+<text x="90" y="186.0" font-size="14" font-weight="bold" fill="#222222">Horizontal, Right</text>
+<text x="258" y="186.0" font-size="14" font-weight="bold" fill="#222222">Horizontal, Left</text>
+<text x="426" y="186.0" font-size="14" font-weight="bold" fill="#222222">Vertical, Left</text>
+<text x="594" y="186.0" font-size="14" font-weight="bold" fill="#222222">Vertical, Right</text>
+</g>
+</svg>

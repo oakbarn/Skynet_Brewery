@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1186" height="220" viewBox="0 0 1186 220">
+<!-- Skynet's own drawing (Help picture, Rule 7.25): the picture is Hose_Bib_IP_Spots_Art.png with its words taken out; the words are real text
+     here, so they stay sharp and show in the Help language (help/<lang>/_pictures.json). It is used in place of Hose_Bib_IP_Spots.png. -->
+<title>Hose Bib: where its IP goes</title>
+<image href="Hose_Bib_IP_Spots_Art.png" x="0" y="0" width="1186" height="220"/>
+<g font-family="Arial, Helvetica, 'Liberation Sans', sans-serif" text-anchor="middle">
+<text x="90" y="186.0" font-size="14" font-weight="bold" fill="#222222">Bottom Middle</text>
+<text x="258" y="186.0" font-size="14" font-weight="bold" fill="#222222">Bottom Left</text>
+<text x="426" y="186.0" font-size="14" font-weight="bold" fill="#222222">Bottom Right</text>
+<text x="594" y="186.0" font-size="14" font-weight="bold" fill="#222222">Left Middle</text>
+<text x="762" y="186.0" font-size="14" font-weight="bold" fill="#222222">Left, Bottom Left</text>
+<text x="930" y="186.0" font-size="14" font-weight="bold" fill="#222222">Vertical Left, Bottom</text>
+<text x="930" y="203.0" font-size="14" font-weight="bold" fill="#222222">Middle</text>
+<text x="1098" y="186.0" font-size="14" font-weight="bold" fill="#222222">Vertical Right,</text>
+<text x="1098" y="203.0" font-size="14" font-weight="bold" fill="#222222">Bottom Left</text>
+</g>
+</svg>

@@ -55,7 +55,8 @@ import { applyKeptSettings } from './lib/freshstart.js';
 import { setupPictureGroups, listGroups } from './lib/picgroups.js';
 import { SkynetPictures } from './lib/skynetpics.js';
 import { listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
-import { Pictures } from './lib/vectorize.js';
+import { Pictures, isHelpPicture } from './lib/vectorize.js';
+import { helpPictureSvg } from './lib/helppictext.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { FileMove, missingMedia, ownMedia } from './lib/filemove.js';
 import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
@@ -1472,7 +1473,12 @@ async function route(req, res) {
   if (p === '/media' && m === 'GET') {
     const f = findMedia(url.searchParams.get('path') ?? '');
     if (!f) return fail(res, 403, 'That path is not inside a media folder (see Settings > Media folders)');
-    return sendFile(req, res, pictures.pick(f, url.searchParams.get('as')));   // as=original / as=svg for side-by-side previews
+    const use = pictures.pick(f, url.searchParams.get('as'));          // as=original / as=svg for side-by-side previews
+    // a Help picture's words in the Help language picked (?lang=fr), with the picture under its words put inside it (Rule 7.25)
+    if (isHelpPicture(use) && /\.svg$/i.test(use)) {
+      try { return send(res, 200, helpPictureSvg(use, HELP, url.searchParams.get('lang')), 'image/svg+xml; charset=utf-8'); } catch { }
+    }
+    return sendFile(req, res, use);
   }
   // File Move page (admin only, see needRole): copy files and folders from your computer to the Brain
   if (p.startsWith('/ui/filemove/')) {

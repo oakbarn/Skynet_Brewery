@@ -34,10 +34,10 @@ En Edit layout, appuyez sur **Override ➕** dans la barre Edit layout. Il est f
 
 ## Override Button Widget Properties {#override-button-widget-properties}
 
-- **1. Label** : ce que dit le bouton sur ce Tab, par exemple **Skip Fire Hose**. Un nouveau dit **Override** ; vide remet Override. Les Rich Text Embedded Codes marchent ici (`\b`, `\n`, `\c{Yellow}` ...).
+- **1. Label** : ce que dit le bouton sur ce Tab, par exemple **Skip Fire Hose**. Un nouveau dit **Passer** (Override) ; vide le remet. Ce Label Override s'affiche dans la langue d'aide choisie (en français : **Passer**) ; un Label que vous tapez s'affiche tel que vous l'avez tapé. Les Rich Text Embedded Codes marchent ici (`\b`, `\n`, `\c{Yellow}` ...).
 - **2. Tab** et **3. Name** (fait par Skynet à partir du Label et du Tab).
 - **4. Process** : **Any** (chaque Process qui tourne sauf les Loopers, l'habituel) ou un Process de la liste. Si le Process change de nom, le bouton le suit.
 - **Background** (Show ou None), **Fore color** (son ⬢ contient Font size, Font, Bold et Alignment) et **Back color**.
 - **X**, **Y**, **Width**, **Height** et le **Widget Type**.
 
-Il commence en **Override** blanc gras sur rouge. Il n'a **pas d'image de fond**.
+Il commence en **Passer** (Override) blanc gras sur rouge. Il n'a **pas d'image de fond**.

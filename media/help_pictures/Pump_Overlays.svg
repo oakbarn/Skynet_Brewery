@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1094" height="558" viewBox="0 0 1094 558">
+<!-- Skynet's own drawing (Help picture, Rule 7.25): the picture is Pump_Overlays_Art.png with its words taken out; the words are real text
+     here, so they stay sharp and show in the Help language (help/<lang>/_pictures.json). It is used in place of Pump_Overlays.png. -->
+<title>Pump Overlays: each choice on a pump that is On</title>
+<image href="Pump_Overlays_Art.png" x="0" y="0" width="1094" height="558"/>
+<g font-family="Arial, Helvetica, 'Liberation Sans', sans-serif" text-anchor="middle">
+<text x="115" y="62.0" font-size="20" font-weight="bold" fill="#000000">None</text>
+<text x="331" y="38.0" font-size="20" font-weight="bold" fill="#000000">Lightning</text>
+<text x="331" y="62.0" font-size="20" font-weight="bold" fill="#000000">Bolt</text>
+<text x="547" y="38.0" font-size="20" font-weight="bold" fill="#000000">Flashing</text>
+<text x="547" y="62.0" font-size="20" font-weight="bold" fill="#000000">Lightning Bolt</text>
+<text x="763" y="38.0" font-size="20" font-weight="bold" fill="#000000">Corner</text>
+<text x="763" y="62.0" font-size="20" font-weight="bold" fill="#000000">Badge Bolt</text>
+<text x="979" y="38.0" font-size="20" font-weight="bold" fill="#000000">See Through</text>
+<text x="979" y="62.0" font-size="20" font-weight="bold" fill="#000000">Lightning Bolt</text>
+<text x="115" y="310.0" font-size="20" font-weight="bold" fill="#000000">Green</text>
+<text x="115" y="334.0" font-size="20" font-weight="bold" fill="#000000">Glow Ring</text>
+<text x="331" y="334.0" font-size="20" font-weight="bold" fill="#000000">Red Glow</text>
+<text x="547" y="334.0" font-size="20" font-weight="bold" fill="#000000">Orange Glow</text>
+<text x="763" y="334.0" font-size="20" font-weight="bold" fill="#000000">Blue Glow</text>
+</g>
+</svg>

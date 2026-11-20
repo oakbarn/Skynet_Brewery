@@ -1,6 +1,6 @@
 # L'aide en français {#help-in-french}
 
-L'aide et les bulles (Hover Help) peuvent se lire en **anglais** ou en **français**. Seule l'aide est en français : les écrans, boutons, libellés, menus et messages du panneau restent en anglais, toujours.
+L'aide et les bulles (Hover Help) peuvent se lire en **anglais** ou en **français**. Seule l'aide est en français : les écrans, boutons, libellés, menus et messages du panneau restent en anglais, toujours. Seule exception, les boutons de sécurité : le bouton **Override** et les boutons **Stop** s'affichent dans la langue d'aide choisie (en français : **Passer**, **Arrêt**, **Tout arrêter**), pour qu'on lise tout de suite le bouton qui arrête ou fait avancer un Process. Un Label que vous avez tapé vous-même reste tel que vous l'avez tapé.
 
 ## Choisir la langue {#picking-the-language}
 

@@ -1,6 +1,6 @@
 # Help in French
 
-The Help and the balloons (Hover Help) can be read in **English** or in **French** (Français). Only the Help is in French: the screens, buttons, labels, menus and messages of the panel stay English, always.
+The Help and the balloons (Hover Help) can be read in **English** or in **French** (Français). Only the Help is in French: the screens, buttons, labels, menus and messages of the panel stay English, always. The one exception is the safety buttons: the **Override** button and the **Stop** buttons show in the Help language picked (French: **Passer**, **Arrêt**, **Tout arrêter**), so the button that stops or moves on a Process is read at once. A Label you typed yourself stays as you typed it.
 
 ## Picking the language
 

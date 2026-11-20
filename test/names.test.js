@@ -77,3 +77,16 @@ assert.equal(fm.target('processes', 'Mash_Steps.txt').use, 'Mash_Steps');
 
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('names tests passed');
+
+// ß æ ø spelled ss ae o in a Name (OakBarn Brewery, 2026-11-20, option A; Rule 3.4, public/letters.js)
+{
+  const { plainLetters } = await import('../public/letters.js');
+  const { parseLabel } = await import('../public/naming.js');
+  const { plainName } = await import('../public/names.js');
+  assert.equal(plainLetters('Weiß Mæsk Søl Café Würze Ålborg'), 'Weiss Maesk Sol Cafe Wurze Alborg');
+  assert.equal(parseLabel('Weiß Bier'), 'Weiss~Bier');
+  assert.equal(parseLabel('Søl Ventil'), 'Sol~Ventil');
+  assert.equal(parseLabel('Würze #2'), 'Wurze~~2', 'any other mark is still ~');
+  assert.equal(plainName('Mæsk Kar'), 'Maesk~Kar');
+  console.log('plain letters ok');
+}

@@ -291,12 +291,19 @@ Pictures on the Help pages and in Hover Help, in [media/help_pictures](../media/
 | `Pump_8_IPs.png` | Help 115 |
 | `Pump_8_IPs.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
 | `Pump_Cover.png` | Help 115 |
+| `Pump_Cover.svg`, `Pump_Cover_Art.png` | Help 115 (2026-11-20, Rule 7.25: used in place of the PNG; its words are real text, translated) |
 | `Pump_Daisy_Chain.png` | Help 115 (2026-11-17: the pump is now the Skynet pump with its Red Cover; the old photo pump is gone) |
+| `Pump_Daisy_Chain.svg`, `Pump_Daisy_Chain_Art.png` | Help 115 (2026-11-20, Rule 7.25: used in place of the PNG; Skynet's words are real text, translated; the board's and SSR's printed words stay) |
+| `Valve_Daisy_Chain.png`, `Valve_Daisy_Chain.svg`, `Valve_Daisy_Chain_Art.png` | Help 128 (2026-11-20, Rule 7.25: the SVG is used; its words are real text, translated) |
+| `Hose_Bib_8_IPs.png`, `Hose_Bib_8_IPs.svg`, `Hose_Bib_8_IPs_Art.png` | Help 141 (2026-11-20, Rule 7.25: the SVG is used; its words are real text) |
+| `Hose_Bib_IP_Spots.png`, `Hose_Bib_IP_Spots.svg`, `Hose_Bib_IP_Spots_Art.png` | Help 141 (2026-11-20, Rule 7.25: the SVG is used; its words are real text, translated) |
+| `Manual_Valve_Orientation.png`, `Manual_Valve_Orientation.svg`, `Manual_Valve_Orientation_Art.png` | Help 87 (2026-11-20, Rule 7.25: the SVG is used; its words are real text) |
 | `Pump_IP_Example_1.png` | Help 115 |
 | `Pump_IP_Example_1.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
 | `Pump_IP_Example_2.png` | Help 115 |
 | `Pump_IP_Example_2.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
 | `Pump_Overlays.png` | Help 115 |
+| `Pump_Overlays.svg`, `Pump_Overlays_Art.png` | Help 115 (2026-11-20, Rule 7.25: used in place of the PNG; its words are real text, translated) |
 | `Pump_Right_Left.png` | Help 115 |
 | `Pump_Right_Left.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
 | `Red_Pump_Label.png` | Help 115 (2026-11-17: made from Red_Pump_Label.svg) |
@@ -360,7 +367,7 @@ Taken out of the public repo (OakBarn Brewery, 2026-11-17: "Every thing with a p
 | `Three_Musketeers.png` | help_pictures | clip art, source unknown; replaced by Musketeers_All_For_One.svg |
 | `Valve_Ball_*.png` (4), `Valve_Ball_OpenH_1.svg`, `Valve_Ball_OpenV-1x1.svg`, `Pump_Red_Rip_Off_Valve_IPs_Test.svg`, help `Bobiverse_Bob.svg`, `Three_Musketeers.svg` | Delete/ folder | product photos of a motorized ball valve and traced copies of removed pictures; the Delete/ folder is public too |
 | `help_pictures/Pump_Daisy_Chain.png` (old version) | Help pictures | showed the Blichmann Riptide photo pump; same file name, the pump is now the Skynet pump with its Red Cover |
-| `help_pictures/Pump_Daisy_Chain.svg` | Help pictures | a traced copy of the old Pump_Daisy_Chain.png (photo pump inside); not replaced: Help shows the PNG (Rule 7.25) |
+| `help_pictures/Pump_Daisy_Chain.svg` (old traced copy) | Help pictures | a traced copy of the old Pump_Daisy_Chain.png (photo pump inside); 2026-11-20 replaced by a hand-made SVG with real text (Rule 7.25) |
 | `help_pictures/Red_Pump_Label.png` (old version) | Help pictures | a screenshot with the photo pump; same file name, now made from the Skynet drawing Red_Pump_Label.svg |
 | `help_pictures/Red_Pump_Label.svg` (old version) | Help pictures | its pump was drawn to look like the photo pump; redrawn with the Skynet pump and Red Cover |
 | `help_pictures/Step_Add_Schema_08_Done.png` (old version) | Help pictures | a screenshot with the photo pumps; same file name, taken again with the Skynet pumps |
