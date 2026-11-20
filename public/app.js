@@ -62,6 +62,7 @@ import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
 import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
+import { qNeedsTurn, qShow, qUnitShown, qBoxShow, qBoxBack, qtyFamily } from './qtyshow.js';
 import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1366,6 +1367,7 @@ const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', 
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 // A Manual vessel's own Temperature units (Rule 2.59, the exception for a Vessel whose own screen has its units; OakBarn Brewery,
 // 2026-11-19: "a user can switch the Digiboil and Brewzilla back to F. I would think that is most common for US Brewers")
+const QTY_UNITS_TIP = 'Kept in: the units this sensor is calibrated in (its range, pulses or counts use them). What you see follows ☰ Menu > Settings > Units (Rule 2.59): psi shows in bar, gal in L and lb in kg when Units is Metric, and the other way in US Standard. A Process reads it in metric (bar, L, L/min, kg).';
 const MANUAL_UNITS_TIP = 'Temperature units: the units its own screen shows, so the pop-up asks for the set point the way you read it. It starts as ☰ Menu > Settings > Units (°F in US Standard). A DigiBoil or Brewzilla screen comes back in °C after every power cycle: switch it back to °F on the vessel, or pick °C here. When this is °F, the pop-up gives the set point in °C as well. Unlike every other temperature, this one does not follow Units (Rule 2.59).';
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -2898,6 +2900,11 @@ function dialTurn(e) {
   const to = showUnits(), n = v => v === undefined || v === null || v === '' ? v : tShow(+v, e.units, to), d = v => v === undefined || v === null || v === '' ? v : dShow(+v, e.units, to);
   return { ...e, units: showLetter(to), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: d(e.dialCool), dialHot: d(e.dialHot), precision: e.precision ?? 1 };
 }
+// a pressure or Level Dial in the Units: its Lowest, Highest and its Cool and Hot bands turned (all by one factor)
+function dialQty(e) {
+  const to = showUnits(), n = v => v === undefined || v === null || v === '' ? v : qShow(+v, e.units, to);
+  return { ...e, units: qUnitShown(e.units, to), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: n(e.dialCool), dialHot: n(e.dialHot) };
+}
 function dialSetpoint(e) {
   const sp = String(e.dialSp ?? '').trim();
   if (!sp) return null;
@@ -2915,6 +2922,17 @@ function tempTxt(e, val, own = e.units) {
   const d = e.precision !== undefined && e.precision !== null && e.precision !== '' ? e.precision : 1;
   return fmtVal({ ...e, precision: d }, tShow(val, own, to)) + ' ' + showLetter(to);
 }
+// Live readings in the Units (Rule 2.59 live side): a pressure, Level, Flow meter or Scale keeps its numbers in its own
+// units (the ones its sensor is calibrated in); it shows in ☰ Menu > Settings > Units (public/qtyshow.js). psi to bar gets one more decimal.
+function qtyTxt(e, val, own) {
+  const to = showUnits();
+  if (!qNeedsTurn(own, to) || typeof val !== 'number') return fmtVal(e, val) + (own ? ' ' + own : '');
+  const p = e.precision !== undefined && e.precision !== null && e.precision !== '' ? +e.precision : null;
+  const d = p === null ? 2 : p + (qtyFamily(own) === 'press' && to === 'Metric' ? 1 : 0);
+  return fmtVal({ ...e, precision: d }, qShow(val, own, to)) + ' ' + qUnitShown(own, to);
+}
+// a probe's or sensor's reading in the Units, whichever it is
+const readTxt = (e, val) => e?.type === 'temperature' ? tempTxt(e, val) : qtyTxt(e || {}, val, e?.units);
 // a Setpoint with no °F / °C after it (an older Hysteresis, PID, Deadband or a Fermentor: "45 %  ▸ 152"), in the Units
 const spNum = (val, own) => needsTurn(own, showUnits()) && typeof val === 'number' ? fmtVal({ precision: 1 }, tShow(val, own, showUnits())) : fmtVal({}, val);
 function fmtVal(e, v) {
@@ -3156,15 +3174,15 @@ function fillEl(n, e0) {
       if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
-    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + (e.type === 'temperature' ? tempTxt(e, v.value) : fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''));
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + readTxt(e, v.value);
       if (e.type === 'temperature') sv = probeSv(e0, e, v);      // its PV and SV (Panel Updates 41)
       break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
-    case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
+    case 'scale': text = `${qtyTxt(e, v.volume, e.volumeUnits || 'gal')} · ${qtyTxt(e, v.value, e.weightUnits || 'lb')}`; break;
     // a Hydrometer (Rule 6.25): its gravity and temperature, or No signal
     case 'hydrometer': text = v.lost ? '⚠ No signal' : `${fmtVal(hydroDec(e), v.value)} ${hydroUnitWord(e)} · ${tempTxt({ precision: 1 }, v.temperature, e.tempUnits || '°F')}`; on = !v.lost; break;
-    case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
+    case 'flowMeter': text = `${qtyTxt(e, v.rate, (e.units || 'gal') + '/min')} · ${qtyTxt(e, v.total, e.units || 'gal')}`; on = v.rate > 0; break;
     case 'stepper': {     // where it is, where it is going, and a warning while it has a home switch but has not found it
       const u = STEP_UNITS[e.units]?.[0] ?? e.units ?? '';
       text = v.enabled === false ? (e.offText ?? 'OFF') : `${fmtVal(e, v.position)} ${u}${v.moving && v.run === 0 ? `  ▸ ${fmtVal(e, v.target)}` : v.run ? `  ${v.run > 0 ? '▶' : '◀'}` : ''}${e.homePin !== undefined && e.homePin !== '' && !v.homed ? '  (not homed)' : ''}`;
@@ -3258,8 +3276,9 @@ function fillEl(n, e0) {
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) {      // the Skynet Dial (Rule 2.40); a probe's Dial reads in the Units (Rule 2.59)
     const dt = e.type === 'temperature' && needsTurn(e.units, showUnits()) ? dialTurn(e) : null, ed = isHeatElem(e) ? { ...e, units: '%' } : dt || e;
-    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e);
-    vl.innerHTML = dialSvg(ed, dt && rd !== null ? tShow(rd, e.units, showUnits()) : rd, dt && sp0 !== null ? tShow(sp0, e.units, showUnits()) : sp0, v.fault ? 'FAULT' : null);
+    const qt = !dt && e.type === 'analogIn' && qNeedsTurn(e.units, showUnits()) ? dialQty(e) : null;      // a pressure or Level Dial too
+    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e), turn = x => x === null ? x : dt ? tShow(x, e.units, showUnits()) : qt ? qShow(x, e.units, showUnits()) : x;
+    vl.innerHTML = dialSvg(qt || ed, turn(rd), turn(sp0), v.fault ? 'FAULT' : null);
   }
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
   else if (sv?.k === 'probe') fillPvSv(vl, text, sv);      // a Temperature Probe's PV over its SV (Panel Updates 41)
@@ -5744,9 +5763,9 @@ const ADD_MENU = [
     ['Analog input on an ADS1115 board (16-bit)', 'analogIn', 'AI', { adc: 'ads1115', signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
     ['Analog input, raw reading (scale / offset)', 'analogIn', 'AI', { signal: 'raw' }],
     ['Pressure transducer 0.5-4.5 V (5 V hobby type)', 'analogIn', 'Pressure', { signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30, units: 'psi', precision: 1 }],
-    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 30, units: 'gal', precision: 1 }],
+    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: 'L', precision: 1 }],      // new items start in metric (Rule 2.59)
     ['pH probe board (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
-    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
+    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 450, units: 'L', precision: 2 }],      // the YF-S201 data sheet: 450 pulses per liter
   ]],
   ['Devices: motors (board pins)', [
     ['Stepper motor on a STEP / DIR driver (A4988, DRV8825, TMC2209, TB6600, DM542)', 'stepper', 'Stepper', { driver: 'A4988', wiring: 'stepDir', stepsPerRev: 200, microsteps: 16, units: 'rev', maxSpeed: 2, accel: 4, precision: 2 }],
@@ -5757,7 +5776,7 @@ const ADD_MENU = [
   ['Devices: hydrometers (Tilt, iSpindel, RAPT Pill ...)', HYDRO_MODEL_KEYS.map(k => [`${HYDRO_MODELS[k].label} hydrometer (${HYDRO_MODELS[k].conns.map(c => HYDRO_CONNECTIONS[c].replace(/[:(].*$/, '').trim()).join(' or ')})`, 'hydrometer', 'Hydro',
     { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°C', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
   ['Devices: weight', [
-    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
+    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'kg', volumeUnits: 'L', specificGravity: 1, autoTare: true, precision: 2 }],      // new items start in metric (Rule 2.59)
   ]],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Widgets with an ON / OFF state that can switch a Device (device_controlled)
   [`Boolean Widgets (a Widget with an ON / OFF state; with a Linked Device it acts like a Clone of it)`, [
@@ -8490,18 +8509,18 @@ function displayText(e, v, k, shown) {
   const onOff = st => st ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
   const probe = () => {
     const p = e.input && S.values[e.input], pe = e.input && S.config.elements.find(x => x.name === e.input);
-    return p ? fmtVal(pe || {}, p.value) + (pe?.units ? ' ' + pe.units : '') : '-';
+    return p ? readTxt(pe, p.value) : '-';      // in the Units (Rule 2.59)
   };
   switch (k) {
     case 'setpoint': return `▸ ${fmtVal({}, v.target)}`;
     case 'reading': return probe();
     case 'output': return hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? onOff(v.output) : `${fmtVal({ precision: 0 }, v.value)} %`;
     case 'state': return onOff(v.state);
-    case 'rate': return `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min`;
-    case 'total': return `${fmtVal(e, v.total)} ${e.units || 'gal'}`;
-    case 'volume': return `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'}`;
-    case 'weight': return `${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`;
-    case 'value': return e.type === 'pwmOut' ? fmtVal(e, v.value) + ' %' : fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+    case 'rate': return qtyTxt(e, v.rate, (e.units || 'gal') + '/min');      // in the Units (Rule 2.59)
+    case 'total': return qtyTxt(e, v.total, e.units || 'gal');
+    case 'volume': return qtyTxt(e, v.volume, e.volumeUnits || 'gal');
+    case 'weight': return qtyTxt(e, v.value, e.weightUnits || 'lb');
+    case 'value': return e.type === 'pwmOut' ? fmtVal(e, v.value) + ' %' : e.type === 'temperature' ? tempTxt(e, v.value) : qtyTxt(e, v.value, e.units);
     case 'volts': { const x = pwmVolts(e, v.value); return x === null || !Number.isFinite(x) ? shown : `${x.toFixed(1)} V`; }
   }
   return shown;
@@ -8578,12 +8597,12 @@ const F = {
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num']],
   scale: [['device', 'Device', 'dev'], ['channel', 'HX711 DT pin(s), comma between several boards on one vessel (e.g. 26, 28)', 'text'],
     ['countsPerUnit', 'Calibration: counts per lb / kg (tap the scale > Calibrate to measure it)', 'num'],
-    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']],
+    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg'], false, false, { tip: QTY_UNITS_TIP }], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L'], false, false, { tip: QTY_UNITS_TIP }],
     ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a variable with the OG)', 'elem'],
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L)', 'num', null, false, false, { tip: 'Empty: 0.05 gal or 0.2 L.' }], ['autoTareSeconds', 'Steady for (seconds)', 'num', null, false, false, { def: 10 }],
     ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units', false, false, { tip: QTY_UNITS_TIP }], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'Offset (- heats, + cools)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
@@ -10210,7 +10229,7 @@ function fieldsOf(item) {
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], SMOOTH_FIELD, ['prefix', 'Prefix', 'text'],
-      ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
+      ['units', 'Units', 'gpick', 'units', false, false, { tip: QTY_UNITS_TIP }], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
 }
@@ -10564,7 +10583,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const tb = kind === 'num' || kind === 'numsel' ? tempBox(key, obj) : null;      // a temperature box shows in the Units (Rule 2.59)
-  const v = tb ? boxShow(tb.kind, obj[key], tb.own, showUnits()) : obj[key];
+  const v = tb ? (tb.kind === 'q' ? qBoxShow(obj[key], tb.own, showUnits()) : boxShow(tb.kind, obj[key], tb.own, showUnits())) : obj[key];
   let input;
   if (kind === 'imgpath') {    // .backpath, _2, _3 (Fritz, 2026-11-02); changing _2 or _3 shows a heads-up once
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
@@ -11010,7 +11029,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   if (tb && input) {
     Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '' });
-    input.title = `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
+    input.title = tb.kind === 'q' ? `In ${qUnitShown(tb.own, showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its sensor keeps (Rule 2.59).`
+      : `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
   }
   const full = kind === 'multi' || kind === 'area' || kind === 'ticks';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
@@ -11021,10 +11041,12 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
 // Deadband, Fermentor, Cool / Warm Pump or gas burner: its probe's (.input).
 const TEMP_HOLD_KEYS = { target: 'abs', onOffset: 'diff', deadbandOffset: 'diff', innerBandOffset: 'diff', heatOffset: 'diff', coolOffset: 'diff', flameRise: 'diff', flameDrop: 'diff', flameBoil: 'abs' };
 const TEMP_PROBE_KEYS = { setpoint: 'abs', dialMin: 'abs', dialMax: 'abs', dialCool: 'diff', dialHot: 'diff' };
+const QTY_DIAL_KEYS = ['dialMin', 'dialMax', 'dialCool', 'dialHot'];
 function tempBox(key, obj) {
   if (!obj || typeof obj !== 'object') return null;
   let kind, own;
   if (obj.type === 'temperature') { kind = TEMP_PROBE_KEYS[key]; own = obj.units || '°F'; }
+  else if (QTY_DIAL_KEYS.includes(key) && obj.type === 'analogIn') return qNeedsTurn(obj.units, showUnits()) ? { kind: 'q', own: obj.units } : null;      // a pressure or Level Dial (Rule 2.59 live side)
   else if (TEMP_HOLD_KEYS[key] && (isHeatElem(obj) || SP_OLD.includes(obj.type) || isFermentor(obj) || isCoolPump(obj) || isGasBurner(obj))) { kind = TEMP_HOLD_KEYS[key]; own = probeOf(obj)?.units; }
   return kind && needsTurn(own, showUnits()) ? { kind, own } : null;
 }
@@ -11101,7 +11123,7 @@ function readFields(obj, root = $('#dlgBody')) {
     }
     else if (kind === 'num' || kind === 'numsel') {
       v = inp.value === '' ? undefined : +inp.value;
-      if (v !== undefined && inp.dataset.tk) v = boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
+      if (v !== undefined && inp.dataset.tk) v = inp.dataset.tk === 'q' ? qBoxBack(v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits()) : boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
     }
     else if (kind === 'owpick') {      // a 1-Wire Index: circuit_index (Rule 6.37), kept as the probe's number and its circuit
       const m = /^(\d+)_(\d+)$/.exec(inp.value), ck = k === 'probeIndex' ? 'owCircuit' : k + 'Circuit';
