@@ -75,7 +75,7 @@ assert.ok(compile('tab.flow_Color = Reddish_Brown\n').errors.length === 0);
 {
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
   assert.match(app, /GRAV_PORTS = new Set\(\['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet'\]\)/, 'gravity starts at a vessel low opening');
-  assert.match(app, /computeFlow\(w\.name, srcs, grav, spouts\)/, 'the pipes draw gravity flow (and the water splash at open ends)');
+  assert.match(app, /computeFlow\(w\.name, srcs, grav, spouts(, still)?\)/, 'the pipes draw gravity flow (and the water splash at open ends)');
   assert.match(app, /if \(dir\.has\(st\.p\.id\) \|\| grav\.has\(st\.p\.id\)\) continue;/, 'pumped flow wins over gravity flow');
   assert.match(app, /\(byGrav \? ' grav' : ''\)/, 'gravity flow has its own look');
   assert.match(app, /computeFlow\(p\.workspace\)\.has\(p\.id\)/, 'the QD hose pump check still sees pumped flow only');

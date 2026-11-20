@@ -2639,6 +2639,21 @@ the crossing can never be taken for a cross or a tee. When both pipes lean the s
 1.29) is in front. Only the drawing changes: the pipes, their IPs, flow and Layer Order stay as they are, and clicking still picks
 the pipe under the pointer. Hoses bend and lie where they fall, so a hose is left as drawn. Help 124 (and French).
 
+5.45 **Water that stands still, and flow never past a closed valve** (OakBarn Brewery, 2026-11-20, Panel Update 7: "It could also
+show in the pipe up to the valves, but the flow is stopped. The flow does not move"; "Looks like a leak. The end is not open but
+connected to a Pipe. This is a Bug."; "Flow past a Closed Valve = bug"):
+- **Still water:** from a Tap Water Valve that is On (a Hose Bib included) or a running pump's outlet, every pipe or hose the water
+  can reach that has no flow (it ends at a closed valve, an End Cap or a Quick Disconnect with nothing on it) is full but not moving.
+  It shows the flow dashes in the flow color, standing still; moving flow still moves. Still water goes through open valves,
+  fittings and pumps that are off, as flow does, and stops at a closed valve.
+- **A water splash only on a truly open end** (Rule 5.40): a loose pipe or hose end within 14 px of an IP (as Save layout rejoins,
+  Rule 5.19), or anywhere inside a Tee, Elbow or other Tab_Fitting, is in that IP: flow goes on through it as if joined, and no
+  splash is drawn. A loose end lying on another pipe or hose, or on a widget, gets no splash either. Only an end out in the air
+  gets one. The saved drawing is not changed.
+- **Never past a closed valve:** a pipe joined to a valve goes on the valve's IP on its own side, never on the far IP, where it
+  would run under the valve and show flow on the other side. The 3 Vessel 1 Pump sample and the default Schema had the Manifold
+  Valve's two pipes the wrong way round (fixed; its Tap water now flows Right to Left, from the tap side to the manifold).
+
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
@@ -6346,6 +6361,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-20: Added Rule 5.45 (OakBarn Brewery, Panel Update 7, items 1 to 3): water that stands still shows still dashes from an open Tap Water Valve or running pump up to each closed valve; a loose pipe or hose end in a Tee or within 14 px of an IP flows on as if joined and gets no water splash, nor does one on a pipe or widget; the Manifold Valve's pipes in the 3 Vessel 1 Pump sample and the default Schema were on the wrong ends (the tap pipe ran under the closed valve and showed flow past it), fixed, its Tap water now Right to Left. Help 127 (and French). Checked against both programs: the BruControl Import brings pipes in as they are and draws no flow; nothing changes there. (thread "Fix water flow drawing bugs")
 - 2026-11-20: Rule 9.12 extended (OakBarn Brewery: "A for font rule", Panel Updates entry 45, Help in a User Language): fonts under the SIL Open Font License 1.1 (OFL) are allowed, with the license file shipped next to them and a row in Media_Licenses.csv.
 - 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
