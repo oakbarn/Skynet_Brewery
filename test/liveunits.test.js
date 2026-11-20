@@ -18,11 +18,15 @@ near(qShow(100, 'kPa', 'US'), 100 * K('skn_const_PSI_p_kPa'), '100 kPa in psi');
 near(qShow(10, 'L', 'US'), 10 * K('skn_const_Gal_p_L'), '10 L in gal');
 near(qShow(5, 'gal/min', 'Metric'), 5 * K('skn_const_LPM_p_GPM'), 'a flow rate'); assert.equal(qUnitShown('gal/min', 'Metric'), 'L/min');
 near(qShow(10, 'lb', 'Metric'), 10 * K('skn_const_Kg_p_Lb'), '10 lb in kg');
-assert.equal(qShow(12, 'psi', 'US'), 12, 'already in the Units'); assert.equal(qShow(50, 'kPa', 'Metric'), 50, 'kPa is metric: shown as it is');
+assert.equal(qShow(12, 'psi', 'US'), 12, 'already in the Units'); near(qShow(50, 'kPa', 'Metric'), 0.5, 'a kPa sensor shows bar to start'); assert.equal(qShow(50, 'kPa', 'Metric', 'kPa'), 50, 'unless its field is kPa'); assert.equal(qShow(2, 'qt', 'US'), 2, 'qt is US: shown as it is');
 assert.equal(qShow(7, 'pH', 'US'), 7); assert.equal(qShow(50, '%', 'Metric'), 50); assert.ok(!qNeedsTurn('°F', 'Metric'), 'temperatures are tempshow.js');
 near(qBack(qShow(30, 'psi', 'Metric'), 'psi', 'Metric'), 30, 'typed back in the sensor\'s units');
 // a box left as shown saves the kept number exactly (no drift)
 const sh = qBoxShow(30, 'psi', 'Metric'); assert.equal(sh, 2.07); assert.equal(qBoxBack(2.07, sh, 30, 'psi', 'Metric'), 30);
+near(qShow(30, 'psi', 'Metric', 'kPa'), 30 * K('skn_const_kPa_p_PSI'), 'a kPa field: 30 psi in kPa'); assert.equal(qUnitShown('psi', 'Metric', 'kPa'), 'kPa');
+assert.equal(qUnitShown('psi', 'US', 'kPa'), 'psi', 'US is always psi'); assert.equal(qShow(2, 'bar', 'Metric', 'bar'), 2);
+near(qShow(1, 'bar', 'Metric', 'kPa'), 100, 'a bar sensor in a kPa field'); near(qBack(100, 'bar', 'Metric', 'kPa'), 1, 'typed back');
+assert.equal(qBoxBack(206.84, qBoxShow(30, 'psi', 'Metric', 'kPa'), 30, 'psi', 'Metric', 'kPa'), 30, 'no drift');
 // which attribute keeps which units
 assert.equal(qtyOwn({ type: 'analogIn', units: 'psi' }, 'value'), 'psi');
 assert.equal(qtyOwn({ type: 'analogIn', units: 'pH' }, 'value'), null, 'pH never turns');
@@ -86,5 +90,9 @@ assert.equal(printed.at(-1), 'ok', 'wait KegP >= 0.8274bar is met by 12.5 psi');
 store.config.brewDefaults.units = 'Metric';
 await run('c', 'print "Keg " + KegP\n');
 assert.equal(printed.at(-1), 'Keg 0.8618', 'in bar');
+// pressure by the field (OakBarn Brewery, 2026-11-20: "depending on the field"): a kPa field shows kPa in Metric, psi in US
+store.get('KegP').metricPressure = 'kPa';
+await run('d', 'print "Keg " + KegP\n');
+assert.equal(printed.at(-1), 'Keg 86.18', 'a kPa field: in kPa');
 console.log('liveunits ok');
 process.exit(0);

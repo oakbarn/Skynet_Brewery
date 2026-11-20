@@ -17,7 +17,14 @@ units** and **Volume units** (a Vessel scale). Its range, its pulses per unit an
 | Flow meter (YF-S201: 450 pulses per liter) | L | gal/min and gal | L/min and L |
 | Vessel scale | kg and L | lb and gal | kg and L |
 
-A unit that is already in your Units stays as it is: a kPa sensor shows kPa in Metric. pH, %, SG, volts and the like never
+## Pressure by the field
+
+A pressure can be read either way, depending on what it is: a CO2 or keg pressure is read in bar or psi, while another gauge may
+read kPa. So each pressure sensor has its own **Metric pressure in** box: **bar** (the start) or **kPa**. It is what that
+pressure shows in when Units is Metric. US Standard always shows psi. Only what you see changes: a Process still works in bar,
+and you can type `50kPa` in one.
+
+A volume or weight unit that is already in your Units stays as it is: qt shows qt in US Standard, mL shows mL in Metric. pH, %, SG, volts and the like never
 change. Temperatures follow Units too (Help: Temperature Probe Device Properties).
 
 ## Where it shows

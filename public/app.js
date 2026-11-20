@@ -62,7 +62,7 @@ import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
 import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
-import { qNeedsTurn, qShow, qUnitShown, qBoxShow, qBoxBack, qtyFamily } from './qtyshow.js';
+import { qNeedsTurn, qShow, qUnitShown, qBoxShow, qBoxBack, qtyFamily, METRIC_PRESSURE } from './qtyshow.js';
 import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1368,6 +1368,7 @@ const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', 
 // A Manual vessel's own Temperature units (Rule 2.59, the exception for a Vessel whose own screen has its units; OakBarn Brewery,
 // 2026-11-19: "a user can switch the Digiboil and Brewzilla back to F. I would think that is most common for US Brewers")
 const QTY_UNITS_TIP = 'Kept in: the units this sensor is calibrated in (its range, pulses or counts use them). What you see follows ☰ Menu > Settings > Units (Rule 2.59): psi shows in bar, gal in L and lb in kg when Units is Metric, and the other way in US Standard. A Process reads it in metric (bar, L, L/min, kg).';
+const METRIC_PRESSURE_TIP = 'What this pressure shows in when ☰ Menu > Settings > Units is Metric: bar (the start, as a CO2 or keg gauge reads) or kPa. US Standard always shows psi. Only what you see changes: a Process still works in bar (type 50kPa to give kPa).';
 const MANUAL_UNITS_TIP = 'Temperature units: the units its own screen shows, so the pop-up asks for the set point the way you read it. It starts as ☰ Menu > Settings > Units (°F in US Standard). A DigiBoil or Brewzilla screen comes back in °C after every power cycle: switch it back to °F on the vessel, or pick °C here. When this is °F, the pop-up gives the set point in °C as well. Unlike every other temperature, this one does not follow Units (Rule 2.59).';
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -2902,8 +2903,8 @@ function dialTurn(e) {
 }
 // a pressure or Level Dial in the Units: its Lowest, Highest and its Cool and Hot bands turned (all by one factor)
 function dialQty(e) {
-  const to = showUnits(), n = v => v === undefined || v === null || v === '' ? v : qShow(+v, e.units, to);
-  return { ...e, units: qUnitShown(e.units, to), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: n(e.dialCool), dialHot: n(e.dialHot) };
+  const to = showUnits(), as = e.metricPressure, n = v => v === undefined || v === null || v === '' ? v : qShow(+v, e.units, to, as);
+  return { ...e, units: qUnitShown(e.units, to, as), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: n(e.dialCool), dialHot: n(e.dialHot) };
 }
 function dialSetpoint(e) {
   const sp = String(e.dialSp ?? '').trim();
@@ -2926,10 +2927,11 @@ function tempTxt(e, val, own = e.units) {
 // units (the ones its sensor is calibrated in); it shows in ☰ Menu > Settings > Units (public/qtyshow.js). psi to bar gets one more decimal.
 function qtyTxt(e, val, own) {
   const to = showUnits();
-  if (!qNeedsTurn(own, to) || typeof val !== 'number') return fmtVal(e, val) + (own ? ' ' + own : '');
+  const as = e.metricPressure;      // a pressure field's Metric unit: bar or kPa (OakBarn Brewery, 2026-11-20: "depending on the field")
+  if (!qNeedsTurn(own, to, as) || typeof val !== 'number') return fmtVal(e, val) + (own ? ' ' + own : '');
   const p = e.precision !== undefined && e.precision !== null && e.precision !== '' ? +e.precision : null;
-  const d = p === null ? 2 : p + (qtyFamily(own) === 'press' && to === 'Metric' ? 1 : 0);
-  return fmtVal({ ...e, precision: d }, qShow(val, own, to)) + ' ' + qUnitShown(own, to);
+  const d = p === null ? 2 : p + (qtyFamily(own) === 'press' && to === 'Metric' && qUnitShown(own, to, as) === 'bar' ? 1 : 0);
+  return fmtVal({ ...e, precision: d }, qShow(val, own, to, as)) + ' ' + qUnitShown(own, to, as);
 }
 // a probe's or sensor's reading in the Units, whichever it is
 const readTxt = (e, val) => e?.type === 'temperature' ? tempTxt(e, val) : qtyTxt(e || {}, val, e?.units);
@@ -3276,8 +3278,8 @@ function fillEl(n, e0) {
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) {      // the Skynet Dial (Rule 2.40); a probe's Dial reads in the Units (Rule 2.59)
     const dt = e.type === 'temperature' && needsTurn(e.units, showUnits()) ? dialTurn(e) : null, ed = isHeatElem(e) ? { ...e, units: '%' } : dt || e;
-    const qt = !dt && e.type === 'analogIn' && qNeedsTurn(e.units, showUnits()) ? dialQty(e) : null;      // a pressure or Level Dial too
-    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e), turn = x => x === null ? x : dt ? tShow(x, e.units, showUnits()) : qt ? qShow(x, e.units, showUnits()) : x;
+    const qt = !dt && e.type === 'analogIn' && qNeedsTurn(e.units, showUnits(), e.metricPressure) ? dialQty(e) : null;      // a pressure or Level Dial too
+    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e), turn = x => x === null ? x : dt ? tShow(x, e.units, showUnits()) : qt ? qShow(x, e.units, showUnits(), e.metricPressure) : x;
     vl.innerHTML = dialSvg(qt || ed, turn(rd), turn(sp0), v.fault ? 'FAULT' : null);
   }
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
@@ -10229,7 +10231,9 @@ function fieldsOf(item) {
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], SMOOTH_FIELD, ['prefix', 'Prefix', 'text'],
-      ['units', 'Units', 'gpick', 'units', false, false, { tip: QTY_UNITS_TIP }], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
+      ['units', 'Units', 'gpick', 'units', true, false, { tip: QTY_UNITS_TIP }],
+      ...(qtyFamily(item.units) === 'press' ? [['metricPressure', 'Metric pressure in', 'sel', METRIC_PRESSURE, false, false, { tip: METRIC_PRESSURE_TIP }]] : []),
+      ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
 }
@@ -10583,7 +10587,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const tb = kind === 'num' || kind === 'numsel' ? tempBox(key, obj) : null;      // a temperature box shows in the Units (Rule 2.59)
-  const v = tb ? (tb.kind === 'q' ? qBoxShow(obj[key], tb.own, showUnits()) : boxShow(tb.kind, obj[key], tb.own, showUnits())) : obj[key];
+  const v = tb ? (tb.kind === 'q' ? qBoxShow(obj[key], tb.own, showUnits(), tb.as) : boxShow(tb.kind, obj[key], tb.own, showUnits())) : obj[key];
   let input;
   if (kind === 'imgpath') {    // .backpath, _2, _3 (Fritz, 2026-11-02); changing _2 or _3 shows a heads-up once
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
@@ -10783,7 +10787,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const keep = CHAIN_RE.test(key), real = v && v !== CHAIN_KEEP;      // an Alarm Chain step: No Change first (Rule 7.16)
     const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (real && !os.includes(v)) os.push(v);
     const pv = h('img', { class: 'gprev' + (real && pic && !isTint(v) ? '' : ' hidden'), ...(real && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
-    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list });
+    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list, ...(rerender === true ? { 'data-rerender': '1' } : {}) });
     // the Group list beside it shows one picture group or All (it has no data-k, so it is never saved)
     const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os);
     let g = lastGroup[gk] || ''; if (!groups.some(([n]) => n === g)) g = '';
@@ -11028,8 +11032,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   if (tb && input) {
-    Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '' });
-    input.title = tb.kind === 'q' ? `In ${qUnitShown(tb.own, showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its sensor keeps (Rule 2.59).`
+    Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '', ...(tb.as ? { as: tb.as } : {}) });
+    input.title = tb.kind === 'q' ? `In ${qUnitShown(tb.own, showUnits(), tb.as)} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its sensor keeps (Rule 2.59).`
       : `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
   }
   const full = kind === 'multi' || kind === 'area' || kind === 'ticks';
@@ -11046,7 +11050,7 @@ function tempBox(key, obj) {
   if (!obj || typeof obj !== 'object') return null;
   let kind, own;
   if (obj.type === 'temperature') { kind = TEMP_PROBE_KEYS[key]; own = obj.units || '°F'; }
-  else if (QTY_DIAL_KEYS.includes(key) && obj.type === 'analogIn') return qNeedsTurn(obj.units, showUnits()) ? { kind: 'q', own: obj.units } : null;      // a pressure or Level Dial (Rule 2.59 live side)
+  else if (QTY_DIAL_KEYS.includes(key) && obj.type === 'analogIn') return qNeedsTurn(obj.units, showUnits(), obj.metricPressure) ? { kind: 'q', own: obj.units, as: obj.metricPressure ?? '' } : null;      // a pressure or Level Dial (Rule 2.59 live side)
   else if (TEMP_HOLD_KEYS[key] && (isHeatElem(obj) || SP_OLD.includes(obj.type) || isFermentor(obj) || isCoolPump(obj) || isGasBurner(obj))) { kind = TEMP_HOLD_KEYS[key]; own = probeOf(obj)?.units; }
   return kind && needsTurn(own, showUnits()) ? { kind, own } : null;
 }
@@ -11123,7 +11127,7 @@ function readFields(obj, root = $('#dlgBody')) {
     }
     else if (kind === 'num' || kind === 'numsel') {
       v = inp.value === '' ? undefined : +inp.value;
-      if (v !== undefined && inp.dataset.tk) v = inp.dataset.tk === 'q' ? qBoxBack(v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits()) : boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
+      if (v !== undefined && inp.dataset.tk) v = inp.dataset.tk === 'q' ? qBoxBack(v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits(), inp.dataset.as) : boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
     }
     else if (kind === 'owpick') {      // a 1-Wire Index: circuit_index (Rule 6.37), kept as the probe's number and its circuit
       const m = /^(\d+)_(\d+)$/.exec(inp.value), ck = k === 'probeIndex' ? 'owCircuit' : k + 'Circuit';

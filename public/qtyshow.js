@@ -4,7 +4,7 @@
 // of their own Units box ("Kept in": the units the sensor is calibrated in, never changed by this). What a person sees follows
 // ☰ Menu > Settings > Units, and a Process works in metric. Showing never changes a kept number.
 // Pressure is shown and worked in bar (Metric) or psi (US), a volume in L or gal, a flow rate in L/min or gal/min, a weight in kg or lb.
-// A unit that already is in the Units (kPa in Metric, qt in US) is shown as it is. Every factor is a Skynet Constant (public/skconst.js).
+// A volume or weight unit that already is in the Units (mL in Metric, qt in US) is shown as it is; a pressure follows its field. Every factor is a Skynet Constant (public/skconst.js).
 // Anything else (%, pH, SG, V, a temperature: public/tempshow.js) is never turned here.
 import { skynetConstant } from './skconst.js';
 
@@ -27,10 +27,18 @@ const unitOf = u => UNIT[String(u ?? '').trim().toLowerCase()] ?? null;
 // 'press', 'vol', 'rate', 'wt' or null
 export const qtyFamily = u => unitOf(u)?.[0] ?? null;
 export const isQtyUnit = u => !!unitOf(u);
+// Pressure is shown by the field (OakBarn Brewery, 2026-11-20: "for a User it could be either depending on the field ... CO2 could
+// be Bar or PSI"): a pressure sensor's "Metric pressure in" box (as) picks bar (the start) or kPa for Metric; US is always psi.
+export const METRIC_PRESSURE = ['bar', 'kPa'];
+const asOf = (own, to, as) => to === 'Metric' && qtyFamily(own) === 'press' ? (unitOf(as)?.[0] === 'press' ? String(as) : 'bar') : null;      // bar to start
 // does a number kept in "own" show differently in the Units "to" (US or Metric)?
-export const qNeedsTurn = (own, to) => { const u = unitOf(own); return !!u && u[2] !== (to === 'Metric' ? 'Metric' : 'US'); };
+export const qNeedsTurn = (own, to, as) => {
+  const u = unitOf(own), a = asOf(own, to, as);
+  if (a) return String(own).trim().toLowerCase() !== a.toLowerCase();
+  return !!u && u[2] !== (to === 'Metric' ? 'Metric' : 'US');
+};
 // the unit word shown after the number
-export const qUnitShown = (own, to) => qNeedsTurn(own, to) ? QTY_FAMILIES[unitOf(own)[0]][to === 'Metric' ? 0 : 1] : own;
+export const qUnitShown = (own, to, as) => !qNeedsTurn(own, to, as) ? own : asOf(own, to, as) ?? QTY_FAMILIES[unitOf(own)[0]][to === 'Metric' ? 0 : 1];
 // the metric unit a Process works in for this unit (bar, L, L/min, kg)
 export const qMetricUnit = own => unitOf(own) ? QTY_FAMILIES[unitOf(own)[0]][0] : own;
 
@@ -40,19 +48,20 @@ export const qFromMetric = (v, own) => { const u = unitOf(own); return u && isNu
 // metric to the Units' unit of the same family (bar to psi in US)
 const usOne = fam => UNIT[QTY_FAMILIES[fam][1].toLowerCase()][1];
 // kept (in "own") to shown (in "to"), full precision: the caller rounds what it shows
-export function qShow(v, own, to) {
-  if (!qNeedsTurn(own, to) || !isNum(v)) return v;
-  const m = qToMetric(v, own);
-  return to === 'Metric' ? m : m / usOne(unitOf(own)[0]);
+export function qShow(v, own, to, as) {
+  if (!qNeedsTurn(own, to, as) || !isNum(v)) return v;
+  const m = qToMetric(v, own), a = asOf(own, to, as);
+  return a ? m / unitOf(a)[1] : to === 'Metric' ? m : m / usOne(unitOf(own)[0]);
 }
 // shown (typed in "to") back to kept (in "own")
-export function qBack(x, own, to) {
-  if (!qNeedsTurn(own, to) || !isNum(x)) return x;
-  const m = to === 'Metric' ? +x : +x * usOne(unitOf(own)[0]);
+export function qBack(x, own, to, as) {
+  if (!qNeedsTurn(own, to, as) || !isNum(x)) return x;
+  const a = asOf(own, to, as), m = a ? +x * unitOf(a)[1] : to === 'Metric' ? +x : +x * usOne(unitOf(own)[0]);
   return r(qFromMetric(m, own), KEEP);
 }
 // a number in the metric unit of a family to the Units (a Process message: 2 bar shows 29.01 psi in US)
-export function qMetricShow(v, fam, to) {
+export function qMetricShow(v, fam, to, as) {
+  if (fam === 'press' && to === 'Metric' && unitOf(as)?.[0] === 'press' && isNum(v)) return +v / unitOf(as)[1];      // its field shows kPa
   if (!QTY_FAMILIES[fam] || to === 'Metric' || !isNum(v)) return v;
   return +v / usOne(fam);
 }
@@ -73,14 +82,14 @@ export function qSignFor(own) {
 export const qMetricSign = fam => ({ press: 'bar', vol: 'L', rate: 'Lpm', wt: 'kg' })[fam] ?? '';
 
 // a Properties box of a quantity (a Dial's Lowest and Highest): the number it shows (2 decimals when turned) and what is saved
-export function qBoxShow(v, own, to) {
-  if (!qNeedsTurn(own, to) || !isNum(v)) return v;
-  return r(qShow(v, own, to), 2);
+export function qBoxShow(v, own, to, as) {
+  if (!qNeedsTurn(own, to, as) || !isNum(v)) return v;
+  return r(qShow(v, own, to, as), 2);
 }
-export function qBoxBack(typed, shown, kept, own, to) {
-  if (!qNeedsTurn(own, to) || !isNum(typed)) return typed;
+export function qBoxBack(typed, shown, kept, own, to, as) {
+  if (!qNeedsTurn(own, to, as) || !isNum(typed)) return typed;
   if (isNum(kept) && isNum(shown) && +typed === +shown) return +kept;
-  return qBack(typed, own, to);
+  return qBack(typed, own, to, as);
 }
 
 // The units an attribute of an item keeps its number in, when it is a quantity that turns (else null).

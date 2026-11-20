@@ -1248,7 +1248,10 @@ never changes a saved number, so switching back and forth can never drift a numb
   choice in Skynet Settings"):** a Pressure transducer, a Level (any analog input in psi, bar, kPa, gal, L, lb, kg ...), a Flow
   meter and a Vessel scale keep their numbers in the units their sensor is calibrated in (its Units, Weight units and Volume units
   boxes, "Kept in"; its range, pulses and counts per unit use them; never changed for the user). What is shown follows Units: US
-  psi, gal, gal/min, lb; Metric bar, L, L/min, kg (a unit already in the Units, such as kPa in Metric, shows as it is). On a Tab,
+  psi, gal, gal/min, lb; Metric bar, L, L/min, kg (a volume or weight unit already in the Units, such as qt in US or mL in Metric, shows as it is). **Pressure by the field** (OakBarn Brewery, 2026-11-20: "for a User it could be either depending
+  on the field. AS an example, ICOA pressure is kPa from the Metar, while CO2 could be Bar or PSI"): each pressure sensor has a
+  **Metric pressure in** box, bar (the start) or kPa, for what it shows in Metric; US is always psi. Display only: a Process works in
+  bar. The boil temperature's air pressure keeps its own display (hPa in Metric, inHg in US, as METAR reports give it). On a Tab,
   its Data Display, its Dial (Lowest, Highest, Cool, Hot) and a Process message. **A Process works in metric** (bar, L, L/min, kg):
   it reads and sets the reading turned; a plain number set on or compared with one is typed in Units and kept in metric with its
   sign (US `wait Keg >= 12` is kept `0.8274bar` and opens as `12`); a number typed with its sign (`12psi`, `0.8bar`, `5gal`, `18.9L`,
