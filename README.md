@@ -39,6 +39,9 @@ The following are the way I build any software, as I have learned to follow them
 3. **One Click for things you do every day.** Things you do rarely can have several clicks to get there, but if you do not do it often, it does not slow you down.
 4. **Easy to find things you do not do every day.** It is annoying to have to hunt for how to change a setting on a cell phone. Have it on a menu.
 5. **Extensive Help, readily available and written in PLAIN LANGUAGE!** Technical information, if needed or nice to know, follows the plain language.
+   1. **Readily available.** Help should be right where you are, not hidden in a manual you have to go find. In the Skynet Panel, rest the mouse on almost any box or button and its Hover Help pops up and tells you what it does. The dialogs stay clean, because the explanations live in the Hover Help. When you want more, the Help tab has a page for each part of the Panel, in English and French.
+   2. **Plain terms, no "Who's on First?"** A word says what it means. Plus means up and minus means down, and nothing should read backward like a debit and a credit, where you have to stop and think which way it goes.
+   3. **Things act the same everywhere.** Once you learn how one thing works, everything like it works the same way. Click the picture of a Pump and it turns On or Off; a Valve or a Heating Element works the same. You should not have to learn it twice.
 6. **Automate behind the user, without much user input if possible.** There are two good examples in the Skynet Panel:
    1. **Import a beer.xml.** Most brewing recipe programs do a good job for you. Brewer's Friend and BeerSmith can export a beer.xml file. You have to know nothing about what is in that file (and only things you add in a program like BeerSmith are exported anyway). Since it is a known standard, all you have to do is provide the .xml file to the Skynet Panel, and it will import the data and calculate IBUs and other things, and set warnings for hop drops, with you only providing the .xml file. Not a single line of code needed from you.
    2. **MQTT.** What the heck is MQTT? You really do not need to know, but it is a way for different programs to work together with very little input from a user. You need an MQTT subscription service to make it easy (it costs a few dollars a month), or you can set it up for free if you know how. What it allows is VOICE command of things like Pumps and Valves using Siri, Google Home or Alexa. The only thing you need to provide is the command part. "Turn On Red Pump": Red Pump is all you have to provide, one time. Easy and no sweat.
@@ -57,11 +60,9 @@ The following are the way I build any software, as I have learned to follow them
 
 17. **Never Take Away, Only Add** (Design Rule #1). An update adds things; it does not remove what users already have. Together with the Meaningless Key of item 13 (Design Rule #2): "90% of issues with software updates are removed if you follow those rules."
 18. **KISS: Keep It Simple Stupid.** No clutter. Dialogs stay clean, and the explanations go in the Hover Help (Rule 2.38).
-19. **Plain terms, no "Who's on First?"** A name, a sign or a word says what it means, so plus means up and minus means down, and nothing reads backward like a debit and a credit.
-20. **Things act the same everywhere** (Rule 2.44). One click on the picture of a Pump, a Valve or a Heating Element turns it On or Off, the same on every Tab, so you learn it once.
-21. **Correct spelling and plain English at all times** (Rule 2.37).
-22. **Data is always metric; Units are for showing only** (Rule 2.59). Switching between US and Metric changes what you see and type, never what is stored.
-23. **Nothing is ever written over.** A Schema backup is made every time a change is saved (Rule 9.17), so an earlier version can always be got back.
+19. **Correct spelling and plain English at all times** (Rule 2.37).
+20. **Data is always metric; Units are for showing only** (Rule 2.59). Switching between US and Metric changes what you see and type, never what is stored.
+21. **Nothing is ever written over.** A Schema backup is made every time a change is saved (Rule 9.17), so an earlier version can always be got back.
 
 ## 1. Install and run
 
