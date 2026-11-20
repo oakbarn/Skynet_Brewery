@@ -303,3 +303,9 @@ credit here (Rule 9.12). The full list with sources is [docs/Media_Licenses.csv]
   speech voice en_GB-alba-medium, trained on the **Alba speech corpus** by Cassia Valentini-Botinhao and Junichi Yamagishi,
   University of Edinburgh (2019), https://doi.org/10.7488/ds/2506, licensed CC BY 4.0
   (https://creativecommons.org/licenses/by/4.0/).
+- **Skynet Music Pack** (☰ Menu > Get Music Pack, a download that is not in the Setups, Rule 9.24): Marine Band pieces performed
+  by "The President's Own" United States Marine Band and bugle calls by the Marine Barracks Washington Ceremonial Bugler,
+  https://www.marineband.marines.mil. US government work, public domain (17 USC 105). Tunes by John Philip Sousa, E. E. Bagley,
+  Jacques Offenbach, Daniel Butterfield, Richard Leveridge and traditional, all public domain. "Old Comrades" (Carl
+  Teike) by the Parlophone Military Band (1925) and Gertrud Kappel singing Richard Wagner (1924), public domain recordings from
+  https://archive.org.

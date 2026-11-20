@@ -15412,6 +15412,7 @@ const MENU = [
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
   { key: 'buildtemplate', title: 'Build Template', tip: 'Make and change Device Templates: every attribute, and a "user can set" box on each (Admins)', render: renderBuildTemplateTab, admin: true },
   { key: 'skynetpics', title: 'Get Skynet pictures', tip: 'Copy the Skynet pictures this Brain does not have yet from GitHub (into media/Images/Skynet). A picture you already have is never changed.', render: renderSkynetPicsTab, admin: true },
+  { key: 'musicpack', title: 'Get Music Pack', tip: 'Copy the Skynet Music Pack (public domain marches and bugle calls) from GitHub into media/sounds/Skynet_Music. A sound you already have is never changed.', render: renderMusicPackTab, admin: true },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
   { key: 'brainmove', title: 'Move Brain', tip: 'Move everything to a new Brain (a computer to a Raspberry Pi): make a Brain Move file here, bring it in on the new Brain, then fix the USB ports', render: renderBrainMoveTab, admin: true },
   { key: 'schema', title: 'Schema', tip: 'Pick the Schema to load, and clone, add, rename, back up or restore one', render: renderSchemaTab },
@@ -16417,6 +16418,43 @@ function renderSkynetPicsTab(box) {
   });
   box.append(h('h3', {}, 'Get Skynet pictures'), h('div', { class: 'menuNarrow' },
     h('p', {}, 'Skynet adds new pictures to GitHub from time to time. This copies the ones this Brain does not have yet into ', h('b', {}, 'media/Images/Skynet'), '. A picture you already have is never changed (a redrawn Skynet picture comes with a new name), your own pictures are never touched, and nothing is deleted. No GitHub account is needed; the Brain must be on the internet.'),
+    saveBar(check, go), out));
+  check.click();
+}
+
+// Get Music Pack (OakBarn Brewery, 2026-11-18: "a Get Music Pack"; Rule 9.24): the optional Skynet Music Pack is a GitHub
+// Release, not part of the Setups. The Brain asks GitHub which marches and bugle calls it is missing and copies them into
+// media/sounds/Skynet_Music. Add-only, the same as Get Skynet pictures.
+function renderMusicPackTab(box) {
+  const out = h('div', { class: 'spOut' }), go = h('button', { class: 'primary', disabled: true }, 'Get them');
+  const check = h('button', {}, 'Check GitHub');
+  let found = null;
+  const kb = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+  const show = r => {
+    found = r;
+    go.disabled = !r.add.length; go.textContent = r.add.length ? `Get ${r.add.length} sound${r.add.length === 1 ? '' : 's'} (${kb(r.add.reduce((a, x) => a + x.size, 0))})` : 'Get them';
+    out.replaceChildren(h('p', {}, r.add.length ? `The ${r.title} has ${r.total} sounds: ${r.add.length} new for this Brain, ${r.same} already here.` : `All ${r.total} sounds of the ${r.title} are already on this Brain. Nothing to get.`),
+      r.add.length ? h('table', { class: 'spTable' }, h('thead', {}, h('tr', {}, h('th', {}, 'Sound'), h('th', {}, 'Size'))),
+        h('tbody', {}, ...r.add.map(x => h('tr', {}, h('td', {}, x.name), h('td', { class: 'num' }, kb(x.size)))))) : '');
+  };
+  check.onclick = guard(async () => {
+    check.disabled = go.disabled = true; out.replaceChildren(h('p', { class: 'muted' }, 'Asking GitHub ...'));
+    try { show(await api('GET', '/ui/musicpack/check')); } catch (e) { out.replaceChildren(h('p', { class: 'bad' }, e.message)); } finally { check.disabled = false; }
+  });
+  go.onclick = guard(async () => {
+    if (!found) return;
+    check.disabled = go.disabled = true; go.textContent = 'Copying ...';
+    try {
+      const r = await api('POST', '/ui/musicpack/get', { pack: found.pack, names: found.add.map(x => x.name) });
+      await loadMediaPictures();
+      out.replaceChildren(h('p', { class: r.failed.length ? 'bad' : '' }, `Copied ${r.saved.length} sound${r.saved.length === 1 ? '' : 's'} into media/${r.folder}.` + (r.failed.length ? ` ${r.failed.length} could not be copied:` : ' They are in every sound list now.')),
+        r.failed.length ? h('ul', {}, ...r.failed.map(f => h('li', {}, f))) : '');
+      toast(`Copied ${r.saved.length} Music Pack sound(s)`, !!r.failed.length);
+    } catch (e) { out.replaceChildren(h('p', { class: 'bad' }, e.message)); }
+    finally { check.disabled = false; go.disabled = true; go.textContent = 'Get them'; found = null; }
+  });
+  box.append(h('h3', {}, 'Get Music Pack'), h('div', { class: 'menuNarrow' },
+    h('p', {}, 'The Skynet Music Pack is public domain marches and bugle calls (for example First Call, Taps and The Stars and Stripes Forever) for Alarms, Sound Players and Processes. It is not in the Setups, so the Setups stay small. This copies the ones this Brain does not have yet into ', h('b', {}, 'media/sounds/Skynet_Music'), '. A sound you already have is never changed, your own sounds are never touched, and nothing is deleted. No GitHub account is needed; the Brain must be on the internet.'),
     saveBar(check, go), out));
   check.click();
 }

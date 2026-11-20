@@ -467,6 +467,8 @@
  "Build Template": "Build Template",
  "Make and change Device Templates: every attribute, and a \"user can set\" box on each (Admins)": "Créer et changer des Device Templates : chaque attribut, et une case « user can set » sur chacun (Admins)",
  "Get Skynet pictures": "Get Skynet pictures",
+ "Get Music Pack": "Get Music Pack",
+ "Copy the Skynet Music Pack (public domain marches and bugle calls) from GitHub into media/sounds/Skynet_Music. A sound you already have is never changed.": "Copier depuis GitHub le Skynet Music Pack (marches et sonneries de clairon du domaine public) dans media/sounds/Skynet_Music. Un son que vous avez déjà n'est jamais changé.",
  "Copy the Skynet pictures this Brain does not have yet from GitHub (into media/Images/Skynet). A picture you already have is never changed.": "Copier depuis GitHub les images Skynet que ce Brain n'a pas encore (dans media/Images/Skynet). Une image que vous avez déjà n'est jamais changée.",
  "File Move Utility": "File Move Utility",
  "Copy files and whole folders from this computer to the Brain (opens the File Move page)": "Copier des fichiers et des dossiers entiers de cet ordinateur vers le Brain (ouvre la page File Move)",

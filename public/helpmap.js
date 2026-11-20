@@ -176,6 +176,7 @@ const MENU_TOPICS = {
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
   pump: { _: ['tab-and-valve-profiles', 'pump-profile'] },
   skynetpics: { _: ['get-skynet-pictures'] },
+  musicpack: { _: ['get-music-pack'] },
   brainmove: { '1. On the OLD Brain': ['move-brain', 'make-the-brain-move-file'], '2. On the NEW Brain': ['move-brain', 'bring-it-in-on-the-new-brain'], '3. On the NEW Brain': ['move-brain', 'usb-ports'], _: ['move-brain'] },
   buildtemplate: { _: ['build-template-tab'] },
   brewprocess: { 'Which Device': ['brew-process', 'which-device-does-each-job'], 'Recipe values': ['brew-process', 'recipe-values'], _: ['brew-process'] },

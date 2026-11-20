@@ -65,3 +65,21 @@ In a sound box (an Alarm's Sound file, a Sound Player, or the sound before a hop
 A Process can use it too: `SoundPlayer path = "https://github.com/oakbarn/Skynet_Brewery/releases/download/Skynet-Sounds/Song_Brautag_im_Takt.mp3"`.
 
 A link needs the internet. For Hop and Brew Flow Alarms, a file on the Brain is the safest choice (Help 186).
+
+---
+
+## The Skynet Music Pack Release (Rule 9.24)
+
+The Music Pack is a **separate** Release, so ☰ Menu > Get Music Pack (Help 242) finds only its files. Make it the same way as
+Part 2 and Part 3, with these changes:
+
+- **Tag:** `Skynet-Music-Pack` (type it exactly, then **+ Create new tag: Skynet-Music-Pack on publish**).
+- **Release title:** `Skynet Music Pack`.
+- **Files:** the MP3s from the `Skynet_Music_Pack` folder Claude gives you. Their names are already right (letters, numbers,
+  `_` and `-` only), so do not rename them. Each one already has a row in `docs/Media_Licenses.csv`.
+- **Untick "Set as the latest release"** before **Publish release**, as in Part 3. The keep-newest clean-up (Rule 9.23) never
+  touches this Release.
+
+To add a piece later: edit the Release (Part 4), drag the new MP3 in, and add its row to `docs/Media_Licenses.csv`. A brewer gets
+it the next time they press **Check GitHub** in Get Music Pack. Please don't remove or change a file that is already up: Brains
+that have it keep their copy (Rule #1).
