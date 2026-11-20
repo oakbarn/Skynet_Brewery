@@ -4,7 +4,7 @@
  "02-tabs": "33b2052c17709737",
  "03-devices": "b6fb84ac03afe153",
  "04-variables": "285856e470f40ab8",
- "05-scripts": "95f83063392989f2",
+ "05-scripts": "d4af4a288d72d2d2",
  "06-log": "5906688b79c6c7d5",
  "07-media": "ae9af08eb3ab447a",
  "08-import": "7e51289d961c126e",
@@ -95,7 +95,7 @@
  "96-override-button": "2ef945413dc48d16",
  "98-database-and-api": "3c27c87803254930",
  "99-recipe-tab": "382bd962d441a937",
- "100-brew-process": "33d51400ed8c0bb3",
+ "100-brew-process": "407422b1864b6840",
  "101-tab-styles": "dd046ee3860e4944",
  "102-process-version": "10e516f468bb74db",
  "103-hidden-tabs": "baeaff7c7887b609",
@@ -231,5 +231,6 @@
  "235-din-button-on-press": "a8b5b5a37b0960b9",
  "236-copy-a-whole-tab": "31a20e264fee5ce1",
  "237-pid-auto-tune": "b4e0d90926f3f155",
- "238-boil-temperature": "ef095e5a40c4562d"
+ "238-boil-temperature": "ef095e5a40c4562d",
+ "239-fire-hose-and-manifold-sample": "8064922d06e0ba5a"
 }
