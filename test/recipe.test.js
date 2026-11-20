@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { readRecipeFile, readBsmx, cleanRecipe, RecipeStore, HopAlerts, defaultBrewOn, brewOnEfficiency, recipeForBrowser, brewOnFromBrowser } from '../lib/recipe.js';
-import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity, RECIPE_LEVELS, recipeLevel, levelShowsTab, levelShowsBox, levelFermTypes, blankRecipe, RECIPE_DEFAULTS, measuredEfficiency, averageEfficiency, EFF_AVERAGE_OF } from '../public/recipecalc.js';
+import { hopUnitOf, yeastUnitOf, yeastAmountText, hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity, RECIPE_LEVELS, recipeLevel, levelShowsTab, levelShowsBox, levelFermTypes, blankRecipe, RECIPE_DEFAULTS, measuredEfficiency, averageEfficiency, EFF_AVERAGE_OF } from '../public/recipecalc.js';
 import { ProfileStore } from '../lib/profiles.js';
 import { recipeValues } from '../lib/brewprocess.js';
 import { SCHEMA_KEYS } from '../lib/schemas.js';
@@ -251,5 +251,37 @@ assert.equal(tv.rcp_Water_Ca, 40, 'no Water Profile picked: Tap Water');
   assert.ok(st.every(x => x.tempC === null && x.min === null), 'no Skynet numbers filled in');
   assert.equal(standByTemp(76.7), 'High'); assert.equal(standByTemp(76.6), 'Middle'); assert.equal(standByTemp(60), 'Middle'); assert.equal(standByTemp(59.9), 'Low');
   assert.equal(hopStands({}, { hsHighTempC: 85, hsHighMin: 5 })[0].tempC, null, 'Default settings Hop Stands are not read');
+}
+// Rule 17.18: each hop line and yeast line keeps its own unit, whatever Units says
+{
+  assert.equal(r.ingredients.hops[0].unit, 'oz', 'a .bsmx hop is in ounces'); assert.equal(r.ingredients.yeasts[0].unit, 'Packs', 'a .bsmx yeast is a count of Packs');
+  assert.equal(x.ingredients.hops[0].unit, 'g', 'a BeerXML hop with no DISPLAY_AMOUNT is in grams'); assert.deepEqual([x.ingredients.yeasts[0].amount, x.ingredients.yeasts[0].unit], [1, 'Packs'], 'no AMOUNT: 1 Pack');
+  const yx = readRecipeFile(`<RECIPES><RECIPE><NAME>Y</NAME><HOPS><HOP><NAME>Oz hop</NAME><AMOUNT>0.0283495</AMOUNT><USE>Boil</USE><TIME>60</TIME><DISPLAY_AMOUNT>1.00 oz</DISPLAY_AMOUNT></HOP></HOPS>
+<YEASTS><YEAST><NAME>Dry</NAME><AMOUNT>0.0115</AMOUNT><AMOUNT_IS_WEIGHT>TRUE</AMOUNT_IS_WEIGHT></YEAST><YEAST><NAME>Liquid</NAME><AMOUNT>0.125</AMOUNT></YEAST>
+<YEAST><NAME>Pack</NAME><AMOUNT>0.0236</AMOUNT><DISPLAY_AMOUNT>2 pkg</DISPLAY_AMOUNT></YEAST><YEAST><NAME>Shown g</NAME><AMOUNT>0.011</AMOUNT><DISPLAY_AMOUNT>11.5 g</DISPLAY_AMOUNT></YEAST></YEASTS></RECIPE></RECIPES>`, 'y.xml').recipe;
+  assert.equal(yx.ingredients.hops[0].unit, 'oz', 'DISPLAY_AMOUNT oz gives the hop line oz'); assert.equal(yx.ingredients.hops[0].kg, 0.0283495, 'the amount is still kept in kg');
+  assert.deepEqual(yx.ingredients.yeasts.map(y => [y.amount, y.unit]), [[11.5, 'g'], [125, 'ml'], [2, 'Packs'], [11.5, 'g']], 'BeerXML yeast: kg to g, liters to ml, DISPLAY_AMOUNT wins');
+  // a hop line with a unit shows in it on a Metric panel; one saved before with none follows Units
+  const ru = { boilTime: 60, ingredients: { hops: [{ name: 'A', kg: 0.0283495, unit: 'oz', alpha: 5, alphaActual: 5, use: 'boil', time: 60 }, { name: 'B', kg: 0.028, alpha: 5, alphaActual: 5, use: 'boil', time: 10 }],
+    yeasts: [{ name: 'US-05', amount: 2, unit: 'Packs' }, { name: 'K-97', amount: 11.5, unit: 'g' }] } };
+  const fv = recipeFieldValues(ru, { units: 'Metric' });
+  assert.equal(fv.rcp_Hop_1_Amount, 1); assert.equal(fv.rcp_Hop_1_Measurement, 'oz'); assert.equal(fv.rcp_Hop_2_Amount, 28); assert.equal(fv.rcp_Hop_2_Measurement, 'g');
+  assert.equal(fv.rcp_Yeast_Count, 2); assert.equal(fv.rcp_Yeast_2_Amount, 11.5); assert.equal(fv.rcp_Yeast_2_Measurement, 'g'); assert.equal(fv.rcp_Yeast_1_Name, 'US-05');
+  assert.equal(recipeField('rcp_Yeast_3_Measurement')[1], 'Yeast 3: Packs, g, oz or ml');
+  assert.ok(/^Add the Start of Boil hops now: 1 oz A/.test(hopSchedule(ru, { units: 'Metric' }).alerts.find(a => a.at === 0).text), 'the alert says the hop in its own unit');
+  // oz to g: only the unit changes, the kg is kept
+  ru.ingredients.hops[0].unit = 'g'; assert.equal(recipeFieldValues(ru, { units: 'US' }).rcp_Hop_1_Amount, 28.35);
+  assert.equal(hopUnitOf({}, { hopUnit: 'g' }), 'g'); assert.equal(yeastUnitOf({ unit: 'cups' }), 'Packs'); assert.equal(yeastAmountText({ amount: 1 }), '1 Pack');
+  const cy = cleanRecipe({ ingredients: { hops: [{ name: 'a', unit: 'lb' }, { name: 'b', unit: 'g' }], yeasts: [{ name: 'y', amount: 5, unit: 'ml' }, { name: 'z' }] } });
+  assert.equal(cy.ingredients.hops.find(h => h.name === 'a').unit, undefined, 'a hop unit not oz or g is not kept: the line follows Units'); assert.equal(cy.ingredients.hops.find(h => h.name === 'b').unit, 'g');
+  assert.deepEqual(cy.ingredients.yeasts.map(y => [y.amount, y.unit]), [[5, 'ml'], [1, 'Packs']]);
+  // the Yeast tab (OakBarn Brewery's layout 2026-11-19): every box is a Skynet_Field; temperatures and the starter follow Units
+  const yt = { ingredients: { yeasts: [{ name: 'US-05', form: 'Dry', amount: 1, unit: 'Packs', attenuation: 81, minTempC: 15, maxTempC: 24, lab: 'Fermentis', productId: 'US-05', type: 'Ale', flocculation: 'Medium', starter: true, starterL: 1.892706, timesCultured: 2, mfgDate: '2026-10-01', notes: 'clean' }] } };
+  const yv = recipeFieldValues(yt, { units: 'US' });
+  assert.deepEqual([yv.rcp_Yeast_1_Form, yv.rcp_Yeast_1_Attenuation, yv.rcp_Yeast_1_Min_Temp, yv.rcp_Yeast_1_Max_Temp, yv.rcp_Yeast_1_Lab, yv.rcp_Yeast_1_Product_ID, yv.rcp_Yeast_1_Type, yv.rcp_Yeast_1_Flocculation, yv.rcp_Yeast_1_Starter, yv.rcp_Yeast_1_Starter_Size, yv.rcp_Yeast_1_Times_Cultured, yv.rcp_Yeast_1_Mfg_Date, yv.rcp_Yeast_1_Notes],
+    ['Dry', 81, 59, 75.2, 'Fermentis', 'US-05', 'Ale', 'Medium', true, 0.5, 2, '2026-10-01', 'clean']);
+  const yc = cleanRecipe(yt).ingredients.yeasts[0]; assert.deepEqual([yc.flocculation, yc.timesCultured, yc.mfgDate, yc.notes, yc.starter], ['Medium', 2, '2026-10-01', 'clean', true], 'Save keeps every Yeast box');
+  assert.equal(cleanRecipe({ ingredients: { yeasts: [{ name: 'old', starterL: 1 }] } }).ingredients.yeasts[0].starter, true, 'an older save with a starter size has Starter on');
+  assert.equal(recipeValues({ recipe: { ...blankRecipe(), name: 'n' } }, {}).rcp_Yeast_Count ?? 0, 0);
 }
 console.log('recipe tests passed');
