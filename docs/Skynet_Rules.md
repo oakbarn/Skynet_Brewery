@@ -1133,7 +1133,7 @@ number: "Yes That was coming soon regardless", "4 digits"). A number with its un
 or Heating Element's "45 % ▸ 152" ...) is never split over two lines, up to 4 digits before the point (9999.9 °F). When it is
 wider than its box, Skynet makes the value's font smaller until it fits; when the reading is short again, it goes back to its own
 size. The box is never made bigger by itself (Design Rule #1: nothing the user set is taken away). Texts that
-are meant to wrap are left alone: Text and Label Widgets, long strings, Alarm text and picture text. The Skynet Dial and Timer
+are meant to wrap are left alone: Text and Label Widgets, long strings, a String gGlobal (it is text, 2026-11-20), Alarm text and picture text. The Skynet Dial and Timer
 Digits draw their own digits to fit (Rule 2.40). Help 138. **Both programs:** the BruControl Import's Build page shares the Panel code.
 
 2.57 **Port means a board Port; a pipe end has an End Fitting** (OakBarn Brewery, 2026-11-17: "Ports could be confused with Arduino
@@ -4738,6 +4738,10 @@ they come from the ☰ Menu > Default tab's Mash and Boil Profiles. **PreBrew st
 make, or review it.
 
 16.5 **`ask "text"`** in a Process shows a pop-up on every screen with ✔ Done and waits until an operator or Admin presses it.
+**`ask "text" Name`** (OakBarn Brewery, 2026-11-20, on the Fire Hose Set Time: "a dialog ask for the time a global variable") adds a
+**box for the answer** to the same pop-up, filled with what Name holds now. Name is a gGlobal or a Value Widget; ✔ Done puts the answer
+in it (a time as hh:mm:ss, a number, or words, by its kind) and the Process goes on. A blank or wrong answer is not taken: the pop-up
+says what to type. Both programs: the BruControl Import has no such command (it is only written in Skynet Processes).
 
 16.6 **Schema Templates** (Fritz, 2026-11-06/07): Schema dropdown > Add new Schema > Start from **A Skynet Schema Template**.
 Answer a few questions, and the Schema is ready to brew. The **Brew House Tab Templates** are **1 Vessel, 1 Vessel + 1 Pump,
@@ -4764,6 +4768,12 @@ the backup. Help 100 and 157.
   **A Process Template is always brought up to the new Rule**, even while the Brew Process is not being tested yet.
 - **The test bed:** every Device, Widget and item in the **3 Vessel 1 Pump** sample (`samples/configs/three-vessel-one-pump`) is
   kept to the newest standard. It is also the Schema a new panel starts with (`config/brewery.json`).
+- **The Process Samples** (OakBarn Brewery, 2026-11-19: "Process Samples first"; on where they run, 2026-11-20: "A But a new Tab")
+  are written one at a time from OakBarn Brewery's own scripts and go in the test bed **on a Tab of their own**, so the Brew House
+  Tab is not changed; each is in the sample and in `config/brewery.json` with its Processes in both `processes/` folders. His codes,
+  Labels and messages are kept; only what Skynet needs changes (a Process Widget instead of a looper switch, `ask` instead of an
+  Advance switch, the Override pop-up, Rule 2.26). **Process Sample 1** is the **Water** Tab (WA): the Fire Hose and the Manifold
+  Supply Valve, timed or until a float (Help 239).
 - **Old Heating Elements** (OakBarn Brewery, 2026-11-08: "Old Heater Elements if on a Template need to be updated to new standard
   One Port One Device. But only in Templates and 3 Vessel Schema"): an old Duty Cycle, Hysteresis, PID or Deadband Device in a
   Template or in the test bed becomes **one Heating Element on one Port** (Rule 6.19), turned On or Off (`= on` / `= off`), never
@@ -4798,6 +4808,19 @@ to its new line number"):
   line it went to. Lines added or taken out above that line change the number; lines below it do not. A goLine typed or changed in
   this edit is kept as typed. If its line was taken out, it goes to the next line still there (lib/goline.js, server Save).
 - A file changed in another text editor is not checked. Help 22. **Both programs:** the BruControl Import reads Processes with the same reader.
+
+16.11 **Every Tap Water Fill gets an Override button** (OakBarn Brewery, 2026-11-20: "And as a Rule: Every Tap Water Fill gets an
+Over Ride Button. It could even be a special one that simply closes the valves used."). A Process that opens a tap water valve to
+fill (the Fire Hose, the Manifold Supply Valve, a fill of a Vessel from tap water) has an **Override button set to that Process**
+(Rule 2.26) on the Tab where it is started, so the water can be shut off at once without waiting for the pop-up. One press passes
+the fill's wait and the Process closes the valves it opened (it ends by closing them, whatever ended the wait). **It appears only
+once the water flows** (OakBarn Brewery, 2026-11-20: "The Override appears after Flow is started not before. So there will not be an
+override in the before delay"): its **Shows** is **Only while tap water flows**, so it is on its Tab only while a tap water valve on
+that Tab is open; during a warning before the water comes on there is no Override (a button set to the Process, even unseen, keeps
+the Override pop-up away too). Shows **Always** is the other choice, for any other Override button. A **Stop** button
+that stops the Process and closes the valves (FireHose Off on the Water Tab) is good to have too. The Process Samples follow it:
+the Water Tab's **Water Override** is set to `utility_FireHose_Manifold_Supply_Water`. Help 239. **Both programs:** the BruControl
+Import adds one when it makes a Tap Water Fill Process (Importer Sandbox; the Importer build is on hold).
 
 ## 17. Recipes
 
@@ -6257,6 +6280,9 @@ import.
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
 - 2026-11-19: Added Rule 6.38 (OakBarn Brewery, Panel Updates entry 31: a physical DIN push button that does one thing without writing code; "I had a Red one That canceled all alarms. I had a yellow one that did a 20 second firehose."): a Digital Input Device's On Press is None, Run a Process, Advance (Override, only when a Process it is set to waits; otherwise ignored) or Cancel all alarms. Help 235 (and French); Help 233 links to it. Checked against both programs: the BruControl Import is unchanged (its DINs come in with None). (thread "Make physical DIN buttons run Processes")
+- 2026-11-20: Rule 16.8 extended with the Process Samples (OakBarn Brewery, 2026-11-19: "Process Samples first"; 2026-11-20: "A But a new Tab"): written one at a time from his scripts, each on its own Tab of the 3 Vessel 1 Pump test bed and the default Schema. Process Sample 1 is the Water Tab (WA): his Fire Hose and Manifold buttons as Process Widgets, utility_FireHose_Manifold_Supply_Water with his codes 1001-1005 and 2001-2005, ask "Manifold Set?", a 20 second warning, the auto Override pop-up, a Float and FireHose Off. Rule 2.56: a String gGlobal wraps like every Text Box (it was made smaller to one line). Help 239 (new, and French); Help 5 links to it. Checked against both programs: the BruControl Import is unchanged (Importer Pattern 1, a switch that launches a script, already maps to one Process Widget). (thread "Write the Fire Hose and Manifold trigger Process")
+- 2026-11-20: Added Rule 16.11 (OakBarn Brewery: "Every Tap Water Fill gets an Over Ride Button"): a Process that fills from tap water has an Override button set to it on its Tab; one press passes the fill's wait and the Process closes the valves it opened. The Water Tab gets its Water Override, set to utility_FireHose_Manifold_Supply_Water; it shows only while tap water flows (new Override button setting 5. Shows: Always / Only while tap water flows), so there is no Override during the 20 second warning (with a button set to it, its pop-up no longer comes by itself). The Fire Hose and Manifold Valves also show on the 3 Vessel 1 Pump Brew House as Clones (OakBarn Brewery's markup). Help 239 (and French). Checked against both programs: the BruControl Import adds one for each Tap Water Fill Process it makes (Importer Sandbox; on hold). (thread "Write the Fire Hose and Manifold trigger Process")
+- 2026-11-20: Rule 16.5 extended (OakBarn Brewery: "a dialog ask for the time a global variable"): `ask "text" Name` shows the ask pop-up with a box for the answer, filled with what Name (a gGlobal or Value Widget) holds now; Done puts the answer in Name. The Fire Hose and Manifold Set Time uses it for gblT_SetTimer_Water (no Set Timer box on the Water Tab). Help 100 and 239 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Write the Fire Hose and Manifold trigger Process")
 - 2026-11-19: Added Rule 18.52 (OakBarn Brewery: "The Hose Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the "motor""): a Hose Bib gets an Inlet box (Top or Bottom on Vertical, greyed on Horizontal), so it has all 4 Vertical looks, and an Inlet IP on its wall thread: a pipe there shows tap flow while it is open, and a closed valve on that side stops its water (entry 35); Manual Ball and Butterfly Valves grey Left / Right on Horizontal (same both ways); a turned Manual Valve's Label stays upright. Panel Updates sandbox entries 33 and 35. Rule 5.33 note. Help 141, 87 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change. Checked on the 3 Vessel sample: its one Hose Bib is Horizontal, so it looks the same.
 - 2026-11-19: Added Rule 4.8 and changed Rules 4.1, 4.4 and 5.21 (OakBarn Brewery, Panel Updates Sandbox entry 18, Panel Updates order
   item 8): New tab > Copy of a whole Tab; Devices become Clones, pipes and hoses get new background names, the Widgets interview
