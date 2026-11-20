@@ -1231,7 +1231,7 @@ never changes a saved number, so switching back and forth can never drift a numb
 - **Recipe values and skn_Boil_Temp in a Process (OakBarn Brewery, 2026-11-20, picked "Metric inside, Units in messages": "I think A
   because it follows the Rule"):** a Process reads every `skn_rcp_` temperature, volume, weight and ratio, and `skn_Boil_Temp`, in metric
   (°C, L, kg, L/kg), so `HLT.setpoint = skn_rcp_Strike_Temp` and `wait HLT_Probe >= skn_rcp_Strike_Temp` are right in US too. In a
-  message (`ask`, `print`, `show`, or text joined with `+`) the number shows in the Units; `skn_rcp_Temp_Units`, `_Volume_Units` and
+  message (text joined with `+` in an `ask`, `print` or `show`, or a `print` of it alone) the number shows in the Units; `skn_rcp_Temp_Units`, `_Volume_Units` and
   `_Weight_Units` are the Units' words. A number added in a formula is °C (`skn_rcp_Boil_Start_Temp + 5`). The Brew Process page shows
   them in the Units. **Exception:** Recipe items in their own unit ("Other additions (Irish Moss, Yeast Nutrient ...) would have their
   own units that do not get converted for display ... they are for display to the user and no math is needed"): adjuncts, a hop's
