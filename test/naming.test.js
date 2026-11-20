@@ -228,7 +228,7 @@ console.log('naming tests passed');
   assert.equal(suggestWidgetName({ code: 'DT', label: 'DateTime_1', tab: 'BR' }), 'wgt_DT_DateTime_1_BR', "Fritz's example");
   assert.equal(suggestWidgetName({ code: 'PIX', label: 'Kettle Element', tab: '' }), 'wgt_PIX_Kettle~Element', 'no Tab ID yet on the Build Tab');
   assert.equal(widgetTypeId({ type: 'picture' }), 'PIX', 'Fritz: Picture is PIX');
-  for (const [t, c] of [['text', 'TXT'], ['valueWidget', 'VAL'], ['timeWidget', 'TM'], ['timer', 'TMR'], ['soundPlayer', 'SND'], ['switch', 'SW'], ['pushButton', 'PB'], ['pulseButton', 'PL'], ['led', 'LED'], ['alarm', 'ALM']]) assert.equal(widgetTypeId({ type: t }), c);
+  for (const [t, c] of [['text', 'TXT'], ['valueWidget', 'VAL'], ['timeWidget', 'TM'], ['timer', 'TMR'], ['soundPlayer', 'AUD'], ['switch', 'SW'], ['pushButton', 'PB'], ['pulseButton', 'PL'], ['led', 'LED'], ['alarm', 'ALM']]) assert.equal(widgetTypeId({ type: t }), c);
   assert.equal(widgetTypeId({ kind: 'override' }), 'OVR'); assert.equal(widgetTypeId({ kind: 'text' }), 'TXT');
   assert.equal(widgetTypeId({ kind: 'ip', fitting: 'manualValve' }), 'MV'); assert.equal(widgetTypeId({ kind: 'ip', fitting: 'manualValve' }, true), 'TWV');
   assert.equal(widgetTypeId({ type: 'digitalOut' }), '', 'a Device is named by Rule 3.1');

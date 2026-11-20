@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- MIT License Granted. Copyright (c) OakBarn Brewery 2026. Skynet's own drawing of an Emergency Off button (Panel Update 8):
+       a red mushroom head on a yellow round plate, as on real machines. No words in it (Rule 7.25). -->
+  <defs>
+    <radialGradient id="plate" cx="50%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#ffe14a"/>
+      <stop offset="0.8" stop-color="#f5c400"/>
+      <stop offset="1" stop-color="#c99a00"/>
+    </radialGradient>
+    <radialGradient id="head" cx="40%" cy="35%" r="65%">
+      <stop offset="0" stop-color="#ff6a5c"/>
+      <stop offset="0.45" stop-color="#e01b12"/>
+      <stop offset="1" stop-color="#8e0d07"/>
+    </radialGradient>
+    <linearGradient id="collar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b8bcc2"/>
+      <stop offset="0.5" stop-color="#6d7279"/>
+      <stop offset="1" stop-color="#3d4146"/>
+    </linearGradient>
+  </defs>
+  <!-- the yellow plate -->
+  <circle cx="100" cy="100" r="96" fill="url(#plate)" stroke="#7a5d00" stroke-width="3"/>
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#c99a00" stroke-width="2" opacity="0.7"/>
+  <!-- the grey collar the head sits in -->
+  <circle cx="100" cy="104" r="58" fill="url(#collar)" stroke="#2a2d31" stroke-width="2"/>
+  <!-- the shadow under the mushroom head -->
+  <ellipse cx="104" cy="112" rx="56" ry="52" fill="#000" opacity="0.35"/>
+  <!-- the red mushroom head -->
+  <circle cx="100" cy="100" r="54" fill="url(#head)" stroke="#5c0804" stroke-width="2.5"/>
+  <circle cx="100" cy="100" r="40" fill="none" stroke="#b3130b" stroke-width="3" opacity="0.6"/>
+  <!-- the shine -->
+  <ellipse cx="82" cy="78" rx="22" ry="13" fill="#fff" opacity="0.35" transform="rotate(-30 82 78)"/>
+  <ellipse cx="76" cy="74" rx="8" ry="4.5" fill="#fff" opacity="0.6" transform="rotate(-30 76 74)"/>
+</svg>

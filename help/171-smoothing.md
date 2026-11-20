@@ -16,6 +16,10 @@ running. **Smoothing** (Skynet Rule 6.24) calms them.
 
 Leave it empty for the starting value: **25 % for a thermistor (NTC) probe**, 100 % (none) for everything else.
 
+**On the screen** a Temperature Probe also shows the average of its readings from the last 5 seconds (15 seconds when its board is in
+Simulation), so the number does not jitter. That is only what you see: the Brain, the heating methods, Processes and Alarms use the
+reading itself (with its Smoothing %). A jump of 2 degrees or more shows at once.
+
 ## Where it is
 
 Open the Device's **Properties** and set **Smoothing %**. It is on:

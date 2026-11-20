@@ -44,7 +44,7 @@ L'aide s'ouvre dans une fenêtre à elle : voir [L'aide dans sa propre fenêtre]
 | Vanne manuelle | [Vannes manuelles](29-manual-valves) |
 | Vanne d'eau du robinet | [Vannes d'eau du robinet](31-tap-water-valves) |
 | Moteur pas à pas | [Moteurs pas à pas](16-stepper-motors) |
-| Alarm, Sound Player | [Alarmes et son](21-alarms-and-sound) |
+| Alarm, Audio Widget | [Alarmes et son](21-alarms-and-sound) |
 | Minuterie | [Tabs : les minuteries](02-tabs) |
 | gGlobal, gGlobal List | [Variables](04-variables) |
 | Image | [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths) |

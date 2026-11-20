@@ -3,7 +3,6 @@
 // a Tab (a Text, Picture, Value, Time or Date Time Widget shows things on a Tab). Each gGlobal has one Kind, picked when it is
 // made, and the Kind can never change afterwards: a wrong Kind is deleted and made again.
 //   gS_Global_String    .value is a String
-//   gG_Global_Graphic   the standard background picture paths (Image Path 1-3, Background #, Back Colour)
 //   gV_Global_Value     .value is a Value (a number)
 //   gB_Global_Boolean   .value is a Boolean (true / false)
 //   gT_Global_Time      .value is a Time (00:00:00)
@@ -12,9 +11,10 @@
 // 2026-11-02): they go to the new Semi_Widgets_Devices class and work as before until it is built.
 
 // kind (as kept in the Schema file) -> Kind name
+// No Graphic gGlobal (OakBarn Brewery, 2026-11-20, Panel Update 8: "No such thing in skynet. In import become Graphic Widget"):
+// a picture on a Tab is a Graphic (Picture) Widget, so there are five Kinds.
 export const VAR_KINDS = {
   string: 'gS_Global_String',
-  graphic: 'gG_Global_Graphic',
   value: 'gV_Global_Value',
   bool: 'gB_Global_Boolean',
   time: 'gT_Global_Time',
@@ -40,7 +40,6 @@ export function kindChangeError(current, incoming, keyOf = el => el?._key) {
 // The sample: one gGlobal of each Kind, none of them on a Tab.
 export const SAMPLE_GLOBALS = [
   { name: 'gS_Brewer_Note', type: 'gGlobal', kind: 'string', initial: 'Add the yeast nutrient at 10 minutes' },
-  { name: 'gG_Brew_Day_Picture', type: 'gGlobal', kind: 'graphic', initial: 'Images/Skynet/Miscellaneous/Skynet_Brewery_Main.svg', backpath: 'Images/Skynet/Miscellaneous/Skynet_Brewery_Main.svg', background: 1 },
   { name: 'gV_Strike_Temp', type: 'gGlobal', kind: 'value', initial: '163', precision: 1, units: '°F', min: 32, max: 212 },
   { name: 'gB_Grain_Added', type: 'gGlobal', kind: 'bool', initial: 'false' },
   { name: 'gT_Mash_Rest', type: 'gGlobal', kind: 'time', initial: '01:00:00' },
@@ -57,7 +56,7 @@ export function samplesToAdd(elements, graphics = []) {
 //   new gV gV_Mash_Temp = 152               the short word
 //   new value gV_Mash_Temp = 152            a normal variable word, but the name starts gV_, so it is a gGlobal
 // "declare" works the same as "new". A name whose start does not fit its word is an error (new value gS_Note).
-// A Graphic gGlobal (gG_) has picture paths, so it is only made on the Variables screen.
+// There is no Graphic gGlobal (Panel Update 8): a gG_ name is an error; a picture is a Graphic (Picture) Widget.
 // The = 152 is the first value, used only when the gGlobal is made: a gGlobal keeps its value (Rule 1.22).
 export const G_DECLARE = {
   value: { long: 'gGlobalValue', short: 'gV', prefix: 'gV_', what: 'a Value (a number)', local: 'value' },
@@ -87,7 +86,7 @@ export function declareCheck(word, name) {
   const dw = declareWord(word);
   if (!dw) return null;
   const pk = prefixKind(name), d = G_DECLARE[dw.kind];
-  if (pk === 'graphic') return { error: `${name}: a name starting gG_ is a Graphic gGlobal (picture paths). Make it on the Variables screen, not in a Process.` };
+  if (pk === 'graphic') return { error: `${name}: gG_ is not a gGlobal Kind (there is no Graphic gGlobal): a picture is a Graphic (Picture) Widget on a Tab.` };
   if (dw.global) {
     if (!pk) return { error: `new ${word} ${name}: a ${d.long} name starts ${d.prefix}, for example ${d.prefix}${name}` };
     if (pk !== dw.kind) return { error: `new ${word} ${name}: ${G_DECLARE[pk].prefix} is for ${G_DECLARE[pk].what}, but ${word} is ${d.what}. Use ${d.prefix} or new ${G_DECLARE[pk].short} ${name}` };

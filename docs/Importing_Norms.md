@@ -154,8 +154,8 @@ variable) is up to the brewer who built the config. **The import asks the user**
 | Value | **gV_Global_Value** | Built |
 | Boolean | **gB_Global_Boolean** | Built |
 | String, no Background picture, just text in the Value | **gS_Global_String** | Built (a String becomes a String) |
-| String with a Background picture and a blank Value | **gG_Global_Graphic** (the picture paths go to its .backpath, .backpath_2, .backpath_3) | Norm (waits for the importer go) |
-| String with a Background picture **and** some text in the Value | **ask the user**: gS_Global_String or gG_Global_Graphic | Norm |
+| String with a Background picture and a blank Value | **a Graphic (Picture) Widget**, never a gGlobal: there is no Graphic gGlobal (OakBarn Brewery, 2026-11-20, Panel Update 8: "No such thing in skynet. In import become Graphic Widget"). Its picture paths go to the Widget's .backpath, .backpath_2, .backpath_3 | Norm (waits for the importer go) |
+| String with a Background picture **and** some text in the Value | a **gS_Global_String** for the text **and** a **Graphic (Picture) Widget** for the picture (Panel Update 8) | Norm |
 
 The name rules of section 6 (`gbl`, `RP_`, `x` ...) still apply to the Name.
 
@@ -167,7 +167,7 @@ place and size), and the Widget shows the gGlobal:
 | BruControl Global on a Workspace | On the Skynet Tab | Status |
 | --- | --- | --- |
 | gS_Global_String kind (text) | a **Text Widget** | Norm |
-| gG_Global_Graphic kind, used to show a background picture | a **Graphic (Picture) Widget** | Norm |
+| A Global with a background picture (there is no Graphic gGlobal) | a **Graphic (Picture) Widget** | Norm |
 | gV_Global_Value kind, used to show a value. The most used case, often only there to have the API or as a global variable | a **Value Widget** | Norm (no Value Widget yet) |
 | gT_Global_Time kind, used to show a time. Often only there for the API or as a global variable | **the user decides**: a **Time Widget**, or only a gGlobal of Kind Time | Norm (no Time Widget yet) |
 | gD_Global_DateTime kind | a **DateTime Widget**, or only a gGlobal of Kind DateTime (the user decides, like Time) | Norm (no DateTime Widget yet) |

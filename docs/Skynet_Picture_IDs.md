@@ -6,7 +6,7 @@ Process can use the number or the file name, for example `MyAlarm.setgraphic = 1
 
 In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with each picture, ready to print.
 
-200 pictures.
+201 pictures.
 
 | ID | File name | Group |
 |---:|---|---|
@@ -210,6 +210,7 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 235 | Skynet_Float_NC_Open.svg | Other Equipment |
 | 236 | Skynet_Float_NO_Closed.svg | Other Equipment |
 | 237 | Skynet_Float_NO_Open.svg | Other Equipment |
+| 238 | Skynet_Emergency_Off.svg | On Off |
 
 ## Retired numbers (never used again)
 

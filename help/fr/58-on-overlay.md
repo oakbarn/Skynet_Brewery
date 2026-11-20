@@ -6,7 +6,7 @@ Au lieu de deux images (une pour **On**, une pour **Off**), un élément peut ga
 
 ## Quels éléments l'ont {#which-items-have-it}
 
-Chaque Device ou Widget qui a **Picture when on** et **Picture when off** (voir On and Off pictures) a aussi **On overlay**, juste en dessous. Ce sont les Digital Outputs (pompes, vannes, brûleurs, résistances ...), les Digital Inputs, les Switches, les Alarms (montrée tant qu'elle sonne), les PWM et Analog Outputs, PID, Duty Cycle, Hysteresis, les Timers, les Steppers, les Flow meters, les Sound Players et un Widget Picture qui s'allume avec un autre élément.
+Chaque Device ou Widget qui a **Picture when on** et **Picture when off** (voir On and Off pictures) a aussi **On overlay**, juste en dessous. Ce sont les Digital Outputs (pompes, vannes, brûleurs, résistances ...), les Digital Inputs, les Switches, les Alarms (montrée tant qu'elle sonne), les PWM et Analog Outputs, PID, Duty Cycle, Hysteresis, les Timers, les Steppers, les Flow meters, les Audio Widgets et un Widget Picture qui s'allume avec un autre élément.
 
 **Les chauffages sont On tant qu'ils sont Enabled.** Un PID, une Hysteresis ou un Duty Cycle compte comme On dès qu'il est Enabled jusqu'à ce qu'il soit Disabled, pas seulement pendant que sa sortie chauffe. Sa superposition (ou sa seconde image) s'affiche tout le temps qu'il est Enabled, de même que la lueur du chauffage d'une cuve et un Widget Picture qui s'allume avec lui.
 

@@ -15,7 +15,8 @@ grey center** so it is easy to see on a Tab, never smaller than 40 pixels.
 3. Drag it off again to take it off the IP.
 
 With a hose on it, the Quick Disconnect passes flow to the IP it sits on, so the flow runs on through the valve when the
-valve is open. With nothing on it, it is shut: no flow shows there.
+valve is open. **With nothing on it, it is open**, like a real Quick Disconnect: water that is pushed into it sprays out of it, with
+the water splash. A hose on it whose other end is loose sprays out of that end.
 
 ## The Quick Disconnect hose
 

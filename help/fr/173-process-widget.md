@@ -33,6 +33,10 @@ erreur dans son code), un message en haut de l'écran dit pourquoi, et le Widget
 Puis **Ask before starting or stopping**, **Picture**, **Picture turns on with**, **X**, **Y**, **Width** et **Height** (200 x 80
 au départ) et le **Widget Type**.
 
+**Hide while running** (désactivé au départ) : activé, le Widget se cache (`.visible = false`) dès que son Process démarre, et se
+montre de nouveau quand le Process s'arrête. Pour un bouton qui démarre quelque chose, comme **Start Brew Day** dans les exemples.
+Laissez-le désactivé sur un bouton Start / Stop, pour qu'un clic puisse aussi arrêter le Process.
+
 ## Une image dessus {#a-picture-on-it}
 
 Un Process Widget peut montrer une **Picture** entre son Label et son bouton, par exemple un interrupteur à flotteur sur un bouton

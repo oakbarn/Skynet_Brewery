@@ -23,6 +23,9 @@ Slider. Its Properties show which one it is (Widget Type, read only). For anothe
 Think of a Boolean Widget with a **Linked Device** as a **Clone of that Device** in what it does, with the look of a Switch,
 Slider, LED and so on. Put a Slider on any Tab, link it to the Mash pump, and it turns the pump ON and OFF with no Process.
 
+**Slider on top (Layer 1):** a plain Switch can show the green Slider on top, in its top right corner. One click on the Slider, or
+anywhere else on the Switch, turns it ON or OFF.
+
 ## Adding one
 
 In Edit layout, **Select Widget Type > Semi_Widgets_Devices**, then pick Switch, Slider, Checkbox, Lighted Button, Push Button,

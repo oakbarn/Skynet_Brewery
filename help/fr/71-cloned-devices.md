@@ -18,6 +18,8 @@ Faites un Clone avec le bouton **⧉ Clone Device** dans la barre Edit layout (A
 
 Un Clone fait sur le Build Tab va vers un Tab avec **Finish Build**, comme tout ce qui y est construit.
 
+Les **Timers** peuvent aussi être clonés : ils ont leur propre groupe dans la liste ⧉ Clone Device.
+
 ## Le nom du Clone {#the-clone-s-name}
 
 Skynet fait le nom, et on ne peut pas le retaper : le nom du parent, puis `_Clone_` et un numéro.

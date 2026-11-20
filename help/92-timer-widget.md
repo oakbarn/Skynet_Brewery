@@ -27,6 +27,12 @@ Rest the mouse on a field's name to see what it is for (hover help).
 - **Seconds only in the last minute**: on, a Timer counting down shows just the seconds (**45**) once less than one minute is left.
 - **X**, **Y**, **Width** and **Height**, and the **Widget Type** greyed out last.
 
+**Format** (it was called Digits) picks how the time shows: hh:mm:ss, hh:mm, mm:ss and more. A Process sets it with `.format`, for
+example `wgt_TMR_Boil_BH.format = "hh:mm"`; `""` puts back its Properties' pick.
+
+**One Timer on several Tabs:** ⧉ Clone Device lists the **Timers** too. A Clone is the same Timer: ▶ ■ ↺ and Set on any of them act on it
+([Cloned Devices](71-cloned-devices)).
+
 ## In a Process
 
 ```

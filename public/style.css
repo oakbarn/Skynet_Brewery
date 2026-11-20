@@ -261,6 +261,9 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el .slider .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.5); transition: left .15s; }
 .el.on .slider { background: var(--ok); }
 .el.on .slider .knob { left: 29px; }
+.el.swLayer1 .slider.layer1 { position: absolute; top: 3px; right: 3px; margin: 0; width: 32px; height: 18px; border-radius: 9px; z-index: 3; cursor: pointer; }
+.el.swLayer1 .slider.layer1 .knob { top: 2px; left: 2px; width: 14px; height: 14px; }
+.el.swLayer1.on .slider.layer1 .knob { left: 16px; }
 .el.k-switch .vl, .el.k-pushbutton .vl, .el.k-momentary .vl { font-size: 13px; flex: none; }
 .el .ledbtn { flex: 1; align-self: center; aspect-ratio: 1; max-height: 70%; min-height: 24px; margin: 2px 0 6px; border-radius: 50%; border: 3px solid #444; background: radial-gradient(circle at 35% 30%, #6a2b2b, #2a0d0d 70%); box-shadow: 0 3px 0 #111; }
 .el.on .ledbtn { background: radial-gradient(circle at 35% 30%, #ffb3a8, #ff3b2a 45%, #a3150b 80%); box-shadow: 0 0 14px 4px rgba(255, 59, 42, .7); }
@@ -1296,6 +1299,9 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .mfPrev { position: relative; margin: 6px 0; }
 /* One-click method spots under a Heating Element (Rule 6.19): one click switches it to that heating method; the one in use is lit */
 /* an invisible box only as wide as the methods ticked, its middle under the middle of the picture (OakBarn Brewery, 2026-11-09) */
+#ws .hmHot { position: absolute; z-index: 6; cursor: pointer; pointer-events: auto; border-radius: 2px; background: transparent; }
+#ws .hmHot:hover, #ws .hmHot:focus-visible { background: rgba(255, 255, 255, 0.28); outline: 1px solid rgba(255, 255, 255, 0.5); }
+#ws .hmHot.shown { background: rgba(255, 255, 255, 0.12); }
 #ws .hmSpots { position: absolute; display: flex; justify-content: center; gap: 3px; z-index: 6; pointer-events: auto; white-space: nowrap; transform: translateX(-50%); background: transparent; border: 0; }
 /* Fritz, 2026-11-07: the method in use is Red, the others Yellow (orange is the Element's own glow while on) */
 #ws .hmBtn, .mBalloons .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid #c9a800; background: #ffd400; color: #000; cursor: pointer; }
@@ -1595,6 +1601,7 @@ body.eqViewing #ws { pointer-events: none; }
 /* A Heating Element's SV box (Panel Updates 40): the number a person sets, green like a panel controller's SV, on the same line as what
    it is doing; one click types a new one in place (app.js svEdit) */
 .el .vl .svStat { margin-right: .45em; }
+.el .vl .svStat.steady { display: inline-block; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .el .vl .svBox { display: inline-flex; align-items: baseline; gap: .3em; padding: 0 .35em; border: 1px solid rgba(61, 220, 90, .55); border-radius: 4px;
   background: rgba(0, 0, 0, .55); color: #3ddc5a; font-family: var(--mono); font-weight: 600; text-shadow: 0 0 6px rgba(61, 220, 90, .45); cursor: pointer; white-space: nowrap; }
 .el .vl .svBox:hover { border-color: #3ddc5a; }
@@ -1621,3 +1628,9 @@ body.eqViewing #ws { pointer-events: none; }
 .tuneRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
 .tuneRow label { white-space: nowrap; }
 .tuneRow input { width: 90px; }
+
+/* Emergency Off (Rule 6.41, Panel Update 8): Skynet's E-stop picture in the top bar, on every page */
+#top .eOff, .bar .eOff { padding: 0; margin-right: 8px; border: 0; background: transparent; border-radius: 50%; cursor: pointer; line-height: 0; }
+#top .eOff svg, .bar .eOff svg { display: block; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6)); }
+.eOff:hover svg, .eOff:focus-visible svg { transform: scale(1.08); }
+.eOff:active svg { transform: scale(0.94); }

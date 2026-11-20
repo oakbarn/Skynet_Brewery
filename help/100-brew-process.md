@@ -86,8 +86,8 @@ The Brew Process screen shows every value as it is now.
 |---|---|
 | `ask "Add the grain, then press Done"` | a pop-up on every screen with **✔ Done**; the Process waits until an operator or Admin presses it. Text codes work (`\b`, `\n` ...). |
 | `ask "Set the Run Time (hh:mm:ss)" gblT_SetTimer_Water` | the same pop-up with a **box for the answer**, filled with what the gGlobal or Value Widget holds now; **✔ Done** puts the answer in it (a time as hh:mm:ss, a number, or words), then the Process goes on. Skynet Rule 16.5. |
-| `close_all_valves` | closes every valve on the **Close all valves** list |
-| `open_all_valves` | opens every valve on the **Open all valves** list (how things are left after cleaning) |
+| `close_all_valves` | closes every valve on the **Close all valves** list (tap water valves always), then asks **Have you closed all Manual Valves?** and waits for **✔ Done** |
+| `open_all_valves` | opens every valve on the **Open all valves** list (never a tap water valve; how things are left after cleaning), then asks **Have you opened all Manual Valves?** and waits for **✔ Done** |
 | `all_pumps_off` | turns every pump off |
 | `open_valve DigiBoil_Spigot` | opens any one valve. A Manual one (a Manual valve, a Manual Valve Widget, a DigiBoil or Brewzilla Spigot) pops up and waits until it is done by hand; a motorized one is switched at once. See [DigiBoil and Brewzilla](158-digiboil-and-brewzilla) |
 | `close_valve DigiBoil_Spigot` | closes any one valve, the same way |
@@ -100,6 +100,8 @@ Every valve that a Process switches (Electro_Mechanical, such as a Motorized Bal
 - **On the Open all valves list** (on to start)
 
 Turn one off to leave that valve out. A **tap water valve** is always on the Close all list and never on the Open all list, so tap water can't be left running: its Properties show On Close List on and On Open List off, both greyed out. The last step of **Clean** opens every valve on the Open List (never a tap water valve) so the brewery dries. A **Manual** valve is on neither list, because a Process asks for it by name.
+
+Skynet can't turn a Manual valve, so after closing or opening its list the Process shows **one** reminder, **Have you closed all Manual Valves?** or **Have you opened all Manual Valves?**, and waits for **✔ Done**. A brewery with no Manual valve gets no reminder.
 
 ## Writing your own Template
 

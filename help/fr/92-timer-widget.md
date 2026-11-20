@@ -27,6 +27,12 @@ Posez la souris sur le nom d'un champ pour voir à quoi il sert (aide au survol)
 - **Seconds only in the last minute** : activé, une minuterie qui décompte ne montre que les secondes (**45**) quand il reste moins d'une minute.
 - **X**, **Y**, **Width** et **Height**, et le **Widget Type** grisé en dernier.
 
+**Format** (avant : Digits) choisit comment le temps s'affiche : hh:mm:ss, hh:mm, mm:ss et plus. Un Process le règle avec `.format`,
+par exemple `wgt_TMR_Boil_BH.format = "hh:mm"` ; `""` remet le choix de ses Properties.
+
+**Un Timer sur plusieurs Tabs :** ⧉ Clone Device liste aussi les **Timers**. Un Clone est le même Timer : ▶ ■ ↺ et Set sur n'importe lequel agissent sur lui
+([Devices clonés](71-cloned-devices)).
+
 ## Dans un Process {#in-a-process}
 
 ```

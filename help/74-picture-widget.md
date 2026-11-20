@@ -25,7 +25,7 @@ Double-click a Picture Widget to open its Properties. They look like a Pump's: t
 **Turns on with** picks what turns the picture on:
 
 - **None**: a still picture. The **Overlay** and **Picture when on** are greyed out, because nothing turns it on.
-- **On / off Devices and Widgets**: an output, a switch, an input, an alarm, a sound player, a timer or a true / false variable. The picture is On while that one is on.
+- **On / off Devices and Widgets**: an output, a switch, an input, an alarm, a Audio Widget, a timer or a true / false variable. The picture is On while that one is on.
 - **Heaters: on while Enabled**: a PID, Hysteresis, Duty Cycle or PWM output. The picture is On while the heater is **Enabled** (a PWM output: while it is above 0 %), not only while its output fires.
 
 Double-click the dropdown to open the Properties of the one picked (see [Double-click in picker dropdowns](73-double-click-in-pickers)).

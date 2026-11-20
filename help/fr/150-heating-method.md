@@ -208,6 +208,14 @@ Plusieurs résistances peuvent être en marche en même temps (par exemple sur d
 Exemple : la résistance HLT de Tartan sur le port 42 du Main Panel montre **Duty Cycle** et **PID** : un clic sur Duty Cycle pour l'ébullition, un
 clic sur PID pour tenir la température d'empâtage.
 
+**Montrer ou cacher les boutons de méthode.** Les boutons de méthode sont **cachés** au départ, pour que le Tab reste propre. Une
+fine bande juste **à l'extérieur de la paroi du Vessel**, là où entre la résistance (à côté de l'image d'une résistance seule), les
+montre en **un clic** et les cache au suivant. Ça marche avec n'importe quelle image de Vessel. Chaque écran garde son propre choix, et
+rien ne se met en marche ni ne s'arrête.
+
+**Un affichage qui ne saute pas.** La sortie d'un PID montre toujours deux chiffres (05 %, 45 %, puis 100 %), et idle, HEAT et COOL
+prennent la même place, donc la case SV à côté ne bouge jamais.
+
 ## Ctrl + clic pour les Settings d'une méthode {#ctrl-click-for-a-method-s-settings}
 
 Sur un Tab en marche (pas en Edit layout), **Ctrl + cliquez un bouton de méthode** (**⌘ + clic** sur un Mac, où Ctrl + clic est le clic

@@ -35,7 +35,7 @@ export function elementTopic(e) {
     case 'deadband': return ['deadband-device'];      // as in BruControl (Fritz, 2026-11-05, Rule 6.17, Help 126)
     case 'stepper': return ['stepper-motors'];
     case 'alarm': return e.alarmClass ? ['alarm-widget'] : ['alarms-and-sound'];      // the Alarm Widget subclasses (Fritz, 2026-11-02)
-    case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
+    case 'soundPlayer': return ['alarms-and-sound', 'audio-widget'];
     case 'timer': return ['timer-widget'];
     case 'chart': return ['graph-widget'];      // the Graph Widget (was Chart), Rule 1.26
     case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return ['value-time-and-datetime-widgets'];     // Rule 1.23 (Fritz, 2026-11-05)      // Timer Widget Properties (Fritz, 2026-10-29)

@@ -23,6 +23,9 @@ Slider. Ses Properties montrent lequel c'est (Widget Type, lecture seule). Pour 
 Voyez un Widget Boolean avec un **Linked Device** (Device lié) comme un **Clone de ce Device** pour ce qu'il fait, avec l'aspect d'un Switch,
 d'un Slider, d'une LED, etc. Mettez un Slider sur n'importe quel Tab, liez-le à la pompe d'empâtage, et il allume et éteint la pompe sans Process.
 
+**Slider on top (Layer 1) :** un Switch simple peut montrer le Slider vert par-dessus, dans son coin en haut à droite. Un clic sur le
+Slider, ou n'importe où ailleurs sur le Switch, le met sur ON ou sur OFF.
+
 ## En ajouter un {#adding-one}
 
 En Edit layout, **Select Widget Type > Semi_Widgets_Devices**, puis choisissez Switch, Slider, Checkbox, Lighted Button, Push Button,

@@ -11,6 +11,7 @@ import { SKYNET_CONSTANT_GROUPS, SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstan
 import { setRich, NAMED_COLORS, setTempUnitSource } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
+import { NUM_FORMATS, NUM_FORMAT_DEFAULT, FIXED_PLACES_DEFAULT, CURRENCY_SIGN_DEFAULT, formatNumber } from './numformat.js';
 import { dialSvg, DIAL_DEFAULTS } from './dial.js';
 import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
@@ -2749,6 +2750,10 @@ function buildEl(e) {
   const bst = SEMI_KINDS[e.type] && !e.imageOff && !e.imageOn ? boolStyleOf(e) : '';
   if (SWITCH_LOOKS.includes(bst)) n.classList.add('bs-' + bst);
   if (bst === 'slider') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
+  // a plain Switch can show the green Slider on top as its Layer 1 (OakBarn Brewery, 2026-11-20, Panel Update 8, item 18: "It should
+  // be able to be clicked to toggle on but have a [slider] as layer one that also works"): a click on the Slider or anywhere else on the
+  // Switch toggles it, the same one click
+  if (e.type === 'switch' && !SWITCH_LOOKS.includes(boolStyleOf(e)) && e.sliderLayer) { n.classList.add('swLayer1'); n.append(h('div', { class: 'slider layer1', title: 'One click toggles it ON or OFF' }, h('div', { class: 'knob' }))); }
   if (bst === 'checkbox') n.append(h('div', { class: 'bschk' }));
   if (bst === 'lighted') n.append(h('div', { class: 'ledbtn' }));
   if (btnKind(e) === 'pushbutton' || btnKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
@@ -2984,12 +2989,38 @@ function heatSv(e0, e, v) {
   const pe = e.input && S.config.elements.find(x => x.name === e.input);
   return svTurn({ prop: 'target', num: Number.isFinite(t) ? t : null, unit: pe?.units || '°F', k, sp: true });
 }
+// A smooth temperature on the screen (OakBarn Brewery, 2026-11-20, Panel Update 8, item 4: "Smooth the Temperature so it does not jump
+// on the screen"; "It was jittery and distracting. More smoothin in simulation mode"): a Temperature Probe shows the average of its
+// readings from the last 5 seconds, or the last 15 seconds when its board is in Simulation (its readings jump more). Only what is shown: the Brain, its
+// control methods, Processes, Alarms, the Database and the .API all use the real reading. A jump of 2 degrees or more (a probe moved
+// into hot water) shows at once.
+const SMOOTH_MS = 5000, SMOOTH_SIM_MS = 15000, SMOOTH_JUMP = 2;
+const smoothSeen = new Map();          // probe name -> [[time, reading], ...]
+function smoothTemp(name, val, sim = false) {
+  const x = Number(val); if (val === null || val === undefined || val === '' || !Number.isFinite(x)) return val;
+  const now = Date.now(), list = smoothSeen.get(name) || [], last = list[list.length - 1];
+  if (last && Math.abs(x - last[1]) >= SMOOTH_JUMP) list.length = 0;
+  if (!last || last[1] !== x || now - last[0] >= 1000 || !list.length) list.push([now, x]);
+  while (list.length > 1 && now - list[0][0] > (sim ? SMOOTH_SIM_MS : SMOOTH_MS)) list.shift();
+  smoothSeen.set(name, list);
+  return list.reduce((a, [, r]) => a + r, 0) / list.length;
+}
 // what it is doing, without the number its SV box shows
 function svStatus(e, v, on, sv) {
   if (!on) return e.offText ?? 'OFF';
   if (sv.k === 'dutyCycle') return '';
   if (sv.k === 'hysteresis') return v.output ? (e.onText ?? 'ON') : 'idle';
-  return `${fmtVal({ precision: 0 }, v.value)} %`;
+  return pidPct(v.value);
+}
+// Steady widths (OakBarn Brewery, 2026-11-20, Panel Update 8, items 3 and 5: "have the % as 2 digits always unless 100% That keeps the
+// display from jumping rapidly"; "have idle, Heat and Cool all the same size so it does not jump"): a PID's output is always two
+// digits (00 % to 99 %, then 100 %), and what it is doing sits in a box as wide as the longest word it can show, so the SV box beside
+// it never moves.
+const pidPct = n => { const r = Math.round(Math.min(100, Math.max(0, Number(n) || 0))); return `${r >= 100 ? '100' : String(r).padStart(2, '0')} %`; };
+function svStatWidth(e, sv) {
+  if (sv.k === 'dutyCycle') return 0;
+  const words = sv.k === 'hysteresis' ? ['idle', e.onText ?? 'ON', e.coolText ?? '', e.offText ?? 'OFF'] : ['100 %', e.offText ?? 'OFF'];
+  return Math.max(...words.map(w => String(w).replace(/\{[^}]*\}/g, '').length));
 }
 // an SV box shows its Setpoint in the Units; .own keeps the probe's units, so what is typed goes back into them (Rule 2.59)
 function svTurn(sv) {
@@ -2999,12 +3030,12 @@ function svTurn(sv) {
 }
 const svFmt = sv => sv.num === null ? '' : fmtVal(sv.sp ? { precision: 1 } : {}, sv.num);      // a Setpoint to 0.1 degree (65.5556 shows 65.6)
 const svText = sv => sv.num === null ? '-' : `${svFmt(sv)}${sv.unit === '%' ? ' %' : ' ' + sv.unit}`;
-function fillSv(vl, text, sv) {
+function fillSv(vl, text, sv, wide = 0) {
   const box = h('span', { class: 'svBox' + (sv.sp ? ' sp' : ' dc'), 'data-prop': sv.prop, 'data-num': svFmt(sv), ...(sv.own ? { 'data-own': sv.own } : {}),
     title: sv.sp ? 'SV: the Setpoint. One click to type a new one, then Enter (Esc puts it back).' : 'Duty cycle %. One click to type a new one, then Enter (0 turns it Off, above 0 turns it On).' },
     ...(sv.sp ? [h('span', { class: 'svTag' }, 'SV')] : []), h('span', { class: 'svNum' }, svText(sv)));
   const parts = [];
-  if (text) { const st = h('span', { class: 'svStat' }); setRich(st, text); parts.push(st); }
+  if (text) { const st = h('span', { class: 'svStat' + (wide ? ' steady' : ''), ...(wide ? { style: `min-width:${wide}ch` } : {}) }); setRich(st, text); parts.push(st); }
   vl.replaceChildren(...parts, box);
 }
 // one click on the SV box: type the new number in place
@@ -3162,7 +3193,7 @@ function fillEl(n, e0) {
       n.classList.toggle('longtext', vkKind(e) === 'longstring');
       break;
     case 'valueWidget': case 'codeValueWidget': case 'timeWidget': case 'dateTimeWidget':
-      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+      text = (e.type === 'valueWidget' && (v.numformat || e.numFormat) ? formatNumber(v.value, v.numformat || e.numFormat, v.precision ?? e.precision, e.currencySign || CURRENCY_SIGN_DEFAULT) : fmtVal(e, v.value)) + (e.units ? ' ' + e.units : '');      // its Format (Panel Update 8)
       { const f = v.showas || e.showAs, dt = f && e.type !== 'valueWidget' ? dataWDt(e) : '';      // its format (Rule 2.45)
         if (dt === 'time') text = formatTime(v.value, f); else if (dt === 'datetime') text = formatDateTime(v.value, f); }
       break;
@@ -3171,13 +3202,13 @@ function fillEl(n, e0) {
       // a Heating Element run by a control method (Rule 6.19): what it is doing, like the PID's own "45 %  ▸ 152"
       if (isHeatElem(e) && on && v.method && heatMethodKey(v.method) !== 'onoff') {
         const hm = heatMethodKey(v.method);
-        text = hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? `${v.output ? (e.onText ?? 'ON') : 'idle'}  ▸ ${spNum(v.target, probeOf(e)?.units)}` : `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${spNum(v.target, probeOf(e)?.units)}`;
+        text = hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? `${v.output ? (e.onText ?? 'ON') : 'idle'}  ▸ ${spNum(v.target, probeOf(e)?.units)}` : `${pidPct(v.value)}  ▸ ${spNum(v.target, probeOf(e)?.units)}`;
       }
       // its SV box (Panel Updates 40): the number a person sets, one click to type a new one; the box shows it, so the text drops it
       if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
-    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + readTxt(e, v.value);
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + readTxt(e, e.type === 'temperature' ? smoothTemp(e.name, v.value, simDev(e.device)) : v.value);
       if (e.type === 'temperature') sv = probeSv(e0, e, v);      // its PV and SV (Panel Updates 41)
       break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
@@ -3203,7 +3234,8 @@ function fillEl(n, e0) {
       n.classList.toggle('almPre', e.alarmClass === 'prehop');
       if (almHasString(e)) text = editing ? (e.string ?? '') : (v.string ?? e.string ?? '');      // its .string, with Rich Text codes (Rule 7.21)
       almLayers(n, e, v); break;
-    case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
+    case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`;
+      if (v.path_image || e.pathImage) img = v.path_image || e.pathImage; break;      // its one picture (Audio Widget, Panel Update 8)
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'chart': fillChart(n, e0, editing ? {} : v); break;          // the Chart Widget (Rule 1.26): its line graph, not a text
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
@@ -3285,7 +3317,7 @@ function fillEl(n, e0) {
   }
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
   else if (sv?.k === 'probe') fillPvSv(vl, text, sv);      // a Temperature Probe's PV over its SV (Panel Updates 41)
-  else if (sv) fillSv(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text, sv);      // a Heating Element's text and its SV box
+  else if (sv) fillSv(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text, sv, svStatWidth(e, sv));      // a Heating Element's text and its SV box
   else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
   // A Timer's look is its Style (Skynet or User, public/styles.js); a Process's .fore / .back go over it
@@ -3473,9 +3505,33 @@ const simDev = d => !d || S.devices.find(x => x.name === d)?.connection === 'sim
 // many Ticked"), its middle under the middle of the picture. No Turn Off button: one click on the picture does that (2026-11-09).
 // Short method names (DO, DutyC, HYS, PID ...) when its Properties say so (methodShort).
 const methodSpots = e => { const ok = allowedMethods(e), l = HEAT_METHODS.filter(([k]) => ok.includes(k)); return l.length > 1 ? l : []; };      // every allowed method (Rule 6.19), when 2 or more
+// The Methods hotspot (OakBarn Brewery, 2026-11-20, Panel Update 8: "Get rid of clutter ... just Outside the Vessel, adjacent to the
+// side of a vessel ... so it would work with any graphic (skynet or User) and as a is a one click hotspot toggle the Methods to be in
+// View or Not"; Rule 6.19). The method buttons start hidden. A thin strip just outside the Vessel wall where the Element goes in (beside
+// the picture of an Element on its own) shows them with one click, and hides them with the next. Kept on this screen only.
+const METHODS_SHOWN_KEY = 'skn_methodsShown';
+const methodsShown = (() => { try { return new Set(JSON.parse(localStorage.getItem(METHODS_SHOWN_KEY) || '[]')); } catch { return new Set(); } })();
+function toggleMethods(name) {
+  if (methodsShown.has(name)) methodsShown.delete(name); else methodsShown.add(name);
+  try { localStorage.setItem(METHODS_SHOWN_KEY, JSON.stringify([...methodsShown])); } catch { /* private window: this screen only */ }
+  renderWs();
+}
+const METHODS_HOT_W = 10;          // as wide as the Element's end plate at the Vessel wall
+function methodsHot(e, left, top, hh) {
+  const word = `${e.label || e.name}: one click shows or hides its heating Methods (Direct, Duty Cycle, Hysteresis, PID)`;
+  return h('div', { class: 'hmHot' + (methodsShown.has(e.name) ? ' shown' : ''), 'data-dev': e.name, title: word, 'aria-label': word, role: 'button',
+    style: `left:${left}px;top:${top}px;width:${METHODS_HOT_W}px;height:${hh}px` });
+}
 function drawMethodSpots(w) {
-  for (const old of $$('#ws .hmSpots')) old.remove();
+  for (const old of $$('#ws .hmSpots, #ws .hmHot')) old.remove();
   for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
+    const pt = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
+    if (pt) {        // just outside the Vessel wall, on the side the Element goes in
+      const l = parseFloat(pt.style.left), t = parseFloat(pt.style.top), pw = parseFloat(pt.style.width), ph = parseFloat(pt.style.height);
+      const vw = parseFloat(pt.parentNode.style.width) || pt.parentNode.offsetWidth || 0, right = l + pw / 2 > vw / 2;
+      pt.parentNode.append(methodsHot(e, right ? Math.max(l + pw, vw) : Math.min(l, 0) - METHODS_HOT_W, t, ph));
+    } else if (!e.integratedIn) $('#ws').append(methodsHot(e, (e.x ?? 0) + (e.w ?? 60), e.y ?? 0, e.h ?? 60));
+    if (!methodsShown.has(e.name)) continue;
     const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
       h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}. Ctrl + Click (⌘ + Click on a Mac): the ${word} Settings of ${e.label || e.name}, nothing turned On or Off (admins)` }, methodButtonWord(k, !!e.methodShort))));
     const part = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
@@ -3491,6 +3547,11 @@ function litSpots(name) {
     b.classList.toggle('cur', b.dataset.k === m);
   }
 }
+$('#ws').addEventListener('click', ev => {
+  const hot = !editing && ev.target.closest('.hmHot'); if (!hot) return;
+  ev.stopPropagation(); ev.preventDefault();
+  toggleMethods(hot.dataset.dev);          // only what this screen shows: nothing turns On or Off, any role
+}, true);
 $('#ws').addEventListener('click', ev => {
   const b = ev.target.closest('.hmBtn'); if (!b) return;
   ev.stopPropagation(); ev.preventDefault();
@@ -4289,8 +4350,10 @@ function ipNode(id, ws) {
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
   if ((isMv(g) && !mvOpen(g)) || g?.fitting === 'cap' || cappedIps().has(id)) return { closed: true };
-  // a Quick Disconnect (Rule 5.28): with a hose on it, it passes flow to the IP it sits on; with nothing on it, it is shut
-  if (isQd(g)) return pipesOn(id, ws).length ? { key: id, pass: true } : { closed: true };
+  // a Quick Disconnect (Rule 5.28) is open, never an End Cap (OakBarn Brewery, 2026-11-20, Panel Update 8: "A QD is open and not an
+  // end cap. It would spray liquid like the Hose Bib"): on an IP with a hose on it, or with pipes on both sides, it passes flow; with
+  // nothing on its open side it is an open end, and what pushes into it sprays out of it
+  if (isQd(g)) { const n = pipesOn(id, ws).length; return n >= (g.qdOn ? 1 : 2) ? { key: id, pass: true } : { key: id, end: true, qdOpen: true }; }
   // a coupling joining two or more pipes / hoses passes flow; a hose end with nothing else on it is an open end (flow pours out)
   if (g?.fitting === 'coupling' && pipesOn(id, ws).length < 2) return { key: id, end: true };
   // a plain IP on its own (the open end of a pipe) with a hose or another pipe joined to it passes flow on into that pipe, the same
@@ -4351,7 +4414,7 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = nu
   const stubs = [];                              // { key, p }: a pipe from an open node to a closed valve (Rule 5.45)
   // an open end, where flow pours out into the air: a pipe end let go in the air, an open-end coupling, or a plain IP with one pipe
   // on it that is not on a vessel or any equipment (OakBarn Brewery, 2026-11-16: "a graphic of water spurting out the end")
-  const openEnd = key => { const n = nodes.get(key); if (n?.air) return !n.touch; const g = L().graphics.find(x => x.id === key && x.kind === 'ip' && x.workspace === ws);
+  const openEnd = key => { const n = nodes.get(key); if (n?.air) return !n.touch; if (n?.qdOpen) return true; const g = L().graphics.find(x => x.id === key && x.kind === 'ip' && x.workspace === ws);
     return !!g && !g.attachTo && !g.port && (g.fitting === 'coupling' || !isFitting(g)) && pipesOn(key, ws).length === 1; };
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
     const a = node(p.from), b = node(p.to);
@@ -4909,6 +4972,16 @@ function renderPipes() {
     drawn.set(p.id, { g, width });
   }
   $('#ws').append(...mine);         // a pipe being drawn has no place yet: on top until the Tab is drawn again
+  // a Quick Disconnect on an IP with nothing on it is open (Rule 5.28, Panel Update 8): what flows into it sprays out of it, pointing
+  // away from what it sits on
+  for (const sp of spouts.filter((x, i, a) => String(x.p?.id).startsWith('qd:') && a.findIndex(y => y.p?.id === x.p.id) === i)) {
+    const q = L().graphics.find(x => x.id === sp.p.id.slice(3)), c = q && ipPoint(q.id, w.name); if (!c) continue;
+    const on = q.qdOn && ipPoint(q.qdOn, w.name), dn = q.qdOn && devOfIp(q.qdOn), e = dn !== null && dn !== undefined ? elNamed(dn) : null;
+    const mid = e ? [(e.x || 0) + (e.w || 0) / 2, (e.y || 0) + (e.h || 0) / 2] : on ? [on[0], on[1] + 1] : [c[0], c[1] + 1];
+    const a = Math.atan2(c[1] - mid[1], c[0] - mid[0]) || -Math.PI / 2, sg = mk('g', { class: 'qdSpout', 'pointer-events': 'none' });
+    sg.append(waterSpout(mk, c, a, 50, pipeFlowColor({ ...srcs.get(sp.p.id), tab: tabFlow }), false));
+    svg.append(sg);
+  }
   // a pipe that crosses another with no joint (Rule 5.44): the up-and-down pipe is drawn again over the crossing, in the higher
   // of the two pipes' places in the Layer Order, with a thin dark edge either side, so the level pipe goes behind it
   pipeCrossings(pipes).forEach((x, k) => {
@@ -5844,7 +5917,7 @@ const ADD_MENU = [
   ]],
   ['Widgets (app only, no board pin)', [
     ['Picture Widget', 'picture'],
-    ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Pre-Hop Alarm (a text box on a Skynet watermark)', 'alarm', '', { kind: 'prehop', alarmClass: 'prehop' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
+    ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Pre-Hop Alarm (a text box on a Skynet watermark)', 'alarm', '', { kind: 'prehop', alarmClass: 'prehop' }], ['Audio Widget (plays one sound file; pauses for alarms; starts hidden)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Graph (a line graph of recorded readings)', 'chart', 'Graph'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
     [`${PROCESS_WIDGET_WORD} (shows a Process; one click starts or stops it)`, PROCESS_WIDGET_TYPE, 'Script'],      // Rule 1.31
@@ -5878,8 +5951,8 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (['pump', 'valve', 'propValve'].includes(pick)) e.imageOverlay = newOverlay(pick === 'pump' ? 'pump' : 'valve');      // the Default Pump or Valve Profile (Rule 2.42)
   if (e.type === 'digitalIn' && e.mode === 'momentary') e.lockout = newLockout();      // a new Pulse button: Push Lockout in Settings > Panel settings
-  if (!D.visible) e.visibility = 'hidden';
-  if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = (d.lbl ?? d.word) + '_' + i; e.dataType = d.dt; if (type === 'valueWidget' || type === 'codeValueWidget') e.precision = 2; if (type === 'codeValueWidget') { e.format = 'value'; e.code = ''; } }     // a Label from the start (Rule 18.15)
+  if (!D.visible || type === 'soundPlayer') e.visibility = 'hidden';      // an Audio Widget starts hidden ("visible would default to no", Panel Update 8)
+  if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = (d.lbl ?? d.word) + '_' + i; e.dataType = d.dt; if (type === 'codeValueWidget') e.precision = 2; if (type === 'valueWidget') { e.numFormat = NUM_FORMAT_DEFAULT; e.precision = FIXED_PLACES_DEFAULT; /* a new Value Widget: Fixed, 1 Decimal (Panel Update 8) */ } if (type === 'codeValueWidget') { e.format = 'value'; e.code = ''; } }     // a Label from the start (Rule 18.15)
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
   if (SEMI_KINDS[type] && !kind) { e.w = SEMI_KINDS[type].w; e.h = SEMI_KINDS[type].h; }
@@ -6156,11 +6229,13 @@ for (const [id, t] of [['#addValueW', 'valueWidget'], ['#addCodeValueW', 'codeVa
 const CLONE_GROUPS = [['Pumps', e => e.subtype === 'pump'], ['Valves', e => e.subtype === 'valve' || e.subtype === 'propValve'],
   ['Heat (PID, Hysteresis, Deadband, Duty Cycle)', e => ['pid', 'hysteresis', 'deadband', 'dutyCycle'].includes(e.type)], ['Temperature probes', e => e.type === 'temperature'],
   ['Other outputs', e => ['digitalOut', 'pwmOut', 'analogOut'].includes(e.type)], ['Motors', e => e.type === 'stepper'],
-  ['Inputs and sensors', e => ['digitalIn', 'analogIn', 'flowMeter', 'scale'].includes(e.type)], ['Other Devices', () => true]];
+  ['Inputs and sensors', e => ['digitalIn', 'analogIn', 'flowMeter', 'scale'].includes(e.type)],
+  ['Timers', e => e.type === 'timer'],      // a Timer can be Cloned (OakBarn Brewery, 2026-11-20, Panel Update 8: "We need to be able to Clone Timers", Rule 4.4)
+  ['Other Devices', () => true]];
 function fillClones() {
   const sel = $('#cloneDev'), w = curWs(); if (!w || !draft) return fillPick(sel, '⧉ Clone Device', []);
   const here = new Set([...draft.elements.filter(e => e.workspace === w.name).map(e => e.name), ...draft.graphics.filter(g => isClone(g) && g.workspace === w.name).map(g => g.of)]);
-  const left = new Set(draft.elements.filter(e => isDevice(e) && realTab(e.workspace) && !here.has(e.name)).sort((a, b) => a.name.localeCompare(b.name))), groups = [];
+  const left = new Set(draft.elements.filter(e => (isDevice(e) || e.type === 'timer') && realTab(e.workspace) && !here.has(e.name)).sort((a, b) => a.name.localeCompare(b.name))), groups = [];
   // a Method Clone (Rule 4.4): a Device with more than one Control Method can be cloned on any Tab, its own too, one tile per method
   const multi = draft.elements.filter(e => controlMethods(e) && !e.integratedIn && realTab(e.workspace)).sort((a, b) => a.name.localeCompare(b.name));
   if (multi.length) groups.push(['Method Clone (one tile per Control Method)', multi.map(e => [`${e.label || e.name}: a Method Clone   (Tab ${e.workspace})`, () => cloneHere(e.name, true)])]);
@@ -8644,7 +8719,7 @@ const F = {
     ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
-    ['_snote', 'Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
+    ['_snote', 'Only one sound plays at a time. An Audio Widget has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Picture when sounding', 'path'], ['imageOff', 'Picture when quiet', 'path']],
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C'], false, false, { tip: MANUAL_UNITS_TIP }], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
@@ -9680,7 +9755,9 @@ const DATAW_TIPS = {
   tab: 'The Tab this Widget is on.',
   name: 'Made from the Label and the Tab: wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID (wgt_DT_DateTime_1_BH). A Process uses it, for example wgt_VAL_Strike_BH = 5.2. It must be unique.',
   start: 'The value it shows when it is made. It keeps its value when the Brain restarts.',
-  units: 'Shown after the number, for example gal, pH or °F. The ⬢ beside it sets the Decimals, the Step for − and +, the Lowest and the Highest.',
+  units: 'Shown after the number, for example gal, pH or °F. The ⬢ beside it sets the Currency sign, the Step for − and +, the Lowest and the Highest.',
+  numFormat: 'How the number shows: Fixed 1000.1, Number 1,000.12, Percent 10.12%, Scientific 1.00E+03, Accounting $ (1,000.12), Financial (1,000.12), Currency $1,000.12, Currency rounded $1,000. A Process can pick one with .format, for example wgt_VAL_Cost_BH.format = "Currency"; "" puts back this pick.',
+  decimals: 'How many places after the decimal point (1 when empty). Currency rounded has none.',
   readOnly: 'On: a tap does nothing; only a Process sets it. Off: a tap and Set changes it.',
   colors: 'The color of the value. The ⬢ beside it sets the Back color and the Alignment.',
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
@@ -9690,7 +9767,7 @@ const DATAW_TIPS = {
   code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
 const DATAW_ALIGN = ALIGN_LCR;
-const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest', 'num', null, false, false, { tip: 'Empty: none.' }], ['max', 'Highest', 'num', null, false, false, { tip: 'Empty: none.' }]] };
+const DATAW_NUM_POP = { title: 'Number settings', fields: [['currencySign', 'Currency sign ($ when empty)', 'text', null, false, false, { tip: 'The sign the Accounting, Currency and Currency rounded Formats show, for example $, € or £.' }], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest', 'num', null, false, false, { tip: 'Empty: none.' }], ['max', 'Highest', 'num', null, false, false, { tip: 'Empty: none.' }]] };
 const DATAW_LOOK_POP = { title: 'Value look', fields: [['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };      // Fore and Back color are on their own lines (Rule 18.50 #2)
 const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BH.showas = "mm:ss" or wgt_DT_Clock_BH.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
 function dataWidgetFields(it) {
@@ -9703,6 +9780,7 @@ function dataWidgetFields(it) {
     ...(cv ? [['format', 'Format', 'sel', CV_FORMATS, true, false, { tip: T.format }]] : []),      // a Code Value Widget (Rule 1.27)
     ['initial', start, val ? 'num' : 'text', null, false, false, { tip: T.start }],
     ...(dt === 'time' || dt === 'datetime' ? [['showAs', 'Shows as', 'sel', formatChoices(dt === 'time' ? TIME_FORMATS : DATETIME_FORMATS, it.showAs), false, false, { tip: SHOWAS_TIP }]] : []),      // Rule 2.45
+    ...(val && !cv ? [['numFormat', 'Format', 'sel', NUM_FORMATS, false, false, { tip: T.numFormat }], ['precision', 'Decimals', 'num', null, false, false, { tip: T.decimals }]] : cv && val ? [['precision', 'Decimals', 'num', null, false, false, { tip: T.decimals }]] : []),      // Panel Update 8
     ...(val ? [['units', 'Units', 'text', null, false, false, { tip: T.units, attr: DATAW_NUM_POP }]] : []),
     ['readOnly', 'Read only', 'bool', null, false, false, { tip: T.readOnly, dbPop: true }],      // Database and .API ⬢ on its line, as the Pump's Overlay
     ...(cv ? [['code', 'Code (runs when the Value is set)', 'area', null, false, false, { tip: T.code }]] : []),
@@ -9815,22 +9893,29 @@ function overrideFields(it) {
     ...NOGFX_LOOK('color', { tip: T.color, attr: { title: 'Button look', fields: LOOK_FIELDS().filter(f => f[0] !== 'backColor').map(f => (f[0] === 'align' ? [f[0], f[1], f[2], TB_ALIGN_CHOICES.filter(c => c[0])] : f)) } }),
     ...wgtPlace(), wgtType('Override')];
 }
-// Sound Player: plays one sound file; pauses for alarms
+// The Audio Widget (OakBarn Brewery, 2026-11-20, Panel Update 8, item 8: "Create an Audio Widget that plays a sound with repeat and a
+// path (only one) ... likely hidden 99% of the time so visible would default to no. Not an Alarm but boolean Process Command to turn on
+// and Off. It could have a graphic path that a Picture could be selected (only 1)"; "Audio Widget conforms more for a name"). It is the
+// older Sound Player with its new name: one sound (.path_audio), Repeat, and one optional picture (.path_image). It pauses for alarms.
 const SND_TIPS = {
-  name: 'How a Process uses it: play wgt_SND_Music_BH, stop wgt_SND_Music_BH, or wgt_SND_Music_BH.path = "..." to change the sound.',
-  path: 'The sound file it plays: a file on the Brain, or a web link to an MP3 (https://...), which needs the internet. Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after.',
+  name: 'How a Process uses it: wgt_AUD_Music_BH = On plays it, wgt_AUD_Music_BH = Off stops it, wgt_AUD_Music_BH.path_audio = "..." changes the sound.',
+  path: 'Its one sound (.path_audio): a file on the Brain, or a web link to an MP3 (https://...), which needs the internet. Only one sound plays at a time. An Audio Widget has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after.',
   loop: 'On: the sound plays over and over until it is stopped.',
+  image: 'Optional. Its one picture (.path_image), shown when the Audio Widget is made Visible. Empty: no picture.',
 };
+const AUDIO_WORD = 'Audio Widget';
 const soundPlayerFields = () => [...wgtHead(SND_TIPS),
-  ['path', 'Sound file', 'gpick', 'sounds', false, false, { tip: SND_TIPS.path }], ['loop', 'Repeat sound', 'bool', null, false, false, { tip: SND_TIPS.loop }],
+  ['path', 'Audio (.path_audio)', 'gpick', 'sounds', false, false, { tip: SND_TIPS.path }], ['loop', 'Repeat sound', 'bool', null, false, false, { tip: SND_TIPS.loop }],
+  ['pathImage', 'Picture (.path_image)', 'path', null, false, false, { tip: SND_TIPS.image }],
   ...NOGFX_LOOK(),
-  ...wgtPlace(), wgtType('Sound Player')];
+  ...wgtPlace(), wgtType(AUDIO_WORD)];
 // Process Widget (OakBarn Brewery, 2026-11-09, Rule 1.31): the Pump's drill-down look (Rule 18.30), its Process picked from the list
 const processWidgetFields = it => {
   const names = (S.scripts || []).map(x => x.name), cur = String(it.process ?? '').trim();
   return [...wgtHead(PROCESS_TIPS),
     ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: PROCESS_TIPS.process }],
     ['confirm', 'Ask before starting or stopping', 'bool', null, false, false, { tip: 'On: one click asks first (Start or Stop). Off (the usual): one click starts or stops it at once (Rule 2.44).' }],
+    ['hideRunning', 'Hide while running', 'bool', null, false, false, { tip: PROCESS_TIPS.hideRunning }],      // Panel Update 8
     ['imageOff', 'Picture', 'path', null, false, false, { tip: PROCESS_TIPS.imageOff, attr: SEMI_PIC_POP }],
     ['follow', 'Picture turns on with', 'onsrc', null, true, false, { tip: PROCESS_TIPS.follow }],
     ...NOGFX_LOOK(),
@@ -9853,6 +9938,7 @@ const semiWidgetFields = (type, it) => {
     ['imageOverlay', 'Overlay', 'gpick', 'overlays', false, false, { tip: SEMI_OVERLAY_TIP, dbPop: true }],
     ['deviceControlled', 'Linked Device', 'devctl', null, false, false, { tip: `${k.title}: a ${BOOL_CLASS} (a Widget with an ON / OFF state). With a Linked Device it acts like a Clone of that Device: the two follow each other. ${drawn ? boolStyleTip(bs) : SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.` }],
     ['onText', 'Text when on', 'text', null, false, false, { tip: 'The words it shows while ON. The ⬢ beside it holds the words while OFF.', attr: SEMI_TEXT_POP }],
+    ...(type === 'switch' && !drawn ? [['sliderLayer', 'Slider on top (Layer 1)', 'bool', null, false, false, { tip: 'On: the green Slider shows on top of the Switch, in its top right corner, and turns green while ON. A click on the Slider, or anywhere else on the Switch, turns it ON or OFF.' }]] : []),      // Panel Update 8
     ...(['switch', 'led'].includes(type) ? [['confirmation', '.confirmation (done by hand, then Done)', 'bool', false, false, false, { tip: CONFIRM_TIP }]] : []),
     ...wgtPlace(), wgtType(`${boolStyleName(bs) || k.title} (a ${BOOL_CLASS})`, `Which ${BOOL_CLASS} it is. Each one is its own Widget, so its look is fixed: a Slider is always a Slider. To have another look, add that one from Boolean ➕.`)];
 };
@@ -9945,7 +10031,7 @@ const TIMER_TIPS = {
   reset: 'The time a reset puts it back to, in hh:mm:ss.',
   running: 'On: it is already counting when the Brain starts.',
   style: 'Its look. Skynet Styles 🔒 can\'t be changed; ➕ Add new User Style… makes one of your own, with its Back, Text Fore and Text Back colors and its Frame (shape and color).',
-  format: 'How the time shows: hours, minutes and seconds (01:30:00), just hours and minutes (01:30), all minutes (90:00) and more (Rule 2.45). A Process can set any format with .showas, for example tm_Boil.showas = "mm:ss"; "" puts back this pick.',
+  format: 'How the time shows: hours, minutes and seconds (01:30:00), just hours and minutes (01:30), all minutes (90:00) and more (Rule 2.45). A Process can set any format with .format (or .showas), for example tm_Boil.format = "mm:ss"; "" puts back this pick.',
   ss: 'On: a Timer counting down shows only the seconds (45) once less than one minute is left.',
 };
 // the Timer's Digits (Rule 2.40) and the other Time formats (Rule 2.45)
@@ -9957,7 +10043,7 @@ function timerWidgetFields() {
     ['initial', 'Start value', 'text', null, false, false, { tip: T.start }], ['resetValue', 'Reset value', 'text', null, false, false, { tip: T.reset }],
     ['initRunning', 'Running at start', 'bool', null, false, false, { tip: T.running, dbPop: true }],      // Database and .API ⬢ on its line
     ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
-    ['timerFormat', 'Digits', 'sel', TIMER_FORMATS, false, false, { tip: T.format }],
+    ['timerFormat', 'Format', 'sel', TIMER_FORMATS, false, false, { tip: T.format }],      // Panel Update 8: "need Format attribute hh:mm:ss hh:mm" (was Digits)
     ['ssLastMinute', 'Seconds only in the last minute', 'bool', null, false, false, { tip: T.ss }],
     ...NOGFX_LOOK(),
     ...wgtPlace()];
@@ -13431,6 +13517,13 @@ $('#scriptAutoRestart').onchange = guard(async ev => {
   toast(ev.target.checked ? `${curScript} will restart by itself if it stops on an error` : `${curScript} will not restart by itself`);
 });
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
+// Emergency Off (Rule 6.41, Panel Update 8): the red mushroom button at the top right, on every page. One click, no pop-up: every Process
+// stops, then the heaters, the pumps, every other output, and the valves close. Brewers and admins (a viewer can't switch anything).
+for (const id of ['#eOff', '#eOffBar']) $(id).onclick = guard(async () => {
+  if (!can('operator')) return toast('Your account is view only', true);
+  await api('POST', '/ui/emergencyoff');
+  toast('🛑 Emergency Off: every Process stopped; heaters, pumps and outputs off; valves closed');
+});
 // the Override and Stop buttons in the Help language (Rule 11.11): again when it is picked here or in another window
 setStopWord(safetyWord);      // a Process Widget's ■ Stop
 function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); $('#stopScript').textContent = safetyWord('Stop'); }
@@ -14837,7 +14930,7 @@ $('#donSave').onclick = guard(async () => {
 $('#donPreview').onclick = () => showDonate(true);
 
 // ---------------------------------------------------------------- MQTT and voice
-const TYPE_WORD = { gGlobal: 'gGlobal', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
+const TYPE_WORD = { gGlobal: 'gGlobal', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Audio Widget' };
 function renderMqttStatus() {
   const st = S.mqtt?.status ?? { state: 'off', text: 'MQTT is off' };
   const box = $('#mqttStatus'); box.className = 'mqtt-status ' + st.state; box.textContent = st.text;

@@ -16,6 +16,10 @@ en marche. Le **Smoothing** (lissage, Règle Skynet 6.24) les calme.
 
 Laissez vide pour la valeur de départ : **25 % pour une sonde thermistance (NTC)**, 100 % (aucun) pour tout le reste.
 
+**À l'écran**, une sonde de température montre aussi la moyenne de ses lectures des 5 dernières secondes (15 secondes quand sa
+carte est en Simulation), pour que le nombre ne tremble pas. C'est seulement ce que vous voyez : le Brain, les méthodes de chauffe, les
+Processes et les Alarmes utilisent la lecture elle-même (avec son Smoothing %). Un saut de 2 degrés ou plus s'affiche tout de suite.
+
 ## Où il se trouve {#where-it-is}
 
 Ouvrez les **Properties** du Device et réglez **Smoothing %**. Il existe sur :

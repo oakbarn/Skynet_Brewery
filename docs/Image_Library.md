@@ -23,7 +23,7 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 - [Hop_Infusion](#hop_infusion) (1)
 - [Lights_LEDs](#lights_leds) (5)
 - [Miscellaneous](#miscellaneous) (12)
-- [On_Off](#on_off) (6)
+- [On_Off](#on_off) (7)
 - [Other_Equipment](#other_equipment) (53)
 - [Pumps](#pumps) (56)
 - [Valves](#valves) (26)
@@ -99,6 +99,7 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `Overlay_Glow_Ring.svg` | On overlay: a green glow around the picture | viewBox 0 0 100 100 (100x100) | On overlay "Green glow ring" |
 | `Overlay_Bolt.svg` | On overlay (Fritz, 2026-11-04): a red lightning bolt with a yellow edge over the middle of a valve or pump while it is on (steady, not flashing) | viewBox 0 0 100 100 (100x100) | Template device Skynet_Motorized_Butterfly_Valve_H; Template device Skynet_KLD20T_Proportional_Valve_H; Template device Skynet_Motorized_Ball_Valve_H; default Schema; sample three-vessel-one-pump; Panel code (app.js, eqinterview.js, profiles.js, schemabuild.js, store.js); Help 121, 193 |
 | `Overlay_Bolt_Flash.svg` | On overlay (Fritz, 2026-11-04): a lightning bolt over the middle of a valve or pump that flashes red and yellow while it is on | viewBox 0 0 100 100 (100x100) | Panel code (app.js, store.js); Help 121 |
+| `Skynet_Emergency_Off.svg` | Emergency Off (OakBarn Brewery, 2026-11-20, Panel Update 8: "fashioned after a real world graphic"; "Add it"): Skynet's own drawing of a red mushroom head on a yellow round plate, no words (Rule 7.25). Skynet Picture number 238 | viewBox 0 0 200 200 (200x200) | The Emergency Off button in the top bar (index.html draws the same picture inline); Rule 6.41, Help 244 |
 | `Overlay_Manual_Valve_Open.svg` | Skynet On overlay for a Manual Valve Widget while it is open (Fritz, 2026-10-28): a green ring and a green open mark | viewBox 0 0 100 100 (100x100) | Panel code (app.js); Help 87 |
 
 ## Other_Equipment

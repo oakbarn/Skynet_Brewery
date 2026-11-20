@@ -18,6 +18,8 @@ Make a Clone with the **⧉ Clone Device** button on the Edit layout bar (Admins
 
 A Clone made on the Build Tab goes to a Tab with **Finish Build**, like everything else built there.
 
+**Timers** can be Cloned too: they have their own group in the ⧉ Clone Device list.
+
 ## The Clone's name
 
 Skynet makes the name, and it can't be typed over: the parent's name, then `_Clone_` and a number.

@@ -1,6 +1,6 @@
 # Get Music Pack
 
-The **Skynet Music Pack** is a set of public domain marches and bugle calls, for example **First Call**, **Mail Call**, **Taps**, **Semper Fidelis** and **The Stars and Stripes Forever**. Use them in an Alarm, a Sound Player or a Process like any other sound.
+The **Skynet Music Pack** is a set of public domain marches and bugle calls, for example **First Call**, **Mail Call**, **Taps**, **Semper Fidelis** and **The Stars and Stripes Forever**. Use them in an Alarm, a Audio Widget or a Process like any other sound.
 
 It is **not** in the Setups, so the Setups stay small. **☰ Menu > Get Music Pack** copies it onto your Brain, into `media/sounds/Skynet_Music`.
 

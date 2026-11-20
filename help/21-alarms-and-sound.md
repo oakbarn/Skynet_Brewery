@@ -8,7 +8,7 @@ Only **one sound plays at a time**. When two want to play, the one with the lowe
 | **Hop Alarm** | 2 | Hop drops. Waits only for a Brew Flow Alarm. |
 | **Pre-Hop Alarm** | 3 | A warning a set time before its Hop Alarm (10 minutes unless you change it). |
 | **General Alarm** | 4 | Anything else. |
-| **Sound only** and the **Sound Player** | 5 | Music and beeps. Pauses while any alarm sounds, then goes on where it stopped. |
+| **Sound only** and the **Audio Widget** | 5 | Music and beeps. Pauses while any alarm sounds, then goes on where it stopped. |
 
 Brew Flow is priority 1 and Hop is priority 2 (OakBarn Brewery, 2026-11-13). If a Hop drop must come first in your brew, give that Hop Alarm its own Priority, such as 0.9. An alarm that had to wait starts from the beginning when its turn comes; music carries on where it was.
 
@@ -52,7 +52,7 @@ alm_Hops_1 = false           turn it off
 
 **A Brew Flow Alarm holds its Process:** turning a Brew Flow Alarm Widget On in a Process (`alm_Mash_Done = On`) waits on that line until the brewer taps it Off, as if `wait alm_Mash_Done == false` followed it. Every attribute an Alarm has (`.path`, `.string`, `.playtime` ...) is in [The Alarm attributes](195-alarm-attributes).
 
-## Sound Player
+## Audio Widget
 
 Every panel has one built-in **SoundPlayer** for music and plain sounds. It is not on any tab; Processes use it:
 
@@ -64,6 +64,15 @@ stop SoundPlayer
 
 A sound can also be a **web link to an MP3** (`https://...`), played straight from the web: see [Sounds from a web link](186-sounds-from-a-web-link).
 
-There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Sound Player on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Sound Player**.
+The **Audio Widget** plays one sound on a Tab. It has **one sound** (`.path_audio`), **Repeat sound**, and **one picture** if you want one
+(`.path_image`). A new one starts **hidden**, because it is seldom looked at. A Process turns it On and Off:
+
+```
+wgt_AUD_Music_BH.path_audio = "sounds/polka.mp3"
+wgt_AUD_Music_BH = On
+wgt_AUD_Music_BH = Off
+```
+
+It is not an Alarm. There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Audio Widget on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Audio Widget**.
 
 When the panel opens with sound off, Skynet asks **🔊 Turn sound on?**: press **🔊 Turn Sound On** (browsers only play sound after one click, so that click is it). While sound is off, a red **🔇 Sound is off** button stays on the Tab and **🔊 Turn Sound On** is at the top of the **☰ Menu**. It is once per browser, not per Tab. You can also press **Enable sound** on the Menu Bar. To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.

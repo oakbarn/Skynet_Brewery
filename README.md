@@ -180,12 +180,11 @@ gGlobal Variables are the only Variables with a Global Scope. Most are used only
 
 ### The gGlobal Kinds
 
-Each gGlobal is one of six Kinds, the subclasses of a gGlobal. The Kind is picked when it is made (**☰ Menu > Variables > ➕ New gGlobal**, or a Process line such as `new gV gV_Boil_Time = 60`) and never changes. Its prefix starts the name.
+Each gGlobal is one of five Kinds, the subclasses of a gGlobal. The Kind is picked when it is made (**☰ Menu > Variables > ➕ New gGlobal**, or a Process line such as `new gV gV_Boil_Time = 60`) and never changes. Its prefix starts the name.
 
 | Kind | Prefix | Notes |
 |---|---|---|
 | String | `gS_` | Text. |
-| Graphic | `gG_` | A picture: Image Path 1, 2 and 3, Background # and Back Colour. A process can swap it: `gG_Burner_Pic = "Images/Skynet/Other_Equipment/Burner_Jet_Flame.svg"` |
 | Value | `gV_` | A number. |
 | Boolean | `gB_` | true / false. |
 | Time | `gT_` | `00:00:00` |

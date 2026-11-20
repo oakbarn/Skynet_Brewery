@@ -20,7 +20,7 @@ assert.deepEqual(declareCheck('bool', 'gB_Added'), { kind: 'bool', global: true 
 assert.match(declareCheck('value', 'gS_Note').error, /gS_ is for a String/);
 assert.match(declareCheck('gGlobalValue', 'Strike').error, /starts gV_, for example gV_Strike/);
 assert.match(declareCheck('gV', 'gB_Added').error, /gB_ is for a Boolean/);
-assert.match(declareCheck('value', 'gG_Picture').error, /Variables screen/);
+assert.match(declareCheck('value', 'gG_Picture').error, /there is no Graphic gGlobal/);
 assert.equal(declareCheck('pump', 'x'), null);
 assert.equal(prefixKind('gravity'), null); assert.equal(prefixKind('gGV_Old'), null);
 

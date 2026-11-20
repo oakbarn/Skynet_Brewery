@@ -5,7 +5,7 @@ panneau le joue directement depuis le web, donc le fichier n'a jamais besoin d'�
 
 ## En utiliser un {#use-one}
 
-Dans n'importe quelle case de son (le **Sound file** d'une alarme, un **Sound Player**, une étape d'Alarm Chain, ou **Settings > Panel settings: screen, Tabs and alerts > Sound before each hop
+Dans n'importe quelle case de son (le **Sound file** d'une alarme, un **Audio Widget**, une étape d'Alarm Chain, ou **Settings > Panel settings: screen, Tabs and alerts > Sound before each hop
 alert**), choisissez **Add new ...** et collez le lien, par exemple :
 
 ```
@@ -27,7 +27,7 @@ Un lien a besoin d'internet. Sans lui :
 - **Une alarme** joue à la place le **Missing Alarm Sound** depuis le Brain (une voix qui dit que le son est introuvable), et un
   avertissement dit pourquoi. S'il n'est pas là non plus, elle joue le bip Skynet. Une alarme n'est jamais muette. La même chose se passe quand le
   fichier son d'une alarme manque sur le Brain.
-- **Un Sound Player** joue une fois à la place la chanson d'OakBarn Brewery *Find The File - Connecting*, et montre le même avertissement.
+- **Un Audio Widget** joue une fois à la place la chanson d'OakBarn Brewery *Find The File - Connecting*, et montre le même avertissement.
 - **Le son avant une alerte houblon** est sauté, et la voix de l'alerte parle quand même.
 
 Pour les alarmes **Hop** et **Brew Flow**, un fichier sur le Brain est le choix le plus sûr : il joue avec ou sans internet.
@@ -48,5 +48,5 @@ Ne mettez en ligne que des sons que vous avez le droit de partager (Règle Skyne
   le web.
 - Un son qui ne se charge pas (un événement `error` : un lien, ou un fichier manquant) fait passer une alarme à `sounds/Skynet/Alarm_Sound_Missing.mp3`,
   puis à `sounds/alarm_beep.wav` si celui-ci échoue aussi, jusqu'à ce que la page soit rouverte.
-- Un Sound Player passe à `sounds/Skynet/Find_The_File_Connecting.mp3` et le joue une fois (Repeat est ignoré pour lui).
+- Un Audio Widget passe à `sounds/Skynet/Find_The_File_Connecting.mp3` et le joue une fois (Repeat est ignoré pour lui).
 - **Media > Move** et la liste des fichiers manquants sautent les liens : il n'y a pas de fichier à déplacer ou à trouver.
