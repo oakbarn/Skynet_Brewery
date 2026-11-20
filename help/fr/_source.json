@@ -4,7 +4,7 @@
  "02-tabs": "33b2052c17709737",
  "03-devices": "b6fb84ac03afe153",
  "04-variables": "285856e470f40ab8",
- "05-scripts": "9e1cfc6e4b57fa92",
+ "05-scripts": "5801b8d7bca0f846",
  "06-log": "5906688b79c6c7d5",
  "07-media": "ae9af08eb3ab447a",
  "08-import": "7e51289d961c126e",
@@ -231,5 +231,6 @@
  "235-din-button-on-press": "a8b5b5a37b0960b9",
  "236-copy-a-whole-tab": "31a20e264fee5ce1",
  "237-pid-auto-tune": "b4e0d90926f3f155",
- "238-boil-temperature": "67d55dcac6d50600"
+ "238-boil-temperature": "67d55dcac6d50600",
+ "239-fire-hose-and-manifold-sample": "a4b692fa98cffe0d"
 }

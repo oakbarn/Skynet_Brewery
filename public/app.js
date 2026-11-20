@@ -3310,7 +3310,8 @@ const FIT_TYPES = new Set(['temperature', 'analogIn', 'analogOut', 'pwmOut', 'va
   'gGlobal', 'hydrometer', 'flowMeter', 'scale', 'dutyCycle', 'pid', 'deadband', 'hysteresis', 'fermentor', 'stepper']);
 function fitsOneLine(e, n, drawn) {
   if (drawn || n.classList.contains('longtext')) return false;
-  if (e.type === 'gGlobal') return !['list', 'graphic', 'longstring'].includes(vkKind(e));
+  // a String is text, so it wraps like every Text Box (Rule 2.56 "long strings ... left alone", Rule 2.22; Process Sample 1, 2026-11-20)
+  if (e.type === 'gGlobal') return !['list', 'graphic', 'longstring', 'string'].includes(vkKind(e));
   return FIT_TYPES.has(e.type) || isHeatElem(e) || isPropValve(e) || (e.type === 'digitalIn' && e.mode === 'counter');
 }
 function fitOneLine(n, vl, text) {

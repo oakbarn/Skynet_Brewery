@@ -1,0 +1,8 @@
+//FireHose_Float
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//The "Use FireHose Float" button on the Water Tab (OakBarn Brewery's switch sw_Flow_FireHoseFloat in looper_scrAutoSwitch).
+//It sets the code and starts the Fire Hose and Manifold Process, then it is done.
+gblV_Water_Switch_Status_Water = 1005
+gblV_Valve_Status = -1
+start "utility_FireHose_Manifold_Supply_Water"

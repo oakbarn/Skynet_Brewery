@@ -81,10 +81,10 @@ for (const sm of list) {
   const c3 = JSON.parse(fs.readFileSync(path.join(SAMPLES, 'three-vessel-one-pump', 'config.json'), 'utf8'));
   for (const e of c3.elements) {
     if (e.type === 'gGlobal') continue;
-    const dev = ['temperature', 'digitalOut'].includes(e.type);
-    assert.match(e.name, dev ? /^(BM1w1_\d+|BM_\d+_(DO@H_Element|DO@Pump|DO@Chill|DO@Valve_E))_[A-Za-z0-9~]+_BH$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
+    const dev = ['temperature', 'digitalOut', 'digitalIn'].includes(e.type);      // the Water Tab (WA): Process Sample 1, 2026-11-20
+    assert.match(e.name, dev ? /^(BM1w1_\d+|BM_\d+_(DO@H_Element|DO@Pump|DO@Chill|DO@Valve_E|DI@Float))_[A-Za-z0-9~]+_(BH|WA)$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP|WA)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
   }
-  for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
+  for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BH|RE|RP|WA)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
 }
 
 // ---- run each brew day, fast
