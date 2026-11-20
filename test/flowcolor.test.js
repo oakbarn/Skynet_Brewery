@@ -86,3 +86,4 @@ clearTimeout(store._persistTimer);
 console.log('flow color tests passed');
 process.exit(0);
 
+await import('./flowstill.test.js');      // Panel Update 7 (Rule 5.45): still water, splash only on open ends
