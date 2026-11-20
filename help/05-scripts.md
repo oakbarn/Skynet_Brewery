@@ -2,8 +2,6 @@
 
 Processes are the automatic steps of a brew: open valves, run a pump, wait for a temperature, start a timer, sound an alarm. They are text files in the `processes` folder on the Pi.
 
-Every step, with pictures: [Step by Step: Add a Process](239-step-by-step-add-a-process).
-
 ## The Processes screen
 
 - The list on the left shows every process; a running one is marked. The small number in front of each one is its **Order**: type a new number to move it, and the others renumber themselves. See [Process Order](38-process-order).

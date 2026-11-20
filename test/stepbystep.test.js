@@ -86,10 +86,10 @@ console.log('stepbystep wiring guides ok');
 }
 console.log('stepbystep 1-Wire ok');
 
-// Step by Step: Add a Process (Help 239, Panel Updates entry 39): the Process editor, ➕ Add New Process..., a wait, a sleep with a Skynet
+// Step by Step: Add a Process (Help 240, Panel Updates entry 39): the Process editor, ➕ Add New Process..., a wait, a sleep with a Skynet
 // Constant (skn_), temperatures typed in Units, Check, Save, Start and the Override pop-up, then a Process Widget; French too.
 {
-  const f = 'help/239-step-by-step-add-a-process.md', g = read(f);
+  const f = 'help/240-step-by-step-add-a-process.md', g = read(f);
   assert.match(g, /^# Step by Step: Add a Process\n/, f + ' is a Step by Step guide');
   for (const w of ['➕ Add New Process...', '📐 Constants', 'skn_const_Ms_p_Min', 'Settings > Units', '66.6667°C', 'Override pop-up', 'show_Override', 'Process Widget', 'Finish Build ... > Move to Tab'])
     assert.ok(g.includes(w), f + ' covers ' + w);
@@ -100,9 +100,9 @@ console.log('stepbystep 1-Wire ok');
   for (const p of gp) assert.ok(fs.existsSync(new URL('../media/' + p, import.meta.url)), p + ' is there');
   for (const l of [...g.matchAll(/\]\((\d+-[\w-]+)(#[\w-]+)?\)/g)].map(m => m[1])) assert.ok(fs.existsSync(new URL(`../help/${l}.md`, import.meta.url)), 'link ' + l);
   assert.doesNotMatch(g, /Fritz|BruControl/, 'Rules 11.3 and 11.5');
-  const fr = read('help/fr/239-step-by-step-add-a-process.md');
+  const fr = read('help/fr/240-step-by-step-add-a-process.md');
   assert.match(fr, /\{#step-by-step-add-a-process\}/, f + ' in French (Rule 11.11)');
   assert.deepEqual([...fr.matchAll(/!\[[^\]]*\]\((help_pictures\/[^)]+)\)/g)].map(m => m[1]), gp, 'the French page has the same pictures');
-  for (const p of ['help/05-scripts.md', 'help/30-process-editor.md']) assert.match(read(p), /239-step-by-step-add-a-process/, p + ' links the guide');
+  for (const p of ['help/30-process-editor.md']) assert.match(read(p), /240-step-by-step-add-a-process/, p + ' links the guide');
   console.log('stepbystep add process ok');
 }

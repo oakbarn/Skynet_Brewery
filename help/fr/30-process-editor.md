@@ -2,7 +2,7 @@
 
 L'écran **Processes** a une rangée d'outils au-dessus de l'éditeur : **Find**, **All Processes**, **Go to line**, **Save to file**, l'interrupteur **Colors** et le **Color key** (légende des couleurs). Le bouton **Recycle Bin** (corbeille) est sous la liste des Processes.
 
-Chaque étape de l'ajout d'un Process, avec des images : [Pas à pas : ajouter un Process](239-step-by-step-add-a-process).
+Chaque étape de l'ajout d'un Process, avec des images : [Pas à pas : ajouter un Process](240-step-by-step-add-a-process).
 
 ## Numéros de ligne et Go to line {#line-numbers-and-go-to-line}
 
