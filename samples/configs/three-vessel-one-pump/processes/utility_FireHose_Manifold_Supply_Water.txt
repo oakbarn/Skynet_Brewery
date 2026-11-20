@@ -6,7 +6,9 @@
 // Water Tab (Process Sample 1, 2026-11-20). His codes, labels and messages are kept; only what Skynet needs changed:
 //   - a Process Widget on the Water Tab sets the code and starts this Process (no looper switch);
 //   - "Manifold Set?" is an ask with Done (was the Advance switch and gblVEndlessLoop 799 / 800);
+//   - Set Time is a pop-up that asks for the time into gblT_SetTimer_Water (was a Set Timer slot on his Water workspace);
 //   - the run is one wait; the Override pop-up comes up by itself after 3 seconds (Rule 2.26) and shuts the water off early;
+//   - a hidden count-up timer, wgt_TMR_Water~elapsed_WA, keeps the true run time in gblT_Elapsed_Water (for seconds per gallon);
 //   - his screen boxes (gblS_Brewery_Top_2 / _3, Bottom_1 / _3 / _4, the insp_ pictures) are one message box, gblS_Water_Text_1_Water.
 // The code in gblV_Water_Switch_Status_Water:
 //   1001 Fire Hose 1 Minute, 1002 2 Minutes, 1003 20 Seconds, 1004 Set Time, 1005 until the Float
@@ -34,7 +36,6 @@ endif
 BM_33_DO@Valve_E_Manifold~Supply_WA = false
 BM_31_DO@Valve_E_Fire~Hose_WA = false
 wgt_TMR_Water~delay_WA.visible = false
-gblT_SetTimer_Water.visible = false
 gblS_Water_Text_1_Water = "Wait! Will Auto Advance"
 //...........................................
 //Set Water Valve Status
@@ -92,9 +93,13 @@ endif
 //Firehose Set Time
 if vVSwitchNumber == 1004
 	gblT_SetTimer_Water = 00:00:00
-	gblT_SetTimer_Water.visible = true
-	gblS_Water_Text_1_Water = "Set the desired Run Time in the Set Timer slot."
-	wait gblT_SetTimer_Water > 00:00:00
+	gblS_Water_Text_1_Water = "Set the desired Run Time."
+	// a pop-up asks for the time and puts it in the gGlobal gblT_SetTimer_Water (Rule 16.5); asked again if it is 00:00:00
+	[Ask_Set_Time_FH]
+	ask "Set the desired Run Time (hh:mm:ss)" gblT_SetTimer_Water
+	if gblT_SetTimer_Water <= 00:00:00
+		goto "Ask_Set_Time_FH"
+	endif
 	vT_Set = gblT_SetTimer_Water
 	vSMsg1 = " "
 	vSMsg = vSMsg + vSMsg1
@@ -164,9 +169,13 @@ if vVSwitchNumber == 2003
 endif
 if vVSwitchNumber == 2004
 	gblT_SetTimer_Water = 00:00:00
-	gblT_SetTimer_Water.visible = true
-	gblS_Water_Text_1_Water = "Set the desired Run Time in the Set Timer slot."
-	wait gblT_SetTimer_Water > 00:00:00
+	gblS_Water_Text_1_Water = "Set the desired Run Time."
+	// a pop-up asks for the time and puts it in the gGlobal gblT_SetTimer_Water (Rule 16.5); asked again if it is 00:00:00
+	[Ask_Set_Time_MSV]
+	ask "Set the desired Run Time (hh:mm:ss)" gblT_SetTimer_Water
+	if gblT_SetTimer_Water <= 00:00:00
+		goto "Ask_Set_Time_MSV"
+	endif
 	vT_Set = gblT_SetTimer_Water
 	vSMsg1 = " "
 	vSMsg = vSMsg + vSMsg1
@@ -213,6 +222,11 @@ stop "wgt_TMR_Water_WA"
 wgt_TMR_Water_WA = vT_Set
 wgt_TMR_Water_WA.type = "countdown"
 start "wgt_TMR_Water_WA"
+// a hidden count-up timer measures the true run time, from the valve opening to the wait being met or Override (for seconds per gallon)
+stop "wgt_TMR_Water~elapsed_WA"
+wgt_TMR_Water~elapsed_WA = 00:00:00
+wgt_TMR_Water~elapsed_WA.type = "countup"
+start "wgt_TMR_Water~elapsed_WA"
 if vVPump == 200
 	// FireHose
 	BM_31_DO@Valve_E_Fire~Hose_WA = true
@@ -231,6 +245,11 @@ stop "wgt_TMR_Water_WA"
 wgt_TMR_Water_WA = 00:00:00
 wgt_TMR_Water_WA.type = "countup"
 start "wgt_TMR_Water_WA"
+// a hidden count-up timer measures the true run time, from the valve opening to the wait being met or Override (for seconds per gallon)
+stop "wgt_TMR_Water~elapsed_WA"
+wgt_TMR_Water~elapsed_WA = 00:00:00
+wgt_TMR_Water~elapsed_WA.type = "countup"
+start "wgt_TMR_Water~elapsed_WA"
 if vVSwitchNumber == 1005
 	BM_31_DO@Valve_E_Fire~Hose_WA = true
 endif
@@ -245,6 +264,9 @@ goto "Exit_Timer_End"
 [Exit_Timer_End]
 print "@ 454 Exit_Timer_End"
 stop "wgt_TMR_Water_WA"
+// the true run time, whether the wait was met or Override ended it, is kept in gblT_Elapsed_Water
+stop "wgt_TMR_Water~elapsed_WA"
+gblT_Elapsed_Water = wgt_TMR_Water~elapsed_WA
 if vVPump == 100
 	BM_33_DO@Valve_E_Manifold~Supply_WA = false
 endif
@@ -256,7 +278,6 @@ print "@465 END"
 wgt_ALM_Fire~Hose_WA = false
 wgt_ALM_Water~flow_WA = false
 wgt_TMR_Water~delay_WA.visible = false
-gblT_SetTimer_Water.visible = false
 gblS_Water_Text_1_Water = "Wait.  Will Auto Advance"
 gblV_Brew_Status = vV_GBrew_Status
 gblV_Water_Switch_Status_Water = -9999

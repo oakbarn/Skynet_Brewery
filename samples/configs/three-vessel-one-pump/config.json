@@ -1973,6 +1973,19 @@
   },
   {
    "workspace": "Water",
+   "name": "gblT_Elapsed_Water",
+   "type": "gGlobal",
+   "kind": "time",
+   "label": "True Run Time",
+   "x": 1650,
+   "y": 430,
+   "w": 170,
+   "h": 62,
+   "initial": "00:00:00",
+   "visibility": "hidden"
+  },
+  {
+   "workspace": "Water",
    "name": "gblV_Water_Switch_Status_Water",
    "type": "gGlobal",
    "kind": "value",
@@ -2013,6 +2026,19 @@
    "w": 250,
    "h": 90,
    "timerType": "countdown",
+   "look": "led",
+   "visibility": "hidden"
+  },
+  {
+   "workspace": "Water",
+   "name": "wgt_TMR_Water~elapsed_WA",
+   "type": "timer",
+   "label": "Water elapsed",
+   "x": 1650,
+   "y": 330,
+   "w": 250,
+   "h": 90,
+   "timerType": "countup",
    "look": "led",
    "visibility": "hidden"
   },

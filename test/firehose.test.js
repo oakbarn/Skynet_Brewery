@@ -48,11 +48,12 @@ const st = n => eng.list().find(x => x.name === n)?.state;
 const FH = 'BM_31_DO@Valve_E_Fire~Hose_WA', MSV = 'BM_33_DO@Valve_E_Manifold~Supply_WA', FLOAT = 'BM_32_DI@Float_Water~float_WA', U = 'utility_FireHose_Manifold_Supply_Water';
 const on = n => !!store.getProp(n, 'state');
 const asked = () => eng.valveList().find(a => a.ask && a.process === U);
-const done = () => { const a = asked(); eng.valveAsks.get(a.name).done = true; };
+const done = () => eng.confirmValve(asked().name);
 const pops = () => eng.overrideList().filter(a => a.process === U);
 const text = () => store.getProp('gblS_Water_Text_1_Water', 'value');
 const quiet = () => st(U) !== 'running';
 
+const secs = n => String(store.getProp(n, 'value') ?? '').split(':').reduce((a, x) => a * 60 + (+x || 0), 0);
 // FireHose 20 Seconds: the button sets 1003 and starts the Fire Hose Process; Manifold Set? then the 20 second warning then 20 s open
 eng.start('FireHose_20_Seconds', 'user');
 assert.ok(await until(() => !!asked()), 'Manifold Set? is asked');
@@ -66,6 +67,9 @@ assert.ok(await until(() => on(FH)), 'the Fire Hose opens');
 assert.ok(!store.getProp('wgt_ALM_Fire~Hose_WA', 'active'), 'the warning sound stops');
 assert.ok(await until(() => !on(FH) && quiet()), 'it closes when the timer reaches 00:00:00');
 assert.equal(store.getProp('gblV_Water_Switch_Status_Water', 'value'), -9999);
+// the hidden count-up timer kept the true run time (about 20 s) in gblT_Elapsed_Water
+assert.equal(store.getProp('wgt_TMR_Water~elapsed_WA', 'visibility'), 'hidden');
+assert.ok(secs('gblT_Elapsed_Water') >= 19 && secs('gblT_Elapsed_Water') <= 22, 'true run time ' + store.getProp('gblT_Elapsed_Water', 'value'));
 
 // Manifold 3 Minutes: the Override pop-up comes up by itself during the run and shuts the valve off early (Rule 2.26)
 eng.start('Manifold_3_Minutes', 'user');
@@ -74,12 +78,22 @@ assert.ok(await until(() => on(MSV)), 'the Manifold Supply Valve opens');
 assert.ok(await until(() => pops().some(p => p.how === 'auto'), 6000), 'the Override pop-up comes by itself');
 eng.override('Fritz', U);
 assert.ok(await until(() => !on(MSV) && quiet()), 'Override shuts it off');
+assert.ok(secs('gblT_Elapsed_Water') > 0 && secs('gblT_Elapsed_Water') < 180, 'true run time to the Override ' + store.getProp('gblT_Elapsed_Water', 'value'));
+assert.ok(!store.getProp('wgt_TMR_Water~elapsed_WA', 'running'));
 
 // Firehose Set Time: waits for a time in Set Timer
 eng.start('FireHose_Set_Time', 'user');
 assert.ok(await until(() => !!asked())); done();
-assert.ok(await until(() => store.getProp('gblT_SetTimer_Water', 'visibility') === 'visible'), 'Set Timer shows');
-store.setProp('gblT_SetTimer_Water', 'value', '00:00:10', 'ui');
+// a pop-up asks for the time into the gGlobal gblT_SetTimer_Water (ask "text" Name, Rule 16.5); no box on the Tab
+assert.ok(await until(() => asked()?.input), 'the pop-up asks for the time');
+assert.deepEqual([asked().input.name, asked().input.kind, asked().input.label], ['gblT_SetTimer_Water', 'time', 'Set Timer']);
+assert.equal(store.getProp('gblT_SetTimer_Water', 'visibility'), 'hidden', 'no Set Timer box on the Tab');
+assert.throws(() => eng.confirmValve(asked().name, ''), /Type the answer/);
+assert.throws(() => eng.confirmValve(asked().name, '10 seconds'), /hh:mm:ss/);
+eng.confirmValve(asked().name, '00:00:00');                                  // no time: asked again
+assert.ok(await until(() => asked()?.input), 'asked again for 00:00:00');
+eng.confirmValve(asked().name, '00:00:10');
+assert.equal(String(store.getProp('gblT_SetTimer_Water', 'value')), '00:00:10', 'the answer is in the gGlobal');
 assert.ok(await until(() => on(FH)), 'opens after the warning');
 assert.ok(await until(() => !on(FH) && quiet()), 'closes after the time set');
 

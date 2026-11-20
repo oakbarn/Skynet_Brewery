@@ -21,7 +21,7 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
 | FireHose 1 Minute | Manifold 1 Minute | Water for 1 minute |
 | FireHose 2 Minutes | Manifold 2 Minutes | Water for 2 minutes |
 | FireHose 20 Seconds | Manifold 3 Minutes | Water for 20 seconds or 3 minutes |
-| Firehose Set Time | Set Time | You type the time in **Set Timer** |
+| Firehose Set Time | Set Time | A pop-up asks for the time; it goes in the gGlobal `gblT_SetTimer_Water` |
 | Use FireHose Float | Use Manifold Float | Water until the **Water float** is made |
 | FireHose Off | | Stops it now and closes both valves |
 
@@ -33,6 +33,9 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
    until the float is made.
 4. **Shut it off early** with **Override**. Its pop-up comes up by itself after 3 seconds
    ([Override button](96-override-button)), or press **FireHose Off**.
+5. **The true run time is kept.** A hidden count-up timer, **Water elapsed**, runs from the valve opening until the time is up, the
+   float is made, or Override or FireHose Off ends it. That time goes in the hidden gGlobal `gblT_Elapsed_Water` (True Run Time),
+   for seconds per gallon.
 
 In the simulator, tap the **Water float** to make it.
 

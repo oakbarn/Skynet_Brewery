@@ -170,9 +170,14 @@ function renderValves(all = []) {
       : h('span', { class: 'muted' }, 'An operator or admin must press Done.'))) : a.ask ? h('div', { class: 'valveAsk' },
     // ask "..." in a Process (the Brew Process): what to do, and Done when it is done
     (n => (setRich(n, a.label), n))(h('div', { class: 'valveDo', style: 'white-space: pre-line' })),
+    // ask "text" Name (Rule 16.5): a box for the answer, filled with what Name holds now; Done puts it in Name
+    // it is the gGlobal's own Set pop-up (the same title and box as a tap on a gGlobal Value Widget, Type Time), inside the ask
+    a.input ? h('div', { class: 'askBox' }, h('div', { class: 'vdTitle' }, a.input.label || a.input.name),
+      h('input', { class: 'vdInput askInput', 'data-ask': a.name, value: a.input.value ?? '', inputmode: a.input.kind === 'value' ? 'decimal' : 'text',
+        placeholder: a.input.kind === 'time' ? 'hh:mm:ss' : '', title: a.input.kind === 'time' ? 'Type the time as hh:mm:ss, for example 00:02:30' : a.input.kind === 'value' ? 'Type a number' : 'Type the answer' })) : '',
     h('div', { class: 'muted' }, `The Process ${a.process} waits until you press Done.`),
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), can('operator')
-      ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, '✔ Done')
+      ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name, ...(a.input ? { value: d.querySelector(`.askInput[data-ask="${CSS.escape(a.name)}"]`)?.value } : {}) })) }, '✔ Done')
       : h('span', { class: 'muted' }, 'An operator or admin must press Done.'))) : h('div', { class: 'valveAsk' },
     // a Confirmation Widget (Rule 1.28) says TURN ON / TURN OFF (a valve OPEN / CLOSE), and Done shows it On or Off
     h('div', { class: 'valveDo' }, `${a.say || (a.open ? 'OPEN' : 'CLOSE')} ${a.label} by hand`),

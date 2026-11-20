@@ -23,7 +23,7 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
 | FireHose 1 Minute | Manifold 1 Minute | De l'eau pendant 1 minute |
 | FireHose 2 Minutes | Manifold 2 Minutes | De l'eau pendant 2 minutes |
 | FireHose 20 Seconds | Manifold 3 Minutes | De l'eau pendant 20 secondes ou 3 minutes |
-| Firehose Set Time | Set Time | Vous tapez le temps dans **Set Timer** |
+| Firehose Set Time | Set Time | Une fenêtre demande le temps ; il va dans le gGlobal `gblT_SetTimer_Water` |
 | Use FireHose Float | Use Manifold Float | De l'eau jusqu'à ce que le **Water float** (flotteur) soit fait |
 | FireHose Off | | L'arrête tout de suite et ferme les deux vannes |
 
@@ -37,6 +37,9 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
    haut, jusqu'à ce que le flotteur soit fait.
 4. **Arrêtez-la plus tôt** avec **Override**. Sa fenêtre s'ouvre toute seule après 3 secondes
    ([Override button](96-override-button)), ou appuyez sur **FireHose Off**.
+5. **Le vrai temps de marche est gardé.** Un minuteur caché qui compte vers le haut, **Water elapsed**, tourne de l'ouverture de la
+   vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Ce temps va dans le gGlobal caché
+   `gblT_Elapsed_Water` (True Run Time), pour les secondes par gallon.
 
 Dans le simulateur, touchez le **Water float** pour le faire.
 
