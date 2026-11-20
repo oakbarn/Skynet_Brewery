@@ -86,8 +86,8 @@ L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 |---|---|
 | `ask "Add the grain, then press Done"` | une fenêtre sur chaque écran avec **✔ Done** ; le Process attend qu'un operator ou un Admin appuie dessus. Les codes de texte marchent (`\b`, `\n` ...). |
 | `ask "Set the Run Time (hh:mm:ss)" gblT_SetTimer_Water` | la même fenêtre avec une **case pour la réponse**, remplie avec ce que le gGlobal ou le Value Widget contient maintenant ; **✔ Done** y met la réponse (un temps en hh:mm:ss, un nombre ou des mots), puis le Process continue. Règle Skynet 16.5. |
-| `close_all_valves` | ferme chaque vanne de la liste **Close all valves** |
-| `open_all_valves` | ouvre chaque vanne de la liste **Open all valves** (l'état dans lequel on laisse tout après le nettoyage) |
+| `close_all_valves` | ferme chaque vanne de la liste **Close all valves** (toujours les vannes d'eau du robinet), puis demande **Have you closed all Manual Valves?** et attend **✔ Done** |
+| `open_all_valves` | ouvre chaque vanne de la liste **Open all valves** (jamais une vanne d'eau du robinet ; l'état dans lequel on laisse tout après le nettoyage), puis demande **Have you opened all Manual Valves?** et attend **✔ Done** |
 | `all_pumps_off` | arrête chaque pompe |
 | `open_valve DigiBoil_Spigot` | ouvre une seule vanne. Une vanne manuelle (une Manual valve, un Widget Manual Valve, un robinet de DigiBoil ou de Brewzilla) affiche une fenêtre et attend que ce soit fait à la main ; une vanne motorisée est commandée tout de suite. Voir [DigiBoil et Brewzilla, réglées à la main](158-digiboil-and-brewzilla) |
 | `close_valve DigiBoil_Spigot` | ferme une seule vanne, de la même façon |
@@ -100,6 +100,8 @@ Chaque vanne qu'un Process commande (Electro_Mechanical, comme une Motorized Bal
 - **On the Open all valves list** (sur la liste Ouvrir toutes les vannes ; activé au départ)
 
 Désactivez-en un pour laisser cette vanne de côté. Une **vanne d'eau du robinet** est toujours sur la liste Close all et jamais sur la liste Open all, donc l'eau du robinet ne peut pas rester ouverte : ses Properties montrent On Close List activé et On Open List désactivé, tous deux grisés. La dernière étape de **Clean** ouvre chaque vanne de la liste Open (jamais une vanne d'eau du robinet) pour que la brasserie sèche. Une vanne **Manual** n'est sur aucune liste, car un Process la demande par son nom.
+
+Skynet ne peut pas tourner une vanne Manual, donc après avoir fermé ou ouvert sa liste, le Process montre **un seul** rappel, **Have you closed all Manual Valves?** (avez-vous fermé toutes les vannes manuelles ?) ou **Have you opened all Manual Valves?** (avez-vous ouvert toutes les vannes manuelles ?), et attend **✔ Done**. Une brasserie sans vanne Manual n'a pas de rappel.
 
 ## Écrire votre propre Template {#writing-your-own-template}
 
