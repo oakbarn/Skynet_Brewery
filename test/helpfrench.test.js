@@ -71,3 +71,6 @@ assert.deepEqual(problems, [], '\n' + problems.join('\n'));
 // _source.json names only pages that are there
 for (const n of Object.keys(fr.sources())) assert.ok(fs.existsSync(path.join(root, 'help', 'fr', n + '.md')), `_source.json names a missing French page ${n}`);
 console.log(`French Help ok (${list.length} pages)`);
+
+// the words in the Help pictures have their French too (Rule 7.25): test/helppicfrench.test.js, run from here
+await import('./helppicfrench.test.js');
