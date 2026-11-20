@@ -1,0 +1,8 @@
+//FireHose_2_Minutes
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//The "FireHose 2 Minutes" button on the Water Tab (OakBarn Brewery's switch sw_Set_FireHose_2_Min in looper_scrAutoSwitch).
+//It sets the code and starts the Fire Hose and Manifold Process, then it is done.
+gblV_Water_Switch_Status_Water = 1002
+gblV_Valve_Status = -1
+start "utility_FireHose_Manifold_Supply_Water"

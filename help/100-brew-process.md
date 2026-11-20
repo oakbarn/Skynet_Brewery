@@ -85,6 +85,7 @@ The Brew Process screen shows every value as it is now.
 | Command | What it does |
 |---|---|
 | `ask "Add the grain, then press Done"` | a pop-up on every screen with **✔ Done**; the Process waits until an operator or Admin presses it. Text codes work (`\b`, `\n` ...). |
+| `ask "Set the Run Time (hh:mm:ss)" gblT_SetTimer_Water` | the same pop-up with a **box for the answer**, filled with what the gGlobal or Value Widget holds now; **✔ Done** puts the answer in it (a time as hh:mm:ss, a number, or words), then the Process goes on. Skynet Rule 16.5. |
 | `close_all_valves` | closes every valve on the **Close all valves** list |
 | `open_all_valves` | opens every valve on the **Open all valves** list (how things are left after cleaning) |
 | `all_pumps_off` | turns every pump off |

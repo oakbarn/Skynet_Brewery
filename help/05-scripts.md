@@ -91,4 +91,4 @@ Tick **Do not show this warning again** to stop the warnings. Turn them back on 
 
 ## Sample processes
 
-The **Three vessels, one pump** sample comes with `BrewDay_Flow` (a whole guided brew day), `BrewDay_Stop` (everything off) and `looper_Advance_Switch`. Open one to see how things are done, and press Start to watch it work on the simulator. The Process Templates (☰ Menu > Brew Process) show more.
+The **Three vessels, one pump** sample comes with `BrewDay_Flow` (a whole guided brew day), `BrewDay_Stop` (everything off) and `looper_Advance_Switch`. Its **Water** Tab has the Fire Hose and Manifold Processes ([Fire Hose and Manifold Sample](239-fire-hose-and-manifold-sample)). Open one to see how things are done, and press Start to watch it work on the simulator. The Process Templates (☰ Menu > Brew Process) show more.

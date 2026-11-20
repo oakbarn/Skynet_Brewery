@@ -63,6 +63,8 @@ for (const sm of list) {
   // every pipe joins two IPs, every picture exists
   const ips = new Set(c.graphics.filter(g => g.kind === 'ip').map(g => g.id));
   for (const e of c.elements) if (e.subtype === 'pump' || e.subtype === 'valve') { ips.add(`dev:${e.name}:in`); ips.add(`dev:${e.name}:out`); }
+  // a Clone of a pump or valve has its own IPs on its own Tab (Rule 4.4)
+  for (const g of c.graphics) if (g.kind === 'clone' && c.elements.some(e => e.name === g.of && (e.subtype === 'pump' || e.subtype === 'valve'))) { ips.add(`dev:${g.name}:in`); ips.add(`dev:${g.name}:out`); }
   // a Manual Valve Widget's own IPs (a Tap Water Valve has only its hose outlet, Rule 5.33)
   for (const g of c.graphics) if (g.kind === 'ip' && g.fitting === 'manualValve') { ips.add(`eq:${g.id}:in`); ips.add(`eq:${g.id}:out`); }
   for (const p of c.graphics.filter(g => g.kind === 'pipe')) {
@@ -81,10 +83,10 @@ for (const sm of list) {
   const c3 = JSON.parse(fs.readFileSync(path.join(SAMPLES, 'three-vessel-one-pump', 'config.json'), 'utf8'));
   for (const e of c3.elements) {
     if (e.type === 'gGlobal') continue;
-    const dev = ['temperature', 'digitalOut'].includes(e.type);
-    assert.match(e.name, dev ? /^(BM1w1_\d+|BM_\d+_(DO@H_Element|DO@Pump|DO@Chill|DO@Valve_E))_[A-Za-z0-9~]+_BH$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
+    const dev = ['temperature', 'digitalOut', 'digitalIn'].includes(e.type);      // the Water Tab (WA): Process Sample 1, 2026-11-20
+    assert.match(e.name, dev ? /^(BM1w1_\d+|BM_\d+_(DO@H_Element|DO@Pump|DO@Chill|DO@Valve_E|DI@Float))_[A-Za-z0-9~]+_(BH|WA)$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP|WA)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
   }
-  for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
+  for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BH|RE|RP|WA)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
 }
 
 // ---- run each brew day, fast

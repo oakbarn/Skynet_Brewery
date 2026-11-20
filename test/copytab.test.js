@@ -42,7 +42,7 @@ assert.equal(b.elements.length, p.widgets.length);
 assert.equal(b.names.get('wgt_SW_Testing_BH'), 'wgt_SW_Testing_B2');
 assert.equal(b.names.get('gblS_Step_Text'), 'gblS_Step_Text_2', 'a taken name gets _2');
 assert.ok(b.elements.every(e => e.workspace === 'Brew House 2' && !('_ref' in e)));
-assert.equal(b.graphics.filter(g => g.kind === 'clone').length, p.devices.length, 'Devices are still Clones');
+assert.equal(b.graphics.filter(g => g.kind === 'clone').length, p.devices.length + p.clones.length, 'Devices (and the Tab\'s own Clones) are still Clones');
 
 // the Processes that use the Widgets, and their copies' names
 const texts = [['BrewDay_Flow', 'wgt_SW_Testing_BH = true\nwgt_SW_Testing_BH_2 = 1'], ['Other', 'wgt_SW_Testing_BH_2 = 1'], ['Pump_only', 'BM_22_DO@Pump_Pump_BH = On']];
