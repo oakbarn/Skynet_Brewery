@@ -4312,7 +4312,33 @@ const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowK
 const isTapNode = (key, n) => n?.push && (n.tap || (devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve'));
 // a vessel's low openings, where liquid runs out by gravity (OakBarn Brewery, 2026-11-16: "Assume gravity flow")
 const GRAV_PORTS = new Set(['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet']);
-function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // spouts: filled with { p, d } for each open end that flow pours out of    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
+// a loose pipe or hose end that sits on something is not an open end (OakBarn Brewery, 2026-11-20, Panel Update 7: "Looks like a leak.
+// The end is not open but connected to a Pipe. This is a Bug."; Rule 5.45). Within 14 px of an IP (as Save layout rejoins, Rule 5.19),
+// or anywhere inside a Tab_Fitting (a Tee, an Elbow), it is in that IP: flow goes on through it as if it were joined.
+const LOOSE_JOIN = 14;
+function looseEndIp(pt, ws, self) {
+  if (!pt) return null;
+  const d = q => Math.hypot(q[0] - pt[0], q[1] - pt[1]);
+  const fit = L().graphics.find(g => isBfit(g) && g.workspace === ws && pt[0] >= g.x - 4 && pt[0] <= g.x + (g.w || 0) + 4 && pt[1] >= g.y - 4 && pt[1] <= g.y + (g.h || 0) + 4);
+  let best = null, bd = Infinity;
+  for (const { id } of allIps(ws)) {
+    if (id === self) continue;
+    const q = ipPoint(id, ws); if (!q) continue;
+    const ok = d(q) <= LOOSE_JOIN || (fit && L().graphics.some(x => x.id === id && x.attachTo === fit.id));
+    if (ok && d(q) < bd) { best = id; bd = d(q); }
+  }
+  return best;
+}
+// a loose end lying on another pipe or hose, or on a widget, is not out in the air either: no water splash there (Rule 5.45)
+const distSeg = (pt, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = dx * dx + dy * dy; const t = l ? Math.max(0, Math.min(1, ((pt[0] - a[0]) * dx + (pt[1] - a[1]) * dy) / l)) : 0; return Math.hypot(pt[0] - a[0] - t * dx, pt[1] - a[1] - t * dy); };
+function looseEndTouches(pt, ws, self) {
+  if (!pt) return false;
+  const inBox = g => pt[0] >= (g.x || 0) && pt[0] <= (g.x || 0) + (g.w || 0) && pt[1] >= (g.y || 0) && pt[1] <= (g.y || 0) + (g.h || 0);
+  if (L().graphics.some(g => g.workspace === ws && (g.kind === 'vessel' || g.kind === 'ip') && inBox(g))) return true;
+  if (L().elements.some(e => e.workspace === ws && hasIps(e) && inBox(e))) return true;
+  return L().graphics.some(p => p.kind === 'pipe' && p.workspace === ws && p.id !== self.id && (p.points || []).some((q, i, a) => i > 0 && distSeg(pt, a[i - 1], q) <= pipeWidth(p) / 2 + pipeWidth(self) / 2));
+}
+function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = null) {    // still: filled with pipe id -> where its water came from, for water that stands still (Rule 5.45)    // spouts: filled with { p, d } for each open end that flow pours out of    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
   const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
   const link = (a, b, p, oneWay) => {
@@ -4321,13 +4347,15 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // sp
     if (!oneWay) { add(adj, b, a, -1); add(radj, a, b, 1); }
   };
   const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
+  const stubs = [];                              // { key, p }: a pipe from an open node to a closed valve (Rule 5.45)
   // an open end, where flow pours out into the air: a pipe end let go in the air, an open-end coupling, or a plain IP with one pipe
   // on it that is not on a vessel or any equipment (OakBarn Brewery, 2026-11-16: "a graphic of water spurting out the end")
-  const openEnd = key => { const n = nodes.get(key); if (n?.air) return true; const g = L().graphics.find(x => x.id === key && x.kind === 'ip' && x.workspace === ws);
+  const openEnd = key => { const n = nodes.get(key); if (n?.air) return !n.touch; const g = L().graphics.find(x => x.id === key && x.kind === 'ip' && x.workspace === ws);
     return !!g && !g.attachTo && !g.port && (g.fitting === 'coupling' || !isFitting(g)) && pipesOn(key, ws).length === 1; };
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
     const a = node(p.from), b = node(p.to);
-    if (a.closed || b.closed || a.key === b.key) continue;
+    // a closed valve (or cap) on one end: no flow, but water can stand in it up to the valve (Rule 5.45)
+    if (a.closed || b.closed || a.key === b.key) { if (!!a.closed !== !!b.closed) stubs.push({ key: (a.closed ? b : a).key, p }); continue; }
     if (a.end && b.end) continue;
     link(a.key, b.key, p);
   }
@@ -4338,7 +4366,15 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // sp
     const loose = ['from', 'to'].filter(k => !p[k]), fixed = loose.length === 1 && (loose[0] === 'to' ? 'from' : 'to');
     if (!fixed || !ipPoint(p[fixed], ws)) continue;
     const a = node(p[fixed]); if (a.closed || !a.key) continue;
-    const key = `air:${p.id}`; nodes.set(key, { key, end: true, air: true });
+    const pt = p.points[fixed === 'from' ? p.points.length - 1 : 0], on = looseEndIp(pt, ws, p[fixed]);
+    if (on) {        // the loose end is in an IP or a Tab_Fitting (Rule 5.45): as if joined there
+      const b = node(on);
+      if (b.closed) { stubs.push({ key: a.key, p }); continue; }
+      if (a.key === b.key || (a.end && b.end)) continue;
+      if (fixed === 'from') link(a.key, b.key, p); else link(b.key, a.key, p);
+      continue;
+    }
+    const key = `air:${p.id}`; nodes.set(key, { key, end: true, air: true, touch: looseEndTouches(pt, ws, p) });
     if (fixed === 'from') link(a.key, key, p); else link(key, a.key, p);
   }
   // a Quick Disconnect passes flow to and from the IP it sits on (no pipe between them), while a hose is on it (Rule 5.28)
@@ -4440,6 +4476,24 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // sp
         continue;
       }
       for (const { v: w, p, d } of adj.get(u) || []) if (!prev.has(w)) { prev.set(w, { from: u, p, d }); queue.push(w); }
+    }
+  }
+  // Water that stands still (OakBarn Brewery, 2026-11-20, Panel Update 7: "It could also show in the pipe up to the valves, but the
+  // flow is stopped. The flow does not move"; Rule 5.45): from an open Tap Water Valve or a running pump's outlet, every pipe the
+  // water can reach that has no flow (it ends at a closed valve, a cap or nothing) is full but not moving: its dashes stand still.
+  // It goes through open valves, fittings and pumps that are off, and stops at a closed valve, a vessel port, an open end or a pump.
+  if (still) {
+    const stubOf = new Map(); for (const s of stubs) { if (!stubOf.has(s.key)) stubOf.set(s.key, []); stubOf.get(s.key).push(s.p); }
+    const moving = id => dir.has(id) || !!grav?.has(id);
+    const seen = new Set(), queue = [];
+    for (const [k, n] of nodes) if (n.push) { seen.add(k); queue.push([k, isTapNode(k, n) ? { tap: true } : pumpSrc.get(devOfIp(k)) || {}]); }
+    while (queue.length) {
+      const [u, o] = queue.shift();
+      for (const p of stubOf.get(u) || []) if (!moving(p.id) && !still.has(p.id)) still.set(p.id, o);
+      for (const { v, p } of adj.get(u) || []) {
+        if (!moving(p.id) && !still.has(p.id)) still.set(p.id, o);
+        if (!seen.has(v)) { seen.add(v); if (nodes.get(v)?.pass) queue.push([v, o]); }
+      }
     }
   }
   return dir;
@@ -4795,21 +4849,21 @@ function renderPipes() {
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
-  const srcs = new Map(), grav = new Map(), spouts = [], flow = computeFlow(w.name, srcs, grav, spouts), cones = reducers(pipes, w.name);
+  const srcs = new Map(), grav = new Map(), spouts = [], still = new Map(), flow = computeFlow(w.name, srcs, grav, spouts, still), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
   const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
   const drawn = new Map();       // each pipe's drawing, for the crossings (Rule 5.44)
   layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
-    const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
+    const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, standing = !flowing && still.has(p.id), backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
     // a pipe or hose always shows (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot disappear in the real world")
     for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color }));
     g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
-    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : standing ? ' still' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...(srcs.get(p.id) || still.get(p.id)), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     // water spurting out of an open end that flow pours out of (OakBarn Brewery, 2026-11-16: "if a pipe or hose is open, maybe a
     // graphic of water spurting out the end")

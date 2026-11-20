@@ -52,7 +52,11 @@ Pendant que vous faites glisser, le tuyau **fléchit** : il quitte la pompe comm
   haut de la cuve, et le bout du flexible va au milieu du haut de la cuve.
 - **n'importe où ailleurs** : le bout est libre, il pend en l'air. Si quelque chose pousse de l'eau dans le flexible (une Tap Water
   Valve ouverte, ou une pompe en marche), elle coule par le bout ouvert, donc le flexible montre un passage et
-  une éclaboussure d'eau de la couleur du passage.
+  une éclaboussure d'eau de la couleur du passage. Un bout laissé dans un Té ou un Coude, ou tout près d'un IP, est dedans :
+  l'eau continue à travers et il n'y a pas d'éclaboussure. Un bout posé sur un tuyau ou un widget n'en a pas non plus.
+
+Quand l'eau n'a nulle part où aller (chaque chemin finit à une vanne fermée), le flexible et les tuyaux jusqu'à ces vannes sont
+pleins mais immobiles : leurs tirets se montrent et **restent immobiles**. Dès qu'une vanne s'ouvre, ils bougent.
 
 Quand vous lâchez, le bout **reste où il est** : joint à l'IP, au Quick Disconnect ou au haut de la cuve en dessous, ou libre.
 Rien n'est demandé. Quand il se fixe sur un IP, un Quick Disconnect ou le haut d'une cuve, son anneau **clignote rouge et jaune pendant 2

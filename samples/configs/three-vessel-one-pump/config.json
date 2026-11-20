@@ -1907,7 +1907,7 @@
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "tapwater": true,
-   "tapwaterOut": "out"
+   "tapwaterOut": "in"
   },
   {
    "name": "BM_31_DO@Valve_E_Fire~Hose_WA",
@@ -5177,7 +5177,7 @@
    "kind": "pipe",
    "workspace": "Water",
    "from": "fw_tee_e",
-   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:in",
+   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:out",
    "points": [
     [
      1480,
@@ -5234,7 +5234,7 @@
    "id": "p_fw_4",
    "kind": "pipe",
    "workspace": "Water",
-   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:out",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:in",
    "to": "ip_brew_manifold",
    "points": [
     [
@@ -5572,7 +5572,7 @@
    "kind": "pipe",
    "workspace": "Brew House",
    "from": "bh_mf_tee_s",
-   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA_Clone_1:out",
+   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA_Clone_1:in",
    "points": [
     [
      1547,
@@ -5593,7 +5593,7 @@
    "id": "p_bh_mv_2",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA_Clone_1:in",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA_Clone_1:out",
    "to": "bh_tap_tee_e",
    "points": [
     [
