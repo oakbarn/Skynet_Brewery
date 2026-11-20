@@ -1133,7 +1133,7 @@ number: "Yes That was coming soon regardless", "4 digits"). A number with its un
 or Heating Element's "45 % ▸ 152" ...) is never split over two lines, up to 4 digits before the point (9999.9 °F). When it is
 wider than its box, Skynet makes the value's font smaller until it fits; when the reading is short again, it goes back to its own
 size. The box is never made bigger by itself (Design Rule #1: nothing the user set is taken away). Texts that
-are meant to wrap are left alone: Text and Label Widgets, long strings, Alarm text and picture text. The Skynet Dial and Timer
+are meant to wrap are left alone: Text and Label Widgets, long strings, a String gGlobal (it is text, 2026-11-20), Alarm text and picture text. The Skynet Dial and Timer
 Digits draw their own digits to fit (Rule 2.40). Help 138. **Both programs:** the BruControl Import's Build page shares the Panel code.
 
 2.57 **Port means a board Port; a pipe end has an End Fitting** (OakBarn Brewery, 2026-11-17: "Ports could be confused with Arduino
@@ -1221,8 +1221,8 @@ never changes a saved number, so switching back and forth can never drift a numb
 - **Exceptions, kept in their own unit whatever Units says (OakBarn Brewery, 2026-11-19):** (1) **Recipe items that come in their
   own unit**: "some recipes have grams vs ounces so we will need to set what the thing added use (some Yeasts come as Grams rather
   than Oz , although most are Packs. Additions can be either"; "Hops may be the same. I have always used OZ. But you could use
-  grams as more accurate." Additions (Misc) already keep their unit on each line; a yeast is a count of Packs; a per-line unit
-  for yeast (Packs / g / oz / ml) and hops (oz / g) is a separate Panel Update, not built. (2) **A Vessel whose own screen has
+  grams as more accurate." Additions (Misc) keep their unit on each line; each **yeast** line has its own unit
+  (Packs / g / oz / ml) and each **hop** line its own unit (oz / g), with an **oz → g** button (built 2026-11-19, Rule 17.18). (2) **A Vessel whose own screen has
   fixed units** ("A digiboil always opens in Metric after a power cycle"; "a user can switch the Digiboil and Brewzilla back
   to F. I would think that is most common for US Brewers"): a Manual vessel (DigiBoil, Brewzilla) has its own Temperature units,
   the units its screen shows. It starts as Units (°F in US Standard) and can be set to °F or °C in its Properties; its Hover Help
@@ -4755,6 +4755,10 @@ they come from the ☰ Menu > Default tab's Mash and Boil Profiles. **PreBrew st
 make, or review it.
 
 16.5 **`ask "text"`** in a Process shows a pop-up on every screen with ✔ Done and waits until an operator or Admin presses it.
+**`ask "text" Name`** (OakBarn Brewery, 2026-11-20, on the Fire Hose Set Time: "a dialog ask for the time a global variable") adds a
+**box for the answer** to the same pop-up, filled with what Name holds now. Name is a gGlobal or a Value Widget; ✔ Done puts the answer
+in it (a time as hh:mm:ss, a number, or words, by its kind) and the Process goes on. A blank or wrong answer is not taken: the pop-up
+says what to type. Both programs: the BruControl Import has no such command (it is only written in Skynet Processes).
 
 16.6 **Schema Templates** (Fritz, 2026-11-06/07): Schema dropdown > Add new Schema > Start from **A Skynet Schema Template**.
 Answer a few questions, and the Schema is ready to brew. The **Brew House Tab Templates** are **1 Vessel, 1 Vessel + 1 Pump,
@@ -4781,6 +4785,12 @@ the backup. Help 100 and 157.
   **A Process Template is always brought up to the new Rule**, even while the Brew Process is not being tested yet.
 - **The test bed:** every Device, Widget and item in the **3 Vessel 1 Pump** sample (`samples/configs/three-vessel-one-pump`) is
   kept to the newest standard. It is also the Schema a new panel starts with (`config/brewery.json`).
+- **The Process Samples** (OakBarn Brewery, 2026-11-19: "Process Samples first"; on where they run, 2026-11-20: "A But a new Tab")
+  are written one at a time from OakBarn Brewery's own scripts and go in the test bed **on a Tab of their own**, so the Brew House
+  Tab is not changed; each is in the sample and in `config/brewery.json` with its Processes in both `processes/` folders. His codes,
+  Labels and messages are kept; only what Skynet needs changes (a Process Widget instead of a looper switch, `ask` instead of an
+  Advance switch, the Override pop-up, Rule 2.26). **Process Sample 1** is the **Water** Tab (WA): the Fire Hose and the Manifold
+  Supply Valve, timed or until a float (Help 239).
 - **Old Heating Elements** (OakBarn Brewery, 2026-11-08: "Old Heater Elements if on a Template need to be updated to new standard
   One Port One Device. But only in Templates and 3 Vessel Schema"): an old Duty Cycle, Hysteresis, PID or Deadband Device in a
   Template or in the test bed becomes **one Heating Element on one Port** (Rule 6.19), turned On or Off (`= on` / `= off`), never
@@ -4815,6 +4825,19 @@ to its new line number"):
   line it went to. Lines added or taken out above that line change the number; lines below it do not. A goLine typed or changed in
   this edit is kept as typed. If its line was taken out, it goes to the next line still there (lib/goline.js, server Save).
 - A file changed in another text editor is not checked. Help 22. **Both programs:** the BruControl Import reads Processes with the same reader.
+
+16.11 **Every Tap Water Fill gets an Override button** (OakBarn Brewery, 2026-11-20: "And as a Rule: Every Tap Water Fill gets an
+Over Ride Button. It could even be a special one that simply closes the valves used."). A Process that opens a tap water valve to
+fill (the Fire Hose, the Manifold Supply Valve, a fill of a Vessel from tap water) has an **Override button set to that Process**
+(Rule 2.26) on the Tab where it is started, so the water can be shut off at once without waiting for the pop-up. One press passes
+the fill's wait and the Process closes the valves it opened (it ends by closing them, whatever ended the wait). **It appears only
+once the water flows** (OakBarn Brewery, 2026-11-20: "The Override appears after Flow is started not before. So there will not be an
+override in the before delay"): its **Shows** is **Only while tap water flows**, so it is on its Tab only while a tap water valve on
+that Tab is open; during a warning before the water comes on there is no Override (a button set to the Process, even unseen, keeps
+the Override pop-up away too). Shows **Always** is the other choice, for any other Override button. A **Stop** button
+that stops the Process and closes the valves (FireHose Off on the Water Tab) is good to have too. The Process Samples follow it:
+the Water Tab's **Water Override** is set to `utility_FireHose_Manifold_Supply_Water`. Help 239. **Both programs:** the BruControl
+Import adds one when it makes a Tap Water Fill Process (Importer Sandbox; the Importer build is on hold).
 
 ## 17. Recipes
 
@@ -4998,6 +5021,25 @@ and changed on the Tab any time (⚙ Numbers, Tab Settings). A Recipe's **Calcul
 Temperature; a Tab with none adds 0. It is a temperature **difference**: kept in °C (Rule 2.59), °F to °C is x 5/9 with no 32. It may be
 below 0 (not restricted). Hover Help says 0 for an All In One or a pre-heated Mash Tun. Asking for it again on Brew Day (a confirm and a
 box, for a hot or cold brewery) belongs to the PreBrew Process (Process Updates Sandbox entry 1).
+
+17.18 **Hop and Yeast lines keep their own unit; the Yeast tab** (OakBarn Brewery, 2026-11-19, Panel Updates entry 13b: "some Yeasts come as
+Grams rather than Oz, although most are Packs"; "Hops may be the same. I have always used OZ. But you could use grams as more accurate";
+a button to turn hop oz into grams because some scales start in grams. Yeast tab layout: "Use it and Build to keep rule"):
+- **Hops:** each hop line has a **Unit** dropdown, **oz** or **g**, whatever Units says (Rule 2.59 exception). The amount is still kept in
+  **kg**; the Unit is how that line shows and is typed, and how its Calc oz / Calc g, its alert text and `rcp_Hop_N_Amount` /
+  `_Calc_Amount` read. `rcp_Hop_N_Measurement` gives the unit. **oz → g** on the Hops tab turns every hop line in oz into g in one press
+  (only the unit changes). A new line starts in the Units; a hop line saved before with no unit follows Units (nothing taken away).
+- **Imports:** a .bsmx hop is **oz**; a BeerXML hop takes the unit its DISPLAY_AMOUNT shows (oz or g), else **g**. A .bsmx yeast is a count
+  of **Packs** (a unit the file names wins); a BeerXML yeast is **g** when AMOUNT_IS_WEIGHT (kg x 1000) or **ml** (liters x 1000), unless
+  DISPLAY_AMOUNT names one ("1 pkg" = Packs); no AMOUNT = 1 Pack.
+- **The Yeast tab** (the layout OakBarn Brewery picked, 2026-11-19): one line per yeast, no limit, **Yeast +** and **Delete**: **Name, Form** (Dry,
+  Liquid, Slurry, Culture), **Amount**, **Unit** (Packs, g, oz, ml; kept in that unit, like an Adjunct line), **Attenuation %**, **Min
+  Temp** and **Max Temp** (kept in °C, shown in the Units). **▸ More** opens **Lab, Product ID, Type** (Ale, Lager, Wheat, Wine,
+  Champagne), **Flocculation** (Low, Medium, High, Very High), **Starter** (a switch) with an optional **Starter Size** (kept in liters),
+  **Times Cultured**, **Mfg Date** and **Notes**. Dropdowns are select only; a word from a file not in the list stays in that line's list.
+  Skynet_Fields `rcp_Yeast_Count`, `rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement`, `_Attenuation`, `_Min_Temp`, `_Max_Temp`,
+  `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`;
+  `rcp_Yeast_Name` stays the first yeast. (Help 99) **Both programs:** the BruControl Import has no recipe lines, so nothing changes there.
 
 ## 18. General Dialog Rules
 
@@ -6256,6 +6298,9 @@ import.
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
 - 2026-11-19: Added Rule 6.38 (OakBarn Brewery, Panel Updates entry 31: a physical DIN push button that does one thing without writing code; "I had a Red one That canceled all alarms. I had a yellow one that did a 20 second firehose."): a Digital Input Device's On Press is None, Run a Process, Advance (Override, only when a Process it is set to waits; otherwise ignored) or Cancel all alarms. Help 235 (and French); Help 233 links to it. Checked against both programs: the BruControl Import is unchanged (its DINs come in with None). (thread "Make physical DIN buttons run Processes")
+- 2026-11-20: Rule 16.8 extended with the Process Samples (OakBarn Brewery, 2026-11-19: "Process Samples first"; 2026-11-20: "A But a new Tab"): written one at a time from his scripts, each on its own Tab of the 3 Vessel 1 Pump test bed and the default Schema. Process Sample 1 is the Water Tab (WA): his Fire Hose and Manifold buttons as Process Widgets, utility_FireHose_Manifold_Supply_Water with his codes 1001-1005 and 2001-2005, ask "Manifold Set?", a 20 second warning, the auto Override pop-up, a Float and FireHose Off. Rule 2.56: a String gGlobal wraps like every Text Box (it was made smaller to one line). Help 239 (new, and French); Help 5 links to it. Checked against both programs: the BruControl Import is unchanged (Importer Pattern 1, a switch that launches a script, already maps to one Process Widget). (thread "Write the Fire Hose and Manifold trigger Process")
+- 2026-11-20: Added Rule 16.11 (OakBarn Brewery: "Every Tap Water Fill gets an Over Ride Button"): a Process that fills from tap water has an Override button set to it on its Tab; one press passes the fill's wait and the Process closes the valves it opened. The Water Tab gets its Water Override, set to utility_FireHose_Manifold_Supply_Water; it shows only while tap water flows (new Override button setting 5. Shows: Always / Only while tap water flows), so there is no Override during the 20 second warning (with a button set to it, its pop-up no longer comes by itself). The Fire Hose and Manifold Valves also show on the 3 Vessel 1 Pump Brew House as Clones (OakBarn Brewery's markup). Help 239 (and French). Checked against both programs: the BruControl Import adds one for each Tap Water Fill Process it makes (Importer Sandbox; on hold). (thread "Write the Fire Hose and Manifold trigger Process")
+- 2026-11-20: Rule 16.5 extended (OakBarn Brewery: "a dialog ask for the time a global variable"): `ask "text" Name` shows the ask pop-up with a box for the answer, filled with what Name (a gGlobal or Value Widget) holds now; Done puts the answer in Name. The Fire Hose and Manifold Set Time uses it for gblT_SetTimer_Water (no Set Timer box on the Water Tab). Help 100 and 239 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Write the Fire Hose and Manifold trigger Process")
 - 2026-11-19: Added Rule 18.52 (OakBarn Brewery: "The Hose Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the "motor""): a Hose Bib gets an Inlet box (Top or Bottom on Vertical, greyed on Horizontal), so it has all 4 Vertical looks, and an Inlet IP on its wall thread: a pipe there shows tap flow while it is open, and a closed valve on that side stops its water (entry 35); Manual Ball and Butterfly Valves grey Left / Right on Horizontal (same both ways); a turned Manual Valve's Label stays upright. Panel Updates sandbox entries 33 and 35. Rule 5.33 note. Help 141, 87 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change. Checked on the 3 Vessel sample: its one Hose Bib is Horizontal, so it looks the same.
 - 2026-11-19: Added Rule 4.8 and changed Rules 4.1, 4.4 and 5.21 (OakBarn Brewery, Panel Updates Sandbox entry 18, Panel Updates order
   item 8): New tab > Copy of a whole Tab; Devices become Clones, pipes and hoses get new background names, the Widgets interview
@@ -6913,5 +6958,6 @@ import.
 - 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
+- 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.

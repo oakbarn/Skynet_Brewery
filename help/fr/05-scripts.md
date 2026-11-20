@@ -94,4 +94,4 @@ Cochez **Do not show this warning again** pour ne plus voir les avertissements. 
 
 ## Exemples de Processes {#sample-processes}
 
-L'exemple **Three vessels, one pump** (trois cuves, une pompe) est livré avec `BrewDay_Flow` (une journée de brassage guidée complète), `BrewDay_Stop` (tout éteindre) et `looper_Advance_Switch`. Ouvrez-en un pour voir comment on fait, et appuyez sur Start pour le regarder travailler sur le simulateur. Les Process Templates (☰ Menu > Brew Process) en montrent davantage.
+L'exemple **Three vessels, one pump** (trois cuves, une pompe) est livré avec `BrewDay_Flow` (une journée de brassage guidée complète), `BrewDay_Stop` (tout éteindre) et `looper_Advance_Switch`. Son onglet **Water** a les Processes Fire Hose et Manifold ([Exemple Lance d'arrosage et Manifold](239-fire-hose-and-manifold-sample)). Ouvrez-en un pour voir comment on fait, et appuyez sur Start pour le regarder travailler sur le simulateur. Les Process Templates (☰ Menu > Brew Process) en montrent davantage.

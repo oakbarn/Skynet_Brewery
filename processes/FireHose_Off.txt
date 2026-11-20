@@ -1,0 +1,18 @@
+//FireHose_Off
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//The "FireHose Off" button on the Water Tab (OakBarn Brewery's switch sw_Set_FireHoseOff in looper_scrAutoSwitch).
+//His switch closed the Fire Hose valve only. Here it also stops the Fire Hose and Manifold Process, so its timers and
+//sound stop too, and closes both water valves.
+stop "utility_FireHose_Manifold_Supply_Water"
+stop "wgt_TMR_Water~delay_WA"
+stop "wgt_TMR_Water_WA"
+// the true run time up to FireHose Off
+stop "wgt_TMR_Water~elapsed_WA"
+gblT_Elapsed_Water = wgt_TMR_Water~elapsed_WA
+BM_31_DO@Valve_E_Fire~Hose_WA = false
+BM_33_DO@Valve_E_Manifold~Supply_WA = false
+wgt_ALM_Fire~Hose_WA = false
+wgt_ALM_Water~flow_WA = false
+gblV_Water_Switch_Status_Water = -9999
+gblS_Water_Text_1_Water = "Fire Hose and Manifold Supply Valve are off."
