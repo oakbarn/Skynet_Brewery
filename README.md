@@ -48,10 +48,20 @@ The following are the way I build any software, as I have learned to follow them
 10. **Don't be a Nanny.** The end user becomes responsible for his Actions or faults. I take zero responsibility for the Safety or Stupidity of someone I do not know. A program is always used at your own risk. I can guide, but not compel.
 11. **Built using available items that can be made or purchased.** In the Skynet Panel, that means you can buy the parts for the Skynet Panel at places like Amazon or MoreBeer.
 12. **Respect Copyright Laws.** Anything that the Skynet Panel supplies in its media files is open: Public Domain, Created as Original by Skynet, CC0 (CC Zero), CC BY and CC BY-SA (and fonts under the SIL Open Font License). I do not check any user files; that is none of my business.
-13. **Use a back house Meaningless Key to store, fetch and put.** That means you can easily change a name and the data will still be retrieved. Years ago, when I was building a PayPhone Accounting Program (for people who provided payphones), the friend I was writing it for told me that a payphone number never changed and we could use it as a key because each was unique. Stupid me. I did not have this rule, and 2 years later, when there was an area code split, half the phones needed to be changed. It was a major rewrite that would not have been necessary if I had had this rule.
+13. **Use a back house Meaningless Key to store, fetch and put** (Design Rule #2). That means you can easily change a name and the data will still be retrieved. Years ago, when I was building a PayPhone Accounting Program (for people who provided payphones), the friend I was writing it for told me that a payphone number never changed and we could use it as a key because each was unique. Stupid me. I did not have this rule, and 2 years later, when there was an area code split, half the phones needed to be changed. It was a major rewrite that would not have been necessary if I had had this rule.
 14. **Allow a User to make the Program his own.** Allow the user to decide which things are shown on a screen or not.
 15. **Keep user tasks as simple as possible.** Lead by the nose if possible. Use Predictive Text, but be able to turn it off. If you cannot turn off Predictive Text = Annoying!
 16. **Have an Undo if possible, rather than a warning on Saving.**
+
+**From the Skynet Rules** ([docs/Skynet_Rules.md](docs/Skynet_Rules.md) is the full list):
+
+17. **Never Take Away, Only Add** (Design Rule #1). An update adds things; it does not remove what users already have. Together with the Meaningless Key of item 13 (Design Rule #2): "90% of issues with software updates are removed if you follow those rules."
+18. **KISS: Keep It Simple Stupid.** No clutter. Dialogs stay clean, and the explanations go in the Hover Help (Rule 2.38).
+19. **Plain terms, no "Who's on First?"** A name, a sign or a word says what it means, so plus means up and minus means down, and nothing reads backward like a debit and a credit.
+20. **Things act the same everywhere** (Rule 2.44). One click on the picture of a Pump, a Valve or a Heating Element turns it On or Off, the same on every Tab, so you learn it once.
+21. **Correct spelling and plain English at all times** (Rule 2.37).
+22. **Data is always metric; Units are for showing only** (Rule 2.59). Switching between US and Metric changes what you see and type, never what is stored.
+23. **Nothing is ever written over.** A Schema backup is made every time a change is saved (Rule 9.17), so an earlier version can always be got back.
 
 ## 1. Install and run
 
