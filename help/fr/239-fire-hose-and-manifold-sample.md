@@ -43,6 +43,9 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
 
 Dans le simulateur, touchez le **Water float** pour le faire.
 
+**Conseil :** mettez un régulateur de pression d'eau sur la ligne d'eau du robinet, avant les vannes. Il coûte peu et
+s'installe facilement, et avec la même pression à chaque fois, un remplissage minuté donne toujours la même quantité d'eau.
+
 ## Les Processes {#the-processes}
 
 | Process | Ce que c'est |

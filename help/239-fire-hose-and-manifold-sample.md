@@ -39,6 +39,9 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
 
 In the simulator, tap the **Water float** to make it.
 
+**Tip:** put a water pressure regulator in the tap water line before the valves. It is cheap and easy to install, and with the
+same pressure every time, a timed fill gives the same amount of water every time.
+
 ## The Processes
 
 | Process | What it is |
