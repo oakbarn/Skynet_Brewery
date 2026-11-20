@@ -61,8 +61,7 @@ The following are the way I build any software, as I have learned to follow them
 17. **Never Take Away, Only Add** (Design Rule #1). An update adds things; it does not remove what users already have. Together with the Meaningless Key of item 13 (Design Rule #2): "90% of issues with software updates are removed if you follow those rules."
 18. **KISS: Keep It Simple Stupid.** No clutter. Dialogs stay clean, and the explanations go in the Hover Help (Rule 2.38).
 19. **Correct spelling and plain English at all times** (Rule 2.37).
-20. **Data is always metric; Units are for showing only** (Rule 2.59). Switching between US and Metric changes what you see and type, never what is stored.
-21. **Nothing is ever written over.** A Schema backup is made every time a change is saved (Rule 9.17), so an earlier version can always be got back.
+20. **Nothing is ever written over.** A Schema backup is made every time a change is saved (Rule 9.17), so an earlier version can always be got back.
 
 ## 1. Install and run
 
