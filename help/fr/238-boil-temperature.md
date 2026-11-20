@@ -68,7 +68,7 @@ Ces Globals internes de Skynet sont mis par Skynet et en lecture seule (Règle 1
 
 | Nom | Ce que c'est |
 |---|---|
-| `skn_Boil_Temp` | La température à laquelle l'eau bout ici et maintenant, dans les Units du panneau (°F pour US, °C pour Metric) |
+| `skn_Boil_Temp` | La température à laquelle l'eau bout ici et maintenant. Un Process l'utilise en °C, comme toute température (Skynet Rule 2.59) ; dans un message (`print`, `ask`, ou un texte joint avec `+`) elle s'affiche dans vos Units (°F pour US, °C pour Metric) |
 | `skn_Boil_Temp_C` | La même en °C |
 | `skn_Boil_Temp_F` | La même en °F |
 | `skn_Air_Pressure` | La pression de l'air à la brasserie maintenant, en hPa |
