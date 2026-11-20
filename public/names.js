@@ -65,7 +65,7 @@ export function elementNameError(name, what = 'Device or Widget') {
   }
   if (RESERVED.test(n)) return reservedMsg(n, what);
   if (PROCESS_WORDS.has(n.toLowerCase())) return `"${n}" is a word of the Process language (such as NULL, true, if or wait), so it can't be a ${what} name. Add to it, for example ${n}_1.`;
-  if (isSkynetConstantName(n)) return `The ${what} name "${n}" can't start with skc_: those names are kept for Skynet Constants`;
+  if (isSkynetConstantName(n)) return `The ${what} name "${n}" can't start with skn_const_: those names are kept for Skynet Constants`;
   return '';
 }
 

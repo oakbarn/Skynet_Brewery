@@ -7,6 +7,7 @@ import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
+import { SKYNET_CONSTANT_GROUPS, SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstant } from './skconst.js';
 import { setRich, NAMED_COLORS, setTempUnitSource } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
@@ -10381,7 +10382,7 @@ function fieldTip(name, text) {
   linkify(tipText);      // its hot spots open their Help page (Rule 2.49)
   // its title and ✖ Close stay at the top while it scrolls, and there is no Close at the bottom (OakBarn Brewery, 2026-11-14, Blichmann
   // Riptide Dialogs 3: "Close Button Frozen at top of All Hover Help. Get Rid of Bottom Close Buttons")
-  const d = h('dialog', { class: 'tipDlg' + (String(text).includes('⟪img:') ? ' tipWide' : ''), 'data-nomenu': '' },
+  const d = h('dialog', { class: 'tipDlg' + (/⟪imgw?:/.test(String(text)) ? ' tipWide' : ''), 'data-nomenu': '' },
     h('div', { class: 'tipHead' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, '✖ Close')), tipText);
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();
@@ -12717,7 +12718,7 @@ function updateAlarms() {
 }
 
 // ---------------------------------------------------------------- scripts
-let curScript = null, dirty = false, problems = [];
+let curScript = null, dirty = false, problems = [], notes = [];
 function renderScripts() { renderScriptList(); }
 // grouped by class: Flow, Sub, Repeat, Looper (lib/scaffold.js); a group can be folded
 let foldedClasses = new Set();
@@ -12778,7 +12779,7 @@ $('#updVersion').onclick = guard(async () => {
 $('#procTab').onclick = () => setView('scripts');
 async function openScript(name) {
   if (dirty && !confirm('Discard unsaved changes?')) return;
-  curScript = name; dirty = false; problems = [];
+  curScript = name; dirty = false; problems = []; notes = [];
   $('#code').value = await api('GET', '/ui/scripts/' + encodeURIComponent(name));
   $('#scriptName').textContent = name;
   knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
@@ -12815,8 +12816,9 @@ function updateGutter() {
 function renderProblems() {
   const ul = $('#problems'); ul.innerHTML = '';
   if (problems === null) return;
-  if (!problems.length) { if (curScript) ul.append(h('li', { class: 'ok' }, 'No problems found')); return; }
+  if (!problems.length && !notes.length) { if (curScript) ul.append(h('li', { class: 'ok' }, 'No problems found')); return; }
   for (const p of problems) ul.append(h('li', { onclick: () => gotoLine(p.line) }, `Line ${p.line}: ${p.msg}`));
+  for (const p of notes) ul.append(h('li', { class: 'warn', onclick: () => gotoLine(p.line) }, `⚠ Line ${p.line}: ${p.msg}`));     // warnings: never stop a save
 }
 function gotoLine(l, ta = $('#code')) {
   const lines = ta.value.split('\n');
@@ -13155,6 +13157,31 @@ $('#colorKey').onclick = () => {
   $('#keyDlg').showModal();
 };
 
+// Skynet Constants list (OakBarn Brewery, 2026-11-19, Panel Updates Sandbox entry 28: a viewable list, usable in Processes): every
+// constant with its Label ("Liters per Gallon"), name and value, by group; typing finds by Label, name or unit; a click puts the name at
+// the cursor in the Process editor
+function renderConstRows() {
+  const box = $('#constRows'), f = $('#constFind').value.trim().toLowerCase(), rows = [];
+  const hit = (...t) => !f || t.join(' ').toLowerCase().includes(f);
+  const put = word => () => {
+    $('#constDlg').close();
+    const ta = $('#code'); if (!curScript || ta.readOnly) return;
+    ta.focus(); ta.setRangeText(word, ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input'));
+  };
+  const fns = SKYNET_FUNCTIONS.filter(([n, , what]) => hit(n, what, 'temperature'));
+  if (fns.length) rows.push(h('div', { class: 'constGroup' }, 'Temperature (functions)'),
+    ...fns.map(([n, , what]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(n + '(') }, h('span', {}, what), h('span', {}), h('code', {}, n + '(x)'))));
+  for (const [group] of SKYNET_CONSTANT_GROUPS) {
+    const mine = SKYNET_CONSTANTS.filter(c => c[3] === group && hit(c[0], c[4], c[2], group));
+    if (!mine.length) continue;
+    rows.push(h('div', { class: 'constGroup' }, group), ...mine.map(([n, v, , , label]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(n) },
+      h('span', {}, label), h('span', { class: 'constVal' }, showConstant(v)), h('code', {}, n))));
+  }
+  box.replaceChildren(...(rows.length ? rows : [h('div', { class: 'muted' }, 'No Skynet Constant has those letters')]));
+}
+$('#constList').onclick = () => { $('#constFind').value = ''; renderConstRows(); $('#constDlg').showModal(); $('#constFind').focus(); };
+$('#constFind').oninput = renderConstRows;
+
 // Save to file: the whole Process or the highlighted part, as text or as XML in color; and the Notepad++ colors file
 let lastSel = [0, 0];
 for (const ev of ['select', 'keyup', 'mouseup', 'touchend']) $('#code').addEventListener(ev, () => { const ta = $('#code'); lastSel = [ta.selectionStart, ta.selectionEnd]; });
@@ -13230,7 +13257,7 @@ const saveScript = guard(async () => {
     const pos = r.text.split('\n').slice(0, line - 1).reduce((a, l) => a + l.length + 1, 0);
     ta.setSelectionRange(pos, pos); ta.scrollTop = top;
   }
-  dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter(); refreshFind(false);
+  dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; notes = r.warnings ?? []; renderProblems(); updateGutter(); refreshFind(false);
   const note = (r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '') + (r.golines ? ` (${r.golines} goLine number(s) moved with their lines)` : '');
   if (problems.length || note) toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length); else savedPop('Saved');
   const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
@@ -13263,7 +13290,7 @@ $('#addSteps').onclick = guard(async () => {
   ta.value = t.text; dirty = true; updateGutter(); refreshFind(false); $('#scriptName').textContent = curScript + ' (not saved)';
   toast('Steps added: Save to number them');
 });
-$('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; renderProblems(); updateGutter(); });
+$('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; notes = r.warnings ?? []; renderProblems(); updateGutter(); });
 $('#startScript').onclick = guard(async () => {
   if (!curScript) return;
   if (dirty) await saveScript();
@@ -14413,8 +14440,8 @@ function renderBoilTemp(st) {
 async function saveBoilTemp() {
   const us = btUS(), e = $('#btElev').value.trim(), p = $('#btPress').value.trim();
   const elevationM = e === '' ? null : btShown && e === btShown.elev ? btShown.elevM : (us ? +e * BT_FT : +e);
-  const pressureHpa = p === '' ? null : (us ? +p * BT_INHG : +p);
-  return api('PUT', '/ui/boiltemp', { airport: $('#btAirport').value.trim().toUpperCase(), elevationM, pressureHpa });
+  // the typed pressure goes as typed: the Brain reads it as inHg or hPa by its size and turns down a number that is no air pressure
+  return api('PUT', '/ui/boiltemp', { airport: $('#btAirport').value.trim().toUpperCase(), elevationM, pressure: p === '' ? null : +p });
 }
 $('#btSave').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; renderBoilTemp(await saveBoilTemp()); savedPop('Boil temperature saved'); });
 $('#btTest').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; await saveBoilTemp(); renderBoilTemp(await api('POST', '/ui/boiltemp/test')); });
@@ -15796,8 +15823,8 @@ const DEF_TIPS = {
   hose: 'Common size of the hoses to be placed on a new Tab. Individual hose size can be changed when they are placed. Hoses can join Pipes, Fittings and anything with IPs but retain their size unlike a Pipe. There is no auto sizing of Hoses. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Hoses are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Hose IP.\n\nIPs snap together and are locked.\n\nHoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.\n\nVessel Devices and Widgets have a large area Quick Disconnect IP at the Top where a Hose can simulate being hooked over the top of the Vessel.\n\nHoses have a flow simulation.',
   px: 'This is simply how Pipes are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
   hosePx: 'This is simply how Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 6 is a good starting point; Hoses are usually drawn thinner than Pipes. It is for any new Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
-  width: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
-  height: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Vertical Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Height only affects a Vertical Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
+  width: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.\n\nAt Zoom 100%, a Tab of 1600 x 900 on a 1920 x 1040 screen fits with room to spare (the red dashes are the Tab\'s edge), so no scroll bars show:⟪imgw:help_pictures/Tab_1600x900_on_1920x1040_Screen.png⟫A Tab of 1920 x 1040 on the same screen is a little too big at Zoom 100%, because the Tab buttons at the top and the panel\'s edges take some of the screen, so both scroll bars show (in red):⟪imgw:help_pictures/Tab_1920x1040_on_1920x1040_Screen.png⟫At Zoom Fit screen the same Tab is drawn a little smaller and no scroll bars show.',
+  height: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Vertical Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Height only affects a Vertical Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.\n\nAt Zoom 100%, a Tab of 1600 x 900 on a 1920 x 1040 screen fits with room to spare (the red dashes are the Tab\'s edge), so no scroll bars show:⟪imgw:help_pictures/Tab_1600x900_on_1920x1040_Screen.png⟫A Tab of 1920 x 1040 on the same screen is a little too big at Zoom 100%, because the Tab buttons at the top and the panel\'s edges take some of the screen, so both scroll bars show (in red):⟪imgw:help_pictures/Tab_1920x1040_on_1920x1040_Screen.png⟫At Zoom Fit screen the same Tab is drawn a little smaller and no scroll bars show.',
   batch: 'This only affects new User Recipes. This is your normal Batch size when Manually creating a Recipe in Skynet. Skynet does not pretend to be a Recipe Builder and can import a standard Beer.xml file from the popular Recipe builders with no coding on your part in Skynet. Simply create the recipe in your favorite Recipe Builder or get one from a forum or a friend and import it. As long as the import is in the beer.xml agreed standard, Skynet should import it. If you never plan to build a Recipe here you can ignore this entire Section as it has some defaults set to what is most common regardless.',
   // written by Claude from OakBarn Brewery's notes (Default Tab 3: "Write a plain language ...")
   mash: 'The Mash Profile a new Recipe starts with. Skynet Single Step, Batch Sparge: one rest at 152 °F (67 °C) for 60 minutes, the usual mash for most beers.\n\n⟪b:Strike Temperature⟫\nThe water is heated hotter than the mash temperature (the Strike Temperature), because the grain cools it down when it goes in. The mash tun soaks up some heat too: that is the Offset for Equipment. Cold grain cools the water more: if your grain is colder on Brew Day than the recipe planned for (72 °F), you will land under the mash temperature.\n\n⟪b:Adding the grain⟫\nAdd the grain slowly while stirring, so no dry clumps (dough balls) form, until you reach the mash temperature. Heat the water (the Pre Strike) a bit higher than the Strike Temperature and let it cool to Strike before the grain goes in: cooling is easy, heating a full mash tun back up is hard.\n\n⟪b:Mash length and temperature⟫\nA lower mash temperature (148 to 150 °F) makes a drier, lighter beer; a higher one (154 to 158 °F) a sweeter, fuller one. 60 minutes is enough for most malts today. Best practice: keep the mash at its temperature for the whole mash, with a lid on or the heat on.\n\n⟪b:Sparge⟫\nAfter the mash, the sugar is rinsed out of the grain (the sparge). Batch Sparge: drain, add hot water, stir, rest, drain again. Fly Sparge: hot water is sprinkled on top while the wort drains slowly from the bottom; slower, often a little more sugar. Brewzilla type (brew in a bag or a basket): lift the grain out and pour hot water over it. Each one changes how much sugar you get out of the grain (the efficiency).',

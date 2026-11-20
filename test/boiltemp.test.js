@@ -2,7 +2,7 @@
 // report with a pretend internet, the fallbacks and their plain messages, and skn_Boil_Temp in a Process.
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
-import { boilC, stationPressure, stdPressure, toHpa, sknValue, isIcao, MSG, STD_HPA } from '../public/boilpoint.js';
+import { boilC, stationPressure, stdPressure, toHpa, pressureHpa, sknValue, isIcao, MSG, STD_HPA } from '../public/boilpoint.js';
 import { BoilTemp, cleanSettings } from '../lib/boiltemp.js';
 import { Store } from '../lib/store.js'; import { Engine } from '../lib/engine.js';
 import { suggest } from '../public/autofill.js';
@@ -16,13 +16,20 @@ near(boilC(834), 94.8, 0.3, 'Denver: about 94.8 °C (202.6 °F)');
 near(stdPressure(1609), 834, 2, 'standard air a mile up');
 near(stationPressure(1013.25, 0), 1013.25, 0.01, 'at sea level the altimeter setting is the pressure');
 near(toHpa(29.92), 1013.2, 0.1, 'inHg to hPa'); assert.equal(toHpa(1013), 1013);
+// real air pressures only (OakBarn Brewery, 2026-11-19: "10.13 would never be a pressue")
+assert.equal(toHpa(10.13), null, 'no airport ever reported 10.13'); assert.equal(toHpa(1200), null); assert.equal(toHpa(700), null, 'below the sea level record');
+near(toHpa(25.7), 870.3, 0.1, 'Typhoon Tip'); near(toHpa(1083.8), 1083.8, 0.01, 'the highest record');
+near(pressureHpa(17.7), 599.4, 0.1, 'a brewery at 4,000 m, typed in inHg'); assert.equal(pressureHpa(600), 600, 'or in hPa');
+for (const bad of [10.13, 0, -5, 15, 33, 100, 539, 1086, 'abc']) assert.equal(pressureHpa(bad), null, `${bad} is not an air pressure`);
+assert.throws(() => cleanSettings({ pressure: 10.13 }), e => e.message === MSG.badPressure, 'one plain message, not used');
+near(cleanSettings({ pressure: 29.92 }).pressureHpa, 1013.2, 0.05, 'typed in inHg, kept in hPa');
 assert.equal(sknValue('skn_Boil_Temp', { boilC: 100 }, 'US'), 212);
 assert.equal(sknValue('SKN_BOIL_TEMP', { boilC: 100 }, 'Metric'), 100, 'any case; Metric shows °C');
 assert.equal(sknValue('skn_Boil_Temp_F', { boilC: 95 }, 'Metric'), 203);
 assert.equal(sknValue('skn_Air_Pressure', { hpa: 1001.26 }), 1001.3);
 assert.ok(isIcao('kord') && isIcao('CYYZ') && !isIcao('ORD') && !isIcao('60601'));
 assert.throws(() => cleanSettings({ elevationM: 10000 }), /Elevation/);
-assert.throws(() => cleanSettings({ pressureHpa: 50 }), /Air pressure/);
+assert.throws(() => cleanSettings({ pressureHpa: 50 }), /not an air pressure/);
 
 // ---- the airport report, with a pretend internet: only the airport code goes out
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'boil'));
@@ -56,6 +63,8 @@ answer = () => { throw new Error('offline'); };
 st = await bt.refresh(); assert.equal(st.note, MSG.noReport, 'no internet');
 answer = () => json([{ icaoId: 'KXYZ', altim: 1010, obsTime: nowS - 5 * 3600 }]);
 st = await bt.refresh(); assert.equal(st.note, MSG.noReport, 'a report older than 3 hours is not used');
+answer = () => json([{ icaoId: 'KXYZ', altim: 10.13, obsTime: nowS }]);
+st = await bt.refresh(); assert.equal(st.note, MSG.noReport, 'a report with a pressure no airport ever had is not used');
 st = await bt.save({ airport: '12', elevationM: 1700 }); assert.equal(st.note, MSG.badCode, 'not an ICAO code');
 // a typed pressure needs no internet
 asked = [];

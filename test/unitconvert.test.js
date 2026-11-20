@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import { toMetric, forShow, defaultsToMetric } from '../public/unitconvert.js';
 import { keepMetric } from '../lib/store.js';
 import './tempshow.test.js';      // Tab temperatures in the Units (kept in its own file; runs with this one, so npm test needs no new line)
+import './proctemp.test.js';      // Processes work in °C (Rule 2.59)
 
 // a US Vessel (no tag = US) is kept in liters and cm; once metric it is left alone
 const v = toMetric.vessel({ kind: 'vessel', volume: 10, deadspace: 0.5, diameter: 16, vheight: 17 });

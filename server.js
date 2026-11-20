@@ -30,7 +30,8 @@ import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, INP
 import { modernize } from './lib/modernize.js';
 import { followGoLines } from './lib/goline.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
-import { Engine } from './lib/engine.js';
+import { Engine, tokenize } from './lib/engine.js';
+import { unitsOnSave, unitsOnShow, unsureWarning } from './lib/proctemp.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { cleanDatabase, ApiGuard, apiList, apiItem, apiPut } from './lib/itemapi.js';
 import { apiNameListError, apiNameItems } from './public/apiname.js';
@@ -138,6 +139,10 @@ if (!IMPORT_BUILD && applyKeptSettings(store)) console.log('Modified Fresh Start
 setupPictureGroups(store._findMedia('Images'));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, PROCESSES, logger);
+// Processes: a temperature is typed and shown in Settings > Units and kept in °C (Rule 2.59, lib/proctemp.js)
+const procUnits = () => store.config.brewDefaults?.units === 'Metric' ? 'Metric' : 'US';
+const procKeep = text => unitsOnSave(text, procUnits(), n => store.get(n), tokenize);
+const procShow = text => unitsOnShow(text, procUnits(), n => store.get(n), tokenize);
 // Device names given their General Type@ when a Schema loads (Rule 3.1, lib/store.js): every Process follows
 const typeAtProcesses = map => { const r = renameInProcesses(engine, map); if (r.length) console.log(`Processes following the General Type@ names: ${r.map(x => x.name).join(', ')}`); };
 if (store.loadRenames?.size) typeAtProcesses(store.loadRenames);
@@ -1272,7 +1277,7 @@ async function route(req, res) {
 
   // scripts
   if (p === '/ui/scripts' && m === 'GET') return ok(res, engine.list());
-  if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
+  if (p === '/ui/scripts/check' && m === 'POST') { const kept = procKeep(await readBody(req)), chk = engine.check(kept.text), uw = unsureWarning(kept.unsure); return ok(res, uw ? { ...chk, warnings: [...(chk.warnings || []), uw] } : chk); }
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
   if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
   // Copy a whole Tab (Rule 4.8): each Process copied under its new name, with the copied Widgets' new names (and the copied Processes'
@@ -1310,17 +1315,18 @@ async function route(req, res) {
       if (followProcessRename(store.config.elements, from, now) + followProcessRename(store.config.graphics, from, now) + followPressRename(store.config.elements, from, now)) { store.writeConfig(); broadcast('config', {}); }     // its Process Widgets follow (Rule 1.31)
       return ok(res, { ok: true, processes: renameInProcesses(engine, new Map([[from, now]])) });
     }
-    if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
+    if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, procShow(engine.read(name)), 'text/plain; charset=utf-8'); }      // temperatures in the Units (Rule 2.59)
     if (!act && m === 'PUT') {
       if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file processes/<name>.txt (public/names.js)
       // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
       // goLine follows its line (Rule 16.10): lines added or taken out above the line it points at change its number
       const body = await readBody(req), gl = followGoLines(engine.exists(name) ? engine.read(name) : null, body);
       const mod = modernize(gl.text, n => store.get(n));
-      engine.write(name, mod.text);
+      const kept = procKeep(mod.text);      // a plain temperature typed in the Units is kept in °C (Rule 2.59)
+      engine.write(name, kept.text);
       engine.renumber();
-      const text = engine.read(name);
-      return ok(res, { ...engine.check(text), text, modernized: mod.changed, golines: gl.changed });
+      const text = engine.read(name), chk = engine.check(text), uw = unsureWarning(kept.unsure);
+      return ok(res, { ...chk, warnings: uw ? [...(chk.warnings || []), uw] : chk.warnings, text: procShow(text), modernized: mod.changed, golines: gl.changed });
     }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
   }

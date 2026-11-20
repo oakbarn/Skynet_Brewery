@@ -16,12 +16,12 @@
 //  - Picking a command or a name opens the list of what can come next, so a whole line can be made by picking:
 //    if -> MB_06_DO@Pump_Wort__HS -> == (or .state, .visible ...) -> true. The line ends there, so Enter makes a new line;
 //    Ctrl+Space then offers and / or to go on.
-//  - Where a value goes, typing also lists the Skynet Constants that fit (skc_Kg_To_Lb; typing Kg finds every kilogram one).
+//  - Where a value goes, typing also lists the Skynet Constants that fit (skn_const_L_p_Gal; typing Gal finds every gallon one).
 //  - After name.onoffset = (and a Fermentor's .heatoffset / .cooloffset) it offers (-) Heat and (+) Cool, the ones that fit the Device,
 //    and puts the minus or plus in the line: the Offset's sign says where it turns On, Setpoint + Offset (Rule 6.19).
 //  - Only names are ever offered: never a hidden key (Rule 3.10), and never a Clone, which is not used in Processes (Rule 4.4).
 import { DEVICE_TYPES } from './colorize.js';
-import { SKYNET_CONSTANTS, showConstant } from './skconst.js';
+import { SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstant } from './skconst.js';
 import { SKN_GLOBALS } from './boilpoint.js';
 import { G_DECLARE } from './gkinds.js';
 import { heatMethodKey, heatMethodCode } from './heatmethod.js';
@@ -210,8 +210,9 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   const ranked = [...els].sort((a, b) => GROUP(a)[0] - GROUP(b)[0] || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));     // each kind A to Z
   for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // gGlobal, not gGlobal (gGlobal)
   for (const n of W.processes || []) add(n + nsp, 'Process', n);
-  // Skynet Constants (skc_Kg_To_Lb ...) where a value goes, once a letter is typed (all of them would fill the list)
-  if (!atStart && w) for (const [n, v, what] of SKYNET_CONSTANTS) add(n + nsp, `Skynet Constant ${showConstant(v)}, ${what}`, n);
+  // Skynet Constants (skn_const_L_p_Gal ...) where a value goes, once a letter is typed (all of them would fill the list)
+  if (!atStart && w) for (const [n, v, , , label] of SKYNET_CONSTANTS) add(n + nsp, `Skynet Constant ${showConstant(v)}, ${label}`, n);     // skn_const_L_p_Gal: Liters per Gallon
+  if (!atStart && w.length >= 2) for (const [n, , what] of SKYNET_FUNCTIONS) add(n + '(', `Skynet temperature: ${what}`, n);      // toF( toC(
   // Skynet internal Globals (skn_Boil_Temp ...: Settings > Boil temperature, Rule 1.18), read only, where a value goes
   if (!atStart && w) for (const [n, what] of SKN_GLOBALS) add(n + nsp, `Skynet internal Global, read only: ${what}`, n);
   // and / or only after a value (if Pump == true an...)

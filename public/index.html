@@ -194,6 +194,7 @@
           <label class="toggle" title="Predictive text: lists of what can come next pop up while you type. Off: only Ctrl+Space or 💡 Suggest open the list"><span class="sw"><input type="checkbox" id="predictOn" checked><span class="swk"></span></span> Predictive text</label>
           <label class="toggle" title="Color the Process by what each word does (see Help > Process editor)"><span class="sw"><input type="checkbox" id="colorsOn" checked><span class="swk"></span></span> Colors</label>
           <button id="colorKey" title="What each color means">Color key</button>
+          <button id="constList" title="Skynet Constants: every built in conversion number, with its Label, value and name. Click one to put it at the cursor">📐 Constants</button>
         </div>
         <div id="findBar" class="findBar hidden">
           <div class="findRow">
@@ -497,7 +498,7 @@
       <div class="form row">
         <label title="Your airport's 4 letter ICAO code (the code pilots use), for example KORD. It is the only way to pick the weather station. It works only with a correct ICAO code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air. Help: Boil temperature from the air pressure tells how to find your code.">Airport (ICAO) <input id="btAirport" maxlength="4" style="width:6em;text-transform:uppercase" autocomplete="off" spellcheck="false" placeholder="KORD"></label>
         <label title="The brewery's height above sea level. It starts as the airport's own height; change it when the brewery sits higher or lower than the airport."><span>Elevation (<span id="btElevUnit">ft</span>)</span> <input id="btElev" type="number" step="1" style="width:7em"></label>
-        <label title="Leave empty to use the airport's report. A pressure typed here is used as it is, with no internet."><span>Typed air pressure (<span id="btPressUnit">inHg</span>)</span> <input id="btPress" type="number" step="0.01" style="width:7em"></label>
+        <label title="Leave empty to use the airport's report. A pressure typed here is used as it is, with no internet. Type it in inHg (15.9 to 32.05) or hPa (540 to 1085); Skynet knows which by its size. A number outside those is not an air pressure and is not used."><span>Typed air pressure (<span id="btPressUnit">inHg</span>)</span> <input id="btPress" type="number" step="0.01" style="width:7em"></label>
       </div>
       <div class="bar"><button id="btSave" class="primary">Save</button><button id="btTest" title="Fetch the airport's report now and show its pressure and the boil temperature">Test</button><span id="btResult"></span></div>
       <h3 id="sec-panel">Panel settings</h3>
@@ -614,6 +615,13 @@
   <p class="muted">Deleted Processes wait here (in <code>processes/Recycle_Bin</code> on the Brain) until you restore them or delete them for good. Nothing is restored or erased without asking you first.</p>
   <div id="binList" class="faList"></div>
   <pre id="binView" class="binView hidden"></pre>
+  <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
+</form></dialog>
+<dialog id="constDlg" class="findAllDlg"><form method="dialog">
+  <h3>Skynet Constants</h3>
+  <p class="muted">Fixed numbers for common conversions (Help: Skynet Constants). Multiply by one: <code>gGV_Batch_L = gGV_Batch_Gal * skn_const_L_p_Gal</code>. Temperatures use <code>toF(x)</code> and <code>toC(x)</code>.</p>
+  <input id="constFind" type="search" placeholder="Find, for example gal, oz or psi" autocomplete="off" spellcheck="false">
+  <div id="constRows" class="faList constRows"></div>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
 </form></dialog>
 <dialog id="keyDlg" data-nomenu><form method="dialog">

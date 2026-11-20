@@ -51,7 +51,8 @@ const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 const until = async (f, ms = 4000) => { for (let i = 0; i < ms / 20 && !f(); i++) await new Promise(r => setTimeout(r, 20)); return f(); };
 const ask = () => eng.valveList().find(a => a.ask);
 
-const text = 'DigiBoil_Controls.setpoint = 152\nStep = 1\nDigiBoil_Controls.heat = on\nStep = 2\nDigiBoil_Controls.heat = on\nopen_valve DigiBoil_Spigot\nStep = 3\nopen_valve Moto\nclose_valve Moto\nOld_Manual.setpoint = 150\nStep = 4\n';
+// Processes work in °C (Rule 2.59): a set point for a °F screen is typed with its degree sign, 152°F
+const text = 'DigiBoil_Controls.setpoint = 152°F\nStep = 1\nDigiBoil_Controls.heat = on\nStep = 2\nDigiBoil_Controls.heat = on\nopen_valve DigiBoil_Spigot\nStep = 3\nopen_valve Moto\nclose_valve Moto\nOld_Manual.setpoint = 150°F\nStep = 4\n';
 assert.deepEqual(compile(text).errors, []);
 assert.ok(compile('open_valve\n').errors.length, 'open_valve needs a name');
 eng.write('brew', text);
