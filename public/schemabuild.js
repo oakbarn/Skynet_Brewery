@@ -102,8 +102,9 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     // its own heat, set by hand (a DigiBoil or a 65 L Brewzilla, Rule 5.39): no probe and no heater of Skynet's. Its Controls and its
     // valves come built into its Vessel Template; it does no Brew Process heating job.
     if (v.heat === 'own') { x += W; return; }
-    // its probe (DS18B20 on the OneWire bus), shown under the vessel
-    const probe = add({ place: { at: 'v', i, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: cx, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' });
+    // its probe (DS18B20 on the OneWire bus), shown under the vessel. Its numbers are kept in °C and shown in the Units (Rule 2.59):
+    // the Setpoints and Offsets below are 150 °F, -1 °F, 152 °F, 66 °F and +1 °F kept in °C, as in the 3 Vessel sample
+    const probe = add({ place: { at: 'v', i, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: cx, y: 420, w: 170, h: 74, units: '°C', precision: 1, look: 'lcd', device: '' });
     job(ROLE_JOBS[role]?.probe ?? [], probe.name);
     // its heat: one Heating Element on one Port (Hysteresis to start, Rule 6.19), an electric element or a burner on a gas valve.
     // It is turned On or Off, never "Enabled" (Rule 6.19), and starts Off.
@@ -112,8 +113,8 @@ export function planSchema(a, { iface, taken = [] } = {}) {
       const el = heat === 'electric'
         ? { label: `${s} element`, onText: 'HEAT', offText: 'idle' }
         : { label: `${s} burner`, onText: 'FLAME', offText: 'off', gasBurner: true, flameOut: 'on' };      // its Flame Out safety On (Rule 6.33)
-      const h = add({ type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', ...el, look: 'dark', place: { at: 'v', i, row: 1, col: 0 }, device: '', input: probe.name, target: 150, onOffset: -1, x: cx, y: 500, w: 170, h: 60 });
-      probe.sim = { start: 62, heater: h.name, heatRate: 1.2, maxTemp: 212 };
+      const h = add({ type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', ...el, look: 'dark', place: { at: 'v', i, row: 1, col: 0 }, device: '', input: probe.name, target: 65.5556, onOffset: -0.5556, x: cx, y: 500, w: 170, h: 60 });
+      probe.sim = { start: 16.6667, heater: h.name, heatRate: 0.6667, maxTemp: 100 };
       job((ROLE_JOBS[role]?.heater ?? []).filter(j => !(role === 'All In One' && j === 'Mash_Heater' && a.recirc !== 'none')), h.name);
     }
     if (a.valves === 'motorized') add({ place: { at: 'v', i, row: 0, col: 1 }, type: 'digitalOut', subtype: 'valve', label: `${s} out`, device: '', x: cx + 180, y: 420, w: 64, h: 55, ipIn: 'top', ipOut: 'bottom',
@@ -127,9 +128,9 @@ export function planSchema(a, { iface, taken = [] } = {}) {
   // recirculation: a RIMS tube (its own element and probe) or a HERMS coil in the HLT (the HLT element heats the mash)
   if (a.recirc === 'rims') {
     equipment.push({ kind: 'rims', template: 'RIMS_Tube', label: 'RIMS tube', x, y: 120 });
-    const p = add({ place: { at: 'e', i: equipment.length - 1, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: 'RIMS temp', x, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' });
-    const h = add({ place: { at: 'e', i: equipment.length - 1, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'pid', label: 'RIMS element', device: '', input: p.name, target: 152, onText: 'HEAT', offText: 'idle', look: 'dark', x, y: 500, w: 170, h: 60 });
-    p.sim = { start: 62, heater: h.name, heatRate: 2, maxTemp: 212 };
+    const p = add({ place: { at: 'e', i: equipment.length - 1, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: 'RIMS temp', x, y: 420, w: 170, h: 74, units: '°C', precision: 1, look: 'lcd', device: '' });
+    const h = add({ place: { at: 'e', i: equipment.length - 1, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'pid', label: 'RIMS element', device: '', input: p.name, target: 66.6667, onText: 'HEAT', offText: 'idle', look: 'dark', x, y: 500, w: 170, h: 60 });
+    p.sim = { start: 16.6667, heater: h.name, heatRate: 1.1111, maxTemp: 100 };
     fields.Mash_Heater = h.name; fields.Mash_Probe ||= p.name;
     x += 240;
   } else if (a.recirc === 'herms') {
@@ -154,7 +155,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     counterflow: { kind: 'pchiller', template: 'Counterflow_Chiller', label: 'Counterflow chiller' } }[hot ? a.chiller : ''] ?? null;
   if (ch) equipment.push({ ...ch, x, y: 160 });
   // the wort out of the chiller has its own probe (OakBarn: "WORT OUT"), so the chill steps know when to stop
-  if (ch) fields.Wort_Probe = add({ place: { at: 'e', i: equipment.length - 1, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: 'Wort out temp', x, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' }).name;
+  if (ch) fields.Wort_Probe = add({ place: { at: 'e', i: equipment.length - 1, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: 'Wort out temp', x, y: 420, w: 170, h: 74, units: '°C', precision: 1, look: 'lcd', device: '' }).name;
   if (ch && a.valves === 'motorized') fields.Chill_Water = add({ place: { at: 'e', i: equipment.length - 1, row: 1, col: 0 }, type: 'digitalOut', label: 'Chiller water', device: '', x, y: 420, w: 170, h: 60, look: 'dark', onText: 'COOLING', offText: 'off' }).name;
   // the timers the Brew Process runs on (Widgets: no Port), named wgt_TMR_Label_TabID (Rule 3.14)
   const timer = (label, xx) => add({ place: { at: 'timers', i: xx > 100 ? 1 : 0 }, type: 'timer', name: suggestWidgetName({ code: 'TMR', label, tab: tabId }), label, timerType: 'countdown', look: 'led', x: xx, y: 780, w: 250, h: 104 });
@@ -168,8 +169,8 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     const s = `FV${i + 1}`;
     vessels.push({ template: 'Fermenter', role: 'Fermentor', vtype: 'Fermenter', label: `Fermentor ${i + 1}`, short: s, tab: fTab, x: 60 + i * 260, y: 80 });
     const vi = vessels.length - 1;
-    const probe = add({ place: { at: 'v', i: vi, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: 60, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' }, fTab, fTabId);
-    const g = add({ place: { at: 'v', i: vi, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', label: `${s} glycol`, device: '', input: probe.name, target: 66, onOffset: 1, onText: 'COOL', offText: 'idle', look: 'dark', x: 60, y: 500, w: 170, h: 60 }, fTab, fTabId);
+    const probe = add({ place: { at: 'v', i: vi, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: 60, y: 420, w: 170, h: 74, units: '°C', precision: 1, look: 'lcd', device: '' }, fTab, fTabId);
+    const g = add({ place: { at: 'v', i: vi, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', label: `${s} glycol`, device: '', input: probe.name, target: 18.8889, onOffset: 0.5556, onText: 'COOL', offText: 'idle', look: 'dark', x: 60, y: 500, w: 170, h: 60 }, fTab, fTabId);
     if (i === 0) { fields.Ferment_Probe = probe.name; fields.Ferment_Heater = g.name; }
   }
   const manifold = hot && a.manifold && a.manifold !== 'none' ? { template: a.manifold, kind: a.manifoldKind === 'motorized' ? 'motorized' : 'manual', x: Math.max(60, x - 120), y: 600 } : null;
