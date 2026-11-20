@@ -80,6 +80,12 @@ passe (par le SSR), et s'il est Off, le SSR n'envoie plus de courant. Comme un i
 
 **⚙ Change** dans la ligne d'une Interface sur la page Devices ouvre la même fenêtre. Utilisez-le pour donner à une carte fictive son vrai **USB Port** ou son adresse réseau une fois câblée, pour choisir un autre USB Port, pour changer ses Board Settings ou pour faire un **Test Communication**. Le nom d'une Interface qui a des Devices reste tel quel, et un ID enregistré ne change jamais (Rule 3.2).
 
+**La liste des USB Ports.** Le USB Port se choisit dans une liste des ports que Skynet trouve sur ce Brain maintenant. Sous Windows c'est un numéro (COM3 s'affiche 3). Sur un Raspberry Pi ou Linux c'est un nom comme /dev/ttyACM0. Vous ne savez pas lequel est la carte ? Débranchez-la et choisissez **🔄 Look again** : celui qui a disparu est la carte. Un port enregistré avant qui n'est pas sur ce Brain maintenant reste dans la liste, en rouge, marqué « not found on this Brain », pour qu'il ne soit jamais perdu sans que vous le voyiez. Quand le panel tourne en **Simulator**, une ligne grise montre le vrai port : il sert quand vous repassez sur Real boards, et vous pouvez encore le changer.
+
+**Changer la carte.** Quand vous choisissez une autre Board pour une Interface qui a des Devices, 💾 Save montre d'abord une seule boîte : combien de Devices, Widgets et Processes l'utilisent, et les Devices sur un Port que la nouvelle carte n'a pas. Appuyez sur 💾 Save pour continuer, ou Close pour revenir. Ces Devices gardent leurs Ports ; donnez à chacun un nouveau Port dans ses Properties.
+
+**Le nom de Device suggéré.** La bulle de l'Interface ID finit par le **Nom de Device suggéré** pour cette Interface, par exemple BM_Port_Type_Label_TabID, avec l'ID en rouge.
+
 ## Retirer une Interface {#removing-an-interface}
 
 Retirer une Interface peut casser toute votre brasserie : chaque Device branché dessus cesse de fonctionner. La plupart du temps, vous voulez plutôt **⚙ Change**, pour choisir une autre carte, un autre USB Port ou une autre Network address ; les Devices y restent.

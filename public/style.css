@@ -1193,6 +1193,9 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 .ifRmWarn > b { color: var(--bad); }
 .ifRmType { text-transform: uppercase; }
 .devNoIface { color: var(--bad); font-weight: 700; }
+/* a saved USB Port that is not on this Brain (Panel Updates entry 29 Part 2) */
+select.portGone, option.portGone { color: var(--bad); font-weight: 700; }
+select.portGone option:not(.portGone) { color: var(--text, inherit); font-weight: normal; }
 /* Rule 2.49 (OakBarn Brewery, 2026-11-11): hot spots in Hover Help open the bigger Help page; the balloon can then be reached */
 .hoverHelp.hhHasLinks { pointer-events: auto; }
 /* a balloon taller than the window is cut to fit and scrolls (OakBarn Brewery, 2026-11-14); the mouse may go into it to scroll */
