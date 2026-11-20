@@ -30,7 +30,17 @@ erreur dans son code), un message en haut de l'écran dit pourquoi, et le Widget
 3. **Name** : créé par Skynet à partir du Label et du Tab.
 4. **Process** : le Process qu'il montre et démarre, choisi dans la liste de tous les Processes.
 
-Puis **Ask before starting or stopping**, **X**, **Y**, **Width** et **Height** (200 x 80 au départ) et le **Widget Type**.
+Puis **Ask before starting or stopping**, **Picture**, **Picture turns on with**, **X**, **Y**, **Width** et **Height** (200 x 80
+au départ) et le **Widget Type**.
+
+## Une image dessus {#a-picture-on-it}
+
+Un Process Widget peut montrer une **Picture** entre son Label et son bouton, par exemple un interrupteur à flotteur sur un bouton
+« remplir jusqu'au flotteur ». Le ⬢ à côté de Picture contient la **Picture when on**. Réglez **Picture turns on with** sur un Device
+ou un Widget, et le Widget montre la Picture when on pendant que celui-ci est allumé, et la Picture when off pendant qu'il est éteint.
+Sur le Tab Water de l'exemple Fire Hose, les boutons **Use FireHose Float** et **Use Manifold Float** montrent le flotteur pendu
+tant que le Water float est sec, et soulevé avec ses contacts fermés (rouges) une fois que l'eau le fait monter. Laissez Picture vide
+pour ne pas avoir d'image.
 
 Posez la souris sur le nom d'un champ pour une courte explication.
 

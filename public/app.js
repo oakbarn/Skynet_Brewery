@@ -43,7 +43,7 @@ import { STOVE_GALLONS, stoveAspect, stovePic } from './stovetop.js';      // th
 import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the Ice Water Can (Rule 19.8)
 import { reportDialog } from './report.js';      // 🐞 Report a problem (Rule 2.61)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
-import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
+import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton, processPicture } from './processwidget.js';
 import { ON_PRESS, ON_PRESS_TIPS, pressProcessOf, pressNeedsProcess } from './onpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
@@ -3559,7 +3559,7 @@ function updateEl(name) {
   else if (t && tn) fillText(tn, t);
   for (const cn of $$(`#ws .el[data-clone="${CSS.escape(name)}"]`)) { const ce = elNamed(cn.dataset.name); if (ce) fillEl(cn, ce); }     // its clones
   if (e?.tapwater) for (const g of L().graphics) if (g.kind === 'override' && g.showWhen === 'water') { const on = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"]`); if (on) on.classList.toggle('vhidden', ovrWaitsForWater(g)); }
-  for (const p of L().elements) if (p.type === 'picture' && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
+  for (const p of L().elements) if ((p.type === 'picture' || isProcessWidget(p)) && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
   // what holds a probe's temperature changed (its Setpoint, ON / OFF): the probe's SV box shows it (Panel Updates 41)
   const ip = e?.input && elNamed(e.input);
   if (ip?.type === 'temperature') for (const pn of $$(`#ws .el[data-name="${CSS.escape(ip.name)}"], #ws .el[data-clone="${CSS.escape(ip.name)}"]`)) { const pe = elNamed(pn.dataset.name); if (pe) fillEl(pn, pe); }
@@ -3965,7 +3965,8 @@ function fillProcessWidget(n, e) {
   const st = processState(e.process, processStatusOf(e.process)), vl = n.querySelector('.vl');
   n.classList.add('procw');
   n.classList.toggle('scr-error', !!st.error); n.classList.toggle('scr-missing', !!st.missing);
-  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st)));
+  const pic = processPicture(e, turnsOn);
+  if (vl) vl.replaceChildren(...(pic ? [h('div', { class: 'procPic', style: `background-image: url("${media(pic)}")` })] : []), h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st)));
   n.title = st.missing ? `${e.label || e.name}: ${st.word}. Pick its Process in its Properties (double-click it).` : `Process ${e.process}: ${st.word}. One click ${st.running ? 'stops' : 'starts'} it.`;
   return st.running;
 }
@@ -9754,6 +9755,8 @@ const processWidgetFields = it => {
   return [...wgtHead(PROCESS_TIPS),
     ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: PROCESS_TIPS.process }],
     ['confirm', 'Ask before starting or stopping', 'bool', null, false, false, { tip: 'On: one click asks first (Start or Stop). Off (the usual): one click starts or stops it at once (Rule 2.44).' }],
+    ['imageOff', 'Picture', 'path', null, false, false, { tip: PROCESS_TIPS.imageOff, attr: SEMI_PIC_POP }],
+    ['follow', 'Picture turns on with', 'onsrc', null, true, false, { tip: PROCESS_TIPS.follow }],
     ...NOGFX_LOOK(),
     ...wgtPlace(), wgtType(PROCESS_WIDGET_WORD, PROCESS_TIPS.type)];
 };

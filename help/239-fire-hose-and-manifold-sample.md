@@ -40,7 +40,8 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
    float is made, or Override or FireHose Off ends it. That time goes in the hidden gGlobal `gblT_Elapsed_Water` (True Run Time),
    for seconds per gallon.
 
-In the simulator, tap the **Water float** to make it.
+In the simulator, tap the **Water float** and pick **Simulate: input ON** to make it (the float is lifted, contacts closed, red), and
+**Simulate: input OFF** to drop it again. The Water float and the two Float buttons show the float switch picture of its state.
 
 **Tip:** put a water pressure regulator in the tap water line before the valves. It is cheap and easy to install, and with the
 same pressure every time, a timed fill gives the same amount of water every time.

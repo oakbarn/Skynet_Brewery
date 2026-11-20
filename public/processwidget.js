@@ -35,7 +35,11 @@ export const PROCESS_TIPS = {
   name: 'Made by Skynet from the Label and the Tab (wgt_PSW_Label_TabID, Rule 3.14). It must be unique.',
   process: 'The Process it shows and starts. One click on the Widget starts it when it is stopped and stops it when it runs. If the Process gets a new name (✏ Change name), the Widget follows it.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
+  imageOff: 'Optional. A picture drawn in it, between the Label and the button, for example a float switch. The ⬢ beside it holds the picture when on. Empty: no picture.',
+  follow: 'The Device or Widget whose state picks the picture: the picture when on while it is on, the picture when off while it is off. None: always the picture when off.',
 };
+// Its optional picture (OakBarn Brewery, 2026-11-20, the Float buttons of the Fire Hose sample): imageOff, imageOn while follow is on
+export const processPicture = (el, isOn) => (el?.follow && el.imageOn && isOn(el.follow) ? el.imageOn : el?.imageOff || el?.imageOn || '');
 
 // A Process got a new name with ✏ Change name (Rule 3.11): every Process Widget that showed it, and every Override button set to it
 // (graphics), follows (server.js). Returns how many.
