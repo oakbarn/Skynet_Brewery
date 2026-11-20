@@ -2,6 +2,8 @@
 
 Les Processes sont les étapes automatiques d'un brassage : ouvrir des vannes, faire tourner une pompe, attendre une température, lancer une minuterie, faire sonner une alarme. Ce sont des fichiers texte dans le dossier `processes` du Pi.
 
+Chaque étape, avec des images : [Pas à pas : ajouter un Process](239-step-by-step-add-a-process).
+
 ## L'écran Processes {#the-processes-screen}
 
 - La liste de gauche montre chaque Process ; celui qui tourne est marqué. Le petit nombre devant chacun est son **Order** (ordre) : tapez un nouveau nombre pour le déplacer, et les autres se renumérotent tout seuls. Voir [L'ordre des Processes (Process Order)](38-process-order).

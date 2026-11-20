@@ -4,7 +4,7 @@
  "02-tabs": "33b2052c17709737",
  "03-devices": "b6fb84ac03afe153",
  "04-variables": "285856e470f40ab8",
- "05-scripts": "95f83063392989f2",
+ "05-scripts": "7a391f38b8d96608",
  "06-log": "5906688b79c6c7d5",
  "07-media": "ae9af08eb3ab447a",
  "08-import": "7e51289d961c126e",
@@ -29,7 +29,7 @@
  "27-minimum-equipment": "a1610529f6d6bab4",
  "28-schemas-and-equipment-profiles": "7742867281eeb5b7",
  "29-manual-valves": "a15b5699a9c4bdcc",
- "30-process-editor": "75a645c8b7af95bf",
+ "30-process-editor": "96179f9fbb38dbe9",
  "31-tap-water-valves": "92b421bb7aec5002",
  "32-file-move": "8b3baa577e9a7d38",
  "33-menu": "b2c0bdda1405aa4e",
@@ -231,5 +231,6 @@
  "235-din-button-on-press": "a8b5b5a37b0960b9",
  "236-copy-a-whole-tab": "31a20e264fee5ce1",
  "237-pid-auto-tune": "b4e0d90926f3f155",
- "238-boil-temperature": "ef095e5a40c4562d"
+ "238-boil-temperature": "ef095e5a40c4562d",
+ "239-step-by-step-add-a-process": "e2dfa6de709defe4"
 }
