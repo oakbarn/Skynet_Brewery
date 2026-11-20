@@ -6,6 +6,7 @@ import { LANG_KEY, refreshBalloonLang } from './hoverhelp.js';      // also the 
 import { brokenLinkPop, forgetHelpIndex } from './brokenlink.js';
 import { showMachineNotice } from './mtnotice.js';         // machine translation notice (Rule 11.14)
 import { reportDialog } from './report.js';                // 🐞 Report a problem (Rule 2.61)
+import { userLang, loadUserLang, languagesDialog, USER } from './helplang.js';      // the User Language (Rule 11.16)
 const $ = s => document.querySelector(s);
 if (!document.getElementById('dlg')) watchButtons();       // the Help window: one look for Cancel, Save, Close ... (public/buttons.js)
 const el = (tag, attrs = {}, ...kids) => {
@@ -24,7 +25,7 @@ let pages = [], cur = null, trail = [], editing = false;
 // Help is translated; the screens, buttons and labels stay English. Kept in this browser (the Help window and the panel share it).
 // the language picked (Rule 11.11): kept under one key with the balloons, which follow it (public/hoverhelp.js)
 export { LANG_KEY };
-export const helpLang = () => { try { return localStorage.getItem(LANG_KEY) === 'fr' ? 'fr' : 'en'; } catch { return 'en'; } };
+export const helpLang = () => { try { const l = localStorage.getItem(LANG_KEY); return l === 'fr' || l === USER ? l : 'en'; } catch { return 'en'; } };
 let lang = helpLang();
 const lq = () => lang === 'en' ? '' : '?lang=' + lang;
 // the words shown above and below a French page (the page itself is French, so these are too)
@@ -34,6 +35,10 @@ const FR = {
   english: 'Voir la page anglaise',
   machine: 'Traduction automatique de la page anglaise. Les boutons, les menus et les écrans restent en anglais, comme dans le programme. En cas de doute, la page anglaise fait foi.',
 };
+// the same words for the User Language (Rule 11.16) come with it, in that language
+const notesOf = l => l === 'fr' ? FR : (n => ({ missing: n.missing, stale: n.stale, english: n.english, back: n.back, machine: n.machine, keep: n.keep }))(userLang()?.notes || {});
+// the first sentence of the User Language's red warnings (Rule 6.20), so they show red as in English and French
+const warnStarts = () => lang === USER ? ['electrical', 'gas'].map(k => (userLang()?.notes?.[k] || '').replace(/^⚠\s*/, '').split(/(?<=[.。।!])\s*/)[0]).filter(Boolean) : [];
 const bare = n => n.replace(/^\d+[-_]/, '');
 // a Step by Step guide: its title starts "Step by Step:" (Rule 11.9)
 export const isStep = p => /^step by step\s*:/i.test(p.title || '');
@@ -82,9 +87,9 @@ function inline(s) {
 
 // (the gas warning too, Rule 6.20 gas half, 2026-11-14: "⚠ Gas can explode or kill") A paragraph that starts with "⚠ Electricity can kill" (in French Help "⚠ L'électricité peut tuer", Rule 11.11) is the electrical warning (Rule 6.20): red bold words under a red triangle,
 // as in the hover help balloons (OakBarn Brewery, 2026-11-10: "in any Help use the Red Text and the Icon for any Electricity Can Kill")
-export function warnText(s) {
+export function warnText(s, starts = []) {
   const m = /^(\*\*)?\s*⚠\s*(.*)$/s.exec(String(s).trim());
-  return m && /^(\*\*)?\s*(Electricity can kill|L['’]électricité peut tuer|Gas can explode or kill|Le gaz peut exploser ou tuer)/i.test(m[2]) ? m[2].replace(/^\*\*\s*/, '').replace(/\*\*(\s*\(Rule [\d.]+\))?\s*$/, '$1').replace(/\*\*/g, '').trim() : '';
+  return m && (/^(\*\*)?\s*(Electricity can kill|L['’]électricité peut tuer|Gas can explode or kill|Le gaz peut exploser ou tuer)/i.test(m[2]) || starts.some(w => m[2].replace(/^\*\*\s*/, '').startsWith(w))) ? m[2].replace(/^\*\*\s*/, '').replace(/\*\*(\s*\(Rule [\d.]+\))?\s*$/, '$1').replace(/\*\*/g, '').trim() : '';
 }
 export function markdown(text) {
   const lines = String(text).replace(/\r\n?/g, '\n').split('\n'), out = [];
@@ -134,7 +139,7 @@ export function markdown(text) {
     const para = [];
     while (i < lines.length && lines[i].trim() && !isBlock(lines[i])) para.push(lines[i++].trim());
     if (!para.length) para.push(lines[i++].trim());
-    const w = warnText(para.join(' '));
+    const w = warnText(para.join(' '), warnStarts());
     out.push(w ? `<div class="helpWarn"><span class="hhTri"></span>${inline(w)}</div>` : `<p>${inline(para.join(' '))}</p>`);
   }
   return out.join('\n');
@@ -205,13 +210,17 @@ function open(name, mark, back = false, section) {
   renderList();
 }
 
-// a French page: a note on top when it is not translated yet or may be out of date, and the machine translation note at the end
+// a French (or User Language) page: a note on top when it is not translated yet or may be out of date, and the machine translation
+// note at the end; a User Language page also says that the Keep English words stay English (Rule 11.16)
 function langNotes(box, p) {
-  const english = el('a', { href: '#', onclick: async e => { e.preventDefault(); const r = await fetch('/ui/help/' + encodeURIComponent(p.name)); if (r.ok) { show(box, await r.text()); box.prepend(el('p', { class: 'hpLangNote' }, el('a', { href: '#', onclick: ev => { ev.preventDefault(); open(p.name, null, true); } }, '🌐 Retour à la page française'))); } } }, FR.english);
-  if (p.missing) box.prepend(el('p', { class: 'hpLangNote' }, '🌐 ' + FR.missing));
+  const N = notesOf(lang);
+  const back = lang === 'fr' ? 'Retour à la page française' : N.back;
+  const english = el('a', { href: '#', onclick: async e => { e.preventDefault(); const r = await fetch('/ui/help/' + encodeURIComponent(p.name)); if (r.ok) { show(box, await r.text()); box.prepend(el('p', { class: 'hpLangNote' }, el('a', { href: '#', onclick: ev => { ev.preventDefault(); open(p.name, null, true); } }, '🌐 ' + back))); } } }, N.english);
+  if (p.missing) box.prepend(el('p', { class: 'hpLangNote' }, '🌐 ' + N.missing));
   else {
-    if (p.stale) box.prepend(el('p', { class: 'hpLangNote' }, '⚠ ' + FR.stale + ' ', english));
-    box.append(el('p', { class: 'muted hpMachine' }, '🌐 ' + FR.machine + ' ', p.stale ? null : english));
+    if (p.stale) box.prepend(el('p', { class: 'hpLangNote' }, '⚠ ' + N.stale + ' ', english));
+    box.append(el('p', { class: 'muted hpMachine' }, '🌐 ' + N.machine + ' ', p.stale ? null : english));
+    if (lang === USER && N.keep) box.append(el('p', { class: 'muted hpMachine' }, N.keep));
   }
 }
 
@@ -254,7 +263,7 @@ $('#hpSearch').addEventListener('input', renderList);
 $('#hpLang').value = lang;
 $('#hpLang').addEventListener('change', e => {
   if (changed() && !confirm('Throw away your changes to this page?')) { e.target.value = lang; return; }
-  lang = e.target.value === 'fr' ? 'fr' : 'en';
+  lang = e.target.value === 'fr' || e.target.value === USER ? e.target.value : 'en';
   try { localStorage.setItem(LANG_KEY, lang); } catch { }
   refreshBalloonLang();
   stopEdit(); load(cur).catch(err => say(err.message, true));
@@ -266,6 +275,15 @@ $('#hpPrint').onclick = () => window.print();
 // 🐞 Report (Rule 2.61): a bug, or a better French wording for this page; the page is filled in, the French form is lit while French is read
 $('#hpReport').onclick = () => reportDialog({ page: cur || '', where: cur ? `Help page ${cur}${lang === 'en' ? '' : ' (' + lang + ')'}` : 'Help', french: lang === 'fr' });
 $('#hpEdit').onclick = startEdit;
+// 🌐 Languages (Admins, Rule 11.16): Export the Help for an AI, Import it back, Keep English words, Add Font to Brain
+if ($('#hpLangs')) $('#hpLangs').onclick = () => languagesDialog();
+// a User Language was imported (or there is none): the list and the page come again in it
+window.addEventListener('skynet-help-reload', () => { if (!changed()) load(cur).catch(err => say(err.message, true)); });
+window.addEventListener('skynet-userlang', ev => {
+  if (lang === USER && !ev.detail) { lang = 'en'; $('#hpLang').value = 'en'; load(cur).catch(() => { }); }
+  else if (lang === USER && cur) open(cur, null, true);      // its notes and red warnings, now that they are here
+});
+loadUserLang();
 $('#hpCancel').onclick = () => { if (changed() && !confirm('Throw away your changes to this page?')) return; stopEdit(); };
 $('#hpSave').onclick = async () => {
   try { await call('PUT', '/ui/help/' + encodeURIComponent(cur) + lq(), $('#hpText').value, true); forgetHelpIndex(); say('Page saved'); await load(cur); }

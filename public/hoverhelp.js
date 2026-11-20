@@ -124,7 +124,7 @@ export function helpNodes(text, doc = globalThis.document) {
       if (t) out.push(...helpNodes(t, doc));
       if (i + 2 >= pics.length) break;
       if (pics[i + 1] === 'b') { const b = doc.createElement('b'); b.className = 'hhHead'; b.textContent = pics[i + 2]; out.push(b); continue; }
-      const im = doc.createElement('img'); im.className = pics[i + 1] === 'imgw' ? 'hhPic hhPicWide' : 'hhPic'; im.alt = ''; im.src = '/media?path=' + encodeURIComponent(pics[i + 2]) + (balloonLang() === 'fr' ? '&lang=fr' : ''); out.push(im);      // its words in French too (Rule 7.25)
+      const im = doc.createElement('img'); im.className = pics[i + 1] === 'imgw' ? 'hhPic hhPicWide' : 'hhPic'; im.alt = ''; im.src = '/media?path=' + encodeURIComponent(pics[i + 2]) + (balloonLang() !== 'en' ? '&lang=' + balloonLang() : ''); out.push(im);      // its words in French too (Rule 7.25)
     }
     return out;
   }
@@ -193,7 +193,8 @@ export function linkify(root, doc = globalThis.document) {
 // is picked. A text with {0}, {1}… stands for a text with something put in (a name, a number); the part put in is turned too when it
 // has its own French. A text with no French shows in English.
 export const LANG_KEY = 'skynet-help-lang';      // the same key as the Help window's pick (public/help.js)
-export const balloonLang = () => { try { return globalThis.localStorage?.getItem(LANG_KEY) === 'fr' ? 'fr' : 'en'; } catch { return 'en'; } };
+// 'en', 'fr', or 'user': the User Language an Admin imported by AI translation (Rule 11.16, public/helplang.js)
+export const balloonLang = () => { try { const l = globalThis.localStorage?.getItem(LANG_KEY); return l === 'fr' || l === 'user' ? l : 'en'; } catch { return 'en'; } };
 const reEsc = w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // the French list made ready to use: whole texts, texts with {0}…, and long texts that may sit inside a bigger one
 export function compileFrench(dict) {
@@ -232,20 +233,24 @@ export function frenchOf(text, c, depth = 0) {
   if (out.includes('\n')) out = out.split('\n').map(l => (l.trim() ? frenchOf(l, c, depth + 1) : l)).join('\n');
   return out;
 }
-let french = null, frenchLoading = null;
+// the balloons of each language, read the first time it is picked: French ships with Skynet, the User Language is on the Brain
+const BALLOON_FILES = { fr: '/hoverhelp-fr.json', user: '/ui/helplang/balloons' };
+const dicts = {}, loading = {};
 const frCache = new Map();
-function loadFrench() {
-  frenchLoading ??= fetch('/hoverhelp-fr.json').then(r => (r.ok ? r.json() : {})).then(d => { french = compileFrench(d); }).catch(() => { frenchLoading = null; });
-  return frenchLoading;
+function loadFrench(lang = balloonLang()) {
+  if (!BALLOON_FILES[lang]) return null;
+  loading[lang] ??= fetch(BALLOON_FILES[lang]).then(r => (r.ok ? r.json() : {})).then(d => { dicts[lang] = compileFrench(d); }).catch(() => { loading[lang] = null; });
+  return loading[lang];
 }
-// the language was picked again (the Help window; another window hears it as a storage event)
-export function refreshBalloonLang() { frCache.clear(); if (balloonLang() === 'fr') loadFrench(); }
+// the language was picked again (the Help window; another window hears it as a storage event); a new User Language was imported
+export function refreshBalloonLang(reload = false) { frCache.clear(); if (reload) { delete dicts.user; loading.user = null; } if (balloonLang() !== 'en') loadFrench(); }
 // a balloon's words in the language picked in Help
 export function balloonText(text) {
-  if (balloonLang() !== 'fr' || !text) return text;
-  if (!french) { loadFrench(); return text; }
+  const lang = balloonLang();
+  if (lang === 'en' || !text) return text;
+  if (!dicts[lang]) { loadFrench(lang); return text; }
   if (frCache.has(text)) return frCache.get(text);
-  const out = frenchOf(text, french);
+  const out = frenchOf(text, dicts[lang]);
   if (frCache.size >= 400) frCache.delete(frCache.keys().next().value);      // a small memory (Panel memory: let go of old ones)
   frCache.set(text, out);
   return out;
@@ -316,7 +321,7 @@ function start(doc = globalThis.document) {
   }, true);
   tip.addEventListener('click', ev => { if (ev.target.closest?.('.hhLink')) setTimeout(hide); });
   // French picked in the Help window: the French list is read now, not at the first balloon
-  if (balloonLang() === 'fr') loadFrench();
+  if (balloonLang() !== 'en') loadFrench();
   globalThis.addEventListener?.('storage', ev => { if (ev.key === LANG_KEY) refreshBalloonLang(); });
 }
 // a button's own tip (the browser's small box): in French too, turned the first time the mouse comes onto it; back to English
@@ -371,7 +376,7 @@ let pageList = null;
 export async function loadSnippet(topic) {
   const [want, section] = Array.isArray(topic) ? topic : [topic];
   if (!want) return '';
-  const lang = balloonLang(), lq = lang === 'fr' ? '?lang=fr' : '';      // the snippet from the French page when French is picked
+  const lang = balloonLang(), lq = lang !== 'en' ? '?lang=' + lang : '';      // the snippet from the French page when French is picked
   const key = lang + ':' + want + '#' + (section || '');
   if (!snipCache.has(key)) snipCache.set(key, (async () => {
     pageList ??= fetch('/ui/help').then(r => r.json()).catch(() => []);

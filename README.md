@@ -303,3 +303,6 @@ credit here (Rule 9.12). The full list with sources is [docs/Media_Licenses.csv]
   speech voice en_GB-alba-medium, trained on the **Alba speech corpus** by Cassia Valentini-Botinhao and Junichi Yamagishi,
   University of Edinburgh (2019), https://doi.org/10.7488/ds/2506, licensed CC BY 4.0
   (https://creativecommons.org/licenses/by/4.0/).
+- **Skynet Language Fonts** (the add-only Language Fonts Setup and zip, Rule 9.24): Google **Noto Sans SC, JP, KR, Thai and
+  Devanagari**, Copyright Google Inc. / The Noto Project Authors, under the **SIL Open Font License 1.1**
+  (https://openfontlicense.org); the license file ships next to each font as OFL.txt. Packaged by Fontsource (https://fontsource.org).
