@@ -225,8 +225,12 @@ jobs:
 
           **Sample Schemas (Mac, Linux, Raspberry Pi or by hand):** \`Skynet_Sample_Schemas_$VERSION.zip\`. Add-only, like the pictures and sounds.
 
+          **Language Fonts (only if a Help language shows empty boxes):** \`Skynet_Language_Fonts_Setup_$VERSION.exe\` (Windows) or \`Skynet_Language_Fonts_$VERSION.zip\`. Chinese, Japanese, Korean, Thai and Hindi letters for the Help. Add-only (Help 242).
+
           NOTES
-          gh release create "$VERSION" --title "$VERSION" --notes-file notes.md --generate-notes --latest \
+          # the Language Fonts (Rule 9.24) are on the Release only when they were made (tools/build-release.sh needs npm for them)
+          FONT_FILES=$(ls release/Skynet_Language_Fonts_* 2>/dev/null || true)
+          gh release create "$VERSION" --title "$VERSION" --notes-file notes.md --generate-notes --latest $FONT_FILES \
             release/Skynet_Brewer_Setup_*.exe release/Skynet_Brewer_Full_Setup_*.exe release/Skynet_BrewPanel_*.zip release/Skynet_Media_*.zip \
             release/Skynet_Sample_Schemas_*.zip release/ReadMe.txt \
             "release/Install Skynet Brewer.command" release/install-skynet-brewer.sh release/Skynet_Brewer.bat \

@@ -9,6 +9,8 @@ L'aide et les bulles (Hover Help) peuvent se lire en **anglais** ou en **frança
 
 Le navigateur garde ce choix, donc l'aide s'ouvre dans la même langue la fois suivante sur ce PC, ce téléphone ou cette tablette. Chaque navigateur a son propre choix : une personne peut lire l'aide en français pendant qu'une autre la lit en anglais. Les bulles du panneau suivent tout de suite le même choix, même dans une fenêtre du panneau déjà ouverte.
 
+Un Admin peut ajouter une langue de plus, la vôtre, faite avec n'importe quelle IA : voir [L'aide dans n'importe quelle langue](242-help-in-any-language).
+
 ## Ce qui est en français {#what-is-in-french}
 
 - Chaque page d'aide, avec les mêmes pages, parties, images et liens que l'aide en anglais.

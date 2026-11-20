@@ -12,7 +12,7 @@
  "10-login": "6d86e529fff854fd",
  "11-api": "745e41a2a06152b8",
  "12-editing-help": "eb31d6badc777cf4",
- "13-glossary": "ffb80a83eb3ed50c",
+ "13-glossary": "5daa1ddb55b66238",
  "14-equipment": "6ceda9a20930af3c",
  "15-mqtt-and-voice": "a336dffb7b61bf6a",
  "16-stepper-motors": "7dadcdd2e692713f",
@@ -185,7 +185,7 @@
  "189-list-boxes": "2f8b35c74cde60f4",
  "190-sleep-updates-and-restarts": "06accd5584038781",
  "191-official-skynet-updates": "6b570b71837dd6a3",
- "192-help-in-french": "8cf9af7c3617604b",
+ "192-help-in-french": "d4c6f4b36dd606c8",
  "193-skynet-picture-numbers": "23124c82bc892965",
  "194-two-part-paths": "1a991331bb8d750f",
  "195-alarm-attributes": "9cd90714e93c30d1",
@@ -234,5 +234,6 @@
  "238-boil-temperature": "65584f93a311b31c",
  "239-fire-hose-and-manifold-sample": "08f3491e659714c6",
  "240-step-by-step-add-a-process": "e2dfa6de709defe4",
- "241-live-readings-in-your-units": "1b02efacdefe6b0c"
+ "241-live-readings-in-your-units": "1b02efacdefe6b0c",
+ "242-help-in-any-language": "9c253b91948d7158"
 }

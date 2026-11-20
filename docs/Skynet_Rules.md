@@ -4261,6 +4261,18 @@ or deleted, so the last good one always stays. The **tags stay**, so the Officia
 install; only the Release pages and their downloads go. The Skynet-Sounds Release (Rule 7.20) is never touched. The number kept is
 KEEP in that job. Both programs (the Importer is in the same Setup; nothing changes there). (Help 19)
 
+9.24 **The Skynet Language Fonts: an add-only Setup of their own** (OakBarn Brewery, 2026-11-20, Panel Updates entry 45: "if you
+clone the checked install and only add the font package, the second exe has been checked already"; "Ok then add Chinese, Japanesse,
+Korean, Thai and Hindi to the Font Package"; "lets do no bold and simplified"). The fonts for a Help language (Rule 11.16) are **not**
+in the panel zip, the Update Setup or the Full Setup, so the main Setup stays small. Every Release also carries
+**Skynet_Language_Fonts_Setup_<version>.exe** (Windows) and **Skynet_Language_Fonts_<version>.zip** (Mac, Linux, Pi, by hand), built
+by tools/build-release.sh from the same release (install/windows/SkynetLanguageFonts.nsi): Google Noto Sans, **Regular only**, for
+**Chinese (Simplified), Japanese, Korean, Thai and Hindi**, as WOFF2 web fonts cut into small pieces (about 10 MB), each with its OFL
+license file (Rule 9.12 point 4). Fetched from npm (Fontsource) at exact versions; with no npm at build time they are simply not made
+and the Release goes on. Like the Media Setup of Rule 9.12 it **only adds** (a font already there is never changed, nothing is
+deleted) into the panel's `fonts` folder, which is not a core folder (Rule 9.14). This is the one add-on .exe left after Rule 9.22.
+Fonts an Admin adds with **🔤 Add Font to Brain** are the user's own (data/fonts), never touched by a Setup. (Help 242)
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -4475,7 +4487,7 @@ Hover Help French"):
   language adds its own. Only the Override button's own Label (**Override**) changes: a Label the user typed (**Water Override**) is
   the user's and stays as typed. A French Help page names such a button with both words, **Passer** (Override), and an English page
   says Override. Every other screen word stays English.
-- **Picked by 🌐 Help language** at the top of the Help page list: **English** or **Français**. The browser remembers it (the Help
+- **Picked by 🌐 Help language** at the top of the Help page list: **English** or **Français** (or a User Language, Rule 11.16). The browser remembers it (the Help
   window, the panel's own Help page and the balloons follow the same choice). English is the default.
 - **French pages:** `help/fr/`, with the same file names as the English pages. They keep everything that is not words: each heading
   keeps the id of its English heading (`## Pour commencer {#getting-started}`) so links to a part of a page work in both languages, and
@@ -4549,6 +4561,46 @@ First six (Help 209-214): a DAC (0-10 V), a 10K NTC probe, an SSR, 1-Wire (DS18B
 ADS1115, a vessel scale (HX711), a stepper motor, a pH probe, an E-Stop, a fan, buzzer or LED, and switches and float switches. A guide
 for anything on gas puts the gas warning before the electrical warning, on the page and on its drawing. Both programs (the BruControl
 Import uses the Panel's Help).
+
+11.16 **Help in any language by AI translation: the User Language** (OakBarn Brewery, 2026-11-20, Panel Updates entry 45: "Could
+there be a method where the Help could be sent to an AI agent external to the Program to Translate to a different langauge and then
+brought back into skynet"; "like 1 better"; "That way we keep french and then another is user. So there would be 3 choices of Help.
+English, French, User Language."; "Right to LEFT will Not work but allow"):
+- **Three choices** in 🌐 Help language: English, Français and **one User Language** (shown by its own name, 🌐 Deutsch). English and
+  French ship with Skynet; the User Language stays on the Brain where it was imported (data/help_user/), so a Setup never touches it
+  and Move Brain takes it along. Importing a different language replaces it; the old one goes to data/help_user_backups/ (Rule #1).
+  More parts of the same language are added to it.
+- **Export** (Admins, Help > **🌐 Languages**): the Help pages, every balloon, the words of the Help pictures (Rule 7.25), the
+  Override and Stop words (Rule 11.11) and the notes around a page (not translated yet, may be out of date, machine translation, the
+  electrical and gas warnings, the notice of Rule 11.14) as plain text files in **parts** (about 40 KB of English each, so one AI
+  answer can hold it; a page is never cut in two). Each piece sits under a marker line the AI keeps; each part starts with
+  instructions for the AI and the **Keep English** list. **Only new and changed** exports only what the User Language lacks or what
+  changed since. No internet, key or cost inside Skynet: the user pastes the parts into any AI.
+- **Import:** every piece is checked against its English: a page keeps the same headings, links, pictures, code, code blocks and ⚠
+  paragraphs; a balloon keeps its {0} parts, ⬢ ⬆ ⟦ ⟧ marks, ⟪ ⟫ parts and ⚠ lines. A piece that fails stays English, and **one
+  warning** lists them all; every good piece is kept (Don't restrict users). Skynet gives each heading its English id (as in French)
+  and makes each red warning (Rule 6.20) the language's own warning sentence, or the English one when the AI gave none, so the
+  warning is never lost.
+- **Keep English words** (OakBarn Brewery, 2026-11-20: "list them in English with the English Translation in English. When you get a
+  language import back, put the English back and leave the translation as foreign ... Since these are fixed and not dynamic, it would
+  work and the brain would know where."): the brewing words in `help/_keep_english.txt` (OakBarn Brewery fills it in; seeded with
+  Strike, Sparge, Mash, Wort, Vorlauf ...) plus an Admin's own words on that Brain. On Export each one is written twice, ⁅Mash⁆ (Mash);
+  on Import the word in the fixed ⁅ ⁆ slot is put back in English, whatever the AI did, so the page reads **Mash (Maische)**. A
+  translated page says under it that these words stay English. Override and Stop are not on the list: they follow the Help language
+  (Rule 11.11).
+- **Right to left** (Arabic, Hebrew, Persian, Urdu ...): taken like any other language, never blocked; it will not show right. Said
+  once, in the Add Font to Brain warning below, not at Import.
+- **Fonts:** the browser reading the Help draws it, and phones, PCs and Macs have most letters. The Skynet Language Fonts (Rule 9.24)
+  and fonts an Admin adds are served by the Brain (/fonts/fonts.css) to the Help pages and balloons only, after the screen's own font,
+  so they are used only for letters it lacks. An Import whose letters need a Skynet Language Font the Brain lacks says where to get it.
+  **🔤 Add Font to Brain** (.woff2, .woff, .ttf, .otf; Pi or Windows Brain alike, no command line): its **first screen is the one
+  warning**, with **▶ Next** and **Abandon**: "Fonts added here are not tested and may not work. Right-to-left languages (such as
+  Arabic or Hebrew) will not work." Delete moves a font to data/help_user_backups/fonts (Rule #1). A font file name follows Rule 3.4.
+- **Code stays English:** Process code, Device, Widget, Tab and file names, and the screens are never translated (Rule 11.11).
+- **Machine translation** (Rule 11.14): the notice and the note under each page come in the User Language's own words.
+- Still to decide: whether a good User Language can be sent in to ship in a Setup (German, Danish, Norwegian, Italian are coming).
+  Both programs: the Panel's Help (the BruControl Import's Build page uses the Panel's Help). (Help 242, lib/helplang.js,
+  public/helplang.js, test/helplang.test.js)
 
 ## 12. Privacy and sharing
 
@@ -6437,6 +6489,7 @@ import.
 - 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
 - 2026-11-20: Rules 3.4 and 3.17 (OakBarn Brewery, option A "Yes: ß=ss, æ=ae, ø=o"): in a Suggested Name ß, æ, ø (and œ, đ, ł, þ) are spelled ss, ae, o instead of becoming ~ (public/letters.js), so Labels in German, Danish and Norwegian give Names that read like them; the Tab Vessel, Vessel Widget and Fermentor names now keep accented letters plain too (Café gave Caf). Names already saved never change. Help 63 (and French), docs/Special_Characters.md. Checked against both programs: the BruControl Import uses the same naming code (public/naming.js). (thread "Make all Help picture text translatable")
+- 2026-11-20: Added Rule 11.16 Help in any language by AI translation and Rule 9.24 the Skynet Language Fonts Setup (OakBarn Brewery, Panel Updates entry 45, "do 29 and 45"): Export the Help in parts for any AI, Import with checks and ONE warning, a User Language as the third 🌐 Help language choice (data/help_user/), Keep English words put back in their fixed ⁅ ⁆ slots (Mash (Maische)), red warnings kept, right to left taken, Add Font to Brain with its one warning (▶ Next / Abandon), the add-only Language Fonts Setup and zip (Noto Sans SC, JP, KR, Thai, Devanagari, Regular). Rule 11.11 picker line points to it. Help 242 (new); Help 192 and the Glossary point to it. Checked against both programs: the BruControl Import uses the Panel's Help; its own pages are not changed. Next free Help 243. (thread "Build Help in any language via AI")
 - 2026-11-20: Rule 11.11 changed (OakBarn Brewery: "Maybe the skynet over ride and STop Button label translate", option A): the Override button and the Stop buttons show in the Help language (French: Passer, Arrêt, Tout arrêter; public/screenwords.js), everything else stays English; a typed Label is never translated; French Help names them with both words. Help 96, 192 and the French pages that name them. Checked against both programs: the BruControl Import's Build page has no Override or Stop buttons; its Help is on hold (Rule 11.3). (thread "Make all Help picture text translatable")
 - 2026-11-20: Rule 7.25 tightened, with no exception (OakBarn Brewery: "remove all text that is part of a graphic and add as text (maybe smaller and always translate because German, Danish, Norwegian, and Italian are coming"; "Do not worry about parts of a graphic that are model or anything in the real world"; option A "lets keep a for now"): every word Skynet draws in a Help picture is real SVG text and shows in the Help language (help/<lang>/_pictures.json, French now; the Brain sends the picture in the language picked, a longer word drawn smaller); words printed on a real item stay; a screenshot of the panel stays as shot (its words are the English screen, Rule 11.11), so the Tab size pictures are no longer an exception. Pump_Daisy_Chain, Valve_Daisy_Chain, Pump_Overlays, Pump_Cover, Hose_Bib_IP_Spots, Manual_Valve_Orientation and Hose_Bib_8_IPs are now SVGs with their words as text over the picture (<Name>_Art.png). Help 7 (and French). Checked against both programs: the BruControl Import's Build page uses the Panel's balloons; its Help is on hold (Rule 11.3). (thread "Make all Help picture text translatable")
 - 2026-11-19: Rule 18.43 extended (OakBarn Brewery, Panel Updates 6: "Can a User Provide a single Image and Skynet create other needed"; "90 degrees to make horizontal vertical"; "Go with A KISS"): a User Defined Motorized Ball Valve's one picture (drawn Horizontal) gives four looks: Horizontal, Horizontal Flipped, Vertical Left (turned 90 degrees) and Vertical Right (turned and mirrored); the Valve Profile offers the same; plain Vertical only where already set. Help 128 (and French) adds a what-picture-works-best guide. Checked against both programs: the BruControl Import's Build page shares the dialog; the Importer's valve list is unchanged. (thread "Build a User Defined ball valve from one picture")

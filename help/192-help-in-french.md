@@ -9,6 +9,8 @@ The Help and the balloons (Hover Help) can be read in **English** or in **French
 
 The browser remembers the choice, so Help opens in the same language next time on that PC, phone or tablet. Each browser has its own choice: one person can read Help in French while another reads it in English. The balloons on the panel follow the same choice at once, even in a panel window that is already open.
 
+An Admin can add one more language of your own, made with any AI: see [Help in any language](242-help-in-any-language).
+
 ## What is in French
 
 - Every Help page, with the same pages, parts, pictures and links as the English Help.
