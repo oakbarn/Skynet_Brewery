@@ -1184,8 +1184,30 @@ never changes a saved number, so switching back and forth can never drift a numb
   Offset (150 °F and -1 °F kept as 65.5556 °C and -0.5556 °C, so the Help examples stay true in US), the Recipe Globals (°C,
   liters, hop grams), the Vessels, the Simulator and the Brew Day Process. Names never change (Rule 3.2), so a Global named
   _Gal or _Oz now holds liters or grams.
-- **Still to come:** showing every number in the Units (each Tab and Recipe turns its numbers into the Units when it opens, only
-  on screen), and the live side of a user's own Schemas (probes, Setpoints, PID, alarms, Processes).
+- **The Rule (OakBarn Brewery, 2026-11-19: "Keep backend data metric, display to user by choice in Skynet Settings"; "US would not
+  understand C and Europeans not F"):** everything kept behind the scenes is metric; **everything a user sees and types follows
+  Units**, on every page. **Tab temperatures (built 2026-11-19):** a Temperature Probe's reading (PV), its SV box, its Dial (with
+  its Lowest, Highest, Cooler and Hotter ranges), the SetPoint pop-up, the Heating Element pop-up, the hydrometer's temperature,
+  the "▸ Setpoint" of an older Hysteresis, PID, Deadband or a Fermentor Control, and in Properties the Setpoint and Offsets of a
+  Heating Element, older Hysteresis, PID, Deadband, Fermentor Control, Cool / Warm Pump and gas burner (its Rise, Drop and Boil
+  point), and a probe's own Setpoint. A turned temperature shows 1 decimal (the probe's Decimals for a reading); a number not
+  changed is saved back exactly as kept. A **temperature difference** (an Offset, a band, a Rise or Drop, a Dial range) turns by
+  9/5 only, never with the 32. The Hysteresis Offset list is every half degree in the Units.
+- **A probe's own Units box ("Kept in"):** never dropped. It is the units that probe keeps its numbers in (its reading, Setpoint,
+  Offsets and what a Process writes to it); it no longer changes what is shown. A probe kept in °F (older Schemas) keeps working
+  and only shows in the Units. What is typed is saved in the probe's own units. A Process number (`HLT.setpoint = 152`) is still
+  in the probe's own units.
+- **Exceptions, kept in their own unit whatever Units says (OakBarn Brewery, 2026-11-19):** (1) **Recipe items that come in their
+  own unit**: "some recipes have grams vs ounces so we will need to set what the thing added use (some Yeasts come as Grams rather
+  than Oz , although most are Packs. Additions can be either"; "Hops may be the same. I have always used OZ. But you could use
+  grams as more accurate." Additions (Misc) already keep their unit on each line; a yeast is a count of Packs; a per-line unit
+  for yeast (Packs / g / oz / ml) and hops (oz / g) is a separate Panel Update, not built. (2) **A Vessel whose own screen has
+  fixed units** ("A digiboil always opens in Metric after a power cycle"; "a user can switch the Digiboil and Brewzilla back
+  to F. I would think that is most common for US Brewers"): a Manual vessel (DigiBoil, Brewzilla) has its own Temperature units,
+  the units its screen shows. It starts as Units (°F in US Standard) and can be set to °F or °C in its Properties; its Hover Help
+  says the screen comes back in °C after a power cycle. In °F its pop-up gives the set point in °C as well. No other Vessel
+  has its own display units.
+- **Still to come:** the live side of a user's own Schemas (turning older °F probes, their Setpoints, PID and alarms into °C).
 - **Both programs:** the BruControl Import still makes its Vessels and Profiles in the Units picked; the Panel keeps them in metric
   when they are saved. Its probes stay in the units BruControl had until the live side is done. (Panel Updates Sandbox entry 9)
 
@@ -4889,14 +4911,23 @@ explain good in the help what it means and have a User Add"; "Same with Water Pr
 17.14 **Three Hop Stands** (OakBarn Brewery, 2026-11-13: "3 different Hop Stand and Times Hop Stand High with time, Hop Stand Middle with
 Time and Hop Stand Low with Time"; "Middle 154"; "low around Pitch"; "make BOTH temperature AND time user settable"; "AN XML FILE MAY
 HAVE INFO AS AN IMPORT"):
-- **High** 180 °F (82 °C), 10 minutes; **Middle** 154 °F (68 °C), 20 minutes; **Low** the Recipe's pitch temperature (68 °F / 20 °C
-  when none), 30 minutes. Replaces the single Hop stand temperature and time.
-- Temperature and time are set in ☰ Menu > Default settings, in own Boil Profiles and in each Recipe. The Recipe's own come first,
-  then its Boil Profile's, then Default settings.
-- Each Whirlpool hop picks its stand. The chill stops at each stand that has hops, highest first, cooling water off for its time
-  (Skynet Chill, Whirlpool and Chill). A Process: `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`, `rcp_Hop_Stand_High_Minutes` (and
-  Middle, Low).
-- An imported recipe's whirlpool temperature and time go to the nearest stand.
+- **No Defaults** (OakBarn Brewery, 2026-11-16, Panel Updates entry 13: "Hop Questions to ask if a Hop is added to a Recipe that is
+  Whirlpool. No Defaults. The help can be with the question and what is common"; built 2026-11-19, "I like your suggestions do it
+  that way"): Skynet fills in no Hop Stand numbers, and ☰ Menu > Default settings has **no Hop Stand boxes**. The common numbers are
+  only in the Hover Help: **High** 170 to 185 °F (most often 180 °F / 82 °C), 10 to 20 minutes; **Middle** 150 to 160 °F (most
+  often 154 °F / 68 °C), 20 to 30 minutes; **Low** about the pitch temperature, 30 minutes or more. Replaces the single Hop stand
+  temperature and time.
+- **The Whirlpool questions:** turning on a hop's Whirlpool switch asks **Hop Stand** (High, Middle, Low), its **Temperature** and its
+  **Time**, all empty unless the Recipe (or its Boil Profile) already has them; each question's Hover Help gives the common numbers.
+  Saving with one empty gives **one warning** ("The chill won't stop for this hop.") and still saves (no restriction).
+- Temperature and time are the Recipe's own (shared by the hops of that stand), else its Boil Profile's (own Boil Profiles keep
+  their boxes: numbers the user typed), else empty.
+- Each Whirlpool hop picks its stand. The chill stops at each stand that has hops **and** its temperature and time, highest first,
+  cooling water off for its time (Skynet Chill, Whirlpool and Chill). A Process: `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`,
+  `rcp_Hop_Stand_High_Minutes` (and Middle, Low); an unanswered Temp or Minutes reads 0.
+- An imported recipe's whirlpool temperature and time go to the stand that temperature fits: **High** 170 °F (77 °C) and above,
+  **Middle** from 140 °F (60 °C), **Low** below. A whirlpool hop with no temperature gets no stand (its questions are asked).
+- Design Rule #1 (Never Take Away): removing the Default settings boxes is allowed because it is before the first Public Production.
 
 17.15 **Saving an imported Recipe** (OakBarn Brewery, 2026-11-13: "saved when user says yes, and then the overwrite question comes up In
 this case Overwrite or add new"): after an import, **Save this Recipe?** (Yes / No). A saved Recipe with the same name asks
@@ -6184,6 +6215,7 @@ import.
 - 2026-11-19: Rule 2.43 and Rule 2.44 changed, Panel Updates 41 (OakBarn Brewery: "the standard PV and SV can be intergrated into The Display"; "Forget visible option Make part of Digit Display Box. Keep all Digits an Dergee F or C fit on one line Inside the display."): every Temperature Probe's display shows PV over a green SV box (PV Blue below, Green at, Red above the Setpoint; Duty Cycle Red / Blue while ON, Grey while OFF), one click on the SV box types a new Setpoint in place; a probe a Heating Element (or Fermentor Control, older Hysteresis, PID, Deadband Device) holds shows and sets that one's Setpoint (one Setpoint), a probe nothing holds keeps its own (.setpoint, a Setpoint row in its Properties). Help 160 (and French). Checked against both programs: the BruControl Import has no running Tabs and BruControl probes have no Setpoint, so nothing changes there.
 - 2026-11-19: Added Rule 2.62 (OakBarn Brewery: "A profile is only to import to start a build. Nothing more."; "I want ZERO connection after placed on Tab."; "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Tab keeps no link to an Equipment Profile or Template. The Tab link, follow the Default Layout, save back on every Save, the locked profile freezing Tabs and Make it unique are gone; the profile numbers are copied onto the Tab (picked "Copied onto the Tab") and changed in Tab Settings or ⚙ Numbers; 💾 Save as a profile ... copies a Tab into a profile, one direction only; lock_Equipment locks the Tab. Rules 2.58, 17.13, 19.6 and question 7 changed to match. Checked against both programs: the BruControl Import has no Equipment Profiles; its import onto a locked Tab is stopped as before.
 - 2026-11-19: Rule 2.62 #7 and #8 added, Rule 5.16 changed (OakBarn Brewery: "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Skynet valve keeps its own copy of its Template's fixed attributes and pictures (the Brain puts a sent fixed attribute back to the valve's own, not the Template's); Orientation copies that picture when picked. Pipe fittings keep their own bend, body, size, upright and openings; a Skynet fitting no longer follows its Template's new picture when Edit layout opens. Help 88 (and French). Checked against both programs: the BruControl Import makes no Skynet valve User versions and only names a vessel's Template for the Panel to copy, so nothing changes there.
+- 2026-11-19: Rule 2.59 extended (OakBarn Brewery, Panel Updates Sandbox entry 9: "Fix the Dispalys as the Skynet Setting for US Metric, US would not understand C and Europeans not F"; "That should be the Rule. Keep backend data metric, display to user by choice in Skynet Settings"): Tab temperatures (PV, SV, Dial, SetPoint and Heating Element pop-ups, Setpoints and Offsets in Properties) show in Units and are saved in the probe's own units; a probe's Units box is what it keeps its numbers in. Exceptions: Recipe items in their own unit (additions, yeast Packs; per-line yeast and hop units not built) and Manual vessels (DigiBoil, Brewzilla) with fixed screen units. Help 155 and 160 (and French). Checked against both programs: the BruControl Import keeps its probes in BruControl's units, and its Build page uses the same Tab, dialogs and pop-ups, so they show in Units there too.
 - 2026-11-19: Rule 2.62 #9 and #10 added, Rule 2.39 #3 changed (OakBarn Brewery: "NO LINK NO Connect Nada 100% Links gone"): a Tab Profile is copied onto a Tab (its color into the Tab's Color, its look into the Tab's own copy) and never linked; Tab Settings' Profile box is now **Copy Profile**, and ☰ Menu > Tab Profile's list of Tabs has **Copy onto it**. A Skynet valve's Properties rows are its own copy. Help 26, 36 and 88 (and French). Checked against both programs: the BruControl Import sets no Tab Profile on a Tab and makes no Skynet valve User versions, so nothing changes there.
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
@@ -6828,3 +6860,4 @@ import.
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
+- 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.

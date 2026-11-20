@@ -41,7 +41,7 @@ Appuyez sur **☰ Menu** et choisissez **Boil Profile**.
 - **Total boil time** (durée totale d'ébullition) en minutes. **0** = pas d'ébullition.
 - **Boil off** : combien s'évapore chaque heure, en gallons ou en litres. **Vide** utilise le Boil Off de l'**Equipment Profile** (chaque brasserie évapore différemment : un petit tout-en-un évapore moins qu'une grande cuve sur un brûleur). Quand un Boil Profile a son propre Boil Off, le choisir dans une Recipe demande lequel utiliser : **celui de l'Equipment Profile**, ou **celui du profil**. Il le demande à chaque fois.
 - **Ask the kettle volume at the start and end of the boil** (demander le volume de la cuve au début et à la fin de l'ébullition) : le jour du brassage, on vous demande combien de moût il y a dans la cuve quand l'ébullition commence et quand elle finit. C'est ainsi que vous apprenez votre vrai Boil Off. C'est activé dans chaque Skynet Boil Profile.
-- **Hop Stands** : les trois Hop Stands (plus bas). Vide : ceux de Default settings.
+- **Hop Stands** : les trois Hop Stands (plus bas). Vide : une Recipe qui utilise ce Boil Profile le demande quand un houblon Whirlpool est ajouté.
 
 | Skynet Boil Profile | Minutes | À quoi il sert |
 |---|---|---|
@@ -58,11 +58,20 @@ Après l'ébullition, le refroidissement s'arrête à chaque **Hop Stand** (infu
 
 | Hop Stand | Température | Durée | Ce qu'il donne |
 |---|---|---|---|
-| **High** | 180 °F (82 °C) | 10 min | Plus d'amertume et de goût ; un peu d'arôme se perd. |
-| **Middle** | 154 °F (68 °C) | 20 min | Goût et arôme, peu d'amertume. |
-| **Low** | la température d'ensemencement de la Recipe (68 °F / 20 °C s'il n'y en a pas) | 30 min | Le plus d'arôme, presque pas d'amertume. |
+| **High** | 170 à 185 °F (77 à 85 °C), le plus souvent 180 °F (82 °C) | 10 à 20 min | Plus d'amertume et de goût ; un peu d'arôme se perd. |
+| **Middle** | 150 à 160 °F (65 à 71 °C), le plus souvent 154 °F (68 °C) | 20 à 30 min | Goût et arôme, peu d'amertume. |
+| **Low** | environ la température d'ensemencement, 60 à 70 °F (16 à 21 °C) | 30 min ou plus | Le plus d'arôme, presque pas d'amertume. |
 
-La température et la durée de chacun se règlent dans **☰ Menu > Default settings**, dans vos propres **Boil Profiles**, et dans chaque **Recipe** (l'onglet Recipe). Ceux de la Recipe passent en premier, puis ceux de son Boil Profile, puis Default settings. Chaque houblon Whirlpool de l'onglet **Hops** choisit son **Hop Stand**. Un fichier de recette (BeerSmith ou BeerXML) qui donne une température de whirlpool met ce houblon dans le stand le plus proche, avec la température et la durée du fichier.
+Ce sont les chiffres **courants**. Skynet n'en remplit aucun : il n'y a **pas de valeurs par défaut** (Règle Skynet 17.14).
+
+**Les questions Whirlpool.** Quand vous activez l'interrupteur **Whirlpool** d'un houblon sur l'onglet **Hops** de la Recipe, Skynet demande :
+- **Hop Stand** : High, Middle ou Low.
+- **Temperature** : où le refroidissement s'arrête pour ce stand.
+- **Time** : combien de temps l'eau de refroidissement reste coupée.
+
+Elles commencent vides. L'aide au survol de chaque question donne les chiffres courants ci-dessus. Les houblons d'un même stand partagent sa Temperature et son Time. Si vous enregistrez avec une case vide, vous avez un seul avertissement, « The chill won't stop for this hop. » (le refroidissement ne s'arrêtera pas pour ce houblon), et c'est quand même enregistré.
+
+La température et la durée de chaque stand sont celles de la **Recipe** (l'onglet Recipe montre les trois). Une Recipe qui n'a pas les siennes utilise celles de son **Boil Profile**, si vous les y avez tapées. Un fichier de recette (BeerSmith ou BeerXML) qui donne une température de whirlpool met ce houblon dans le stand qui lui correspond, avec la température et la durée du fichier : **High** à 170 °F (77 °C) et plus, **Middle** à partir de 140 °F (60 °C), **Low** en dessous. Un houblon whirlpool sans température dans le fichier n'a pas de stand, donc ses questions sont posées quand vous l'ouvrez.
 
 Un Process les lit comme `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp` et `rcp_Hop_Stand_High_Minutes` (et pareil pour Middle et Low). Les Process Templates Skynet **Chill** et **Whirlpool and Chill** s'arrêtent à chacun.
 

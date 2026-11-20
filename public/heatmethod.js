@@ -174,8 +174,10 @@ const isCelsius = u => /c/i.test(String(u ?? '')) && !/f/i.test(String(u ?? ''))
 // { min, max, delay, u } for this Heating Element; probe = its Temperature Probe (for °C), or null (°F)
 export function heatHysRange(el, probe) {
   const s = SWITCHED_BY.find(x => x[0] === switchedBy(el)), c = isCelsius(probe?.units);
-  const f = x => c ? Math.round(x * 5 / 9 * 10) / 10 : x;
-  return { min: f(s[2]), max: f(s[3]), delay: s[4], u: c ? '°C' : '°F', word: s[1], start: f(s[5]), startDelay: s[6] };
+  const f = x => c ? Math.round(x * 5 / 9 * 10) / 10 : x, x = v => c ? v * 5 / 9 : v;
+  // min / max: the list's ends, to 0.1; minX / maxX: the exact ends, for the checks, so -0.5 °F typed in the Units (kept as
+  // -0.2778 °C, Rule 2.59) is still in range for an Optical SSR
+  return { min: f(s[2]), max: f(s[3]), minX: x(s[2]), maxX: x(s[3]), delay: s[4], u: c ? '°C' : '°F', word: s[1], start: f(s[5]), startDelay: s[6] };
 }
 // The plain error when its heat Hysteresis Offset or On delay is outside the range, or null. Only a Heating Element that may use
 // Hysteresis is checked; offset and delay default to the element's own saved ones. A plus Offset on a Heating Element is an error too:
@@ -184,7 +186,7 @@ export function heatHysProblem(el, probe, offset = el?.onOffset ?? -1, delay = e
   if (!isHeatElem(el) || !allowedMethods(el).includes('hysteresis')) return null;
   const o = Number(offset), d = Number(delay) || 0, r = heatHysRange(el, probe), who = el.name || 'This Heating Element';
   if (Number.isFinite(o) && o > 0) return `${who} heats, so its Hysteresis Offset has a minus: -${o} turns it On ${o} ${r.u} below the Setpoint (Rule 6.19).`;
-  if (Number.isFinite(o) && (-o < r.min || -o > r.max))
+  if (Number.isFinite(o) && (-o < Math.min(r.min, r.minX) - 1e-6 || -o > Math.max(r.max, r.maxX) + 1e-6))
     return `${who} (Hardware Controller: ${r.word}): its Hysteresis Offset (-) must be -${r.min} to -${r.max} ${r.u} (Rule 6.29). It is ${o}.`;
   if (Number.isFinite(o) && d < r.delay)
     return `${who} (Hardware Controller: ${r.word}): its Hysteresis On delay must be at least ${r.delay} seconds, so it does not wear out (Rule 6.29). It is ${d}.`;

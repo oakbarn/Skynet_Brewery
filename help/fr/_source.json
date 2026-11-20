@@ -1,5 +1,4 @@
 {
- "238-boil-temperature": "ef095e5a40c4562d",
  "00-tailscale-windows": "7718c563861cc0e1",
  "01-getting-started": "326257bbd14831ea",
  "02-tabs": "33b2052c17709737",
@@ -35,7 +34,7 @@
  "32-file-move": "8b3baa577e9a7d38",
  "33-menu": "b2c0bdda1405aa4e",
  "34-vessel-tab": "2002cefdad750513",
- "35-mash-and-boil-profiles": "26bea423883e9ef9",
+ "35-mash-and-boil-profiles": "366f2db8e08ce695",
  "36-tab-and-valve-profiles": "369599488dda730d",
  "38-process-order": "d90a9c0c17d6f78e",
  "39-password-rules": "ed4e43b0f5f9e749",
@@ -95,8 +94,8 @@
  "95-closing-skynet-brewer": "124af9d3a442752d",
  "96-override-button": "2ef945413dc48d16",
  "98-database-and-api": "3c27c87803254930",
- "99-recipe-tab": "f6553b0781bd1ba4",
- "100-brew-process": "d9ebd70f616fb67b",
+ "99-recipe-tab": "23a7167e41ca3185",
+ "100-brew-process": "33d51400ed8c0bb3",
  "101-tab-styles": "dd046ee3860e4944",
  "102-process-version": "10e516f468bb74db",
  "103-hidden-tabs": "baeaff7c7887b609",
@@ -150,12 +149,12 @@
  "152-skynet-dial-and-timer-digits": "72aac9abbaa83357",
  "153-move-alone-swap-put-back": "8e22e24f7e2b2c4f",
  "154-properties-hotspots": "a7eb990a890c104c",
- "155-default-settings": "edd7d98d3618c6b4",
+ "155-default-settings": "0249d04e844ff67a",
  "156-precise-heating": "8fd94eeafd51a4bb",
  "157-schema-templates": "5e9897df31c0bd9a",
  "158-digiboil-and-brewzilla": "795d4373881bd748",
  "159-graph-widget": "323275136ef3ed5f",
- "160-setpoint-from-a-temperature": "cf0543225b0f95ca",
+ "160-setpoint-from-a-temperature": "e5aa1b19614493b3",
  "161-code-value-widget": "7b9ef90e4dbd25aa",
  "162-confirmation-widgets": "a92ff3f5dca31a7d",
  "163-dc-pumps-and-pump-speed": "389320e561265490",
@@ -231,5 +230,6 @@
  "234-1-wire-probes": "6099b8f79b1e2ab1",
  "235-din-button-on-press": "a8b5b5a37b0960b9",
  "236-copy-a-whole-tab": "31a20e264fee5ce1",
- "237-pid-auto-tune": "b4e0d90926f3f155"
+ "237-pid-auto-tune": "b4e0d90926f3f155",
+ "238-boil-temperature": "ef095e5a40c4562d"
 }
