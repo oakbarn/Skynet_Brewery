@@ -14,6 +14,10 @@ fields themselves. The explanation of a field is in its **hover help**.
 - The box **stays as long as the mouse is on the name**. Move the mouse off (or click, press a key or scroll) and it goes away.
 - **Click the name** to open the same help in a small pop-up with **Close**, if you want to keep it open while you read.
 
+Example: the Blichmann Riptide Add box, with the mouse resting on **1. Label**. The Label's hover help shows to the right of the dialog.
+
+![The mouse rests on 1. Label and its hover help shows to the right of the dialog](help_pictures/Blichmann_Label_HoverHelp.png)
+
 ## Hot spots: jump to the bigger Help
 
 Some words in a help box are **blue and underlined**. They are **hot spots**: each one has its own, bigger Help page.
