@@ -37,6 +37,9 @@ Rest the mouse on a field's name to see what it is for (hover help).
 - **Fore color** of the value, and its ⬢ holds the Back color and the Alignment.
 - **X**, **Y**, **Width** and **Height**, and the **Widget Type** greyed out last.
 
+A Value Widget's **Format** (Fixed, Number, Percent, Scientific, Accounting, Financial, Currency, Currency rounded) and its
+**Decimals** are on their own lines: see [Value Widget Formats](245-value-widget-formats).
+
 ## Widget, Device or Clone: your choice
 
 When you put a reading on a Tab, pick what fits your brewery. Skynet does not choose for you:

@@ -33,6 +33,10 @@ mistake in its code), a message at the top of the screen says why, and the Widge
 Then **Ask before starting or stopping**, **Picture**, **Picture turns on with**, **X**, **Y**, **Width** and **Height** (200 x 80
 to start) and the **Widget Type**.
 
+**Hide while running** (Off to start): On, the Widget hides (`.visible = false`) once its Process starts, and shows again when the
+Process stops. Use it for a button that starts something, such as **Start Brew Day** in the samples. Leave it Off on a Start / Stop
+button, so one click can stop the Process too.
+
 ## A picture on it
 
 A Process Widget can show a **Picture** between its Label and its button, for example a float switch on a "fill to the float"

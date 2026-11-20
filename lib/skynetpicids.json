@@ -237,6 +237,7 @@
   { "id": 234, "file": "Other_Equipment/Skynet_Float_NC_Closed.svg" },
   { "id": 235, "file": "Other_Equipment/Skynet_Float_NC_Open.svg" },
   { "id": 236, "file": "Other_Equipment/Skynet_Float_NO_Closed.svg" },
-  { "id": 237, "file": "Other_Equipment/Skynet_Float_NO_Open.svg" }
+  { "id": 237, "file": "Other_Equipment/Skynet_Float_NO_Open.svg" },
+  { "id": 238, "file": "On_Off/Skynet_Emergency_Off.svg" }
  ]
 }

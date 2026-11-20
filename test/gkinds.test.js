@@ -1,10 +1,10 @@
-// gGlobal Kinds (Fritz, 2026-11-02): six variable Kinds, the Kind can't change once made, one sample of each Kind
+// gGlobal Kinds (Fritz, 2026-11-02): five variable Kinds (no Graphic gGlobal, Panel Update 8), the Kind can't change once made, one sample of each Kind
 import assert from 'node:assert/strict';
 import { VAR_KINDS, isVarKind, kindChangeError, SAMPLE_GLOBALS, samplesToAdd } from '../public/gkinds.js';
 import { G_KINDS } from '../lib/store.js';
 import { elementTopic } from '../public/helpmap.js';
 
-assert.deepEqual(Object.values(VAR_KINDS), ['gS_Global_String', 'gG_Global_Graphic', 'gV_Global_Value', 'gB_Global_Boolean', 'gT_Global_Time', 'gD_Global_DateTime']);
+assert.deepEqual(Object.values(VAR_KINDS), ['gS_Global_String', 'gV_Global_Value', 'gB_Global_Boolean', 'gT_Global_Time', 'gD_Global_DateTime']);
 for (const [k, name] of Object.entries(VAR_KINDS)) {
   assert.ok(G_KINDS[k]?.variable, `${k} is a variable Kind on the Brain`);
   assert.equal(G_KINDS[k].label, name);
@@ -23,8 +23,8 @@ assert.equal(kindChangeError(cur, [{ name: 'gS_New', type: 'gGlobal', kind: 'str
 // the sample: one of each Kind, not on a Tab, not added twice
 assert.deepEqual(SAMPLE_GLOBALS.map(s => s.kind).sort(), Object.keys(VAR_KINDS).sort());
 assert.ok(SAMPLE_GLOBALS.every(s => !s.workspace && s.type === 'gGlobal'));
-assert.equal(samplesToAdd([]).length, 6);
-assert.equal(samplesToAdd([{ name: 'gv_strike_temp' }]).length, 5, 'a name already used (any case) is skipped');
+assert.equal(samplesToAdd([]).length, 5);
+assert.equal(samplesToAdd([{ name: 'gv_strike_temp' }]).length, 4, 'a name already used (any case) is skipped');
 assert.ok(samplesToAdd([]).every(s => !('retain' in s)));      // no switch: every gGlobal keeps its value (Rule 1.22)
 
 assert.deepEqual(elementTopic({ type: 'gGlobal', kind: 'time' }), ['gglobal-kinds']);

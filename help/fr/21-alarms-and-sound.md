@@ -8,7 +8,7 @@
 | **Hop Alarm** | 2 | Les ajouts de houblon. N'attend qu'une Brew Flow Alarm. |
 | **Pre-Hop Alarm** | 3 | Un avertissement un temps réglé avant sa Hop Alarm (10 minutes si vous ne le changez pas). |
 | **General Alarm** | 4 | Tout le reste. |
-| **Sound only** et le **Sound Player** | 5 | Musique et bips. Se met en pause pendant qu'une alarme sonne, puis reprend là où il s'était arrêté. |
+| **Sound only** et le **Audio Widget** | 5 | Musique et bips. Se met en pause pendant qu'une alarme sonne, puis reprend là où il s'était arrêté. |
 
 Brew Flow est en priorité 1 et Hop en priorité 2 (OakBarn Brewery, 2026-11-13). Si un ajout de houblon doit passer en premier dans votre brassin, donnez à cette Hop Alarm sa propre Priority, par exemple 0.9. Une alarme qui a dû attendre recommence depuis le début quand son tour arrive ; la musique reprend là où elle en était.
 
@@ -54,7 +54,7 @@ alm_Hops_1 = false           turn it off
 
 **Une Brew Flow Alarm retient son Process :** quand un Process met une Brew Flow Alarm Widget sur On (`alm_Mash_Done = On`), il attend sur cette ligne jusqu'à ce que le brasseur l'arrête d'un toucher, comme si `wait alm_Mash_Done == false` suivait. Tous les attributs d'une Alarm (`.path`, `.string`, `.playtime` ...) sont dans [Les attributs d'une Alarm](195-alarm-attributes).
 
-## Sound Player
+## Audio Widget
 
 Chaque panel a un **SoundPlayer** intégré pour la musique et les sons simples. Il n'est sur aucun Tab ; les Processes l'utilisent :
 
@@ -66,6 +66,15 @@ stop SoundPlayer
 
 Un son peut aussi être un **lien web vers un MP3** (`https://...`), joué directement depuis le web : voir [Des sons depuis un lien web](186-sounds-from-a-web-link).
 
-Il n'y a pas de commande de pause : il se met en pause tout seul pendant qu'une alarme sonne et reprend ensuite. Pour mettre un Sound Player sur un Tab (touchez-le pour jouer ou arrêter), utilisez **Add Widget > On-screen controls > Sound Player**.
+L'**Audio Widget** joue un son sur un Tab. Il a **un seul son** (`.path_audio`), **Repeat sound**, et **une image** si vous en voulez une
+(`.path_image`). Un nouveau commence **caché**, parce qu'on le regarde rarement. Un Process le met sur On et sur Off :
+
+```
+wgt_AUD_Music_BH.path_audio = "sounds/polka.mp3"
+wgt_AUD_Music_BH = On
+wgt_AUD_Music_BH = Off
+```
+
+Ce n'est pas une Alarme. Il n'y a pas de commande de pause : il se met en pause tout seul pendant qu'une alarme sonne et reprend ensuite. Pour mettre un Audio Widget sur un Tab (touchez-le pour jouer ou arrêter), utilisez **Add Widget > On-screen controls > Audio Widget**.
 
 Quand le panel s'ouvre avec le son coupé, Skynet demande **🔊 Turn sound on?** : appuyez sur **🔊 Turn Sound On** (les navigateurs ne jouent un son qu'après un clic, et ce clic suffit). Tant que le son est coupé, un bouton rouge **🔇 Sound is off** reste sur le Tab et **🔊 Turn Sound On** est en haut du **☰ Menu**. C'est une fois par navigateur, pas par Tab. Vous pouvez aussi appuyer sur **Enable sound** dans la barre de menu. Pour avoir le son actif à chaque ouverture du panel, activez **Turn Sound On when starting** sur **☰ Menu > Default** (voir [Le ☰ Menu](33-menu)) ; il faut quand même toucher ou cliquer une fois la page avant le premier son, parce que les navigateurs l'exigent aussi.

@@ -5,7 +5,7 @@ Les images et sons Skynet (pompes, vannes, cuves, sons d'alarme ...) viennent av
 - **Nouveau sur cet ordinateur Windows :** le **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) a toutes les images et tous les sons Skynet, et tous les Sample Schemas.
 - **À chaque mise à jour :** l'**Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) et le zip du panel portent chaque image et son Skynet ajoutés depuis le dernier Update Setup. Le Brain ajoute ceux qu'il n'a pas encore à son prochain démarrage.
 
-Trois sons viennent toujours avec le panneau lui-même, pour qu'une alarme ou un Sound Player puisse toujours sonner : le bip d'alarme, la voix « Alarm sound missing » et la chanson « Find The File ».
+Trois sons viennent toujours avec le panneau lui-même, pour qu'une alarme ou un Audio Widget puisse toujours sonner : le bip d'alarme, la voix « Alarm sound missing » et la chanson « Find The File ».
 
 **Il ne fait qu'ajouter.** Une image ou un son que vous avez déjà, sous ce nom, n'est jamais changé. Vos propres images et sons ne sont jamais touchés.
 

@@ -1,6 +1,6 @@
 # Obtenir le Music Pack {#get-music-pack}
 
-Le **Skynet Music Pack** est un ensemble de marches et de sonneries de clairon du domaine public, par exemple **First Call**, **Mail Call**, **Taps**, **Semper Fidelis** et **The Stars and Stripes Forever**. Utilisez-les dans une Alarme, un Sound Player ou un Process comme n'importe quel autre son.
+Le **Skynet Music Pack** est un ensemble de marches et de sonneries de clairon du domaine public, par exemple **First Call**, **Mail Call**, **Taps**, **Semper Fidelis** et **The Stars and Stripes Forever**. Utilisez-les dans une Alarme, un Audio Widget ou un Process comme n'importe quel autre son.
 
 Il n'est **pas** dans les Setups, donc les Setups restent petits. **☰ Menu > Get Music Pack** le copie sur votre Brain, dans `media/sounds/Skynet_Music`.
 

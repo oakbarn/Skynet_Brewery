@@ -1,6 +1,6 @@
 # Variables
 
-Les variables contiennent des valeurs que les Processes et les écrans utilisent. L'écran **Variables** les liste toutes avec leurs valeurs. Les six Kinds (types) simples (String, Graphic, Value, Boolean, Time, Date Time) sont créés sur l'écran **gGlobal** avec **➕ New gGlobal** et ne sont jamais posés sur un Tab : voir [Sortes de gGlobal](108-gglobal-kinds). Les types affichés à l'écran (Switch, Push Button, Pulse Button, List, Step, Long String) s'ajoutent toujours dans **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, puis **Add Widget**. Les préfixes de nom ci-dessous sont des suggestions ; n'importe quel nom marche.
+Les variables contiennent des valeurs que les Processes et les écrans utilisent. L'écran **Variables** les liste toutes avec leurs valeurs. Les cinq Kinds (types) simples (String, Value, Boolean, Time, Date Time) sont créés sur l'écran **gGlobal** avec **➕ New gGlobal** et ne sont jamais posés sur un Tab : voir [Sortes de gGlobal](108-gglobal-kinds). Les types affichés à l'écran (Switch, Push Button, Pulse Button, List, Step, Long String) s'ajoutent toujours dans **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, puis **Add Widget**. Les préfixes de nom ci-dessous sont des suggestions ; n'importe quel nom marche.
 
 gKonstant et gAPI sont devenus une seule classe, **gGlobal**, le 2026-10-30. Envoyer les lectures à la base de données et laisser des programmes extérieurs atteindre un élément sont maintenant des réglages que chaque Device et chaque Widget possède, donc une classe API séparée n'était plus nécessaire. Les anciens sont convertis au démarrage du Brain : voir [Base de données et .API sur chaque Device et Widget](98-database-and-api).
 
@@ -22,7 +22,6 @@ L'ancienne classe **Global** est retirée. Quand un Schema plus ancien est charg
 
 | Type | Préfixe | Remarques |
 |---|---|---|
-| gG_Global_Graphic | `gG_` | Les chemins d'image de fond standard. Un Process peut changer l'image. [Sortes de gGlobal](108-gglobal-kinds) |
 | gS_Global_String | `gGS_` | Du texte. [Sortes de gGlobal](108-gglobal-kinds) |
 | Long String | `gGL_` | Relié à un fichier texte dans un dossier media. Modifiez le fichier et le panel suit en moins d'une seconde. |
 | gV_Global_Value | `gGV_` | Un nombre. |

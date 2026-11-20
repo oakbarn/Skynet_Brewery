@@ -203,6 +203,13 @@ Several Elements can be On at the same time (for example on different AC circuit
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
 click on PID to hold the strike temperature.
 
+**Show or hide the method buttons.** The method buttons start **hidden**, so the Tab stays clean. A thin strip just **outside the
+Vessel wall**, where the Element goes in (beside the picture of an Element on its own), shows them with **one click** and hides them
+with the next. It works with any Vessel picture. Each screen remembers its own pick, and nothing turns On or Off.
+
+**A display that does not jump.** A PID's output always shows two digits (05 %, 45 %, then 100 %), and idle, HEAT and COOL take
+the same room, so the SV box beside them never moves.
+
 ## Ctrl + Click for a method's Settings
 
 On a running Tab (not Edit layout), **Ctrl + Click a method button** (**⌘ + Click** on a Mac, where Ctrl + Click is the right-click and

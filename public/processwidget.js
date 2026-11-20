@@ -36,6 +36,7 @@ export const PROCESS_TIPS = {
   process: 'The Process it shows and starts. One click on the Widget starts it when it is stopped and stops it when it runs. If the Process gets a new name (✏ Change name), the Widget follows it.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
   imageOff: 'Optional. A picture drawn in it, between the Label and the button, for example a float switch. The ⬢ beside it holds the picture when on. Empty: no picture.',
+  hideRunning: 'On: it hides (.visible = false) once its Process starts, and shows again when the Process stops. For a button that starts something, such as Start Brew Day. Off (the usual): it always shows, so one click can stop it too.',
   follow: 'The Device or Widget whose state picks the picture: the picture when on while it is on, the picture when off while it is off. None: always the picture when off.',
 };
 // Its optional picture (OakBarn Brewery, 2026-11-20, the Float buttons of the Fire Hose sample): imageOff, imageOn while follow is on
@@ -47,4 +48,20 @@ export function followProcessRename(elements, from, to) {
   let n = 0;
   for (const el of elements ?? []) if ((isProcessWidget(el) || el?.kind === 'override') && String(el.process ?? '').trim() === from) { el.process = to; n++; }      // an Override button set to it too (Rule 2.26)
   return n;
+}
+
+// Hide while running (OakBarn Brewery, 2026-11-20, Panel Update 8, item 21: "Not a switch! For a Process Start, a Process Widget a Once a
+// Process is started, .visible = false"; Rule 1.31). A Process Widget with Hide while running on gets .visible = false while its Process
+// runs, and .visible = true again once it stops (only when it was this that hid it). Off to start, so a Start / Stop button (the Fire
+// Hose Float buttons) keeps showing. Returns [{ name, visible }] for the Widgets whose .visible must change. hid: the names hidden by it.
+export function hideWhileRunning(elements, list, hid) {
+  const running = new Set((list ?? []).filter(s => s?.state === 'running').map(s => s.name));
+  const out = [];
+  for (const el of elements ?? []) {
+    if (!isProcessWidget(el) || !el.hideRunning) { if (hid.has(el?.name)) { hid.delete(el.name); } continue; }
+    const run = running.has(String(el.process ?? '').trim());
+    if (run && !hid.has(el.name)) { hid.add(el.name); out.push({ name: el.name, visible: false }); }
+    else if (!run && hid.has(el.name)) { hid.delete(el.name); out.push({ name: el.name, visible: true }); }
+  }
+  return out;
 }

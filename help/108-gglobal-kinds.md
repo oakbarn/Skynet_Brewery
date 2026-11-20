@@ -4,18 +4,19 @@ A **gGlobal** is a variable with a global scope: every Process can read it and c
 
 Every gGlobal has one **Kind**. The Kind is picked when the gGlobal is made and **can never be changed**. If the Kind is wrong, delete the gGlobal and make a new one.
 
-## The six Kinds
+## The five Kinds
 
 | Kind | .value is | Example |
 |---|---|---|
 | **gS_Global_String** | a String (text) | `gS_Brewer_Note.value = "Add the yeast nutrient at 10 minutes"` |
-| **gG_Global_Graphic** | the path of a picture (it starts as the Image Path that Background # picks): the standard background picture paths (Image Path 1, 2, 3, Background #, Back Colour) | `gG_Brew_Day_Picture.background = 2` |
 | **gV_Global_Value** | a Value (a number) | `gV_Strike_Temp.value = 163` |
 | **gB_Global_Boolean** | a Boolean: true or false | `gB_Grain_Added.value = true` |
 | **gT_Global_Time** | a Time, `hh:mm:ss` | `gT_Mash_Rest.value = 01:00:00` |
 | **gD_Global_DateTime** | a Date Time | `gD_Brew_Day_Start.value = "2026-11-07T07:00:00"` |
 
-On this screen the name prefixes (`gS_`, `gG_`, `gV_` ...) are hints and any name works. In a Process, a name's prefix tells which Kind it is (Help 145).
+On this screen the name prefixes (`gS_`, `gV_`, `gB_` ...) are hints and any name works. In a Process, a name's prefix tells which Kind it is (Help 145).
+
+There is **no Graphic gGlobal**: a picture on a Tab is a **Graphic (Picture) Widget**.
 
 ## Making a gGlobal
 
@@ -42,7 +43,6 @@ All of them follow the General Dialog Rules: Name first, ✖ Cancel and 💾 Sav
 | Kind | Fields |
 |---|---|
 | gS_Global_String | **.value** with ⬆ |
-| gG_Global_Graphic | **Image Path 1** (pick from the list or type a path) with ⬢ for the **Graphic Dialog**: Background # (1, 2 or 3 picks Image Path 1-3), Back Colour, Image Path 1, 2 and 3 with OPEN |
 | gV_Global_Value | **.value**, Decimals, Units, Lowest allowed, Highest allowed |
 | gB_Global_Boolean | **.value** as a switch (on = true) |
 | gT_Global_Time | **.value** like `01:30:00` |
@@ -57,7 +57,6 @@ Every gGlobal keeps its .value when a Process starts and when the Brain restarts
 | Name | Kind | .value |
 |---|---|---|
 | gS_Brewer_Note | gS_Global_String | Add the yeast nutrient at 10 minutes |
-| gG_Brew_Day_Picture | gG_Global_Graphic | Images/Skynet/Miscellaneous/Skynet_Brewery_Main.svg |
 | gV_Strike_Temp | gV_Global_Value | 163 °F (32 to 212) |
 | gB_Grain_Added | gB_Global_Boolean | false |
 | gT_Mash_Rest | gT_Global_Time | 01:00:00 |

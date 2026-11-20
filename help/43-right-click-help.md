@@ -44,7 +44,7 @@ Help opens in a window of its own: see [Help in its own window](54-help-window).
 | Manual valve | [Manual valves](29-manual-valves) |
 | Tap water valve | [Tap water valves](31-tap-water-valves) |
 | Stepper motor | [Stepper motors](16-stepper-motors) |
-| Alarm, Sound Player | [Alarms and sound](21-alarms-and-sound) |
+| Alarm, Audio Widget | [Alarms and sound](21-alarms-and-sound) |
 | Timer | [Tabs: Timers](02-tabs) |
 | gGlobal, gGlobal List | [Variables](04-variables) |
 | Picture | [Pictures on items](25-picture-paths) |

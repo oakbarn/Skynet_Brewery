@@ -61,7 +61,7 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
 - **Toutes les autres fenêtres** (la passe « Recheck dialogs », partie 2) ont maintenant le même aspect et le même ordre, sans rien
   retirer : le **Switch**, le **Push Button**, le **Pulse Button** et la **LED** reçoivent le **Graphic** (le Widget tel que dessiné sur
   son Tab) et un **Overlay** dont le ⬢ contient Database et .API. Un Widget sans image (Data / Value, Text, Override, Label, Timer,
-  Graph, Sound Player, Process) a **Background** (Show ou None), **Fore color** et **Back color** sur leurs propres lignes. Le gGlobal
+  Graph, Audio Widget, Process) a **Background** (Show ou None), **Fore color** et **Back color** sur leurs propres lignes. Le gGlobal
   Widget, l'ancienne Alarm, le Manual vessel et un Clone, chaque Vessel, IP, Pipe, Hose, raccord et Manifold, et le tube RIMS et la
   bouilloire électrique suivent le même ordre : 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name, leurs propres cases, X Y Width
   Height, et le Type en dernier. Le Picture Widget reçoit un **Background** (None, 1, 2 ou 3) dont le ⬢ contient ses 3 images.

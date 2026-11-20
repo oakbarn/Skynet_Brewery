@@ -5,7 +5,7 @@ The Skynet pictures and sounds (pumps, valves, vessels, alarm sounds ...) come w
 - **New on this Windows computer:** the **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) has every Skynet picture and sound, and every Sample Schema.
 - **Each update:** the **Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) and the panel zip carry every Skynet picture and sound added since the last Update Setup. The Brain adds the ones it does not have yet on its next start.
 
-Three sounds always come with the panel itself, so an Alarm or Sound Player can always sound: the alarm beep, the "Alarm sound missing" voice clip and the "Find The File" song.
+Three sounds always come with the panel itself, so an Alarm or Audio Widget can always sound: the alarm beep, the "Alarm sound missing" voice clip and the "Find The File" song.
 
 **It only ever adds.** A picture or sound you already have, by that name, is never changed. Your own pictures and sounds are never touched.
 

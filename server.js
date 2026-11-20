@@ -89,7 +89,7 @@ import { readVersion, VersionCheck } from './lib/version.js';
 import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
 import { chillerTemplates, chillerVessels, moveChiller } from './lib/chiller.js';
-import { followProcessRename } from './public/processwidget.js';
+import { followProcessRename, hideWhileRunning } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { BoilTemp } from './lib/boiltemp.js';
 import { startPowerOff, finishPowerOff, cannotWhy } from './lib/brainoff.js';
@@ -336,6 +336,13 @@ function hold(name, down) {
   store.setProp(name, prop, down ? !rest : rest, 'ui');
 }
 engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout(() => broadcast('scripts', engine.list()), 100); });
+// a Process Widget set to Hide while running (Rule 1.31, Panel Update 8): .visible = false while its Process runs, true once it stops
+const hidRunning = new Set();
+engine.on('scripts', () => {
+  for (const { name, visible } of hideWhileRunning(store.config.elements, engine.list(), hidRunning)) {
+    try { store.setProp(name, 'visible', visible, 'engine'); } catch { /* it was deleted */ }
+  }
+});
 engine.on('print', e => broadcast('print', e));
 // Alarm Email Notification (Rule 7.17): through the mail server picked in Settings > Sending codes; what happened shows in the Console
 watchAlarmEmails(store, {
@@ -475,7 +482,7 @@ function setBuildDraft(v) {
   store.writeConfig();
 }
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/emergencyoff' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -1385,6 +1392,13 @@ async function route(req, res) {
     return ok(res, { opened: local && CLOSABLE ? openInDefaultBrowser(url) : false });
   }
   if (p === '/ui/stopall' && m === 'POST') { engine.stopAll(); return ok(res); }
+  // Emergency Off (Rule 6.41, Panel Update 8): one click, no pop-up. Every Process stops, then heaters, pumps, other outputs, valves
+  if (p === '/ui/emergencyoff' && m === 'POST') {
+    engine.stopAll();
+    const n = hw.emergencyOff();
+    broadcast('print', { script: 'Emergency Off', text: `Every Process stopped; ${n} heater, pump, output and valve setting${n === 1 ? '' : 's'} switched off`, ts: Date.now() });
+    return ok(res);
+  }
   // ☰ Menu > Close Skynet Panel and the Brain (Rule 2.25): stops the Brain and closes its window. Only on the Brain's own computer
   // (OakBarn Brewery, 2026-11-14: "This option only available if the Skynet Panel and Brain on same computer"); other screens use
   // Standby. Every open page is told first, so a phone shows that the Brain was closed, not just "lost connection".

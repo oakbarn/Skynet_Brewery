@@ -14,6 +14,8 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **API** : la façon dont d'autres programmes (Node-RED, Home Assistant) lisent et règlent des valeurs. Voir [API (les autres programmes)](11-api).
 
+**Audio Widget** (lecteur de son) : un Widget qui joue un fichier son (`play SoundPlayer`, `stop SoundPlayer`). Il se met en pause pendant qu'une alarme sonne.
+
 ## B {#b}
 
 **Background (d'un Tab)** (fond) : l'image et la couleur derrière tout ce qui est sur un Tab. Se règle dans **⚙ Tab settings** avec Edit layout actif. Voir [Image et couleur de fond d'un Tab](26-tab-background).
@@ -197,8 +199,6 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 **skn_** : le début de chaque nom Skynet, pour tout ce qui appartient à Skynet : des valeurs que Skynet règle et qu'un Process lit seulement, comme `skn_Boil_Temp` ; des rôles qui tiennent une sonde de température, comme `skn_Boil_Probe_1` ; et les constantes Skynet.
 
 **skn_const_ (Skynet Constants)** (constantes Skynet) : des nombres fixes intégrés à Skynet pour les conversions courantes, comme `skn_const_L_p_Gal` (Label : Liters per Gallon). Personne ne peut les changer. Voir [Constantes Skynet](94-skynet-constants).
-
-**Sound Player** (lecteur de son) : un Widget qui joue un fichier son (`play SoundPlayer`, `stop SoundPlayer`). Il se met en pause pendant qu'une alarme sonne.
 
 **Step** (étape) : une ligne `step "name"` dans un Process. Les étapes se numérotent toutes seules (1.00000, 1.00001 ...). Voir [Le langage des Processes et les étapes](22-process-language).
 

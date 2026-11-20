@@ -4,18 +4,19 @@ Une **gGlobal** est une variable à portée globale : chaque Process peut la lir
 
 Chaque gGlobal a une **Kind** (sorte). La sorte est choisie quand la gGlobal est faite et **ne peut jamais être changée**. Si la sorte est fausse, supprimez la gGlobal et faites-en une nouvelle.
 
-## Les six sortes {#the-six-kinds}
+## Les cinq sortes {#the-five-kinds}
 
 | Sorte | .value est | Exemple |
 |---|---|---|
 | **gS_Global_String** | une chaîne (du texte) | `gS_Brewer_Note.value = "Add the yeast nutrient at 10 minutes"` |
-| **gG_Global_Graphic** | le chemin d'une image (il commence comme l'Image Path que choisit Background #) : les chemins d'images de fond standard (Image Path 1, 2, 3, Background #, Back Colour) | `gG_Brew_Day_Picture.background = 2` |
 | **gV_Global_Value** | une valeur (un nombre) | `gV_Strike_Temp.value = 163` |
 | **gB_Global_Boolean** | un booléen : true ou false | `gB_Grain_Added.value = true` |
 | **gT_Global_Time** | une durée, `hh:mm:ss` | `gT_Mash_Rest.value = 01:00:00` |
 | **gD_Global_DateTime** | une date et heure | `gD_Brew_Day_Start.value = "2026-11-07T07:00:00"` |
 
-Sur cet écran, les préfixes de noms (`gS_`, `gG_`, `gV_` ...) sont des indications et n'importe quel nom marche. Dans un Process, le préfixe d'un nom dit de quelle sorte il est (aide 145).
+Sur cet écran, les préfixes de noms (`gS_`, `gV_`, `gB_` ...) sont des indications et n'importe quel nom marche. Dans un Process, le préfixe d'un nom dit de quelle sorte il est (aide 145).
+
+Il n'y a **pas de gGlobal Graphic** : une image sur un Tab est un **Graphic (Picture) Widget**.
 
 ## Faire une gGlobal {#making-a-gglobal}
 
@@ -42,7 +43,6 @@ Toutes suivent les règles générales des fenêtres : Name en premier, ✖ Canc
 | Sorte | Champs |
 |---|---|
 | gS_Global_String | **.value** avec ⬆ |
-| gG_Global_Graphic | **Image Path 1** (choisir dans la liste ou taper un chemin) avec ⬢ pour la **Graphic Dialog** : Background # (1, 2 ou 3 choisit l'Image Path 1-3), Back Colour, Image Path 1, 2 et 3 avec OPEN |
 | gV_Global_Value | **.value**, Decimals, Units, Lowest allowed, Highest allowed |
 | gB_Global_Boolean | **.value** sous forme d'interrupteur (activé = true) |
 | gT_Global_Time | **.value** comme `01:30:00` |
@@ -57,7 +57,6 @@ Chaque gGlobal garde sa .value quand un Process démarre et quand le Brain redé
 | Nom | Sorte | .value |
 |---|---|---|
 | gS_Brewer_Note | gS_Global_String | Add the yeast nutrient at 10 minutes |
-| gG_Brew_Day_Picture | gG_Global_Graphic | Images/Skynet/Miscellaneous/Skynet_Brewery_Main.svg |
 | gV_Strike_Temp | gV_Global_Value | 163 °F (32 à 212) |
 | gB_Grain_Added | gB_Global_Boolean | false |
 | gT_Mash_Rest | gT_Global_Time | 01:00:00 |

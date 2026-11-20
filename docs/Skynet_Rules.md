@@ -171,9 +171,10 @@ The `skn_` probe roles and `wait_boil` are **not built yet**; until then a Proce
 1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
 **not a Widget and is never on a Tab** (a Text, Picture, Value, Time or DateTime Widget shows things on a Tab), and its
 properties and attributes are only those of a variable. Each gGlobal has one **Kind**, and joins that Kind's group:
-**gS_Global_String** (.value a String), **gG_Global_Graphic** (the standard background picture paths, in the Graphic
-Dialog), **gV_Global_Value** (.value a Value), **gB_Global_Boolean** (.value a Boolean), **gT_Global_Time** (.value a Time),
-**gD_Global_DateTime** (.value a DateTime). **Making one:** ➕ New gGlobal, its Name, pick the Kind from the dropdown, the Kind's
+**gS_Global_String** (.value a String), **gV_Global_Value** (.value a Value), **gB_Global_Boolean** (.value a Boolean), **gT_Global_Time** (.value a Time),
+**gD_Global_DateTime** (.value a DateTime). **There is no Graphic gGlobal** (OakBarn Brewery, 2026-11-20, Panel Update 8: "No such thing
+in skynet. In import become Graphic Widget"): a picture on a Tab is a Graphic (Picture) Widget, and the BruControl Import makes a
+Global with a background picture a Graphic Widget (docs/Importing_Norms.md); a `gG_` name is an error. **Making one:** ➕ New gGlobal, its Name, pick the Kind from the dropdown, the Kind's
 dialog opens, fill it in, ✖ Cancel or 💾 Save (Rule 18.11 asks before discarding changes). **Once picked, the Kind is set and
 can't be changed**; a wrong Kind is deleted and made again. The Kind dialogs follow the General Dialog Rules (section 18).
 ➕ Add the sample gGlobals adds one of each Kind. **New gGlobals are only variables with a global scope.** Switch, Push Button,
@@ -194,6 +195,10 @@ Button gives the Device one 100 ms ON; one that only follows its Device shows ON
 has no device_controlled** (only a click turns it, Rule 5.15). `.device_controlled` is read only in a Process; a deleted Device puts
 it back to None and a renamed one is followed. From outside (.API, Rule 6.14) one with a Device controlled can be changed only when
 that Device is Get and Put too. (thread "Create the Semi_Widgets_Devices class", Help 112)
+**Slider on top (Layer 1)** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 18: "Switch Widget. It should be able to be clicked to toggle on but have a [slider] as
+layer one that also works"): a plain Switch has a **Slider on top (Layer 1)** switch (Off to start). On, the green Slider is drawn on
+top of the Switch in its top right corner and turns green while ON; one click on the Slider, or anywhere else on the Switch, turns it
+ON or OFF (Rule 2.44). The 3 Vessel 1 Pump sample's Testing Switch has it on. Help 112.
 **Boolean Widgets** (OakBarn Brewery, 2026-11-09: "Boolean Widgets would include sub classes: Switches, Sliders, LEDs and maybe
 others"; "Think of it like a clone in the action but a Switch, slider or Led in appearance"; "a Slider Widget can Only be a Slider
 Widget ... I like the subclass as it fits more"): every ON / OFF Semi_Widgets_Device is a **Boolean Widget**, and each kind is its
@@ -235,6 +240,13 @@ A tap sets it (unless **Read only**); every Process reads and sets it by its Nam
 across Processes, so they **stay Widgets and do not become gGlobals**. It keeps its value when the Brain restarts. Database and
 .API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
 Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
+**Format** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 7: "On Value Widgets, and add Fixed which brings up a spaces field with 1 as default plus these"): a Value
+Widget has a **Format** and its **Decimals** (the "spaces") on its own lines: **Fixed** (1000.1, the start, with 1 Decimal),
+**Number** (1,000.12), **Percent** (10.12%: the number as it is, with a %), **Scientific** (1.01E+03), **Accounting** ($ (1,000.12)),
+**Financial** ((1,000.12)), **Currency** ($1,000.12) and **Currency rounded** ($1,000, no Decimals). The **Currency sign** ($ when
+empty, for example € or £) is in the Units ⬢. A Process picks one with `.format` (`wgt_VAL_Cost_BH.format = "Currency"`; "" puts
+back its Properties' pick). A Value Widget made before has no Format and shows as it always did (its Decimals). public/numformat.js,
+Help 245.
 
 1.27 **Code Value Widget** (OakBarn Brewery, 2026-11-08: "A Code Value Widget. It has a Value displayed in the chosen format and
 will run a Process code that is in an Attribute", "It would have the normal Label like a Regular Value Widget"; it sits here,
@@ -357,6 +369,13 @@ Process picked** when it has none) and a **▶ Start** / **■ Stop** button.
   element** a Process Widget that shows the BruControl Script of the same name (it is that Process once the Processes come in); the
   Script element's variable is kept with what BruControl had (`.bru`), and one BruControl marked as not user controlled gets When
   tapped: none (Rule 2.44). The Importer's Widget pages list it as Process Widget. Help 173.
+- **Hide while running** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 21: "Not a switch! For a Process Start, a Process Widget a Once a Process is started,
+  .visible = false"; item 9: "No Nanny. I clicked Start Brew Day ... I want to start the brew day, not CLICK Click Click! Violates one
+  click rule"): a switch in its Properties, **Off** to start. On, the Brain sets the Widget's `.visible = false` once its Process starts
+  and `.visible = true` again when the Process stops (only when this hid it). For a button that starts something; a Start / Stop
+  button (the Fire Hose Float buttons) leaves it Off. The 3 Vessel 1 Pump sample and the default Schema: **Start Brew Day** and **Stop
+  (all off)** are Process Widgets (they were Label Widgets with an Ask first pop-up), one click, no pop-up; Start Brew Day hides while
+  BrewDay_Flow runs.
 
 1.29 **Layer Order** (OakBarn Brewery, 2026-11-09: "also missing is a new Univeral .attribute .layer"; ".layer is layer Order";
 "BruControl has that field. Have skynet work the same as BruControl"). Every Device, Widget and Semi_Widgets_Device has a
@@ -900,6 +919,10 @@ JustGage) and Fritz picked **Skynet's own drawings** (SVG), from his own idea pi
    up and down or side to side) and 8 Skynet color styles (also for LCD and LED digits), in the Dial ⬢; `name.valueType = "Bar"`.
    The Import maps each BruControl gauge's settings and style to the nearest (thread "Find BruControl properties missing in Skynet").
 (thread "Build our own temperature gauge and timer looks", Help 152)
+
+**A Timer's Format** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 6: "On Timers, need Format attribute hh:mm:ss hh:mm ..."): the Timer's **Digits** box is
+called **Format** (hh:mm:ss, hh:mm, mm:ss and the other Time formats of Rule 2.45), and a Process sets it with **`.format`**, the same
+as `.showas` (`wgt_TMR_Boil_BH.format = "hh:mm"`; "" puts back its Properties' pick). Help 92.
 
 2.41 **Properties hotspots on a Vessel Device** (Fritz, 2026-11-07: "A Hotspot on a Vessel device to bring up its property dialog";
 "And if not done, the same Method for a Heating Element integrated to the Vessel Device"; "And a Temp Probe and Valve Hot spots";
@@ -1525,7 +1548,7 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 3.14 **Widget names** follow `wgt_Type_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-06: "Suggested names for
 widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name is good. wgt_DT_DateTime_1_BR"). Example
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
-**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch, **PSW** Process Switch (the Process Widget, a Switch Widget that is a Process subclass, Rule 1.31),
+**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **AUD** Audio Widget (was SND Sound Player, Rule 7.26), **SW** Switch, **PSW** Process Switch (the Process Widget, a Switch Widget that is a Process subclass, Rule 1.31),
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override, **GPH** Graph (was CHT Chart, Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Finish Build ...
@@ -1735,6 +1758,12 @@ deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per po
   parent to its method and turns it On. *Replaced:* one click switched the method and opened the parent's pop-up (2026-11-07). A Clone with no Control Method picked is a plain Clone. So a
   Tab can show one Element as tiles side by side, like BruControl's *M_HLT Heat* (Duty Cycle) and *HLT PID*. The BruControl
   Import makes each joined control's second placing a Method Clone with its BruControl Label.
+
+**Timers can be Cloned** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 13: "Normal Timer. We need to be able to Clone Timers"): ⧉ Clone Device lists
+the **Timers** (in their own group) as well as the Devices, so one Timer shows on several Tabs. A Timer's Clone is the same Timer
+(Rule 4.4): ▶ ■ ↺ and Set on any of them act on it. Item 14 (a Process Timer, an Action Timer and a Delay Timer) needs nothing: they
+are all the same standard Timer, each used for something else (OakBarn Brewery: "all the same standard timers, just do different
+things. Added by Process Editor"). Help 71, 92.
 
 4.5 **The Edit layout bar has three rows** (Fritz's layout, 2026-10-28, Help 82):
 - **Row 1, Devices:** **Select Device Type** (the major kinds: On/Off, Pumps, Valves, Heating Element,
@@ -2166,8 +2195,11 @@ can be run to a vessel or an IP. The hose end could be run anytime, not just in 
 Help 127).
 - **The Quick Disconnect Widget** sits on an IP, most often a valve end. It is Fritz's **bold red four-point star with a grey center**
   (his drawing, 2026-11-05: "I want it easy to see on a Tab"), never smaller than 40 px. In Edit layout it snaps onto the nearest IP
-  within 30 px and follows it; dragged off, it comes off. With a hose on it, it passes flow to the IP under it; with nothing on it, it
-  is shut (no flow).
+  within 30 px and follows it; dragged off, it comes off. With a hose on it, it passes flow to the IP under it. **With nothing on it, it is open** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 1: "A QD is
+  open and not an end cap. It would spray liquid like the Hose Bib. And hose connected but with an open end would spray"): what
+  pushes into it sprays out of it, with the water splash, as an open pipe end does (Rule 5.45). A Quick Disconnect on a pipe end (not
+  on an IP) passes flow on into a hose or pipe joined to it, and sprays when nothing else is on it.
+  *Replaced:* with nothing on it, it was shut, as an End Cap (2026-11-05).
 - **The Quick Disconnect hose** (**Draw QD hose**, Edit layout bar) hangs from a **pump IP**. Its **free end can be moved at any time,
   not only in Edit layout**: with the **right mouse button** (Rule 2.9) on a computer, a **finger** on a phone or tablet (this is
   running the brewery, so it works in run mode, Rule 2.35). Dropped on an IP or a Quick Disconnect it joins it (a Quick Disconnect wins
@@ -2689,7 +2721,7 @@ the pipe under the pointer. Hoses bend and lie where they fall, so a hose is lef
 show in the pipe up to the valves, but the flow is stopped. The flow does not move"; "Looks like a leak. The end is not open but
 connected to a Pipe. This is a Bug."; "Flow past a Closed Valve = bug"):
 - **Still water:** from a Tap Water Valve that is On (a Hose Bib included) or a running pump's outlet, every pipe or hose the water
-  can reach that has no flow (it ends at a closed valve, an End Cap or a Quick Disconnect with nothing on it) is full but not moving.
+  can reach that has no flow (it ends at a closed valve or an End Cap; a Quick Disconnect with nothing on it is open and sprays, Rule 5.28) is full but not moving.
   It shows the flow dashes in the flow color, standing still; moving flow still moves. Still water goes through open valves,
   fittings and pumps that are off, as flow does, and stops at a closed valve.
 - **A water splash only on a truly open end** (Rule 5.40): a loose pipe or hose end within 14 px of an IP (as Save layout rejoins,
@@ -3105,6 +3137,18 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   shows its choices beside it. A Device with only one way of control has no `.method`.
   (thread "Pick the heating method on one Element", Help 150)
 
+**The Methods hotspot, and a display that does not jump** (OakBarn Brewery, 2026-11-20, Panel Update 8, items 2, 3, 5):
+- **Methods hotspot** ("Get rid of clutter. This area of any graphic (just Outside the Vessel, adjacent to the side of a vessel same
+  pixels high and wide as the Red area ... so it would work with any graphic (skynet or User) and as a is a one click hotspot toggle the
+  Methods to be in View or Not"): a Heating Element's method buttons (Rule 6.19) **start hidden**. A thin strip (10 px wide, as high as
+  the Element's picture) just outside the Vessel wall where the Element goes in (beside the picture of an Element on its own Tab
+  spot) shows them with **one click** and hides them with the next. It works with any Vessel picture, Skynet's or the user's. Only
+  this screen remembers it (each phone or PC picks its own); nothing turns On or Off, and every role may use it. Not in Edit layout.
+- **PID % is always two digits** ("have the % as 2 digits always unless 100%"): 00 % to 99 %, then 100 %.
+- **Hysteresis idle, Heat and Cool are the same width** ("have idle, Heat and Cool all the same size so it does not jump"): what an
+  Element is doing sits in a box as wide as the longest word it can show, with even-width digits, so its SV box never moves.
+Help 150.
+
 6.20 **Electrical warning** (Fritz, 2026-11-08: "WE wi;; give a General warning about electricty and that we are not
 Electricians and can give no electrical advice. Consult a Licensed Electrician."; "OaKbarn Brewery or Skynet"). Wherever
 Skynet talks about wiring, heating elements, SSRs, contactors, DACs or AC circuits (a Heating Element's Properties and the hover
@@ -3190,6 +3234,12 @@ bottom (layered, as BruControl's): **Linear Offset**, **Linear Multiplier**, **L
 - **Both programs:** the BruControl Importer keeps each Analog In's and probe's calibrations in order, with its Text Format (Decimal
   Places, Prefix, Suffix as Units). A PWM output's BruControl calibrations are not copied (BruControl counts it 0-255, Skynet in %) and
   are listed in the Import notes. Help 169.
+
+**A smooth temperature on the screen** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 4: "Smooth the Temperature so it does not jump on the screen";
+"It was jittery and distracting. More smoothin in simulation mode"): a Temperature Probe's reading on the screen is the average of
+its readings from the **last 5 seconds**, or the **last 15 seconds** when its board is in Simulation. Only what is shown: the Brain,
+the heating methods, Processes, Alarms, the Database and the .API use the real reading (Smoothing %, Rule 6.24, still smooths that).
+A jump of 2 degrees or more shows at once. Help 171.
 
 6.25 **One Hydrometer Device, a Template for each kind** (OakBarn Brewery, 2026-11-09: "Add all the Hydrometer Types as Hydrometer
 Templates, Tilt, Tilt Pro, ISpindel and I know there or others. Almost all have a Method so you can connect more than 1. Tilt has you
@@ -3579,6 +3629,19 @@ set Skynet Settings").
 6. **Both programs:** the BruControl Import program controls nothing and never shuts down the computer; nothing changes there.
 Help 95, 9 (and French).
 
+
+6.41 **Emergency Off** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 20: "Stop All could be an Emergency Off where it shuts every thing down: Heaters, Pumps,
+Valves close. But that could be a SkyNet Button"; "And maybe fashioned after a real world graphic"; "Emergency off now"):
+1. **Where:** a Skynet button at the top right of **every page**, Skynet's own drawing of a real Emergency Off button: a **red
+   mushroom head on a yellow round plate**, no words in it (Rule 7.25). It is in the Image Library (On_Off/Skynet_Emergency_Off.svg,
+   Skynet Picture number 238); the top bar draws it itself, so it shows even without the Skynet Media Setup.
+2. **One click, no pop-up** (Rule 2.44). Brewers and admins (a viewer can't switch anything).
+3. **What it does, in this order:** every Process stops (as Stop all); then the **heaters** (Heating Elements Off; Duty Cycle,
+   Hysteresis, PID and Deadband disabled); then the **pumps** and motors; then **every other output** (PWM and analog outputs at 0,
+   Switches Off); last the **valves close**, so a pump never runs against a closed valve. **Manual valves** are turned by hand and stay
+   as they are. Timers, Alarms and sounds are left alone. The Console says how many things it switched.
+4. **Both programs:** the BruControl Import program controls nothing, so it has no Emergency Off.
+Help 244.
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -3638,7 +3701,7 @@ version of a Skynet Template, Rule 5.16) and by a Process; changing 2 or 3 in Pr
 Under Rule 15.2 the old names **imagePath_1, _2, _3** are changed everywhere (Schemas, Processes, samples, predictive text,
 the BruControl importer); an older item with a picture and a blank background gets .background = 1 so it still shows.
 **Exception, a User pump** (Fritz, 2026-11-04, Rule 18.19): one path only, its Image Path; a Skynet pump drawing has none
-(its Graphic is set). **At most 3:** no item has more than 3 background pictures; an older item with a 4th or more keeps only the first 3
+(its Graphic is set). **Only what BruControl had** gets the three; a new Skynet Device or Widget has one path (`.path_image`, `.path_audio`, Rule 7.26). **At most 3:** no item has more than 3 background pictures; an older item with a 4th or more keeps only the first 3
 (stacked BruControl copies with more than 3 are handled when the importer is built). **Not every item has a backpath:** most
 Widgets have none; the Graphic Widget is the one that normally does.
 *Replaced:* imagePath_2 and imagePath_3 worked as in BruControl and a blank background showed imagePath_1 (2026-10-27).
@@ -3881,6 +3944,24 @@ Both programs: the BruControl Import's Build page shows it too.
 Skynet does this in the Background and needs no user input (Rule 11.13). Both programs: the BruControl Import makes no traced copies, so it already shows
 the pictures themselves (and the hand-made SVGs). Help 7.
 
+
+7.26 **Only what BruControl had gets three backgrounds; a new Skynet Device or Widget has one path** (OakBarn Brewery, 2026-11-20, Panel Update 8, item 8: "New Rule
+Change: The 3 background rule does not apply to anything that BruControl did not have. Note A Graphic Widget will have 3 backgrounds
+because it could have been a global in Brucontrol. New Skynet Devices and widgets only have one path and attribute. On the new
+attributes will be .path_image and .path_audio"). A change to Rules 7.10 and 18.50 #4:
+- **Three backgrounds** (.backpath, .backpath_2, .backpath_3 and .background, Rule 7.10) only on the items BruControl had. The
+  **Graphic (Picture) Widget** keeps its three, because a BruControl Global with a background picture comes in as one (there is no
+  Graphic gGlobal, Rule 1.19).
+- **A new Skynet Device or Widget** (one BruControl never had) has **one path and one attribute** for each thing it shows or plays:
+  **`.path_image`** for its one picture and **`.path_audio`** for its one sound. The first is the **Audio Widget**.
+- **The Audio Widget** ("Create an Audio Widget that plays a sound with repeat and a path (only one) Similar to alarm but likely hidden
+  99% of the time so visible would default to no. Not an Alarm but boolean Process Command to turn on and Off. It could have a graphic
+  path that a Picture could be selected (only 1)"; "I forgot about the sound Player but Audio Widget conforms more for a name"): the
+  Sound Player with its new name. One sound (`.path_audio`, the older `.path` works too), **Repeat sound** (`.loop`), one optional
+  picture (`.path_image`), and On / Off from a Process (`wgt_AUD_Music_BH = On`). **A new one starts hidden** (Visible Off). It is not
+  an Alarm: it has the lowest sound priority (5) and pauses while an Alarm sounds. Type letters **AUD** (Rule 3.14). The Process word
+  `SoundPlayer` (the built-in one every panel has) is not changed.
+Help 21.
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -6148,6 +6229,7 @@ programs (the BruControl Import's Build page shares the Panel's dialogs).
      with .background picking which one shows.
    - **Every other Widget**: one Background from Skynet. It is set, so a Skynet Widget has **no path** box.
    - **A User Widget** (the user's own picture): **one path only**, as a User pump (Rule 7.10's exception).
+   - **A new Skynet Device or Widget** (one BruControl never had): one path and one attribute, `.path_image` and `.path_audio` (Rule 7.26, Panel Update 8).
 5. **No pipe parts** ("No IPs, No Hose/Pipe No Ips Fittings No Cover No Overlay except for Switches which have an Overlay."): a Widget
    without IPs has no IPs, no Hose or Pipe, no IP Fittings, no Cover and no Overlay. **A Switch has an Overlay.** A Widget with IPs (the
    Hose Bib, the Manual Pump) keeps its own, as the Model does.
@@ -6497,6 +6579,8 @@ import.
 - 2026-11-17: Rule 9.20 changed, Rule 9.8 points to it (OakBarn Brewery, Panel Updates Sandbox entry 10: "always a full install and will overwrite any installed folders or files ... the one warning is allowed ... a link to the Update ... a Close and Do Not install Option"): the Full Setup has no choices; one warning page when Skynet is already installed (Get the Update Setup, Close and Do Not Install, Install); old folders moved to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date> first. install/windows/SkynetBrewer.nsi, Help 19 and 183 (and French). Both programs: the Importer is in the same Setup; it is overwritten with the rest, nothing else changes for it.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
+
+- 2026-11-20: Panel Update 8 (OakBarn Brewery, PDF "Panel Update #8", 21 items): Rule 5.28 and 5.45 changed, a Quick Disconnect with nothing on it is open and sprays (was shut, like an End Cap); Rule 6.19 the Methods hotspot (method buttons start hidden; a thin strip just outside the Vessel wall shows or hides them with one click), PID % always two digits, Hysteresis idle / Heat / Cool one width; Rule 6.24 a smooth temperature on the screen (5 s average, 15 s in Simulation; display only); Rule 2.40 a Timer's Digits is called Format, `.format` = `.showas`; Rule 4.4 Timers can be Cloned (item 14 needs nothing); Rule 1.23 Value Widget Format (Fixed, Number, Percent, Scientific, Accounting, Financial, Currency, Currency rounded) with Decimals and a Currency sign; Rule 1.31 Process Widget Hide while running, and the samples' Start Brew Day and Stop (all off) are Process Widgets with no pop-up (items 9, 20, 21); Rule 1.20 a Switch's Slider on top (Layer 1); added Rule 6.41 Emergency Off (Skynet's E-stop button on every page, Image Library picture 238); added Rule 7.26 only what BruControl had gets three backgrounds, a new Skynet Device or Widget has one path (`.path_image`, `.path_audio`), and the Sound Player is now the Audio Widget (AUD, starts hidden); Rule 1.19 there is no Graphic gGlobal (five Kinds; a BruControl Global with a picture imports as a Graphic Widget). Items 10 and 19 (import side, Brew Status as a skn_ value) went to the sandboxes. Help 244, 245 and the pages named in each Rule (English and French).
 
 - 2026-11-20: Rule 2.63 extended (Panel Updates entry 29 Parts 2-4 and question (c), OakBarn Brewery: "KISS"): Change of Board shows the counts and the Devices whose Ports the new board lacks, then Save, with no typed confirmation; the USB Port is a dropdown of the ports on this Brain with 🔄 Look again and a saved port not found shown in red; a Simulator line keeps the real port; the Interface ID balloon gets the Suggested Device Name line; USB Port and Answer Wait balloons reworded (drafts A and B). Help 76 (and French). Checked against the BruControl Import program: its Build page shares the pop-up and gets the same port list. (thread "Make removing an Interface safer")
 - 2026-11-20: Rule 9.12 extended (OakBarn Brewery: "A for font rule", Panel Updates entry 45, Help in a User Language): fonts under the SIL Open Font License 1.1 (OFL) are allowed, with the license file shipped next to them and a row in Media_Licenses.csv.

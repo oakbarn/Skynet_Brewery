@@ -37,6 +37,9 @@ Posez la souris sur le nom d'un champ pour voir à quoi il sert (hover help).
 - **Fore color** de la valeur, et son ⬢ contient la Back color et l'Alignment.
 - **X**, **Y**, **Width** et **Height**, et le **Widget Type** grisé en dernier.
 
+Le **Format** d'un Value Widget (Fixed, Number, Percent, Scientific, Accounting, Financial, Currency, Currency rounded) et ses
+**Decimals** sont sur leurs propres lignes : voir [Formats du Value Widget](245-value-widget-formats).
+
 ## Widget, Device ou Clone : à vous de choisir {#widget-device-or-clone-your-choice}
 
 Quand vous mettez une lecture sur un Tab, choisissez ce qui convient à votre brasserie. Skynet ne choisit pas pour vous :

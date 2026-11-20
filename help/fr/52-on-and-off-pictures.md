@@ -9,7 +9,7 @@ Chaque Device ou Widget qui a un état On / Off a deux réglages, **.imageOn** e
 - **Digital Output** (pompes, vannes, brûleurs, résistances, LED ...) : On tant que la broche est active.
 - **PWM Output**, **Analog Output** et **PID** : On tant qu'ils tournent au-dessus de 0 %.
 - **Duty Cycle** et **Hysteresis** : On tant que leur broche est active.
-- **Timer** : On tant qu'elle tourne. **Stepper** : On tant qu'il bouge. **Flow meter** : On tant que quelque chose coule. **Sound Player** : On tant qu'il joue.
+- **Timer** : On tant qu'elle tourne. **Stepper** : On tant qu'il bouge. **Flow meter** : On tant que quelque chose coule. **Audio Widget** : On tant qu'il joue.
 - **Digital Input**, **Switch**, **Alarm** (qui sonne / silencieuse) et une **Picture** qui suit un autre élément.
 
 ## Régler les deux images {#setting-the-two-pictures}

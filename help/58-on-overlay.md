@@ -6,7 +6,7 @@ Instead of two pictures (one for **On**, one for **Off**), an item can keep **on
 
 ## Which items have it
 
-Every Device or Widget that has **Picture when on** and **Picture when off** (see On and Off pictures) also has **On overlay**, right below them. That is Digital Outputs (pumps, valves, burners, elements ...), Digital Inputs, Switches, Alarms (shown while sounding), PWM and Analog Outputs, PID, Duty Cycle, Hysteresis, Timers, Steppers, Flow meters, Sound Players and a Picture Widget that turns on with another item.
+Every Device or Widget that has **Picture when on** and **Picture when off** (see On and Off pictures) also has **On overlay**, right below them. That is Digital Outputs (pumps, valves, burners, elements ...), Digital Inputs, Switches, Alarms (shown while sounding), PWM and Analog Outputs, PID, Duty Cycle, Hysteresis, Timers, Steppers, Flow meters, Audio Widgets and a Picture Widget that turns on with another item.
 
 **Heaters are On while Enabled.** A PID, Hysteresis or Duty Cycle counts as On from the moment it is Enabled until it is Disabled, not only while its output fires. Its overlay (or second picture) shows the whole time it is Enabled, and so does a vessel's heater glow and a Picture Widget that turns on with it.
 

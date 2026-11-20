@@ -54,7 +54,7 @@ Press **Ctrl+Space** (on a phone or tablet, tap **💡 Suggest** above the edito
 - After **`==` or `=`** on something that is on or off (a pump, a valve, an alarm, a true/false variable): `true`, `false`, `on` and `off` come first.
 - After a **whole test** (`if MB_06_DO@Pump_Wort__HS == true`): `and` or `or`, to add another test.
 - After **`start`**, **`stop`** or **`restart`**: your Processes, then the timers and alarms they can start or stop. After **`reset`**: timers and stepper motors.
-- After **`play`**: alarms and sound players.
+- After **`play`**: alarms and Audio Widgets.
 - After **`show tab`**: your Tab names (a name with a space gets its quotes).
 - After **`goto`**: the `[labels]` in this Process.
 - After **`new`**: `value`, `string`, `bool`, `time` and `datetime`.

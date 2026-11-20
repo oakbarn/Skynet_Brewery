@@ -15,7 +15,8 @@ centre gris** pour être facile à voir sur un Tab, jamais plus petit que 40 pix
 3. Faites-le glisser ailleurs pour le retirer de l'IP.
 
 Avec un flexible dessus, le Quick Disconnect passe le liquide à l'IP sur lequel il est, donc le passage continue à travers la vanne quand la
-vanne est ouverte. Sans rien dessus, il est fermé : aucun passage ne s'y affiche.
+vanne est ouverte. **Sans rien dessus, il est ouvert**, comme un vrai Quick Disconnect : l'eau poussée dedans en jaillit, avec
+l'éclaboussure d'eau. Un flexible dessus dont l'autre bout est libre jaillit par ce bout.
 
 ## Le flexible Quick Disconnect {#the-quick-disconnect-hose}
 

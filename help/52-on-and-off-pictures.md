@@ -9,7 +9,7 @@ Every Device or Widget that has an On / Off state has two settings, **.imageOn**
 - **Digital Output** (pumps, valves, burners, elements, LEDs ...): On while the pin is on.
 - **PWM Output**, **Analog Output** and **PID**: On while running above 0 %.
 - **Duty Cycle** and **Hysteresis**: On while their pin is on.
-- **Timer**: On while it is running. **Stepper**: On while it moves. **Flow meter**: On while something flows. **Sound Player**: On while it plays.
+- **Timer**: On while it is running. **Stepper**: On while it moves. **Flow meter**: On while something flows. **Audio Widget**: On while it plays.
 - **Digital Input**, **Switch**, **Alarm** (sounding / quiet) and a **Picture** that follows another item.
 
 ## Setting the two pictures
