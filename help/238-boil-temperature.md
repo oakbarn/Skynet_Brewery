@@ -40,9 +40,17 @@ says *Check your Airport code in Skynet Settings*, try the next nearest airport.
 Your Elevation is how high your brewery is above sea level. The airport's height is filled in to start, but your brewery
 can sit well above or below the airport. Every 30 feet (10 metres) is about 1 hPa of air pressure.
 
-- **Your phone:** on an iPhone the **Compass** app shows the elevation at the bottom of the screen. Many free elevation or
-  altimeter apps do the same on iPhone and Android. Stand in the brewery and read it.
+Stand in the brewery and read it:
+
+- **iPhone:** open the **Compass** app. The elevation shows at the bottom of the screen, under your position. Location
+  Services must be on for Compass.
+- **Android:** most phones have no built-in elevation. A free GPS app, such as **GPS Status**, shows it as *altitude*.
+- **Google Earth:** drop a pin on your brewery. The elevation shows at the bottom of the screen. Works on a phone or a
+  computer.
 - **An internet search:** search for **elevation** and your town or address.
+
+A phone's GPS elevation can be off by 30 to 50 feet (10 to 15 metres). That is fine: it moves the boil temperature by less
+than 0.1 °F (0.05 °C). A map pin, like Google Earth, is often steadier than the phone.
 
 Type it in the **Elevation** box and press **Save**.
 

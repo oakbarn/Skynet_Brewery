@@ -43,9 +43,19 @@ Votre Elevation est la hauteur de votre brasserie au-dessus du niveau de la mer.
 départ, mais votre brasserie peut être bien plus haut ou plus bas que l'aéroport. Chaque 30 pieds (10 mètres) vaut environ
 1 hPa de pression.
 
-- **Votre téléphone :** sur un iPhone, l'app **Boussole** (Compass) affiche l'altitude en bas de l'écran. Beaucoup d'apps
-  gratuites d'altitude ou d'altimètre font de même sur iPhone et Android. Mettez-vous dans la brasserie et lisez-la.
+Mettez-vous dans la brasserie et lisez-la :
+
+- **iPhone :** ouvrez l'app **Boussole** (Compass). L'altitude s'affiche en bas de l'écran, sous votre position. Le Service
+  de localisation doit être activé pour Boussole.
+- **Android :** la plupart des téléphones n'affichent pas l'altitude d'origine. Une app GPS gratuite, comme **GPS Status**,
+  l'affiche sous le nom *altitude*.
+- **Google Earth :** placez un repère sur votre brasserie. L'altitude s'affiche en bas de l'écran. Marche sur un téléphone
+  ou un ordinateur.
 - **Une recherche sur internet :** cherchez **altitude** et votre ville ou votre adresse.
+
+L'altitude GPS d'un téléphone peut être fausse de 30 à 50 pieds (10 à 15 mètres). Ce n'est pas grave : cela change la
+température d'ébullition de moins de 0,1 °F (0,05 °C). Un repère sur une carte, comme Google Earth, est souvent plus stable
+que le téléphone.
 
 Tapez-la dans la case **Elevation** et appuyez sur **Save**.
 
