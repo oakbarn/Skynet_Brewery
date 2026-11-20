@@ -80,6 +80,23 @@ passe (par le SSR), et s'il est Off, le SSR n'envoie plus de courant. Comme un i
 
 **⚙ Change** dans la ligne d'une Interface sur la page Devices ouvre la même fenêtre. Utilisez-le pour donner à une carte fictive son vrai **USB Port** ou son adresse réseau une fois câblée, pour choisir un autre USB Port, pour changer ses Board Settings ou pour faire un **Test Communication**. Le nom d'une Interface qui a des Devices reste tel quel, et un ID enregistré ne change jamais (Rule 3.2).
 
+## Retirer une Interface {#removing-an-interface}
+
+Retirer une Interface peut casser toute votre brasserie : chaque Device branché dessus cesse de fonctionner. La plupart du temps, vous voulez plutôt **⚙ Change**, pour choisir une autre carte, un autre USB Port ou une autre Network address ; les Devices y restent.
+
+Poser la souris sur **Remove** montre un grand avertissement avec le nombre de Devices, de Widgets et de Processes qui utilisent cette Interface. Rien n'est retiré par lui.
+
+**Remove** (Admins seulement) ouvre une seule boîte Skynet. Rien ne change tant que vous n'appuyez pas sur un de ses boutons.
+
+- **Rien ne l'utilise :** la boîte le dit, et **🗑 Delete** la retire.
+- **Quelque chose l'utilise :** la boîte liste ce qui l'utilise, avec le nombre de chacun : les **Devices** qui sont dessus (avec leurs Ports), les **Widgets et images** liés à ces Devices (un Clone, un Widget qui en nomme un), les **Processes** qui les utilisent, ses emplacements **1-Wire Index**, et les autres éléments dessus (les pièces d'un Vessel, un Manifold).
+- **▶ Move them** (recommandé) : choisissez une autre Interface, ou ➕ Add new Interface, et chaque Device y est déplacé avec son nom et tous ses réglages. Un Device dont le Port (ou le 1-Wire Index) est déjà pris sur la nouvelle Interface reste où il est, et la boîte le liste avec la raison, pour que vous puissiez le corriger et appuyer de nouveau sur Move. Quand tout est déplacé, rien n'utilise plus l'Interface et elle peut être retirée sans risque.
+- **La retirer quand même :** un seul avertissement. Tapez l'Interface ID (par exemple BM) pour allumer **🗑 Delete**.
+
+Une sauvegarde du Schema est toujours faite d'abord (Règle 9.17) : une Interface retirée peut être remise à partir d'elle.
+
+Rien de ce qui utilisait l'Interface n'est supprimé (Règle de conception n° 1) : les Devices, Widgets et Processes gardent tous leurs réglages. Un Device dont l'Interface a été retirée montre **⚠ No Interface** en rouge dans sa case Interface, et ne fait rien tant qu'il n'est pas déplacé vers une Interface. Un Process s'arrête à une ligne qui en utilise un.
+
 ## Un nouveau Schema vide n'a pas d'Interface {#a-new-empty-schema-has-no-interface}
 
 Un nouveau Schema qui n'est **pas** une copie d'un autre (liste Schema > Add new Schema > *An empty Schema*) commence **sans Interface**. Ajoutez vos cartes avec **Add Interface** sur la page Devices, ou avec **➕ Add new Interface…** dans la case New Device. Chaque Device que vous ajoutez porte son Interface.

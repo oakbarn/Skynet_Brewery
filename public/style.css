@@ -1178,6 +1178,21 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 .hoverHelp.hhWide { max-width: min(560px, calc(100vw - 16px)); font-size: 12.5px; }
 .hhPic.hhPicWide { max-width: 100%; }      /* ⟪imgw:⟫ a whole-screen picture, as wide as the balloon (Panel Updates entry 15) */
 .hhHead { display: block; font-size: 1.05em; }
+/* a large warning balloon (Panel Updates entry 29, OakBarn Brewery: "When you Hover the Remove Button Large Warning Pop Up") */
+.hoverHelp.hhBig { max-width: min(480px, calc(100vw - 16px)); font-size: 15px; padding: 10px 14px; border: 3px solid #d01818; }
+.hoverHelp.hhBig .hhWarn { font-size: 1.15em; }
+/* Remove Interface (Panel Updates entry 29, Rule 2.63) */
+.ifRmDlg { max-width: min(640px, calc(100vw - 16px)); }
+.ifRmDlg .dlgBar { position: sticky; top: 0; background: var(--panel, inherit); z-index: 1; }
+.ifRmDlg h3 { margin: 0; }
+.ifRmGroup { margin: 6px 0; }
+.ifRmGroup ul { margin: 2px 0 2px 1.2em; padding: 0; }
+.ifRmMove { margin: 10px 0; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
+.ifRmNote { margin-top: 6px; color: var(--bad); }
+.ifRmWarn { margin: 10px 0; padding: 8px; border: 2px solid var(--bad); border-radius: 6px; }
+.ifRmWarn > b { color: var(--bad); }
+.ifRmType { text-transform: uppercase; }
+.devNoIface { color: var(--bad); font-weight: 700; }
 /* Rule 2.49 (OakBarn Brewery, 2026-11-11): hot spots in Hover Help open the bigger Help page; the balloon can then be reached */
 .hoverHelp.hhHasLinks { pointer-events: auto; }
 /* a balloon taller than the window is cut to fit and scrolls (OakBarn Brewery, 2026-11-14); the mouse may go into it to scroll */
