@@ -46,7 +46,7 @@ Making the file changes nothing on the old Brain. Keep the old Brain as it is un
 3. Under **2. On the NEW Brain**, pick the file, type the **Move password** and click **⬆ Bring in the file**. The panel checks
    the file and says where it came from and how many files it has. A wrong password or a damaged file is refused, and nothing is
    changed.
-4. Click **🚚 Move in now** and answer **OK**. Every output turns off and running Processes stop. The panel stops and, as it starts
+4. Click **🚚 Move in now**, then **🚚 Move in now** again in the Skynet box that asks (Close changes nothing). Every output turns off and running Processes stop. The panel stops and, as it starts
    again, the old Brain's files take the place of the new Brain's.
    - On a **Pi** (Skynet runs as a service) it starts again by itself after a few seconds. Reload the page after about 15 seconds.
    - On a **computer** the Skynet Brewer window closes: double-click **Skynet Brewer** to start it again, then reload the page.
@@ -62,9 +62,13 @@ A board on USB has a different port name on each kind of Brain: **COM3** on Wind
 boards into the new Brain and open **☰ Menu > Move Brain**. Under **3. USB ports**:
 
 - Each old port is listed once, with the Interfaces (and their Schemas) that use it, and what board the old Brain saw on it.
-- **Change to** lists the USB ports this Brain sees now. A board the old Brain saw is **found by its serial number and picked
-  for you**. When only one board is left, it is picked too. Check each one.
-- **Keep** leaves the port as it is (for a board that is not plugged in yet). Click **🔄 Look again** after plugging one in.
+- **Change to** is the same USB Port list as the Interface pop-up: the USB ports this Brain sees now, with what is plugged in and its
+  serial number. On Windows a port shows as its number (COM3 shows as 3). A board the old Brain saw is **found by its serial number
+  and picked for you**. When only one board is left, it is picked too. Check each one.
+- The old port is always in the list. Pick it to **keep** the port as it is (for a board that is not plugged in yet). When it is
+  not on this Brain it shows in red: **⚠ COM3 (not found on this Brain)**.
+- Plugged a board in? Pick **🔄 Look again** at the bottom of the list (or the button): the ports are read again and what you
+  already picked stays picked.
 - Click **💾 Save USB ports**. Every Schema that uses that port changes at once, and the loaded Schema's boards connect again.
 
 You can use **USB ports** any time, not only after a move, for example after plugging a board into another USB socket.

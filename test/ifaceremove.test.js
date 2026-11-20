@@ -1,7 +1,7 @@
 // Removing an Interface safely (Panel Updates entry 29, Rule 2.63), checked on the 3 Vessel 1 Pump sample
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip } from '../public/ifaceremove.js';
+import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip, devicesOffBoard } from '../public/ifaceremove.js';
 import { processesUsing } from '../public/copytab.js';
 import { compileFrench, frenchOf } from '../public/hoverhelp.js';
 
@@ -56,4 +56,13 @@ for (const x of [t, removeTip('SM', 'Spare Mega', { devices: 0, widgets: 0, proc
   const f = frenchOf(x, fr);
   for (const line of f.split('\n')) assert.ok(!/\b(the|is|Nothing|Interface can)\b/.test(line.replace(/BM: Brewery Mega|Spare Mega/g, '')), 'French for: ' + line);
 }
+// Changing the Board (question (c)): the Devices whose Ports the new board does not have; 1-Wire Index slots always fit
+assert.equal(devicesOffBoard(c, BM, 'mega').length, 0, 'every sample Device fits a Mega');
+const off = devicesOffBoard(c, BM, 'esp32');
+assert.ok(off.length > 0 && off.every(o => o.ports.every(p => /^\d+$/.test(p))), 'Mega Ports an ESP32 does not have are listed');
+assert.ok(!off.some(o => /1w/.test(o.name.split('_')[0])), '1-Wire probes are not listed');
+assert.ok(!off.some(o => o.ports.includes('22') || o.ports.includes('2')), 'Ports the ESP32 has are not listed');
 console.log('ifaceremove: all checks passed');
+
+// Panel Updates entry 29, the last parts: the Brain Move USB Port list and the one Skynet confirm box (Rule 2.64)
+await import('./skyconfirm.test.js');

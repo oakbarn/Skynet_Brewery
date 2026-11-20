@@ -51,7 +51,8 @@ import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lT
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
-import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
+import { skyConfirm } from './skyconfirm.js';      // the one shared Skynet confirm box (Rule 2.64)
+import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip, devicesOffBoard } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
 import { pipeCrossings, crossBox, CROSS_EDGE } from './pipecross.js';      // a pipe crossing with no joint never looks joined (Rule 5.44)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -62,6 +63,7 @@ import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
 import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
+import { qNeedsTurn, qShow, qUnitShown, qBoxShow, qBoxBack, qtyFamily, METRIC_PRESSURE } from './qtyshow.js';
 import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -397,7 +399,7 @@ function connect() {
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
   es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
-  es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by); });
+  es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by, d.poweroff); });
   es.addEventListener('standby', e => showStandby(JSON.parse(e.data)));      // an Admin put the Brain in Standby (Rule 6.32)
   es.addEventListener('waking', () => { const m = $('.standbyPage .muted'); if (m) m.textContent = 'An Admin is starting the Brain ... this page comes back by itself.'; waitForBrain(); });
   es.addEventListener('boil', e => renderBoilTemp(JSON.parse(e.data)));
@@ -1366,6 +1368,8 @@ const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', 
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 // A Manual vessel's own Temperature units (Rule 2.59, the exception for a Vessel whose own screen has its units; OakBarn Brewery,
 // 2026-11-19: "a user can switch the Digiboil and Brewzilla back to F. I would think that is most common for US Brewers")
+const QTY_UNITS_TIP = 'Kept in: the units this sensor is calibrated in (its range, pulses or counts use them). What you see follows ☰ Menu > Settings > Units (Rule 2.59): psi shows in bar, gal in L and lb in kg when Units is Metric, and the other way in US Standard. A Process reads it in metric (bar, L, L/min, kg).';
+const METRIC_PRESSURE_TIP = 'What this pressure shows in when ☰ Menu > Settings > Units is Metric: bar (the start, as a CO2 or keg gauge reads) or kPa. US Standard always shows psi. Only what you see changes: a Process still works in bar (type 50kPa to give kPa).';
 const MANUAL_UNITS_TIP = 'Temperature units: the units its own screen shows, so the pop-up asks for the set point the way you read it. It starts as ☰ Menu > Settings > Units (°F in US Standard). A DigiBoil or Brewzilla screen comes back in °C after every power cycle: switch it back to °F on the vessel, or pick °C here. When this is °F, the pop-up gives the set point in °C as well. Unlike every other temperature, this one does not follow Units (Rule 2.59).';
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -2898,6 +2902,11 @@ function dialTurn(e) {
   const to = showUnits(), n = v => v === undefined || v === null || v === '' ? v : tShow(+v, e.units, to), d = v => v === undefined || v === null || v === '' ? v : dShow(+v, e.units, to);
   return { ...e, units: showLetter(to), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: d(e.dialCool), dialHot: d(e.dialHot), precision: e.precision ?? 1 };
 }
+// a pressure or Level Dial in the Units: its Lowest, Highest and its Cool and Hot bands turned (all by one factor)
+function dialQty(e) {
+  const to = showUnits(), as = e.metricPressure, n = v => v === undefined || v === null || v === '' ? v : qShow(+v, e.units, to, as);
+  return { ...e, units: qUnitShown(e.units, to, as), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: n(e.dialCool), dialHot: n(e.dialHot) };
+}
 function dialSetpoint(e) {
   const sp = String(e.dialSp ?? '').trim();
   if (!sp) return null;
@@ -2915,6 +2924,18 @@ function tempTxt(e, val, own = e.units) {
   const d = e.precision !== undefined && e.precision !== null && e.precision !== '' ? e.precision : 1;
   return fmtVal({ ...e, precision: d }, tShow(val, own, to)) + ' ' + showLetter(to);
 }
+// Live readings in the Units (Rule 2.59 live side): a pressure, Level, Flow meter or Scale keeps its numbers in its own
+// units (the ones its sensor is calibrated in); it shows in ☰ Menu > Settings > Units (public/qtyshow.js). psi to bar gets one more decimal.
+function qtyTxt(e, val, own) {
+  const to = showUnits();
+  const as = e.metricPressure;      // a pressure field's Metric unit: bar or kPa (OakBarn Brewery, 2026-11-20: "depending on the field")
+  if (!qNeedsTurn(own, to, as) || typeof val !== 'number') return fmtVal(e, val) + (own ? ' ' + own : '');
+  const p = e.precision !== undefined && e.precision !== null && e.precision !== '' ? +e.precision : null;
+  const d = p === null ? 2 : p + (qtyFamily(own) === 'press' && to === 'Metric' && qUnitShown(own, to, as) === 'bar' ? 1 : 0);
+  return fmtVal({ ...e, precision: d }, qShow(val, own, to, as)) + ' ' + qUnitShown(own, to, as);
+}
+// a probe's or sensor's reading in the Units, whichever it is
+const readTxt = (e, val) => e?.type === 'temperature' ? tempTxt(e, val) : qtyTxt(e || {}, val, e?.units);
 // a Setpoint with no °F / °C after it (an older Hysteresis, PID, Deadband or a Fermentor: "45 %  ▸ 152"), in the Units
 const spNum = (val, own) => needsTurn(own, showUnits()) && typeof val === 'number' ? fmtVal({ precision: 1 }, tShow(val, own, showUnits())) : fmtVal({}, val);
 function fmtVal(e, v) {
@@ -3156,15 +3177,15 @@ function fillEl(n, e0) {
       if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
-    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + (e.type === 'temperature' ? tempTxt(e, v.value) : fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''));
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + readTxt(e, v.value);
       if (e.type === 'temperature') sv = probeSv(e0, e, v);      // its PV and SV (Panel Updates 41)
       break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
-    case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
+    case 'scale': text = `${qtyTxt(e, v.volume, e.volumeUnits || 'gal')} · ${qtyTxt(e, v.value, e.weightUnits || 'lb')}`; break;
     // a Hydrometer (Rule 6.25): its gravity and temperature, or No signal
     case 'hydrometer': text = v.lost ? '⚠ No signal' : `${fmtVal(hydroDec(e), v.value)} ${hydroUnitWord(e)} · ${tempTxt({ precision: 1 }, v.temperature, e.tempUnits || '°F')}`; on = !v.lost; break;
-    case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
+    case 'flowMeter': text = `${qtyTxt(e, v.rate, (e.units || 'gal') + '/min')} · ${qtyTxt(e, v.total, e.units || 'gal')}`; on = v.rate > 0; break;
     case 'stepper': {     // where it is, where it is going, and a warning while it has a home switch but has not found it
       const u = STEP_UNITS[e.units]?.[0] ?? e.units ?? '';
       text = v.enabled === false ? (e.offText ?? 'OFF') : `${fmtVal(e, v.position)} ${u}${v.moving && v.run === 0 ? `  ▸ ${fmtVal(e, v.target)}` : v.run ? `  ${v.run > 0 ? '▶' : '◀'}` : ''}${e.homePin !== undefined && e.homePin !== '' && !v.homed ? '  (not homed)' : ''}`;
@@ -3258,8 +3279,9 @@ function fillEl(n, e0) {
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) {      // the Skynet Dial (Rule 2.40); a probe's Dial reads in the Units (Rule 2.59)
     const dt = e.type === 'temperature' && needsTurn(e.units, showUnits()) ? dialTurn(e) : null, ed = isHeatElem(e) ? { ...e, units: '%' } : dt || e;
-    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e);
-    vl.innerHTML = dialSvg(ed, dt && rd !== null ? tShow(rd, e.units, showUnits()) : rd, dt && sp0 !== null ? tShow(sp0, e.units, showUnits()) : sp0, v.fault ? 'FAULT' : null);
+    const qt = !dt && e.type === 'analogIn' && qNeedsTurn(e.units, showUnits(), e.metricPressure) ? dialQty(e) : null;      // a pressure or Level Dial too
+    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e), turn = x => x === null ? x : dt ? tShow(x, e.units, showUnits()) : qt ? qShow(x, e.units, showUnits(), e.metricPressure) : x;
+    vl.innerHTML = dialSvg(qt || ed, turn(rd), turn(sp0), v.fault ? 'FAULT' : null);
   }
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
   else if (sv?.k === 'probe') fillPvSv(vl, text, sv);      // a Temperature Probe's PV over its SV (Panel Updates 41)
@@ -4291,7 +4313,33 @@ const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowK
 const isTapNode = (key, n) => n?.push && (n.tap || (devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve'));
 // a vessel's low openings, where liquid runs out by gravity (OakBarn Brewery, 2026-11-16: "Assume gravity flow")
 const GRAV_PORTS = new Set(['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet']);
-function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // spouts: filled with { p, d } for each open end that flow pours out of    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
+// a loose pipe or hose end that sits on something is not an open end (OakBarn Brewery, 2026-11-20, Panel Update 7: "Looks like a leak.
+// The end is not open but connected to a Pipe. This is a Bug."; Rule 5.45). Within 14 px of an IP (as Save layout rejoins, Rule 5.19),
+// or anywhere inside a Tab_Fitting (a Tee, an Elbow), it is in that IP: flow goes on through it as if it were joined.
+const LOOSE_JOIN = 14;
+function looseEndIp(pt, ws, self) {
+  if (!pt) return null;
+  const d = q => Math.hypot(q[0] - pt[0], q[1] - pt[1]);
+  const fit = L().graphics.find(g => isBfit(g) && g.workspace === ws && pt[0] >= g.x - 4 && pt[0] <= g.x + (g.w || 0) + 4 && pt[1] >= g.y - 4 && pt[1] <= g.y + (g.h || 0) + 4);
+  let best = null, bd = Infinity;
+  for (const { id } of allIps(ws)) {
+    if (id === self) continue;
+    const q = ipPoint(id, ws); if (!q) continue;
+    const ok = d(q) <= LOOSE_JOIN || (fit && L().graphics.some(x => x.id === id && x.attachTo === fit.id));
+    if (ok && d(q) < bd) { best = id; bd = d(q); }
+  }
+  return best;
+}
+// a loose end lying on another pipe or hose, or on a widget, is not out in the air either: no water splash there (Rule 5.45)
+const distSeg = (pt, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = dx * dx + dy * dy; const t = l ? Math.max(0, Math.min(1, ((pt[0] - a[0]) * dx + (pt[1] - a[1]) * dy) / l)) : 0; return Math.hypot(pt[0] - a[0] - t * dx, pt[1] - a[1] - t * dy); };
+function looseEndTouches(pt, ws, self) {
+  if (!pt) return false;
+  const inBox = g => pt[0] >= (g.x || 0) && pt[0] <= (g.x || 0) + (g.w || 0) && pt[1] >= (g.y || 0) && pt[1] <= (g.y || 0) + (g.h || 0);
+  if (L().graphics.some(g => g.workspace === ws && (g.kind === 'vessel' || g.kind === 'ip') && inBox(g))) return true;
+  if (L().elements.some(e => e.workspace === ws && hasIps(e) && inBox(e))) return true;
+  return L().graphics.some(p => p.kind === 'pipe' && p.workspace === ws && p.id !== self.id && (p.points || []).some((q, i, a) => i > 0 && distSeg(pt, a[i - 1], q) <= pipeWidth(p) / 2 + pipeWidth(self) / 2));
+}
+function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = null) {    // still: filled with pipe id -> where its water came from, for water that stands still (Rule 5.45)    // spouts: filled with { p, d } for each open end that flow pours out of    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
   const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
   const link = (a, b, p, oneWay) => {
@@ -4300,13 +4348,15 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // sp
     if (!oneWay) { add(adj, b, a, -1); add(radj, a, b, 1); }
   };
   const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
+  const stubs = [];                              // { key, p }: a pipe from an open node to a closed valve (Rule 5.45)
   // an open end, where flow pours out into the air: a pipe end let go in the air, an open-end coupling, or a plain IP with one pipe
   // on it that is not on a vessel or any equipment (OakBarn Brewery, 2026-11-16: "a graphic of water spurting out the end")
-  const openEnd = key => { const n = nodes.get(key); if (n?.air) return true; const g = L().graphics.find(x => x.id === key && x.kind === 'ip' && x.workspace === ws);
+  const openEnd = key => { const n = nodes.get(key); if (n?.air) return !n.touch; const g = L().graphics.find(x => x.id === key && x.kind === 'ip' && x.workspace === ws);
     return !!g && !g.attachTo && !g.port && (g.fitting === 'coupling' || !isFitting(g)) && pipesOn(key, ws).length === 1; };
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
     const a = node(p.from), b = node(p.to);
-    if (a.closed || b.closed || a.key === b.key) continue;
+    // a closed valve (or cap) on one end: no flow, but water can stand in it up to the valve (Rule 5.45)
+    if (a.closed || b.closed || a.key === b.key) { if (!!a.closed !== !!b.closed) stubs.push({ key: (a.closed ? b : a).key, p }); continue; }
     if (a.end && b.end) continue;
     link(a.key, b.key, p);
   }
@@ -4317,7 +4367,15 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // sp
     const loose = ['from', 'to'].filter(k => !p[k]), fixed = loose.length === 1 && (loose[0] === 'to' ? 'from' : 'to');
     if (!fixed || !ipPoint(p[fixed], ws)) continue;
     const a = node(p[fixed]); if (a.closed || !a.key) continue;
-    const key = `air:${p.id}`; nodes.set(key, { key, end: true, air: true });
+    const pt = p.points[fixed === 'from' ? p.points.length - 1 : 0], on = looseEndIp(pt, ws, p[fixed]);
+    if (on) {        // the loose end is in an IP or a Tab_Fitting (Rule 5.45): as if joined there
+      const b = node(on);
+      if (b.closed) { stubs.push({ key: a.key, p }); continue; }
+      if (a.key === b.key || (a.end && b.end)) continue;
+      if (fixed === 'from') link(a.key, b.key, p); else link(b.key, a.key, p);
+      continue;
+    }
+    const key = `air:${p.id}`; nodes.set(key, { key, end: true, air: true, touch: looseEndTouches(pt, ws, p) });
     if (fixed === 'from') link(a.key, key, p); else link(key, a.key, p);
   }
   // a Quick Disconnect passes flow to and from the IP it sits on (no pipe between them), while a hose is on it (Rule 5.28)
@@ -4419,6 +4477,24 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // sp
         continue;
       }
       for (const { v: w, p, d } of adj.get(u) || []) if (!prev.has(w)) { prev.set(w, { from: u, p, d }); queue.push(w); }
+    }
+  }
+  // Water that stands still (OakBarn Brewery, 2026-11-20, Panel Update 7: "It could also show in the pipe up to the valves, but the
+  // flow is stopped. The flow does not move"; Rule 5.45): from an open Tap Water Valve or a running pump's outlet, every pipe the
+  // water can reach that has no flow (it ends at a closed valve, a cap or nothing) is full but not moving: its dashes stand still.
+  // It goes through open valves, fittings and pumps that are off, and stops at a closed valve, a vessel port, an open end or a pump.
+  if (still) {
+    const stubOf = new Map(); for (const s of stubs) { if (!stubOf.has(s.key)) stubOf.set(s.key, []); stubOf.get(s.key).push(s.p); }
+    const moving = id => dir.has(id) || !!grav?.has(id);
+    const seen = new Set(), queue = [];
+    for (const [k, n] of nodes) if (n.push) { seen.add(k); queue.push([k, isTapNode(k, n) ? { tap: true } : pumpSrc.get(devOfIp(k)) || {}]); }
+    while (queue.length) {
+      const [u, o] = queue.shift();
+      for (const p of stubOf.get(u) || []) if (!moving(p.id) && !still.has(p.id)) still.set(p.id, o);
+      for (const { v, p } of adj.get(u) || []) {
+        if (!moving(p.id) && !still.has(p.id)) still.set(p.id, o);
+        if (!seen.has(v)) { seen.add(v); if (nodes.get(v)?.pass) queue.push([v, o]); }
+      }
     }
   }
   return dir;
@@ -4774,21 +4850,21 @@ function renderPipes() {
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
-  const srcs = new Map(), grav = new Map(), spouts = [], flow = computeFlow(w.name, srcs, grav, spouts), cones = reducers(pipes, w.name);
+  const srcs = new Map(), grav = new Map(), spouts = [], still = new Map(), flow = computeFlow(w.name, srcs, grav, spouts, still), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
   const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
   const drawn = new Map();       // each pipe's drawing, for the crossings (Rule 5.44)
   layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
-    const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
+    const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, standing = !flowing && still.has(p.id), backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
     // a pipe or hose always shows (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot disappear in the real world")
     for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color }));
     g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
-    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : standing ? ' still' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...(srcs.get(p.id) || still.get(p.id)), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     // water spurting out of an open end that flow pours out of (OakBarn Brewery, 2026-11-16: "if a pipe or hose is open, maybe a
     // graphic of water spurting out the end")
@@ -5744,9 +5820,9 @@ const ADD_MENU = [
     ['Analog input on an ADS1115 board (16-bit)', 'analogIn', 'AI', { adc: 'ads1115', signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
     ['Analog input, raw reading (scale / offset)', 'analogIn', 'AI', { signal: 'raw' }],
     ['Pressure transducer 0.5-4.5 V (5 V hobby type)', 'analogIn', 'Pressure', { signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30, units: 'psi', precision: 1 }],
-    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 30, units: 'gal', precision: 1 }],
+    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: 'L', precision: 1 }],      // new items start in metric (Rule 2.59)
     ['pH probe board (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
-    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
+    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 450, units: 'L', precision: 2 }],      // the YF-S201 data sheet: 450 pulses per liter
   ]],
   ['Devices: motors (board pins)', [
     ['Stepper motor on a STEP / DIR driver (A4988, DRV8825, TMC2209, TB6600, DM542)', 'stepper', 'Stepper', { driver: 'A4988', wiring: 'stepDir', stepsPerRev: 200, microsteps: 16, units: 'rev', maxSpeed: 2, accel: 4, precision: 2 }],
@@ -5757,7 +5833,7 @@ const ADD_MENU = [
   ['Devices: hydrometers (Tilt, iSpindel, RAPT Pill ...)', HYDRO_MODEL_KEYS.map(k => [`${HYDRO_MODELS[k].label} hydrometer (${HYDRO_MODELS[k].conns.map(c => HYDRO_CONNECTIONS[c].replace(/[:(].*$/, '').trim()).join(' or ')})`, 'hydrometer', 'Hydro',
     { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°C', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
   ['Devices: weight', [
-    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
+    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'kg', volumeUnits: 'L', specificGravity: 1, autoTare: true, precision: 2 }],      // new items start in metric (Rule 2.59)
   ]],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Widgets with an ON / OFF state that can switch a Device (device_controlled)
   [`Boolean Widgets (a Widget with an ON / OFF state; with a Linked Device it acts like a Clone of it)`, [
@@ -8324,7 +8400,7 @@ async function saveBuild() {
   const r = await saveBuildDialog(b); if (!r) return false;
   if (r.to === 'trash') {
     const came = buildItems(b).filter(g => g.buildFrom).map(g => `${g.label || g.name} (from the ${g.buildFrom.tab} tab)`);
-    if (!confirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''))) return false;
+    if (!await skyConfirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''), { ok: '🗑 Throw away' })) return false;
     dropBuild(); await keepBuild(null); toast('The Build Tab was thrown away');
   } else if (r.to === 'tab') {
     const went = moveBuildTo(r.tab), n = went.reduce((a, g) => a + g.n, 0);
@@ -8490,18 +8566,18 @@ function displayText(e, v, k, shown) {
   const onOff = st => st ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
   const probe = () => {
     const p = e.input && S.values[e.input], pe = e.input && S.config.elements.find(x => x.name === e.input);
-    return p ? fmtVal(pe || {}, p.value) + (pe?.units ? ' ' + pe.units : '') : '-';
+    return p ? readTxt(pe, p.value) : '-';      // in the Units (Rule 2.59)
   };
   switch (k) {
     case 'setpoint': return `▸ ${fmtVal({}, v.target)}`;
     case 'reading': return probe();
     case 'output': return hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? onOff(v.output) : `${fmtVal({ precision: 0 }, v.value)} %`;
     case 'state': return onOff(v.state);
-    case 'rate': return `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min`;
-    case 'total': return `${fmtVal(e, v.total)} ${e.units || 'gal'}`;
-    case 'volume': return `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'}`;
-    case 'weight': return `${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`;
-    case 'value': return e.type === 'pwmOut' ? fmtVal(e, v.value) + ' %' : fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+    case 'rate': return qtyTxt(e, v.rate, (e.units || 'gal') + '/min');      // in the Units (Rule 2.59)
+    case 'total': return qtyTxt(e, v.total, e.units || 'gal');
+    case 'volume': return qtyTxt(e, v.volume, e.volumeUnits || 'gal');
+    case 'weight': return qtyTxt(e, v.value, e.weightUnits || 'lb');
+    case 'value': return e.type === 'pwmOut' ? fmtVal(e, v.value) + ' %' : e.type === 'temperature' ? tempTxt(e, v.value) : qtyTxt(e, v.value, e.units);
     case 'volts': { const x = pwmVolts(e, v.value); return x === null || !Number.isFinite(x) ? shown : `${x.toFixed(1)} V`; }
   }
   return shown;
@@ -8578,12 +8654,12 @@ const F = {
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num']],
   scale: [['device', 'Device', 'dev'], ['channel', 'HX711 DT pin(s), comma between several boards on one vessel (e.g. 26, 28)', 'text'],
     ['countsPerUnit', 'Calibration: counts per lb / kg (tap the scale > Calibrate to measure it)', 'num'],
-    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']],
+    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg'], false, false, { tip: QTY_UNITS_TIP }], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L'], false, false, { tip: QTY_UNITS_TIP }],
     ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a variable with the OG)', 'elem'],
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L)', 'num', null, false, false, { tip: 'Empty: 0.05 gal or 0.2 L.' }], ['autoTareSeconds', 'Steady for (seconds)', 'num', null, false, false, { def: 10 }],
     ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units', false, false, { tip: QTY_UNITS_TIP }], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'Offset (- heats, + cools)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
@@ -10210,7 +10286,9 @@ function fieldsOf(item) {
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], SMOOTH_FIELD, ['prefix', 'Prefix', 'text'],
-      ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
+      ['units', 'Units', 'gpick', 'units', true, false, { tip: QTY_UNITS_TIP }],
+      ...(qtyFamily(item.units) === 'press' ? [['metricPressure', 'Metric pressure in', 'sel', METRIC_PRESSURE, false, false, { tip: METRIC_PRESSURE_TIP }]] : []),
+      ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
 }
@@ -10564,7 +10642,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const tb = kind === 'num' || kind === 'numsel' ? tempBox(key, obj) : null;      // a temperature box shows in the Units (Rule 2.59)
-  const v = tb ? boxShow(tb.kind, obj[key], tb.own, showUnits()) : obj[key];
+  const v = tb ? (tb.kind === 'q' ? qBoxShow(obj[key], tb.own, showUnits(), tb.as) : boxShow(tb.kind, obj[key], tb.own, showUnits())) : obj[key];
   let input;
   if (kind === 'imgpath') {    // .backpath, _2, _3 (Fritz, 2026-11-02); changing _2 or _3 shows a heads-up once
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
@@ -10764,7 +10842,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const keep = CHAIN_RE.test(key), real = v && v !== CHAIN_KEEP;      // an Alarm Chain step: No Change first (Rule 7.16)
     const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (real && !os.includes(v)) os.push(v);
     const pv = h('img', { class: 'gprev' + (real && pic && !isTint(v) ? '' : ' hidden'), ...(real && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
-    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list });
+    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list, ...(rerender === true ? { 'data-rerender': '1' } : {}) });
     // the Group list beside it shows one picture group or All (it has no data-k, so it is never saved)
     const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os);
     let g = lastGroup[gk] || ''; if (!groups.some(([n]) => n === g)) g = '';
@@ -11009,8 +11087,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   if (tb && input) {
-    Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '' });
-    input.title = `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
+    Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '', ...(tb.as ? { as: tb.as } : {}) });
+    input.title = tb.kind === 'q' ? `In ${qUnitShown(tb.own, showUnits(), tb.as)} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its sensor keeps (Rule 2.59).`
+      : `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
   }
   const full = kind === 'multi' || kind === 'area' || kind === 'ticks';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
@@ -11021,10 +11100,12 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
 // Deadband, Fermentor, Cool / Warm Pump or gas burner: its probe's (.input).
 const TEMP_HOLD_KEYS = { target: 'abs', onOffset: 'diff', deadbandOffset: 'diff', innerBandOffset: 'diff', heatOffset: 'diff', coolOffset: 'diff', flameRise: 'diff', flameDrop: 'diff', flameBoil: 'abs' };
 const TEMP_PROBE_KEYS = { setpoint: 'abs', dialMin: 'abs', dialMax: 'abs', dialCool: 'diff', dialHot: 'diff' };
+const QTY_DIAL_KEYS = ['dialMin', 'dialMax', 'dialCool', 'dialHot'];
 function tempBox(key, obj) {
   if (!obj || typeof obj !== 'object') return null;
   let kind, own;
   if (obj.type === 'temperature') { kind = TEMP_PROBE_KEYS[key]; own = obj.units || '°F'; }
+  else if (QTY_DIAL_KEYS.includes(key) && obj.type === 'analogIn') return qNeedsTurn(obj.units, showUnits(), obj.metricPressure) ? { kind: 'q', own: obj.units, as: obj.metricPressure ?? '' } : null;      // a pressure or Level Dial (Rule 2.59 live side)
   else if (TEMP_HOLD_KEYS[key] && (isHeatElem(obj) || SP_OLD.includes(obj.type) || isFermentor(obj) || isCoolPump(obj) || isGasBurner(obj))) { kind = TEMP_HOLD_KEYS[key]; own = probeOf(obj)?.units; }
   return kind && needsTurn(own, showUnits()) ? { kind, own } : null;
 }
@@ -11101,7 +11182,7 @@ function readFields(obj, root = $('#dlgBody')) {
     }
     else if (kind === 'num' || kind === 'numsel') {
       v = inp.value === '' ? undefined : +inp.value;
-      if (v !== undefined && inp.dataset.tk) v = boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
+      if (v !== undefined && inp.dataset.tk) v = inp.dataset.tk === 'q' ? qBoxBack(v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits(), inp.dataset.as) : boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
     }
     else if (kind === 'owpick') {      // a 1-Wire Index: circuit_index (Rule 6.37), kept as the probe's number and its circuit
       const m = /^(\d+)_(\d+)$/.exec(inp.value), ck = k === 'probeIndex' ? 'owCircuit' : k + 'Circuit';
@@ -11632,7 +11713,7 @@ function styleEditor(kind, st, from) {
       try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = item; d.close(); } catch (e) { err.textContent = e.message; }
     };
     const del = async () => {
-      if (!confirm(`Delete the User Style ${st.name}? Anything that uses it goes back to the first Skynet Style.`)) return;
+      if (!await skyConfirm(`Delete the User Style ${st.name}? Anything that uses it goes back to the first Skynet Style.`, { ok: '🗑 Delete' })) return;
       const all = { ...(S.config.userStyles || {}), [kind]: (S.config.userStyles?.[kind] ?? []).filter(x => x.id !== st.id) };
       try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = false; d.close(); } catch (e) { err.textContent = e.message; }
     };
@@ -12215,7 +12296,7 @@ async function editItem(kind, id) {
           [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
         if (pick === undefined) return;
         if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
-      } else if (!confirm('Delete this item?')) return;
+      } else if (!await skyConfirm('Delete this item?', { ok: '🗑 Delete' })) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else if (item.kind === 'pipe') deletePipe(item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
@@ -12618,7 +12699,7 @@ async function editWorkspace() {
     if (idBox) { nameBox?.removeEventListener('input', followName); idBox.removeEventListener('input', ownId); idBox.removeEventListener('change', upId); }
   }
   if (r === 'delete') {
-    if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
+    if (!await skyConfirm(`Delete tab "${w.name}" and everything on it?`, { ok: '🗑 Delete' })) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
     draft.elements = draft.elements.filter(e => e.workspace !== w.name);
     draft.graphics = draft.graphics.filter(g => g.workspace !== w.name);
@@ -13158,7 +13239,7 @@ $('#faReplace').onclick = guard(async () => {
   const n = todo.reduce((a, r) => a + r.hits.length, 0), repl = $('#faRepl').value;
   if (!n) return;
   if (dirty && todo.some(r => r.name === curScript)) throw new Error(`"${curScript}" has unsaved changes. Save it first, then search again.`);
-  if (!confirm(`Replace ${n} match${n === 1 ? '' : 'es'} in ${todo.length} Process${todo.length === 1 ? '' : 'es'} with "${repl}"?\n\nEach Process is saved straight away.`)) return;
+  if (!await skyConfirm(`Replace ${n} match${n === 1 ? '' : 'es'} in ${todo.length} Process${todo.length === 1 ? '' : 'es'} with "${repl}"?\n\nEach Process is saved straight away.`, { ok: '🔁 Replace' })) return;
   const done = [], changed = [], bad = [];
   for (const r of todo) {
     if (await api('GET', '/ui/scripts/' + encodeURIComponent(r.name)) !== r.text) { changed.push(r.name); continue; }   // edited since the search: leave it alone
@@ -13266,7 +13347,7 @@ async function renderBin() {
     }) }, 'Look'),
     admin ? h('button', { type: 'button', class: 'primary', onclick: guard(() => restoreFromBin(b)) }, 'Restore') : null,
     admin ? h('button', { type: 'button', class: 'danger', onclick: guard(async () => {
-      if (!confirm(`Delete "${b.name}" for good?\n\nIt cannot be brought back after this.`)) return;
+      if (!await skyConfirm(`Delete "${b.name}" for good?\n\nIt cannot be brought back after this.`, { ok: '🗑 Delete for good' })) return;
       await api('DELETE', '/ui/recycle/' + encodeURIComponent(b.id)); toast(`"${b.name}" deleted for good`); $('#binView').classList.add('hidden'); await renderBin();
     }) }, 'Delete for good') : null));
 }
@@ -13376,7 +13457,7 @@ $('#renScript').onclick = guard(async () => {
   curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
 $('#delScript').onclick = guard(async () => {
-  if (!curScript || !confirm(`Delete the Process "${curScript}"?\n\nIt goes to the Recycle Bin, where you can restore it.` + (dirty ? '\n\nYour unsaved changes are lost.' : ''))) return;
+  if (!curScript || !await skyConfirm(`Delete the Process "${curScript}"?\n\nIt goes to the Recycle Bin, where you can restore it.` + (dirty ? '\n\nYour unsaved changes are lost.' : ''), { ok: '🗑 Delete' })) return;
   await api('DELETE', '/ui/scripts/' + encodeURIComponent(curScript));
   toast(`"${curScript}" moved to the Recycle Bin`);
   curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); updateGutter(); refreshFind(false);
@@ -13581,7 +13662,7 @@ async function globalDialog(work, orig) {
   async function cancel() { if (snap() === snap0 || await askDiscard('this gGlobal')) close(); }
   d.oncancel = ev => { ev.preventDefault(); cancel(); };
   async function del() {
-    if (!confirm(`Delete ${orig.name}? A Process that uses it stops at that line until it is changed.`)) return;
+    if (!await skyConfirm(`Delete ${orig.name}? A Process that uses it stops at that line until it is changed.`, { ok: '🗑 Delete' })) return;
     await saveElements(S.config.elements.filter(x => x !== orig)); close(); toast(`${orig.name} deleted`);
   }
   async function save() {
@@ -13722,7 +13803,7 @@ $('#csvSaveSet').onclick = guard(async () => {
   renderCsvBox(); $('#csvSet').value = name; renderCsvBox(); savedPop('Saved');
 });
 $('#csvDelSet').onclick = guard(async () => {
-  const name = $('#csvSet').value; if (!name || !confirm(`Delete the CSV set "${name}"? The readings stay in the brew database.`)) return;
+  const name = $('#csvSet').value; if (!name || !await skyConfirm(`Delete the CSV set "${name}"? The readings stay in the brew database.`, { ok: '🗑 Delete' })) return;
   await saveCsvSets((S.config.logSets || []).filter(s => s.name !== name)); $('#csvSet').value = ''; renderCsvBox();
 });
 function csvSpan() {
@@ -13835,7 +13916,7 @@ function renderProbes() {
       h('td', { ...(warn ? { class: 'warnTxt', title: warn } : {}) }, `${n} (soft limit ${owLimit(c)})${warn ? ' ⚠' : ''}`),
       h('td', {}, h('button', { class: 'admin-only', title: 'A new 1-Wire Index on this circuit, for a probe you will plug in', onclick: () => newSlot('', d.name, c.n) }, '➕ Index'), ' ',
         h('button', { class: 'danger admin-only', onclick: guard(async () => {
-          if (n && !confirm(`${owCircuitId(d.name, c.n)} has ${n} probe Device${n === 1 ? '' : 's'} on it. They lose their 1-Wire Index. Delete the circuit anyway?`)) return;
+          if (n && !await skyConfirm(`${owCircuitId(d.name, c.n)} has ${n} probe Device${n === 1 ? '' : 's'} on it. They lose their 1-Wire Index. Delete the circuit anyway?`, { ok: '🗑 Delete' })) return;
           await saveCircuit(d.name, c.n, null);
         }) }, 'Delete'))));
   }
@@ -13850,7 +13931,7 @@ function renderProbes() {
         ...roms.map(r => { const o = slots.find(x => x.rom === r && owSlotKey(x) !== owSlotKey(p)); return h('option', { value: r, ...(r === p.rom ? { selected: true } : {}) }, r + (seen.has(r) ? '' : '  (not seen now)') + (o ? `  (in ${slotId(o)})` : '')); }))),
       h('td', {}, seen.has(p.rom) ? String(seen.get(p.rom).t) : p.rom ? 'not seen' : ''),
       h('td', {}, users),
-      h('td', {}, h('button', { class: 'danger admin-only', onclick: () => { if (users && !confirm(`${slotId(p)} is used by ${users}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => owSlotKey(x) === owSlotKey(p)), 1)); } }, 'Remove'))));
+      h('td', {}, h('button', { class: 'danger admin-only', onclick: async () => { if (users && !await skyConfirm(`${slotId(p)} is used by ${users}. Remove it anyway?`, { ok: '🗑 Remove' })) return; saveProbes(l => l.splice(l.findIndex(x => owSlotKey(x) === owSlotKey(p)), 1)); } }, 'Remove'))));
   }
   // the probes the boards report
   const pb = $('#probeBody'); pb.innerHTML = '';
@@ -13981,6 +14062,29 @@ async function ifaceRemoveDialog(name) {
   draw();
   dlg.showModal();
 }
+// Changing the Board of an Interface that is in use (Panel Updates entry 29, question (c); OakBarn Brewery, 2026-11-20: "I'd make it
+// simpler: show the counts and save, with no typed confirmation. KISS"): one box with what uses it and the Devices on Ports the new
+// board does not have, and 💾 Save. Nothing is moved or taken away: those Devices keep their Ports until each is given a new one.
+async function boardChangeOk(old, d) {
+  const use = ifaceUse(S.config, old.name);
+  if (!use.devices.length && !use.widgets.length) return true;
+  const procs = processesUsing(await procTexts(), useNames(use, old.name)), off = devicesOffBoard(S.config, old.name, d.board);
+  const bn = b => (BOARDS.find(([k]) => k === b) || [b, b])[1], id = old.id || ifaceIdOf(old.name) || old.name;
+  return new Promise(res => {
+    const dlg = $('#valDlg'); dlg.innerHTML = '';
+    const done = v => { dlg.close(); res(v); };
+    const save = h('button', { type: 'button', class: 'primary', title: 'Save the new Board. Nothing else changes.', onclick: () => done(true) }, '💾 Save');
+    const close = h('button', { type: 'button', title: 'Back to the Interface pop-up. Nothing is saved.', onclick: () => done(false) }, 'Close');
+    const x = h('button', { type: 'button', class: 'boxX', title: 'Back to the Interface pop-up. Nothing is saved.', 'aria-label': 'Close', onclick: () => done(false) }, '✕');
+    dlg.append(h('div', { class: 'bar dlgBar', style: 'min-width:min(560px, calc(100vw - 48px))' }, h('h3', { style: 'margin:0' }, `Change ${id} from ${bn(boardOf(old))} to ${bn(d.board)}`), h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' }, save, close, x)),
+      h('p', {}, `In use by: Devices ${use.devices.length}, Widgets ${use.widgets.length}, Processes ${procs.length}.`),
+      off.length ? h('div', { class: 'ifRmWarn' }, h('b', {}, `⚠ ${off.length} Device${off.length === 1 ? ' is' : 's are'} on a Port the ${bn(d.board)} does not have`),
+        h('p', {}, 'They keep their Ports. Give each a new Port in its Properties.'), h('ul', {}, ...off.map(o => h('li', {}, `${o.name} (Port ${o.ports.join(', ')})`))))
+        : h('p', {}, `Every Device's Port is on the ${bn(d.board)} too.`));
+    dlg.oncancel = () => res(false);
+    dlg.showModal(); save.focus();
+  });
+}
 // the large warning on the Remove button (entry 29 Part 5): counted now; the Processes once they are read
 function removeTipFor(d, texts = []) {
   const use = ifaceUse(S.config, d.name);
@@ -14002,7 +14106,7 @@ const IFACE_TIP = {
   // board instead"; "you could have a mixed system of 3.3 and 5v" (Rule 6.35)
   board: 'The kind of board this Interface is. Skynet sets the rest from the board: its Connection choices, how fast it talks over USB, and its Ports (IO Pins).\n\nSkynet is planned and wired for the Arduino Mega 2560 (a 5 V board). Every other board in the list can be used too.\n\n⟪b:3.3 V boards⟫Due, GIGA, Nano ESP32, Grand Central, Feather M0, ESP32, ESP8266 and Raspberry Pi are 3.3 V boards. When you put an input, a 0-5 V sensor or a relay on one, Skynet shows one warning. You can mix 5 V and 3.3 V boards: each board is its own Interface.\nMore: Skynet Boards.',
   connection: 'How the board is connected to the Brain. The choices are the ones this board can use. USB is the safest; Ethernet and WiFi depend on your network.',
-  usb: 'The number of the USB Port the board is plugged into on the Brain: a number between 1 and 256, used to connect the Arduino to the Brain. Skynet suggests a free one it found. If none is suggested, plug the board in and open this box again.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
+  usb: 'The USB Port the board is plugged into on the Brain. Pick it from the list: Skynet shows the ports it finds on this Brain right now. On Windows it is a number (COM3 shows as 3). On a Raspberry Pi or Linux it is a name like /dev/ttyACM0. Not sure which one is the board? Unplug it and press 🔄 Look again: the one that is gone is the board. A port shown in red was saved before but is not on this Brain now.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
   // Network Address (OakBarn Brewery, 2026-11-16, Add Interface markup: "This is always a big stumbling Block for many users who know
   // nothing about TCIP and IP Address or how to figure out which one to use. Help here can be expansive but start with If you do not
   // understand Networks and protocalls, call a friend to help. Do we need the SSID and Password to connect? And is this a Software and
@@ -14021,7 +14125,7 @@ const IFACE_TIP = {
     + NET_HELP_FIND + NET_HELP_SAME,
   on: 'On: the panel talks to this board. Off: the panel never opens it, and its Devices show as not connected.\nWhen a board is Off, none of its Devices work. A board must be On and in communication with the Brain (the two talking to each other) to do any action.',
   test: 'Test Communication: a step by step check that the Brain and this board are talking to each other, with sample answers and what to do when they are not.',
-  answer: 'Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.',
+  answer: 'How long Skynet waits for the board to answer before the Devices page shows "no answer". Leave it blank and Skynet uses 10. 2 to 600.\nAnswer Wait only shows you a problem. Lost Comm is the one that turns the board\'s outputs OFF.',
   lost: `Lost Comm (lost communication) is a safety: if the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF, so a heater or a pump is not left on when the Brain, the cable or the network fails. Must be filled in: ${LOST_LINK.min} to ${LOST_LINK.max}; Skynet uses ${LOST_LINK.def}.`,
   // "Make the Lost Comm and you are the Saftey with a blank line to seperate from Above and Bold and add a Red Safety Tringe before the Caveat"
   lostYou: '⚠ You are the Safety. Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.',
@@ -14053,6 +14157,21 @@ function boardSave(d, w) {
 // The USB Port box (OakBarn Brewery, 2026-11-15): on Windows the number alone (COM3 is 3); a free port found on the Brain is suggested
 const comNum = (p, win) => win && /^COM\d+$/i.test(String(p ?? '')) ? String(p).slice(3) : String(p ?? '');
 const comPath = (v, win) => { const t = String(v ?? '').trim(); return win && /^\d+$/.test(t) ? 'COM' + Number(t) : win && /^com\d+$/i.test(t) ? t.toUpperCase() : t; };
+// the USB Port dropdown (Panel Updates entry 29 Part 2, OakBarn Brewery, 2026-11-18: the box showed "/dev/ttyACM0" on Windows): the
+// ports found on this Brain now (on Windows the number alone, COM3 is 3; on a Pi /dev/ttyACM0), with what is plugged in when the port
+// says so; a saved port that is not on this Brain is kept and shown as not found (Design Rule #1); 🔄 Look again reads them again
+const USB_LOOK = '\0lookAgain';
+function usbPortChoices(ports, cur, win) {
+  const list = (ports || []).map(p => { const v = comNum(p.path, win); return [v, `${win && v !== p.path ? `${v}  (${p.path})` : v}${p.manufacturer ? `  ${p.manufacturer}` : ''}`]; });
+  const c = String(cur ?? '').trim();
+  if (c && !list.some(([v]) => v.toUpperCase() === c.toUpperCase())) list.unshift([c, `⚠ ${c} (not found on this Brain)`]);
+  if (!list.length) list.push(['', '(no board found: plug it in, then 🔄 Look again)']);
+  return [...list, [USB_LOOK, '🔄 Look again']];
+}
+const markPortList = sel => { for (const x of sel.options) x.classList.toggle('portGone', /not found on this Brain/.test(x.textContent)); sel.classList.toggle('portGone', !!sel.selectedOptions[0]?.classList.contains('portGone')); };
+// the Brain Move USB ports page (entry 29 (e)): the same list, and the old port is always in it (red when not on this Brain), so
+// keeping it is always a choice; the serial number shows, as it is how the old Brain's boards are found again
+const brainMovePortChoices = (ports, old, win) => usbPortChoices((ports || []).map(p => ({ ...p, manufacturer: [p.manufacturer, p.serialNumber && 'serial ' + p.serialNumber].filter(Boolean).join(', ') })), comNum(old, win), win);
 const freeUsbPort = (ports, devices, me) => ports.map(p => p.path).find(p => !devices.some(d => d.name !== me && connOf(d) === 'serial' && String(d.port).toUpperCase() === String(p).toUpperCase())) || '';
 
 // Test Communication (OakBarn Brewery, 2026-11-15, Add Interface markup: "Change Pause Communication To Test Communication. Have a
@@ -14153,12 +14272,17 @@ function boardTalk(name) {
 const IFACE_BOARD_WORD = { mega: 'Arduino Mega', esp32: 'ESP32', pi: 'Raspberry Pi' };
 function ifaceIdTip(name, id, board) {
   const n = String(name ?? '').trim(), i = String(id ?? '').trim().toUpperCase();
-  if (!n && !i) return IFACE_PUMP_PARTS.slice(4, 8).join('\n\n');      // Dialog 1, word for word
+  if (!n && !i) return IFACE_PUMP_PARTS.slice(4, 8).join('\n\n') + '\n\n' + suggestedDeviceLine('');      // Dialog 1, word for word, and the line under it
   const b = IFACE_BOARD_WORD[board] || 'Arduino', nm = n || i;
   return [`When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Interface IDs follow Rule 3.2. This Interface is: ${i}: ${nm}`,
     `The ID is important as it is Part of the Suggested Name.\n⟦${i}⟧_15_DO@Pump_Red~Pump_BH`,
     `Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above ${i}_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface ${i} (${nm} {${b}}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).`,
-    `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`].join('\n\n');
+    `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`, suggestedDeviceLine(i)].join('\n\n');
+}
+// Panel Updates entry 29 Part 3 (OakBarn Brewery, 2026-11-18: "add the suggest name for ID under the text", "Suggest Device Name"):
+// this Interface's real ID in red, changing as the ID is typed
+function suggestedDeviceLine(id) {
+  return id ? `Suggested Device Name: ⟦${id}⟧_Port_Type_Label_TabID, for example ⟦${id}⟧_15_DO@Pump_Red~Pump_BH` : 'Suggested Device Name: (type a Name first)';
 }
 // The Network address Skynet suggests for a new Interface (OakBarn Brewery, 2026-11-16: "suggest a Network address based on the
 // Brian's IP address"): the Brain's first three numbers and a last one no other Interface (or the Brain) uses, 60 first (the address
@@ -14184,8 +14308,10 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   if (pretend) w.connection = w.realConnection || 'serial';
   if (!BOARDS.some(([b]) => b === w.board)) w.board = '';      // a board the BruControl Import could not tell: pick it
   boardStart(w);
-  let ports = [], win = false;
-  try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; win = r.platform === 'win32'; } catch { /* no USB support on the server */ }
+  let ports = [], win = false, portList = false;
+  // Panel Updates entry 29 Part 2: the USB Port is a dropdown of the ports Skynet finds on this Brain right now, when it can read them
+  const readPorts = async () => { try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; win = r.platform === 'win32'; portList = r.installed !== false; } catch { portList = false; /* no USB support on the server */ } };
+  await readPorts();
   w.port = comNum(w.port, win);
   if (w.connection === 'serial' && !w.port) w.port = comNum(freeUsbPort(ports, S.config.devices, old?.name), win);      // a free USB Port found on the Brain
   const taken = () => S.config.devices.filter(d => d !== old).map(x => x.id);
@@ -14201,7 +14327,9 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         : [['id', 'Interface ID', 'text', null, false, false, { tip: ifaceIdTip(o.name, idNow(o), o.board) }]]),
       ['board', 'Board', 'sel', [...(o.board ? [] : [['', '(pick the board)']]), ...BOARDS], true, false, { tip: IFACE_TIP.board }],
       ['connection', 'Connection', 'sel', conns, true, false, { tip: IFACE_TIP.connection + (rt.text ? '\nThis connection: ' + rt.text : '') }],
-      ...(o.connection === 'serial' ? [['port', 'USB Port', 'text', null, false, false, { tip: IFACE_TIP.usb }]]
+      // while the Simulator runs nothing goes to the board: the real USB Port (or address) is kept for Real boards and may be changed (entry 29 Part 2)
+      ...(S.sim?.on && (o.connection === 'serial' ? o.port : o.host) ? [['_simPort', `🧪 Simulator: nothing goes to this board now. Real ${o.connection === 'serial' ? 'USB Port' : 'Network address'}: ${o.connection === 'serial' ? comPath(o.port, win) : o.host}, used when you switch back to Real boards.`, 'note']] : []),
+      ...(o.connection === 'serial' ? [['port', 'USB Port', portList ? 'sel' : 'text', portList ? usbPortChoices(ports, o.port, win) : null, false, false, { tip: IFACE_TIP.usb }]]
         : [['host', 'Network address', 'text', null, false, false, { tip: o.connection === 'esp32' ? IFACE_TIP.hostWifi : IFACE_TIP.hostEth }]]),
       ...boardFields(o),      // Board settings (Rule 6.27)
     ];
@@ -14228,7 +14356,20 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   };
   const oks = $$('#dlg button[value="ok"]'), was = oks.map(b => b.textContent);
   for (const b of oks) b.textContent = old ? 'Save' : 'Add';
-  const live = ev => { if (['name', 'id', 'board', 'connection'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0); };      // a new Connection redraws the box: the suggested ID stays (OakBarn Brewery, 2026-11-16: "Change of Connection Type removes suggested Interface ID")
+  const lookAgain = async sel => {
+    const keep = [...sel.options].find(x => x.dataset.prev)?.value ?? '';
+    await readPorts();
+    const now = keep || comNum(freeUsbPort(ports, S.config.devices, old?.name), win);
+    sel.replaceChildren(...usbPortChoices(ports, now, win).map(([v, t]) => h('option', { value: v, ...(v === now ? { selected: true } : {}) }, t)));
+    markPortList(sel);
+    toast(ports.length ? `Found ${ports.length} USB Port${ports.length === 1 ? '' : 's'} on this Brain` : 'No USB Port found on this Brain: plug the board in, then 🔄 Look again', !ports.length);
+  };
+  const live = ev => {
+    if (ev.target?.dataset?.k === 'port' && ev.target.value === USB_LOOK) { if (ev.type === 'change') lookAgain(ev.target).catch(e => toast(e.message, true)); return; }
+    if (ev.target?.dataset?.k === 'port' && ev.target.tagName === 'SELECT') for (const x of ev.target.options) delete x.dataset.prev;
+    if (ev.target?.dataset?.k === 'port' && ev.target.tagName === 'SELECT') { const x = ev.target.selectedOptions[0]; if (x) x.dataset.prev = '1'; }
+    if (['name', 'id', 'board', 'connection'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0);
+  };      // a new Connection redraws the box: the suggested ID stays (OakBarn Brewery, 2026-11-16: "Change of Connection Type removes suggested Interface ID")
   dlgEl.addEventListener('keydown', tabKey, true); body.addEventListener('input', live); body.addEventListener('change', live);
   try {
     for (;;) {
@@ -14241,7 +14382,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
       };
       body.oninput = null;      // the New Device box's own; the dialog sets its own onchange (it redraws for a new Board)
       const shown = dialog(title || (old ? `Interface ${old.name}` : 'Add Interface'), fields, w, false, ['interfaces']);
-      setTimeout(() => { liveId(); (renamable && !String(w.name ?? '').trim() ? allBoxes()[0] : allBoxes().at(-1))?.focus(); }, 0);
+      setTimeout(() => { liveId(); const ps = body.querySelector('select[data-k="port"]'); if (ps) { markPortList(ps); if (ps.selectedOptions[0]) ps.selectedOptions[0].dataset.prev = '1'; } (renamable && !String(w.name ?? '').trim() ? allBoxes()[0] : allBoxes().at(-1))?.focus(); }, 0);
       if (await shown !== 'ok') return null;
       try {
         readFields(w);
@@ -14255,6 +14396,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         if (taken().some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
         const d = { ...(old || {}), name, id, connection: w.connection, board: w.board };
         delete d.port; delete d.host; delete d.baud; delete d.realConnection;
+        if (w.port === USB_LOOK) w.port = '';
         if (w.connection === 'serial') d.port = comPath(w.port, win);
         if (['esp32', 'ethernet'].includes(w.connection)) d.host = String(w.host ?? '').trim();
         if (pretend && !d.port && !d.host) { d.realConnection = d.connection; d.connection = 'simulator'; }      // still pretend: no board yet
@@ -14263,6 +14405,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         boardSave(d, w);
         if (d.connection === 'simulator') delete d.port;
         const devices = old ? S.config.devices.map(x => x === old ? d : x) : [...S.config.devices, d];
+        if (old && boardOf(old) && boardOf(old) !== d.board && !(await boardChangeOk(old, d))) continue;      // entry 29 (c): the counts, then Save
         await api('PUT', '/ui/layout', { devices });
         if (old && old.name !== name) {      // nothing uses it, but a Device made in this Edit layout may: follow the new name
           for (const e of (draft || S.config).elements) if (e.device === old.name) e.device = name;
@@ -14318,7 +14461,7 @@ async function bruSend(preview) {
 $('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
 $('#bruImport').onclick = guard(async () => {
   const msg = $('#bruMode').value === 'replace' ? 'Replace your Tabs, Devices and Widgets with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old Schema.)' : 'Add this BruControl file to your Schema? Running processes are stopped.';
-  if (!confirm(msg)) return;
+  if (!await skyConfirm(msg, { ok: '⬆ Import', danger: $('#bruMode').value === 'replace' })) return;
   const r = await bruSend(false);
   $('#bruResult').textContent = bruReport(r);
   await load(); toast('BruControl Schema imported');
@@ -14412,7 +14555,7 @@ async function renderUsers() {
       ...S.roles.map(r => h('option', { value: r, ...(r === u.role ? { selected: true } : {}) }, r[0].toUpperCase() + r.slice(1))));
     tb.append(h('tr', {}, h('td', {}, u.name + (u.name === S.me.name ? ' (you)' : '')), h('td', {}, role), h('td', {},
       h('button', { onclick: guard(async () => { const pw = prompt(`New password for ${u.name}\n${S.passwordRules.text}`); if (!pw) return; await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { password: pw }); toast('Password set'); }) }, 'Set password'), ' ',
-      h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove user ${u.name}?`)) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
+      h('button', { class: 'danger', onclick: guard(async () => { if (!await skyConfirm(`Remove user ${u.name}?`, { ok: '🗑 Remove' })) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
   }
 }
 async function renderRecovery() {
@@ -14435,7 +14578,7 @@ async function renderApproved() {
       ? [h('button', { class: 'primary', onclick: guard(() => put({ state: 'approved' }).then(() => toast(`${d.name} is approved. ${d.user || 'They'} can sign in now.`))) }, 'Approve'), ' ',
         h('button', { class: 'danger', onclick: guard(async () => { await api('DELETE', '/auth/devices/' + d.key); renderApproved(); }) }, 'Refuse')]
       : [h('button', { onclick: guard(async () => { const n = prompt('A name for this device (for example: Brew room tablet)', d.name); if (n) await put({ name: n }); }) }, 'Rename'), ' ',
-        h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove ${d.name}${d.thisDevice ? ' (this device: you will be signed out)' : ''}? It signs out at once and must be approved again.`)) return; await api('DELETE', '/auth/devices/' + d.key); if (d.thisDevice && !r.brainItself && r.on) location.reload(); else renderApproved(); }) }, 'Remove')];
+        h('button', { class: 'danger', onclick: guard(async () => { if (!await skyConfirm(`Remove ${d.name}${d.thisDevice ? ' (this device: you will be signed out)' : ''}? It signs out at once and must be approved again.`, { ok: '🗑 Remove' })) return; await api('DELETE', '/auth/devices/' + d.key); if (d.thisDevice && !r.brainItself && r.on) location.reload(); else renderApproved(); }) }, 'Remove')];
     tb.append(h('tr', {}, h('td', {}, d.name + (d.thisDevice ? ' (this device)' : '')), h('td', {}, d.user || ''),
       h('td', {}, d.state === 'waiting' ? h('b', { class: 'bad' }, `Waiting since ${when(d.asked)}`) : 'Approved'),
       h('td', {}, when(d.seen || d.approved)), h('td', {}, ...btns)));
@@ -14443,7 +14586,7 @@ async function renderApproved() {
   if (!list.length) tb.append(h('tr', {}, h('td', { colspan: 5, class: 'muted' }, 'No devices yet.')));
 }
 $('#apdOn').onchange = guard(async ev => {
-  if (!ev.target.checked && !confirm('Turn Approved Devices Off? Then a right password alone signs anyone in, from any device.')) { ev.target.checked = true; return; }
+  if (!ev.target.checked && !await skyConfirm('Turn Approved Devices Off? Then a right password alone signs anyone in, from any device.', { ok: 'Turn Off' })) { ev.target.checked = true; return; }
   await api('PUT', '/auth/devices', { on: ev.target.checked });
   toast(ev.target.checked ? 'Approved Devices is On. This device is approved.' : 'Approved Devices is Off');
   renderApproved();
@@ -14468,7 +14611,7 @@ async function renderPatron() {
   const inp = h('input', { placeholder: 'SKYPATRON1....', autocomplete: 'off', spellcheck: 'false', style: 'width:100%' });
   box.append(h('label', {}, 'Patron code (from the email OakBarn Brewery sent you)', inp),
     h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: guard(async () => { await api('PUT', '/ui/patron', { code: inp.value }); toast('Thank you! The Patron perks are unlocked.'); renderPatron(); }) }, 'Save Patron code'),
-      st.hasCode ? h('button', { class: 'danger', onclick: guard(async () => { if (!confirm('Remove the Patron code from this Brain? The Patron perks lock again.')) return; await api('DELETE', '/ui/patron'); renderPatron(); }) }, 'Remove Patron code') : ''),
+      st.hasCode ? h('button', { class: 'danger', onclick: guard(async () => { if (!await skyConfirm('Remove the Patron code from this Brain? The Patron perks lock again.', { ok: '🗑 Remove' })) return; await api('DELETE', '/ui/patron'); renderPatron(); }) }, 'Remove Patron code') : ''),
     h('p', { class: 'muted' }, 'The code holds only the name to show, the level and the end date: never an email address. Patron emails come from OakBarn Brewery, never from your Brain.'));
 }
 // a pop-up with a title, any content, ✖ Close at the top and an optional main button; resolves true when the main button is pressed
@@ -14591,7 +14734,7 @@ $('#setWarnPaths').onchange = guard(async ev => {
   toast(ev.target.checked ? 'You will be warned about files that are not on the Brain' : 'Path warnings are off');
 });
 $('#recNew').onclick = guard(async () => {
-  if ($('#recInfo').textContent.startsWith('Made') && !confirm('Make a new recovery code? The old one stops working.')) return;
+  if ($('#recInfo').textContent.startsWith('Made') && !await skyConfirm('Make a new recovery code? The old one stops working.', { ok: '🔑 Make a new code' })) return;
   const r = await api('POST', '/auth/recovery');
   $('#recCode').textContent = r.code; $('#recShow').classList.remove('hidden');
   renderRecovery();
@@ -14815,8 +14958,8 @@ $('#simSave').onclick = $('#simSave2').onclick = guard(async () => {
 // Simulator or Real boards, for the whole panel (every Interface at once): the 🔌 Real / 🧪 Simulator button on the Tabs bar
 // (Fritz, 2026-10-27) and the ☰ Menu. Returns false when the admin said no.
 async function setSimulator(on) {
-  if (!confirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
-    : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.')) return false;
+  if (!await skyConfirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
+    : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.', { ok: on ? '🧪 Switch to Simulator' : '🔌 Switch to Real boards' })) return false;
   S.sim = await api('PUT', '/ui/sim', { on });
   await load(); toast(on ? '🧪 Simulator mode: no real hardware is switched. 25× speed and Auto skip are on' : '🔌 Real boards: real hardware is used');
   return true;
@@ -14883,12 +15026,12 @@ function fillSchemaSelect(s) {
 }
 // Processes running now: switching the Schema stops them, so you are warned first (Fritz, 2026-10-21)
 const runningProcs = () => (S.scripts || []).filter(x => x.state === 'running');
-function okToSwitch(toName, what = 'Loading') {
+async function okToSwitch(toName, what = 'Loading') {
   const act = S.schemas.active?.name, run = runningProcs();
   const off = 'Every output is switched off first: digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms.';
-  if (run.length) return confirm(`⚠ The Schema "${act}" is active: ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running:\n${run.slice(0, 12).map(x => '• ' + x.name).join('\n')}${run.length > 12 ? '\n• ...' : ''}\n\n` +
-    `${what} "${toName}" stops ${run.length > 1 ? 'them' : 'it'}. ${off}\n\nIs it OK to proceed?`);
-  return confirm(`${what} "${toName}"?\n\n${off}\n\nIts Tabs, Devices, Widgets and Equipment Profile take the place of "${act}". "${act}" is kept just as it is: pick it in the Schema list to go back to it.`);
+  if (run.length) return skyConfirm(`⚠ The Schema "${act}" is active: ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running:\n${run.slice(0, 12).map(x => '• ' + x.name).join('\n')}${run.length > 12 ? '\n• ...' : ''}\n\n` +
+    `${what} "${toName}" stops ${run.length > 1 ? 'them' : 'it'}. ${off}\n\nIs it OK to proceed?`, { ok: '▶ Proceed' });
+  return skyConfirm(`${what} "${toName}"?\n\n${off}\n\nIts Tabs, Devices, Widgets and Equipment Profile take the place of "${act}". "${act}" is kept just as it is: pick it in the Schema list to go back to it.`, { ok: '▶ Proceed', danger: false });
 }
 // after another Schema is loaded: start fresh on its first tab
 async function afterSchemaSwitch(msg) {
@@ -15087,12 +15230,12 @@ const schemaPicked = guard(async ev => {
         ['_n', 'The loaded Schema cannot be deleted. A deleted Schema is moved to config/schemas/deleted, so it can be got back.', 'note']], w) !== 'ok') return;
       readFields(w);
       const name = others.find(x => x.id === w.id)?.name;
-      if (!confirm(`Delete the Schema "${name}"?`)) return;
+      if (!await skyConfirm(`Delete the Schema "${name}"?`, { ok: '🗑 Delete' })) return;
       await api('DELETE', `/ui/schemas/${w.id}`); await load(); return toast(`Schema "${name}" deleted`);
     }
     if (v === act?.id) return;
     const to = S.schemas.list.find(x => x.id === v);
-    if (!okToSwitch(to.name)) return;
+    if (!await okToSwitch(to.name)) return;
     await api('POST', `/ui/schemas/${v}/load`);
     await afterSchemaSwitch(`Schema "${to.name}" loaded`);
   } finally { back(); }
@@ -15108,7 +15251,7 @@ async function addNewSchema() {
       ...((S.profiles || []).length ? [['profile', 'An Equipment Profile (its hardware, already wired)']] : [])]],
     ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
   readFields(w);
-  if (!okToSwitch(w.name, 'Making and loading')) return;
+  if (!await okToSwitch(w.name, 'Making and loading')) return;
   if (w.start === 'template') return newSchemaFromTemplate(w.name);
   if (w.start === 'profile') return newSchemaFromProfile(null, w.name);
   await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
@@ -15128,7 +15271,7 @@ async function newSchemaFromProfile(pid, name = '') {
       ['_n', FROM_PROFILE_TIP, 'note', null, null, null, { keep: true }], ['_m', 'The new Schema is loaded at once. The Schema you have now is kept just as it is.', 'note']], w) !== 'ok') return;
     readFields(w);
   }
-  if (!okToSwitch(w.name, 'Making and loading')) return;
+  if (!await okToSwitch(w.name, 'Making and loading')) return;
   const p = S.profiles.find(x => x.id === w.prof); if (!p) return toast('Pick an Equipment Profile', true);
   await api('POST', '/ui/schemas', { name: w.name, fromProfile: p.id });
   await afterSchemaSwitch(`Schema "${w.name}" made from "${p.name}" and loaded`);
@@ -15323,7 +15466,7 @@ async function nsiLand() {
 // Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
 async function addSampleSchema(id, name = '') {
   const sm = (samples || []).find(x => x.id === id); if (!sm) return toast('No such sample', true);
-  if (!okToSwitch(name || sm.name, 'Adding the Sample Schema')) return;
+  if (!await okToSwitch(name || sm.name, 'Adding the Sample Schema')) return;
   const r = await api('POST', `/ui/samples/${id}/load`, name ? { name } : undefined);
   await afterSchemaSwitch(`Sample Schema "${r.schema?.name || sm.name}" added and loaded`);
   const bad = (r.problems || []).length;
@@ -15358,7 +15501,7 @@ async function cloneSchema(id) {
   let name = String(w.name || '').trim();
   if (!name) { name = `${from.name} copy`; for (let i = 2; list.some(x => x.name.toLowerCase() === name.toLowerCase()); i++) name = `${from.name} copy ${i}`; }
   if (smp) return addSampleSchema(smp.id, name);
-  if (w.load && !okToSwitch(name, 'Loading the clone')) return;
+  if (w.load && !await okToSwitch(name, 'Loading the clone')) return;
   await api('POST', `/ui/schemas/${w.id}/clone`, { name, load: !!w.load });
   if (w.load) return afterSchemaSwitch(`Clone "${name}" made and loaded`);
   S.schemas = await api('GET', '/ui/schemas'); renderSchemaPick(); if (['schema', 'about'].includes(menuTab)) renderMenuPane();
@@ -15372,7 +15515,7 @@ async function restoreSchema() {
   if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}  (${b.file})`])],
     ['_n', 'The Schema as it is now is backed up first, so you can undo this by restoring that backup. Running Processes stop.', 'note']], w) !== 'ok') return;
   readFields(w);
-  if (!okToSwitch(act.name, 'Restoring and loading again')) return;
+  if (!await okToSwitch(act.name, 'Restoring and loading again')) return;
   await api('POST', `/ui/schemas/${act.id}/restore`, { file: w.file.slice(2), version: w.file.startsWith('v:') });
   await afterSchemaSwitch('Backup restored');
 }
@@ -15495,39 +15638,49 @@ function menuItems(list, go) {
   if (S.me?.role === 'admin' && !S.importBuild) list.append(h('hr'), S.closable && S.onBrain
     ? item('⏻ Close Skynet Panel and the Brain', guard(() => brainStopDialog('close')), { title: 'Turn everything Off, stop the Brain on this computer and close this window' })
     : item('💤 Put the Brain in Standby', guard(() => brainStopDialog('standby')), { title: 'Turn everything Off and let go of the boards. An Admin starts the Brain again from any screen' }));
+  // Rule 6.40 (OakBarn Brewery, 2026-11-20, Panel Update 7): only when an Admin turned on Shut Down Brain Option, so nobody is asked
+  // "shut down the Brain?" every time a browser closes
+  if (S.me?.role === 'admin' && !S.importBuild && S.config?.brewDefaults?.shutDownBrain)
+    list.append(item('⏼ Shut down the Brain\'s computer', guard(() => brainStopDialog('poweroff')), { title: POWEROFF_TIP }));
 }
+const POWEROFF_TIP = 'Turn everything Off, stop the Brain and turn off the computer (or Raspberry Pi) it runs on. Someone has to turn it on again by hand.';
 // ☰ Menu > Close Skynet Panel and the Brain / Put the Brain in Standby (Rule 2.25, Rule 6.32, OakBarn Brewery 2026-11-14: "Give a
 // Warning if others are connected prior to shut down. The Back out above would allow an Admin user to not shut down the Brain").
 // Every warning has its own tick box; the button works only once each is ticked. Back changes nothing.
 async function brainStopDialog(kind) {
   const info = await api('GET', '/ui/screens');
-  const close = kind === 'close';
-  const warn = [close
+  const close = kind === 'close', off = kind === 'poweroff';
+  const warn = [off
+    ? 'Everything is turned Off, every Process stops, the Brain stops and the Brain\'s computer (or Raspberry Pi) turns off.'
+    : close
     ? 'Everything is turned Off, every Process stops and the Brain on this computer stops. This window closes.'
     : 'Everything is turned Off, every Process stops and the Brain lets go of the boards. Every screen shows only "The Brain is in Standby".'];
   if (info.brewing) warn.push('You are brewing. ' + [info.on.length ? 'On now: ' + info.on.join(', ') + '.' : '', info.processes.length ? 'Running: ' + info.processes.join(', ') + '.' : ''].filter(Boolean).join(' '));
   if (info.others.length) warn.push(`${plural(info.others.length, 'other screen')} ${info.others.length === 1 ? 'has' : 'have'} the panel open and will lose it: `
     + info.others.map(o => `${o.name} (${o.device})`).join(', ') + '.');
-  warn.push(close
+  warn.push(off
+    ? 'Nothing can start it again from a screen: someone has to turn the computer on by hand (a Raspberry Pi: unplug and plug in its power).'
+    : close
     ? 'To start it again, double-click Skynet Brewer on this computer.'
     : 'Only an Admin can start the Brain again: sign in on any screen, then click Start on the Standby page.');
+  const title = off ? '⏼ Shut down the Brain\'s computer?' : close ? '⏻ Close Skynet Panel and the Brain?' : '💤 Put the Brain in Standby?';
   return new Promise(done => {
     const d = $('#valDlg'); d.innerHTML = '';
-    const go = h('button', { type: 'button', class: 'big danger', disabled: true }, close ? '⏻ Close the panel and the Brain' : '💤 Put the Brain in Standby');
+    const go = h('button', { type: 'button', class: 'big danger', disabled: true }, off ? '⏼ Shut down the computer' : close ? '⏻ Close the panel and the Brain' : '💤 Put the Brain in Standby');
     const back = h('button', { type: 'button', class: 'big primary', onclick: () => { d.close(); done(false); } }, 'Back');
     const ticks = warn.map(() => h('input', { type: 'checkbox' }));
     for (const t of ticks) t.onchange = () => { go.disabled = !ticks.every(x => x.checked); };
     go.onclick = guard(async () => {
       go.disabled = true; d.close();
-      await api('POST', close ? '/ui/close' : '/ui/standby');
-      if (close) showClosed(S.me?.name); else showStandby({ by: S.me?.name, at: Date.now() });
+      await api('POST', off ? '/ui/poweroff' : close ? '/ui/close' : '/ui/standby');
+      if (off || close) showClosed(S.me?.name, off); else showStandby({ by: S.me?.name, at: Date.now() });
       done(true);
     });
     // the Freeze (OakBarn Brewery, 2026-11-14: "Apply the Freeze to any dialog that is updated", Rule 2.51): the title and the buttons
     // stay at the top while the warnings scroll under them, and there is no bottom row
     d.classList.add('frozenDlg');
     d.addEventListener('close', () => d.classList.remove('frozenDlg'), { once: true });
-    d.append(h('div', { class: 'frozenHead' }, h('div', { class: 'vdTitle' }, close ? '⏻ Close Skynet Panel and the Brain?' : '💤 Put the Brain in Standby?'),
+    d.append(h('div', { class: 'frozenHead' }, h('div', { class: 'vdTitle' }, title),
       h('div', { class: 'vdBtns' }, back, go)),
       h('div', { class: 'vdText', style: 'max-width:480px;margin:8px 0 12px' }, ...warn.map((w, i) => h('label', { style: 'display:flex;gap:8px;align-items:flex-start;margin:8px 0' }, ticks[i], h('span', {}, w)))));
     d.oncancel = e => { e.preventDefault(); d.close(); done(false); };
@@ -15553,17 +15706,23 @@ function showStandby(st) {
     h('h2', {}, '💤 The Brain is in Standby'),
     h('p', {}, `${st.by || 'An Admin'} put the Brain in Standby${when ? ' on ' + when : ''}. Everything is Off and no Process runs.`),
     admin ? start : h('p', {}, 'Only an Admin can start it again.'),
-    admin ? '' : signIn, msg));
+    admin ? '' : signIn,
+    admin && S.config?.brewDefaults?.shutDownBrain ? h('button', { type: 'button', class: 'big', title: POWEROFF_TIP, onclick: guard(() => brainStopDialog('poweroff')) }, '⏼ Shut down the Brain\'s computer') : '', msg));
 }
 // After Start: the Brain stops and starts again, then the page loads fresh
 function waitForBrain(tries = 0) {
   setTimeout(() => api('GET', '/ui/state').then(st => { if (st.standby && tries < 60) return waitForBrain(tries + 1); location.reload(); })
     .catch(() => { if (tries < 60) waitForBrain(tries + 1); else location.reload(); }), 1500);
 }
-function showClosed(by) {
-  if ($('.closedPage')) return;      // the page that closed it hears it twice: from its own click and from the Brain
+function showClosed(by, poweroff = false) {
+  if ($('.closedPage:not(.standbyPage)')) return;      // the page that closed it hears it twice: from its own click and from the Brain
   // covers the whole page (the page itself stays, so nothing on it breaks while it closes)
   for (const d of $$('dialog[open]')) d.close();
+  // ☰ Menu > Shut down the Brain's computer (Rule 6.40)
+  if (poweroff) return void document.body.append(h('div', { class: 'closedPage' },
+    h('h2', {}, 'The Brain\'s computer is shutting down'),
+    h('p', {}, by ? by + ' shut down the Brain\'s computer. Everything is Off.' : 'The Brain\'s computer was shut down. Everything is Off.'),
+    h('p', { class: 'muted' }, 'You can close this browser tab. To start again, turn the Brain\'s computer on (a Raspberry Pi: unplug and plug in its power), then reload this page.')));
   document.body.append(h('div', { class: 'closedPage' },
     h('h2', {}, 'Skynet Brewer is closed'),
     h('p', {}, by ? `${by} closed the panel.` : 'The panel was closed.'),
@@ -15572,7 +15731,7 @@ function showClosed(by) {
 }
 // ---- Move Brain (Fritz, 2026-11-03, Rule 9.9, lib/brainmove.js): from a Windows, Linux or Mac computer Brain to a Raspberry Pi
 // (or any new Brain). 1 Make a Brain Move file on the old Brain, 2 bring it in on the new one, 3 fix the USB ports.
-let BM = null;
+let BM = null, bmPicks = {};      // bmPicks: the USB ports picked in step 3, kept through 🔄 Look again
 async function loadBrainMove() { BM = await api('GET', '/ui/brainmove'); }
 function renderBrainMoveTab(box) {
   if (!BM) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadBrainMove().then(() => menuTab === 'brainmove' && renderMenuPane()).catch(e => toast(e.message, true)); return; }
@@ -15615,41 +15774,49 @@ function renderBrainMoveTab(box) {
   });
   go.onclick = guard(async () => {
     const running = (S.scripts || []).filter(s => s.state === 'running').length;
-    if (!confirm('Move in now?\n\nEvery output turns off' + (running ? ` and ${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}` : '')
+    if (!await skyConfirm('Move in now?\n\nEvery output turns off' + (running ? ` and ${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}` : '')
       + '. The panel stops, and as it starts again the old Brain\'s Schemas, settings, Processes, pictures, saved values, logins and brew log take the place of this Brain\'s.'
       + '\n\nThis Brain\'s own files are not deleted: they are kept in backups/before_brain_move_<date>.'
-      + '\n\nAfter the move, sign in with your OLD Brain\'s user name and password.')) return;
+      + '\n\nAfter the move, sign in with your OLD Brain\'s user name and password.', { ok: '🚚 Move in now' })) return;
     const r = await api('POST', '/ui/brainmove/go');
     showMoving(r.service);
   });
-  // 3. USB ports, in every Schema at once
+  // 3. USB ports, in every Schema at once. The same USB Port list as the Interface pop-up (Panel Updates entry 29 (e), Rule 9.9):
+  // on Windows the number alone (COM3 is 3), on a Pi /dev/ttyACM0, with what is plugged in; the old port stays in the list, in red
+  // when it is not on this Brain (Design Rule #1); 🔄 Look again reads the ports again and keeps what was picked
   const portsBox = h('div');
-  const ifs = BM.interfaces, olds = [...new Set(ifs.map(x => x.port))], now = BM.ports.ports || [];
+  const ifs = BM.interfaces, olds = [...new Set(ifs.map(x => x.port))], now = BM.ports.ports || [], win = BM.platform === 'win32';
   if (!olds.length) portsBox.append(h('p', { class: 'muted' }, 'No Interface is on USB in any Schema. Nothing to change.'));
   else {
     const picks = {}, seen = p => BM.last?.usbPorts?.find(x => x.path === p);
+    const lookAgain = () => { BM = null; renderMenuPane(); };
     const tb = h('tbody');
     for (const o of olds) {
-      const users = ifs.filter(x => x.port === o), was = seen(o), here = now.some(x => x.path === o);
-      const sel = h('select', {}, h('option', { value: '' }, here ? `Keep ${o}` : `Keep ${o} (not on this Brain)`),
-        ...now.filter(x => x.path !== o).map(x => h('option', { value: x.path }, x.path + (x.manufacturer ? ` (${x.manufacturer}${x.serialNumber ? ', serial ' + x.serialNumber : ''})` : ''))));
-      sel.value = BM.suggest[o] && BM.suggest[o] !== o ? BM.suggest[o] : '';
+      const users = ifs.filter(x => x.port === o), was = seen(o);
+      const pick = bmPicks[o] ?? (BM.suggest[o] || o);
+      const list = brainMovePortChoices(now, o, win);
+      const sel = h('select', { 'data-old': o }, ...list.map(([v, t]) => h('option', { value: v, ...(v.toUpperCase() === comNum(pick, win).toUpperCase() ? { selected: true } : {}) }, t)));
+      sel.onchange = () => {
+        if (sel.value === USB_LOOK) { sel.value = comNum(bmPicks[o] ?? pick, win); return lookAgain(); }
+        bmPicks[o] = comPath(sel.value, win); markPortList(sel);
+      };
+      setTimeout(() => markPortList(sel), 0);
       picks[o] = sel;
       tb.append(h('tr', {}, h('td', {}, h('b', {}, o), was?.manufacturer ? h('div', { class: 'muted' }, `was ${was.manufacturer}${was.serialNumber ? ', serial ' + was.serialNumber : ''}`) : ''),
         h('td', {}, users.map(u => `${u.interface} (${u.schema})`).join(', ')), h('td', {}, sel)));
     }
     const save = h('button', { class: 'primary' }, '💾 Save USB ports');
     save.onclick = guard(async () => {
-      const map = Object.fromEntries(Object.entries(picks).map(([o, s]) => [o, s.value]).filter(([, v]) => v));
+      const map = Object.fromEntries(Object.entries(picks).map(([o, s]) => [o, s.value === USB_LOOK ? '' : comPath(s.value, win)]).filter(([o, v]) => v && v.toUpperCase() !== o.toUpperCase()));
       const r = await api('POST', '/ui/brainmove/ports', { map });
       toast(r.changed ? `${plural(r.changed, 'Interface')} changed to the new USB port` : 'Nothing changed');
-      BM = null; renderMenuPane();
+      bmPicks = {}; BM = null; renderMenuPane();
     });
     portsBox.append(
       h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'USB port now'), h('th', {}, 'Interfaces (Schema)'), h('th', {}, 'Change to'))), tb),
       !BM.ports.installed ? h('p', { class: 'bad' }, 'USB board support is not installed on this Brain yet, so it can\'t list its ports. Start Skynet Brewer once with the internet on.')
         : !now.length ? h('p', { class: 'muted' }, 'No USB boards are plugged into this Brain right now. Plug them in, then click Look again.') : '',
-      saveBar(h('button', { onclick: () => { BM = null; renderMenuPane(); } }, '🔄 Look again'), save));
+      saveBar(h('button', { onclick: lookAgain }, '🔄 Look again'), save));
   }
   box.append(h('h3', {}, 'Move Brain'), h('div', { class: 'menuNarrow' },
     h('p', {}, 'Moves everything from one Brain to another, for example from a Windows, Linux or Mac computer to a Raspberry Pi: every Schema, panel setting, Process, picture and sound, saved gGlobal values, logins and the brew log. Then the USB ports are changed to the new Brain\'s names (COM3 on Windows is /dev/ttyACM0 on a Pi).'),
@@ -16127,11 +16294,15 @@ function renderDefaultTab(box) {
 // things like the Theme or Pulse button (and anything that affects existing Device, Tabs etc to only be in settings as the are more
 // Settings than defaults. No need to even mention on Default Tab"). They change what is already made, so they are Settings (Rule 2.42).
 // Saved with the Default tab's values (brewDefaults), so nothing is moved on the Brain.
+const SHUTDOWN_OPTION_TIP = 'On: Admins get ☰ Menu > Shut down the Brain\'s computer, which turns everything Off and then turns off the computer (or Raspberry Pi) the Brain runs on. Off: nobody can shut it down from Skynet.';
 const panelSetFields = w => [
     // Units (OakBarn Brewery, 2026-11-16, Default Tab 3: "This is not a default but a Skynet Setting that resides in the Brain";
     // "Units are set by the Skynet Panel Setting and not by Recipe Level Hover Help will be set in the Skynet Settings and not here")
     ['_un', 'Units', 'head'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true, false, { tip: 'US (gallons, pounds, °F) or Metric (liters, kilograms, °C). Every amount, temperature and Recipe shows in it, on every screen. Skynet keeps the numbers the same inside, so changing it only changes how they show.' }],
+    // Shut Down Brain Option (Rule 6.40, OakBarn Brewery, 2026-11-20, Panel Update 7): Off unless an Admin turns it on
+    ['_br', 'The Brain', 'head'],
+    ['shutDownBrain', 'Shut Down Brain Option', 'bool', false, false, false, { tip: SHUTDOWN_OPTION_TIP }],
     ['_ts', 'Tabs', 'head'],
     ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
     ['_m', 'Menu Bar', 'head'],
@@ -16163,7 +16334,7 @@ const panelSetFields = w => [
     ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3)', 'text', null, false, false, { tip: 'Empty: none.' }],
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
     ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]]];
-const PANEL_SET_KEYS = ['units', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'pushLockout', 'touchEdit', 'touchMove',
+const PANEL_SET_KEYS = ['units', 'shutDownBrain', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'pushLockout', 'touchEdit', 'touchMove',
   'grainLabelVisible', 'ppgLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
 function renderPanelSettings() {
   const box = $('#panelSet'); if (!box) return;
@@ -16290,7 +16461,7 @@ function renderSchemaTab(box) {
     h('td', {}, String(x.tabs)), h('td', {}, when(x)),
     h('td', {}, admin && !x.active ? h('button', { onclick: guard(async () => {
       if (editing) return toast('Save or exit Edit layout first', true);
-      if (!okToSwitch(x.name)) return;
+      if (!await okToSwitch(x.name)) return;
       await api('POST', `/ui/schemas/${x.id}/load`); await afterSchemaSwitch(`Schema "${x.name}" loaded`);
     }) }, 'Load') : '',
       admin ? h('button', { title: 'Make a copy of this Schema under a new name', onclick: guard(() => cloneSchema(x.id)) }, 'Create New Copy of Schema') : '')));
@@ -16383,7 +16554,7 @@ function renderBuildTemplateTab(box) {
     setTPL(r); renderMenuPane(); fillAddType(); savedPop(`Saved ${t.name}`);
   });
   const del = h('button', { class: 'danger', disabled: !t.deletable, title: t.deletable ? '' : 'Shipped Skynet Templates are never deleted' }, '🗑 Delete');
-  del.onclick = guard(async () => { if (!confirm(`Delete the Template ${t.name}?`)) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
+  del.onclick = guard(async () => { if (!await skyConfirm(`Delete the Template ${t.name}?`, { ok: '🗑 Delete' })) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
   box.append(h('div', { class: 'bar' }, save, del, master ? h('span', { class: 'muted' }, `An Orientation of ${skyFamily(master)}: only what differs from it is kept.`) : ''), head,
     h('h3', {}, 'Attributes'), grid, h('div', { class: 'bar' }, save.cloneNode(true)));
   box.lastChild.firstChild.onclick = save.onclick;
@@ -16552,7 +16723,7 @@ async function editProcessTemplate(st, name, copy) {
     close(); await loadBrewProcess(); renderMenuPane(); toast('User Process Template saved');
   });
   const del = guard(async () => {
-    if (!confirm(`Delete the User Process Template ${t.name}?`)) return;
+    if (!await skyConfirm(`Delete the User Process Template ${t.name}?`, { ok: '🗑 Delete' })) return;
     await api('DELETE', `/ui/brewprocess/template/${st.key}/${t.name}`);
     if (bpWork.templates[st.key] === t.name) { bpWork.templates[st.key] = 'Skynet_' + st.key; await api('PUT', '/ui/brewprocess', bpWork); }
     close(); await loadBrewProcess(); renderMenuPane();
@@ -16961,7 +17132,7 @@ async function ivBuild(a) {
 function openProfile(id) { return eqViewOpen(id); }       // a profile opens as itself (Rule 19.6 #2: the old Equipment Profile screen is gone)
 async function deleteProfile(id) {
   const p = S.profiles.find(x => x.id === id); if (!p) return;
-  if (!confirm(`Delete the Equipment Profile "${p.name}"?\n\nNo Tab is linked to it: the Tabs it was copied onto keep their equipment, pipes and numbers.`)) return;
+  if (!await skyConfirm(`Delete the Equipment Profile "${p.name}"?\n\nNo Tab is linked to it: the Tabs it was copied onto keep their equipment, pipes and numbers.`, { ok: '🗑 Delete' })) return;
   await api('DELETE', `/ui/equipment/${id}`);
   if (eqWork?.id === id) { eqWork = null; eqDirty = false; }
   await load(); toast(`"${p.name}" deleted`);
@@ -18117,7 +18288,7 @@ function openTemplate(kind, name) {
       setTPL(r); dirty = false; toast(`Saved ${r.saved.name}`); finish();
     });
     const del = guard(async () => {
-      if (!confirm(`Delete the ${TEMPLATE_KINDS[kind]} "${t.name}"?\n\nTab items made from it stay on their Tabs.`)) return;
+      if (!await skyConfirm(`Delete the ${TEMPLATE_KINDS[kind]} "${t.name}"?\n\nTab items made from it stay on their Tabs.`, { ok: '🗑 Delete' })) return;
       setTPL(await api('DELETE', `/ui/templates/${kind}/${t.name}`)); toast(`Deleted ${t.name}`); finish();
     });
     // Fritz (2026-10-23): a copy of a Template (Skynet or User Bundled) is always made on the 🔨 Build Tab first. Clone: change it
@@ -18553,7 +18724,7 @@ function renderBrewProfileTab(kind) {
       S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(shownIn(kind, r.saved))); profDirty[kind] = false; renderMenuPane(); savedPop(`${K.title} saved`);
     });
     const del = guard(async () => {
-      if (!confirm(`Delete the ${K.title} "${w.name}"?`)) return;
+      if (!await skyConfirm(`Delete the ${K.title} "${w.name}"?`, { ok: '🗑 Delete' })) return;
       const r = await api('DELETE', `/ui/profiles/${kind}/${w.id}`);
       S[kind + 'Profiles'] = r.list; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); toast(`"${w.name}" deleted`);
     });
@@ -19323,7 +19494,7 @@ $('#cfgCheck').onclick = guard(async () => {
 $('#cfgSave').onclick = guard(async () => {
   const c = await api('POST', '/ui/config/check', $('#cfgCode').value, true);
   if (c.problem) { cfgProblem = c.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + c.problem.line + ': ' + c.problem.msg); }
-  if (!confirm('Save the config file?\n\nRunning Processes are stopped and the boards reconnect. The old file is kept in config/backups.')) return;
+  if (!await skyConfirm('Save the config file?\n\nRunning Processes are stopped and the boards reconnect. The old file is kept in config/backups.', { ok: '💾 Save' })) return;
   const r = await api('PUT', '/ui/config', $('#cfgCode').value, true);
   if (!r.ok) { cfgProblem = r.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + r.problem.line + ': ' + r.problem.msg); }
   cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(true);
@@ -19344,7 +19515,7 @@ $('#cfgBackups').onclick = guard(async () => {
     }) }, 'Open'),
     h('button', { class: 'primary', onclick: guard(async ev => {
       ev.preventDefault();
-      if (!confirm(`Put back the config from ${new Date(b.time).toLocaleString()}?\n\nRunning Processes are stopped and the boards reconnect. The current file is copied to config/backups first.`)) return;
+      if (!await skyConfirm(`Put back the config from ${new Date(b.time).toLocaleString()}?\n\nRunning Processes are stopped and the boards reconnect. The current file is copied to config/backups first.`, { ok: '↩ Put back' })) return;
       const r = await api('POST', `/ui/config/backups/${encodeURIComponent(b.name)}/restore`);
       setCfgText(r.text); $('#cfgBackupDlg').close();
       $('#cfgBackupNote').textContent = `Restored ${b.name}. The file it replaced was copied to config/backups/${r.backup}`;
@@ -19395,7 +19566,7 @@ async function importSchemaFile() {
     if (!f) return;
     body = await f.text();
   } else q += '&file=' + encodeURIComponent(w.pick);
-  if (w.load && !okToSwitch(w.pick, 'Loading the Schema')) return;
+  if (w.load && !await okToSwitch(w.pick, 'Loading the Schema')) return;
   const r = await api('POST', '/ui/schemas/import?' + q, body ?? '', true);
   const p = r.processes;
   const lines = [`Schema "${r.made.name}" added.`,

@@ -19,6 +19,49 @@ The **Brain** is the main computer that runs Skynet. It can be a **Windows, Mac 
 
 The server runs the processes and talks to the hardware. Processes keep running when every browser is closed, as long as the "Brain" is powered and On.
 
+## Skynet Build Philosophy
+
+*In OakBarn Brewery's own words: why Skynet was written, and the rules every part of it is built by.*
+
+I wrote the Skynet Panel because I was not satisfied with what was available. And because of my experience with things I had previously written (and sold by subscription or outright), when there is basically one person, or even one with a paid assistant, it is NOT a long term solution. In a previous program I used, promises were made but not kept, and the "developer" disappeared for years. Also, I wanted changes that were not considered, even if they were trivial in my mind to code.
+
+I have something of a background in coding that started with writing Macros in Lotus 1-2-3. That eventually led me here. This program is written in Node.js to make it cross platform. My background is more Visual Basic oriented, but I understand how to program and know how to use classes, objects, waits, ifs and such in writing a program. So knowing that, I used Claude AI to help write the backend code, which was much faster than me learning the Node.js way.
+
+One thing I found out very quickly: Claude AI cannot write a program as complicated as the Skynet Panel without a knowledgeable helper like me to steer it in the correct direction. You can ask AI to make a chocolate pie, but if left alone, AI might create a mud pie instead. That being said, Claude AI was essential to creating this program.
+
+The following are the way I build any software, as I have learned to follow them. While some are cumbersome to create or slow a creation down, they have helped me and every user of a program I have done.
+
+1. **Open Source and Free.** What is better than FREE? I do plan to fix any bugs when they are found, and even allow suggestions for improvements. I will also seek others to help with maintaining and helping on requests and bugs, so I am not the sole source of a solution. Monetize only with a small donation or levels for features. But don't ASK all the time!
+2. **Do not be annoying!**
+   1. Don't constantly ask for unnecessary confirmations. As an example in the Skynet Panel, Claude (in Mud Pie Mode) required a confirmation every time you turned on a motorized Pump. I would not have turned it "On" if I did not want it on! Annoying! There is a confirmation for a manual valve, because you are the motor and Skynet cannot tell if you did open the valve or not.
+   2. Try to keep the Warnings (Annoying!) down to a minimum, and only when necessary.
+   3. Do not constantly nag about Donations! Annoying! I am tired of being asked to leave a tip at a self service Kiosk!
+3. **One Click for things you do every day.** Things you do rarely can have several clicks to get there, but if you do not do it often, it does not slow you down.
+4. **Easy to find things you do not do every day.** It is annoying to have to hunt for how to change a setting on a cell phone. Have it on a menu.
+5. **Extensive Help, readily available and written in PLAIN LANGUAGE!** Technical information, if needed or nice to know, follows the plain language.
+   1. **Readily available.** Help should be right where you are, not hidden in a manual you have to go find. In the Skynet Panel, rest the mouse on almost any box or button and its Hover Help pops up and tells you what it does. The dialogs stay clean, because the explanations live in the Hover Help. When you want more, the Help tab has a page for each part of the Panel, in English and French.
+   2. **Plain terms, no "Who's on First?"** A word says what it means. Plus means up and minus means down, and nothing should read backward like a debit and a credit, where you have to stop and think which way it goes.
+   3. **Things act the same everywhere.** Once you learn how one thing works, everything like it works the same way. Click the picture of a Pump and it turns On or Off; a Valve or a Heating Element works the same. You should not have to learn it twice.
+6. **Automate behind the user, without much user input if possible.** There are two good examples in the Skynet Panel:
+   1. **Import a beer.xml.** Most brewing recipe programs do a good job for you. Brewer's Friend and BeerSmith can export a beer.xml file. You have to know nothing about what is in that file (and only things you add in a program like BeerSmith are exported anyway). Since it is a known standard, all you have to do is provide the .xml file to the Skynet Panel, and it will import the data and calculate IBUs and other things, and set warnings for hop drops, with you only providing the .xml file. Not a single line of code needed from you.
+   2. **MQTT.** What the heck is MQTT? You really do not need to know, but it is a way for different programs to work together with very little input from a user. You need an MQTT subscription service to make it easy (it costs a few dollars a month), or you can set it up for free if you know how. What it allows is VOICE command of things like Pumps and Valves using Siri, Google Home or Alexa. The only thing you need to provide is the command part. "Turn On Red Pump": Red Pump is all you have to provide, one time. Easy and no sweat.
+7. **Cross Platform** (Windows, macOS, Linux and Raspberry Pi), with any common browser on a computer, tablet or phone (Android or iPhone).
+8. **HMI (Human Machine Interface) as a Browser.**
+9. **Remote Access.**
+10. **Don't be a Nanny.** The end user becomes responsible for his Actions or faults. I take zero responsibility for the Safety or Stupidity of someone I do not know. A program is always used at your own risk. I can guide, but not compel.
+11. **Built using available items that can be made or purchased.** In the Skynet Panel, that means you can buy the parts for the Skynet Panel at places like Amazon or MoreBeer.
+12. **Respect Copyright Laws.** Anything that the Skynet Panel supplies in its media files is open: Public Domain, Created as Original by Skynet, CC0 (CC Zero), CC BY and CC BY-SA (and fonts under the SIL Open Font License). I do not check any user files; that is none of my business.
+13. **Use a back house Meaningless Key to store, fetch and put** (Design Rule #2). That means you can easily change a name and the data will still be retrieved. Years ago, when I was building a PayPhone Accounting Program (for people who provided payphones), the friend I was writing it for told me that a payphone number never changed and we could use it as a key because each was unique. Stupid me. I did not have this rule, and 2 years later, when there was an area code split, half the phones needed to be changed. It was a major rewrite that would not have been necessary if I had had this rule.
+14. **Allow a User to make the Program his own.** Allow the user to decide which things are shown on a screen or not.
+15. **Keep user tasks as simple as possible.** Lead by the nose if possible. Use Predictive Text, but be able to turn it off. If you cannot turn off Predictive Text = Annoying!
+16. **Have an Undo if possible, rather than a warning on Saving.** And nothing is ever written over: in the Skynet Panel a Schema backup is made every time a change is saved, so an earlier version can always be got back.
+
+**From the Skynet Rules** ([docs/Skynet_Rules.md](docs/Skynet_Rules.md) is the full list):
+
+17. **Never Take Away, Only Add** (Design Rule #1). An update adds things; it does not remove what users already have. Together with the Meaningless Key of item 13 (Design Rule #2): "90% of issues with software updates are removed if you follow those rules."
+18. **KISS: Keep It Simple Stupid.** No clutter. Dialogs stay clean, and the explanations go in the Hover Help (Rule 2.38).
+19. **Correct spelling and plain English at all times** (Rule 2.37).
+
 ## 1. Install and run
 
 **Official Release:** **[Releases > Latest](https://github.com/oakbarn/skynet_brewery/releases/latest)** is always the newest **Official** Skynet, built and sent out by OakBarn Brewery. Every time Skynet starts it checks that its program files are still the ones OakBarn Brewery sent, and shows **✓ Official** on the Menu Bar (or a warning when something was changed). See Help > Official Skynet updates.

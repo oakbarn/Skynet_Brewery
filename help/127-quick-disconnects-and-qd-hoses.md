@@ -52,7 +52,11 @@ While you drag, the hose **flexes**: it leaves the pump the way it did before an
   top of the vessel, and the hose end goes to the middle of the vessel's top.
 - **anywhere else**: the end is loose, hanging in the air. If something pushes water into the hose (a Tap Water Valve that is On,
   or a running pump), it pours out of the open end, so the hose shows flow and a
-  water splash in the color of the flow.
+  water splash in the color of the flow. An end left inside a Tee or Elbow, or very close to an IP, is in it: water goes on
+  through it and there is no splash. An end lying on a pipe or a widget gets no splash either.
+
+When the water has nowhere to go (every way ends at a closed valve), the hose and the pipes up to those valves are full but not
+moving: their dashes show and **stand still**. Once a valve opens, they move.
 
 When you let go, the end **stays where it is**: joined to the IP, Quick Disconnect or vessel top under it, or hanging loose.
 Nothing is asked. When it locks onto an IP, a Quick Disconnect or a vessel top, its ring **flashes red and yellow for 2

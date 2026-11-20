@@ -36,6 +36,7 @@ Try a brew day without touching any hardware, with time running faster or skippi
 
 These change things already made and how the whole panel works, for every Schema (they used to be on the Default tab; Skynet Rule 2.42). What a **new** thing starts with is on [Default settings](155-default-settings).
 
+- **The Brain**: **Shut Down Brain Option** (Off to start). On: Admins get ☰ Menu > **⏼ Shut down the Brain's computer** ([Closing Skynet Brewer and Standby](95-closing-skynet-brewer)).
 - **Tabs**: **Tab Style**, the look of every Tab that has no Tab Style of its own ([Tab Styles](101-tab-styles)).
 - **Menu Bar**: hide the Menu Bar on Tabs ([The Menu Bar](40-menu-bar)).
 - **Sound**: **Sound on** (this screen, right now) and **Turn Sound On when starting**.
