@@ -15,7 +15,7 @@ Open **Settings > Boil temperature (air pressure)** (Admins).
 |---|---|
 | **Airport (ICAO)** | Your airport's 4 letter ICAO code, for example `KORD`. This is the only way to pick the weather station. |
 | **Elevation** | Your brewery's height above sea level (feet for US Units, metres for Metric). It starts as the airport's own height. Change it to your own. |
-| **Typed air pressure** | Leave it empty. A pressure typed here is used as it is, with no internet. |
+| **Typed air pressure** | Leave it empty. A pressure typed here is used as it is, with no internet. It is the pressure at your brewery. Type it in **inHg** (15.9 to 32.05) or **hPa** (540 to 1085); Skynet knows which by its size. |
 
 Press **Test**. Skynet fetches the report now and shows the airport, the air pressure and the boil temperature. **Save**
 keeps the boxes.
@@ -48,11 +48,15 @@ Type it in the **Elevation** box and press **Save**.
 
 ## The messages
 
+Only real air pressures are used. The lowest ever at sea level was about 870 hPa (25.69 inHg) and the highest about
+1084 hPa (32.01 inHg); up high the pressure at the brewery is lower, about 600 hPa (17.7 inHg) at 4,000 metres.
+
 | Message | What it means | What Skynet uses |
 |---|---|---|
 | *Check your Airport code in Skynet Settings.* | The code is not 4 letters, or that airport sends no weather report. | Standard air at your Elevation |
-| *The Pressure is not available from your Airport code set in Skynet Settings.* | No internet, or the airport's weather station is down (no report in the last 3 hours). | Standard air at your Elevation |
+| *The Pressure is not available from your Airport code set in Skynet Settings.* | No internet, the airport's weather station is down (no report in the last 3 hours), or its report has a pressure no airport ever had (below 865 or above 1085 hPa). | Standard air at your Elevation |
 | *No Airport code in Skynet Settings yet.* | The box is empty. | Standard air at your Elevation |
+| *That is not an air pressure. Type it in inHg (15.9 to 32.05) or hPa (540 to 1085).* | The typed pressure can't be real (for example 10.13). It is not saved. | What it used before |
 
 ## In a Process
 

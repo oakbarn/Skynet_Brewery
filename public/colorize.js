@@ -1,4 +1,4 @@
-import { SKYNET_CONSTANTS } from './skconst.js';
+import { SKYNET_CONSTANT_WORDS } from './skconst.js';
 import { SKN_GLOBALS } from './boilpoint.js';
 // Color coding of Processes (Fritz, 2026-10-19). Used by the Process editor, the XML file export and the Notepad++ colors file.
 // Every character of a Process gets a class by what it does:
@@ -15,7 +15,7 @@ import { SKN_GLOBALS } from './boilpoint.js';
 //   com   comments: //, #, ' and /* ... */ (C, C++, C#, JavaScript, Node.js, Python, VB)  green
 //   lab   [labels] and the label after goto                                             slate
 //   attr  the attribute after a dot (my_Widget.visible)                                 gray
-// Skynet Constants (skc_Kg_To_Lb ...) are blue like true, false and now. Node loads it too (tests, tools/notepadpp.js).
+// Skynet Constants (skn_const_L_p_Gal ...) are blue like true, false and now. Node loads it too (tests, tools/notepadpp.js).
 
 export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'op', 'str', 'num', 'com', 'lab', 'attr'];
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
@@ -28,7 +28,7 @@ export const LOGIC = ['and', 'or', 'not'];
 COMMANDS.push('declare', 'gglobalvalue', 'gglobalstring', 'gglobaltime', 'gglobaldatetime', 'gglobalboolean', 'gv', 'gs', 'gt', 'gd', 'gb');
 // element types that sit on a PLC port: Devices. Every other type (but gGlobal) is a Widget.
 export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid', 'deadband', 'hydrometer'];
-const CMD = new Set(COMMANDS), CONST = new Set([...CONSTANTS, ...SKYNET_CONSTANTS.map(c => c[0].toLowerCase()), ...SKN_GLOBALS.map(c => c[0].toLowerCase())]), LOG = new Set(LOGIC);
+const CMD = new Set(COMMANDS), CONST = new Set([...CONSTANTS, ...SKYNET_CONSTANT_WORDS.map(c => c.toLowerCase()), ...SKN_GLOBALS.map(c => c[0].toLowerCase())]), LOG = new Set(LOGIC);
 
 // The colors, for a light page (the files) and for the panel's dark look. Notepad++ uses the light ones.
 export const COLORS = {
@@ -83,7 +83,7 @@ export function classify(text, words) {
       const rest = line.slice(i);
       let m;
       if (prev === 'step' && (m = /^[A-Za-z]\d+\.\d+/.exec(rest))) { set(p, p + m[0].length, 'num'); i += m[0].length; prev = 'num'; continue; }   // step S2.00001
-      if ((m = /^\d+:\d{2}(?::\d{2}(?:\.\d+)?)?/.exec(rest)) || (m = /^(\d+\.?\d*|\.\d+)/.exec(rest))) {
+      if ((m = /^\d+:\d{2}(?::\d{2}(?:\.\d+)?)?/.exec(rest)) || (m = /^(\d+\.?\d*|\.\d+)(\s*°\s*[CFcf](?![A-Za-z0-9_~@°]))?/.exec(rest))) {      // 152°F is one number (Rule 2.59)
         if (!(c === '.' && prev === 'name')) { set(p, p + m[0].length, 'num'); i += m[0].length; prev = 'num'; first = false; continue; }
       }
       if ((m = /^[A-Za-z_][A-Za-z0-9_~@°]*/.exec(rest))) {
@@ -181,7 +181,7 @@ export function notepadPlusPlus(words, texts = []) {
   const vars = [...new Set(texts.flatMap(t => [...String(t).matchAll(/^\s*new\s+\w+\s+([A-Za-z_]\w*)/gim)].map(m => m[1])))].sort().join(' ');
   const general = !words;
   const kw = [
-    [...COMMANDS, ...CONSTANTS, ...SKYNET_CONSTANTS.map(c => c[0]), ...SKN_GLOBALS.map(c => c[0])].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
+    [...COMMANDS, ...CONSTANTS, ...SKYNET_CONSTANT_WORDS, ...SKN_GLOBALS.map(c => c[0])].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
     group('dev'),
     general ? 'gG' : group('vk'),
     '',

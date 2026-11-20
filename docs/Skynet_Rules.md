@@ -139,22 +139,33 @@ Get and Put, `log Name` in a Process becomes `send_db Name`, and the web API is 
 (`/api/gapi` is gone). (Fritz, 2026-10-30, thread "Send any Device or Widget to a database", Help 4, 98;
 was 2026-10-28, Help 84)
 
-1.17 **Skynet Constants** are fixed numbers built into Skynet for common conversions (weight, volume,
-pressure, temperature, brewing ratios, length, power, time). Each name starts **`skc_`** and says
-from_To_to: `skc_Kg_To_Lb`, `skc_PSI_To_kPa`. A Process uses one like a number
-(`gGV_Lb = gGV_Kg * skc_Kg_To_Lb`). Nobody can change them (Rule 3.11), and no Device, Widget or
-variable name can start `skc_`. (Fritz, 2026-10-30, thread "Add Skynet unit conversion constants", Help 94)
+1.17 **Skynet Constants** are fixed numbers built into Skynet for common conversions (weight, fractions and water, volume US and
+Imperial, pressure, temperature, brewing ratios, length, power, time). **Name and Label (OakBarn Brewery, 2026-11-19: "SK_CONST_L_p_G
+with a label Liters per Gallon"; "KISS make them the same"; "yes the skn_ as any Skynet thing"):** each name is **`skn_const_`**
+(Rule 3.20) plus a short code read as "this many A in one B" (`_p_` = per), and each has a plain **Label**: `skn_const_L_p_Gal`,
+Label **Liters per Gallon**, 3.785. A gallon is `Gal`, never `G` (capitals mean nothing, so `G` and `g` for gram would be one
+letter; OakBarn Brewery, 2026-11-17: "Capitalization should mean nothing"). A gallon, quart, pint or fl oz is always US; an
+**Imperial** unit has **Im** (`skn_const_L_p_ImGal` = 4.546; OakBarn Brewery: "OK \"IM\" for imperial"). A Process uses one like
+a number (`gGV_Batch_L = gGV_Batch_Gal * skn_const_L_p_Gal`). Nobody can change them (Rule 3.11), and no Device, Widget or variable
+name can start `skn_const_`. A Process also has **`toF(x)`** (x × 1.8 + 32) and **`toC(x)`** ((x − 32) ÷ 1.8) (OakBarn Brewery,
+2026-11-17: "toF and toC look good"); they work only with ( ) after them, so an item called `toF` is still read by its name and no
+name is refused for them. The list is viewable in the Process editor (**📐 Constants**: Label, value, name; click one to put it at the
+cursor) and in Help 94. **Adding constants (OakBarn Brewery, 2026-11-19):** a new Skynet feature that needs a conversion adds it to
+public/skconst.js and Help 94 in the same PR, without asking first. (Fritz, 2026-10-30, thread "Add Skynet unit conversion
+constants"; names and Labels 2026-11-19, Panel Updates Sandbox entry 28; Help 94)
+- *Replaced 2026-11-19:* the `skc_From_To_To` names (`skc_Kg_To_Lb`), and the short names with no start (`L_p_Gal`) as reserved
+  words. Before the first Public Production, so no old way is kept.
 
-1.18 **Skynet names: `skn_` and `sk_`.** **`skn_`** = a **Skynet internal Global**, set by Skynet and read only in a
+1.18 **Skynet names: `skn_`** (Rule 3.20). **`skn_`** = a **Skynet internal Global**, set by Skynet and read only in a
 Process: `skn_Boil_Temp` (the temperature water boils at here and now, in the panel's units), `skn_Boil_Temp_C`,
-`skn_Boil_Temp_F`, `skn_Air_Pressure` (hPa). **`sk_`** = a **Skynet role** that holds one temperature probe (by its hidden
-key, so a rename keeps it): `sk_Boil_Probe_1-3`, `sk_Mash_Probe_1-3`, `sk_HLT_Probe_1-3`, `sk_Ferment_Probe_1-10`, set on
+`skn_Boil_Temp_F`, `skn_Air_Pressure` (hPa). A **Skynet role** (`skn_` too; was `sk_` before 2026-11-19) holds one temperature probe (by its hidden
+key, so a rename keeps it): `skn_Boil_Probe_1-3`, `skn_Mash_Probe_1-3`, `skn_HLT_Probe_1-3`, `skn_Ferment_Probe_1-10`, set on
 ☰ Menu > Default > Probe roles. In a Process a role works like its probe's name. One probe per role, one role per probe.
-**`wait_boil`** waits until `sk_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
+**`wait_boil`** waits until `skn_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
 temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
 at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97) **Built 2026-11-19 (Panel Updates
 entry 16, Help 238):** the four `skn_` Globals (read only; `skn_Boil_Temp` in the panel's Units; data kept in °C and hPa).
-The `sk_` probe roles and `wait_boil` are **not built yet**; until then a Process waits with
+The `skn_` probe roles and `wait_boil` are **not built yet**; until then a Process waits with
 `wait BK_Temp >= skn_Boil_Temp - 1`.
 
 1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
@@ -689,7 +700,12 @@ sits in (a goto back up, often in an if) is left; the next wait runs as normal. 
 2.27 **Boil temperature** (Settings > Boil temperature (air pressure); was "User Profile"): the airport's **ICAO code** is
 the **one and only way** to pick the weather station (no Postal Code or town lookup; Fritz, 2026-11-19: "The perferred way
 should be ICAO id of airport. WE could make it the only way and explain how to find it with an internet search"), then the
-brewery's **Elevation** (starts as the airport's own height, always changeable) and an optional **typed air pressure**. The
+brewery's **Elevation** (starts as the airport's own height, always changeable) and an optional **typed air pressure**
+(the pressure at the brewery, typed in inHg or hPa). **Only real air pressures** (Fritz, 2026-11-19: "10.13 would never be
+a pressue"): a number is read as inHg when it is 15.9 to 32.05 and as hPa when it is 540 to 1085 (down to about 5,000 m);
+anything else is turned down with one plain message, "That is not an air pressure. Type it in inHg (15.9 to 32.05) or hPa
+(540 to 1085).", and not used. An airport's report must be a real sea level pressure, 25.5 to 32.05 inHg or 865 to 1085 hPa
+(records about 870 and 1083.8 hPa); a report outside that is not used. The
 Brain reads that airport's METAR every 30 minutes, takes its pressure to the Elevation and works out `skn_Boil_Temp`
 (Rule 1.18). Order: typed pressure > the airport's report > standard air at the Elevation. **Test** fetches it now. One
 plain message when the report is not used: "Check your Airport code in Skynet Settings." (not 4 letters, or no report for
@@ -1190,8 +1206,18 @@ never changes a saved number, so switching back and forth can never drift a numb
   9/5 only, never with the 32. The Hysteresis Offset list is every half degree in the Units.
 - **A probe's own Units box ("Kept in"):** never dropped. It is the units that probe keeps its numbers in (its reading, Setpoint,
   Offsets and what a Process writes to it); it no longer changes what is shown. A probe kept in °F (older Schemas) keeps working
-  and only shows in the Units. What is typed is saved in the probe's own units. A Process number (`HLT.setpoint = 152`) is still
-  in the probe's own units.
+  and only shows in the Units. What is typed is saved in the probe's own units.
+- **Temperatures in a Process (OakBarn Brewery's choice, 2026-11-19: "we need the use to be able to type 152. This can be
+  triggered by the settings in Skynet Defaults US?Metric as how it inturpeded by the backend"):** a plain number set on, or
+  compared with, a temperature is typed in Units (`HLT.setpoint = 152` is 152 °F in US). When the Process is saved it is kept in
+  °C with its sign (`66.6667°C`), so a saved Process never changes meaning when Units is switched; when it is opened it is shown
+  in Units again (`152`). An Offset (.onoffset, .heatoffset, .cooloffset, .deadbandoffset, .innerbandoffset) and a `+=` or `-=`
+  are differences (9/5 only, no 32). A number typed with its sign (`152°F`, `66.7°C`) is always that. A plain number in a saved
+  Process, a Sample or a Brew Day Process is °C. A number in a formula with a temperature (`= Strike + 2`) is left as typed (°C)
+  and the save gives one warning; a setpoint hotter than boiling in °C gets one warning. A probe kept in °F is turned where the
+  Process reads or sets it, so a Process always works in °C behind the scenes. The BruControl Import puts °F on the plain numbers
+  of its scripts that are on °F probes (155 becomes `155°F`). *Not taken:* Processes in °C only, with °F typed by its sign
+  (Claude's first recommendation).
 - **Exceptions, kept in their own unit whatever Units says (OakBarn Brewery, 2026-11-19):** (1) **Recipe items that come in their
   own unit**: "some recipes have grams vs ounces so we will need to set what the thing added use (some Yeasts come as Grams rather
   than Oz , although most are Packs. Additions can be either"; "Hops may be the same. I have always used OZ. But you could use
@@ -1483,6 +1509,13 @@ Process string, a `print` line, a pop-up), changes how it looks. The one list is
   `\ohm` Ω, `\+-` ±, `\\` one backslash.
 - **No `\F` or `\C` alone:** a folder path like `C:\Config` must never turn into °Config (Rule 7.23 uses paths everywhere).
 - A code that is not on the list stays as typed. Codes work the same in both programs; the BruControl Import brings in no codes.
+
+3.20 **`skn_` starts every Skynet name** (OakBarn Brewery, 2026-11-19: "yes the skn_ as any Skynet thing"; "KISS make them the
+same"). A name Skynet owns, that a Process can read, starts **`skn_`**, lower case like the other starts (`gG`, `wgt_`):
+Skynet internal Globals (`skn_Boil_Temp`, Rule 1.18), probe roles (`skn_Boil_Probe_1`, Rule 1.18, not built yet) and Skynet
+Constants (`skn_const_L_p_Gal`, Rule 1.17). A group of Skynet names gets **`skn_<group>_`** (OakBarn Brewery, 2026-11-19:
+"they could be skn_rcp_ so I will know what you are taking about"): `skn_const_` for Skynet Constants, `skn_rcp_` for Recipe values.
+Recipe values become `skn_rcp_Strike_Temp` ... (was `rcp_`, Rule 16.4) in their own PR, after the Recipe PR now open (536).
 
 ## 4. Making things: the Build Tab
 
@@ -3698,6 +3731,12 @@ Both programs: the BruControl Import's Build page shows it too.
 - **Any Help picture taken from a PNG or a PDF is redrawn** (OakBarn Brewery, 2026-11-15: "Good rule on drawing any pix from a Png
   or pdf"), never cut out and shipped as it is. A picture cut from a markup PDF is only as sharp as it was pasted into the PDF
   (most are 96 dots per inch). The PNG may stay next to the SVG (Rule #1, Never Take Away); the SVG is what shows.
+- **One exception, waiting for OakBarn Brewery's review** (2026-11-19, Panel Updates entry 15, taken as Claude's recommendation while he
+  was away): the two **Tab size pictures** (`help_pictures/Tab_1600x900_on_1920x1040_Screen.png` and `Tab_1920x1040_on_1920x1040_Screen.png`,
+  in the Width and Height of a New Tab Hover Help) are real screenshots of the panel, as he asked ("add some graphics of a tab ...
+  highlighting the scroll bars"), so the words on the Tab are part of the picture. They show how a whole screen looks, not words to read;
+  the explanation is real text in the balloon (English and French), and the pictures add no words of their own (only red marks).
+  A whole-screen picture uses ⟪imgw:path⟫ in Hover Help, drawn as wide as the balloon (⟪img:⟫ stays at most 240 px).
 Skynet does this in the Background and needs no user input (Rule 11.13). Both programs: the BruControl Import makes no traced copies, so it already shows
 the pictures themselves (and the hand-made SVGs). Help 7.
 
@@ -6229,6 +6268,7 @@ import.
 - 2026-11-19: Rule 2.43 and Rule 2.44 changed, Panel Updates 41 (OakBarn Brewery: "the standard PV and SV can be intergrated into The Display"; "Forget visible option Make part of Digit Display Box. Keep all Digits an Dergee F or C fit on one line Inside the display."): every Temperature Probe's display shows PV over a green SV box (PV Blue below, Green at, Red above the Setpoint; Duty Cycle Red / Blue while ON, Grey while OFF), one click on the SV box types a new Setpoint in place; a probe a Heating Element (or Fermentor Control, older Hysteresis, PID, Deadband Device) holds shows and sets that one's Setpoint (one Setpoint), a probe nothing holds keeps its own (.setpoint, a Setpoint row in its Properties). Help 160 (and French). Checked against both programs: the BruControl Import has no running Tabs and BruControl probes have no Setpoint, so nothing changes there.
 - 2026-11-19: Added Rule 2.62 (OakBarn Brewery: "A profile is only to import to start a build. Nothing more."; "I want ZERO connection after placed on Tab."; "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Tab keeps no link to an Equipment Profile or Template. The Tab link, follow the Default Layout, save back on every Save, the locked profile freezing Tabs and Make it unique are gone; the profile numbers are copied onto the Tab (picked "Copied onto the Tab") and changed in Tab Settings or ⚙ Numbers; 💾 Save as a profile ... copies a Tab into a profile, one direction only; lock_Equipment locks the Tab. Rules 2.58, 17.13, 19.6 and question 7 changed to match. Checked against both programs: the BruControl Import has no Equipment Profiles; its import onto a locked Tab is stopped as before.
 - 2026-11-19: Rule 2.62 #7 and #8 added, Rule 5.16 changed (OakBarn Brewery: "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Skynet valve keeps its own copy of its Template's fixed attributes and pictures (the Brain puts a sent fixed attribute back to the valve's own, not the Template's); Orientation copies that picture when picked. Pipe fittings keep their own bend, body, size, upright and openings; a Skynet fitting no longer follows its Template's new picture when Edit layout opens. Help 88 (and French). Checked against both programs: the BruControl Import makes no Skynet valve User versions and only names a vessel's Template for the Panel to copy, so nothing changes there.
+- 2026-11-19: Rule 2.59: temperatures in a Process (OakBarn Brewery's choice: "we need the use to be able to type 152"): typed and shown in Units, kept in °C with its sign when saved; Offsets and += / -= are differences; a number with its sign is always that; one warning for a number in a formula with a temperature. Help 05 (and French). Checked against both programs: the BruControl Import marks the plain °F numbers of its scripts with °F, so they mean the same.
 - 2026-11-19: Rule 2.59 extended (OakBarn Brewery, Panel Updates Sandbox entry 9: "Fix the Dispalys as the Skynet Setting for US Metric, US would not understand C and Europeans not F"; "That should be the Rule. Keep backend data metric, display to user by choice in Skynet Settings"): Tab temperatures (PV, SV, Dial, SetPoint and Heating Element pop-ups, Setpoints and Offsets in Properties) show in Units and are saved in the probe's own units; a probe's Units box is what it keeps its numbers in. Exceptions: Recipe items in their own unit (additions, yeast Packs; per-line yeast and hop units not built) and Manual vessels (DigiBoil, Brewzilla) with fixed screen units. Help 155 and 160 (and French). Checked against both programs: the BruControl Import keeps its probes in BruControl's units, and its Build page uses the same Tab, dialogs and pop-ups, so they show in Units there too.
 - 2026-11-19: Rule 2.62 #9 and #10 added, Rule 2.39 #3 changed (OakBarn Brewery: "NO LINK NO Connect Nada 100% Links gone"): a Tab Profile is copied onto a Tab (its color into the Tab's Color, its look into the Tab's own copy) and never linked; Tab Settings' Profile box is now **Copy Profile**, and ☰ Menu > Tab Profile's list of Tabs has **Copy onto it**. A Skynet valve's Properties rows are its own copy. Help 26, 36 and 88 (and French). Checked against both programs: the BruControl Import sets no Tab Profile on a Tab and makes no Skynet valve User versions, so nothing changes there.
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
@@ -6869,7 +6909,9 @@ import.
 - 2026-11-19: Rule 3.14 kept the same everywhere (OakBarn Brewery: "The suggested Skynet Type needs to be consistent and repeatable in every case"): a Hose Bib (Tap Water Valve) showed wgt_MV_ on its Suggested Name line but wgt_TWV_ from 🏷 Update to Suggested Name. The Suggested Name line now uses the same Tap Water Valve test, so it is wgt_TWV_ in every place. Every other Device and Widget already used one way for both. No Rule change. (thread "Add Device and Widget step-by-step Help")
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 1.18 and 2.27 changed (Panel Updates entry 16, OakBarn Brewery: "The perferred way should be ICAO id of airport. WE could make it the only way"): the boil temperature is rebuilt on today's code in Settings > Boil temperature (air pressure): the ICAO code is the only way (no Postal Code), Elevation, typed pressure, Test, three plain messages; the four `skn_` Globals built; `sk_` roles and `wait_boil` not built yet. Help 238 (how to find the ICAO code and your Elevation) and French. Panel only (the BruControl Import program never fetches a report). (thread "Set boil temp from local weather")
+- 2026-11-19: Rule 2.27 grows (OakBarn Brewery: "10.13 would never be a pressue"): only real air pressures: the typed pressure is read as inHg (15.9 to 32.05) or hPa (540 to 1085) by its size, anything else is turned down with one plain message; an airport report outside the sea level records (865 to 1085 hPa) is not used. Help 238 and French. (thread "Set boil temp from local weather")
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.

@@ -40,7 +40,8 @@ fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simu
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 const until = async (f, ms = 4000) => { for (let i = 0; i < ms / 20 && !f(); i++) await new Promise(r => setTimeout(r, 20)); return f(); };
-eng.write('p', 'hE.onoffset = -2\nif hE.onoffset == -2\nStep = 1\nendif\n');
+// Processes work in °C (Rule 2.59): this probe is kept in °F, so the Offset is typed with its degree sign
+eng.write('p', 'hE.onoffset = -2°F\nif hE.onoffset == -2°F\nStep = 1\nendif\n');
 eng.start('p');
 assert.ok(await until(() => store.getProp('Step', 'value') === 1), 'the Process reads back -2');
 assert.equal(store.getProp('hE', 'onoffset'), -2, 'the same sign in the Brain');

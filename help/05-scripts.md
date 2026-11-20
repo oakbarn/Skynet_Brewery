@@ -27,7 +27,7 @@ gblS_Msg = "Mash in"           set a variable
 tm_Whirlpool = 00:20:00        set a timer
 start "tm_Whirlpool"           start a timer
 alm_Hops = true                sound an alarm
-wait BK_Temp <= 154            wait for a temperature
+wait BK_Temp <= 154            wait for a temperature (in your Units)
 sleep 1000                     wait 1 second (1000 ms)
 my_Widget.visible = false      hide something on the screen
 if vVCount > 2 && Pump_Red == true
@@ -58,6 +58,24 @@ Every Device and Widget has a **label**: the name shown on the tab (empty = its 
 tm_Delay_W1.label = "1 Minute Delay"
 gGS_Brewery_Top.label = "Mash"
 ```
+
+## Temperatures in a Process
+
+Type a temperature in your **Settings > Units**: `152` is 152 °F in US and 152 °C in Metric (Skynet Rule 2.59). When you save, Skynet
+keeps it in °C with its sign (`66.6667°C`), so the Process means the same if Units is switched later, and when you open the Process it
+shows `152` again (or `66.67` in Metric).
+
+```
+HLT_Element.setpoint = 152       152 in your Units
+HLT_Element.onoffset = -1        an Offset is a difference: -1 °F is -0.56 °C (no 32)
+HLT_Element.setpoint += 2        so is a step up or down
+wait HLT_Temp >= 150             wait until the HLT reaches 150
+HLT_Element.setpoint = 66.7°C    a number with its own sign is always that
+```
+
+Only a plain number set on, or compared with, a temperature is turned. A number in a formula with a temperature
+(`HLT_Element.setpoint = Strike + 2`) is kept as typed, in °C, and the save gives one warning: give it its sign (`2°F`) or work it out
+on its own line. A setpoint hotter than boiling in °C gets one warning too. A probe kept in °F (an older Schema) works the same way.
 
 ## Files that are not on the Brain
 

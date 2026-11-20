@@ -16,7 +16,7 @@ Ouvrez **Settings > Boil temperature (air pressure)** (Admins).
 |---|---|
 | **Airport (ICAO)** | Le code ICAO de 4 lettres de votre aéroport, par exemple `KORD`. C'est la seule façon de choisir la station météo. |
 | **Elevation** | La hauteur de votre brasserie au-dessus du niveau de la mer (pieds pour les Units US, mètres pour Metric). Elle commence à la hauteur de l'aéroport. Mettez la vôtre. |
-| **Typed air pressure** | Laissez-la vide. Une pression tapée ici est utilisée telle quelle, sans internet. |
+| **Typed air pressure** | Laissez-la vide. Une pression tapée ici est utilisée telle quelle, sans internet. C'est la pression à votre brasserie. Tapez-la en **inHg** (15,9 à 32,05) ou en **hPa** (540 à 1085) ; Skynet sait laquelle par sa taille. |
 
 Appuyez sur **Test**. Skynet va chercher le bulletin tout de suite et affiche l'aéroport, la pression de l'air et la
 température d'ébullition. **Save** garde les cases.
@@ -51,11 +51,16 @@ Tapez-la dans la case **Elevation** et appuyez sur **Save**.
 
 ## Les messages {#the-messages}
 
+Seules les vraies pressions de l'air sont utilisées. La plus basse jamais vue au niveau de la mer était d'environ 870 hPa
+(25,69 inHg) et la plus haute d'environ 1084 hPa (32,01 inHg) ; en altitude la pression à la brasserie est plus basse,
+environ 600 hPa (17,7 inHg) à 4 000 mètres.
+
 | Message | Ce qu'il veut dire | Ce que Skynet utilise |
 |---|---|---|
 | *Check your Airport code in Skynet Settings.* | Le code n'a pas 4 lettres, ou cet aéroport n'envoie pas de bulletin météo. | L'air standard à votre Elevation |
-| *The Pressure is not available from your Airport code set in Skynet Settings.* | Pas d'internet, ou la station météo de l'aéroport est en panne (aucun bulletin depuis 3 heures). | L'air standard à votre Elevation |
+| *The Pressure is not available from your Airport code set in Skynet Settings.* | Pas d'internet, la station météo de l'aéroport est en panne (aucun bulletin depuis 3 heures), ou son bulletin a une pression qu'aucun aéroport n'a jamais eue (sous 865 ou au-dessus de 1085 hPa). | L'air standard à votre Elevation |
 | *No Airport code in Skynet Settings yet.* | La case est vide. | L'air standard à votre Elevation |
+| *That is not an air pressure. Type it in inHg (15.9 to 32.05) or hPa (540 to 1085).* | La pression tapée ne peut pas être réelle (par exemple 10,13). Elle n'est pas gardée. | Ce qu'il utilisait avant |
 
 ## Dans un Process {#in-a-process}
 

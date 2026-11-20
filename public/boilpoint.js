@@ -30,8 +30,26 @@ export function boilC(hpa) {
 export const stationPressure = (qnhHpa, elevM) => (qnhHpa ** 0.190263 - 8.417286e-5 * elevM) ** (1 / 0.190263);
 // Standard air at a height in metres (no report: the fallback)
 export const stdPressure = elevM => stationPressure(STD_HPA, elevM);
-// A METAR altimeter: hPa, or inches of mercury in older reports (under 40)
-export const toHpa = a => a < 40 ? a * 33.8638866667 : a;
+// Real air pressures only (OakBarn Brewery, 2026-11-19: "10.13 would never be a pressue"). A number is read as inches of
+// mercury when it is in the inHg range and as hPa when it is in the hPa range; anything else is not an air pressure.
+export const INHG_HPA = 33.8638866667;
+// An airport's altimeter setting is at sea level: the records are about 870 hPa (25.69 inHg, Typhoon Tip, 1979) and
+// 1083.8 hPa (32.01 inHg, Siberia, 1968), with a little room around them.
+export const QNH_LIMITS = { hpa: [865, 1085], inHg: [25.5, 32.05] };
+// The typed pressure is the air pressure at the brewery itself (station pressure): lower up high, about 600 hPa
+// (17.7 inHg) at 4,000 m, so the low end allows a brewery up to about 5,000 m.
+export const TYPED_LIMITS = { hpa: [540, 1085], inHg: [15.9, 32.05] };
+const inside = (v, [lo, hi]) => v >= lo && v <= hi;
+// hPa from a number in either unit, or null when it is not a real air pressure
+export function pressureHpa(v, limits = TYPED_LIMITS) {
+  const n = Number(v);
+  if (v === null || v === '' || !Number.isFinite(n)) return null;
+  if (inside(n, limits.inHg)) return n * INHG_HPA;
+  if (inside(n, limits.hpa)) return n;
+  return null;
+}
+// A METAR altimeter: hPa, or inches of mercury in older reports; null when it can't be a real pressure (a bad report)
+export const toHpa = a => pressureHpa(a, QNH_LIMITS);
 
 // The value of one Skynet internal Global from { boilC, hpa } and the panel's Units ('US' or 'Metric')
 export function sknValue(name, now, units = 'US') {
@@ -51,4 +69,5 @@ export const MSG = {
   badCode: 'Check your Airport code in Skynet Settings.',
   noReport: 'The Pressure is not available from your Airport code set in Skynet Settings.',
   noCode: 'No Airport code in Skynet Settings yet.',
+  badPressure: 'That is not an air pressure. Type it in inHg (15.9 to 32.05) or hPa (540 to 1085).',
 };
