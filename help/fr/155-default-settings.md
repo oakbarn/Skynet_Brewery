@@ -104,7 +104,7 @@ Et si vous brassez avec l'eau du robinet et faites de la Bonne bière, pourquoi 
 
 ### Hop Stands {#hop-stands}
 
-La température et la durée des trois Hop Stands (High, Middle, Low) d'une nouvelle Recette ([Profils d'empâtage, d'ébullition et d'eau](35-mash-and-boil-profiles), Règle Skynet 17.14).
+Plus dans Default settings : il n'y a pas de Hop Stands par défaut. Une Recette demande le stand, sa température et sa durée quand un houblon Whirlpool est ajouté, avec les chiffres courants dans l'aide au survol ([Profils d'empâtage, d'ébullition et d'eau](35-mash-and-boil-profiles#the-three-hop-stands), Règle Skynet 17.14).
 
 ### Water to Grain Ratio {#water-to-grain-ratio}
 
