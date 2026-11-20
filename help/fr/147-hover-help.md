@@ -14,6 +14,10 @@ champs eux-mêmes. L'explication d'un champ est dans son **hover help** (l'aide 
 - La case **reste tant que la souris est sur le nom**. Écartez la souris (ou cliquez, appuyez sur une touche ou faites défiler) et elle disparaît.
 - **Cliquez sur le nom** pour ouvrir la même aide dans une petite fenêtre avec **Close**, si vous voulez la garder ouverte pendant que vous lisez.
 
+Exemple : la fenêtre Add de la Blichmann Riptide, avec la souris posée sur **1. Label**. Le hover help du Label s'affiche à droite de la fenêtre.
+
+![La souris est posée sur 1. Label et son hover help s'affiche à droite de la fenêtre](help_pictures/Blichmann_Label_HoverHelp.png)
+
 ## Les points actifs : aller à l'aide plus complète {#hot-spots-jump-to-the-bigger-help}
 
 Certains mots d'une case d'aide sont **bleus et soulignés**. Ce sont des **points actifs (hot spots)** : chacun a sa propre page d'aide, plus complète.
