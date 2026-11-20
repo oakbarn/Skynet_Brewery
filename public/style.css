@@ -61,6 +61,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .pipes .flow.rev { animation-direction: reverse; }
 .pipes .flow.off { display: none; }
 .pipes .flow.grav { opacity: 0.45; animation-duration: 2.4s; }     /* gravity flow (Rule 5.21): lighter and slower than pumped flow */
+.pipes .flow.still { animation: none; }     /* water that stands still (Rule 5.45): full up to a closed valve, the dashes do not move */
 .pipes .hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; pointer-events: none; }
 #ws.editing .pipes .hit { pointer-events: stroke; }
 .pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
@@ -1119,6 +1120,10 @@ dialog.gDlg .gErr { color: var(--bad); min-height: 1.2em; margin: 4px 0; }
 dialog.strEntryDlg { width: min(640px, 94vw); }
 dialog.strEntryDlg textarea.strEntry { width: 100%; box-sizing: border-box; white-space: pre-wrap; }
 dialog.askDiscard { width: min(420px, 94vw); }
+/* the one shared Skynet confirm box (public/skyconfirm.js, Rule 2.64): buttons upper right (Rule 2.54), the text keeps its lines */
+dialog.skyConfirm { width: min(520px, 94vw); }
+dialog.skyConfirm .skyAskHead { margin: 0; white-space: pre-line; font-size: 1.05em; }
+dialog.skyConfirm .skyAskText { white-space: pre-line; margin: 10px 0 4px; }
 @media (max-width: 520px) {
   dialog.gDlg .gRow { grid-template-columns: 1fr; gap: 2px; }
   dialog.gDlg .gNote { margin-left: 0; }

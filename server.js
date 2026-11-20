@@ -92,6 +92,7 @@ import { chillerTemplates, chillerVessels, moveChiller } from './lib/chiller.js'
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { BoilTemp } from './lib/boiltemp.js';
+import { startPowerOff, finishPowerOff, cannotWhy } from './lib/brainoff.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -730,7 +731,7 @@ async function route(req, res) {
   if (!roleAtLeast(me.role, need)) return fail(res, 403, need === 'admin' ? 'Only an admin can do that' : 'Your account is view only');
   if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
   // Standby (Rule 6.32): nothing can be changed, only Start (an Admin) and Close on the Brain's own computer
-  if (STANDBY && m !== 'GET' && !['/ui/wake', '/ui/close'].includes(p)) return fail(res, 409, 'The Brain is in Standby: an Admin starts it again from the panel');
+  if (STANDBY && m !== 'GET' && !['/ui/wake', '/ui/close', '/ui/poweroff'].includes(p)) return fail(res, 409, 'The Brain is in Standby: an Admin starts it again from the panel');
 
   // ===== Browser UI =====
   if (p === '/ui/events') {
@@ -1413,6 +1414,18 @@ async function route(req, res) {
     ok(res); setTimeout(() => shutdown({ reason: 'standby', again: true }), 300);
     return;
   }
+  // ☰ Menu > Shut down the Brain's computer (Rule 6.40, Admins only, from any screen, also from Standby): only when Settings > Panel
+  // settings > Shut Down Brain Option is On. Checked first, so a computer that refuses leaves everything running and says why.
+  if (p === '/ui/poweroff' && m === 'POST') {
+    if (me.role !== 'admin') return fail(res, 403, 'Only an admin can do that');
+    if (IMPORT_BUILD) return fail(res, 400, 'The Importer never shuts down the computer');
+    if (!store.config.brewDefaults?.shutDownBrain) return fail(res, 400, 'Shut Down Brain Option is Off (Settings > Panel settings)');
+    if (!(await startPowerOff())) return fail(res, 400, cannotWhy());
+    console.log(`The Brain's computer is shut down from the panel by ${me?.name ?? 'an admin'}`);
+    broadcast('closing', { by: me?.name ?? '', poweroff: true });
+    ok(res); setTimeout(() => shutdown({ after: () => finishPowerOff() }), 300);
+    return;
+  }
   // Start, on the Standby page (Rule 6.32, Admins only, from any screen): the Brain starts again the normal way
   if (p === '/ui/wake' && m === 'POST') {
     if (me.role !== 'admin') return fail(res, 403, 'Only an admin can do that');
@@ -1663,13 +1676,14 @@ const CLOSABLE = !process.env.INVOCATION_ID;
 // restarted or signed out). again: Standby or Start, so the Brain starts again by itself and the clean window stays open (Rule 6.32).
 // Every output is turned Off first and given a moment to reach the boards (Rule 6.31), so nothing waits for the boards' lost link.
 let stopping = false;
-function shutdown({ reason = 'closed', again = false } = {}) {
+function shutdown({ reason = 'closed', again = false, after = null } = {}) {
   if (stopping) return; stopping = true;
   console.log('Stopping...'); auth.flush(); power?.closing(reason); engine.stopAll(); control.stop(); store.persistNow();
   setTimeout(() => {
     mqtt.stop(); hw.stop(); pictures.stop(); logger.close(); removeStopKey(DATA, STOP_KEY);
     if (again) { server.close(); startAgain({ dataDir: DATA }); return setTimeout(() => process.exit(0), 200); }
     if (!IMPORT_BUILD) closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched (the Importer's Build page leaves the real panel's window alone)
+    after?.();                             // ☰ Menu > Shut down the Brain's computer (Rule 6.40): every output is Off now
     process.exit(0);
   }, 400);
 }

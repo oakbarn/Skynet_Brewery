@@ -1876,7 +1876,7 @@
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "tapwater": true,
-   "tapwaterOut": "out"
+   "tapwaterOut": "in"
   },
   {
    "name": "BM_31_DO@Valve_E_Fire~Hose_WA",
@@ -4731,7 +4731,7 @@
    "kind": "pipe",
    "workspace": "Water",
    "from": "fw_tee_e",
-   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:in",
+   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:out",
    "points": [
     [
      1480,
@@ -4788,7 +4788,7 @@
    "id": "p_fw_4",
    "kind": "pipe",
    "workspace": "Water",
-   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:out",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:in",
    "to": "ip_brew_manifold",
    "points": [
     [

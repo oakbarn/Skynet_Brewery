@@ -126,6 +126,12 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable "$SERVICE" >/dev/null 2>&1
 sudo systemctl restart "$SERVICE"
+# Let Skynet turn this computer off (☰ Menu > Shut down the Brain's computer, Rule 6.40). Only this one command, nothing else,
+# and only when an Admin turned on Settings > Panel settings > Shut Down Brain Option.
+POWEROFF_RULE=/etc/sudoers.d/skynet-brewer-poweroff
+echo "$USER ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff, /bin/systemctl poweroff" | sudo tee "$POWEROFF_RULE" >/dev/null
+sudo chmod 440 "$POWEROFF_RULE"
+sudo visudo -cf "$POWEROFF_RULE" >/dev/null 2>&1 || sudo rm -f "$POWEROFF_RULE"
 
 # A Desktop icon that opens the panel in the Pi's own browser
 DESKTOP_DIR="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"

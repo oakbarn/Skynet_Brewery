@@ -1366,6 +1366,24 @@ approved 2026-11-20: "29 ... yes"). The browser's own OK box is never used for i
 **Both programs:** the BruControl Import has no Interface list with Remove; its Interface step is unchanged. The Import Build page
 shares the Interface pop-up: it lists the ports of the computer it runs on, the same as the Panel. Help 76.
 
+2.64 **One Skynet confirm box for big deletes and changes** (OakBarn Brewery, Panel Updates entry 29, 2026-11-18: "I clicked remove
+on the Interface ... It is the host asking if I want to delete"; 2026-11-20: "do 29"). The browser's own OK / Cancel box is not used
+for a big delete or change. They all ask in **one shared Skynet box** (public/skyconfirm.js), the same everywhere (Rule 2.44):
+- Its buttons are in the **upper right** (Rule 2.54): the action, named for what it does (🗑 Delete, 🗑 Remove, 🚚 Move in now,
+  ▶ Proceed ...), red for a delete or a big change, then **Close** and **✕**. Close, ✕ and Esc change nothing. Close has the focus,
+  so a stray Enter changes nothing.
+- The question is the heading; the rest of the old message is the text under it, word for word.
+- **One warning only:** one box, no second "Are you sure?", nothing to type or tick (only Remove an Interface keeps its typed ID,
+  Rule 2.63). It is a modal dialog, so it is on top of everything (Rule 18.53).
+- Used for: Delete a Tab, a Schema, an item on a Tab, a gGlobal, an Equipment Profile, a Profile, a Device Template, a Template,
+  a User Process Template, a User Style, a Process (to the Recycle Bin) and a Process for good, a CSV set, a 1-Wire circuit or Index
+  in use, a Help page, media files; Throw away the Build Tab; Replace in many Processes; Remove a user, an Approved Device, the
+  Patron code; Turn Approved Devices Off; Make a new recovery code; the BruControl Import; Switch / load a Schema; Simulator or Real
+  boards; Move in (Brain Move); Save the config file and Put back an old one. The small "leave without saving?" questions stay as
+  they are.
+**Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asks in this box.
+Help 28, 48, 119, 188.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2667,6 +2685,21 @@ the crossing can never be taken for a cross or a tee. When both pipes lean the s
 1.29) is in front. Only the drawing changes: the pipes, their IPs, flow and Layer Order stay as they are, and clicking still picks
 the pipe under the pointer. Hoses bend and lie where they fall, so a hose is left as drawn. Help 124 (and French).
 
+5.45 **Water that stands still, and flow never past a closed valve** (OakBarn Brewery, 2026-11-20, Panel Update 7: "It could also
+show in the pipe up to the valves, but the flow is stopped. The flow does not move"; "Looks like a leak. The end is not open but
+connected to a Pipe. This is a Bug."; "Flow past a Closed Valve = bug"):
+- **Still water:** from a Tap Water Valve that is On (a Hose Bib included) or a running pump's outlet, every pipe or hose the water
+  can reach that has no flow (it ends at a closed valve, an End Cap or a Quick Disconnect with nothing on it) is full but not moving.
+  It shows the flow dashes in the flow color, standing still; moving flow still moves. Still water goes through open valves,
+  fittings and pumps that are off, as flow does, and stops at a closed valve.
+- **A water splash only on a truly open end** (Rule 5.40): a loose pipe or hose end within 14 px of an IP (as Save layout rejoins,
+  Rule 5.19), or anywhere inside a Tee, Elbow or other Tab_Fitting, is in that IP: flow goes on through it as if joined, and no
+  splash is drawn. A loose end lying on another pipe or hose, or on a widget, gets no splash either. Only an end out in the air
+  gets one. The saved drawing is not changed.
+- **Never past a closed valve:** a pipe joined to a valve goes on the valve's IP on its own side, never on the far IP, where it
+  would run under the valve and show flow on the other side. The 3 Vessel 1 Pump sample and the default Schema had the Manifold
+  Valve's two pipes the wrong way round (fixed; its Tap water now flows Right to Left, from the tap side to the manifold).
+
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
@@ -3526,6 +3559,26 @@ warning), the **Highest temperature** (the Setpoint + 10 °F, 5 °C, to start), 
   dialogs, nothing else changes there.
 Help 237 (and French); Help 156 points to it.
 
+6.40 **Shut down the Brain's computer** (OakBarn Brewery, 2026-11-20, Panel Update 7: "We need a method to shut down a Brain when
+you exit but reserved only for admin users And maybe a Skynet Setting to avoid option until set to Shut Down Brain Option is True in
+settings so no annoying Do you want to shut down the Brain every time an Admin closes the browser"; "Only Admin users are allowed to
+set Skynet Settings").
+1. **Shut Down Brain Option** (Settings > Panel settings > The Brain, a switch): **Off** to start. Only an Admin changes it (every
+   Skynet Setting is Admins only: the Brain refuses a change from anyone else, and the Settings page is greyed for them).
+2. **☰ Menu > ⏼ Shut down the Brain's computer**: shown only to an **Admin**, only when the Option is On; on any screen, and as a
+   button on the Standby page (Rule 6.32). With the Option Off nobody sees it and the Brain refuses it.
+3. It is a ☰ Menu choice, **never asked when a browser closes**: a browser can't tell the Brain a window was closed (a phone that
+   lost WiFi looks the same), and closing a window never stops the Brain (Rule 2.25).
+4. **The same box as Close and Standby** (Rule 2.25): what happens, brewing (what is On, which Processes run), other screens named,
+   one tick box each, **Back** changes nothing. Then the normal stop (every output Off, every Process stopped, a brew written down,
+   Rule 6.31) and the computer turns off. Every screen shows "The Brain's computer is shutting down". Standby stays as it was.
+5. **How** (lib/brainoff.js): Windows `shutdown.exe /s /t 10` (no admin rights); Raspberry Pi and Linux `sudo -n systemctl poweroff`,
+   which the Pi and Linux installers allow without a password and nothing else (/etc/sudoers.d/skynet-brewer-poweroff); Mac System
+   Events "shut down". Checked **before** anything stops: a computer that refuses leaves everything running and says why (Pi: run
+   the installer again once).
+6. **Both programs:** the BruControl Import program controls nothing and never shuts down the computer; nothing changes there.
+Help 95, 9 (and French).
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -3955,6 +4008,10 @@ Raspberry Pi later (or any Brain to any other), with **☰ Menu > Move Brain** (
 3. **USB ports**: each old USB port (COM3) is changed to the new Brain's (/dev/ttyACM0) in **every Schema at once**, Simulator
    boards included. A board the old Brain saw is found by its serial number and picked for you. It can be used any time, not only
    after a move. Ethernet and WiFi boards keep their address.
+   *Changed 2026-11-20* (Panel Updates entry 29 (e)): **Change to** is the **same USB Port list as the Interface pop-up** (Rule
+   2.63): the ports on this Brain now with what is plugged in and its serial number, on Windows the number alone (COM3 shows as 3),
+   the old port always in the list (red **not found on this Brain** when it is not here, Design Rule #1), and **🔄 Look again** at
+   the bottom of the list, which keeps what was already picked. Move in now asks in the Skynet confirm box (Rule 2.64).
 (thread "Move a computer Brain to a Pi", Help 119)
 
 9.10 **The Windows Setup .exe is signed** (OakBarn Brewery, 2026-11-09): Smart App Control blocks unsigned programs, so the
@@ -6443,6 +6500,7 @@ import.
 
 - 2026-11-20: Rule 2.63 extended (Panel Updates entry 29 Parts 2-4 and question (c), OakBarn Brewery: "KISS"): Change of Board shows the counts and the Devices whose Ports the new board lacks, then Save, with no typed confirmation; the USB Port is a dropdown of the ports on this Brain with 🔄 Look again and a saved port not found shown in red; a Simulator line keeps the real port; the Interface ID balloon gets the Suggested Device Name line; USB Port and Answer Wait balloons reworded (drafts A and B). Help 76 (and French). Checked against the BruControl Import program: its Build page shares the pop-up and gets the same port list. (thread "Make removing an Interface safer")
 - 2026-11-20: Rule 9.12 extended (OakBarn Brewery: "A for font rule", Panel Updates entry 45, Help in a User Language): fonts under the SIL Open Font License 1.1 (OFL) are allowed, with the license file shipped next to them and a row in Media_Licenses.csv.
+- 2026-11-20: Added Rule 6.40 Shut down the Brain's computer (OakBarn Brewery, Panel Update 7: "a method to shut down a Brain when you exit but reserved only for admin users"; "a Skynet Setting ... Shut Down Brain Option"; "Only Admin users are allowed to set Skynet Settings"): Settings > Panel settings > The Brain > Shut Down Brain Option (Off to start); ☰ Menu > ⏼ Shut down the Brain's computer and a Standby page button, Admins only, with the Close and Standby tick box box; Windows, Pi, Linux and Mac; the Pi and Linux installers allow only the poweroff command. Help 95, 9 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Let admins shut down the Brain")
 - 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-20: Added Rule 9.25 The Skynet Music Pack (OakBarn Brewery, Panel Updates entry 30, "a Get Music Pack"; Patron Add-On packs in a Patron subfolder, no locks or warnings): ☰ Menu > Get Music Pack copies the pack's MP3s from the Skynet-Music-Pack GitHub Release into media/sounds/Skynet_Music, add-only; 28 clearly public domain files, each with a Media_Licenses.csv row (OakBarn Brewery: "Get rid of any questionable": the Armstrong pieces, It Had to Be You, Adjutant's Call into French Foreign Legion March and Four Ruffles into General's March are left out); README Media credits. (Rule 9.23 is the Release clean-up and 9.24 the Language Fonts, PR 559, so the plan's "Rule 9.23" is 9.25.) Help 243 (new, and French); Help 59 links to it. Checked against both programs: the BruControl Import is not changed. (thread "Finish the Music Pack")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
@@ -6455,6 +6513,7 @@ import.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
 - 2026-11-19: Added Rule 6.38 (OakBarn Brewery, Panel Updates entry 31: a physical DIN push button that does one thing without writing code; "I had a Red one That canceled all alarms. I had a yellow one that did a 20 second firehose."): a Digital Input Device's On Press is None, Run a Process, Advance (Override, only when a Process it is set to waits; otherwise ignored) or Cancel all alarms. Help 235 (and French); Help 233 links to it. Checked against both programs: the BruControl Import is unchanged (its DINs come in with None). (thread "Make physical DIN buttons run Processes")
 - 2026-11-20: Added Rule 5.44 (OakBarn Brewery: "When a Pipe crosses a different pipe with no connect"; "The red looks like a cross fitting"): a pipe crossing with no joint never looks joined; the up-and-down pipe passes in front and the level pipe behind, with a thin dark edge either side. Seen on the 3 Vessel 1 Pump Brew House manifold (two crossings). Help 124 (and French). Checked against both programs: the BruControl Import is unchanged (it brings pipes in as they are; the drawing is the Panel's). (thread "Show pipe crossings without a joint")
+- 2026-11-20: Added Rule 5.45 (OakBarn Brewery, Panel Update 7, items 1 to 3): water that stands still shows still dashes from an open Tap Water Valve or running pump up to each closed valve; a loose pipe or hose end in a Tee or within 14 px of an IP flows on as if joined and gets no water splash, nor does one on a pipe or widget; the Manifold Valve's pipes in the 3 Vessel 1 Pump sample and the default Schema were on the wrong ends (the tap pipe ran under the closed valve and showed flow past it), fixed, its Tap water now Right to Left. Help 127 (and French). Checked against both programs: the BruControl Import brings pipes in as they are and draws no flow; nothing changes there. (thread "Fix water flow drawing bugs")
 - 2026-11-20: Rule 16.8 extended with the Process Samples (OakBarn Brewery, 2026-11-19: "Process Samples first"; 2026-11-20: "A But a new Tab"): written one at a time from his scripts, each on its own Tab of the 3 Vessel 1 Pump test bed and the default Schema. Process Sample 1 is the Water Tab (WA): his Fire Hose and Manifold buttons as Process Widgets, utility_FireHose_Manifold_Supply_Water with his codes 1001-1005 and 2001-2005, ask "Manifold Set?", a 20 second warning, the auto Override pop-up, a Float and FireHose Off. Rule 2.56: a String gGlobal wraps like every Text Box (it was made smaller to one line). Help 239 (new, and French); Help 5 links to it. Checked against both programs: the BruControl Import is unchanged (Importer Pattern 1, a switch that launches a script, already maps to one Process Widget). (thread "Write the Fire Hose and Manifold trigger Process")
 - 2026-11-20: Added Rule 16.11 (OakBarn Brewery: "Every Tap Water Fill gets an Over Ride Button"): a Process that fills from tap water has an Override button set to it on its Tab; one press passes the fill's wait and the Process closes the valves it opened. The Water Tab gets its Water Override, set to utility_FireHose_Manifold_Supply_Water; it shows only while tap water flows (new Override button setting 5. Shows: Always / Only while tap water flows), so there is no Override during the 20 second warning (with a button set to it, its pop-up no longer comes by itself). The Fire Hose and Manifold Valves also show on the 3 Vessel 1 Pump Brew House as Clones (OakBarn Brewery's markup). Help 239 (and French). Checked against both programs: the BruControl Import adds one for each Tap Water Fill Process it makes (Importer Sandbox; on hold). (thread "Write the Fire Hose and Manifold trigger Process")
 - 2026-11-20: Rule 16.5 extended (OakBarn Brewery: "a dialog ask for the time a global variable"): `ask "text" Name` shows the ask pop-up with a box for the answer, filled with what Name (a gGlobal or Value Widget) holds now; Done puts the answer in Name. The Fire Hose and Manifold Set Time uses it for gblT_SetTimer_Water (no Set Timer box on the Water Tab). Help 100 and 239 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Write the Fire Hose and Manifold trigger Process")

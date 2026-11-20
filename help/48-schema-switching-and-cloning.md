@@ -22,7 +22,7 @@ Loading another Schema stops every running Process. So if any Process is running
 
 > ⚠ The Schema "Oak Barn" is active: 2 Processes are running ... Is it OK to proceed?
 
-Press **OK** to go ahead, or **Cancel** to stay where you are. The Schema tab shows the same warning in yellow while Processes are running.
+Press **▶ Proceed** to go ahead, or **Close** to stay where you are. The Schema tab shows the same warning in yellow while Processes are running.
 
 The same warning comes up for anything else that loads a Schema again: **Add new Schema**, **Create New Copy of Schema** with **Load the clone now**, and **Restore a backup or version**.
 

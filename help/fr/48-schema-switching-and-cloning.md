@@ -22,7 +22,7 @@ Charger un autre Schema arrête chaque Process en marche. Donc si un Process tou
 
 > ⚠ The Schema "Oak Barn" is active: 2 Processes are running ... Is it OK to proceed?
 
-(Le Schema « Oak Barn » est actif : 2 Processes tournent ... Peut-on continuer ?) Appuyez sur **OK** pour continuer, ou sur **Cancel** pour rester où vous êtes. L'onglet Schema montre le même avertissement en jaune tant que des Processes tournent.
+(Le Schema « Oak Barn » est actif : 2 Processes tournent ... Peut-on continuer ?) Appuyez sur **▶ Proceed** pour continuer, ou sur **Close** pour rester où vous êtes. L'onglet Schema montre le même avertissement en jaune tant que des Processes tournent.
 
 Le même avertissement apparaît pour tout ce qui recharge un Schema : **Add new Schema**, **Create New Copy of Schema** avec **Load the clone now**, et **Restore a backup or version**.
 

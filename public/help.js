@@ -2,6 +2,7 @@
 // Everyone can read them; admins can edit, add and delete pages here. Help shows the page for the screen you came from
 // (helpmap.js says which); it runs in the Help window (help.html) and, when a browser blocks that window, on the panel's Help page.
 import { watchButtons } from './buttons.js';
+import { skyConfirm } from './skyconfirm.js';      // the one shared Skynet confirm box (Rule 2.64)
 import { LANG_KEY, refreshBalloonLang } from './hoverhelp.js';      // also the buttons' tips of this window in French (Rule 11.11)
 import { brokenLinkPop, forgetHelpIndex } from './brokenlink.js';
 import { showMachineNotice } from './mtnotice.js';         // machine translation notice (Rule 11.14)
@@ -290,7 +291,7 @@ $('#hpSave').onclick = async () => {
   catch (e) { say(e.message, true); }
 };
 $('#hpDelete').onclick = async () => {
-  if (!confirm(`Delete the page "${find(cur)?.title}"? A copy is kept in help/backups on the Brew Panel computer.`)) return;
+  if (!await skyConfirm(`Delete the page "${find(cur)?.title}"? A copy is kept in help/backups on the Brew Panel computer.`, { ok: '🗑 Delete' })) return;
   try { await call('DELETE', '/ui/help/' + encodeURIComponent(cur) + lq()); trail = trail.filter(n => n !== cur); cur = null; say('Page deleted'); await load(); }
   catch (e) { say(e.message, true); }
 };
