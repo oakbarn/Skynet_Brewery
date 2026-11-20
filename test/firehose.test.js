@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { Store } from '../lib/store.js'; import { Engine, compile } from '../lib/engine.js'; import { Hardware } from '../lib/hardware.js';
 import { loadSample } from '../lib/samples.js';
+import { processPicture } from '../public/processwidget.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
@@ -120,6 +121,25 @@ eng.start('FireHose_Off', 'user');
 assert.ok(await until(() => !on(FH) && !on(MSV) && quiet()), 'FireHose Off');
 assert.ok(!store.getProp('wgt_TMR_Water_WA', 'running'));
 
+// The Float buttons and the Water float show OakBarn Brewery's float switch pictures (Rule 1.31 Picture, 2026-11-20)
+{
+  const F = 'Images/Skynet/Other_Equipment/', FL = 'BM_32_DI@Float_Water~float_WA';
+  for (const f of ['config/brewery.json', 'samples/configs/three-vessel-one-pump/config.json']) {
+    const c = JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
+    for (const n of ['wgt_PSW_Use~FireHose~Float_WA', 'wgt_PSW_Use~Manifold~Float_WA', FL]) {
+      const e = c.elements.find(x => x.name === n);
+      assert.equal(e.imageOff, F + 'Skynet_Float_NO_Open.svg', `${f} ${n}`); assert.equal(e.imageOn, F + 'Skynet_Float_NO_Closed.svg', `${f} ${n}`);
+      if (n !== FL) {
+        assert.equal(e.follow, FL);
+        assert.equal(processPicture(e, () => false), e.imageOff, 'dry: the float hangs');
+        assert.equal(processPicture(e, x => x === FL), e.imageOn, 'made: the float is lifted');
+      }
+    }
+  }
+  for (const s of ['NO_Open', 'NO_Closed', 'NC_Closed', 'NC_Open']) assert.match(fs.readFileSync(path.join(ROOT, 'media', F, `Skynet_Float_${s}.svg`), 'utf8'), /^<svg [^>]*viewBox="0 0 640 500"/);
+  assert.equal(processPicture({}, () => true), '', 'no Picture: none, as before');
+  assert.equal(processPicture({ imageOff: 'a.svg', imageOn: 'b.svg' }, () => true), 'a.svg', 'no Turns on with: the Picture when off');
+}
 clearInterval(tick); eng.stopAll(); hw.stop(); clearTimeout(store._persistTimer);
 fs.rmSync(d, { recursive: true, force: true });
 console.log('firehose tests passed');

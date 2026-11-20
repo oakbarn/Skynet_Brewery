@@ -12,7 +12,7 @@ The older copy in the project folder (`/mnt/project-files/Image_Library/`, last 
 
 **2026-11-17 (OakBarn Brewery, "any Copywrite images need to be removed from the Public github regardless"):** every Skynet picture in the repo now has a row here (116 were missing). Pictures that might be copyrighted were taken out of the repo and replaced by Skynet drawings; see [Removed for copyright](#removed-for-copyright-2026-11-17) at the end.
 
-**Totals (2026-11-18):** 201 Skynet pictures in 10 groups (the Motors group is empty), plus the Help pictures and program icons listed at the end.
+**Totals (2026-11-20):** 205 Skynet pictures in 10 groups (the Motors group is empty), plus the Help pictures and program icons listed at the end.
 
 Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size on screen). PNG sizes are pixels. Where a PNG and an SVG share a name, the PNG is the original and the SVG is either a hand redraw ("Skynet drawing") or a panel auto-trace. "Pump_Whute_Rip_On" is the original file name, typo included.
 
@@ -24,7 +24,7 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 - [Lights_LEDs](#lights_leds) (5)
 - [Miscellaneous](#miscellaneous) (12)
 - [On_Off](#on_off) (6)
-- [Other_Equipment](#other_equipment) (49)
+- [Other_Equipment](#other_equipment) (53)
 - [Pumps](#pumps) (56)
 - [Valves](#valves) (26)
 - [Vessels](#vessels) (28)
@@ -154,6 +154,10 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `Skynet_TC2_1_Reducer_Concentric.svg` | Skynet TC 2 to 1 concentric reducer (Fritz's drawing 2_1__Reducer, 2026-11-02): IPs at the center of each ferrule face, big end (0, 0.5), small end (1, 0.5) | viewBox 0 0 120 84 (120x84) | Template fitting Reducer; Template fitting Reducer_2_1_Concentric; Panel code (app.js) |
 | `Skynet_TC2_1_Reducer_Eccentric.svg` | Skynet TC 2 to 1 eccentric reducer, flat along the bottom (Fritz's drawing 2_1_Concentric, 2026-11-02): IPs at the center of each ferrule face, big end (0, 0... | viewBox 0 0 120 84 (120x84) | Template fitting Reducer_2_1_Eccentric; Panel code (app.js) |
 | `Skynet_TC2_1_Reducer_Front.svg` | Skynet TC 2 to 1 reducer seen from the front, looking down the pipe (Fritz's drawing, 2026-11-02): both IPs at the center of the opening (0.5, 0.5) | viewBox 0 0 100 100 (100x100) | Template fitting Reducer_2_1_Front; Panel code (app.js) |
+| `Skynet_Float_NC_Closed.svg` | Skynet float switch, Normally Closed (OakBarn Brewery's own drawing, 2026-11-20, redrawn as SVG): water low, the float hangs and its bar rests on the contacts, closed (red). | viewBox 0 0 640 500 (640x500) | not used yet |
+| `Skynet_Float_NC_Open.svg` | Skynet float switch, Normally Closed (OakBarn Brewery's own drawing, 2026-11-20, redrawn as SVG): the water lifts the float and its bar off the contacts, open (black). | viewBox 0 0 640 500 (640x500) | not used yet |
+| `Skynet_Float_NO_Closed.svg` | Skynet float switch, Normally Open (OakBarn Brewery's own drawing, 2026-11-20, redrawn as SVG): the water lifts the float and its bar closes the contacts (red). Picture when on (float made). | viewBox 0 0 640 500 (640x500) | Water float BM_32 and the Use FireHose Float / Use Manifold Float Process Widgets on the Water Tab (default Schema; sample three-vessel-one-pump); Help 173 |
+| `Skynet_Float_NO_Open.svg` | Skynet float switch, Normally Open (OakBarn Brewery's own drawing, 2026-11-20, redrawn as SVG): water low, the float hangs, contacts apart (black). Picture when off (float dry). | viewBox 0 0 640 500 (640x500) | Water float BM_32 and the Use FireHose Float / Use Manifold Float Process Widgets on the Water Tab (default Schema; sample three-vessel-one-pump); Help 173 |
 
 ## Pumps
 

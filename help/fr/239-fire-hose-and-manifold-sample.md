@@ -44,7 +44,9 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
    vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Ce temps va dans le gGlobal caché
    `gblT_Elapsed_Water` (True Run Time), pour les secondes par gallon.
 
-Dans le simulateur, touchez le **Water float** pour le faire.
+Dans le simulateur, touchez le **Water float** et choisissez **Simulate: input ON** pour le faire (le flotteur est soulevé, contacts
+fermés, en rouge), et **Simulate: input OFF** pour le faire retomber. Le Water float et les deux boutons Float montrent l'image de
+l'interrupteur à flotteur selon son état.
 
 **Conseil :** mettez un régulateur de pression d'eau sur la ligne d'eau du robinet, avant les vannes. Il coûte peu et
 s'installe facilement, et avec la même pression à chaque fois, un remplissage minuté donne toujours la même quantité d'eau.

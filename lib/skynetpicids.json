@@ -233,6 +233,10 @@
   { "id": 230, "file": "Alarms/Alarm_Hop_Fore.svg" },
   { "id": 231, "file": "Alarms/Alarm_Hop.svg" },
   { "id": 232, "file": "Alarms/Alarm_Set_Hop_Cone.svg" },
-  { "id": 233, "file": "Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg" }
+  { "id": 233, "file": "Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg" },
+  { "id": 234, "file": "Other_Equipment/Skynet_Float_NC_Closed.svg" },
+  { "id": 235, "file": "Other_Equipment/Skynet_Float_NC_Open.svg" },
+  { "id": 236, "file": "Other_Equipment/Skynet_Float_NO_Closed.svg" },
+  { "id": 237, "file": "Other_Equipment/Skynet_Float_NO_Open.svg" }
  ]
 }

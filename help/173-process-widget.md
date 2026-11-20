@@ -30,7 +30,16 @@ mistake in its code), a message at the top of the screen says why, and the Widge
 3. **Name**: made by Skynet from the Label and the Tab.
 4. **Process**: the Process it shows and starts, picked from the list of every Process.
 
-Then **Ask before starting or stopping**, **X**, **Y**, **Width** and **Height** (200 x 80 to start) and the **Widget Type**.
+Then **Ask before starting or stopping**, **Picture**, **Picture turns on with**, **X**, **Y**, **Width** and **Height** (200 x 80
+to start) and the **Widget Type**.
+
+## A picture on it
+
+A Process Widget can show a **Picture** between its Label and its button, for example a float switch on a "fill to the float"
+button. The ⬢ beside Picture holds the **Picture when on**. Set **Picture turns on with** to a Device or Widget, and the Widget
+shows the Picture when on while that one is on, and the Picture when off while it is off. On the Fire Hose sample's Water Tab, the
+**Use FireHose Float** and **Use Manifold Float** buttons show the float hanging while the Water float is dry, and lifted with its
+contacts closed (red) once the water makes it. Leave Picture empty for no picture.
 
 Hover over a field's name for a short explanation.
 

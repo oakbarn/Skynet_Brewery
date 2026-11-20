@@ -24,7 +24,6 @@
  "22-process-language": "1bf219ffe9b9d05b",
  "23-restarting-processes": "7cd1dabd5f9bf0c6",
  "24-pipes-and-hoses": "1933095dc8e6323f",
- "240-step-by-step-add-a-process": "e2dfa6de709defe4",
  "25-picture-paths": "28941ad7551c6970",
  "26-tab-background": "2cfbbdc12b0fc965",
  "27-minimum-equipment": "a1610529f6d6bab4",
@@ -168,7 +167,7 @@
  "170-hydrometers": "3f095a06a3f2d57f",
  "171-smoothing": "c06a79ecf6b5ab59",
  "172-alarm-chain": "8785ba42a81582c6",
- "173-process-widget": "850014e8e93939d2",
+ "173-process-widget": "6eb68f6619485ca7",
  "174-data-display": "79a670cd288fcfbe",
  "175-alarm-email": "ff2600d9ad683b30",
  "176-time-formats": "a46b4d3b210c33cb",
@@ -233,5 +232,6 @@
  "236-copy-a-whole-tab": "31a20e264fee5ce1",
  "237-pid-auto-tune": "b4e0d90926f3f155",
  "238-boil-temperature": "65584f93a311b31c",
- "239-fire-hose-and-manifold-sample": "8064922d06e0ba5a"
+ "239-fire-hose-and-manifold-sample": "08f3491e659714c6",
+ "240-step-by-step-add-a-process": "e2dfa6de709defe4"
 }

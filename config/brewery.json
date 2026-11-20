@@ -1751,7 +1751,10 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
-   "nameColor": "#ffff00"
+   "nameColor": "#ffff00",
+   "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
+   "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
+   "follow": "BM_32_DI@Float_Water~float_WA"
   },
   {
    "workspace": "Water",
@@ -1847,7 +1850,10 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
-   "nameColor": "#000000"
+   "nameColor": "#000000",
+   "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
+   "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
+   "follow": "BM_32_DI@Float_Water~float_WA"
   },
   {
    "name": "BM_33_DO@Valve_E_Manifold~Supply_WA",
@@ -1899,7 +1905,7 @@
    "name": "BM_32_DI@Float_Water~float_WA",
    "typeCode": "Float",
    "type": "digitalIn",
-   "mode": "momentary",
+   "mode": "switch",
    "workspace": "Water",
    "device": "Brewery Mega",
    "channel": 32,
@@ -1907,9 +1913,11 @@
    "x": 1250,
    "y": 520,
    "w": 150,
-   "h": 70,
+   "h": 150,
    "onText": "MADE",
-   "offText": "open"
+   "offText": "open",
+   "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
+   "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg"
   },
   {
    "workspace": "Water",
