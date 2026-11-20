@@ -192,7 +192,7 @@ store.on('sdcard', m => { engine.print('system', m); broadcast('alert', { text: 
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 const mediaFiles = new MediaFiles(() => store.mediaRoots());
 const skynetPics = new SkynetPictures(() => store._findMedia('Images'), { source: store.config.skynetPictures });   // ☰ Menu > Get Skynet pictures        // Media page: add / rename / delete pictures and sounds
-const musicPack = new MusicPack(() => store._findMedia('sounds'), { source: store.config.musicPack });   // ☰ Menu > Get Music Pack (Rule 9.24)
+const musicPack = new MusicPack(() => store._findMedia('sounds'), { source: store.config.musicPack });   // ☰ Menu > Get Music Pack (Rule 9.25)
 const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], processes: PROCESSES, help: HELP }));   // File Move page
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
@@ -1506,7 +1506,7 @@ async function route(req, res) {
     if (r.saved.length) broadcast('media', {});
     return ok(res, { ok: true, ...r });
   }
-  // Get Music Pack (admin only, see needRole; Rule 9.24): what the pack's GitHub Release has that this Brain is missing, then copy them
+  // Get Music Pack (admin only, see needRole; Rule 9.25): what the pack's GitHub Release has that this Brain is missing, then copy them
   if (p === '/ui/musicpack/check' && m === 'GET') {
     try { return ok(res, await musicPack.check(url.searchParams.get('pack'))); }
     catch (e) { return fail(res, e.code === 404 ? 404 : 502, e.message); }

@@ -1,4 +1,4 @@
-// Get Music Pack (Rule 9.24): what the Skynet-Music-Pack Release has against what this Brain has in media/sounds/Skynet_Music;
+// Get Music Pack (Rule 9.25): what the Skynet-Music-Pack Release has against what this Brain has in media/sounds/Skynet_Music;
 // only new sounds are copied (a sound already here is never changed, Rule #1), a damaged download is never saved, odd names
 // are skipped, and your own sounds are never touched.
 import assert from 'node:assert/strict';

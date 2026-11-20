@@ -21,5 +21,5 @@ Press **Check GitHub** to ask again. If everything is already here, it says **No
 - Skynet never changes a picture it has already sent out. When a drawing is redone, it comes as a new picture with a new name, so every Schema that uses the old one looks the same as before.
 - If GitHub says **too many requests**, wait an hour: GitHub lets each internet address ask about 60 times an hour without an account.
 - All the Skynet pictures and sounds at once, without the internet on the Brain, come with the **Full Setup**, and each **Update Setup** brings the new ones (see [The Skynet pictures and sounds](183-skynet-media-setup)).
-- Marches and bugle calls for your Alarms and Sound Players come with **Get Music Pack** (see [Get Music Pack](242-get-music-pack)).
+- Marches and bugle calls for your Alarms and Sound Players come with **Get Music Pack** (see [Get Music Pack](243-get-music-pack)).
 - A whole new panel version (program files, not just pictures) still comes through **Updating** (see [Updating](18-updating)).

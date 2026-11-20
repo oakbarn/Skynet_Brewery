@@ -16422,7 +16422,7 @@ function renderSkynetPicsTab(box) {
   check.click();
 }
 
-// Get Music Pack (OakBarn Brewery, 2026-11-18: "a Get Music Pack"; Rule 9.24): the optional Skynet Music Pack is a GitHub
+// Get Music Pack (OakBarn Brewery, 2026-11-18: "a Get Music Pack"; Rule 9.25): the optional Skynet Music Pack is a GitHub
 // Release, not part of the Setups. The Brain asks GitHub which marches and bugle calls it is missing and copies them into
 // media/sounds/Skynet_Music. Add-only, the same as Get Skynet pictures.
 function renderMusicPackTab(box) {

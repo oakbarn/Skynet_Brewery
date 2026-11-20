@@ -58,5 +58,5 @@ assert.equal(new SkynetPictures(() => images, { source: { repo: 'bad repo' } }).
 fs.rmSync(d, { recursive: true, force: true });
 console.log('skynet pictures tests passed');
 
-// Get Music Pack (Rule 9.24) uses the same GitHub reading; its tests run here so the long test list in package.json is not touched
+// Get Music Pack (Rule 9.25) uses the same GitHub reading; its tests run here so the long test list in package.json is not touched
 await import('./musicpack.test.js');

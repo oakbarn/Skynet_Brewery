@@ -68,9 +68,9 @@ A link needs the internet. For Hop and Brew Flow Alarms, a file on the Brain is 
 
 ---
 
-## The Skynet Music Pack Release (Rule 9.24)
+## The Skynet Music Pack Release (Rule 9.25)
 
-The Music Pack is a **separate** Release, so ☰ Menu > Get Music Pack (Help 242) finds only its files. Make it the same way as
+The Music Pack is a **separate** Release, so ☰ Menu > Get Music Pack (Help 243) finds only its files. Make it the same way as
 Part 2 and Part 3, with these changes:
 
 - **Tag:** `Skynet-Music-Pack` (type it exactly, then **+ Create new tag: Skynet-Music-Pack on publish**).
