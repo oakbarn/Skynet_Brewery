@@ -34,7 +34,7 @@ Every Level has the Waters tab, and it starts with **Tap Water**: your own water
 
 A recipe file you IMPORT comes in at its own Level (an Extract recipe at Level 2, a Partial Mash at Level 3, an All Grain at Level 4). Change it if it is a Can Kit.
 
-The technical side: the Level is the Skynet_Field `rcp_Level` (1 to 4), so a Process can do the steps for its Level. It is saved with the Recipe, and its BeerXML type says the same thing (Levels 1 and 2 are Extract, 3 is Partial Mash, 4 is All Grain).
+The technical side: the Level is the Skynet_Field `skn_rcp_Level` (1 to 4), so a Process can do the steps for its Level. It is saved with the Recipe, and its BeerXML type says the same thing (Levels 1 and 2 are Extract, 3 is Partial Mash, 4 is All Grain).
 
 ## The boxes
 
@@ -54,59 +54,59 @@ The Recipe is kept in kilograms, liters and °C. It shows in the units you pick 
 
 ## Skynet_Fields
 
-Every box on the Recipe tab and its Daughter Tabs is a **Skynet_Field**: it has a fixed Skynet name that starts with `rcp_`, shown when the mouse rests on the box. A Process reads them (they are read only there), for example `rcp_Strike_Temp`, `rcp_Boil_Minutes` or `rcp_Pitch_Temp`. The names never change.
+Every box on the Recipe tab and its Daughter Tabs is a **Skynet_Field**: it has a fixed Skynet name that starts with `skn_rcp_`, shown when the mouse rests on the box. A Process reads them (they are read only there), for example `skn_rcp_Strike_Temp`, `skn_rcp_Boil_Minutes` or `skn_rcp_Pitch_Temp`. The names never change.
 
 | Box | Skynet_Field |
 |---|---|
-| Beer Name | `rcp_Name` |
-| Style | `rcp_Style` |
-| Level | `rcp_Level` |
-| Brew Length | `rcp_Batch_Volume` |
-| Grain Wt. | `rcp_Total_Grain_Weight` |
-| 1st Mash | `rcp_First_Mash_Temp` |
-| IBU | `rcp_IBU` |
-| Expected Gravity | `rcp_Expected_Gravity` |
-| Strike Volume | `rcp_Strike_Volume` |
-| Strike Temperature | `rcp_Strike_Temp` |
-| Grain Temperature | `rcp_Grain_Temp` |
-| Sparge Volume | `rcp_Sparge_Volume` |
-| Sparge Type | `rcp_Sparge_Type` |
-| Sparge Minutes | `rcp_Sparge_Minutes` |
-| Sparge Temperature | `rcp_Sparge_Temp` |
-| PreBoil Volume | `rcp_Boil_Volume` |
-| Boil Minutes | `rcp_Boil_Minutes` |
-| Whirlpool Minutes | `rcp_Whirlpool_Minutes` |
-| Pitch At | `rcp_Pitch_Temp` |
-| Grain Ratio | `rcp_Grain_Ratio` |
-| Waters: Water Profile | `rcp_Water_Profile` |
-| MASH: Mash Profile | `rcp_Mash_Profile` |
-| Hops tab: how many hop lines | `rcp_Hop_Count` |
+| Beer Name | `skn_rcp_Name` |
+| Style | `skn_rcp_Style` |
+| Level | `skn_rcp_Level` |
+| Brew Length | `skn_rcp_Batch_Volume` |
+| Grain Wt. | `skn_rcp_Total_Grain_Weight` |
+| 1st Mash | `skn_rcp_First_Mash_Temp` |
+| IBU | `skn_rcp_IBU` |
+| Expected Gravity | `skn_rcp_Expected_Gravity` |
+| Strike Volume | `skn_rcp_Strike_Volume` |
+| Strike Temperature | `skn_rcp_Strike_Temp` |
+| Grain Temperature | `skn_rcp_Grain_Temp` |
+| Sparge Volume | `skn_rcp_Sparge_Volume` |
+| Sparge Type | `skn_rcp_Sparge_Type` |
+| Sparge Minutes | `skn_rcp_Sparge_Minutes` |
+| Sparge Temperature | `skn_rcp_Sparge_Temp` |
+| PreBoil Volume | `skn_rcp_Boil_Volume` |
+| Boil Minutes | `skn_rcp_Boil_Minutes` |
+| Whirlpool Minutes | `skn_rcp_Whirlpool_Minutes` |
+| Pitch At | `skn_rcp_Pitch_Temp` |
+| Grain Ratio | `skn_rcp_Grain_Ratio` |
+| Waters: Water Profile | `skn_rcp_Water_Profile` |
+| MASH: Mash Profile | `skn_rcp_Mash_Profile` |
+| Hops tab: how many hop lines | `skn_rcp_Hop_Count` |
 
 Each line on the Hops tab has its own Skynet_Fields, N = the line number (1, 2, 3 ... with no limit):
 
 | Box on the Hops tab | Skynet_Field |
 |---|---|
-| Hop N (its name) | `rcp_Hop_N_Name` |
-| Ounces (or Grams) | `rcp_Hop_N_Amount` |
-| Unit (oz or g) | `rcp_Hop_N_Measurement` |
-| AAU % Recipe | `rcp_Hop_N_AA_Recipe` |
-| AAU % Actual | `rcp_Hop_N_AA_Actual` |
-| Calc oz | `rcp_Hop_N_Calc_Amount` |
-| Boil, Mash, 1st Wort, Secondary, Dry Hop or Whirlpool | `rcp_Hop_N_Use` |
-| Hop N Min | `rcp_Hop_N_Min` |
-| Hop N Drop | `rcp_Hop_N_Drop` |
-| Hop N IBU | `rcp_Hop_N_IBU` |
-| Hop N Boil Group | `rcp_Hop_N_Boil_Group` |
-| Secondary or Dry Hop Days | `rcp_Hop_N_Days` |
-| Secondary or Dry Hop Date | `rcp_Hop_N_Date` |
-| Whirlpool Temperature | `rcp_Hop_N_Whirlpool_Temp` |
-| Hop Rocket | `rcp_Hop_N_Hop_Rocket` |
+| Hop N (its name) | `skn_rcp_Hop_N_Name` |
+| Ounces (or Grams) | `skn_rcp_Hop_N_Amount` |
+| Unit (oz or g) | `skn_rcp_Hop_N_Measurement` |
+| AAU % Recipe | `skn_rcp_Hop_N_AA_Recipe` |
+| AAU % Actual | `skn_rcp_Hop_N_AA_Actual` |
+| Calc oz | `skn_rcp_Hop_N_Calc_Amount` |
+| Boil, Mash, 1st Wort, Secondary, Dry Hop or Whirlpool | `skn_rcp_Hop_N_Use` |
+| Hop N Min | `skn_rcp_Hop_N_Min` |
+| Hop N Drop | `skn_rcp_Hop_N_Drop` |
+| Hop N IBU | `skn_rcp_Hop_N_IBU` |
+| Hop N Boil Group | `skn_rcp_Hop_N_Boil_Group` |
+| Secondary or Dry Hop Days | `skn_rcp_Hop_N_Days` |
+| Secondary or Dry Hop Date | `skn_rcp_Hop_N_Date` |
+| Whirlpool Temperature | `skn_rcp_Hop_N_Whirlpool_Temp` |
+| Hop Rocket | `skn_rcp_Hop_N_Hop_Rocket` |
 
-For example `rcp_Hop_1_Name` is the first hop. A line the Recipe does not have reads as empty (or 0).
+For example `skn_rcp_Hop_1_Name` is the first hop. A line the Recipe does not have reads as empty (or 0).
 
-The Grain and Fermentable tabs work the same way: `rcp_Grain_Count`, `rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, and `rcp_Fermentable_Count`, `rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, `_After_Boil`.
+The Grain and Fermentable tabs work the same way: `skn_rcp_Grain_Count`, `skn_rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, and `skn_rcp_Fermentable_Count`, `skn_rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, `_After_Boil`.
 
-The Yeast tab too: `rcp_Yeast_Count`, `rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement` (Packs, g, oz or ml), `_Attenuation`, `_Min_Temp`, `_Max_Temp`, `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`. `rcp_Yeast_Name` is still the first yeast.
+The Yeast tab too: `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement` (Packs, g, oz or ml), `_Attenuation`, `_Min_Temp`, `_Max_Temp`, `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`. `skn_rcp_Yeast_Name` is still the first yeast.
 
 ## The Daughter Tabs
 
@@ -175,7 +175,7 @@ Whirlfloc, yeast nutrient, gypsum, spices: what BeerSmith and BeerXML call Misc.
 - **Type**: Spice, Fining, Water Agent, Herb, Flavor or Other. **Use**: Boil, Mash, Primary, Secondary or Bottling.
 - **Time** and **Time Unit** (min, hr, day, week). For a Boil adjunct the box says **Boil Min**: minutes left in the boil when it goes in. A Boil adjunct gets a warning and a drop alert like a hop (the Drops tab).
 
-The dropdowns are select only, with the BeerXML lists. Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity. Skynet_Fields: `rcp_Adjunct_Count`, `rcp_Adjunct_N_Name`, `_Amount`, `_Measurement`, `_Type`, `_Use`, `_Time`, `_Time_Unit`.
+The dropdowns are select only, with the BeerXML lists. Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity. Skynet_Fields: `skn_rcp_Adjunct_Count`, `skn_rcp_Adjunct_N_Name`, `_Amount`, `_Measurement`, `_Type`, `_Use`, `_Time`, `_Time_Unit`.
 
 ## The MASH tab
 
@@ -187,13 +187,13 @@ Pick the **Mash Profile**: a Skynet Template, one of your own (☰ Menu > Mash P
 
 Skynet has two Templates: **Skynet Single Step, Batch Sparge** (152 °F for 60 minutes, mash out at 168 °F, batch sparge with a 10 minute rest) and **Skynet 3 Mash Steps, Fly Sparge** (122 °F for 15, 146 °F for 30, 158 °F for 20 minutes, mash out at 168 °F, fly sparge with 168 °F water).
 
-Skynet_Fields: `rcp_Mash_Profile`, `rcp_Mash_Step_N_Name`, `rcp_Mash_Step_N_Temp`, `rcp_Mash_Step_N_Time`.
+Skynet_Fields: `skn_rcp_Mash_Profile`, `skn_rcp_Mash_Step_N_Name`, `skn_rcp_Mash_Step_N_Temp`, `skn_rcp_Mash_Step_N_Time`.
 
 ## The Waters tab
 
 Pick the **Water Profile**. It starts with **Tap Water** (your own water, ☰ Menu > Default settings > Tap Water). Its minerals show after the distilled or RO cut (Calcium, Magnesium, Sodium, Sulfate, Chloride, Bicarbonate, in ppm), with the **% Distilled / RO**, the **SO4 : Cl** ratio (above 2 crisp and hoppy, below 1 round and malty) and the **pH**. They are read only here; change the profile on ☰ Menu > Water Profile. Below them are the waters the recipe file listed.
 
-Skynet_Fields: `rcp_Water_Profile`, `rcp_Water_Ca`, `rcp_Water_Mg`, `rcp_Water_Na`, `rcp_Water_SO4`, `rcp_Water_Cl`, `rcp_Water_HCO3`, `rcp_Water_Distilled_Pct`, `rcp_Water_SO4_Cl`, `rcp_Water_PH`.
+Skynet_Fields: `skn_rcp_Water_Profile`, `skn_rcp_Water_Ca`, `skn_rcp_Water_Mg`, `skn_rcp_Water_Na`, `skn_rcp_Water_SO4`, `skn_rcp_Water_Cl`, `skn_rcp_Water_HCO3`, `skn_rcp_Water_Distilled_Pct`, `skn_rcp_Water_SO4_Cl`, `skn_rcp_Water_PH`.
 
 ## Importing a BeerSmith file
 

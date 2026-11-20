@@ -518,7 +518,7 @@
  "Open Edit layout on the Tab": "Ouvrir Edit layout sur le Tab",
  "Double-click for its Tab settings": "Double-cliquez pour les réglages de son Tab",
  "Recipe library: saved Recipes (config/recipes on the Brain)": "Bibliothèque de Recipes : les Recipes enregistrées (config/recipes sur le Brain)",
- "Skynet_Field rcp_Level": "Skynet_Field rcp_Level",
+ "Skynet_Field skn_rcp_Level": "Skynet_Field skn_rcp_Level",
  "Back to the Recipe tab": "Retour à l'onglet Recipe",
  "A BeerSmith .bsmx file (BeerSmith 3 or 4) or a BeerXML .xml file": "Un fichier BeerSmith .bsmx (BeerSmith 3 ou 4) ou un fichier BeerXML .xml",
  "Clear the Recipe and start a new one from the Defaults": "Effacer la Recipe et en commencer une nouvelle à partir des Defaults",

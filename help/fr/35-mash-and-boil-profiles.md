@@ -73,7 +73,7 @@ Elles commencent vides. L'aide au survol de chaque question donne les chiffres c
 
 La température et la durée de chaque stand sont celles de la **Recipe** (l'onglet Recipe montre les trois). Une Recipe qui n'a pas les siennes utilise celles de son **Boil Profile**, si vous les y avez tapées. Un fichier de recette (BeerSmith ou BeerXML) qui donne une température de whirlpool met ce houblon dans le stand qui lui correspond, avec la température et la durée du fichier : **High** à 170 °F (77 °C) et plus, **Middle** à partir de 140 °F (60 °C), **Low** en dessous. Un houblon whirlpool sans température dans le fichier n'a pas de stand, donc ses questions sont posées quand vous l'ouvrez.
 
-Un Process les lit comme `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp` et `rcp_Hop_Stand_High_Minutes` (et pareil pour Middle et Low). Les Process Templates Skynet **Chill** et **Whirlpool and Chill** s'arrêtent à chacun.
+Un Process les lit comme `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp` et `skn_rcp_Hop_Stand_High_Minutes` (et pareil pour Middle et Low). Les Process Templates Skynet **Chill** et **Whirlpool and Chill** s'arrêtent à chacun.
 
 ## Water Profile {#water-profile}
 

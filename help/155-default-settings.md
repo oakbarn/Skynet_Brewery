@@ -199,6 +199,6 @@ The boxes:
 
 Rest the mouse on a box (or tap its name) to see what it does for the beer.
 
-The technical side: Tap Water is a Water Profile (☰ Menu > Water Profile lists it) that is made when the Brain first starts and is never deleted. A Recipe or the Default settings with no Water Profile picked uses it. Bicarbonate = Alkalinity (as CaCO3) x 1.22. Hardness (as CaCO3) = 2.497 x Calcium + 4.118 x Magnesium. A Process reads it with the `rcp_Water_...` Skynet_Fields (Help 99).
+The technical side: Tap Water is a Water Profile (☰ Menu > Water Profile lists it) that is made when the Brain first starts and is never deleted. A Recipe or the Default settings with no Water Profile picked uses it. Bicarbonate = Alkalinity (as CaCO3) x 1.22. Hardness (as CaCO3) = 2.497 x Calcium + 4.118 x Magnesium. A Process reads it with the `skn_rcp_Water_...` Skynet_Fields (Help 99).
 
 The section titles on this tab have a blue back, so each part is easy to find. The title and **Save** stay at the top while the rest scrolls (Skynet Rule 2.51).

@@ -7,7 +7,7 @@ ask "Hook up the chiller. Press Done when it is on."
 @if Chill_Pump
 {{Chill_Pump}} = true
 @end
-if rcp_Hop_Stand_High == true
+if skn_rcp_Hop_Stand_High == true
   step "Chill to Hop Stand High"
 @if Chill_Water
 {{Chill_Water}} = true
@@ -15,9 +15,9 @@ if rcp_Hop_Stand_High == true
 ask "Open the chiller cooling water. Press Done when it runs."
 @end
 @if Wort_Probe
-  wait {{Wort_Probe}} <= rcp_Hop_Stand_High_Temp
+  wait {{Wort_Probe}} <= skn_rcp_Hop_Stand_High_Temp
 @else
-  ask "Press Done when the wort is down to " + rcp_Hop_Stand_High_Temp + rcp_Temp_Units + " for Hop Stand High."
+  ask "Press Done when the wort is down to " + skn_rcp_Hop_Stand_High_Temp + skn_rcp_Temp_Units + " for Hop Stand High."
 @end
   step "Hop Stand High"
 @if Chill_Water
@@ -25,18 +25,18 @@ ask "Open the chiller cooling water. Press Done when it runs."
 @else
 ask "Turn the chiller cooling water off. Press Done when it is off."
 @end
-  if rcp_Hop_Infuser == true
+  if skn_rcp_Hop_Infuser == true
 @if Hop_Infuser_Valve
     {{Hop_Infuser_Valve}} = true
 @end
-    ask "Load the Hop Stand High hops into the Hop Infuser and run the wort through it (" + rcp_Hop_Stand_High_Temp + rcp_Temp_Units + "). Press Done when it flows through the hops."
+    ask "Load the Hop Stand High hops into the Hop Infuser and run the wort through it (" + skn_rcp_Hop_Stand_High_Temp + skn_rcp_Temp_Units + "). Press Done when it flows through the hops."
   else
-    ask "Add the Hop Stand High hops now, at " + rcp_Hop_Stand_High_Temp + rcp_Temp_Units + ". Press Done when they are in."
+    ask "Add the Hop Stand High hops now, at " + skn_rcp_Hop_Stand_High_Temp + skn_rcp_Temp_Units + ". Press Done when they are in."
   endif
-  print "Hop Stand High for " + rcp_Hop_Stand_High_Minutes + " minutes, cooling water off"
-  sleep rcp_Hop_Stand_High_Minutes * 60000
+  print "Hop Stand High for " + skn_rcp_Hop_Stand_High_Minutes + " minutes, cooling water off"
+  sleep skn_rcp_Hop_Stand_High_Minutes * 60000
 endif
-if rcp_Hop_Stand_Middle == true
+if skn_rcp_Hop_Stand_Middle == true
   step "Chill to Hop Stand Middle"
 @if Chill_Water
 {{Chill_Water}} = true
@@ -44,9 +44,9 @@ if rcp_Hop_Stand_Middle == true
 ask "Open the chiller cooling water. Press Done when it runs."
 @end
 @if Wort_Probe
-  wait {{Wort_Probe}} <= rcp_Hop_Stand_Middle_Temp
+  wait {{Wort_Probe}} <= skn_rcp_Hop_Stand_Middle_Temp
 @else
-  ask "Press Done when the wort is down to " + rcp_Hop_Stand_Middle_Temp + rcp_Temp_Units + " for Hop Stand Middle."
+  ask "Press Done when the wort is down to " + skn_rcp_Hop_Stand_Middle_Temp + skn_rcp_Temp_Units + " for Hop Stand Middle."
 @end
   step "Hop Stand Middle"
 @if Chill_Water
@@ -54,18 +54,18 @@ ask "Open the chiller cooling water. Press Done when it runs."
 @else
 ask "Turn the chiller cooling water off. Press Done when it is off."
 @end
-  if rcp_Hop_Infuser == true
+  if skn_rcp_Hop_Infuser == true
 @if Hop_Infuser_Valve
     {{Hop_Infuser_Valve}} = true
 @end
-    ask "Load the Hop Stand Middle hops into the Hop Infuser and run the wort through it (" + rcp_Hop_Stand_Middle_Temp + rcp_Temp_Units + "). Press Done when it flows through the hops."
+    ask "Load the Hop Stand Middle hops into the Hop Infuser and run the wort through it (" + skn_rcp_Hop_Stand_Middle_Temp + skn_rcp_Temp_Units + "). Press Done when it flows through the hops."
   else
-    ask "Add the Hop Stand Middle hops now, at " + rcp_Hop_Stand_Middle_Temp + rcp_Temp_Units + ". Press Done when they are in."
+    ask "Add the Hop Stand Middle hops now, at " + skn_rcp_Hop_Stand_Middle_Temp + skn_rcp_Temp_Units + ". Press Done when they are in."
   endif
-  print "Hop Stand Middle for " + rcp_Hop_Stand_Middle_Minutes + " minutes, cooling water off"
-  sleep rcp_Hop_Stand_Middle_Minutes * 60000
+  print "Hop Stand Middle for " + skn_rcp_Hop_Stand_Middle_Minutes + " minutes, cooling water off"
+  sleep skn_rcp_Hop_Stand_Middle_Minutes * 60000
 endif
-if rcp_Hop_Stand_Low == true
+if skn_rcp_Hop_Stand_Low == true
   step "Chill to Hop Stand Low"
 @if Chill_Water
 {{Chill_Water}} = true
@@ -73,9 +73,9 @@ if rcp_Hop_Stand_Low == true
 ask "Open the chiller cooling water. Press Done when it runs."
 @end
 @if Wort_Probe
-  wait {{Wort_Probe}} <= rcp_Hop_Stand_Low_Temp
+  wait {{Wort_Probe}} <= skn_rcp_Hop_Stand_Low_Temp
 @else
-  ask "Press Done when the wort is down to " + rcp_Hop_Stand_Low_Temp + rcp_Temp_Units + " for Hop Stand Low."
+  ask "Press Done when the wort is down to " + skn_rcp_Hop_Stand_Low_Temp + skn_rcp_Temp_Units + " for Hop Stand Low."
 @end
   step "Hop Stand Low"
 @if Chill_Water
@@ -83,16 +83,16 @@ ask "Open the chiller cooling water. Press Done when it runs."
 @else
 ask "Turn the chiller cooling water off. Press Done when it is off."
 @end
-  if rcp_Hop_Infuser == true
+  if skn_rcp_Hop_Infuser == true
 @if Hop_Infuser_Valve
     {{Hop_Infuser_Valve}} = true
 @end
-    ask "Load the Hop Stand Low hops into the Hop Infuser and run the wort through it (" + rcp_Hop_Stand_Low_Temp + rcp_Temp_Units + "). Press Done when it flows through the hops."
+    ask "Load the Hop Stand Low hops into the Hop Infuser and run the wort through it (" + skn_rcp_Hop_Stand_Low_Temp + skn_rcp_Temp_Units + "). Press Done when it flows through the hops."
   else
-    ask "Add the Hop Stand Low hops now, at " + rcp_Hop_Stand_Low_Temp + rcp_Temp_Units + ". Press Done when they are in."
+    ask "Add the Hop Stand Low hops now, at " + skn_rcp_Hop_Stand_Low_Temp + skn_rcp_Temp_Units + ". Press Done when they are in."
   endif
-  print "Hop Stand Low for " + rcp_Hop_Stand_Low_Minutes + " minutes, cooling water off"
-  sleep rcp_Hop_Stand_Low_Minutes * 60000
+  print "Hop Stand Low for " + skn_rcp_Hop_Stand_Low_Minutes + " minutes, cooling water off"
+  sleep skn_rcp_Hop_Stand_Low_Minutes * 60000
 endif
 step "Chill"
 @if Chill_Water
@@ -101,9 +101,9 @@ step "Chill"
 ask "Open the chiller cooling water. Press Done when it runs."
 @end
 @if Wort_Probe
-wait {{Wort_Probe}} <= rcp_Ferment_Temp
+wait {{Wort_Probe}} <= skn_rcp_Ferment_Temp
 @else
-ask "Press Done when the wort is down to " + rcp_Ferment_Temp + rcp_Temp_Units + "."
+ask "Press Done when the wort is down to " + skn_rcp_Ferment_Temp + skn_rcp_Temp_Units + "."
 @end
 @if Chill_Pump
 {{Chill_Pump}} = false
@@ -113,11 +113,11 @@ ask "Press Done when the wort is down to " + rcp_Ferment_Temp + rcp_Temp_Units +
 @else
 ask "Turn the chiller cooling water off. Press Done when it is off."
 @end
-if rcp_Hop_Infuser == true
+if skn_rcp_Hop_Infuser == true
 @if Hop_Infuser_Valve
   {{Hop_Infuser_Valve}} = false
 @else
   ask "Take the Hop Infuser out of line (or close its valves). Press Done when it is."
 @end
 endif
-print "Wort chilled to " + rcp_Ferment_Temp + rcp_Temp_Units
+print "Wort chilled to " + skn_rcp_Ferment_Temp + skn_rcp_Temp_Units

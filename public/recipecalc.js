@@ -143,11 +143,11 @@ export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Ar
 // Mash, All Grain), so a BeerXML or BeerSmith file brings its Level in and a saved Recipe says the same thing both ways.
 //   tabs: the Daughter Tabs shown (Waters on every Level, default Tap Water). hide: the Recipe tab boxes (their Skynet_Field) not shown.
 //   fermTypes: the Types the Fermentable tab offers (OakBarn Brewery, 2026-11-11: "on the Level 1 and 2 only Extracts").
-const MASH_BOXES = ['rcp_Total_Grain_Weight', 'rcp_First_Mash_Temp', 'rcp_Strike_Volume', 'rcp_Strike_Temp', 'rcp_Grain_Temp', 'rcp_Sparge_Volume',
-  'rcp_Sparge_Type', 'rcp_Sparge_Minutes', 'rcp_Sparge_Temp', 'rcp_Grain_Ratio'];
+const MASH_BOXES = ['skn_rcp_Total_Grain_Weight', 'skn_rcp_First_Mash_Temp', 'skn_rcp_Strike_Volume', 'skn_rcp_Strike_Temp', 'skn_rcp_Grain_Temp', 'skn_rcp_Sparge_Volume',
+  'skn_rcp_Sparge_Type', 'skn_rcp_Sparge_Minutes', 'skn_rcp_Sparge_Temp', 'skn_rcp_Grain_Ratio'];
 export const RECIPE_LEVELS = [
   { level: 1, name: '1 Can Kit', title: 'Level 1: Extract Can Kit', type: 'Extract', about: 'For a beginner brewer: a can of hopped malt extract, often with sugar or dry malt extract, then the yeast. No grain and no hops to add.',
-    tabs: ['fermentables', 'yeast', 'adjuncts', 'waters'], hide: [...MASH_BOXES, 'rcp_IBU', 'rcp_Whirlpool_Minutes'], fermTypes: ['extract', 'dry extract'] },
+    tabs: ['fermentables', 'yeast', 'adjuncts', 'waters'], hide: [...MASH_BOXES, 'skn_rcp_IBU', 'skn_rcp_Whirlpool_Minutes'], fermTypes: ['extract', 'dry extract'] },
   { level: 2, name: '2 Extract', title: 'Level 2: Extract', type: 'Extract', about: 'Malt extract (liquid or dry) boiled with your own hops. No grain.',
     tabs: ['hops', 'drops', 'fermentables', 'yeast', 'adjuncts', 'waters'], hide: MASH_BOXES, fermTypes: ['extract', 'dry extract'] },
   { level: 3, name: '3 Partial Grain', title: 'Level 3: Extract with Partial Grain and Hops', type: 'Partial Mash', about: 'Malt extract plus some grain mashed or steeped in a small amount of water, and your own hops.',
@@ -334,49 +334,49 @@ export function blendWater(w = {}) {
 
 
 // ---- Skynet_Fields (Fritz, 2026-10-31: "all fields on a Recipe Tab or Daughter Tab is a Skynet_Field"). Each box on the
-// Recipe tab has a fixed Skynet name (rcp_), the same names the Brew Process reads (lib/brewprocess.js). A Skynet name is
+// Recipe tab has a fixed Skynet name (skn_rcp_), the same names the Brew Process reads (lib/brewprocess.js). A Skynet name is
 // never changed by the user (Rule 3.11). [name, what it is, how to read it from a Recipe in the panel's display units]
 export const RECIPE_FIELDS = [
-  ['rcp_Name', 'Beer Name', r => r.name ?? ''],
-  ['rcp_Style', 'Style', r => r.style ?? ''],
-  ['rcp_Level', 'Recipe Level: 1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain', r => recipeLevel(r)],
-  ['rcp_Batch_Volume', 'Brew Length (batch size into the fermenter)', (r, u) => lTo(r.volumes?.batchLiters, u.volumeUnit)],
-  ['rcp_Total_Grain_Weight', 'Grain Wt. (calculated)', (r, u) => kgTo(r.grainKg, u.grainUnit)],
-  ['rcp_First_Mash_Temp', '1st Mash (calculated)', (r, u) => cTo(r.firstMashC, u.tempUnit)],
-  ['rcp_IBU', 'IBU (calculated)', r => r.ibuCalc],
-  ['rcp_Expected_Gravity', 'Expected Gravity (calculated: 1 + the gravity points of every grain and fermentable / 1000)', r => r.expectedSG],
-  ['rcp_Strike_Volume', 'Strike Volume', (r, u) => lTo(r.strikeLiters, u.volumeUnit)],
-  ['rcp_Strike_Temp', 'Strike Temperature', (r, u) => cTo(r.strikeTempC, u.tempUnit)],
-  ['rcp_Grain_Temp', 'Grain Temperature', (r, u) => cTo(r.grainTempC, u.tempUnit)],
-  ['rcp_Sparge_Volume', 'Sparge Volume', (r, u) => lTo(r.spargeLiters, u.volumeUnit)],
-  ['rcp_Sparge_Type', 'Sparge Type (batch, fly, none)', r => r.spargeType ?? ''],
-  ['rcp_Sparge_Minutes', 'Sparge Minutes', r => r.spargeMinutes],
-  ['rcp_Sparge_Temp', 'Sparge Temperature', (r, u) => cTo(r.spargeTempC, u.tempUnit)],
-  ['rcp_Boil_Volume', 'PreBoil Volume', (r, u) => lTo(r.volumes?.boilLiters, u.volumeUnit)],
-  ['rcp_Boil_Minutes', 'Boil Minutes', r => r.boilTime],
-  ['rcp_Whirlpool_Minutes', 'Whirlpool Minutes', r => r.whirlpoolMinutes],
-  ['rcp_Boil_Profile', 'Boil Profile (its id)', r => r.boilProfile ?? ''],
+  ['skn_rcp_Name', 'Beer Name', r => r.name ?? ''],
+  ['skn_rcp_Style', 'Style', r => r.style ?? ''],
+  ['skn_rcp_Level', 'Recipe Level: 1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain', r => recipeLevel(r)],
+  ['skn_rcp_Batch_Volume', 'Brew Length (batch size into the fermenter)', (r, u) => lTo(r.volumes?.batchLiters, u.volumeUnit)],
+  ['skn_rcp_Total_Grain_Weight', 'Grain Wt. (calculated)', (r, u) => kgTo(r.grainKg, u.grainUnit)],
+  ['skn_rcp_First_Mash_Temp', '1st Mash (calculated)', (r, u) => cTo(r.firstMashC, u.tempUnit)],
+  ['skn_rcp_IBU', 'IBU (calculated)', r => r.ibuCalc],
+  ['skn_rcp_Expected_Gravity', 'Expected Gravity (calculated: 1 + the gravity points of every grain and fermentable / 1000)', r => r.expectedSG],
+  ['skn_rcp_Strike_Volume', 'Strike Volume', (r, u) => lTo(r.strikeLiters, u.volumeUnit)],
+  ['skn_rcp_Strike_Temp', 'Strike Temperature', (r, u) => cTo(r.strikeTempC, u.tempUnit)],
+  ['skn_rcp_Grain_Temp', 'Grain Temperature', (r, u) => cTo(r.grainTempC, u.tempUnit)],
+  ['skn_rcp_Sparge_Volume', 'Sparge Volume', (r, u) => lTo(r.spargeLiters, u.volumeUnit)],
+  ['skn_rcp_Sparge_Type', 'Sparge Type (batch, fly, none)', r => r.spargeType ?? ''],
+  ['skn_rcp_Sparge_Minutes', 'Sparge Minutes', r => r.spargeMinutes],
+  ['skn_rcp_Sparge_Temp', 'Sparge Temperature', (r, u) => cTo(r.spargeTempC, u.tempUnit)],
+  ['skn_rcp_Boil_Volume', 'PreBoil Volume', (r, u) => lTo(r.volumes?.boilLiters, u.volumeUnit)],
+  ['skn_rcp_Boil_Minutes', 'Boil Minutes', r => r.boilTime],
+  ['skn_rcp_Whirlpool_Minutes', 'Whirlpool Minutes', r => r.whirlpoolMinutes],
+  ['skn_rcp_Boil_Profile', 'Boil Profile (its id)', r => r.boilProfile ?? ''],
   // the three Hop Stands: the Recipe's own numbers here (the Brain fills in the rest from the Boil Profile and Default settings)
-  ...[['High', 'High'], ['Middle', 'Middle'], ['Low', 'Low']].flatMap(([k, l]) => [[`rcp_Hop_Stand_${k}_Temp`, `Hop Stand ${l} temperature`, (r, u) => cTo(r.hopStands?.[k]?.tempC, u.tempUnit)],
-    [`rcp_Hop_Stand_${k}_Minutes`, `Hop Stand ${l} minutes`, r => r.hopStands?.[k]?.min]]),
-  ['rcp_Pitch_Temp', 'Pitch At', (r, u) => cTo(r.pitchTempC, u.tempUnit)],
-  ['rcp_Grain_Ratio', 'Grain Ratio', (r, u) => ratioTo(r.waterToGrain, u.ratioUnit)],
+  ...[['High', 'High'], ['Middle', 'Middle'], ['Low', 'Low']].flatMap(([k, l]) => [[`skn_rcp_Hop_Stand_${k}_Temp`, `Hop Stand ${l} temperature`, (r, u) => cTo(r.hopStands?.[k]?.tempC, u.tempUnit)],
+    [`skn_rcp_Hop_Stand_${k}_Minutes`, `Hop Stand ${l} minutes`, r => r.hopStands?.[k]?.min]]),
+  ['skn_rcp_Pitch_Temp', 'Pitch At', (r, u) => cTo(r.pitchTempC, u.tempUnit)],
+  ['skn_rcp_Grain_Ratio', 'Grain Ratio', (r, u) => ratioTo(r.waterToGrain, u.ratioUnit)],
   // Daughter Tabs (their own fields come when Fritz sends each layout)
-  ['rcp_Water_Profile', 'Waters: the Water Profile (its id)', r => r.waterProfile ?? ''],
-  ['rcp_Mash_Profile', 'MASH: the Mash Profile (its id; empty = the mash from the recipe file)', r => r.mashProfile ?? ''],
+  ['skn_rcp_Water_Profile', 'Waters: the Water Profile (its id)', r => r.waterProfile ?? ''],
+  ['skn_rcp_Mash_Profile', 'MASH: the Mash Profile (its id; empty = the mash from the recipe file)', r => r.mashProfile ?? ''],
 ];
 // Waters tab: the Water Profile's minerals after the distilled cut (ppm). The Brew Process fills them from the profile
 // (lib/brewprocess.js recipeValues); a Recipe alone does not hold them.
-export const WATER_FIELDS = [...WATER_IONS.map(([k, t]) => [`rcp_Water_${k === 'so4' ? 'SO4' : k === 'hco3' ? 'HCO3' : k[0].toUpperCase() + k.slice(1)}`, `Waters: ${t}, ppm after the distilled cut`, k]),
-  ['rcp_Water_Distilled_Pct', 'Waters: % distilled or RO water', 'distilledPct'], ['rcp_Water_SO4_Cl', 'Waters: sulfate to chloride ratio', 'so4cl'], ['rcp_Water_PH', 'Waters: pH', 'ph']];
+export const WATER_FIELDS = [...WATER_IONS.map(([k, t]) => [`skn_rcp_Water_${k === 'so4' ? 'SO4' : k === 'hco3' ? 'HCO3' : k[0].toUpperCase() + k.slice(1)}`, `Waters: ${t}, ppm after the distilled cut`, k]),
+  ['skn_rcp_Water_Distilled_Pct', 'Waters: % distilled or RO water', 'distilledPct'], ['skn_rcp_Water_SO4_Cl', 'Waters: sulfate to chloride ratio', 'so4cl'], ['skn_rcp_Water_PH', 'Waters: pH', 'ph']];
 // the values of WATER_FIELDS from a Water Profile (null: none picked)
 export function waterFieldValues(wp) {
   const b = wp ? { ...blendWater(wp), distilledPct: +wp.distilledPct || 0, ph: wp.ph ?? null } : {};
   return Object.fromEntries(WATER_FIELDS.map(([k, , key]) => [k, wp ? b[key] ?? 0 : 0]));
 }
-// MASH tab lines: rcp_Mash_Step_N_Name, _Temp, _Time (filled by the Brew Process from the Mash Profile or the recipe's mash)
-const MASH_STEP_FIELD = /^rcp_Mash_Step_(\d+)_(Name|Temp|Time)$/;
-// The Hops tab: one set of Skynet_Fields for each hop line, N = the line number (rcp_Hop_1_Name, rcp_Hop_2_Name ...), so there
+// MASH tab lines: skn_rcp_Mash_Step_N_Name, _Temp, _Time (filled by the Brew Process from the Mash Profile or the recipe's mash)
+const MASH_STEP_FIELD = /^skn_rcp_Mash_Step_(\d+)_(Name|Temp|Time)$/;
+// The Hops tab: one set of Skynet_Fields for each hop line, N = the line number (skn_rcp_Hop_1_Name, skn_rcp_Hop_2_Name ...), so there
 // is no limit on the hops. [the end of the name, what it is, how to read it (r, hop, display units, the hop schedule, line index)]
 function r_h_stand(r, h) { return h.use === 'whirlpool' ? standOf(h, hopStands(r)) : ''; }
 export const HOP_FIELDS = [
@@ -397,8 +397,8 @@ export const HOP_FIELDS = [
   ['Whirlpool_Temp', 'Hop N: Whirlpool temperature (its Hop Stand\'s)', (r, h, u) => { const st = h.use === 'whirlpool' ? hopStands(r).find(s => s.key === r_h_stand(r, h)) : null; return st && st.tempC !== null ? cTo(st.tempC, u.tempUnit) : 0; }],
   ['Hop_Rocket', 'Hop N: Whirlpool through the Hop Rocket (true or false)', (r, h) => h.use === 'whirlpool' && !!h.hopRocket],
 ];
-export const HOP_FIELD = /^rcp_Hop_(\d+)_([A-Za-z_]+)$/;
-// The Grain tab and the Fermentable tab: rcp_Grain_N_... and rcp_Fermentable_N_..., N = the line number on that tab
+export const HOP_FIELD = /^skn_rcp_Hop_(\d+)_([A-Za-z_]+)$/;
+// The Grain tab and the Fermentable tab: skn_rcp_Grain_N_... and skn_rcp_Fermentable_N_..., N = the line number on that tab
 export const GRAIN_FIELDS = [
   ['Name', 'Grain N: the grain', f => f.name ?? ''],
   ['Amount', 'Grain N: the amount (lb or kg)', (f, u) => kgTo(f.kg, u.grainUnit)],
@@ -425,7 +425,7 @@ export const ADJUNCT_FIELDS = [
   ['Time', 'Adjunct N: how long (Boil: minutes left in the boil when it goes in)', m => m.time],
   ['Time_Unit', 'Adjunct N: min, hr, day or week', m => m.timeUnit || 'min'],
 ];
-// The Yeast lines (Rule 17.18): rcp_Yeast_N_Name, _Amount, _Measurement (Packs, g, oz or ml). rcp_Yeast_Name stays the first yeast.
+// The Yeast lines (Rule 17.18): skn_rcp_Yeast_N_Name, _Amount, _Measurement (Packs, g, oz or ml). skn_rcp_Yeast_Name stays the first yeast.
 export const YEAST_FIELDS = [
   ['Name', 'Yeast N: the yeast', y => y.name ?? ''],
   ['Form', 'Yeast N: Dry, Liquid, Slurry or Culture', y => y.form ?? ''],
@@ -444,23 +444,23 @@ export const YEAST_FIELDS = [
   ['Mfg_Date', 'Yeast N: manufacture date (YYYY-MM-DD)', y => y.mfgDate ?? ''],
   ['Notes', 'Yeast N: notes', y => y.notes ?? ''],
 ];
-const LINE_FIELD = /^rcp_(Grain|Fermentable|Adjunct|Yeast)_(\d+)_([A-Za-z_]+)$/;
+const LINE_FIELD = /^skn_rcp_(Grain|Fermentable|Adjunct|Yeast)_(\d+)_([A-Za-z_]+)$/;
 const LINE_LISTS = { grain: () => GRAIN_FIELDS, fermentable: () => FERMENTABLE_FIELDS, adjunct: () => ADJUNCT_FIELDS, yeast: () => YEAST_FIELDS };
-const GRAIN_COUNT = ['rcp_Grain_Count', 'Grain tab: how many grain lines', r => (r.ingredients?.fermentables || []).filter(isGrain).length];
+const GRAIN_COUNT = ['skn_rcp_Grain_Count', 'Grain tab: how many grain lines', r => (r.ingredients?.fermentables || []).filter(isGrain).length];
 // a line field (any case) of the Hops, Grain or Fermentable tab: its empty value (a line past the Count reads as this), else undefined
 export function lineFieldEmpty(name) {
   const s = String(name), h = new RegExp(HOP_FIELD.source, 'i').exec(s), g = new RegExp(LINE_FIELD.source, 'i').exec(s);
   const end = h ? HOP_FIELDS.find(x => x[0].toLowerCase() === h[2].toLowerCase())?.[0]
     : g ? LINE_LISTS[g[1].toLowerCase()]().find(x => x[0].toLowerCase() === g[3].toLowerCase())?.[0] : undefined;
-  if (!end) return /^rcp_(Hop|Grain|Fermentable|Adjunct|Yeast)_Count$/i.test(s) ? 0 : undefined;
+  if (!end) return /^skn_rcp_(Hop|Grain|Fermentable|Adjunct|Yeast)_Count$/i.test(s) ? 0 : undefined;
   return ['Name', 'Use', 'Date', 'Type', 'Measurement', 'Time_Unit', 'Form', 'Lab', 'Product_ID', 'Flocculation', 'Mfg_Date', 'Notes'].includes(end) ? '' : ['Hop_Rocket', 'After_Boil', 'Starter'].includes(end) ? false : 0;
 }
-const FERM_COUNT = ['rcp_Fermentable_Count', 'Fermentable tab: how many lines', r => (r.ingredients?.fermentables || []).filter(f => !isGrain(f)).length];
-const ADJ_COUNT = ['rcp_Adjunct_Count', 'Adjuncts tab: how many lines', r => (r.ingredients?.miscs || []).length];
-const YEAST_COUNT = ['rcp_Yeast_Count', 'Yeast tab: how many yeast lines', r => (r.ingredients?.yeasts || []).length];
-export const hopFieldName = (line, end) => `rcp_Hop_${line}_${end}`;
-const HOP_COUNT = ['rcp_Hop_Count', 'Hops tab: how many hop lines', r => (r.ingredients?.hops || []).length];
-// a Skynet_Field by its name: the Recipe tab's, rcp_Hop_Count, or one of a hop line (any line number)
+const FERM_COUNT = ['skn_rcp_Fermentable_Count', 'Fermentable tab: how many lines', r => (r.ingredients?.fermentables || []).filter(f => !isGrain(f)).length];
+const ADJ_COUNT = ['skn_rcp_Adjunct_Count', 'Adjuncts tab: how many lines', r => (r.ingredients?.miscs || []).length];
+const YEAST_COUNT = ['skn_rcp_Yeast_Count', 'Yeast tab: how many yeast lines', r => (r.ingredients?.yeasts || []).length];
+export const hopFieldName = (line, end) => `skn_rcp_Hop_${line}_${end}`;
+const HOP_COUNT = ['skn_rcp_Hop_Count', 'Hops tab: how many hop lines', r => (r.ingredients?.hops || []).length];
+// a Skynet_Field by its name: the Recipe tab's, skn_rcp_Hop_Count, or one of a hop line (any line number)
 export const recipeField = name => {
   const ms = MASH_STEP_FIELD.exec(name); if (ms) return [name, `MASH: step ${ms[1]} ${ms[2].toLowerCase()}`, () => null];
   const wf = WATER_FIELDS.find(x => x[0] === name); if (wf) return [name, wf[1], () => null];
@@ -480,11 +480,11 @@ export function recipeFieldValues(r, d = {}) {
   hops.forEach((h, i) => { for (const [end, , get] of HOP_FIELDS) put(hopFieldName(i + 1, end), get(r, h, u, sch, i) ?? (end === 'Name' || end === 'Date' ? '' : 0)); });
   const ferms = r?.ingredients?.fermentables || [];
   put(GRAIN_COUNT[0], r ? GRAIN_COUNT[2](r) : 0); put(FERM_COUNT[0], r ? FERM_COUNT[2](r) : 0);
-  ferms.filter(isGrain).forEach((f, i) => { for (const [end, , get] of GRAIN_FIELDS) put(`rcp_Grain_${i + 1}_${end}`, get(f, u, r, d.eff) ?? (end === 'Name' ? '' : 0)); });
-  ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`rcp_Fermentable_${i + 1}_${end}`, get(f, u, r, d.eff) ?? (end === 'Name' ? '' : 0)); });
+  ferms.filter(isGrain).forEach((f, i) => { for (const [end, , get] of GRAIN_FIELDS) put(`skn_rcp_Grain_${i + 1}_${end}`, get(f, u, r, d.eff) ?? (end === 'Name' ? '' : 0)); });
+  ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`skn_rcp_Fermentable_${i + 1}_${end}`, get(f, u, r, d.eff) ?? (end === 'Name' ? '' : 0)); });
   put(ADJ_COUNT[0], r ? ADJ_COUNT[2](r) : 0);
-  (r?.ingredients?.miscs || []).forEach((m, i) => { for (const [end, , get] of ADJUNCT_FIELDS) put(`rcp_Adjunct_${i + 1}_${end}`, get(m) ?? 0); });
+  (r?.ingredients?.miscs || []).forEach((m, i) => { for (const [end, , get] of ADJUNCT_FIELDS) put(`skn_rcp_Adjunct_${i + 1}_${end}`, get(m) ?? 0); });
   put(YEAST_COUNT[0], r ? YEAST_COUNT[2](r) : 0);
-  (r?.ingredients?.yeasts || []).forEach((y, i) => { for (const [end, , get] of YEAST_FIELDS) put(`rcp_Yeast_${i + 1}_${end}`, get(y, u) ?? 0); });
+  (r?.ingredients?.yeasts || []).forEach((y, i) => { for (const [end, , get] of YEAST_FIELDS) put(`skn_rcp_Yeast_${i + 1}_${end}`, get(y, u) ?? 0); });
   return out;
 }
