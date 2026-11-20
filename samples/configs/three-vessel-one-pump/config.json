@@ -1887,8 +1887,8 @@
    "workspace": "Water",
    "device": "Brewery Mega",
    "channel": 33,
-   "label": "Manifold Supply Valve",
-   "x": 1400,
+   "label": "Manifold Valve",
+   "x": 1360,
    "y": 70,
    "w": 150,
    "h": 150,
@@ -1910,14 +1910,14 @@
    "workspace": "Water",
    "device": "Brewery Mega",
    "channel": 31,
-   "label": "Fire Hose",
-   "x": 1080,
-   "y": 70,
+   "label": "Firehose Valve",
+   "x": 1185,
+   "y": 230,
    "w": 150,
    "h": 150,
-   "ipIn": "left",
-   "ipOut": "right",
-   "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
+   "ipIn": "top",
+   "ipOut": "bottom",
+   "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg",
    "hideValue": true,
    "tap": "toggle",
    "onText": "OPEN",
@@ -1935,7 +1935,7 @@
    "device": "Brewery Mega",
    "channel": 32,
    "label": "Water float",
-   "x": 1080,
+   "x": 1500,
    "y": 330,
    "w": 150,
    "h": 70,
@@ -5066,37 +5066,295 @@
    "name": "wgt_TXT_Water_WA"
   },
   {
+   "id": "ip_tap_supply",
+   "kind": "ip",
+   "workspace": "Water",
+   "x": 1100,
+   "y": 126,
+   "w": 26,
+   "h": 26,
+   "color": "#4a90d9",
+   "label": "Tap Water Supply",
+   "labelVisible": true,
+   "labelAlign": "above",
+   "labelSize": 14
+  },
+  {
+   "id": "fw_tee",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Water",
+   "w": 80,
+   "h": 51,
+   "name": "Tee_1",
+   "template": "Tee",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "tee"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0,0.216",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.216",
+     "standard": "TC 1.5"
+    },
+    "branch1": {
+     "installed": true,
+     "position": "0.5,1",
+     "standard": "TC 1.5"
+    }
+   },
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0,0.216",
+    "end": "1,0.216",
+    "branch1": "0.5,1"
+   },
+   "bend": "0.5,0.216",
+   "x": 1220,
+   "y": 128,
+   "bundled": true,
+   "label": "tee_1"
+  },
+  {
+   "id": "fw_tee_s",
+   "kind": "ip",
+   "workspace": "Water",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "fw_tee",
+   "port": "start",
+   "labelVisible": false,
+   "x": 1205,
+   "y": 124,
+   "label": "Start (TC 1.5)"
+  },
+  {
+   "id": "fw_tee_e",
+   "kind": "ip",
+   "workspace": "Water",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "fw_tee",
+   "port": "end",
+   "labelVisible": false,
+   "x": 1285,
+   "y": 124,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "fw_tee_b",
+   "kind": "ip",
+   "workspace": "Water",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "fw_tee",
+   "port": "branch1",
+   "labelVisible": false,
+   "x": 1245,
+   "y": 164,
+   "label": "Branch (TC 1.5)"
+  },
+  {
+   "id": "p_fw_1",
+   "kind": "pipe",
+   "workspace": "Water",
+   "from": "ip_tap_supply",
+   "to": "fw_tee_s",
+   "points": [
+    [
+     1113,
+     139
+    ],
+    [
+     1220,
+     139
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "name": "Pipe_W1",
+   "label": "Tap water"
+  },
+  {
+   "id": "p_fw_2",
+   "kind": "pipe",
+   "workspace": "Water",
+   "from": "fw_tee_e",
+   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:in",
+   "points": [
+    [
+     1300,
+     139
+    ],
+    [
+     1360,
+     139
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "name": "Pipe_W2",
+   "label": "To Manifold Valve"
+  },
+  {
+   "id": "p_fw_3",
+   "kind": "pipe",
+   "workspace": "Water",
+   "from": "fw_tee_b",
+   "to": "dev:BM_31_DO@Valve_E_Fire~Hose_WA:in",
+   "points": [
+    [
+     1260,
+     179
+    ],
+    [
+     1260,
+     230
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "name": "Pipe_W3",
+   "label": "To Firehose Valve"
+  },
+  {
+   "id": "ip_brew_manifold",
+   "kind": "ip",
+   "workspace": "Water",
+   "x": 1640,
+   "y": 126,
+   "w": 26,
+   "h": 26,
+   "color": "#4a90d9",
+   "label": "Brewery manifold",
+   "labelVisible": true,
+   "labelAlign": "above",
+   "labelSize": 14
+  },
+  {
+   "id": "p_fw_4",
+   "kind": "pipe",
+   "workspace": "Water",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:out",
+   "to": "ip_brew_manifold",
+   "points": [
+    [
+     1510,
+     139
+    ],
+    [
+     1653,
+     139
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "name": "Pipe_W4",
+   "label": "To the Brewery manifold"
+  },
+  {
+   "id": "ip_fh_qd",
+   "kind": "ip",
+   "fitting": "qd",
+   "workspace": "Water",
+   "x": 1243,
+   "y": 420,
+   "w": 34,
+   "h": 34,
+   "color": "#e8a33a",
+   "label": "QD SS Male",
+   "labelVisible": true,
+   "labelAlign": "right",
+   "labelSize": 14
+  },
+  {
+   "id": "p_fw_5",
+   "kind": "pipe",
+   "workspace": "Water",
+   "from": "dev:BM_31_DO@Valve_E_Fire~Hose_WA:out",
+   "to": "ip_fh_qd",
+   "points": [
+    [
+     1260,
+     380
+    ],
+    [
+     1260,
+     420
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "name": "Pipe_W5",
+   "label": "To the QD"
+  },
+  {
    "id": "ip_fh_end",
    "kind": "ip",
    "workspace": "Water",
    "fitting": "coupling",
-   "x": 1260,
-   "y": 230,
+   "x": 1380,
+   "y": 540,
    "w": 30,
    "h": 30,
    "color": "#e8a33a",
-   "label": "Hose end",
+   "label": "Fire Hose end",
    "labelVisible": false
   },
   {
    "id": "p_fh_hose",
    "kind": "pipe",
    "hose": true,
+   "qd": true,
    "workspace": "Water",
-   "from": "dev:BM_31_DO@Valve_E_Fire~Hose_WA:out",
+   "from": "ip_fh_qd",
    "to": "ip_fh_end",
    "points": [
     [
-     1230,
-     145
+     1260,
+     454
     ],
     [
-     1275,
-     145
+     1260,
+     500
     ],
     [
-     1275,
-     245
+     1395,
+     500
+    ],
+    [
+     1395,
+     555
     ]
    ],
    "width": 10,

@@ -5,6 +5,9 @@ The **Three vessels, one pump** sample has a **Water** Tab. It runs tap water fo
 - the **Fire Hose**, a valve on an open hose, to top off a vessel or rinse one when cleaning;
 - the **Manifold Supply Valve**, tap water into the manifold.
 
+The piping is drawn as OakBarn Brewery's is: the **Tap Water Supply** goes into a Tee; one side goes through the **Manifold Valve**
+to the **Brewery manifold**, the other down through the **Firehose Valve** to a **QD SS Male**, where the fire hose clips on.
+
 It is the first Process Sample, made from OakBarn Brewery's own Fire Hose and Manifold Processes. Open it on the simulator and press a
 button to watch it work.
 

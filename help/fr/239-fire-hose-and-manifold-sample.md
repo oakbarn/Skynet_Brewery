@@ -6,6 +6,10 @@ motorisées :
 - la **Fire Hose** (lance d'arrosage), une vanne sur un tuyau ouvert, pour compléter une cuve ou la rincer au nettoyage ;
 - la **Manifold Supply Valve**, l'eau du robinet dans le manifold.
 
+La tuyauterie est dessinée comme celle d'OakBarn Brewery : le **Tap Water Supply** (arrivée d'eau du robinet) entre dans un Té ; un
+côté passe par la **Manifold Valve** vers le **Brewery manifold**, l'autre descend par la **Firehose Valve** jusqu'à un **QD SS Male**,
+où la lance d'arrosage s'accroche.
+
 C'est le premier exemple de Process, fait à partir des Processes Fire Hose et Manifold d'OakBarn Brewery. Ouvrez-le sur le simulateur
 et appuyez sur un bouton pour le voir fonctionner.
 
