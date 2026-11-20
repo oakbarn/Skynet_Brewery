@@ -49,6 +49,7 @@ import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
 import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
+import { pipeCrossings, crossBox, CROSS_EDGE } from './pipecross.js';      // a pipe crossing with no joint never looks joined (Rule 5.44)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
@@ -4773,6 +4774,7 @@ function renderPipes() {
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
   const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
+  const drawn = new Map();       // each pipe's drawing, for the crossings (Rule 5.44)
   layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
     const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
@@ -4824,8 +4826,22 @@ function renderPipes() {
       });
     }
     const own = layers.get(p.id); if (own) own.append(g); else { const n = pipeLayer(p.id); n.append(g); mine.push(n); }      // in its own place in the Layer Order (Rule 1.29)
+    drawn.set(p.id, { g, width });
   }
   $('#ws').append(...mine);         // a pipe being drawn has no place yet: on top until the Tab is drawn again
+  // a pipe that crosses another with no joint (Rule 5.44): the up-and-down pipe is drawn again over the crossing, in the higher
+  // of the two pipes' places in the Layer Order, with a thin dark edge either side, so the level pipe goes behind it
+  pipeCrossings(pipes).forEach((x, k) => {
+    const f = drawn.get(x.front.id), b = drawn.get(x.back.id); if (!f || !b) return;
+    const fl = f.g.ownerSVGElement, bl = b.g.ownerSVGElement; if (!fl || !bl) return;
+    const top = fl.compareDocumentPosition(bl) & Node.DOCUMENT_POSITION_FOLLOWING ? bl : fl;
+    const id = `pipeCross_${k}_${String(x.front.id).replace(/[^\w-]/g, '')}`, box = (n, more) => { const c = mk('clipPath', { id: id + n }); c.append(mk('polygon', { points: crossBox(x, f.width, b.width, more).map(q => q.join(',')).join(' ') })); return c; };
+    const over = mk('g', { class: 'pipeCross', 'pointer-events': 'none' });
+    over.append(box('e', 0), box('p', 3), mk('polyline', { points: x.seg.map(q => q.join(',')).join(' '), stroke: 'rgba(0,0,0,0.6)', 'stroke-width': f.width + 2 * CROSS_EDGE, fill: 'none', 'clip-path': `url(#${id}e)` }));
+    const copy = f.g.cloneNode(true); copy.removeAttribute('data-gid'); copy.removeAttribute('class'); copy.setAttribute('clip-path', `url(#${id}p)`);
+    for (const n of copy.querySelectorAll('.hit, .handle, .loose, .pipeLabel, [stroke-dasharray="4 3"]')) n.parentNode.removeChild(n);
+    over.append(copy); top.append(over);
+  });
   if (drawPts) {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
     if (all.length > 1) svg.append(line({ hose: drawHose, points: all }, { class: 'drawing' }));

@@ -24,7 +24,8 @@ chaque tuyau finit sur un de ses IP.
 - **Joindre un tuyau au milieu d'un autre tuyau :** commencez ou finissez le nouveau tuyau sur l'autre tuyau, loin de ses IP. Skynet coupe ce
   tuyau en deux à cet endroit et y met un té.
 - **Deux bouts de tuyau libres** qui se rencontrent deviennent un seul joint, donc un coude y est mis (ou un manchon, quand ils sont alignés).
-- Un tuyau qui ne fait que croiser un autre en son milieu ne s'y joint pas.
+- Un tuyau qui ne fait que croiser un autre en son milieu ne s'y joint pas. Sur l'onglet, le tuyau vertical passe devant et le
+  tuyau horizontal passe derrière lui, avec un fin bord sombre de chaque côté : un croisement ne ressemble jamais à une croix ni à un té.
 - Deux tuyaux en ligne droite se joignent simplement sur un IP (un manchon). Un bout de tuyau ouvert reçoit aussi un manchon.
 
 ## En ajouter un à la main {#adding-one-by-hand}
