@@ -80,6 +80,12 @@ is on (through the SSR), and if Off the SSR no longer sends power. Similar to a 
 
 **⚙ Change** in an Interface's row on the Devices page opens the same pop-up. Use it to give a pretend board its real **USB Port** or network address once it is wired, to pick another USB Port, to change its Board Settings or to **Test Communication**. The name of an Interface that has Devices on it stays as it is, and a saved ID never changes (Rule 3.2).
 
+**The USB Port list.** The USB Port is picked from a list of the ports Skynet finds on this Brain right now. On Windows it is a number (COM3 shows as 3). On a Raspberry Pi or Linux it is a name like /dev/ttyACM0. Not sure which one is the board? Unplug it and pick **🔄 Look again**: the one that is gone is the board. A port saved before that is not on this Brain now stays in the list, in red, marked "not found on this Brain", so it is never lost without you seeing it. While the panel runs the **Simulator**, a grey line shows the real port: it is used when you switch back to Real boards, and you may still change it.
+
+**Changing the Board.** When you pick another Board for an Interface that has Devices on it, 💾 Save first shows one box: how many Devices, Widgets and Processes use it, and the Devices on a Port the new board does not have. Press 💾 Save to go ahead, or Close to go back. Those Devices keep their Ports; give each a new Port in its Properties.
+
+**The suggested Device name.** The Interface ID balloon ends with the **Suggested Device Name** for this Interface, for example BM_Port_Type_Label_TabID, with the ID in red.
+
 ## Removing an Interface
 
 Removing an Interface can break your whole brewery: every Device wired to it stops working. Most of the time you want **⚙ Change** instead, to pick another board, USB Port or Network address; the Devices stay on it.

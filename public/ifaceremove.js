@@ -5,7 +5,8 @@
 // Interface, and (one warning only) asks for the Interface ID to be typed before an Interface still in use is removed. Nothing that
 // used it is deleted (Design Rule #1): its Devices keep every setting and show "No Interface" until they are moved.
 // Pure functions here (used by public/app.js and test/ifaceremove.test.js); the box itself is in public/app.js (ifaceRemoveDialog).
-import { portKeys, oneWireCircuits, owCircuitOf, isOneWirePort } from './naming.js';
+import { portKeys, oneWireCircuits, owCircuitOf, isOneWirePort, pinProfile } from './naming.js';
+import { analogPins } from './boards.js';
 
 const isOneWire = e => e?.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
 // the Port names of a Device, without the Interface part (22, A5, 1w1_2 ...)
@@ -72,4 +73,24 @@ export function removeTip(id, ifName, n) {
     'If it is removed, every one of them stops working: nothing on this board can be switched or read until each Device is moved to another Interface.',
     'Did you mean ⚙ Change? Use Change to pick another board, USB Port or Network address. The Devices stay on it.',
     `Remove shows what uses it, offers to move it all to another Interface, and asks you to type ${id || ifName} before anything is removed. A backup of the Schema is made first.`].join('\n');
+}
+
+// Changing an Interface's Board (Panel Updates entry 29, question (c); OakBarn Brewery, 2026-11-20: "I'd make it simpler: show the counts
+// and save, with no typed confirmation. KISS"): the Devices on it whose Ports the new board does not have. They keep their Ports
+// (nothing is taken away, Design Rule #1); the brewer gives each a new Port. 1-Wire Index slots and parts on an add-on (ADS) are not
+// board pins and always fit.
+const pinNorm = p => {
+  const s = String(p ?? '').trim().toUpperCase(); if (!s) return '';
+  let m = /^A(\d{1,2})$/.exec(s); if (m && +m[1] <= 15) return String(54 + +m[1]);
+  m = /^(?:GPIO|BCM)(\d+)$/.exec(s); if (m) return String(+m[1]);
+  m = /^D?(\d+)$/.exec(s); return m ? String(+m[1]) : s;
+};
+export function devicesOffBoard(cfg, name, board) {
+  const P = pinProfile(board), fits = new Set([...P.pins, ...analogPins(P)].map(pinNorm));
+  const out = [];
+  for (const e of ifaceUse(cfg, name).devices) {
+    const off = pinsShown(e).filter(p => /^\d+$/.test(p) && !fits.has(pinNorm(p)));
+    if (off.length) out.push({ name: e.name, ports: off });
+  }
+  return out;
 }

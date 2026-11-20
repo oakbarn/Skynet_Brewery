@@ -51,7 +51,7 @@ import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lT
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
-import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
+import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip, devicesOffBoard } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
 import { pipeCrossings, crossBox, CROSS_EDGE } from './pipecross.js';      // a pipe crossing with no joint never looks joined (Rule 5.44)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -62,6 +62,7 @@ import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
 import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
+import { qNeedsTurn, qShow, qUnitShown, qBoxShow, qBoxBack, qtyFamily, METRIC_PRESSURE } from './qtyshow.js';
 import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1366,6 +1367,8 @@ const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', 
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 // A Manual vessel's own Temperature units (Rule 2.59, the exception for a Vessel whose own screen has its units; OakBarn Brewery,
 // 2026-11-19: "a user can switch the Digiboil and Brewzilla back to F. I would think that is most common for US Brewers")
+const QTY_UNITS_TIP = 'Kept in: the units this sensor is calibrated in (its range, pulses or counts use them). What you see follows ☰ Menu > Settings > Units (Rule 2.59): psi shows in bar, gal in L and lb in kg when Units is Metric, and the other way in US Standard. A Process reads it in metric (bar, L, L/min, kg).';
+const METRIC_PRESSURE_TIP = 'What this pressure shows in when ☰ Menu > Settings > Units is Metric: bar (the start, as a CO2 or keg gauge reads) or kPa. US Standard always shows psi. Only what you see changes: a Process still works in bar (type 50kPa to give kPa).';
 const MANUAL_UNITS_TIP = 'Temperature units: the units its own screen shows, so the pop-up asks for the set point the way you read it. It starts as ☰ Menu > Settings > Units (°F in US Standard). A DigiBoil or Brewzilla screen comes back in °C after every power cycle: switch it back to °F on the vessel, or pick °C here. When this is °F, the pop-up gives the set point in °C as well. Unlike every other temperature, this one does not follow Units (Rule 2.59).';
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -2898,6 +2901,11 @@ function dialTurn(e) {
   const to = showUnits(), n = v => v === undefined || v === null || v === '' ? v : tShow(+v, e.units, to), d = v => v === undefined || v === null || v === '' ? v : dShow(+v, e.units, to);
   return { ...e, units: showLetter(to), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: d(e.dialCool), dialHot: d(e.dialHot), precision: e.precision ?? 1 };
 }
+// a pressure or Level Dial in the Units: its Lowest, Highest and its Cool and Hot bands turned (all by one factor)
+function dialQty(e) {
+  const to = showUnits(), as = e.metricPressure, n = v => v === undefined || v === null || v === '' ? v : qShow(+v, e.units, to, as);
+  return { ...e, units: qUnitShown(e.units, to, as), dialMin: n(e.dialMin), dialMax: n(e.dialMax), dialCool: n(e.dialCool), dialHot: n(e.dialHot) };
+}
 function dialSetpoint(e) {
   const sp = String(e.dialSp ?? '').trim();
   if (!sp) return null;
@@ -2915,6 +2923,18 @@ function tempTxt(e, val, own = e.units) {
   const d = e.precision !== undefined && e.precision !== null && e.precision !== '' ? e.precision : 1;
   return fmtVal({ ...e, precision: d }, tShow(val, own, to)) + ' ' + showLetter(to);
 }
+// Live readings in the Units (Rule 2.59 live side): a pressure, Level, Flow meter or Scale keeps its numbers in its own
+// units (the ones its sensor is calibrated in); it shows in ☰ Menu > Settings > Units (public/qtyshow.js). psi to bar gets one more decimal.
+function qtyTxt(e, val, own) {
+  const to = showUnits();
+  const as = e.metricPressure;      // a pressure field's Metric unit: bar or kPa (OakBarn Brewery, 2026-11-20: "depending on the field")
+  if (!qNeedsTurn(own, to, as) || typeof val !== 'number') return fmtVal(e, val) + (own ? ' ' + own : '');
+  const p = e.precision !== undefined && e.precision !== null && e.precision !== '' ? +e.precision : null;
+  const d = p === null ? 2 : p + (qtyFamily(own) === 'press' && to === 'Metric' && qUnitShown(own, to, as) === 'bar' ? 1 : 0);
+  return fmtVal({ ...e, precision: d }, qShow(val, own, to, as)) + ' ' + qUnitShown(own, to, as);
+}
+// a probe's or sensor's reading in the Units, whichever it is
+const readTxt = (e, val) => e?.type === 'temperature' ? tempTxt(e, val) : qtyTxt(e || {}, val, e?.units);
 // a Setpoint with no °F / °C after it (an older Hysteresis, PID, Deadband or a Fermentor: "45 %  ▸ 152"), in the Units
 const spNum = (val, own) => needsTurn(own, showUnits()) && typeof val === 'number' ? fmtVal({ precision: 1 }, tShow(val, own, showUnits())) : fmtVal({}, val);
 function fmtVal(e, v) {
@@ -3156,15 +3176,15 @@ function fillEl(n, e0) {
       if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
-    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + (e.type === 'temperature' ? tempTxt(e, v.value) : fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''));
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + readTxt(e, v.value);
       if (e.type === 'temperature') sv = probeSv(e0, e, v);      // its PV and SV (Panel Updates 41)
       break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
-    case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
+    case 'scale': text = `${qtyTxt(e, v.volume, e.volumeUnits || 'gal')} · ${qtyTxt(e, v.value, e.weightUnits || 'lb')}`; break;
     // a Hydrometer (Rule 6.25): its gravity and temperature, or No signal
     case 'hydrometer': text = v.lost ? '⚠ No signal' : `${fmtVal(hydroDec(e), v.value)} ${hydroUnitWord(e)} · ${tempTxt({ precision: 1 }, v.temperature, e.tempUnits || '°F')}`; on = !v.lost; break;
-    case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
+    case 'flowMeter': text = `${qtyTxt(e, v.rate, (e.units || 'gal') + '/min')} · ${qtyTxt(e, v.total, e.units || 'gal')}`; on = v.rate > 0; break;
     case 'stepper': {     // where it is, where it is going, and a warning while it has a home switch but has not found it
       const u = STEP_UNITS[e.units]?.[0] ?? e.units ?? '';
       text = v.enabled === false ? (e.offText ?? 'OFF') : `${fmtVal(e, v.position)} ${u}${v.moving && v.run === 0 ? `  ▸ ${fmtVal(e, v.target)}` : v.run ? `  ${v.run > 0 ? '▶' : '◀'}` : ''}${e.homePin !== undefined && e.homePin !== '' && !v.homed ? '  (not homed)' : ''}`;
@@ -3258,8 +3278,9 @@ function fillEl(n, e0) {
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) {      // the Skynet Dial (Rule 2.40); a probe's Dial reads in the Units (Rule 2.59)
     const dt = e.type === 'temperature' && needsTurn(e.units, showUnits()) ? dialTurn(e) : null, ed = isHeatElem(e) ? { ...e, units: '%' } : dt || e;
-    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e);
-    vl.innerHTML = dialSvg(ed, dt && rd !== null ? tShow(rd, e.units, showUnits()) : rd, dt && sp0 !== null ? tShow(sp0, e.units, showUnits()) : sp0, v.fault ? 'FAULT' : null);
+    const qt = !dt && e.type === 'analogIn' && qNeedsTurn(e.units, showUnits(), e.metricPressure) ? dialQty(e) : null;      // a pressure or Level Dial too
+    const rd = v.fault ? null : dialReading(e, v), sp0 = dialSetpoint(e), turn = x => x === null ? x : dt ? tShow(x, e.units, showUnits()) : qt ? qShow(x, e.units, showUnits(), e.metricPressure) : x;
+    vl.innerHTML = dialSvg(qt || ed, turn(rd), turn(sp0), v.fault ? 'FAULT' : null);
   }
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
   else if (sv?.k === 'probe') fillPvSv(vl, text, sv);      // a Temperature Probe's PV over its SV (Panel Updates 41)
@@ -5744,9 +5765,9 @@ const ADD_MENU = [
     ['Analog input on an ADS1115 board (16-bit)', 'analogIn', 'AI', { adc: 'ads1115', signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
     ['Analog input, raw reading (scale / offset)', 'analogIn', 'AI', { signal: 'raw' }],
     ['Pressure transducer 0.5-4.5 V (5 V hobby type)', 'analogIn', 'Pressure', { signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30, units: 'psi', precision: 1 }],
-    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 30, units: 'gal', precision: 1 }],
+    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: 'L', precision: 1 }],      // new items start in metric (Rule 2.59)
     ['pH probe board (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
-    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
+    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 450, units: 'L', precision: 2 }],      // the YF-S201 data sheet: 450 pulses per liter
   ]],
   ['Devices: motors (board pins)', [
     ['Stepper motor on a STEP / DIR driver (A4988, DRV8825, TMC2209, TB6600, DM542)', 'stepper', 'Stepper', { driver: 'A4988', wiring: 'stepDir', stepsPerRev: 200, microsteps: 16, units: 'rev', maxSpeed: 2, accel: 4, precision: 2 }],
@@ -5757,7 +5778,7 @@ const ADD_MENU = [
   ['Devices: hydrometers (Tilt, iSpindel, RAPT Pill ...)', HYDRO_MODEL_KEYS.map(k => [`${HYDRO_MODELS[k].label} hydrometer (${HYDRO_MODELS[k].conns.map(c => HYDRO_CONNECTIONS[c].replace(/[:(].*$/, '').trim()).join(' or ')})`, 'hydrometer', 'Hydro',
     { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°C', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
   ['Devices: weight', [
-    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
+    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'kg', volumeUnits: 'L', specificGravity: 1, autoTare: true, precision: 2 }],      // new items start in metric (Rule 2.59)
   ]],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Widgets with an ON / OFF state that can switch a Device (device_controlled)
   [`Boolean Widgets (a Widget with an ON / OFF state; with a Linked Device it acts like a Clone of it)`, [
@@ -8490,18 +8511,18 @@ function displayText(e, v, k, shown) {
   const onOff = st => st ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
   const probe = () => {
     const p = e.input && S.values[e.input], pe = e.input && S.config.elements.find(x => x.name === e.input);
-    return p ? fmtVal(pe || {}, p.value) + (pe?.units ? ' ' + pe.units : '') : '-';
+    return p ? readTxt(pe, p.value) : '-';      // in the Units (Rule 2.59)
   };
   switch (k) {
     case 'setpoint': return `▸ ${fmtVal({}, v.target)}`;
     case 'reading': return probe();
     case 'output': return hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? onOff(v.output) : `${fmtVal({ precision: 0 }, v.value)} %`;
     case 'state': return onOff(v.state);
-    case 'rate': return `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min`;
-    case 'total': return `${fmtVal(e, v.total)} ${e.units || 'gal'}`;
-    case 'volume': return `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'}`;
-    case 'weight': return `${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`;
-    case 'value': return e.type === 'pwmOut' ? fmtVal(e, v.value) + ' %' : fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+    case 'rate': return qtyTxt(e, v.rate, (e.units || 'gal') + '/min');      // in the Units (Rule 2.59)
+    case 'total': return qtyTxt(e, v.total, e.units || 'gal');
+    case 'volume': return qtyTxt(e, v.volume, e.volumeUnits || 'gal');
+    case 'weight': return qtyTxt(e, v.value, e.weightUnits || 'lb');
+    case 'value': return e.type === 'pwmOut' ? fmtVal(e, v.value) + ' %' : e.type === 'temperature' ? tempTxt(e, v.value) : qtyTxt(e, v.value, e.units);
     case 'volts': { const x = pwmVolts(e, v.value); return x === null || !Number.isFinite(x) ? shown : `${x.toFixed(1)} V`; }
   }
   return shown;
@@ -8578,12 +8599,12 @@ const F = {
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num']],
   scale: [['device', 'Device', 'dev'], ['channel', 'HX711 DT pin(s), comma between several boards on one vessel (e.g. 26, 28)', 'text'],
     ['countsPerUnit', 'Calibration: counts per lb / kg (tap the scale > Calibrate to measure it)', 'num'],
-    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']],
+    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg'], false, false, { tip: QTY_UNITS_TIP }], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L'], false, false, { tip: QTY_UNITS_TIP }],
     ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a variable with the OG)', 'elem'],
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L)', 'num', null, false, false, { tip: 'Empty: 0.05 gal or 0.2 L.' }], ['autoTareSeconds', 'Steady for (seconds)', 'num', null, false, false, { def: 10 }],
     ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units', false, false, { tip: QTY_UNITS_TIP }], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'Offset (- heats, + cools)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
@@ -10210,7 +10231,9 @@ function fieldsOf(item) {
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], SMOOTH_FIELD, ['prefix', 'Prefix', 'text'],
-      ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
+      ['units', 'Units', 'gpick', 'units', true, false, { tip: QTY_UNITS_TIP }],
+      ...(qtyFamily(item.units) === 'press' ? [['metricPressure', 'Metric pressure in', 'sel', METRIC_PRESSURE, false, false, { tip: METRIC_PRESSURE_TIP }]] : []),
+      ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
 }
@@ -10564,7 +10587,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const tb = kind === 'num' || kind === 'numsel' ? tempBox(key, obj) : null;      // a temperature box shows in the Units (Rule 2.59)
-  const v = tb ? boxShow(tb.kind, obj[key], tb.own, showUnits()) : obj[key];
+  const v = tb ? (tb.kind === 'q' ? qBoxShow(obj[key], tb.own, showUnits(), tb.as) : boxShow(tb.kind, obj[key], tb.own, showUnits())) : obj[key];
   let input;
   if (kind === 'imgpath') {    // .backpath, _2, _3 (Fritz, 2026-11-02); changing _2 or _3 shows a heads-up once
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
@@ -10764,7 +10787,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const keep = CHAIN_RE.test(key), real = v && v !== CHAIN_KEEP;      // an Alarm Chain step: No Change first (Rule 7.16)
     const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (real && !os.includes(v)) os.push(v);
     const pv = h('img', { class: 'gprev' + (real && pic && !isTint(v) ? '' : ' hidden'), ...(real && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
-    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list });
+    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list, ...(rerender === true ? { 'data-rerender': '1' } : {}) });
     // the Group list beside it shows one picture group or All (it has no data-k, so it is never saved)
     const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os);
     let g = lastGroup[gk] || ''; if (!groups.some(([n]) => n === g)) g = '';
@@ -11009,8 +11032,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   if (tb && input) {
-    Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '' });
-    input.title = `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
+    Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '', ...(tb.as ? { as: tb.as } : {}) });
+    input.title = tb.kind === 'q' ? `In ${qUnitShown(tb.own, showUnits(), tb.as)} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its sensor keeps (Rule 2.59).`
+      : `In ${showLetter(showUnits())} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its probe keeps (Rule 2.59).`;
   }
   const full = kind === 'multi' || kind === 'area' || kind === 'ticks';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
@@ -11021,10 +11045,12 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
 // Deadband, Fermentor, Cool / Warm Pump or gas burner: its probe's (.input).
 const TEMP_HOLD_KEYS = { target: 'abs', onOffset: 'diff', deadbandOffset: 'diff', innerBandOffset: 'diff', heatOffset: 'diff', coolOffset: 'diff', flameRise: 'diff', flameDrop: 'diff', flameBoil: 'abs' };
 const TEMP_PROBE_KEYS = { setpoint: 'abs', dialMin: 'abs', dialMax: 'abs', dialCool: 'diff', dialHot: 'diff' };
+const QTY_DIAL_KEYS = ['dialMin', 'dialMax', 'dialCool', 'dialHot'];
 function tempBox(key, obj) {
   if (!obj || typeof obj !== 'object') return null;
   let kind, own;
   if (obj.type === 'temperature') { kind = TEMP_PROBE_KEYS[key]; own = obj.units || '°F'; }
+  else if (QTY_DIAL_KEYS.includes(key) && obj.type === 'analogIn') return qNeedsTurn(obj.units, showUnits(), obj.metricPressure) ? { kind: 'q', own: obj.units, as: obj.metricPressure ?? '' } : null;      // a pressure or Level Dial (Rule 2.59 live side)
   else if (TEMP_HOLD_KEYS[key] && (isHeatElem(obj) || SP_OLD.includes(obj.type) || isFermentor(obj) || isCoolPump(obj) || isGasBurner(obj))) { kind = TEMP_HOLD_KEYS[key]; own = probeOf(obj)?.units; }
   return kind && needsTurn(own, showUnits()) ? { kind, own } : null;
 }
@@ -11101,7 +11127,7 @@ function readFields(obj, root = $('#dlgBody')) {
     }
     else if (kind === 'num' || kind === 'numsel') {
       v = inp.value === '' ? undefined : +inp.value;
-      if (v !== undefined && inp.dataset.tk) v = boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
+      if (v !== undefined && inp.dataset.tk) v = inp.dataset.tk === 'q' ? qBoxBack(v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits(), inp.dataset.as) : boxBack(inp.dataset.tk, v, inp.dataset.shown, inp.dataset.kept, inp.dataset.own, showUnits());      // typed in the Units, saved in the probe's (Rule 2.59)
     }
     else if (kind === 'owpick') {      // a 1-Wire Index: circuit_index (Rule 6.37), kept as the probe's number and its circuit
       const m = /^(\d+)_(\d+)$/.exec(inp.value), ck = k === 'probeIndex' ? 'owCircuit' : k + 'Circuit';
@@ -13980,6 +14006,29 @@ async function ifaceRemoveDialog(name) {
   draw();
   dlg.showModal();
 }
+// Changing the Board of an Interface that is in use (Panel Updates entry 29, question (c); OakBarn Brewery, 2026-11-20: "I'd make it
+// simpler: show the counts and save, with no typed confirmation. KISS"): one box with what uses it and the Devices on Ports the new
+// board does not have, and 💾 Save. Nothing is moved or taken away: those Devices keep their Ports until each is given a new one.
+async function boardChangeOk(old, d) {
+  const use = ifaceUse(S.config, old.name);
+  if (!use.devices.length && !use.widgets.length) return true;
+  const procs = processesUsing(await procTexts(), useNames(use, old.name)), off = devicesOffBoard(S.config, old.name, d.board);
+  const bn = b => (BOARDS.find(([k]) => k === b) || [b, b])[1], id = old.id || ifaceIdOf(old.name) || old.name;
+  return new Promise(res => {
+    const dlg = $('#valDlg'); dlg.innerHTML = '';
+    const done = v => { dlg.close(); res(v); };
+    const save = h('button', { type: 'button', class: 'primary', title: 'Save the new Board. Nothing else changes.', onclick: () => done(true) }, '💾 Save');
+    const close = h('button', { type: 'button', title: 'Back to the Interface pop-up. Nothing is saved.', onclick: () => done(false) }, 'Close');
+    const x = h('button', { type: 'button', class: 'boxX', title: 'Back to the Interface pop-up. Nothing is saved.', 'aria-label': 'Close', onclick: () => done(false) }, '✕');
+    dlg.append(h('div', { class: 'bar dlgBar', style: 'min-width:min(560px, calc(100vw - 48px))' }, h('h3', { style: 'margin:0' }, `Change ${id} from ${bn(boardOf(old))} to ${bn(d.board)}`), h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' }, save, close, x)),
+      h('p', {}, `In use by: Devices ${use.devices.length}, Widgets ${use.widgets.length}, Processes ${procs.length}.`),
+      off.length ? h('div', { class: 'ifRmWarn' }, h('b', {}, `⚠ ${off.length} Device${off.length === 1 ? ' is' : 's are'} on a Port the ${bn(d.board)} does not have`),
+        h('p', {}, 'They keep their Ports. Give each a new Port in its Properties.'), h('ul', {}, ...off.map(o => h('li', {}, `${o.name} (Port ${o.ports.join(', ')})`))))
+        : h('p', {}, `Every Device's Port is on the ${bn(d.board)} too.`));
+    dlg.oncancel = () => res(false);
+    dlg.showModal(); save.focus();
+  });
+}
 // the large warning on the Remove button (entry 29 Part 5): counted now; the Processes once they are read
 function removeTipFor(d, texts = []) {
   const use = ifaceUse(S.config, d.name);
@@ -14001,7 +14050,7 @@ const IFACE_TIP = {
   // board instead"; "you could have a mixed system of 3.3 and 5v" (Rule 6.35)
   board: 'The kind of board this Interface is. Skynet sets the rest from the board: its Connection choices, how fast it talks over USB, and its Ports (IO Pins).\n\nSkynet is planned and wired for the Arduino Mega 2560 (a 5 V board). Every other board in the list can be used too.\n\n⟪b:3.3 V boards⟫Due, GIGA, Nano ESP32, Grand Central, Feather M0, ESP32, ESP8266 and Raspberry Pi are 3.3 V boards. When you put an input, a 0-5 V sensor or a relay on one, Skynet shows one warning. You can mix 5 V and 3.3 V boards: each board is its own Interface.\nMore: Skynet Boards.',
   connection: 'How the board is connected to the Brain. The choices are the ones this board can use. USB is the safest; Ethernet and WiFi depend on your network.',
-  usb: 'The number of the USB Port the board is plugged into on the Brain: a number between 1 and 256, used to connect the Arduino to the Brain. Skynet suggests a free one it found. If none is suggested, plug the board in and open this box again.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
+  usb: 'The USB Port the board is plugged into on the Brain. Pick it from the list: Skynet shows the ports it finds on this Brain right now. On Windows it is a number (COM3 shows as 3). On a Raspberry Pi or Linux it is a name like /dev/ttyACM0. Not sure which one is the board? Unplug it and press 🔄 Look again: the one that is gone is the board. A port shown in red was saved before but is not on this Brain now.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
   // Network Address (OakBarn Brewery, 2026-11-16, Add Interface markup: "This is always a big stumbling Block for many users who know
   // nothing about TCIP and IP Address or how to figure out which one to use. Help here can be expansive but start with If you do not
   // understand Networks and protocalls, call a friend to help. Do we need the SSID and Password to connect? And is this a Software and
@@ -14020,7 +14069,7 @@ const IFACE_TIP = {
     + NET_HELP_FIND + NET_HELP_SAME,
   on: 'On: the panel talks to this board. Off: the panel never opens it, and its Devices show as not connected.\nWhen a board is Off, none of its Devices work. A board must be On and in communication with the Brain (the two talking to each other) to do any action.',
   test: 'Test Communication: a step by step check that the Brain and this board are talking to each other, with sample answers and what to do when they are not.',
-  answer: 'Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.',
+  answer: 'How long Skynet waits for the board to answer before the Devices page shows "no answer". Leave it blank and Skynet uses 10. 2 to 600.\nAnswer Wait only shows you a problem. Lost Comm is the one that turns the board\'s outputs OFF.',
   lost: `Lost Comm (lost communication) is a safety: if the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF, so a heater or a pump is not left on when the Brain, the cable or the network fails. Must be filled in: ${LOST_LINK.min} to ${LOST_LINK.max}; Skynet uses ${LOST_LINK.def}.`,
   // "Make the Lost Comm and you are the Saftey with a blank line to seperate from Above and Bold and add a Red Safety Tringe before the Caveat"
   lostYou: '⚠ You are the Safety. Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.',
@@ -14052,6 +14101,18 @@ function boardSave(d, w) {
 // The USB Port box (OakBarn Brewery, 2026-11-15): on Windows the number alone (COM3 is 3); a free port found on the Brain is suggested
 const comNum = (p, win) => win && /^COM\d+$/i.test(String(p ?? '')) ? String(p).slice(3) : String(p ?? '');
 const comPath = (v, win) => { const t = String(v ?? '').trim(); return win && /^\d+$/.test(t) ? 'COM' + Number(t) : win && /^com\d+$/i.test(t) ? t.toUpperCase() : t; };
+// the USB Port dropdown (Panel Updates entry 29 Part 2, OakBarn Brewery, 2026-11-18: the box showed "/dev/ttyACM0" on Windows): the
+// ports found on this Brain now (on Windows the number alone, COM3 is 3; on a Pi /dev/ttyACM0), with what is plugged in when the port
+// says so; a saved port that is not on this Brain is kept and shown as not found (Design Rule #1); 🔄 Look again reads them again
+const USB_LOOK = '\0lookAgain';
+function usbPortChoices(ports, cur, win) {
+  const list = (ports || []).map(p => { const v = comNum(p.path, win); return [v, `${win && v !== p.path ? `${v}  (${p.path})` : v}${p.manufacturer ? `  ${p.manufacturer}` : ''}`]; });
+  const c = String(cur ?? '').trim();
+  if (c && !list.some(([v]) => v.toUpperCase() === c.toUpperCase())) list.unshift([c, `⚠ ${c} (not found on this Brain)`]);
+  if (!list.length) list.push(['', '(no board found: plug it in, then 🔄 Look again)']);
+  return [...list, [USB_LOOK, '🔄 Look again']];
+}
+const markPortList = sel => { for (const x of sel.options) x.classList.toggle('portGone', /not found on this Brain/.test(x.textContent)); sel.classList.toggle('portGone', !!sel.selectedOptions[0]?.classList.contains('portGone')); };
 const freeUsbPort = (ports, devices, me) => ports.map(p => p.path).find(p => !devices.some(d => d.name !== me && connOf(d) === 'serial' && String(d.port).toUpperCase() === String(p).toUpperCase())) || '';
 
 // Test Communication (OakBarn Brewery, 2026-11-15, Add Interface markup: "Change Pause Communication To Test Communication. Have a
@@ -14152,12 +14213,17 @@ function boardTalk(name) {
 const IFACE_BOARD_WORD = { mega: 'Arduino Mega', esp32: 'ESP32', pi: 'Raspberry Pi' };
 function ifaceIdTip(name, id, board) {
   const n = String(name ?? '').trim(), i = String(id ?? '').trim().toUpperCase();
-  if (!n && !i) return IFACE_PUMP_PARTS.slice(4, 8).join('\n\n');      // Dialog 1, word for word
+  if (!n && !i) return IFACE_PUMP_PARTS.slice(4, 8).join('\n\n') + '\n\n' + suggestedDeviceLine('');      // Dialog 1, word for word, and the line under it
   const b = IFACE_BOARD_WORD[board] || 'Arduino', nm = n || i;
   return [`When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Interface IDs follow Rule 3.2. This Interface is: ${i}: ${nm}`,
     `The ID is important as it is Part of the Suggested Name.\n⟦${i}⟧_15_DO@Pump_Red~Pump_BH`,
     `Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above ${i}_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface ${i} (${nm} {${b}}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).`,
-    `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`].join('\n\n');
+    `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`, suggestedDeviceLine(i)].join('\n\n');
+}
+// Panel Updates entry 29 Part 3 (OakBarn Brewery, 2026-11-18: "add the suggest name for ID under the text", "Suggest Device Name"):
+// this Interface's real ID in red, changing as the ID is typed
+function suggestedDeviceLine(id) {
+  return id ? `Suggested Device Name: ⟦${id}⟧_Port_Type_Label_TabID, for example ⟦${id}⟧_15_DO@Pump_Red~Pump_BH` : 'Suggested Device Name: (type a Name first)';
 }
 // The Network address Skynet suggests for a new Interface (OakBarn Brewery, 2026-11-16: "suggest a Network address based on the
 // Brian's IP address"): the Brain's first three numbers and a last one no other Interface (or the Brain) uses, 60 first (the address
@@ -14183,8 +14249,10 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   if (pretend) w.connection = w.realConnection || 'serial';
   if (!BOARDS.some(([b]) => b === w.board)) w.board = '';      // a board the BruControl Import could not tell: pick it
   boardStart(w);
-  let ports = [], win = false;
-  try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; win = r.platform === 'win32'; } catch { /* no USB support on the server */ }
+  let ports = [], win = false, portList = false;
+  // Panel Updates entry 29 Part 2: the USB Port is a dropdown of the ports Skynet finds on this Brain right now, when it can read them
+  const readPorts = async () => { try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; win = r.platform === 'win32'; portList = r.installed !== false; } catch { portList = false; /* no USB support on the server */ } };
+  await readPorts();
   w.port = comNum(w.port, win);
   if (w.connection === 'serial' && !w.port) w.port = comNum(freeUsbPort(ports, S.config.devices, old?.name), win);      // a free USB Port found on the Brain
   const taken = () => S.config.devices.filter(d => d !== old).map(x => x.id);
@@ -14200,7 +14268,9 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         : [['id', 'Interface ID', 'text', null, false, false, { tip: ifaceIdTip(o.name, idNow(o), o.board) }]]),
       ['board', 'Board', 'sel', [...(o.board ? [] : [['', '(pick the board)']]), ...BOARDS], true, false, { tip: IFACE_TIP.board }],
       ['connection', 'Connection', 'sel', conns, true, false, { tip: IFACE_TIP.connection + (rt.text ? '\nThis connection: ' + rt.text : '') }],
-      ...(o.connection === 'serial' ? [['port', 'USB Port', 'text', null, false, false, { tip: IFACE_TIP.usb }]]
+      // while the Simulator runs nothing goes to the board: the real USB Port (or address) is kept for Real boards and may be changed (entry 29 Part 2)
+      ...(S.sim?.on && (o.connection === 'serial' ? o.port : o.host) ? [['_simPort', `🧪 Simulator: nothing goes to this board now. Real ${o.connection === 'serial' ? 'USB Port' : 'Network address'}: ${o.connection === 'serial' ? comPath(o.port, win) : o.host}, used when you switch back to Real boards.`, 'note']] : []),
+      ...(o.connection === 'serial' ? [['port', 'USB Port', portList ? 'sel' : 'text', portList ? usbPortChoices(ports, o.port, win) : null, false, false, { tip: IFACE_TIP.usb }]]
         : [['host', 'Network address', 'text', null, false, false, { tip: o.connection === 'esp32' ? IFACE_TIP.hostWifi : IFACE_TIP.hostEth }]]),
       ...boardFields(o),      // Board settings (Rule 6.27)
     ];
@@ -14227,7 +14297,20 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   };
   const oks = $$('#dlg button[value="ok"]'), was = oks.map(b => b.textContent);
   for (const b of oks) b.textContent = old ? 'Save' : 'Add';
-  const live = ev => { if (['name', 'id', 'board', 'connection'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0); };      // a new Connection redraws the box: the suggested ID stays (OakBarn Brewery, 2026-11-16: "Change of Connection Type removes suggested Interface ID")
+  const lookAgain = async sel => {
+    const keep = [...sel.options].find(x => x.dataset.prev)?.value ?? '';
+    await readPorts();
+    const now = keep || comNum(freeUsbPort(ports, S.config.devices, old?.name), win);
+    sel.replaceChildren(...usbPortChoices(ports, now, win).map(([v, t]) => h('option', { value: v, ...(v === now ? { selected: true } : {}) }, t)));
+    markPortList(sel);
+    toast(ports.length ? `Found ${ports.length} USB Port${ports.length === 1 ? '' : 's'} on this Brain` : 'No USB Port found on this Brain: plug the board in, then 🔄 Look again', !ports.length);
+  };
+  const live = ev => {
+    if (ev.target?.dataset?.k === 'port' && ev.target.value === USB_LOOK) { if (ev.type === 'change') lookAgain(ev.target).catch(e => toast(e.message, true)); return; }
+    if (ev.target?.dataset?.k === 'port' && ev.target.tagName === 'SELECT') for (const x of ev.target.options) delete x.dataset.prev;
+    if (ev.target?.dataset?.k === 'port' && ev.target.tagName === 'SELECT') { const x = ev.target.selectedOptions[0]; if (x) x.dataset.prev = '1'; }
+    if (['name', 'id', 'board', 'connection'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0);
+  };      // a new Connection redraws the box: the suggested ID stays (OakBarn Brewery, 2026-11-16: "Change of Connection Type removes suggested Interface ID")
   dlgEl.addEventListener('keydown', tabKey, true); body.addEventListener('input', live); body.addEventListener('change', live);
   try {
     for (;;) {
@@ -14240,7 +14323,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
       };
       body.oninput = null;      // the New Device box's own; the dialog sets its own onchange (it redraws for a new Board)
       const shown = dialog(title || (old ? `Interface ${old.name}` : 'Add Interface'), fields, w, false, ['interfaces']);
-      setTimeout(() => { liveId(); (renamable && !String(w.name ?? '').trim() ? allBoxes()[0] : allBoxes().at(-1))?.focus(); }, 0);
+      setTimeout(() => { liveId(); const ps = body.querySelector('select[data-k="port"]'); if (ps) { markPortList(ps); if (ps.selectedOptions[0]) ps.selectedOptions[0].dataset.prev = '1'; } (renamable && !String(w.name ?? '').trim() ? allBoxes()[0] : allBoxes().at(-1))?.focus(); }, 0);
       if (await shown !== 'ok') return null;
       try {
         readFields(w);
@@ -14254,6 +14337,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         if (taken().some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
         const d = { ...(old || {}), name, id, connection: w.connection, board: w.board };
         delete d.port; delete d.host; delete d.baud; delete d.realConnection;
+        if (w.port === USB_LOOK) w.port = '';
         if (w.connection === 'serial') d.port = comPath(w.port, win);
         if (['esp32', 'ethernet'].includes(w.connection)) d.host = String(w.host ?? '').trim();
         if (pretend && !d.port && !d.host) { d.realConnection = d.connection; d.connection = 'simulator'; }      // still pretend: no board yet
@@ -14262,6 +14346,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         boardSave(d, w);
         if (d.connection === 'simulator') delete d.port;
         const devices = old ? S.config.devices.map(x => x === old ? d : x) : [...S.config.devices, d];
+        if (old && boardOf(old) && boardOf(old) !== d.board && !(await boardChangeOk(old, d))) continue;      // entry 29 (c): the counts, then Save
         await api('PUT', '/ui/layout', { devices });
         if (old && old.name !== name) {      // nothing uses it, but a Device made in this Edit layout may: follow the new name
           for (const e of (draft || S.config).elements) if (e.device === old.name) e.device = name;

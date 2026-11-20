@@ -83,7 +83,7 @@ export function classify(text, words) {
       const rest = line.slice(i);
       let m;
       if (prev === 'step' && (m = /^[A-Za-z]\d+\.\d+/.exec(rest))) { set(p, p + m[0].length, 'num'); i += m[0].length; prev = 'num'; continue; }   // step S2.00001
-      if ((m = /^\d+:\d{2}(?::\d{2}(?:\.\d+)?)?/.exec(rest)) || (m = /^(\d+\.?\d*|\.\d+)(\s*°\s*[CFcf](?![A-Za-z0-9_~@°]))?/.exec(rest))) {      // 152°F is one number (Rule 2.59)
+      if ((m = /^\d+:\d{2}(?::\d{2}(?:\.\d+)?)?/.exec(rest)) || (m = /^(\d+\.?\d*|\.\d+)(\s*°\s*[CFcf](?![A-Za-z0-9_~@°])|(?:psi|bar|kPa|gal|L|lb|kg|gpm|Lpm)(?![A-Za-z0-9_~@°]))?/i.exec(rest))) {      // 152°F and 12psi are one number (Rule 2.59)
         if (!(c === '.' && prev === 'name')) { set(p, p + m[0].length, 'num'); i += m[0].length; prev = 'num'; first = false; continue; }
       }
       if ((m = /^[A-Za-z_][A-Za-z0-9_~@°]*/.exec(rest))) {
