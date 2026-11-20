@@ -1,5 +1,7 @@
 {
  "Close": "Fermer",
+ "Close: nothing is changed.": "Fermer : rien n'est changé.",
+ "Do it now, as the box says.": "Le faire maintenant, comme le dit la boîte.",
  "Close this notice": "Fermer cet avis",
  "Close this note": "Fermer cette note",
  "Turn everything Off, stop the Brain and turn off the computer (or Raspberry Pi) it runs on. Someone has to turn it on again by hand.": "Tout éteindre, arrêter le Brain et éteindre l'ordinateur (ou le Raspberry Pi) sur lequel il tourne. Quelqu'un doit le rallumer à la main.",

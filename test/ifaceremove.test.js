@@ -63,3 +63,6 @@ assert.ok(off.length > 0 && off.every(o => o.ports.every(p => /^\d+$/.test(p))),
 assert.ok(!off.some(o => /1w/.test(o.name.split('_')[0])), '1-Wire probes are not listed');
 assert.ok(!off.some(o => o.ports.includes('22') || o.ports.includes('2')), 'Ports the ESP32 has are not listed');
 console.log('ifaceremove: all checks passed');
+
+// Panel Updates entry 29, the last parts: the Brain Move USB Port list and the one Skynet confirm box (Rule 2.64)
+await import('./skyconfirm.test.js');
