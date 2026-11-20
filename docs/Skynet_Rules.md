@@ -1336,7 +1336,18 @@ approved 2026-11-20: "29 ... yes"). The browser's own OK box is never used for i
 - **Remove anyway: one warning only** (no tick boxes, no chain of pop-ups). Typing the Interface ID lights up 🗑 Delete.
 - A Schema backup is made first (Rule 9.17). **Nothing that used it is deleted** (Design Rule #1): its Devices keep every setting
   and show **⚠ No Interface** in red in their Interface box until moved; a Process stops at a line that uses one.
-**Both programs:** the BruControl Import has no Interface list with Remove; its Interface step is unchanged. Help 76.
+- **Changing the Board** of an Interface in use (question (c), OakBarn Brewery, 2026-11-20: "I'd make it simpler: show the counts and
+  save, with no typed confirmation. KISS"): ⚙ Change > Save shows one box with what uses it (Devices, Widgets, Processes) and the
+  Devices on Ports the new board does not have, with 💾 Save · Close · ✕. No typing. Those Devices keep their Ports until each is
+  given a new one in its Properties.
+- **The ⚙ Change pop-up** (entry 29 Parts 2-4): the **USB Port** is a dropdown of the ports Skynet finds on this Brain now (Windows:
+  the number, COM3 shows 3; a Pi or Linux: /dev/ttyACM0), with what is plugged in when the port says so, and 🔄 Look again. A saved
+  port not on this Brain stays, shown in red "(not found on this Brain)". When Skynet cannot read the ports it stays a text box.
+  While the Simulator runs, a grey line shows the real port, used when switching back to Real boards; it may still be changed.
+  The Interface ID balloon gets one line under its text: **Suggested Device Name: BM_Port_Type_Label_TabID** with the real ID in
+  red. The USB Port and Answer Wait balloons have OakBarn Brewery's approved drafts A and B.
+**Both programs:** the BruControl Import has no Interface list with Remove; its Interface step is unchanged. The Import Build page
+shares the Interface pop-up: it lists the ports of the computer it runs on, the same as the Panel. Help 76.
 
 ## 3. Names and file names
 
@@ -6346,6 +6357,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-20: Rule 2.63 extended (Panel Updates entry 29 Parts 2-4 and question (c), OakBarn Brewery: "KISS"): Change of Board shows the counts and the Devices whose Ports the new board lacks, then Save, with no typed confirmation; the USB Port is a dropdown of the ports on this Brain with 🔄 Look again and a saved port not found shown in red; a Simulator line keeps the real port; the Interface ID balloon gets the Suggested Device Name line; USB Port and Answer Wait balloons reworded (drafts A and B). Help 76 (and French). Checked against the BruControl Import program: its Build page shares the pop-up and gets the same port list. (thread "Make removing an Interface safer")
 - 2026-11-20: Rule 9.12 extended (OakBarn Brewery: "A for font rule", Panel Updates entry 45, Help in a User Language): fonts under the SIL Open Font License 1.1 (OFL) are allowed, with the license file shipped next to them and a row in Media_Licenses.csv.
 - 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")

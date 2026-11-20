@@ -51,7 +51,7 @@ import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lT
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
-import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
+import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip, devicesOffBoard } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
 import { pipeCrossings, crossBox, CROSS_EDGE } from './pipecross.js';      // a pipe crossing with no joint never looks joined (Rule 5.44)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -13980,6 +13980,29 @@ async function ifaceRemoveDialog(name) {
   draw();
   dlg.showModal();
 }
+// Changing the Board of an Interface that is in use (Panel Updates entry 29, question (c); OakBarn Brewery, 2026-11-20: "I'd make it
+// simpler: show the counts and save, with no typed confirmation. KISS"): one box with what uses it and the Devices on Ports the new
+// board does not have, and 💾 Save. Nothing is moved or taken away: those Devices keep their Ports until each is given a new one.
+async function boardChangeOk(old, d) {
+  const use = ifaceUse(S.config, old.name);
+  if (!use.devices.length && !use.widgets.length) return true;
+  const procs = processesUsing(await procTexts(), useNames(use, old.name)), off = devicesOffBoard(S.config, old.name, d.board);
+  const bn = b => (BOARDS.find(([k]) => k === b) || [b, b])[1], id = old.id || ifaceIdOf(old.name) || old.name;
+  return new Promise(res => {
+    const dlg = $('#valDlg'); dlg.innerHTML = '';
+    const done = v => { dlg.close(); res(v); };
+    const save = h('button', { type: 'button', class: 'primary', title: 'Save the new Board. Nothing else changes.', onclick: () => done(true) }, '💾 Save');
+    const close = h('button', { type: 'button', title: 'Back to the Interface pop-up. Nothing is saved.', onclick: () => done(false) }, 'Close');
+    const x = h('button', { type: 'button', class: 'boxX', title: 'Back to the Interface pop-up. Nothing is saved.', 'aria-label': 'Close', onclick: () => done(false) }, '✕');
+    dlg.append(h('div', { class: 'bar dlgBar', style: 'min-width:min(560px, calc(100vw - 48px))' }, h('h3', { style: 'margin:0' }, `Change ${id} from ${bn(boardOf(old))} to ${bn(d.board)}`), h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' }, save, close, x)),
+      h('p', {}, `In use by: Devices ${use.devices.length}, Widgets ${use.widgets.length}, Processes ${procs.length}.`),
+      off.length ? h('div', { class: 'ifRmWarn' }, h('b', {}, `⚠ ${off.length} Device${off.length === 1 ? ' is' : 's are'} on a Port the ${bn(d.board)} does not have`),
+        h('p', {}, 'They keep their Ports. Give each a new Port in its Properties.'), h('ul', {}, ...off.map(o => h('li', {}, `${o.name} (Port ${o.ports.join(', ')})`))))
+        : h('p', {}, `Every Device's Port is on the ${bn(d.board)} too.`));
+    dlg.oncancel = () => res(false);
+    dlg.showModal(); save.focus();
+  });
+}
 // the large warning on the Remove button (entry 29 Part 5): counted now; the Processes once they are read
 function removeTipFor(d, texts = []) {
   const use = ifaceUse(S.config, d.name);
@@ -14001,7 +14024,7 @@ const IFACE_TIP = {
   // board instead"; "you could have a mixed system of 3.3 and 5v" (Rule 6.35)
   board: 'The kind of board this Interface is. Skynet sets the rest from the board: its Connection choices, how fast it talks over USB, and its Ports (IO Pins).\n\nSkynet is planned and wired for the Arduino Mega 2560 (a 5 V board). Every other board in the list can be used too.\n\n⟪b:3.3 V boards⟫Due, GIGA, Nano ESP32, Grand Central, Feather M0, ESP32, ESP8266 and Raspberry Pi are 3.3 V boards. When you put an input, a 0-5 V sensor or a relay on one, Skynet shows one warning. You can mix 5 V and 3.3 V boards: each board is its own Interface.\nMore: Skynet Boards.',
   connection: 'How the board is connected to the Brain. The choices are the ones this board can use. USB is the safest; Ethernet and WiFi depend on your network.',
-  usb: 'The number of the USB Port the board is plugged into on the Brain: a number between 1 and 256, used to connect the Arduino to the Brain. Skynet suggests a free one it found. If none is suggested, plug the board in and open this box again.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
+  usb: 'The USB Port the board is plugged into on the Brain. Pick it from the list: Skynet shows the ports it finds on this Brain right now. On Windows it is a number (COM3 shows as 3). On a Raspberry Pi or Linux it is a name like /dev/ttyACM0. Not sure which one is the board? Unplug it and press 🔄 Look again: the one that is gone is the board. A port shown in red was saved before but is not on this Brain now.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
   // Network Address (OakBarn Brewery, 2026-11-16, Add Interface markup: "This is always a big stumbling Block for many users who know
   // nothing about TCIP and IP Address or how to figure out which one to use. Help here can be expansive but start with If you do not
   // understand Networks and protocalls, call a friend to help. Do we need the SSID and Password to connect? And is this a Software and
@@ -14020,7 +14043,7 @@ const IFACE_TIP = {
     + NET_HELP_FIND + NET_HELP_SAME,
   on: 'On: the panel talks to this board. Off: the panel never opens it, and its Devices show as not connected.\nWhen a board is Off, none of its Devices work. A board must be On and in communication with the Brain (the two talking to each other) to do any action.',
   test: 'Test Communication: a step by step check that the Brain and this board are talking to each other, with sample answers and what to do when they are not.',
-  answer: 'Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.',
+  answer: 'How long Skynet waits for the board to answer before the Devices page shows "no answer". Leave it blank and Skynet uses 10. 2 to 600.\nAnswer Wait only shows you a problem. Lost Comm is the one that turns the board\'s outputs OFF.',
   lost: `Lost Comm (lost communication) is a safety: if the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF, so a heater or a pump is not left on when the Brain, the cable or the network fails. Must be filled in: ${LOST_LINK.min} to ${LOST_LINK.max}; Skynet uses ${LOST_LINK.def}.`,
   // "Make the Lost Comm and you are the Saftey with a blank line to seperate from Above and Bold and add a Red Safety Tringe before the Caveat"
   lostYou: '⚠ You are the Safety. Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.',
@@ -14052,6 +14075,18 @@ function boardSave(d, w) {
 // The USB Port box (OakBarn Brewery, 2026-11-15): on Windows the number alone (COM3 is 3); a free port found on the Brain is suggested
 const comNum = (p, win) => win && /^COM\d+$/i.test(String(p ?? '')) ? String(p).slice(3) : String(p ?? '');
 const comPath = (v, win) => { const t = String(v ?? '').trim(); return win && /^\d+$/.test(t) ? 'COM' + Number(t) : win && /^com\d+$/i.test(t) ? t.toUpperCase() : t; };
+// the USB Port dropdown (Panel Updates entry 29 Part 2, OakBarn Brewery, 2026-11-18: the box showed "/dev/ttyACM0" on Windows): the
+// ports found on this Brain now (on Windows the number alone, COM3 is 3; on a Pi /dev/ttyACM0), with what is plugged in when the port
+// says so; a saved port that is not on this Brain is kept and shown as not found (Design Rule #1); 🔄 Look again reads them again
+const USB_LOOK = '\0lookAgain';
+function usbPortChoices(ports, cur, win) {
+  const list = (ports || []).map(p => { const v = comNum(p.path, win); return [v, `${win && v !== p.path ? `${v}  (${p.path})` : v}${p.manufacturer ? `  ${p.manufacturer}` : ''}`]; });
+  const c = String(cur ?? '').trim();
+  if (c && !list.some(([v]) => v.toUpperCase() === c.toUpperCase())) list.unshift([c, `⚠ ${c} (not found on this Brain)`]);
+  if (!list.length) list.push(['', '(no board found: plug it in, then 🔄 Look again)']);
+  return [...list, [USB_LOOK, '🔄 Look again']];
+}
+const markPortList = sel => { for (const x of sel.options) x.classList.toggle('portGone', /not found on this Brain/.test(x.textContent)); sel.classList.toggle('portGone', !!sel.selectedOptions[0]?.classList.contains('portGone')); };
 const freeUsbPort = (ports, devices, me) => ports.map(p => p.path).find(p => !devices.some(d => d.name !== me && connOf(d) === 'serial' && String(d.port).toUpperCase() === String(p).toUpperCase())) || '';
 
 // Test Communication (OakBarn Brewery, 2026-11-15, Add Interface markup: "Change Pause Communication To Test Communication. Have a
@@ -14152,12 +14187,17 @@ function boardTalk(name) {
 const IFACE_BOARD_WORD = { mega: 'Arduino Mega', esp32: 'ESP32', pi: 'Raspberry Pi' };
 function ifaceIdTip(name, id, board) {
   const n = String(name ?? '').trim(), i = String(id ?? '').trim().toUpperCase();
-  if (!n && !i) return IFACE_PUMP_PARTS.slice(4, 8).join('\n\n');      // Dialog 1, word for word
+  if (!n && !i) return IFACE_PUMP_PARTS.slice(4, 8).join('\n\n') + '\n\n' + suggestedDeviceLine('');      // Dialog 1, word for word, and the line under it
   const b = IFACE_BOARD_WORD[board] || 'Arduino', nm = n || i;
   return [`When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Interface IDs follow Rule 3.2. This Interface is: ${i}: ${nm}`,
     `The ID is important as it is Part of the Suggested Name.\n⟦${i}⟧_15_DO@Pump_Red~Pump_BH`,
     `Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above ${i}_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface ${i} (${nm} {${b}}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).`,
-    `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`].join('\n\n');
+    `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`, suggestedDeviceLine(i)].join('\n\n');
+}
+// Panel Updates entry 29 Part 3 (OakBarn Brewery, 2026-11-18: "add the suggest name for ID under the text", "Suggest Device Name"):
+// this Interface's real ID in red, changing as the ID is typed
+function suggestedDeviceLine(id) {
+  return id ? `Suggested Device Name: ⟦${id}⟧_Port_Type_Label_TabID, for example ⟦${id}⟧_15_DO@Pump_Red~Pump_BH` : 'Suggested Device Name: (type a Name first)';
 }
 // The Network address Skynet suggests for a new Interface (OakBarn Brewery, 2026-11-16: "suggest a Network address based on the
 // Brian's IP address"): the Brain's first three numbers and a last one no other Interface (or the Brain) uses, 60 first (the address
@@ -14183,8 +14223,10 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   if (pretend) w.connection = w.realConnection || 'serial';
   if (!BOARDS.some(([b]) => b === w.board)) w.board = '';      // a board the BruControl Import could not tell: pick it
   boardStart(w);
-  let ports = [], win = false;
-  try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; win = r.platform === 'win32'; } catch { /* no USB support on the server */ }
+  let ports = [], win = false, portList = false;
+  // Panel Updates entry 29 Part 2: the USB Port is a dropdown of the ports Skynet finds on this Brain right now, when it can read them
+  const readPorts = async () => { try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; win = r.platform === 'win32'; portList = r.installed !== false; } catch { portList = false; /* no USB support on the server */ } };
+  await readPorts();
   w.port = comNum(w.port, win);
   if (w.connection === 'serial' && !w.port) w.port = comNum(freeUsbPort(ports, S.config.devices, old?.name), win);      // a free USB Port found on the Brain
   const taken = () => S.config.devices.filter(d => d !== old).map(x => x.id);
@@ -14200,7 +14242,9 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         : [['id', 'Interface ID', 'text', null, false, false, { tip: ifaceIdTip(o.name, idNow(o), o.board) }]]),
       ['board', 'Board', 'sel', [...(o.board ? [] : [['', '(pick the board)']]), ...BOARDS], true, false, { tip: IFACE_TIP.board }],
       ['connection', 'Connection', 'sel', conns, true, false, { tip: IFACE_TIP.connection + (rt.text ? '\nThis connection: ' + rt.text : '') }],
-      ...(o.connection === 'serial' ? [['port', 'USB Port', 'text', null, false, false, { tip: IFACE_TIP.usb }]]
+      // while the Simulator runs nothing goes to the board: the real USB Port (or address) is kept for Real boards and may be changed (entry 29 Part 2)
+      ...(S.sim?.on && (o.connection === 'serial' ? o.port : o.host) ? [['_simPort', `🧪 Simulator: nothing goes to this board now. Real ${o.connection === 'serial' ? 'USB Port' : 'Network address'}: ${o.connection === 'serial' ? comPath(o.port, win) : o.host}, used when you switch back to Real boards.`, 'note']] : []),
+      ...(o.connection === 'serial' ? [['port', 'USB Port', portList ? 'sel' : 'text', portList ? usbPortChoices(ports, o.port, win) : null, false, false, { tip: IFACE_TIP.usb }]]
         : [['host', 'Network address', 'text', null, false, false, { tip: o.connection === 'esp32' ? IFACE_TIP.hostWifi : IFACE_TIP.hostEth }]]),
       ...boardFields(o),      // Board settings (Rule 6.27)
     ];
@@ -14227,7 +14271,20 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   };
   const oks = $$('#dlg button[value="ok"]'), was = oks.map(b => b.textContent);
   for (const b of oks) b.textContent = old ? 'Save' : 'Add';
-  const live = ev => { if (['name', 'id', 'board', 'connection'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0); };      // a new Connection redraws the box: the suggested ID stays (OakBarn Brewery, 2026-11-16: "Change of Connection Type removes suggested Interface ID")
+  const lookAgain = async sel => {
+    const keep = [...sel.options].find(x => x.dataset.prev)?.value ?? '';
+    await readPorts();
+    const now = keep || comNum(freeUsbPort(ports, S.config.devices, old?.name), win);
+    sel.replaceChildren(...usbPortChoices(ports, now, win).map(([v, t]) => h('option', { value: v, ...(v === now ? { selected: true } : {}) }, t)));
+    markPortList(sel);
+    toast(ports.length ? `Found ${ports.length} USB Port${ports.length === 1 ? '' : 's'} on this Brain` : 'No USB Port found on this Brain: plug the board in, then 🔄 Look again', !ports.length);
+  };
+  const live = ev => {
+    if (ev.target?.dataset?.k === 'port' && ev.target.value === USB_LOOK) { if (ev.type === 'change') lookAgain(ev.target).catch(e => toast(e.message, true)); return; }
+    if (ev.target?.dataset?.k === 'port' && ev.target.tagName === 'SELECT') for (const x of ev.target.options) delete x.dataset.prev;
+    if (ev.target?.dataset?.k === 'port' && ev.target.tagName === 'SELECT') { const x = ev.target.selectedOptions[0]; if (x) x.dataset.prev = '1'; }
+    if (['name', 'id', 'board', 'connection'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0);
+  };      // a new Connection redraws the box: the suggested ID stays (OakBarn Brewery, 2026-11-16: "Change of Connection Type removes suggested Interface ID")
   dlgEl.addEventListener('keydown', tabKey, true); body.addEventListener('input', live); body.addEventListener('change', live);
   try {
     for (;;) {
@@ -14240,7 +14297,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
       };
       body.oninput = null;      // the New Device box's own; the dialog sets its own onchange (it redraws for a new Board)
       const shown = dialog(title || (old ? `Interface ${old.name}` : 'Add Interface'), fields, w, false, ['interfaces']);
-      setTimeout(() => { liveId(); (renamable && !String(w.name ?? '').trim() ? allBoxes()[0] : allBoxes().at(-1))?.focus(); }, 0);
+      setTimeout(() => { liveId(); const ps = body.querySelector('select[data-k="port"]'); if (ps) { markPortList(ps); if (ps.selectedOptions[0]) ps.selectedOptions[0].dataset.prev = '1'; } (renamable && !String(w.name ?? '').trim() ? allBoxes()[0] : allBoxes().at(-1))?.focus(); }, 0);
       if (await shown !== 'ok') return null;
       try {
         readFields(w);
@@ -14254,6 +14311,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         if (taken().some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
         const d = { ...(old || {}), name, id, connection: w.connection, board: w.board };
         delete d.port; delete d.host; delete d.baud; delete d.realConnection;
+        if (w.port === USB_LOOK) w.port = '';
         if (w.connection === 'serial') d.port = comPath(w.port, win);
         if (['esp32', 'ethernet'].includes(w.connection)) d.host = String(w.host ?? '').trim();
         if (pretend && !d.port && !d.host) { d.realConnection = d.connection; d.connection = 'simulator'; }      // still pretend: no board yet
@@ -14262,6 +14320,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         boardSave(d, w);
         if (d.connection === 'simulator') delete d.port;
         const devices = old ? S.config.devices.map(x => x === old ? d : x) : [...S.config.devices, d];
+        if (old && boardOf(old) && boardOf(old) !== d.board && !(await boardChangeOk(old, d))) continue;      // entry 29 (c): the counts, then Save
         await api('PUT', '/ui/layout', { devices });
         if (old && old.name !== name) {      // nothing uses it, but a Device made in this Edit layout may: follow the new name
           for (const e of (draft || S.config).elements) if (e.device === old.name) e.device = name;
