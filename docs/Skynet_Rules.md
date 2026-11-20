@@ -1305,6 +1305,23 @@ else associated with a Tab or any of its chilcren (Pumps, Valves....)").
 **Both programs:** the BruControl Import makes no Equipment Profiles; its import onto a Tab that is locked by lock_Equipment is stopped
 with the same message. Help 28 and 188.
 
+2.63 **Removing an Interface is safe** (OakBarn Brewery, 2026-11-18: "I clicked remove on the Interface for BM Brewery Mega. It is
+the host asking if I want to delete. I know I should not do this as it would mess up almost every Thing so a Remove needs lots of
+steps to do so"; "When you Hover the Remove Button Large Warning Pop Up"; "Pop up does not cover Button"; Panel Updates entry 29,
+approved 2026-11-20: "29 ... yes"). The browser's own OK box is never used for it. On the Devices page, Interface list:
+- **Resting the mouse on Remove** shows a **large** Hover Help warning (red border, red ⚠ heading) with this Interface's own counts
+  of Devices, Widgets and Processes that use it. It opens beside the button, never over it. It only warns; nothing is removed.
+- **Remove** (Admins only) opens **one Skynet box** (buttons 🗑 Delete · Close · ✕ upper right, Rule 2.54). Nothing changes until a
+  button is pressed. Nothing uses it: 🗑 Delete removes it. Something uses it: the box lists, by group with counts, the Devices on it
+  (with their Ports), the Widgets and pictures tied to them, the Processes that use them, its 1-Wire Index slots and other items
+  that name it.
+- **▶ Move them** (recommended): every Device moves to another Interface (or ➕ Add new Interface) with its name and settings. A
+  Device whose Port or 1-Wire Index is taken there stays and is listed with the reason. Nothing is restricted.
+- **Remove anyway: one warning only** (no tick boxes, no chain of pop-ups). Typing the Interface ID lights up 🗑 Delete.
+- A Schema backup is made first (Rule 9.17). **Nothing that used it is deleted** (Design Rule #1): its Devices keep every setting
+  and show **⚠ No Interface** in red in their Interface box until moved; a Process stops at a line that uses one.
+**Both programs:** the BruControl Import has no Interface list with Remove; its Interface step is unchanged. Help 76.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -6233,6 +6250,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
 - 2026-11-19: Rule 18.43 extended (OakBarn Brewery, Panel Updates 6: "Can a User Provide a single Image and Skynet create other needed"; "90 degrees to make horizontal vertical"; "Go with A KISS"): a User Defined Motorized Ball Valve's one picture (drawn Horizontal) gives four looks: Horizontal, Horizontal Flipped, Vertical Left (turned 90 degrees) and Vertical Right (turned and mirrored); the Valve Profile offers the same; plain Vertical only where already set. Help 128 (and French) adds a what-picture-works-best guide. Checked against both programs: the BruControl Import's Build page shares the dialog; the Importer's valve list is unchanged. (thread "Build a User Defined ball valve from one picture")
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.

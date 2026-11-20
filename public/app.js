@@ -47,7 +47,8 @@ import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS,
 import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
-import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';      // Copy a whole Tab on New tab (Rule 4.8)
+import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
+import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
@@ -10942,7 +10943,10 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     };
     input._fill(obj.device);
   }      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
+  // an Interface that was removed: the Device keeps its name and shows ⚠ No Interface in red until it is moved (Panel Updates entry 29, Rule 2.63)
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}), ...(v && !(S.config.devices || []).some(d => d.name === v) ? { class: 'devNoIface' } : {}) }, h('option', { value: '' }, '(none)'),
+    ...(v && !(S.config.devices || []).some(d => d.name === v) ? [h('option', { value: v, selected: true, class: 'devNoIface' }, `⚠ No Interface (${v} was removed)`)] : []),
+...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
     ...(String(opts).startsWith('addnew') && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
     ...controllableNames((draft || S.config).elements).map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)),
@@ -13749,9 +13753,11 @@ function renderDevices() {
       h('td', { title: sim ? 'Simulator: the panel pretends to be this board; nothing goes to the real board' : 'Real: the panel talks to the real board' }, sim ? '🧪 Simulator' : '🔌 Real'),
       h('td', { title: where || 'No USB Port or Network address yet: ⚙ Change to fill it in' }, TYPES[link] || link || ''), rateCell, h('td', {}, lostBox, ' s'),
       h('td', { title: d.info || '' }, h('span', { style: `color:${ok ? 'var(--ok)' : 'var(--bad)'}` }, d.status), infoShown ? h('div', { class: 'muted' }, d.info) : '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
-      h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its board, connection (USB, Ethernet or WiFi), USB Port or address and Board settings, and Test Communication', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its board, connection (USB, Ethernet or WiFi), USB Port or address and Board settings, and Test Communication', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only ifRmBtn', 'data-help': removeTipFor(d), 'data-help-big': '1', 'data-iface': d.name, onclick: guard(() => ifaceRemoveDialog(d.name)) }, 'Remove'))));
     tb.lastChild?.lastChild?.append(' ', h('button', { class: 'admin-only', title: 'Board Talk: every line to and from this board in plain words, and a box to send one (Rule 6.27)', onclick: () => boardTalk(d.name) }, '💬 Board Talk'));
   }
+  // the Remove buttons' warning counts the Processes too, once they are read (entry 29 Part 5)
+  if ($$('.ifRmBtn').length) procTextsSoon().then(texts => { for (const b of $$('.ifRmBtn')) { const d = S.devices.find(x => x.name === b.dataset.iface); if (d) b.dataset.help = removeTipFor(d, texts); } });
   renderProbes();
 }
 
@@ -13846,6 +13852,96 @@ $('#addOwCircuit').onclick = guard(async () => { if (await owInterview('', true)
 // Interface ID's on the Interface ID, not on the Board), the Board list has boards only, the Connection choices follow the Board, no
 // Simulator (it belongs to the panel, Rule 10.10), no Baud (it comes from the board), Test Communication in place of Pause, Lost Comm.
 const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device === name).length;
+// ---- Removing an Interface (Panel Updates entry 29, Rule 2.63, Help 76 "Removing an Interface"; public/ifaceremove.js). One Skynet box,
+// not the browser's: what uses it, ▶ Move them to another Interface, and, when something still uses it, one warning and the
+// Interface ID typed to light up 🗑 Delete. Nothing that used it is deleted (Design Rule #1); a Schema backup is made first (Rule 9.17).
+async function procTexts() {
+  try {
+    const all = (await api('GET', '/ui/scripts')).map(x => typeof x === 'string' ? x : x.name).filter(Boolean);
+    return await Promise.all(all.map(async n => [n, await api('GET', '/ui/scripts/' + encodeURIComponent(n)).catch(() => '')]));
+  } catch { return []; }
+}
+// the Remove buttons' warning reads the Processes at most once a minute (the Devices page is drawn again on every board status)
+let procCache = null;
+function procTextsSoon() {
+  if (!procCache || Date.now() - procCache.at > 60000) procCache = { at: Date.now(), p: procTexts() };
+  return procCache.p;
+}
+const IF_RM_COUNT = 12;     // longer lists show the first 12 and "and N more" (open it to see all)
+async function ifaceRemoveDialog(name) {
+  if (!can('admin')) { toast('Only an admin can remove an Interface', true); return; }
+  const texts = await procTexts();
+  const dlg = h('dialog', { class: 'ifRmDlg', 'data-nomenu': '' });
+  document.body.append(dlg);
+  const shut = () => { if (dlg.open) dlg.close(); else dlg.remove(); };
+  dlg.addEventListener('close', () => dlg.remove());
+  const draw = () => {
+    const d = S.config.devices.find(x => x.name === name); if (!d) return shut();
+    const id = d.id || ifaceIdOf(name) || '', who = `${id ? id + ': ' : ''}${name}`;
+    const use = ifaceUse(S.config, name), procs = processesUsing(texts, useNames(use, name)), busy = inUse(use, procs);
+    const list = (title, items) => {
+      if (!items.length) return '';
+      const show = items.slice(0, IF_RM_COUNT), more = items.slice(IF_RM_COUNT);
+      return h('div', { class: 'ifRmGroup' }, h('b', {}, `${title} (${items.length})`), h('ul', {}, ...show.map(t => h('li', {}, t))),
+        more.length ? h('details', {}, h('summary', {}, `and ${more.length} more`), h('ul', {}, ...more.map(t => h('li', {}, t)))) : '');
+    };
+    const want = String(id || name).toUpperCase();
+    const typed = h('input', { class: 'ifRmType', size: 6, autocomplete: 'off', 'aria-label': `Type ${want} to remove it` });
+    const del = h('button', { type: 'button', class: 'danger', title: 'Remove this Interface. A backup of the Schema is made first.' }, '🗑 Delete');
+    const ready = () => { del.disabled = busy && typed.value.trim().toUpperCase() !== want; };
+    typed.oninput = ready;
+    del.onclick = guard(async () => {
+      if (del.disabled) return;
+      await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== name) });
+      shut(); await load(); toast(`Interface ${who} removed. A backup of the Schema was made first.`);
+    });
+    const close = h('button', { type: 'button', title: 'Close. Nothing is removed.', onclick: shut }, 'Close');
+    const x = h('button', { type: 'button', class: 'boxX', title: 'Close. Nothing is removed.', 'aria-label': 'Close', onclick: shut }, '✕');
+    const body = [];
+    if (!busy) body.push(h('p', {}, 'Nothing uses this Interface, so it can be removed safely. A backup of the Schema is made first.'));
+    else {
+      body.push(h('p', {}, h('b', {}, `What uses ${want}`), ' (nothing is changed yet):'),
+        list('Devices on it', use.devices.map(e => { const p = pinsShown(e); return `${e.name}${p.length ? ` (${/^1w/.test(p[0]) ? '1-Wire Index' : 'Port'} ${p.join(', ')})` : ''}`; })),
+        list('Widgets and pictures tied to those Devices', use.widgets.map(w => w.name || w.kind || w.type || '(no name)')),
+        list('Processes that use them', procs),
+        list('1-Wire Index slots on it', use.probes.map(p => `${id}1w${owCircuitOf(p)}_${p.index}${p.name ? ' ' + p.name : ''}`)),
+        list('Other items on it (Vessel parts, Manifolds)', use.others.map(o => o.name || o.kind || o.type || '(no name)')));
+      // ▶ Move them (recommended): all to another Interface; a Device whose Port is taken there stays here and is listed
+      if (use.devices.length || use.probes.length || use.others.length) {
+        const others = S.config.devices.filter(o => o.name !== name);
+        const pick = h('select', { 'aria-label': 'Move them to' }, h('option', { value: '' }, '(pick an Interface)'),
+          ...others.map(o => { const oid = o.id || ifaceIdOf(o.name); return h('option', { value: o.name }, `${oid ? oid + ': ' : ''}${o.name}`); }),
+          h('option', { value: ADD_IFACE }, '➕ Add new Interface…'));
+        const note = h('div', { class: 'ifRmNote' });
+        const go = h('button', { type: 'button', class: 'primary', title: 'Move every Device on this Interface to the one picked. A Device whose Port is taken there stays here and is listed.', onclick: guard(async () => {
+          let to = pick.value;
+          if (to === ADD_IFACE) { to = await addInterfaceDialog({}); if (!to) return; await load(); }
+          if (!to) throw new Error('Pick the Interface to move them to');
+          const r = moveIface(S.config, name, to);
+          await api('PUT', '/ui/layout', { elements: r.elements, graphics: r.graphics, probes: r.probes });
+          await load(); draw();
+          const n2 = dlg.querySelector('.ifRmNote');
+          if (r.stay.length && n2) n2.replaceChildren(h('b', {}, `${r.moved.length} moved. These stay on ${want}: fix them, then Move again`), h('ul', {}, ...r.stay.map(s => h('li', {}, `${s.name}: ${s.why}`))));
+          else toast(`${r.moved.length} Device${r.moved.length === 1 ? '' : 's'} moved to ${to}`);
+        }) }, '▶ Move them');
+        body.push(h('div', { class: 'ifRmMove' }, h('b', {}, 'Move them (recommended): '), pick, ' ', go, note));
+      }
+      // the one warning (no nanny steps): Delete lights up when the Interface ID is typed
+      body.push(h('div', { class: 'ifRmWarn' }, h('b', {}, '⚠ Remove anyway?'),
+        h('p', {}, 'Nothing above is deleted: the Devices, Widgets and Processes keep every setting. But each Device shows ⚠ No Interface and does nothing until it is moved to an Interface, and a Process stops at a line that uses one. A backup of the Schema is made first.'),
+        h('label', {}, `Type ${want} to light up 🗑 Delete: `, typed)));
+    }
+    dlg.replaceChildren(h('div', { class: 'bar dlgBar' }, h('h3', {}, `Remove Interface ${who}`), h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' }, del, close, x)), ...body);
+    ready();
+  };
+  draw();
+  dlg.showModal();
+}
+// the large warning on the Remove button (entry 29 Part 5): counted now; the Processes once they are read
+function removeTipFor(d, texts = []) {
+  const use = ifaceUse(S.config, d.name);
+  return removeTip(d.id || ifaceIdOf(d.name) || '', d.name, { devices: use.devices.length, widgets: use.widgets.length, others: use.others.length + use.probes.length, procs: processesUsing(texts, useNames(use, d.name)).length });
+}
 // Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
 const NET_HELP_START = 'If you do not understand Networks and protocols, call a friend to help.\n\n'
   + '⟪b:What it is⟫The Network Address (IP Address) is the board\'s own number on your home network: four numbers with dots, for example 192.168.1.60. The Brain finds the board by it, the way a letter finds a house by its street address.\n\n';
