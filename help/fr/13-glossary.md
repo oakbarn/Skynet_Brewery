@@ -194,9 +194,9 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Simulator** (simulateur) : une fausse carte, pour tout essayer sans matériel.
 
-**skc_ (Skynet Constants)** (constantes Skynet) : des nombres fixes intégrés à Skynet pour les conversions courantes, comme `skc_Kg_To_Lb`. Personne ne peut les changer. Voir [Constantes Skynet](94-skynet-constants).
+**skn_** : le début de chaque nom Skynet, pour tout ce qui appartient à Skynet : des valeurs que Skynet règle et qu'un Process lit seulement, comme `skn_Boil_Temp` ; des rôles qui tiennent une sonde de température, comme `skn_Boil_Probe_1` ; et les constantes Skynet.
 
-**skn_, sk_** : les noms `skn_` sont des valeurs que Skynet règle et qu'un Process lit seulement, comme `skn_Boil_Temp`. Les noms `sk_` sont des rôles qui tiennent une sonde de température, comme `sk_Boil_Probe_1`.
+**skn_const_ (Skynet Constants)** (constantes Skynet) : des nombres fixes intégrés à Skynet pour les conversions courantes, comme `skn_const_L_p_Gal` (Label : Liters per Gallon). Personne ne peut les changer. Voir [Constantes Skynet](94-skynet-constants).
 
 **Sound Player** (lecteur de son) : un Widget qui joue un fichier son (`play SoundPlayer`, `stop SoundPlayer`). Il se met en pause pendant qu'une alarme sonne.
 
