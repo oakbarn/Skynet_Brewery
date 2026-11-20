@@ -124,7 +124,7 @@ export function helpNodes(text, doc = globalThis.document) {
       if (t) out.push(...helpNodes(t, doc));
       if (i + 2 >= pics.length) break;
       if (pics[i + 1] === 'b') { const b = doc.createElement('b'); b.className = 'hhHead'; b.textContent = pics[i + 2]; out.push(b); continue; }
-      const im = doc.createElement('img'); im.className = pics[i + 1] === 'imgw' ? 'hhPic hhPicWide' : 'hhPic'; im.alt = ''; im.src = '/media?path=' + encodeURIComponent(pics[i + 2]); out.push(im);
+      const im = doc.createElement('img'); im.className = pics[i + 1] === 'imgw' ? 'hhPic hhPicWide' : 'hhPic'; im.alt = ''; im.src = '/media?path=' + encodeURIComponent(pics[i + 2]) + (balloonLang() === 'fr' ? '&lang=fr' : ''); out.push(im);      // its words in French too (Rule 7.25)
     }
     return out;
   }

@@ -58,7 +58,8 @@ function src(url) {
   url = url.trim();
   if (/^https?:/i.test(url)) return url;
   if (/^(javascript|data|vbscript):/i.test(url)) return '';
-  return '/media?path=' + encodeURIComponent(url);      // a path inside a media folder, like everywhere else in the panel
+  // a path inside a media folder, like everywhere else in the panel; a Help picture's words come in the Help language (Rule 7.25)
+  return '/media?path=' + encodeURIComponent(url) + (lang !== 'en' && /(^|\/)help_pictures\//i.test(url) ? '&lang=' + lang : '');
 }
 
 function inline(s) {

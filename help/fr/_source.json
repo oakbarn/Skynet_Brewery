@@ -6,7 +6,7 @@
  "04-variables": "285856e470f40ab8",
  "05-scripts": "d4af4a288d72d2d2",
  "06-log": "5906688b79c6c7d5",
- "07-media": "ae9af08eb3ab447a",
+ "07-media": "f9f934b1fd796164",
  "08-import": "7e51289d961c126e",
  "09-settings": "568277dc0efd2f3d",
  "10-login": "6d86e529fff854fd",
@@ -24,7 +24,6 @@
  "22-process-language": "1bf219ffe9b9d05b",
  "23-restarting-processes": "7cd1dabd5f9bf0c6",
  "24-pipes-and-hoses": "1933095dc8e6323f",
- "240-step-by-step-add-a-process": "e2dfa6de709defe4",
  "25-picture-paths": "28941ad7551c6970",
  "26-tab-background": "2cfbbdc12b0fc965",
  "27-minimum-equipment": "a1610529f6d6bab4",
@@ -233,5 +232,6 @@
  "236-copy-a-whole-tab": "31a20e264fee5ce1",
  "237-pid-auto-tune": "b4e0d90926f3f155",
  "238-boil-temperature": "65584f93a311b31c",
- "239-fire-hose-and-manifold-sample": "8064922d06e0ba5a"
+ "239-fire-hose-and-manifold-sample": "8064922d06e0ba5a",
+ "240-step-by-step-add-a-process": "e2dfa6de709defe4"
 }
