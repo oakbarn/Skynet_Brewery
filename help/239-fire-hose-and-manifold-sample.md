@@ -5,8 +5,10 @@ The **Three vessels, one pump** sample has a **Water** Tab. It runs tap water fo
 - the **Fire Hose**, a valve on an open hose, to top off a vessel or rinse one when cleaning;
 - the **Manifold Supply Valve**, tap water into the manifold.
 
-The piping is drawn as OakBarn Brewery's is: the **Tap Water Supply** goes into a Tee; one side goes through the **Manifold Valve**
-to the **Brewery manifold**, the other down through the **Firehose Valve** to a **QD SS Male**, where the fire hose clips on.
+The piping is drawn as OakBarn Brewery's is: the **Tap Water Supply** comes in from the right into a Tee; one side goes through the
+**Manifold Valve** to the **Brewery manifold**, the other up through the **Firehose Valve** to a **QD SS Male**, where the fire hose
+clips on. The same two valves also show on the **Brew House** Tab, on the tap water line into its manifold, fed by the **Tap water**
+hose bib (they are Clones: the same valves, so opening one on either Tab opens it on both).
 
 It is the first Process Sample, made from OakBarn Brewery's own Fire Hose and Manifold Processes. Open it on the simulator and press a
 button to watch it work.
@@ -32,7 +34,8 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
 3. **The valve opens.** The **Water timer** counts down to 00:00:00, then the valve closes. With a Float button it counts up instead,
    until the float is made.
 4. **Shut it off early** with the **Water Override** button: one press ends the run and the valve closes
-   ([Override button](96-override-button)). Every tap water fill gets its own Override button. **FireHose Off** stops it too.
+   ([Override button](96-override-button)). Every tap water fill gets its own Override button. It shows only once the water is
+   on, so there is none during the 20 second warning. **FireHose Off** stops it at any time.
 5. **The true run time is kept.** A hidden count-up timer, **Water elapsed**, runs from the valve opening until the time is up, the
    float is made, or Override or FireHose Off ends it. That time goes in the hidden gGlobal `gblT_Elapsed_Water` (True Run Time),
    for seconds per gallon.

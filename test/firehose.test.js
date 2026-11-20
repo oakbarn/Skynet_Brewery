@@ -76,6 +76,7 @@ assert.ok(secs('gblT_Elapsed_Water') >= 19 && secs('gblT_Elapsed_Water') <= 22, 
 const ovrBtn = store.config.graphics.find(g => g.kind === 'override' && g.workspace === 'Water');
 assert.equal(ovrBtn?.process, U, 'the Water Override button is set to the Fire Hose and Manifold Process');
 assert.equal(ovrBtn.label, 'Water Override');
+assert.equal(ovrBtn.showWhen, 'water', 'it shows only once the water flows: no Override during the 20 second warning (Rule 16.11)');
 eng.start('Manifold_3_Minutes', 'user');
 assert.ok(await until(() => !!asked())); done();
 assert.ok(await until(() => on(MSV)), 'the Manifold Supply Valve opens');

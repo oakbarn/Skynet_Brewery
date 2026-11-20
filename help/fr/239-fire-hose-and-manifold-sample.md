@@ -6,9 +6,11 @@ motorisées :
 - la **Fire Hose** (lance d'arrosage), une vanne sur un tuyau ouvert, pour compléter une cuve ou la rincer au nettoyage ;
 - la **Manifold Supply Valve**, l'eau du robinet dans le manifold.
 
-La tuyauterie est dessinée comme celle d'OakBarn Brewery : le **Tap Water Supply** (arrivée d'eau du robinet) entre dans un Té ; un
-côté passe par la **Manifold Valve** vers le **Brewery manifold**, l'autre descend par la **Firehose Valve** jusqu'à un **QD SS Male**,
-où la lance d'arrosage s'accroche.
+La tuyauterie est dessinée comme celle d'OakBarn Brewery : le **Tap Water Supply** (arrivée d'eau du robinet) arrive par la droite
+dans un Té ; un côté passe par la **Manifold Valve** vers le **Brewery manifold**, l'autre monte par la **Firehose Valve** jusqu'à un
+**QD SS Male**, où la lance d'arrosage s'accroche. Les deux mêmes vannes apparaissent aussi sur l'onglet **Brew House**, sur la ligne
+d'eau du robinet qui va à son manifold, alimentée par le robinet **Tap water** (ce sont des Clones : les mêmes vannes, donc en ouvrir
+une sur un onglet l'ouvre sur les deux).
 
 C'est le premier exemple de Process, fait à partir des Processes Fire Hose et Manifold d'OakBarn Brewery. Ouvrez-le sur le simulateur
 et appuyez sur un bouton pour le voir fonctionner.
@@ -36,8 +38,8 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
 3. **La vanne s'ouvre.** Le **Water timer** compte jusqu'à 00:00:00, puis la vanne se ferme. Avec un bouton Float il compte vers le
    haut, jusqu'à ce que le flotteur soit fait.
 4. **Arrêtez-la plus tôt** avec le bouton **Water Override** : un appui finit la marche et la vanne se ferme
-   ([Override button](96-override-button)). Chaque remplissage d'eau du robinet a son propre bouton Override. **FireHose Off**
-   l'arrête aussi.
+   ([Override button](96-override-button)). Chaque remplissage d'eau du robinet a son propre bouton Override. Il n'apparaît
+   qu'une fois l'eau ouverte, donc il n'y en a pas pendant l'avertissement de 20 secondes. **FireHose Off** l'arrête à tout moment.
 5. **Le vrai temps de marche est gardé.** Un minuteur caché qui compte vers le haut, **Water elapsed**, tourne de l'ouverture de la
    vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Ce temps va dans le gGlobal caché
    `gblT_Elapsed_Water` (True Run Time), pour les secondes par gallon.

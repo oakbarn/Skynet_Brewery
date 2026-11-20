@@ -1707,8 +1707,12 @@ function fillText(n, g) {
 // loop that holds it. Any number on a Tab, each with its own Label, Process and look (Rule 2.26). Only the Label and its style
 // can be changed (font, size, bold, fore and back color, alignment), never a background picture.
 const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#ffffff', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
+// Shows: Only while tap water flows (Rule 16.11, OakBarn Brewery, 2026-11-20: "The Override appears after Flow is started not before"):
+// the button is on its Tab only while a tap water valve on that Tab is open, so a warning before the water comes on has no Override
+const ovrWaitsForWater = g => g?.showWhen === 'water' && !L().elements.some(e => e.tapwater && e.workspace === g.workspace && isOn(e.name));
 function fillOverride(n, g) {
   n.classList.add('ovr'); place(n, g);
+  n.classList.toggle('vhidden', ovrWaitsForWater(g));
   const who = String(g.process ?? '').trim();
   const b = h('button', { type: 'button', class: 'ovrBtn', title: who ? `Override: ${who} moves on past the wait, sleep or loop that holds it` : 'Override: every running Process (Any) moves on past the wait, sleep or loop that holds it' });
   setRich(b, g.label || OVR.label);
@@ -3549,6 +3553,7 @@ function updateEl(name) {
   if (t && (gTab(t) === wsName) !== !!tn) renderWs();          // a Process moved it to or from this Tab (.tab)
   else if (t && tn) fillText(tn, t);
   for (const cn of $$(`#ws .el[data-clone="${CSS.escape(name)}"]`)) { const ce = elNamed(cn.dataset.name); if (ce) fillEl(cn, ce); }     // its clones
+  if (e?.tapwater) for (const g of L().graphics) if (g.kind === 'override' && g.showWhen === 'water') { const on = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"]`); if (on) on.classList.toggle('vhidden', ovrWaitsForWater(g)); }
   for (const p of L().elements) if (p.type === 'picture' && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
   // what holds a probe's temperature changed (its Setpoint, ON / OFF): the probe's SV box shows it (Panel Updates 41)
   const ip = e?.input && elNamed(e.input);
@@ -9687,6 +9692,7 @@ const OVR_TIPS = {
   label: 'What the button says on this Tab, for example Skip Fire Hose. One press and its Process moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.',
   process: 'Which Process this button moves on. Any (the usual): every running Process except Loopers. A Process picked: only that one, so a Fire Hose or Manifold Process running beside the Brew is overridden on its own. A Process that waits with no button set to it (or to Any) gets an Override pop-up naming it. If the Process gets a new name, the button follows it.',
   name: 'Made by Skynet from the Label and the Tab (Rule 3.14).',
+  showWhen: 'Always: the button is always on its Tab. Only while tap water flows: it shows only while a tap water valve on its Tab is open, so a Tap Water Fill has its Override once the water is on and none during a warning before (Rule 16.11).',
   color: 'The color of its words. The ⬢ beside it sets the font, size, Back color and alignment.',
 };
 // 4. Process: Any (empty) or one Process, picked from the list as on the Process Widget
@@ -9707,6 +9713,7 @@ function overrideFields(it) {
     ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
     ['_nmro', '3. Name', 'ro', it.name || '', false, false, { tip: T.name }],
     ovrProcessField(it, T.process),
+    ['showWhen', '5. Shows', 'sel', [['', 'Always'], ['water', 'Only while tap water flows']], false, false, { tip: T.showWhen }],
     ...NOGFX_LOOK('color', { tip: T.color, attr: { title: 'Button look', fields: LOOK_FIELDS().filter(f => f[0] !== 'backColor').map(f => (f[0] === 'align' ? [f[0], f[1], f[2], TB_ALIGN_CHOICES.filter(c => c[0])] : f)) } }),
     ...wgtPlace(), wgtType('Override')];
 }
