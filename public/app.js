@@ -18,6 +18,7 @@ import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName, LANG_KEY } from './hoverhelp.js';
 import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
+import { plainLetters } from './letters.js';      // ß ss, æ ae, ø o in a Name (Rule 3.4)
 import { setStopWord } from './processwidget.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
@@ -7077,7 +7078,7 @@ async function newIntegratedDevice(tname) {
         if (!String(w.iface ?? '').trim()) throw new Error(`2. Pick the Interface the ${what} is wired to`);
         const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
         // its name comes from its Label (RIMS, RIMS_2 ...): it is one Device, not a bundle (Fritz, 2026-10-26)
-        let nm = noSpaces(w.label || lbl).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
+        let nm = noSpaces(plainLetters(w.label || lbl)).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
         const g = placeTabVessel(t, wsName, nm);
         if (w.label) g.label = String(w.label).trim();
         g.labelVisible = w.labelVisible !== false;
@@ -7537,7 +7538,7 @@ function vbBuild(t, w) {
   const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
   try {
     const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean).map(x => String(x).toLowerCase());
-    const base = String(w.label).trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
+    const base = plainLetters(String(w.label).trim()).replace(/\s+/g, '~').replace(/[^\w~]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
     let name = base; for (let n = 2; taken.includes(name.toLowerCase()); n++) name = `${base}_${n}`;
     addTemplateToTab('vessel', t, w.workspace, name);
     const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
@@ -7665,7 +7666,7 @@ function vbFermMake(g) {
     delete g.vbFerm; toast(`${g.label || g.name}: the imported Fermentor Control ${loose.name} is now built into it.`, false, 8000); return;
   }
   const taken = n => [...draft.elements, ...draft.graphics].some(x => String(x.name ?? '').toLowerCase() === n.toLowerCase());
-  const base = String(g.label || 'Fermentor').trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') || 'Fermentor';
+  const base = plainLetters(String(g.label || 'Fermentor').trim()).replace(/\s+/g, '~').replace(/[^\w~]/g, '') || 'Fermentor';
   let name = base; for (let i = 2; taken(name); i++) name = `${base}_${i}`;
   draft.elements.push({ name, type: FERM_TYPE, label: g.label || name, workspace: g.workspace, integratedIn: g.id, integratedAs: 'fv:control', input: probe.name, heat: heat?.name ?? '', cool: cool?.name ?? '',
     mode: g.vbFerm, ...Object.fromEntries(FERM_SETTINGS.map(([, k, , d]) => [k, d])), x: Math.round((g.x || 0) + (g.w || 200) + 12), y: Math.round(g.y || 0), w: 190, h: 60, offText: 'OFF' });

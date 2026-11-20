@@ -14,7 +14,7 @@ Un nom de Device, Widget, gGlobal, Text, tuyau, cuve ou autre élément n'a que 
 - Aucun nom ni **Label** ne peut commencer ou finir par une espace. Un Label est raccourci dès que vous quittez sa case.
 - Un **Label** peut avoir presque n'importe quelle marque, mais pas `©` `®` `™` (réservés aux mentions de copyright et de marque de la licence MIT de Skynet) ni `@` `~` (gardés pour le Suggested Name). Pendant que vous tapez, `©` `®` `™` sont retirés et `@` `~` deviennent une espace. La liste complète, avec la raison pour chaque marque : [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 
-Votre **Label** peut avoir les autres marques : il est seulement affiché. Dans le Suggested Name, chacune devient `~`, et un accent est enlevé (*Würze #2* donne `Wurze~~2`).
+Votre **Label** peut avoir les autres marques : il est seulement affiché. Dans le Suggested Name, chacune devient `~`, et un accent est enlevé (*Würze #2* donne `Wurze~~2`). Les lettres ß, æ et ø s'écrivent ss, ae et o (*Weiß Bier* donne `Weiss~Bier`, *Søl* donne `Sol`).
 
 **Les noms de Tabs et d'Interfaces** sont des noms affichés (*Brew House*, *Brewery Mega*), ils peuvent donc avoir des espaces ; leurs ID (`BH`, `BM`) sont simples. (Les noms de Templates de l'utilisateur ne servent qu'à choisir un Template, ils ne sont donc pas touchés.) Aucun nom ne peut avoir :
 

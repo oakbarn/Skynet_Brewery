@@ -9,6 +9,7 @@
 // Older names with < > : " / \ | ? * in them are changed once to a ~ for each (lib/namechars.js, Skynet Rule 15.2).
 
 import { isSkynetConstantName } from './skconst.js';
+import { plainLetters } from './letters.js';
 
 export const FILE_CHARS = '< > : " / \\ | ? *';
 export const BAD_NAME_CHARS = /[<>:"/\\|?*]/;
@@ -43,7 +44,7 @@ export const PLAIN_NAME = /^[A-Za-z_][A-Za-z0-9_~@°]*$/;
 const SHOWN_NAMES = ['Tab', 'Interface'];
 // any other mark (a space, - + = ! # ' % ^ & ( ) [ ] { } ; , . $ `, an accent ...) becomes ~; © ® ™ are dropped; an accent is dropped first (Würze -> Wurze)
 export const plainName = n => {
-  let s = String(n ?? '').trim().replace(/[©®™]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_~@°]/g, '~');
+  let s = String(n ?? '').trim().replace(/[©®™]/g, '').replace(/\S+/g, plainLetters).replace(/[^A-Za-z0-9_~@°]/g, '~');      // ß ss, æ ae, ø o (public/letters.js)
   if (s && !/^[A-Za-z_]/.test(s)) s = '_' + s;
   return s;
 };
