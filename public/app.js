@@ -14412,8 +14412,8 @@ function renderBoilTemp(st) {
 async function saveBoilTemp() {
   const us = btUS(), e = $('#btElev').value.trim(), p = $('#btPress').value.trim();
   const elevationM = e === '' ? null : btShown && e === btShown.elev ? btShown.elevM : (us ? +e * BT_FT : +e);
-  const pressureHpa = p === '' ? null : (us ? +p * BT_INHG : +p);
-  return api('PUT', '/ui/boiltemp', { airport: $('#btAirport').value.trim().toUpperCase(), elevationM, pressureHpa });
+  // the typed pressure goes as typed: the Brain reads it as inHg or hPa by its size and turns down a number that is no air pressure
+  return api('PUT', '/ui/boiltemp', { airport: $('#btAirport').value.trim().toUpperCase(), elevationM, pressure: p === '' ? null : +p });
 }
 $('#btSave').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; renderBoilTemp(await saveBoilTemp()); savedPop('Boil temperature saved'); });
 $('#btTest').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; await saveBoilTemp(); renderBoilTemp(await api('POST', '/ui/boiltemp/test')); });
