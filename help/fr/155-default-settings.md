@@ -104,7 +104,7 @@ Et si vous brassez avec l'eau du robinet et faites de la Bonne bière, pourquoi 
 
 ### Hop Stands {#hop-stands}
 
-La température et la durée des trois Hop Stands (High, Middle, Low) d'une nouvelle Recette ([Profils d'empâtage, d'ébullition et d'eau](35-mash-and-boil-profiles), Règle Skynet 17.14).
+Plus dans Default settings : il n'y a pas de Hop Stands par défaut. Une Recette demande le stand, sa température et sa durée quand un houblon Whirlpool est ajouté, avec les chiffres courants dans l'aide au survol ([Profils d'empâtage, d'ébullition et d'eau](35-mash-and-boil-profiles#the-three-hop-stands), Règle Skynet 17.14).
 
 ### Water to Grain Ratio {#water-to-grain-ratio}
 
@@ -156,7 +156,7 @@ Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles (par e
 
 Ceux-ci changent les choses déjà faites, ou la façon dont tout le panneau marche, donc ce sont des réglages (Settings), pas des réglages par défaut. Ils sont dans **Settings > Panel settings: screen, Tabs and alerts** :
 
-- **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix. Skynet garde chaque nombre en métrique (°C, litres, kilogrammes, cm) : Units change seulement ce que vous voyez et tapez, et le changer ne change jamais un nombre enregistré (Skynet Rule 2.59). Les Mash, Boil et Equipment Profiles, les Vessels et les Vessel Templates affichent leurs nombres dans ce choix à l'ouverture ; leur propre case Units est grisée et suit celle-ci ;
+- **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix. Skynet garde chaque nombre en métrique (°C, litres, kilogrammes, cm) : Units change seulement ce que vous voyez et tapez, et le changer ne change jamais un nombre enregistré (Skynet Rule 2.59). Les Mash, Boil et Equipment Profiles, les Vessels et les Vessel Templates affichent leurs nombres dans ce choix à l'ouverture ; leur propre case Units est grisée et suit celle-ci ; sur un Tab en marche, chaque température s'affiche aussi dans ce choix : la lecture d'une sonde (PV), sa consigne (SV), son Dial, et la consigne et les Offsets d'un Heating Element ou d'un Fermentor Control, aussi dans leurs Properties et leurs fenêtres. Une sonde gardée en °C (le 3 Vessel Sample) affiche 150.0 °F en US, et une sonde gardée en °F affiche des °C en Métrique ; ce que vous tapez est enregistré dans les unités de la sonde, et un nombre que vous n'avez pas changé est enregistré exactement comme avant. Un Offset se convertit par 1,8 seulement (1 °C = 1,8 °F), jamais avec le 32. Les articles d'une Recette qui ont leur propre unité la gardent (un ajout en grammes, une levure en Packs ; les houblons sont gardés en kg et s'affichent en oz ou g) ;
 - **Tab Style** (l'aspect de chaque Tab qui n'a pas de Tab Style à lui) ;
 - **Menu Bar**, **Sound**, **On startup** (Zoom, plein écran) ;
 - **\L Rich Text Code Size** ;
