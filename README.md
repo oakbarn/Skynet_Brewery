@@ -349,3 +349,9 @@ credit here (Rule 9.12). The full list with sources is [docs/Media_Licenses.csv]
 - **Skynet Language Fonts** (the add-only Language Fonts Setup and zip, Rule 9.24): Google **Noto Sans SC, JP, KR, Thai and
   Devanagari**, Copyright Google Inc. / The Noto Project Authors, under the **SIL Open Font License 1.1**
   (https://openfontlicense.org); the license file ships next to each font as OFL.txt. Packaged by Fontsource (https://fontsource.org).
+- **Skynet Music Pack** (☰ Menu > Get Music Pack, a download that is not in the Setups, Rule 9.25): Marine Band pieces performed
+  by "The President's Own" United States Marine Band and bugle calls by the Marine Barracks Washington Ceremonial Bugler,
+  https://www.marineband.marines.mil. US government work, public domain (17 USC 105). Tunes by John Philip Sousa, E. E. Bagley,
+  Jacques Offenbach, Daniel Butterfield, Richard Leveridge and traditional, all public domain. "Old Comrades" (Carl
+  Teike) by the Parlophone Military Band (1925) and Gertrud Kappel singing Richard Wagner (1924), public domain recordings from
+  https://archive.org.

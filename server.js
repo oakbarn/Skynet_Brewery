@@ -54,6 +54,7 @@ import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { applyKeptSettings } from './lib/freshstart.js';
 import { setupPictureGroups, listGroups } from './lib/picgroups.js';
 import { SkynetPictures } from './lib/skynetpics.js';
+import { MusicPack } from './lib/musicpack.js';
 import { listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures, isHelpPicture } from './lib/vectorize.js';
 import { helpPictureSvg } from './lib/helppictext.js';
@@ -193,6 +194,7 @@ store.on('sdcard', m => { engine.print('system', m); broadcast('alert', { text: 
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 const mediaFiles = new MediaFiles(() => store.mediaRoots());
 const skynetPics = new SkynetPictures(() => store._findMedia('Images'), { source: store.config.skynetPictures });   // ☰ Menu > Get Skynet pictures        // Media page: add / rename / delete pictures and sounds
+const musicPack = new MusicPack(() => store._findMedia('sounds'), { source: store.config.musicPack });   // ☰ Menu > Get Music Pack (Rule 9.25)
 const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], processes: PROCESSES, help: HELP }));   // File Move page
 // the User Language (Rule 11.16, lib/helplang.js): in the data folder, so a Setup never touches it and Move Brain takes it along
 const HELP_USER = path.join(DATA, 'help_user');
@@ -487,6 +489,7 @@ function needRole(p, m) {
   if (p.startsWith('/ui/schemas/import')) return 'admin';   // Schema.json: Open a Schema file (Brewing\\Import)
   if (p.startsWith('/ui/filemove/')) return 'admin';   // File Move: copies files onto the Brain
   if (p.startsWith('/ui/skynetpics/')) return 'admin';
+  if (p.startsWith('/ui/musicpack/')) return 'admin';   // Get Music Pack: copies the pack's sounds from GitHub onto the Brain
   if (p.startsWith('/ui/brainmove')) return 'admin';   // Move Brain: every file, logins included, and the USB ports   // Get Skynet pictures: copies pictures from GitHub onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
@@ -1522,6 +1525,19 @@ async function route(req, res) {
     const r = await skynetPics.get(Array.isArray(paths) ? paths.map(String) : [], f => pictures.add(f));
     if (r.saved.length) broadcast('media', {});
     return ok(res, { ok: true, ...r });
+  }
+  // Get Music Pack (admin only, see needRole; Rule 9.25): what the pack's GitHub Release has that this Brain is missing, then copy them
+  if (p === '/ui/musicpack/check' && m === 'GET') {
+    try { return ok(res, await musicPack.check(url.searchParams.get('pack'))); }
+    catch (e) { return fail(res, e.code === 404 ? 404 : 502, e.message); }
+  }
+  if (p === '/ui/musicpack/get' && m === 'POST') {
+    const { pack, names } = await jsonBody(req);
+    try {
+      const r = await musicPack.get(pack ? String(pack) : null, Array.isArray(names) ? names.map(String) : []);
+      if (r.saved.length) broadcast('media', {});
+      return ok(res, { ok: true, ...r });
+    } catch (e) { return fail(res, 400, e.message); }
   }
   // Media page
   if (p.startsWith('/ui/media/')) {
