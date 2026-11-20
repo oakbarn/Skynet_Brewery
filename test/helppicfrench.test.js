@@ -60,4 +60,20 @@ for (const n of ['Pump_Daisy_Chain', 'Valve_Daisy_Chain', 'Pump_Overlays', 'Pump
   const svg = fs.readFileSync(path.join(PICS, n + '.svg'), 'utf8');
   assert.ok(svg.includes(`href="${n}_Art.png"`) && pictureWords(svg).length, `${n}.svg: the picture with its words as real text`);
 }
+// ---- the safety buttons in the Help language (Rule 11.11 changed 2026-11-20): Override and Stop, nothing else
+{
+  const { safetyWord, SAFETY_WORDS } = await import('../public/screenwords.js');
+  const { processButton } = await import('../public/processwidget.js');
+  assert.equal(safetyWord('Override', 'fr'), 'Passer');
+  assert.equal(safetyWord('Stop', 'fr'), 'Arrêt');
+  assert.equal(safetyWord('Stop all', 'fr'), 'Tout arrêter');
+  assert.equal(safetyWord('Stop', 'en'), 'Stop');
+  assert.equal(safetyWord('Start', 'fr'), 'Start', 'every other screen word stays English');
+  assert.equal(safetyWord('Water Override', 'fr'), 'Water Override', 'a typed Label is the user\'s own');
+  assert.equal(processButton({ running: true }, w => safetyWord(w, 'fr')), '■ Arrêt');
+  assert.equal(processButton({ running: true }), '■ Stop', 'the Brain and the Import keep the English');
+  for (const [l, w] of Object.entries(SAFETY_WORDS)) assert.deepEqual(Object.keys(w).sort(), ['Override', 'Stop', 'Stop all'], `${l}: the same three words`);
+  const app = fs.readFileSync(path.join(root, 'public', 'app.js'), 'utf8');
+  assert.ok(app.includes("!g.label || g.label === OVR.label ? safetyWord(OVR.label) : g.label"), 'only the Override button\'s own Label changes');
+}
 console.log('helppicfrench tests passed');

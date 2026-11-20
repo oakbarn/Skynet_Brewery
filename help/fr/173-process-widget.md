@@ -7,7 +7,7 @@ Il montre trois choses :
 
 - son **Label** comme titre (par exemple *Mash Steps*),
 - ce que fait son Process : **Running** (en cours), **Waiting** (retenu à un `wait` ou un `ask`), **Stopped** (arrêté), ou **Stopped on an error** (arrêté sur une erreur),
-- un bouton **▶ Start** tant que le Process est arrêté, ou un bouton **■ Stop** tant qu'il tourne.
+- un bouton **▶ Start** tant que le Process est arrêté, ou un bouton **■ Arrêt** (Stop) tant qu'il tourne.
 
 Ajoutez-en un dans **Edit layout > Add Widget > Widgets (app only, no board pin) > Process Widget**. Comme tout Widget, il est d'abord créé sur le
 🔨 Build Tab et n'existe que dans l'application (pas d'Interface ni de Port). Son Name suit `wgt_PSW_` + le Label + l'ID du Tab, par

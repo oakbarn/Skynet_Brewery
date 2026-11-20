@@ -22,7 +22,7 @@ dont part Precise (Help 156).
 4. Appuyez sur **▶ Start**.
 
 La boîte montre ce qu'il fait : **Warming up to the Setpoint**, puis **Swing 1 of 5** jusqu'à **Swing 5 of 5**. Il tourne sur le
-Brain : vous pouvez fermer la boîte et revenir. **■ Stop** l'arrête à tout moment, et éteindre l'élément l'arrête aussi.
+Brain : vous pouvez fermer la boîte et revenir. **■ Arrêt** (Stop) l'arrête à tout moment, et éteindre l'élément l'arrête aussi.
 
 ## Combien de temps {#how-long}
 

@@ -34,7 +34,7 @@ In Edit layout press **Override ➕** on the Edit layout bar. It is made on the 
 
 ## Override Button Widget Properties
 
-- **1. Label**: what the button says on this Tab, for example **Skip Fire Hose**. A new one says **Override**; empty puts Override back. Rich Text Embedded Codes work here (`\b`, `\n`, `\c{Yellow}` ...).
+- **1. Label**: what the button says on this Tab, for example **Skip Fire Hose**. A new one says **Override**; empty puts Override back. That Label Override shows in the Help language picked (French: **Passer**); a Label you type shows as you typed it. Rich Text Embedded Codes work here (`\b`, `\n`, `\c{Yellow}` ...).
 - **2. Tab** and **3. Name** (made by Skynet from the Label and the Tab).
 - **4. Process**: **Any** (every running Process but Loopers, the usual) or one Process from the list. If the Process gets a new name, the button follows it.
 - **Background** (Show or None), **Fore color** (its ⬢ holds Font size, Font, Bold and Alignment) and **Back color**.

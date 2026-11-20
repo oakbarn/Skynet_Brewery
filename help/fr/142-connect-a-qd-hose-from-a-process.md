@@ -27,7 +27,7 @@ Ces trois lignes branchent le flexible sur un raccord rapide (l'étoile rouge) d
 3. Le Process **attend**, comme pour une vanne manuelle (Règle 5.13), qu'un opérateur ou un admin déplace le vrai flexible et appuie sur
    **✔ Done: the hose is on**.
 
-Si le flexible y est déjà, rien n'est demandé et le Process continue directement. **Stop** sur le Process enlève la fenêtre.
+Si le flexible y est déjà, rien n'est demandé et le Process continue directement. **Arrêt** (Stop) sur le Process enlève la fenêtre.
 Le bouton Override ne la passe pas : le flexible doit être placé.
 
 ## Le déplacer à la main {#moving-it-by-hand}

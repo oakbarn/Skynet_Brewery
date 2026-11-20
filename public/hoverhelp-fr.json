@@ -707,7 +707,7 @@
  "Push Button": "Push Button",
  "Pulse Button": "Pulse Button",
  "LED": "LED",
- "The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English.": "La langue des pages d'aide et des bulles (Hover Help). Les écrans, les boutons et les libellés restent en anglais.",
+ "The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English, except the Override and Stop buttons.": "La langue des pages d’aide et des bulles (Hover Help). Les écrans, les boutons et les libellés restent en anglais, sauf les boutons Override et Stop.",
  "sounds": "sons",
  "skynetAudio": "skynetAudio",
  "skynetGraphic": "skynetGraphic",

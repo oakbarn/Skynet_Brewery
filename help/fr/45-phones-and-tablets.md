@@ -7,7 +7,7 @@
 Quand un Admin se connecte sur un téléphone ou une tablette, le panel marche comme pour un Operator :
 
 - **Changer de Schema** avec le sélecteur Schema de la Menu Bar.
-- **Start, Stop et Restart des Processes**, et **Stop all**.
+- **Start, Arrêt (Stop) et Restart des Processes**, et **Tout arrêter** (Stop all).
 - **Les boutons des Tabs** : les pompes, vannes, interrupteurs, boutons Override, minuteries et le reste marchent d'un toucher.
 - Surveiller les Tabs, les alarmes, le Log et la barre du simulateur.
 

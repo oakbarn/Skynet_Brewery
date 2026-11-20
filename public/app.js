@@ -16,7 +16,7 @@ import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
-import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName } from './hoverhelp.js';
+import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName, LANG_KEY } from './hoverhelp.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -41,6 +41,7 @@ import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the I
 import { reportDialog } from './report.js';      // 🐞 Report a problem (Rule 2.61)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
+import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
 import { ON_PRESS, ON_PRESS_TIPS, pressProcessOf, pressNeedsProcess } from './onpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
@@ -1716,7 +1717,7 @@ function fillOverride(n, g) {
   n.classList.toggle('vhidden', ovrWaitsForWater(g));
   const who = String(g.process ?? '').trim();
   const b = h('button', { type: 'button', class: 'ovrBtn', title: who ? `Override: ${who} moves on past the wait, sleep or loop that holds it` : 'Override: every running Process (Any) moves on past the wait, sleep or loop that holds it' });
-  setRich(b, g.label || OVR.label);
+  setRich(b, !g.label || g.label === OVR.label ? safetyWord(OVR.label) : g.label);      // its own Label Override in the Help language; a typed Label as it is
   b.style.fontSize = (+g.fontSize || OVR.fontSize) + 'px'; b.style.fontWeight = g.bold === false ? '400' : '700';
   b.style.fontFamily = tbFontCss(g.font) || g.font || '';
   b.style.color = g.color || OVR.color; b.style.backgroundColor = g.panelBg === 'none' ? 'transparent' : g.backColor || OVR.backColor;      // Background None (Rule 18.50 #2)
@@ -1742,7 +1743,7 @@ function renderOverrides(list = []) {
   box.replaceChildren(...show.map(a => h('div', { class: 'ovrPopRow' },
     h('div', { class: 'ovrPopWho' }, h('b', {}, a.process), a.text ? ` ${a.text}` : a.how === 'auto' ? ' is waiting' : ''),
     h('div', { class: 'ovrPopBar' },
-      can('operator') ? h('button', { type: 'button', class: 'ovrBtn', title: `One press: ${a.process} moves on past the wait or sleep that holds it. Only this Process moves on.`, onclick: () => pressOverride({ process: a.process }) }, OVR.label)
+      can('operator') ? h('button', { type: 'button', class: 'ovrBtn', title: `One press: ${a.process} moves on past the wait or sleep that holds it. Only this Process moves on.`, onclick: () => pressOverride({ process: a.process }) }, safetyWord(OVR.label))
         : h('span', { class: 'muted' }, 'An operator or admin can press Override.'),
       h('button', { type: 'button', class: 'ovrPopX', title: 'Hide it on this screen. It pops up again next time this Process waits.', onclick: () => { ovrHidden.set(a.process, a.since); renderOverrides(S.overrides); } }, '✕')))));
 }
@@ -3961,7 +3962,7 @@ function fillProcessWidget(n, e) {
   const st = processState(e.process, processStatusOf(e.process)), vl = n.querySelector('.vl');
   n.classList.add('procw');
   n.classList.toggle('scr-error', !!st.error); n.classList.toggle('scr-missing', !!st.missing);
-  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st)));
+  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st, safetyWord)));
   n.title = st.missing ? `${e.label || e.name}: ${st.word}. Pick its Process in its Properties (double-click it).` : `Process ${e.process}: ${st.word}. One click ${st.running ? 'stops' : 'starts'} it.`;
   return st.running;
 }
@@ -3969,7 +3970,7 @@ async function processWidgetTap(e) {
   const name = String(e.process ?? '').trim();
   const st = processState(name, processStatusOf(name));
   if (st.missing) return toast(`${e.label || e.name}: ${st.word}. Double-click it to pick its Process.`, true);
-  if (e.confirm && !(await choose(`${st.running ? 'Stop' : 'Start'} Process ${name}?`, [[st.running ? 'Stop' : 'Start', true]]))) return;
+  if (e.confirm && !(await choose(`${st.running ? 'Stop' : 'Start'} Process ${name}?`, [[st.running ? safetyWord('Stop') : 'Start', true]]))) return;
   try {
     const r = await api('POST', `/ui/scripts/${encodeURIComponent(name)}/${st.running ? 'stop' : 'start'}`);
     if (!st.running && !r.ok) toast(r.msg ? `${name}: ${r.msg}` : `${name} did not start`, true);
@@ -9257,7 +9258,7 @@ async function tuneDialog(name) {
     const start = h('button', { type: 'button', class: 'primary', onclick: async () => {
       try { await api('POST', '/ui/autotune', { name, action: 'start', highest: Number(hi.value) }); } catch (e) { return toast(e.message, true); }
     } }, '▶ Start');
-    const stop = h('button', { type: 'button', class: 'danger', onclick: async () => { try { await api('POST', '/ui/autotune', { name, action: 'stop' }); } catch (e) { toast(e.message, true); } } }, '■ Stop');
+    const stop = h('button', { type: 'button', class: 'danger', onclick: async () => { try { await api('POST', '/ui/autotune', { name, action: 'stop' }); } catch (e) { toast(e.message, true); } } }, '■ ' + safetyWord('Stop'));
     const use = async () => {
       const v = V(), now = S.config.elements.find(e => e.name === name);
       if (!now) return toast(`${name} is gone: nothing saved`, true);
@@ -13328,6 +13329,12 @@ $('#scriptAutoRestart').onchange = guard(async ev => {
   toast(ev.target.checked ? `${curScript} will restart by itself if it stops on an error` : `${curScript} will not restart by itself`);
 });
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
+// the Override and Stop buttons in the Help language (Rule 11.11): again when it is picked here or in another window
+function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); $('#stopScript').textContent = safetyWord('Stop'); }
+function safetyRefresh() { safetyWords(); if (curWs()) renderWs(); }
+safetyWords();
+$('#hpLang')?.addEventListener('change', () => setTimeout(safetyRefresh));
+addEventListener('storage', ev => { if (ev.key === LANG_KEY) safetyRefresh(); });
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
   n = noSpaces(n);
@@ -15430,7 +15437,7 @@ function menuItems(list, go) {
   // Rule 11.11): the same switch as 🌐 in the Help page list (public/help.js), with the machine translation notice (Rule 11.14)
   { const hl = $('#hpLang'), fr = hl?.value === 'fr';
     if (hl) list.append(item(fr ? '🌐 Help in English' : '🌐 Help in Français', () => { hl.value = fr ? 'en' : 'fr'; hl.dispatchEvent(new Event('change')); },
-      { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English.' })); }
+      { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English, except the Override and Stop buttons.' })); }
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
@@ -19212,7 +19219,7 @@ function rcDrops(pane, rc) {
     h('div', { class: 'bar' }, h('span', {}, st.running ? `Running (${st.sent} of ${st.of} sent${st.timer ? `, following ${st.timer}` : ''})` : 'Not running'),
       can('operator') ? [rcInput(run, 'timer', { kind: 'sel', list: [['', 'Skynet clock (from now)'], ...timers] }),
         h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'start', timer: run.timer }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '▶ Start hop alerts'),
-        h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'stop' }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '■ Stop'),
+        h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'stop' }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '■ ' + safetyWord('Stop')),
         h('button', { title: 'Show and say the first alert now, to check the sound', onclick: () => (same ? saved : sch).alerts[0] ? hopAlert((same ? saved : sch).alerts[0]) : toast('No alerts', true) }, '🔊 Test the first alert')] : ''));
 }
 // the voice file of one alert: found, or the steps to make it by hand (a free text to voice web site, then put the file here)

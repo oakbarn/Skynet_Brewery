@@ -27,7 +27,7 @@ Pour faire tourner un Process en boucle, utilisez un `[Label]` et `goto`, pas `r
 
 Sur l'écran **Processes**, activez **Restart if it fails** (Admins) pour un Process. Si ce Process s'arrête sur une erreur, le panel attend 2 secondes et le relance tout seul. L'erreur est quand même écrite dans **Output**.
 
-Il ne relance **pas** quand quelqu'un appuie sur **Stop** ou **Stop all**, quand le Process arrive à sa fin, ou quand il contient une erreur qui l'empêche même de démarrer. Appuyer sur **Stop** pendant les 2 secondes annule la relance.
+Il ne relance **pas** quand quelqu'un appuie sur **Arrêt** (Stop) ou **Tout arrêter** (Stop all), quand le Process arrive à sa fin, ou quand il contient une erreur qui l'empêche même de démarrer. Appuyer sur **Arrêt** (Stop) pendant les 2 secondes annule la relance.
 
 ## Pas de boucles sans fin {#no-endless-loops}
 

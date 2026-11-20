@@ -7,7 +7,7 @@ Les Processes sont les étapes automatiques d'un brassage : ouvrir des vannes, f
 - La liste de gauche montre chaque Process ; celui qui tourne est marqué. Le petit nombre devant chacun est son **Order** (ordre) : tapez un nouveau nombre pour le déplacer, et les autres se renumérotent tout seuls. Voir [L'ordre des Processes (Process Order)](38-process-order).
 - **New**, **Rename**, **Delete** (Admins).
 - **Save** et **Check** (Admins). Check trouve les erreurs sans lancer le Process.
-- **Start**, **Stop** et **Restart** (Operators et Admins). **Stop all** arrête tous les Processes. Restart arrête le Process, efface sa mémoire et le relance depuis le début.
+- **Start**, **Arrêt** (Stop) et **Restart** (Operators et Admins). **Tout arrêter** (Stop all) arrête tous les Processes. Restart arrête le Process, efface sa mémoire et le relance depuis le début.
 - **Restart if it fails** (Admins) : relancer le Process tout seul s'il s'arrête sur une erreur. Voir *Restarting Processes*.
 - **Output** montre ce que les Processes affichent (print). Cochez **all processes** pour voir la sortie de tous les Processes.
 
