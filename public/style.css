@@ -739,6 +739,8 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 .valveDlg { border: 2px solid var(--warn); border-radius: 10px; background: var(--panel); color: var(--text); max-width: 460px; }
 .valveAsk { border-top: 1px solid var(--line); padding: 8px 0; }
 .valveDo { font-size: 1.35em; font-weight: 700; color: var(--warn); margin-bottom: 4px; }
+.askBox { margin: 8px 0; }
+.askBox .askInput { width: 100%; box-sizing: border-box; text-align: center; }
 /* Manual Valve Widget: its open overlay, and the bar that asks for it by hand (it blinks on its Tab until it is clicked) */
 #ws .gfx.ip .mvOver { position: absolute; inset: -15%; background: center / contain no-repeat; pointer-events: none; }
 #ws .gfx.ip.mvAsk { animation: mvBlink 1s ease-in-out infinite; border-radius: 50%; }
@@ -1013,6 +1015,8 @@ dialog.imgOpenDlg h3 { margin: 0; }
 
 /* the Override button (Fritz, 2026-10-30): one press and running Processes move on */
 .gfx.ovr, #ws.editing .gfx.ovr { display: flex; }
+.gfx.ovr.vhidden { display: none; }
+#ws.editing .gfx.ovr.vhidden { display: flex; opacity: 0.35; }      /* Shows: Only while tap water flows (Rule 16.11): faint in Edit layout */
 .gfx.ovr .ovrBtn { flex: 1; display: flex; align-items: center; padding: 0 8px; border: 2px solid rgba(0,0,0,.45); border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,.35); overflow: hidden; }
 .gfx.ovr .ovrBtn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
 #ws.editing .gfx.ovr .ovrBtn { pointer-events: none; }

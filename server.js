@@ -793,7 +793,7 @@ async function route(req, res) {
     store.writeConfig(); broadcast('config', {});
     return ok(res, r);
   }
-  if (p === '/ui/valve/confirm' && m === 'POST') { engine.confirmValve((await jsonBody(req)).name); return ok(res); }
+  if (p === '/ui/valve/confirm' && m === 'POST') { { const b = await jsonBody(req); engine.confirmValve(b.name, b.value); }; return ok(res); }
   if (p === '/ui/hydrometers/heard' && m === 'GET') return ok(res, hw.hydroHeardList());      // Hardware IDs heard but not claimed (Rule 6.25)
   if (p === '/ui/reading' && m === 'POST') { engine.readingAction(await jsonBody(req), me?.name); return ok(res); }      // take_reading's pop-up (Rule 6.25)
   // the Override button (Fritz, 2026-10-30): every running Process moves on past the wait, sleep or loop that holds it

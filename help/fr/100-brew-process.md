@@ -85,6 +85,7 @@ L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 | Commande | Ce qu'elle fait |
 |---|---|
 | `ask "Add the grain, then press Done"` | une fenêtre sur chaque écran avec **✔ Done** ; le Process attend qu'un operator ou un Admin appuie dessus. Les codes de texte marchent (`\b`, `\n` ...). |
+| `ask "Set the Run Time (hh:mm:ss)" gblT_SetTimer_Water` | la même fenêtre avec une **case pour la réponse**, remplie avec ce que le gGlobal ou le Value Widget contient maintenant ; **✔ Done** y met la réponse (un temps en hh:mm:ss, un nombre ou des mots), puis le Process continue. Règle Skynet 16.5. |
 | `close_all_valves` | ferme chaque vanne de la liste **Close all valves** |
 | `open_all_valves` | ouvre chaque vanne de la liste **Open all valves** (l'état dans lequel on laisse tout après le nettoyage) |
 | `all_pumps_off` | arrête chaque pompe |
