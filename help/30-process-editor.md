@@ -14,6 +14,8 @@ To jump to a line, press **Go to line** (or **Ctrl+G** on a PC), type the number
 
 Open the Process editor from **☰ Menu > Processes**, or, while you are in **Edit layout**, with **📝 Processes** on the Edit layout bar (next to 🔨 Build Tab). Go back with **☰ Menu > Tabs**.
 
+The editor opens ready to edit: it shows the Process you had open last on this computer or phone (the first time, the first Process in the list). Click in the box and type, then press **Save**.
+
 Pick the Process to work on in the list box at the top of the editor. **➕ Add New Process...** is first in that list; then come your Processes, grouped by class (Flow, Sub, Repeat, Looper) in their Order. The list down the left side still works too, and is where you change the Order numbers.
 
 A Process has a hidden key, so **Rename** only changes its name: every other Process that starts or stops it is updated to the new name by itself. See the Help page Name change and hidden keys.

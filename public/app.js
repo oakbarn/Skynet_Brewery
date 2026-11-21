@@ -423,6 +423,7 @@ function setView(v, here = false) {
   if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderPatron).then(renderMessaging).then(() => api('GET', '/ui/boiltemp')).then(renderBoilTemp).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
   if (v === 'scripts' || v === 'config') placeFind();
   if (v === 'scripts' && consoleStale) renderConsole();
+  if (v === 'scripts' && !curScript) openLastProcess();
   if (v === 'config') openConfig();
 }
 
@@ -13053,9 +13054,20 @@ $('#updVersion').onclick = guard(async () => {
 });
 // 📝 Processes on the Edit layout bar opens the Process editor, the same way 🔨 Build Tab opens the Build Tab
 $('#procTab').onclick = () => setView('scripts');
+// The Process editor never opens empty (OakBarn Brewery, 2026-11-21: "I opened the Process with the Button on the Work Tab Menu and
+// it is not in edit mode"): it opens the Process this browser had open last, or the first one in the list. The box says what to do
+// when there is no Process yet.
+const LAST_PROC = 'bp.lastProcess';
+function openLastProcess() {
+  let last = ''; try { last = localStorage.getItem(LAST_PROC) || ''; } catch { /* private window */ }
+  const first = Object.keys(S.processClasses || { sub: 1 }).flatMap(c => S.scripts.filter(s => (s.cls || 'sub') === c).sort((a, b) => (a.order ?? 1e9) - (b.order ?? 1e9)))[0];
+  const name = S.scripts.some(s => s.name === last) ? last : first?.name;
+  if (name) guard(openScript)(name);
+}
 async function openScript(name) {
   if (dirty && !confirm('Discard unsaved changes?')) return;
   curScript = name; dirty = false; problems = []; notes = [];
+  try { localStorage.setItem(LAST_PROC, name); } catch { /* private window */ }
   $('#code').value = await api('GET', '/ui/scripts/' + encodeURIComponent(name));
   $('#scriptName').textContent = name;
   knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
