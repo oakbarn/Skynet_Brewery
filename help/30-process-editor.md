@@ -118,6 +118,8 @@ Everyone can look in the Recycle Bin; only admins can restore or erase.
 
 **Find** (or **Ctrl+F**; **Ctrl+H** to replace) searches the open Process. **Aa** matches upper and lower case, **Whole word** skips longer names. Up and down buttons (or **Enter** and **F3**) move between matches. **Replace** changes one match, **Replace all** every match; press **Save** to keep them, **Ctrl+Z** undoes them.
 
+The same bar (Ctrl+F and Ctrl+H) is in the **Process Template** editor (☰ Menu > Brew Process > **👁 View** or **✏ Edit**) and the **Help** text editor (**✏ Edit page**). Every match is lit and the current one is darker. A Skynet Process Template can't be changed, so it has Find but no Replace.
+
 **All Processes** searches every Process and lists each match with how the line will look after the change. Untick the ones to leave alone, then press **Replace ticked** to save those Processes. A running Process keeps the old text until it is restarted.
 
 ## The Schema.json editor (admins)

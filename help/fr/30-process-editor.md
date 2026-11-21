@@ -120,6 +120,8 @@ Tout le monde peut regarder dans la Recycle Bin ; seuls les Admins peuvent resta
 
 **Find** (ou **Ctrl+F** ; **Ctrl+H** pour remplacer) cherche dans le Process ouvert. **Aa** respecte les majuscules et les minuscules, **Whole word** (mot entier) saute les noms plus longs. Les boutons haut et bas (ou **Entrée** et **F3**) passent d'une correspondance à l'autre. **Replace** change une correspondance, **Replace all** toutes ; appuyez sur **Save** pour les garder, **Ctrl+Z** les annule.
 
+La même barre (Ctrl+F et Ctrl+H) se trouve dans l'éditeur de **Process Template** (☰ Menu > Brew Process > **👁 View** ou **✏ Edit**) et dans l'éditeur de texte de l'**Aide** (**✏ Edit page**). Chaque correspondance est surlignée, et la correspondance en cours est plus foncée. Un Skynet Process Template ne peut pas être changé : il a Find mais pas Replace.
+
 **All Processes** cherche dans tous les Processes et liste chaque correspondance avec l'allure qu'aura la ligne après le changement. Décochez celles à laisser tranquilles, puis appuyez sur **Replace ticked** pour enregistrer ces Processes. Un Process en marche garde l'ancien texte jusqu'à ce qu'il soit relancé.
 
 ## L'éditeur Schema.json (Admins) {#the-schema-json-editor-admins}

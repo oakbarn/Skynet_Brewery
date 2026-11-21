@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { Store } from '../lib/store.js'; import { Engine } from '../lib/engine.js'; import { Hardware } from '../lib/hardware.js'; import { Control } from '../lib/control.js';
 import { listSamples, loadSample, simulated } from '../lib/samples.js';
+import { HopAlerts } from '../lib/recipe.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
@@ -78,7 +79,8 @@ for (const sm of list) {
 
 // The Three Vessel sample is the test bed and follows the latest standard (Fritz, 2026-11-08): Device names
 // InterfaceID_Port_TypeID_Label_TabID (Rule 3.1), Widget names wgt_Type_Label_TabID (Rule 3.14), a space in the Label is ~.
-// gGlobals keep their names (the Rule 1.16 prefix change is on hold; Beer.xml import fills them by name).
+// gGlobals keep their names (the Rule 1.16 prefix change is on hold). The Recipe and its hops are the skn_rcp_ values, never gGlobals
+// (OakBarn Brewery, 2026-11-21: "Those should be back house skynet variables", "if the gGlobals are no longer needed, trash").
 {
   const c3 = JSON.parse(fs.readFileSync(path.join(SAMPLES, 'three-vessel-one-pump', 'config.json'), 'utf8'));
   for (const e of c3.elements) {
@@ -86,6 +88,11 @@ for (const sm of list) {
     const dev = ['temperature', 'digitalOut', 'digitalIn'].includes(e.type);      // the Water Tab (WA): Process Sample 1, 2026-11-20
     assert.match(e.name, dev ? /^(BM1w1_\d+|BM_\d+_(DO@H_Element|DO@Pump|DO@Chill|DO@Valve_E|DI@Float))_[A-Za-z0-9~]+_(BH|WA)$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP|WA)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
   }
+  assert.ok(!c3.elements.some(e => /^gbl[A-Z]?_?(Hop|TimeHop|BeerName|Style|OG|FG|IBU|BatchSize|BoilSize|Desired|Sparge|Pitch|Whirlpool|Mash|MashOut)|^gblVBoilTime|^gblT_\d_Mash/.test(e.name)), 'no Recipe gGlobals in the sample');
+  assert.ok(!c3.beerxml && !c3.elements.some(e => e.workspace === 'Recipe'), 'no BeerXML mapping and nothing on the Recipe Tab: the Recipe is on ☰ Menu > Recipe');
+  const flow = fs.readFileSync(path.join(SAMPLES, 'three-vessel-one-pump', 'processes', 'BrewDay_Flow.txt'), 'utf8');
+  assert.match(flow, /start_hop_alerts "wgt_TMR_Step~timer_BH", vVScale/);
+  assert.doesNotMatch(flow, /gbl[SVBT]_?(Hop|TimeHop|BeerName|Desired|Sparge|Pitch|Whirlpool|Mash_\d)|gblVBoilTime|gblT_\d_Mash/);
   for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BH|RE|RP|WA)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
 }
 
@@ -96,6 +103,8 @@ async function brewDay(id, tweak) {
   const { store, engine, hw } = scratch();
   loadSample(SAMPLES, id, { store, engine, hw });
   const control = new Control(store); control.start();
+  const alerts = [], hops = new HopAlerts({ store, send: a => alerts.push(a), recipe: () => store.config.recipe ?? null });
+  engine.onRecipe = (cmd, args) => cmd === 'start' ? hops.start(args[0], 'test', args[1]) : cmd === 'stop' ? (hops.stop(), 'stopped') : '';
   const tick = setInterval(() => store.tickTimers(0.05), 50);
   const sim = setInterval(() => hw._simulate(), 50);
   tweak(store);
@@ -118,21 +127,26 @@ async function brewDay(id, tweak) {
     await new Promise(r => setTimeout(r, 100));
   }
   for (const t of [brewer, tick, sim]) clearInterval(t);
+  hops.stop();
   seen.push(999);
   control.stop(); engine.stopAll(); hw.stop(); clearTimeout(store._persistTimer);
-  const hops = [1, 2, 3, 4, 5, 6, 7, 8].filter(n => store.getProp(`gblB_Hop${n}_Added`, 'value'));
-  return { seen, hops, secs: (Date.now() - t0) / 1000 };
+  return { seen, alerts, secs: (Date.now() - t0) / 1000 };
 }
-const fast = store => {   // short recipe; heaters very quick
-  store.setProp('gblVBoilTime_Minutes', 'value', 12); store.setProp('gblT_1_Mash_Time_R1', 'value', '00:02:00');
-  store.setProp('gblT_MashOut_Time', 'value', '00:01:00'); store.setProp('gblV_Whirlpool_Min', 'value', 1);
-  store.setProp('gblV_TimeHop1_Min_R1', 'value', 12); store.setProp('gblV_TimeHop2_Min_R1', 'value', 6); store.setProp('gblV_TimeHop3_Min_R1', 'value', 1);
+const hop = (name, use, time, extra = {}) => ({ name, kg: 0.028, alpha: 8, use, time, ...extra });
+const fast = store => {   // short recipe (the Skynet Recipe, read as skn_rcp_ values); heaters very quick
+  store.config.recipe = { name: 'Sample Pale Ale', boilTime: 12, strikeTempC: 72, spargeTempC: 76, pitchTempC: 20,
+    mash: { steps: [{ name: 'Saccharification', tempC: 66, min: 2 }] },
+    ingredients: { fermentables: [], yeasts: [], miscs: [], hops: [hop('Magnum', 'mash', 0), hop('Cascade', 'first wort', 0), hop('Centennial', 'boil', 12),
+      hop('Citra', 'boil', 6), hop('Mosaic', 'boil', 1), hop('Amarillo', 'whirlpool', 10), hop('Galaxy', 'dry hop', 0, { dryDays: 4 })] } };
   for (const e of store.list('temperature')) if (e.sim) { e.sim.heatRate = 40; e.sim.coolRate = 200; e.sim.followRate = 0.9; }
 };
 for (const id of ['three-vessel-one-pump']) {
   const r = await brewDay(id, fast);
   for (const st of [100, 150, 400, 500, 600, 700, 999]) assert.ok(r.seen.includes(st), `${id}: never reached step ${st} (${r.seen})`);
-  assert.deepEqual(r.hops, [1, 2, 3, 4, 5], `${id}: hops marked added`);
+  // Skynet's hop alerts followed the sped-up boil timer: a drop for each boil hop and the Whirlpool, in order
+  const drops = r.alerts.filter(a => a.kind === 'drop').map(a => a.text).join(' | ');
+  for (const h of ['Centennial', 'Citra', 'Mosaic', 'Amarillo']) assert.match(drops, new RegExp(h), `${id}: no drop alert for ${h} (${drops})`);
+  assert.ok(drops.indexOf('Centennial') < drops.indexOf('Citra') && drops.indexOf('Citra') < drops.indexOf('Mosaic'), `${id}: drops in boil order (${drops})`);
   console.log(`${id}: brew day ran in ${r.secs.toFixed(1)} s through ${r.seen.length} steps`);
 }
 console.log('samples tests passed');

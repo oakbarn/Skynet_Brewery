@@ -24,7 +24,7 @@ Les boutons en haut sont les écrans principaux :
 | **Log** | Les valeurs écrites dans la base de données de brassage, avec un téléchargement CSV. |
 | **Devices** | Les cartes (automates, PLC) branchées au Pi, et la liste des sondes de température. |
 | **Media** | Ajouter des images et des sons sur le Pi depuis n'importe quel navigateur. |
-| **Import** | Importer une recette BeerSmith ou un Schema BruControl. |
+| **Import** | Importer une recette BeerSmith. |
 | **Settings** | Exemples, votre mot de passe, les utilisateurs et les réglages du panel. |
 | **Help** | Ce manuel. |
 

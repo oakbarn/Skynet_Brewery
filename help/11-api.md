@@ -17,7 +17,7 @@ Programs send the **API key** from **Settings** in the header `X-API-Key: <key>`
 | `PUT /api/items/<name>` with `{"setpoint": 152, "enabled": true}` | Change several attributes |
 | `PUT /api/items/<name>/<attribute>` with `152` | Change one attribute |
 | `POST /api/items` with `{"name1": v1, "name2": v2}` | Change several main values |
-| `POST /api/import/beerxml` with the XML file | Import a recipe |
+| `POST /api/import/beerxml` with the XML file | Import a recipe: it becomes the Recipe (its values are the `skn_rcp_` names) |
 | `POST /api/log/<name>` | Send its reading to the database now |
 | `GET /api/log?name=&from=&to=&limit=` | Readings in the database (an item's older names included) |
 | `GET /api/log.csv?...` | The same as CSV |

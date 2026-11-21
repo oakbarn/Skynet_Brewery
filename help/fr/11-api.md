@@ -17,7 +17,7 @@ Les programmes envoient l'**API key** (clé d'API) de **Settings** dans l'en-tê
 | `PUT /api/items/<name>` avec `{"setpoint": 152, "enabled": true}` | Change plusieurs attributs |
 | `PUT /api/items/<name>/<attribute>` avec `152` | Change un attribut |
 | `POST /api/items` avec `{"name1": v1, "name2": v2}` | Change plusieurs valeurs principales |
-| `POST /api/import/beerxml` avec le fichier XML | Importe une recette |
+| `POST /api/import/beerxml` avec le fichier XML | Importe une recette : elle devient la recette (ses valeurs sont les noms `skn_rcp_`) |
 | `POST /api/log/<name>` | Envoie sa lecture à la base de données maintenant |
 | `GET /api/log?name=&from=&to=&limit=` | Les lectures dans la base de données (y compris les anciens noms d'un élément) |
 | `GET /api/log.csv?...` | La même chose en CSV |

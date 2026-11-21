@@ -28,14 +28,14 @@ import { heatMethodKey, heatMethodCode } from './heatmethod.js';
 
 const COMMANDS = [
   ['if', 'test something'], ['elseif', 'another test'], ['else if', 'another test'], ['else', 'when no test fit'], ['endif', 'end of the if'],
-  ['wait', 'until true, or a time'], ['sleep', 'pause, in ms'], ['goto', 'jump to a [label]'], ['goLine', 'jump to a line number'], ['step', 'start a step'],
+  ['wait', 'until true, or a time'], ['sleep', 'pause, in ms'], ['delay', 'pause, in seconds'], ['goto', 'jump to a [label]'], ['goLine', 'jump to a line number'], ['step', 'start a step'],
   ['start', 'a Process or timer'], ['stop', 'a Process, timer or alarm'], ['restart', 'a Process from the top'], ['reset', 'a timer'],
   ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'], ['send_db_group', 'send a database Group now, once'], ['start_db_group', 'start sending a database Group'], ['stop_db_group', 'stop sending a database Group'],
   ['new value', 'make a number'], ['new string', 'make a text'], ['new bool', 'make a true/false'], ['new time', 'make a time'], ['new datetime', 'make a date and time'],
   // gGlobals made in a Process (Fritz, 2026-11-06, Rule 1.24): picking one also fills in the start of the name (gV_ ...)
   ...Object.values(G_DECLARE).map(d => [`new ${d.long}`, `make a gGlobal: ${d.what}`]),
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
-  ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'],
+  ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'], ['all_heaters_off', 'every heater off'],
   ['import_recipe', 'a .bsmx or .xml file'], ['start_hop_alerts', 'hop alerts for the boil'], ['stop_hop_alerts', 'stop the hop alerts'],
   ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
   // the Chiller Overlay (OakBarn Brewery, 2026-11-15, Rule 5.42): picking one opens the list of Chiller Templates, then of Vessels
@@ -67,7 +67,7 @@ export function fit(name, typed) {
 }
 
 // commands that take something after them: the pick ends in a space and the next list opens by itself
-const TAKES = new Set(['take_reading', 'if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'goline', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group',
+const TAKES = new Set(['take_reading', 'if', 'elseif', 'else if', 'wait', 'sleep', 'delay', 'goto', 'goline', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group',
   'new value', 'new string', 'new bool', 'new time', 'new datetime']);
 const COMPARE = [['= ', 'is equal to'], ['== ', 'is equal to (the same as =)'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
 const SET = [['= ', 'set it to'], ['+= ', 'add to it'], ['-= ', 'take from it'], ['++', 'add 1']];
@@ -97,7 +97,10 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     const f = fit(l, w); if (f < 0) return;
     seen.add(text); (f ? second : first).push({ text, hint, label: l === text ? undefined : l, ...(back ? { back } : {}) });
   };
-  const done = () => { const list = [...first, ...second]; return list.length ? { list, typed: q ? w.length + 1 : w.length } : null; };
+  // a space on both sides of = == != < > <= >= += -= (Fritz, 2026-11-21: "if Pump =true" -> "if Pump = true")
+  const opGap = /([^\s=!<>+\-]?)(==|!=|<=|>=|\+=|-=|=|<|>)$/.exec(pre);
+  const spaced = it => !opGap || it.back ? it : opGap[1] ? { ...it, text: ' ' + opGap[2] + ' ' + it.text, label: it.label ?? it.text.trim(), back: opGap[2].length } : { ...it, text: ' ' + it.text, label: it.label ?? it.text.trim() };
+  const done = () => { const list = [...first, ...second].map(spaced); return list.length ? { list, typed: q ? w.length + 1 : w.length } : null; };
   // in quotes the pick keeps its quotes; a name that needs quotes gets them
   const named = (n, hint) => q ? add(`"${n}"`, hint, n) : add(quote(n), hint, n);
   const command = (k, h) => add(G_TEXT[k] ?? (TAKES.has(k) ? k + ' ' : k), h, k);
@@ -127,7 +130,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     return out;
   }
   // Ctrl+Space right after a value in an if or a wait (if Pump == true): and / or
-  if (forced && inCond && !q && /(==|!=|<=|>=|<|>|=)\s*(\S+)$/.test(line) && (!w || /^(true|false|on|off|now)$/i.test(w) || elOf(w) || declared.has(w)))
+  if (forced && inCond && !q && /(==|!=|<=|>=|<|>|=)\s*([^\s=!<>]+)$/.test(line) && (!w || /^(true|false|on|off|now)$/i.test(w) || elOf(w) || declared.has(w)))
     return { list: JOIN.map(([text, hint]) => ({ text: ' ' + text, hint })), typed: 0 };
   // Ctrl+Space right after a whole name ("if Pump" with no space yet): the same list, a space put in front where needed
   if (forced && w && !q) {

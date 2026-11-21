@@ -2,6 +2,7 @@
 // Everyone can read them; admins can edit, add and delete pages here. Help shows the page for the screen you came from
 // (helpmap.js says which); it runs in the Help window (help.html) and, when a browser blocks that window, on the panel's Help page.
 import { watchButtons } from './buttons.js';
+import { attachFind } from './findbar.js';      // Ctrl+F Find and Ctrl+H Replace in the page text (Rule 2.65)
 import { skyConfirm } from './skyconfirm.js';      // the one shared Skynet confirm box (Rule 2.64)
 import { LANG_KEY, refreshBalloonLang } from './hoverhelp.js';      // also the buttons' tips of this window in French (Rule 11.11)
 import { brokenLinkPop, forgetHelpIndex } from './brokenlink.js';
@@ -244,7 +245,8 @@ function startEdit() {
   $('#hpPage').hidden = true; $('#hpEditor').hidden = false; $('#hpEdit').hidden = true;
   $('#hpText').focus();
 }
-function stopEdit() { editing = false; $('#hpPage').hidden = false; $('#hpEditor').hidden = true; $('#hpEdit').hidden = false; }
+const hpFind = $('#hpText') ? attachFind($('#hpText'), { before: $('#hpText').closest('.hpEditPanes') || $('#hpText') }) : null;
+function stopEdit() { hpFind?.close(); editing = false; $('#hpPage').hidden = false; $('#hpEditor').hidden = true; $('#hpEdit').hidden = false; }
 const changed = () => editing && !!find(cur) && $('#hpText').value !== find(cur).text;
 
 // links inside a page

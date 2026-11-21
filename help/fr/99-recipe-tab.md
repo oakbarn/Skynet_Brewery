@@ -268,9 +268,10 @@ import_recipe "Recipes/Zombie Dust.bsmx"
 import_recipe "Recipes/All My Recipes.bsmx", "Zombie Dust"
 start_hop_alerts
 start_hop_alerts "Boil_Timer"
+start_hop_alerts "Boil_Timer", 1
 stop_hop_alerts
 ```
 
 - `import_recipe` lit un fichier .bsmx ou .xml sur le Brain (un chemin dans le dossier du Brain ou dans un dossier media) et en fait la recette. Un second texte choisit une recette dans un fichier qui en a beaucoup.
-- `start_hop_alerts` démarre les alertes de houblonnage sur l'horloge de Skynet à partir de maintenant ; avec un nom de minuterie, il suit plutôt cette minuterie.
+- `start_hop_alerts` démarre les alertes de houblonnage sur l'horloge de Skynet à partir de maintenant ; avec un nom de minuterie, il suit plutôt cette minuterie. Un nombre après la minuterie dit combien de secondes de minuterie font une minute d'ébullition : 60 (temps réel) au départ ; 1 quand un interrupteur Testing fait passer chaque minute en une seconde.
 - `stop_hop_alerts` les arrête.

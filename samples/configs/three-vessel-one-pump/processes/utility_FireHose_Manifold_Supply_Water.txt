@@ -2,7 +2,7 @@
 // MIT License Granted for all Scripts and Configurations
 // Copyright © OakBarn Brewery 2026
 // All Fire Hose and Manifold Supply Valve Water on the Fly.
-// OakBarn Brewery's BruControl script (07/27/2023, modified 06/27/2026), brought to Skynet for the 3 Vessel 1 Pump sample's
+// OakBarn Brewery's script (07/27/2023, modified 06/27/2026), brought to Skynet for the 3 Vessel 1 Pump sample's
 // Water Tab (Process Sample 1, 2026-11-20). His codes, labels and messages are kept; only what Skynet needs changed:
 //   - a Process Widget on the Water Tab sets the code and starts this Process (no looper switch);
 //   - "Manifold Set?" is an ask with Done (was the Advance switch and gblVEndlessLoop 799 / 800);

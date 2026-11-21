@@ -3,6 +3,7 @@ import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
 import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, pipeLine, sameSize, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
+import { attachFind } from './findbar.js';      // Find and Replace in the Process Template editor (Rule 2.65)
 import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of every dialog (Rule 18.53)
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -3518,11 +3519,14 @@ function toggleMethods(name) {
   try { localStorage.setItem(METHODS_SHOWN_KEY, JSON.stringify([...methodsShown])); } catch { /* private window: this screen only */ }
   renderWs();
 }
-const METHODS_HOT_W = 10;          // as wide as the Element's end plate at the Vessel wall
-function methodsHot(e, left, top, hh) {
+const METHODS_HOT_W = 10;          // how far past the Vessel wall the strip reaches
+// The strip starts right at the Element's end plate and is at least 25 px wide (OakBarn Brewery, 2026-11-21: "Hotspot too small
+// increase to purple area": his purple box ran from the end plate out past the wall, about half as wide as the Element is high).
+const METHODS_HOT_MIN = 25;
+function methodsHot(e, left, top, hh, ww = METHODS_HOT_MIN) {
   const word = `${e.label || e.name}: one click shows or hides its heating Methods (Direct, Duty Cycle, Hysteresis, PID)`;
   return h('div', { class: 'hmHot' + (methodsShown.has(e.name) ? ' shown' : ''), 'data-dev': e.name, title: word, 'aria-label': word, role: 'button',
-    style: `left:${left}px;top:${top}px;width:${METHODS_HOT_W}px;height:${hh}px` });
+    style: `left:${left}px;top:${top}px;width:${ww}px;height:${hh}px` });
 }
 function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots, #ws .hmHot')) old.remove();
@@ -3531,7 +3535,10 @@ function drawMethodSpots(w) {
     if (pt) {        // just outside the Vessel wall, on the side the Element goes in
       const l = parseFloat(pt.style.left), t = parseFloat(pt.style.top), pw = parseFloat(pt.style.width), ph = parseFloat(pt.style.height);
       const vw = parseFloat(pt.parentNode.style.width) || pt.parentNode.offsetWidth || 0, right = l + pw / 2 > vw / 2;
-      pt.parentNode.append(methodsHot(e, right ? Math.max(l + pw, vw) : Math.min(l, 0) - METHODS_HOT_W, t, ph));
+      // from the Element's end plate out to METHODS_HOT_W past the wall, never thinner than METHODS_HOT_MIN
+      const plate = right ? l + pw : l, outer = right ? Math.max(l + pw, vw) + METHODS_HOT_W : Math.min(l, 0) - METHODS_HOT_W;
+      const ww = Math.max(METHODS_HOT_MIN, Math.abs(outer - plate));
+      pt.parentNode.append(methodsHot(e, right ? plate : plate - ww, t, ph, ww));
     } else if (!e.integratedIn) $('#ws').append(methodsHot(e, (e.x ?? 0) + (e.w ?? 60), e.y ?? 0, e.h ?? 60));
     if (!methodsShown.has(e.name)) continue;
     const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
@@ -14683,34 +14690,6 @@ $('#importBtn').onclick = guard(async () => {
   $('#importResult').textContent = out; rcView = null;
 });
 
-// BruControl Schema (.brucfg configuration file)
-function bruReport(r) {
-  const t = r.summary.byType;
-  const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} Devices and Widgets, ${r.summary.scripts} processes`,
-    '  ' + Object.entries(t).map(([k, n]) => `${k} ${n}`).join(', ')];
-  if (r.autostart.length) lines.push(`Processes started with the server: ${r.autostart.join(', ')}`);
-  lines.push(r.missingMedia.length ? `\n${r.missingMedia.length} of ${r.mediaCount} pictures and sounds are not in your media folder yet. Copy them from C:\\BruControl\\Media:\n  ${r.missingMedia.join('\n  ')}` : `All ${r.mediaCount} pictures and sounds were found.`);
-  if (r.warnings.length) lines.push('\nNotes:\n  ' + r.warnings.join('\n  '));
-  if (r.scripts) {
-    lines.push(`\nProcesses written: ${r.scripts.written.length}` + (r.scripts.backedUp.length ? `, ${r.scripts.backedUp.length} older copies kept as .bak` : '') + (r.scripts.skipped.length ? `\nProcesses not replaced: ${r.scripts.skipped.join(', ')}` : ''));
-    lines.push(r.problems.length ? `${r.problems.length} processes have problems (they will not start until fixed):\n` + r.problems.map(p => `  ${p.script}: ` + p.errors.map(e => `line ${e.line}: ${e.msg}`).join('; ') + (p.more ? ` (+${p.more} more)` : '')).join('\n') : 'Every process checks OK.');
-  }
-  return lines.join('\n');
-}
-async function bruSend(preview) {
-  const f = $('#bruFile').files[0]; if (!f) throw new Error('Choose a BruControl .brucfg file first');
-  const q = new URLSearchParams({ mode: $('#bruMode').value, simulate: $('#bruSim').checked ? '1' : '0', overwrite: $('#bruOverwrite').checked ? '1' : '0', media: $('#bruMedia').value.trim(), preview: preview ? '1' : '0' });
-  $('#bruResult').textContent = preview ? 'Reading…' : 'Importing…';
-  try { return await api('POST', '/ui/import/brucontrol?' + q, await f.text(), true); } catch (e) { $('#bruResult').textContent = ''; throw e; }
-}
-$('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
-$('#bruImport').onclick = guard(async () => {
-  const msg = $('#bruMode').value === 'replace' ? 'Replace your Tabs, Devices and Widgets with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old Schema.)' : 'Add this BruControl file to your Schema? Running processes are stopped.';
-  if (!await skyConfirm(msg, { ok: '⬆ Import', danger: $('#bruMode').value === 'replace' })) return;
-  const r = await bruSend(false);
-  $('#bruResult').textContent = bruReport(r);
-  await load(); toast('BruControl Schema imported');
-});
 
 // ---------------------------------------------------------------- settings
 // ---- sample Schemas: on first start, and under Settings
@@ -16097,7 +16076,7 @@ const PAGE_PARTS = {
   globals: [['gGlobal', '#sec-gglobal']],
   log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['1-Wire circuits', '#sec-owCircuits'], ['1-Wire Indexes', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
-  import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
+  import: [['BeerSmith recipe', '#sec-beersmith']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Approved Devices', '#sec-devices'], ['Sending codes (email and text)', '#sec-sending'],
     ['Patron', '#sec-patron'], ['Beer money pop-up', '#sec-beerMoney'],
@@ -17102,6 +17081,7 @@ async function editProcessTemplate(st, name, copy) {
     h('p', { class: 'muted' }, ro && t.cls === 'skynet' ? 'A Skynet Process Template is never changed. To change it, pick ➕ Add new User Process Template… and change your copy.' :
       'A Process with build lines: {{HLT_Heater}} is the Device picked for that job; @if HLT_Heater … @else … @end uses lines only when one is picked (or not); @each_mash_step … @end repeats lines for each mash step ({{n}} = 1, 2, 3 …). skn_rcp_ names are the Recipe\'s values. See Help: Brew Process.'),
     ta, bar());
+  attachFind(ta);      // Ctrl+F Find and Ctrl+H Replace in this box (Rule 2.65)
   document.body.append(d); d.showModal();
 }
 function renderAboutTab(box) {
@@ -19920,7 +19900,7 @@ async function importSchemaFile() {
   const opts = [...dir.files.map(f => [f.name, `${f.name}   (${f.modified})`]), [PC, 'A .json file on this computer…']];
   const w = { pick: dir.files[0]?.name ?? PC, load: false };
   const fields = [['pick', 'Schema file', 'sel', opts],
-    ['_n', dir.exists ? `Files in the Import folder (${dir.folder}), newest first. The BruControl Importer saves its Schemas there.` : `The Import folder (${dir.folder}) is not there yet. The BruControl Importer makes it when it saves a Schema.`, 'note'],
+    ['_n', dir.exists ? `Files in the Import folder (${dir.folder}), newest first. The Importer saves its Schemas there.` : `The Import folder (${dir.folder}) is not there yet. The Importer makes it when it saves a Schema.`, 'note'],
     ['load', 'Load it now (the panel switches to it)', 'bool'],
     ['_p', 'The file becomes a new Schema; no Schema here is changed. Its Processes are added (a Process with the same name that differs is backed up first).', 'note'],
     ['_c', SHARE_NOTICE, 'note']];
@@ -19938,7 +19918,7 @@ async function importSchemaFile() {
   const p = r.processes;
   const lines = [`Schema "${r.made.name}" added.`,
     `Processes: ${p.written.length} added${p.renamed?.length ? ` (you already had ${p.renamed.length} with the same name, so these came in under a new name: ${p.renamed.join(', ')})` : ''}${p.same.length ? `, ${p.same.length} already the same` : ''}${p.failed.length ? `, ${p.failed.length} could not be written` : ''}.`];
-  if (r.draft) lines.push('This is a first draft from the BruControl Importer (made without its questions).');
+  if (r.draft) lines.push('This is a first draft from the Importer (made without its questions).');
   if (r.warningCount) lines.push(`${r.warningCount} notes from the import${r.warningCount > 30 ? ' (the first 30)' : ''}:`, ...r.warnings.slice(0, 30).map(x => '• ' + x));
   if (w.load) await afterSchemaSwitch(`Schema "${r.made.name}" opened and loaded`);
   else { S.schemas = await api('GET', '/ui/schemas'); renderSchemaPick(); toast(`Schema "${r.made.name}" added. Pick it in the Schema list to load it.`); }
