@@ -3210,9 +3210,10 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 **The Methods hotspot, and a display that does not jump** (OakBarn Brewery, 2026-11-20, Panel Update 8, items 2, 3, 5):
 - **Methods hotspot** ("Get rid of clutter. This area of any graphic (just Outside the Vessel, adjacent to the side of a vessel same
   pixels high and wide as the Red area ... so it would work with any graphic (skynet or User) and as a is a one click hotspot toggle the
-  Methods to be in View or Not"): a Heating Element's method buttons (Rule 6.19) **start hidden**. A thin strip (10 px wide, as high as
-  the Element's picture) just outside the Vessel wall where the Element goes in (beside the picture of an Element on its own Tab
-  spot) shows them with **one click** and hides them with the next. It works with any Vessel picture, Skynet's or the user's. Only
+  Methods to be in View or Not"): a Heating Element's method buttons (Rule 6.19) **start hidden**. A strip as high as the Element's
+  picture where the Element goes in, from the Element's end plate out to 10 px past the Vessel wall and never thinner than 25 px
+  (OakBarn Brewery, 2026-11-21: "Hotspot too small increase to purple area"; it was a 10 px strip outside the wall), or beside the
+  picture of an Element on its own Tab spot, shows them with **one click** and hides them with the next. It works with any Vessel picture, Skynet's or the user's. Only
   this screen remembers it (each phone or PC picks its own); nothing turns On or Off, and every role may use it. Not in Edit layout.
 - **PID % is always two digits** ("have the % as 2 digits always unless 100%"): 00 % to 99 %, then 100 %.
 - **Hysteresis idle, Heat and Cool are the same width** ("have idle, Heat and Cool all the same size so it does not jump"): what an
@@ -7368,3 +7369,4 @@ import.
 - 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.
+- 2026-11-21: Rule 6.19 Methods hotspot made bigger (OakBarn Brewery, screenshot of the 3 Vessel 1 Pump HLT: "Hotspot too small increase to purple area"): the strip now runs from the Element's end plate out to 10 px past the Vessel wall, never thinner than 25 px (was 10 px outside the wall, with a gap after the end plate). Help 150 (and French). Checked against the BruControl Import program: its Build page uses the same Panel drawing, nothing else changes.

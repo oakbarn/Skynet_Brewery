@@ -3518,11 +3518,14 @@ function toggleMethods(name) {
   try { localStorage.setItem(METHODS_SHOWN_KEY, JSON.stringify([...methodsShown])); } catch { /* private window: this screen only */ }
   renderWs();
 }
-const METHODS_HOT_W = 10;          // as wide as the Element's end plate at the Vessel wall
-function methodsHot(e, left, top, hh) {
+const METHODS_HOT_W = 10;          // how far past the Vessel wall the strip reaches
+// The strip starts right at the Element's end plate and is at least 25 px wide (OakBarn Brewery, 2026-11-21: "Hotspot too small
+// increase to purple area": his purple box ran from the end plate out past the wall, about half as wide as the Element is high).
+const METHODS_HOT_MIN = 25;
+function methodsHot(e, left, top, hh, ww = METHODS_HOT_MIN) {
   const word = `${e.label || e.name}: one click shows or hides its heating Methods (Direct, Duty Cycle, Hysteresis, PID)`;
   return h('div', { class: 'hmHot' + (methodsShown.has(e.name) ? ' shown' : ''), 'data-dev': e.name, title: word, 'aria-label': word, role: 'button',
-    style: `left:${left}px;top:${top}px;width:${METHODS_HOT_W}px;height:${hh}px` });
+    style: `left:${left}px;top:${top}px;width:${ww}px;height:${hh}px` });
 }
 function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots, #ws .hmHot')) old.remove();
@@ -3531,7 +3534,10 @@ function drawMethodSpots(w) {
     if (pt) {        // just outside the Vessel wall, on the side the Element goes in
       const l = parseFloat(pt.style.left), t = parseFloat(pt.style.top), pw = parseFloat(pt.style.width), ph = parseFloat(pt.style.height);
       const vw = parseFloat(pt.parentNode.style.width) || pt.parentNode.offsetWidth || 0, right = l + pw / 2 > vw / 2;
-      pt.parentNode.append(methodsHot(e, right ? Math.max(l + pw, vw) : Math.min(l, 0) - METHODS_HOT_W, t, ph));
+      // from the Element's end plate out to METHODS_HOT_W past the wall, never thinner than METHODS_HOT_MIN
+      const plate = right ? l + pw : l, outer = right ? Math.max(l + pw, vw) + METHODS_HOT_W : Math.min(l, 0) - METHODS_HOT_W;
+      const ww = Math.max(METHODS_HOT_MIN, Math.abs(outer - plate));
+      pt.parentNode.append(methodsHot(e, right ? plate : plate - ww, t, ph, ww));
     } else if (!e.integratedIn) $('#ws').append(methodsHot(e, (e.x ?? 0) + (e.w ?? 60), e.y ?? 0, e.h ?? 60));
     if (!methodsShown.has(e.name)) continue;
     const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
