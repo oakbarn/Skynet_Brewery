@@ -4756,6 +4756,33 @@ function unlockJoins(joins) {
     if (g && at) { g.wasAt = at.map(Math.round); if (ipEnd(was)) g.wasEnd = ipEnd(was); }
   }
 }
+// 🔓 Unlock its IPs in Properties (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
+// Rule 5.37): an IP has no dialog of its own (Rule 2.9), so the Properties of anything with IPs (a Device, Widget, Manual Valve,
+// fitting or vessel) have the grab pop-up's 🔓 Unlock its IPs in the title line, and a Pipe or Hose has 🔓 Unlock its ends. It does
+// the same at once: each pipe end on it lets go where it is (an open end), so it then moves alone. ↩ Put back (Ctrl+Z) joins them
+// again. Greyed out when nothing is joined, or when it is 🔒 locked (Rule 2.12) or on a Tab whose equipment is locked.
+// onLetGo(): after the ends let go (a pipe's own Properties keep its new ends when saved)
+function propsUnlockIps(it, onLetGo) {
+  if (!editing || !it || !(it.kind === 'pipe' || grabIpIds(it).length)) return;
+  const pipe = it.kind === 'pipe', word = pipe ? '🔓 Unlock its ends' : '🔓 Unlock its IPs', who = pipe ? (it.name || (it.hose ? 'This hose' : 'This pipe')) : lockName(it);
+  const joins = grabJoins(it), n = joins.length;
+  const why = profileFrozen(it) ? 'The equipment on this Tab is locked (lock_Equipment); unlock_Equipment first.'
+    : it.locked ? `${who} is 🔒 locked (Rule 2.12). Unlock it first (the 🔒 in this title line, then Save), then open its Properties again.`
+    : !n ? (pipe ? 'Neither end is joined to anything.' : 'No pipe or hose is joined to its IPs.') : '';
+  const tip = (pipe ? `Its ${n === 1 ? 'end lets' : 'ends let'} go of what ${n === 1 ? 'it is' : 'they are'} joined to and stay open, so the ${it.hose ? 'hose' : 'pipe'} moves alone.`
+    : `The ${n === 1 ? 'pipe end' : n + ' pipe ends'} on its IPs let go and stay where they are (open ends), so it moves alone and the pipes and fittings stay.`)
+    + ' It happens at once; ↩ Put back (Ctrl+Z) joins them again (Rule 5.37).' + (why ? `\n\nNot now: ${why}` : '');
+  const b = h('button', { type: 'button', class: 'propsUnlockIps tipLbl', 'data-help': tip, disabled: !!why || null }, word);
+  b.onclick = ev => {
+    ev.preventDefault(); if (b.disabled) return;
+    const now = grabJoins(it); if (!now.length) return;
+    pushUndo(`unlock ${who}`); unlockJoins(now); grabWith.delete(it.id || it.name); onLetGo?.(); renderWs();
+    b.disabled = true; b.textContent = pipe ? '🔓 Ends let go' : '🔓 IPs let go';
+    toast(`🔓 ${who}: ${now.length} ${pipe ? 'end' : 'pipe end'}${now.length > 1 ? 's' : ''} let go. Close or Save, then grab it and move it alone. ↩ Put back (Ctrl+Z) joins ${now.length > 1 ? 'them' : 'it'} again.`, false, 7000);
+  };
+  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b);
+  setTimeout(() => setTimeout(() => { const ttl = $('#dlgTitle'); for (const o of ttl.querySelectorAll('.ttlExtra[data-for="_unlockIps"]')) o.remove(); ttl.append(t); }, 0), 0);      // after the lock, Visible and Hidden Locked
+}
 // an item dropped where something let go of its pipes: each open end whose IP was within REJOIN_PX of the same end of this item
 // (the inlet on an inlet ...) joins it again, as it was (Rule 5.37). Returns how many joined.
 function rejoinLetGo(it) {
@@ -12125,6 +12152,7 @@ async function attrEntry(attr, obj) {
 async function editBundle(v) {
   const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked, x: v.x || 0, y: v.y || 0 };
   const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
+  propsUnlockIps(v);      // 🔓 Unlock its IPs in the title line (Rule 5.37)
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
     ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
     ['x', 'X Horizontal (the whole bundle moves)', 'num'], ['y', 'Y Vertical (the whole bundle moves)', 'num'],
@@ -12408,6 +12436,7 @@ async function editItem(kind, id) {
   // a Heating Element just added from a Method row (OakBarn Brewery's markup: "choosing Duty Cycle one creates a Heating Element Device that
   // first presents the Duty Cycle Attributes"): its Current Method's ⬢ Settings open on top of its Properties
   if (kind === 'el' && item._openMethod) { delete item._openMethod; setTimeout(() => $('#dlgBody .methodPopBtn')?.click(), 50); }
+  propsUnlockIps(item, () => { if (item.kind === 'pipe') { work.from = item.from; work.to = item.to; } });      // 🔓 Unlock its IPs / its ends in the title line (Rule 5.37)
   let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? (isTapMv(item) ? 'Hose Bib Widget' : 'Manual Valve Widget') : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(kind !== 'el' && !isMv(item) && !['text', 'override', 'clone'].includes(type) ? gfxModelOf(fields, item) : fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {

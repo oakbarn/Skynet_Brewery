@@ -26,3 +26,6 @@ assert.match(app, /class: 'vwPart vpOvl'[^\n]*\n[^\n]*media\(ovp\)/, 'the On Ove
 assert.match(app, /return e\.vpKind === 'valve' \? BOLT : ''/, 'a built in Valve starts with the bolt, a built in Element with its Glow alone (2026-11-09)');
 assert.match(app, /'#ws \.vpPart\[data-dev\], #ws \.vpOvl\[data-dev\]'/, 'the overlay follows on and off');
 console.log('propshot flow + overlay ok');
+
+// 🔓 Unlock its IPs in Properties (Rule 5.37, 2026-11-21): its own file, run from here
+await import('./propsunlockips.test.js');
