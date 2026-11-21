@@ -22,6 +22,6 @@ As soon as **Add new Schema** has made your new Schema and loaded it, the **New 
 
 **A Skynet Schema Template** or **an Equipment Profile** has already asked about the boards, Tabs and equipment, so they get only **About** and **Done**.
 
-Units (US or Metric) are not asked: they are a Panel setting, the same for every Schema (**Settings > Panel settings**).
+Units (US or Metric) are not asked: they are a Panel setting, the same for every Schema (**☰ Menu > Default settings**).
 
 See also [Step by Step: Add a Schema](188-step-by-step-add-a-schema).

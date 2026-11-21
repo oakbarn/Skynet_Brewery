@@ -65,5 +65,5 @@ Phones and tablets with no keyboard do not have these keys: type the codes by ha
 - A code that is not on this page stays on the screen as it is typed.
 - To show a real backslash, as in a folder name, type two: `C:\\Brewing`. A single one could turn into a code (`\b` is bold, `\i` is italic).
 - Use `\t` and `\n` to lay text out, not extra spaces: a Label can't start or end with a space (they are trimmed).
-- The size of large text is **\L Rich Text Code Size (px)** in **Settings > Panel settings: screen, Tabs and alerts** (under **Rich Text Embedded Code**), in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font. Small text is three quarters of the text around it.
+- The size of large text is **\L Rich Text Code Size (px)** in **☰ Menu > Default settings** (under **Rich Text Embedded Code**), in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font. Small text is three quarters of the text around it.
 - The color names are the same list as the color dropdowns in the Properties dialogs.

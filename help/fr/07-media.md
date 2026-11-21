@@ -1,6 +1,6 @@
 # Media (images et sons) {#media-pictures-and-sounds}
 
-Les images et les sons sont dans des **dossiers media** sur le Pi. Partout dans le panel, une image ou un son est donné par son **chemin** dans un dossier media, par exemple `Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg`. Les dossiers media sont listés dans **Settings > Panel settings**.
+Les images et les sons sont dans des **dossiers media** sur le Pi. Partout dans le panel, une image ou un son est donné par son **chemin** dans un dossier media, par exemple `Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg`. Les dossiers media sont listés dans **☰ Menu > Default settings**.
 
 **Chaque image est dans `media/Images`**, rangée en **groupes d'images** (un dossier pour Pumps, Valves, Vessels ...), les images Skynet étant gardées à part dans `Images/Skynet` (voir [Groupes d'images](57-picture-groups)), les fonds aussi. Les listes d'images des fenêtres de propriétés ne montrent que les images de là. **Chaque son est dans `media/sounds`.** Les anciens chemins marchent toujours : `oakbarn/...` (l'ancien nom d'Images), un simple nom d'image comme `Skynet_Brewery_Main.svg`, les dessins d'exemple `samples/...`, et les sons gardés en `Images/wave/...`.
 

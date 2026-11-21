@@ -8,7 +8,7 @@ Every picture and sound has a path in two parts: the **folder** it is in (**.pat
 |---|---|---|
 | **Skynet Graphic** | `Images/Skynet` | No. The Skynet pictures live here. |
 | **Skynet Audio** | `sounds/Skynet` | No. The Skynet sounds live here. |
-| **User Graphic** | `Images` | Yes, in **Settings > Panel settings > Default folders**. Your picture groups are folders in it. |
+| **User Graphic** | `Images` | Yes, in **☰ Menu > Default settings > Default folders**. Your picture groups are folders in it. |
 | **User Audio** | `sounds` | Yes, in the same place. |
 
 ## In Properties

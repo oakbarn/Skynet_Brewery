@@ -1,6 +1,6 @@
 # Zoom and Full screen
 
-Zoom and Full screen are in the **☰ Menu > Zoom** Menu tab. They are no longer on the tab bar. Zoom is number 1 in the ☰ Menu to start with; you can move it in **Settings > Panel settings: screen, Tabs and alerts** (Order of the Menu), like any other Menu tab.
+Zoom and Full screen are in the **☰ Menu > Zoom** Menu tab. They are no longer on the tab bar. Zoom is number 1 in the ☰ Menu to start with; you can move it in **☰ Menu > Default settings** (Order of the Menu), like any other Menu tab.
 
 ## Zoom
 
@@ -20,7 +20,7 @@ iPhones cannot go full screen in a browser. On an iPhone, use Safari's **Share >
 
 ## What the panel starts with
 
-In **Settings > Panel settings: screen, Tabs and alerts**, under **On startup** (Admins):
+In **☰ Menu > Default settings**, under **On startup** (Admins):
 
 - **Zoom**: the size every browser starts with. **(the last one used on this browser)** keeps each browser's own choice.
 - **Full screen**: switch it on to start in Full screen. Browsers only allow Full screen after you click or tap the page, so the panel goes full screen on your **first click or tap**. This does nothing on iPhones.

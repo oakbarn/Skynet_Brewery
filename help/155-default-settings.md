@@ -1,27 +1,26 @@
 # Default settings
 
-**☰ Menu > Default settings** has **every default** in Skynet (Skynet Rule 2.42): every default setting **must** be on this page, and it **may** also be in other places as well, such as **Settings** ([Settings](09-settings)). Wherever else it shows, it is the same setting: change it in one place and every place shows it. It opens only from the
-**☰ Menu**. It used to be called the **Default** tab.
+**☰ Menu > Default settings** has **every default** in Skynet (Skynet Rule 2.42): every default setting **must** be on this page, and it **may** also be in other places as well, such as a Device's Properties. Wherever else it shows, it is the same setting: change it in one place and every place shows it. It opens only from the
+**☰ Menu**. It used to be called the **Default** tab. Since 2026-11-21 it also has the Boil temperature, the Panel settings and the
+Order of the Menu, which were on the Settings page; that page is now **Admin Settings** (accounts, users, passwords, Approved Devices,
+sending codes and Patron), and the **🔐 Admin Settings** button at the top of this tab opens it ([Admin Settings](09-settings)).
 
 These settings belong to the **panel**, so they are the same in every Schema. **Admins** change them and press **Save**; everyone
 else can look.
 
 ## Units and your brewery
 
-Since 2026-11-21 **every default is on this tab**, even the ones that are also somewhere else (Skynet Rule 2.42). Both places show
-and change the **same** setting: change it in one and the other shows it.
-
 | Setting | What it does |
 |---|---|
 | **Brewery Name** | Your brewery's name, shown at the top of every Tab's menu bar. Empty: OakBarn Brewery. |
-| **Units** | US (gallons, pounds, °F) or Metric (liters, kilograms, °C). Every amount and temperature shows in it. Skynet keeps every number in metric, so it only changes what you see and type (Skynet Rule 2.59). Also in Settings > Panel settings. |
-| *Boil temperature (air pressure)* | The two boxes below, under their own title: the same as Settings > Boil temperature (air pressure). |
-| **Airport (ICAO)** | The 4 letter code of your nearest airport with a weather report (its METAR station), for example `KDFW`. Skynet reads its air pressure to work out the temperature water boils at here (`skn_Boil_Temp`). Also in Settings > Boil temperature. |
-| **Elevation** | Your brewery's height above sea level: feet for US Units, metres for Metric (kept in metres). Also in Settings > Boil temperature. |
+| **Units** | US (gallons, pounds, °F) or Metric (liters, kilograms, °C). Every amount and temperature shows in it. Skynet keeps every number in metric, so it only changes what you see and type (Skynet Rule 2.59). |
+| *Boil temperature (air pressure)* | The two boxes below, under their own title. |
+| **Airport (ICAO)** | The 4 letter code of your nearest airport with a weather report (its METAR station), for example `KDFW`. Skynet reads its air pressure to work out the temperature water boils at here (`skn_Boil_Temp`). |
+| **Elevation** | Your brewery's height above sea level: feet for US Units, metres for Metric (kept in metres). |
 
 Boxes are typed in the Units they show. Change **Units** and press **Save**, and the boxes then show in the new Units.
-**Test** beside Airport (ICAO) keeps the Airport and Elevation as typed, fetches the airport's report now and shows the airport, the air pressure and the boil temperature under Elevation (the same as Test in Settings).
-The **Typed air pressure** is not here: it is not a default. It is the air pressure on one Brew Day, in Settings > Boil temperature; left empty, Skynet uses the airport's report, or a standard day at your Elevation.
+**Test** beside Airport (ICAO) keeps the Airport and Elevation as typed, fetches the airport's report now and shows the airport, the air pressure and the boil temperature under Elevation.
+The **Typed air pressure** is not here: it is not a default. It is the air pressure on one Brew Day, to be asked in the Brew Day interview (not built yet; a pressure typed before is kept and used); left empty, Skynet uses the airport's report, or a standard day at your Elevation.
 How to find your airport's code and your Elevation: [Boil temperature from the air pressure](238-boil-temperature).
 
 ## Pipes, hoses and sizes
@@ -156,7 +155,7 @@ This only affects new Tabs added to a Schema. This is how the Tab fits on the sc
 
 The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
 
-The technical side: from 200 to 20000 pixels. The boxes start filled in with the usable size of your screen (the screen less the taskbar: 1920 x 1040 on a 1920 x 1080 Windows screen). Left at that, a new Tab takes the size of the screen it is made on, so it fills the screen at Zoom Fit screen; a different number is kept for every new Tab. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The four boxes are in each Tab Profile.
+The technical side: from 200 to 20000 pixels. The boxes start filled in with the usable size of your screen (the screen less the taskbar: 1920 x 1040 on a 1920 x 1080 Windows screen). Left at that, a new Tab takes the size of the screen it is made on, so it fills the screen at Zoom Fit screen; a different number is kept for every new Tab. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in ☰ Menu > Default settings (On startup). The four boxes are in each Tab Profile.
 
 ## New User Templates and Schemas
 
@@ -164,7 +163,7 @@ These are used only by **new** things you make yourself. A Skynet Template keeps
 
 | Setting | What it does |
 |---|---|
-| **Look of a New Schema** | The Look (theme) a new empty Schema starts with. The open Schema's own Look is changed in Settings > Panel settings ([Panel Looks](151-panel-looks)). |
+| **Look of a New Schema** | The Look (theme) a new empty Schema starts with. The open Schema's own Look is changed in ☰ Menu > Default settings ([Panel Looks](151-panel-looks)). |
 
 The **Pump Overlay** is now on each **Pump Profile** and the **Valve Overlay** on each **Valve Profile** ([Tab, Valve and Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** is in **Panel settings (also in Settings)** below. What was set here is kept.
 
@@ -173,13 +172,11 @@ Some things have no box because they are always the same (for example the Pump a
 ## Default folders
 
 **User Graphic** and **User Audio**: where your own pictures and sounds are (empty: `Images` and `sounds`). A Process can give only a
-file name and Skynet looks here first ([Two-part paths](194-two-part-paths), Skynet Rule 7.23). The same two boxes as Settings >
-Panel settings > Default folders.
+file name and Skynet looks here first ([Two-part paths](194-two-part-paths), Skynet Rule 7.23).
 
-## Panel settings (also in Settings)
+## Panel settings
 
-These are the boxes of **Settings > Panel settings: screen, Tabs and alerts**, shown here too (Units is at the top). They change how the
-whole panel works, so a change reaches things already made:
+How the whole panel works, so a change reaches things already made. They were on the Settings page until 2026-11-21:
 
 - **Units** (US or Metric): every amount, temperature and Recipe shows in it. Skynet keeps every number in metric (°C, liters, kilograms, cm), so Units only changes what you see and type; switching it never changes a saved number (Skynet Rule 2.59). Mash, Boil and Equipment Profiles, Vessels and Vessel Templates show their numbers in it when they open; the Units box in each of them is greyed out and follows this one; on a running Tab every temperature shows in it too: a probe's reading (PV), its Setpoint (SV), its Dial, and the Setpoint and Offsets of a Heating Element or Fermentor Control, in their Properties and pop-ups as well. A probe kept in °C (the 3 Vessel Sample) shows 150.0 °F in US, and a probe kept in °F shows °C in Metric; what you type is saved in the probe's own units, and a number you did not change is saved exactly as it was. An Offset turns by 1.8 only (1 °C = 1.8 °F), never with the 32. Recipe items that come in their own unit keep it (an addition in grams, a yeast in Packs; hops are kept in kg and show in oz or g);
 - **Tab Style** (the look of every Tab that has no Tab Style of its own);
@@ -189,10 +186,12 @@ whole panel works, so a change reaches things already made:
 - **Push Lockout (s)**: how long a new Pulse push button waits before another press counts;
 - **Phones and tablets**;
 - the **Grain weight label** and the gravity points label;
-- **Hop alerts**.
-The **Order of the Menu** is only in Settings > Panel settings.
+- **Hop alerts**;
+- **Title**, **Look (theme)** (saved at once), **Media folders**, **API key**, **BeerXML mapping**, the Processes that start with the server, and the restart limit and its Alarm.
 
-The Look (theme) of the open Schema is in Settings > Panel settings ([Panel Looks](151-panel-looks)), and Pulse is always 100 ms.
+**Order of the Menu**: type a number to move a Menu tab.
+
+The Look (theme) is the open Schema's own ([Panel Looks](151-panel-looks)), and Pulse is always 100 ms.
 
 ## The other settings on this tab
 

@@ -1360,7 +1360,7 @@ const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skyne
 // the On overlay a new pump or a new powered valve starts with: the Overlay of the Pump or Valve Profile marked Default (OakBarn Brewery,
 // 2026-11-17: Pump Overlay "On Pump Profile", Valve Overlay "On Valve Profile", off Default settings); the profile picked in the Add
 // box then sets its own. The old Default settings value only where no profile names one. A Skynet Template keeps its own.
-// the lockout a new Pulse button starts with (Rule 6.7): Settings > Panel settings > Push Lockout (s), 3 unless changed (OakBarn
+// the lockout a new Pulse button starts with (Rule 6.7): ☰ Menu > Default settings > Push Lockout (s), 3 unless changed (OakBarn
 // Brewery, 2026-11-17: "Skynet Panel Setting", off Default settings)
 const newLockout = () => Math.round((+S.config.brewDefaults?.pushLockout > 0 ? +S.config.brewDefaults.pushLockout : 3) * 1000);
 const OVERLAY_DEFAULTS = { pump: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg', valve: BOLT };
@@ -6020,7 +6020,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
   const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (['pump', 'valve', 'propValve'].includes(pick)) e.imageOverlay = newOverlay(pick === 'pump' ? 'pump' : 'valve');      // the Default Pump or Valve Profile (Rule 2.42)
-  if (e.type === 'digitalIn' && e.mode === 'momentary') e.lockout = newLockout();      // a new Pulse button: Push Lockout in Settings > Panel settings
+  if (e.type === 'digitalIn' && e.mode === 'momentary') e.lockout = newLockout();      // a new Pulse button: Push Lockout in ☰ Menu > Default settings
   if (!D.visible || type === 'soundPlayer') e.visibility = 'hidden';      // an Audio Widget starts hidden ("visible would default to no", Panel Update 8)
   if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = (d.lbl ?? d.word) + '_' + i; e.dataType = d.dt; if (type === 'codeValueWidget') e.precision = 2; if (type === 'valueWidget') { e.numFormat = NUM_FORMAT_DEFAULT; e.precision = FIXED_PLACES_DEFAULT; /* a new Value Widget: Fixed, 1 Decimal (Panel Update 8) */ } if (type === 'codeValueWidget') { e.format = 'value'; e.code = ''; } }     // a Label from the start (Rule 18.15)
   if (kind) e.kind = kind;
@@ -13563,7 +13563,7 @@ function offBrainDialog(list) {
   const off = h('input', { type: 'checkbox', class: 'swc' });
   const close = guard(async () => {
     d.close();
-    if (off.checked) { await api('PUT', '/ui/settings', { warnOffBrainPaths: false }); S.config.warnOffBrainPaths = false; toast('Path warnings are off. Turn them back on in Settings > Panel settings.'); }
+    if (off.checked) { await api('PUT', '/ui/settings', { warnOffBrainPaths: false }); S.config.warnOffBrainPaths = false; toast('Path warnings are off. Turn them back on in ☰ Menu > Default settings.'); }
   });
   d.append(h('div', { class: 'vdTitle' }, '⚠ File not on the Brain'),
     h('p', {}, list.length === 1 ? 'This process uses a file that is not on the Brain (the Raspberry Pi):' : 'This process uses files that are not on the Brain (the Raspberry Pi):'),
@@ -14871,7 +14871,7 @@ $('#msTest').onclick = guard(async () => {
   catch (e) { $('#msResult').textContent = e.message.includes('No email or text') ? 'Put your own email or mobile number under "Sign-in codes" in My account first.' : e.message; throw e; }
 });
 
-// Settings > Boil temperature (Panel Updates entry 16, Rules 1.18 and 2.27): the airport's ICAO code is the only way to pick the
+// ☰ Menu > Default settings > Boil temperature (Panel Updates entry 16, Rules 1.18 and 2.27): the airport's ICAO code is the only way to pick the
 // weather station. Data is metric (metres, hPa); US Units show feet and inHg.
 const BT_FT = 0.3048, BT_INHG = 33.8638866667;
 const btUS = () => showUnits() !== 'Metric';
@@ -14962,15 +14962,17 @@ $('#setLook').onchange = guard(async () => {
   S.config.theme = t.key; renderLook(); toast(`Look: ${t.name}`);
 });
 
-$('#saveSettings').onclick = guard(async () => {
+// the Panel settings form (Title, Media folders, API key, BeerXML mapping, autostart, restarts): on the Default settings tab since
+// 2026-11-21 (OakBarn Brewery), saved by its one Save. The User Graphic / User Audio boxes are the Default tab's own (Default folders).
+async function savePanelForm() {
   let beer; try { beer = JSON.parse($('#setBeer').value || '{}'); } catch { throw new Error('BeerXML mapping is not valid JSON'); }
   await api('PUT', '/ui/settings', {
-    title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean), mediaDefaults: { userGraphic: $('#setDefUserG').value.trim(), userAudio: $('#setDefUserA').value.trim() },
+    title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean),
     apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
     restartLimit: Math.min(60, Math.max(1, Math.round(Number($('#setRestartLimit').value)) || 5)), restartAlarm: $('#setRestartAlarm').value,
   });
-  await load(); savedPop('Settings saved');
-});
+}
+$('#saveSettings').onclick = guard(async () => { await savePanelForm(); await load(); savedPop('Settings saved'); });
 
 // ---------------------------------------------------------------- beer money pop-up
 // Each browser remembers when to ask next (localStorage). A first visit waits one full interval,
@@ -15462,7 +15464,7 @@ async function newSchemaFromProfile(pid, name = '') {
 // Schema has made and loaded the new Schema: the steps across the top like the Skynet BruControl Importer, one short page at a time,
 // ◀ Back and Next ▶. Nothing is changed until ✔ Finish. Finish (and Close) land on the new Schema's first Tab, never back on the
 // Schema page. A Skynet Schema Template or an Equipment Profile already asked about the boards, Tabs and equipment, so they get About
-// and Done only. Units are not asked: they are a Panel setting (Settings > Panel settings), the same for every Schema.
+// and Done only. Units are not asked: they are a Panel setting (☰ Menu > Default settings), the same for every Schema.
 const NSI_KEEP = { keep: true };       // the interview's notes stay on the page (Rule 11.8: need to know)
 // Panel Update 5 (OakBarn Brewery, 2026-11-19, Rule 2.58): "Equipment is taken care of in 3 above", so the Equipment Profile is asked on
 // the Tabs page, Tab by Tab
@@ -16033,7 +16035,7 @@ const PAGE_PARTS = {
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Approved Devices', '#sec-devices'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Panel settings', '#sec-panel'], ['Panel settings: screen, Tabs and alerts', '#sec-panelSet'], ['Patron', '#sec-patron'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Patron', '#sec-patron'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };
@@ -16245,7 +16247,9 @@ function dropDirty(k) {
   if (profDirty[k]) { profWork[k] = null; profDirty[k] = false; }
 }
 function renderMenuPane() {
-  const box = $('#menuPane'); box.innerHTML = '';
+  const box = $('#menuPane');
+  { const pf = $('#panelForm'); if (pf && box.contains(pf)) $('#panelFormHome').append(pf); }      // keep the moved Panel settings form (Default settings)
+  box.innerHTML = '';
   const m = MENU.find(x => x.key === menuTab); if (!m) return;
   const k = menuTab;
   const pc = paneClose(() => closeMenuTab(k), CLOSE_TIP);
@@ -16368,7 +16372,7 @@ const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
 // the New User Templates and Schemas boxes' hover help (OakBarn Brewery, 2026-11-14: "These are for new User Created only")
 const NEW_TIPS = {
   brewery: 'Your brewery\'s name, shown at the top of every Tab\'s menu bar. Empty: OakBarn Brewery.',
-  look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in Settings > Panel settings.',
+  look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in ☰ Menu > Default settings.',
   lockout: 'How long a new Pulse button waits before another press counts, in seconds. Each button can change its own in its Properties.' };
 // the Hover Delay box's own hover help (Rule 2.38)
 const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover Help shows, in milliseconds (1000 ms = 1 second). 0 or empty: it shows at once. Up to 5000. Phones and tablets have no mouse: a tap still opens the help at once.';
@@ -16380,11 +16384,11 @@ const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColo
 // temperature. The Typed air pressure is not a default (OakBarn Brewery, 2026-11-21: "not a default but a skynet variable set on a Brew
 // Day"), so it is not here and Default settings never changes it
 const BT_TIPS = {
-  airport: 'Your airport\'s 4 letter ICAO code (the code pilots use), for example KORD. It is the weather station Skynet reads the air pressure from, to work out the temperature water boils at here (skn_Boil_Temp). It works only with a correct ICAO code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air. The same box as Settings > Boil temperature. Help: Boil temperature from the air pressure tells how to find your code.',
-  elev: 'The brewery\'s height above sea level, in feet for US Units and metres for Metric (kept in metres). It starts as the airport\'s own height; change it when the brewery sits higher or lower than the airport. The same box as Settings > Boil temperature.' };
+  airport: 'Your airport\'s 4 letter ICAO code (the code pilots use), for example KORD. It is the weather station Skynet reads the air pressure from, to work out the temperature water boils at here (skn_Boil_Temp). It works only with a correct ICAO code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air. Help: Boil temperature from the air pressure tells how to find your code.',
+  elev: 'The brewery\'s height above sea level, in feet for US Units and metres for Metric (kept in metres). It starts as the airport\'s own height; change it when the brewery sits higher or lower than the airport.' };
 const MD_TIPS = {
-  graphic: 'Where your own pictures are (normally Images: the picture groups are folders in it). Empty: Images. A Process can give only a file name and Skynet looks here first. The same box as Settings > Panel settings > Default folders (Rule 7.23).',
-  audio: 'Where your own sounds are (normally sounds). Empty: sounds. A Process can give only a file name and Skynet looks here first. The same box as Settings > Panel settings > Default folders (Rule 7.23).' };
+  graphic: 'Where your own pictures are (normally Images: the picture groups are folders in it). Empty: Images. A Process can give only a file name and Skynet looks here first (Rule 7.23).',
+  audio: 'Where your own sounds are (normally sounds). Empty: sounds. A Process can give only a file name and Skynet looks here first (Rule 7.23).' };
 // the two boxes as they show (feet for US, metres for Metric), and what goes back to the Brain: a box not changed keeps the exact saved
 // number, and the Typed air pressure goes back as it was
 function btBoxes(set, metric) {
@@ -16404,13 +16408,13 @@ function renderDefaultTab(box) {
   // Every default is here (OakBarn Brewery, 2026-11-21: "every default needs to be on the Default Settings as well"): the ones also
   // in Settings show here too, and both places change the same saved value (Rule 2.42)
   const pf = panelSetFields(d), unitsRow = pf.find(x => x[0] === 'units'), panelRows = pf.filter(x => x[0] !== '_un' && x[0] !== 'units');
-  const fields = w => [['_d', 'Every default is here, for every Schema. Some are also in Settings; both places change the same setting (Rule 2.42).', 'note'],
+  const fields = w => [['_d', 'Every default is here, for every Schema (Rule 2.42). Accounts, users and Patron are in Admin Settings (the button at the top).', 'note'],
     ['_ub', 'Units and your brewery', 'head'],
     unitsRow,
     // Brewery Name (OakBarn Brewery, 2026-11-21: "Default Brewery Name (Patron Level)"; "It is Just a Name we can display at the top of
     // every tab menu bar"; "greyed out later if not a Patron": Panel Updates)
     ['breweryName', 'Brewery Name', 'text', null, false, false, { tip: NEW_TIPS.brewery }],
-    // the same boxes and Test as Settings > Boil temperature (air pressure) (OakBarn Brewery, 2026-11-21: "There is no test beside the
+    // the same boxes and Test as ☰ Menu > Default settings > Boil temperature (air pressure) (OakBarn Brewery, 2026-11-21: "There is no test beside the
     // ICOA field")
     ['_btH', 'Boil temperature (air pressure)', 'head'],
     ['_btAirport', 'Airport (ICAO)', 'text', null, false, false, { tip: BT_TIPS.airport }],
@@ -16426,7 +16430,7 @@ function renderDefaultTab(box) {
     ['_bd', 'New Devices and Widgets (the Build)', 'head'],
     ['buildIface', 'Default Interface', 'sel', [['', '(the last one used)'], ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return [id, `${id}: ${x.name}`]; })], false, false, { tip: 'The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used (Rule 4.6).' }],
     ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).' }],
-    // New User Recipes (Default Tab 3, 2026-11-16): Units is a Skynet Panel Setting (Settings > Panel settings); Equipment Profile,
+    // New User Recipes (Default Tab 3, 2026-11-16): Units is a Skynet Panel Setting (☰ Menu > Default settings); Equipment Profile,
     // Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are not Recipe defaults
     ['_r', 'New User Recipes', 'head'],
     ['_rn', 'A new Recipe starts with these, and you can change each one in the Recipe.', 'note'],
@@ -16462,21 +16466,21 @@ function renderDefaultTab(box) {
     ['textHeight', 'New Box Height', 'num', null, false, false, { tip: TBX_TIPS.height }],
     ['_nw', 'New User Templates and Schemas', 'head'],
     // Pump Overlay, Valve Overlay and Push Lockout moved (OakBarn Brewery, 2026-11-17: "On Pump Profile", "On Valve Profile",
-    // "Skynet Panel Setting"): ☰ Menu > Pump Profile and Valve Profile (Overlay), Settings > Panel settings (Push Lockout)
+    // "Skynet Panel Setting"): ☰ Menu > Pump Profile and Valve Profile (Overlay), ☰ Menu > Default settings (Push Lockout)
     ['newSchemaLook', 'Look of a New Schema', 'sel', THEMES.map(t => [t.key, t.name]), false, false, { tip: NEW_TIPS.look }],
-    // Default folders (Rule 7.23): the same two boxes as Settings > Panel settings > Default folders
+    // Default folders (Rule 7.23): the same two boxes as ☰ Menu > Default settings > Default folders
     ['_mdf', 'Default folders', 'head'],
     ['_mdUserG', 'User Graphic', 'text', null, false, false, { tip: MD_TIPS.graphic }],
     ['_mdUserA', 'User Audio', 'text', null, false, false, { tip: MD_TIPS.audio }],
-    // Settings > Panel settings: screen, Tabs and alerts, the same boxes (Units is at the top)
-    ['_pss', 'Panel settings (also in Settings)', 'head'],
+    // ☰ Menu > Default settings, the same boxes (Units is at the top)
+    ['_pss', 'Screen, Tabs and alerts', 'head'],
     ...panelRows];
   // the recipe defaults are kept as L/kg and °C; the form shows them in the units picked
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
   d._grainLabel = grainWtLabel(d.units);
-  // the boil temperature place (Settings > Boil temperature): kept in metres and hPa, shown per Units (Rule 2.59)
+  // the boil temperature place (☰ Menu > Default settings > Boil temperature): kept in metres and hPa, shown per Units (Rule 2.59)
   const bt = S.boil?.settings ?? {}, btWas = btBoxes(bt, shownMetric);
   // S is new after each load(), so the place is asked for again when it is not there (one ask at a time)
   if (!S.boil && !renderDefaultTab.asking) { renderDefaultTab.asking = true; api('GET', '/ui/boiltemp').then(st => { S.boil = st; if (menuTab === 'default' && !profDirty.default) renderMenuPane(); }).catch(() => { }).finally(() => { renderDefaultTab.asking = false; }); }
@@ -16499,7 +16503,7 @@ function renderDefaultTab(box) {
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
     f.read();
-    // the Panel settings boxes are here too (2026-11-21, Rule 2.42): empty = Skynet's own, as in Settings > Panel settings
+    // the Panel settings boxes are here too (2026-11-21, Rule 2.42): empty = Skynet's own, as in ☰ Menu > Default settings
     for (const k of PANEL_SET_KEYS) if (d[k] === undefined || d[k] === '' || d[k] === null) delete d[k];
     if (typeof d.breweryName === 'string') d.breweryName = d.breweryName.trim();
     if (!d.breweryName) delete d.breweryName;
@@ -16529,6 +16533,7 @@ function renderDefaultTab(box) {
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
     // the boil temperature place first: the Brain checks it (an Elevation out of range, a pressure that is no air pressure)
     if (btChanged) S.boil = await api('PUT', '/ui/boiltemp', btSend(btNow, bt, btWas, shownMetric));
+    if (box.contains($('#panelForm'))) await savePanelForm();      // Title, Media folders, API key, BeerXML, autostart, restarts (2026-11-21)
     await api('PUT', '/ui/settings', { brewDefaults: d, ...(mdChanged ? { mediaDefaults: mdNow } : {}) }); S.config.brewDefaults = d; showBreweryName(); showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay);
     await tap.save();      // Tap Water is saved with the rest (one Save for the whole tab)
     if (mdChanged) S.config.mediaDefaults = Object.fromEntries(Object.entries(mdNow).filter(([, v]) => v));
@@ -16536,13 +16541,18 @@ function renderDefaultTab(box) {
   const state = h('span', { class: 'muted' }, profDirty.default ? 'Not saved yet' : 'Saved');
   const saveBtn = () => admin ? dlgBtns(h('button', { class: 'primary', onclick: save }, 'Save'), undoBtn(() => profDirty.default, () => { profDirty.default = false; renderMenuPane(); })) : dlgBtns();
   // Freeze (Default Tab 3, Rule 2.51): the title and Save stay at the top while the rest scrolls; no Save further down
-  box.append(h('div', { class: 'defTab' }, h('div', { class: 'defFreeze' }, saveBtn(), h('h3', {}, 'Default settings'), admin ? state : ''), h('div', { class: 'menuNarrow' }, f.box),
+  // Admin Settings (OakBarn Brewery, 2026-11-21: "On the default settings tab just have a Button to access the Admin Tab")
+  const adminBtn = h('button', { type: 'button', title: 'Open Admin Settings: accounts, users, passwords, Approved Devices, sending codes and Patron', onclick: () => { if (paneDirty() && !confirm('This Menu tab has changes that are not saved. Open Admin Settings anyway?')) return; leaveMenuTab(); setView('settings'); } }, '🔐 Admin Settings');
+  // Boil temperature down to Patron moved here from Settings (OakBarn Brewery, 2026-11-21): the Panel settings form, and the Order of the Menu
+  const pfm = $('#panelForm'), moved = pfm && admin ? [h('h3', { id: 'sec-panel' }, 'Panel settings'), pfm] : [];
+  box.append(h('div', { class: 'defTab' }, h('div', { class: 'defFreeze' }, saveBtn(), h('h3', {}, 'Default settings'), admin ? state : '', adminBtn), h('div', { class: 'menuNarrow' }, f.box),
+    ...moved, h('h3', { id: 'sec-menuOrder' }, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), menuOrderTable(admin),
     ...tap.nodes));      // .defTab: section titles highlighted (OakBarn Brewery, 2026-11-14)
   // any change below the frozen top is 'Not saved yet' until Save (so Close asks first, and Undo has something to go back from)
   if (admin) { const tab = box.lastChild, mark = e => { if (e.target.closest('.defFreeze')) return; profDirty.default = true; state.textContent = 'Not saved yet'; }; tab.addEventListener('input', mark); tab.addEventListener('change', mark); }
 }
 
-// Settings > Panel settings, the part that was on the Default tab (OakBarn Brewery, 2026-11-14: "Move any field that affects existing
+// ☰ Menu > Default settings, the part that was on the Default tab (OakBarn Brewery, 2026-11-14: "Move any field that affects existing
 // things like the Theme or Pulse button (and anything that affects existing Device, Tabs etc to only be in settings as the are more
 // Settings than defaults. No need to even mention on Default Tab"). They change what is already made, so they are Settings (Rule 2.42).
 // Saved with the Default tab's values (brewDefaults), so nothing is moved on the Brain.
@@ -16588,6 +16598,14 @@ const panelSetFields = w => [
     ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]]];
 const PANEL_SET_KEYS = ['units', 'shutDownBrain', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'pushLockout', 'touchEdit', 'touchMove',
   'grainLabelVisible', 'ppgLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
+function menuOrderTable(admin) {
+  return h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
+    h('tbody', {}, ...menuSorted().map((m, i) => {
+      const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });
+      n.onchange = guard(() => setMenuOrder(m.key, +n.value));
+      return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
+    })));
+}
 function renderPanelSettings() {
   const box = $('#panelSet'); if (!box) return;
   box.innerHTML = '';
@@ -16609,12 +16627,7 @@ function renderPanelSettings() {
     await api('PUT', '/ui/settings', { brewDefaults: cur }); S.config.brewDefaults = cur;
     showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(cur.hoverDelay);
     renderWs(); renderMenuPane(); savedPop('Panel settings saved'); });
-  const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
-    h('tbody', {}, ...menuSorted().map((m, i) => {
-      const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });
-      n.onchange = guard(() => setMenuOrder(m.key, +n.value));
-      return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
-    })));
+  const order = menuOrderTable(admin);
   box.append(h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
     h('h4', { id: 'sec-menuOrder' }, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
 }

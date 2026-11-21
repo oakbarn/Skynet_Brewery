@@ -21,7 +21,7 @@ Sur un Tab en marche, l'affichage de chaque Temperature Probe montre deux lignes
   - Une sonde que rien n'utilise garde la couleur de son affichage.
 - **SV** dessous, dans une **case verte** : sa **consigne** (Setpoint), par exemple **152.0 °F**.
 
-Les deux lignes s'affichent dans **Settings > Panel settings > Units** (Skynet Rule 2.59) : **°F** en US, **°C** en Métrique, quelles que soient
+Les deux lignes s'affichent dans **☰ Menu > Default settings > Units** (Skynet Rule 2.59) : **°F** en US, **°C** en Métrique, quelles que soient
 les unités où la sonde garde ses nombres. Une sonde gardée en °C (le 3 Vessel Sample) affiche **150.0 °F** en US ; une consigne tapée en °F est
 enregistrée en °C. Chaque ligne garde tous ses chiffres et son °F ou °C ensemble sur une seule ligne, dans l'affichage ; un long nombre rend les deux lignes
 plus petites pour qu'elles tiennent. Il n'y a pas d'interrupteur Visible : PV et SV font partie de l'affichage.

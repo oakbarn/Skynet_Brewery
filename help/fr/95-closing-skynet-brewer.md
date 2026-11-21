@@ -36,7 +36,7 @@ Le Brain reste en veille, même après un redémarrage ou une coupure de courant
 
 Éteint l'ordinateur (ou le Raspberry Pi) sur lequel tourne le Brain, pas seulement Skynet (règle Skynet 6.40). Pratique pour un Raspberry Pi sans écran ni clavier : éteignez-le depuis votre téléphone avant de le débrancher. Admins seulement, depuis n'importe quel écran, et aussi depuis la page Standby.
 
-C'est **désactivé** jusqu'à ce qu'un Admin l'active, pour que personne ne se fasse demander « Éteindre le Brain ? » chaque fois qu'un navigateur se ferme : **Settings > Panel settings > The Brain > Shut Down Brain Option**, puis **Save**. Désactivé, le choix n'est pas du tout dans le ☰ Menu.
+C'est **désactivé** jusqu'à ce qu'un Admin l'active, pour que personne ne se fasse demander « Éteindre le Brain ? » chaque fois qu'un navigateur se ferme : **☰ Menu > Default settings > The Brain > Shut Down Brain Option**, puis **Save**. Désactivé, le choix n'est pas du tout dans le ☰ Menu.
 
 1. Ouvrez **☰ Menu**. En bas, choisissez **⏼ Shut down the Brain's computer**.
 2. La même boîte avec ses cases à cocher (brassage, autres écrans), et **Back** pour ne rien changer.

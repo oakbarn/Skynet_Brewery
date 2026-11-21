@@ -9,13 +9,13 @@ tell when the boil has started.
 
 ## Set it up
 
-Open **Settings > Boil temperature (air pressure)** (Admins). The same boxes are on **☰ Menu > Default settings > Units and your brewery**.
+Open **☰ Menu > Default settings > Boil temperature (air pressure)** (Admins).
 
 | Box | What to put in |
 |---|---|
 | **Airport (ICAO)** | Your airport's 4 letter ICAO code, for example `KORD`. This is the only way to pick the weather station. |
 | **Elevation** | Your brewery's height above sea level (feet for US Units, metres for Metric). It starts as the airport's own height. Change it to your own. |
-| **Typed air pressure** | Leave it empty. A pressure typed here is used as it is, with no internet. It is the pressure at your brewery. Type it in **inHg** (15.9 to 32.05) or **hPa** (540 to 1085); Skynet knows which by its size. |
+| **Typed air pressure** | Not a default, so it has no box here: it is to be asked on Brew Day (the Brew Day interview, not built yet). A pressure typed before is kept and used as it is, with no internet. Skipped: the airport's report, or a standard day at your Elevation. |
 
 Press **Test**. Skynet fetches the report now and shows the airport, the air pressure and the boil temperature. **Save**
 keeps the boxes.

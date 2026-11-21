@@ -1,27 +1,26 @@
 # Réglages par défaut {#default-settings}
 
-**☰ Menu > Default settings** a **tous les réglages par défaut** de Skynet (Règle Skynet 2.42) : chaque réglage par défaut **doit** être sur cette page, et il **peut** aussi être dans d'autres endroits, comme **Settings** ([Réglages](09-settings)). Où qu'il soit aussi, c'est le même réglage : changez-le à un endroit et chaque endroit le montre. Il ne s'ouvre que depuis le
-**☰ Menu**. Il s'appelait autrefois le Tab **Default**.
+**☰ Menu > Default settings** a **tous les réglages par défaut** de Skynet (Règle Skynet 2.42) : chaque réglage par défaut **doit** être sur cette page, et il **peut** aussi être dans d'autres endroits, comme les Properties d'un Device. Où qu'il soit aussi, c'est le même réglage : changez-le à un endroit et chaque endroit le montre. Il ne s'ouvre que depuis le
+**☰ Menu**. Il s'appelait autrefois le Tab **Default**. Depuis le 2026-11-21, il a aussi la Boil temperature, les Panel settings et
+l'Ordre du Menu, qui étaient sur la page Settings ; cette page s'appelle maintenant **Admin Settings** (comptes, utilisateurs, mots de
+passe, Approved Devices, envoi des codes et Patron), et le bouton **🔐 Admin Settings** en haut de ce Tab l'ouvre ([Admin Settings](09-settings)).
 
 Ces réglages appartiennent au **panneau**, donc ils sont les mêmes dans chaque Schema. Les **Admins** les changent et appuient sur **Save** ; tous les
 autres peuvent regarder.
 
 ## Unités et votre brasserie {#units-and-your-brewery}
 
-Depuis le 2026-11-21, **chaque réglage par défaut est sur ce Tab**, même ceux qui sont aussi ailleurs (Règle Skynet 2.42). Les deux
-endroits montrent et changent le **même** réglage : changez-le dans l'un et l'autre le montre.
-
 | Réglage | Ce qu'il fait |
 |---|---|
 | **Brewery Name** | Le nom de votre brasserie, affiché en haut de la barre de menu de chaque Tab. Vide : OakBarn Brewery. |
-| **Units** | US (gallons, livres, °F) ou Métrique (litres, kilogrammes, °C). Chaque quantité et température s'affiche dans ce choix. Skynet garde chaque nombre en métrique, donc il change seulement ce que vous voyez et tapez (Règle Skynet 2.59). Aussi dans Settings > Panel settings. |
-| *Boil temperature (air pressure)* | Les deux cases ci-dessous, sous leur propre titre : les mêmes que Settings > Boil temperature (air pressure). |
-| **Airport (ICAO)** | Le code à 4 lettres de l'aéroport le plus proche qui a un bulletin météo (sa station METAR), par exemple `KDFW`. Skynet lit sa pression de l'air pour trouver la température à laquelle l'eau bout ici (`skn_Boil_Temp`). Aussi dans Settings > Boil temperature. |
-| **Elevation** | L'altitude de votre brasserie au-dessus du niveau de la mer : en pieds pour les Units US, en mètres pour Métrique (gardée en mètres). Aussi dans Settings > Boil temperature. |
+| **Units** | US (gallons, livres, °F) ou Métrique (litres, kilogrammes, °C). Chaque quantité et température s'affiche dans ce choix. Skynet garde chaque nombre en métrique, donc il change seulement ce que vous voyez et tapez (Règle Skynet 2.59). |
+| *Boil temperature (air pressure)* | Les deux cases ci-dessous, sous leur propre titre. |
+| **Airport (ICAO)** | Le code à 4 lettres de l'aéroport le plus proche qui a un bulletin météo (sa station METAR), par exemple `KDFW`. Skynet lit sa pression de l'air pour trouver la température à laquelle l'eau bout ici (`skn_Boil_Temp`). |
+| **Elevation** | L'altitude de votre brasserie au-dessus du niveau de la mer : en pieds pour les Units US, en mètres pour Métrique (gardée en mètres). |
 
 Les cases se tapent dans les Units qu'elles montrent. Changez **Units** et appuyez sur **Save**, et les cases s'affichent ensuite dans les nouvelles Units.
-**Test** à côté d'Airport (ICAO) garde l'Airport et l'Elevation tels que tapés, va chercher le bulletin de l'aéroport tout de suite et montre l'aéroport, la pression de l'air et la température d'ébullition sous Elevation (comme Test dans Settings).
-La **Typed air pressure** n'est pas ici : ce n'est pas un réglage par défaut. C'est la pression de l'air d'un jour de brassage, dans Settings > Boil temperature ; laissée vide, Skynet utilise le bulletin de l'aéroport, ou une journée standard à votre Elevation.
+**Test** à côté d'Airport (ICAO) garde l'Airport et l'Elevation tels que tapés, va chercher le bulletin de l'aéroport tout de suite et montre l'aéroport, la pression de l'air et la température d'ébullition sous Elevation.
+La **Typed air pressure** n'est pas ici : ce n'est pas un réglage par défaut. C'est la pression de l'air d'un jour de brassage, à demander dans l'entretien du jour de brassage (pas encore fait ; une pression tapée avant est gardée et utilisée) ; laissée vide, Skynet utilise le bulletin de l'aéroport, ou une journée standard à votre Elevation.
 Comment trouver le code de votre aéroport et votre Elevation : [Température d'ébullition selon la pression de l'air](238-boil-temperature).
 
 ## Tuyaux, flexibles et tailles {#pipes-hoses-and-sizes}
@@ -156,7 +155,7 @@ Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le 
 
 La taille d'affichage (le Zoom de Skynet : Fit screen, Fit width, 50 % à 150 %) change si les barres de défilement se voient ou non. Skynet commence à Fit screen, qui dessine tout le Tab plus petit pour tenir à l'écran : aucune barre de défilement ne se voit. Votre ordinateur décide aussi de l'aspect des barres : Windows les montre ; un Mac les cache souvent jusqu'à ce que vous fassiez défiler (Réglages Système > Apparence) ; sous Linux, cela dépend du bureau et du navigateur.
 
-Le côté technique : de 200 à 20000 pixels. Les cases sont remplies au départ avec la taille utile de votre écran (l'écran moins la barre des tâches : 1920 x 1040 sur un écran Windows de 1920 x 1080). Laissé ainsi, un nouveau Tab prend la taille de l'écran sur lequel il est créé, et remplit donc l'écran au Zoom Fit screen ; un autre nombre est gardé pour chaque nouveau Tab. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). Les quatre cases sont dans chaque Tab Profile.
+Le côté technique : de 200 à 20000 pixels. Les cases sont remplies au départ avec la taille utile de votre écran (l'écran moins la barre des tâches : 1920 x 1040 sur un écran Windows de 1920 x 1080). Laissé ainsi, un nouveau Tab prend la taille de l'écran sur lequel il est créé, et remplit donc l'écran au Zoom Fit screen ; un autre nombre est gardé pour chaque nouveau Tab. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans ☰ Menu > Default settings (On startup). Les quatre cases sont dans chaque Tab Profile.
 
 ## Nouveaux Templates de l'utilisateur et Schemas {#new-user-templates-and-schemas}
 
@@ -164,7 +163,7 @@ Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| **Look of a New Schema** | Le Look (thème) avec lequel commence un nouveau Schema vide. Le Look du Schema ouvert se change dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)). |
+| **Look of a New Schema** | Le Look (thème) avec lequel commence un nouveau Schema vide. Le Look du Schema ouvert se change dans ☰ Menu > Default settings ([Les Looks du panneau (thèmes)](151-panel-looks)). |
 
 Le **Pump Overlay** est maintenant sur chaque **Pump Profile** et le **Valve Overlay** sur chaque **Valve Profile** ([Tab, Valve et Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** est dans **Panel settings (aussi dans Settings)** plus bas. Ce qui était réglé ici est gardé.
 
@@ -173,13 +172,11 @@ Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles (par e
 ## Dossiers par défaut {#default-folders}
 
 **User Graphic** et **User Audio** : où sont vos propres images et sons (vide : `Images` et `sounds`). Un Process peut donner seulement
-un nom de fichier et Skynet cherche ici d'abord ([Chemins en deux parties](194-two-part-paths), Règle Skynet 7.23). Les deux mêmes
-cases que Settings > Panel settings > Default folders.
+un nom de fichier et Skynet cherche ici d'abord ([Chemins en deux parties](194-two-part-paths), Règle Skynet 7.23).
 
-## Panel settings (aussi dans Settings) {#panel-settings-also-in-settings}
+## Panel settings {#panel-settings}
 
-Ce sont les cases de **Settings > Panel settings: screen, Tabs and alerts**, montrées ici aussi (Units est en haut). Elles changent la
-façon dont tout le panneau marche, donc un changement atteint les choses déjà faites :
+La façon dont tout le panneau marche, donc un changement atteint les choses déjà faites. Ils étaient sur la page Settings jusqu'au 2026-11-21 :
 
 - **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix. Skynet garde chaque nombre en métrique (°C, litres, kilogrammes, cm) : Units change seulement ce que vous voyez et tapez, et le changer ne change jamais un nombre enregistré (Skynet Rule 2.59). Les Mash, Boil et Equipment Profiles, les Vessels et les Vessel Templates affichent leurs nombres dans ce choix à l'ouverture ; leur propre case Units est grisée et suit celle-ci ; sur un Tab en marche, chaque température s'affiche aussi dans ce choix : la lecture d'une sonde (PV), sa consigne (SV), son Dial, et la consigne et les Offsets d'un Heating Element ou d'un Fermentor Control, aussi dans leurs Properties et leurs fenêtres. Une sonde gardée en °C (le 3 Vessel Sample) affiche 150.0 °F en US, et une sonde gardée en °F affiche des °C en Métrique ; ce que vous tapez est enregistré dans les unités de la sonde, et un nombre que vous n'avez pas changé est enregistré exactement comme avant. Un Offset se convertit par 1,8 seulement (1 °C = 1,8 °F), jamais avec le 32. Les articles d'une Recette qui ont leur propre unité la gardent (un ajout en grammes, une levure en Packs ; les houblons sont gardés en kg et s'affichent en oz ou g) ;
 - **Tab Style** (l'aspect de chaque Tab qui n'a pas de Tab Style à lui) ;
@@ -189,10 +186,12 @@ façon dont tout le panneau marche, donc un changement atteint les choses déjà
 - **Push Lockout (s)** : combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte ;
 - **Phones and tablets** (téléphones et tablettes) ;
 - le **Grain weight label** et le label des points de densité ;
-- les **Hop alerts** (alertes houblon).
-L'**Ordre du Menu** est seulement dans Settings > Panel settings.
+- les **Hop alerts** (alertes houblon) ;
+- **Title**, **Look (theme)** (enregistré tout de suite), **Media folders**, **API key**, **BeerXML mapping**, les Processes qui démarrent avec le serveur, et la limite de redémarrages et son Alarm.
 
-Le Look (thème) du Schema ouvert est dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)), et le Pulse est toujours de 100 ms.
+**Ordre du Menu** : tapez un numéro pour déplacer un Tab du Menu.
+
+Le Look (thème) est celui du Schema ouvert ([Les Looks du panneau (thèmes)](151-panel-looks)), et le Pulse est toujours de 100 ms.
 
 ## Les autres réglages de ce Tab {#the-other-settings-on-this-tab}
 

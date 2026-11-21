@@ -36,7 +36,7 @@ The Brain stays in Standby, even after a restart or a power cut, until an Admin 
 
 Turns off the computer (or Raspberry Pi) the Brain runs on, not just Skynet (Skynet Rule 6.40). Handy for a Raspberry Pi with no screen or keyboard: shut it down from your phone before you unplug it. Admins only, from any screen, and also from the Standby page.
 
-It is **Off** until an Admin turns it on, so nobody is asked "Shut down the Brain?" every time a browser closes: **Settings > Panel settings > The Brain > Shut Down Brain Option**, then **Save**. With it Off, the choice is not in the ☰ Menu at all.
+It is **Off** until an Admin turns it on, so nobody is asked "Shut down the Brain?" every time a browser closes: **☰ Menu > Default settings > The Brain > Shut Down Brain Option**, then **Save**. With it Off, the choice is not in the ☰ Menu at all.
 
 1. Open **☰ Menu**. At the bottom, pick **⏼ Shut down the Brain's computer**.
 2. The same box with its tick boxes (brewing, other screens), and **Back** to change nothing.

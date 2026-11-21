@@ -22,6 +22,6 @@ Dès que **Add new Schema** a fait votre nouveau Schema et l'a chargé, la **New
 
 **Un Skynet Schema Template** ou **un Equipment Profile** a déjà posé les questions sur les cartes, les Tabs et l'équipement, donc ils n'ont que **About** et **Done**.
 
-Les unités (US ou Metric) ne sont pas demandées : c'est un réglage du Panel, le même pour chaque Schema (**Settings > Panel settings**).
+Les unités (US ou Metric) ne sont pas demandées : c'est un réglage du Panel, le même pour chaque Schema (**☰ Menu > Default settings**).
 
 Voir aussi [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema).
