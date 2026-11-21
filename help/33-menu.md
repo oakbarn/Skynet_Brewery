@@ -31,16 +31,16 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 **Every default is set here: what a new thing starts with.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Profile a new tab gets (the Valve and Pump Profile a new one starts with is the one marked Default in its own list). **Labels** and **Text Boxes**: the Defaults of every text box (see [Text boxes](49-text-boxes)). New User Templates and Schemas. Press **Save**.
 
-What changes things already made, or how the whole panel works, is in **Settings > Panel settings: screen, Tabs and alerts** ([Settings](09-settings)): the Menu Bar ([The Menu Bar](40-menu-bar)), **Sound**, **On startup** ([Zoom and Full screen](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Rich Text Embedded Code](90-rich-text-embedded-code)), Hover Delay, Phones and tablets ([Phones and tablets](45-phones-and-tablets)), Hop alerts and the **Order of the Menu**.
+What changes things already made, or how the whole panel works, is in **☰ Menu > Default settings** ([Settings](09-settings)): the Menu Bar ([The Menu Bar](40-menu-bar)), **Sound**, **On startup** ([Zoom and Full screen](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Rich Text Embedded Code](90-rich-text-embedded-code)), Hover Delay, Phones and tablets ([Phones and tablets](45-phones-and-tablets)), Hop alerts and the **Order of the Menu**.
 
-**Sound** (in Settings > Panel settings: screen, Tabs and alerts):
+**Sound** (in ☰ Menu > Default settings):
 
 - **Sound on**: the same as the sound button at the top of the page. It turns sound on or off on this screen right away, and is not saved.
 - **Turn Sound On when starting**: when this is on, sound is on by itself every time the panel opens and every time a Schema is loaded, so you do not have to press **Enable sound**. Press **Save** to keep it.
 
 Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any sound until you tap or click it once. So when the panel opens, the button at the top says **Sound on (tap anywhere)**: tap or click anywhere on the page once and the sound plays from then on. An alarm that went off before that first tap starts as soon as you tap.
 
-**Order of the Menu** (in Settings > Panel settings: screen, Tabs and alerts): each Menu tab has an Order number. Type a new number to move a Menu tab there. The others are numbered again to make room (1, 2, 3 ...), and the Menu and the open Menu tabs sort themselves. New Menu tabs added later go at the end.
+**Order of the Menu** (in ☰ Menu > Default settings): each Menu tab has an Order number. Type a new number to move a Menu tab there. The others are numbered again to make room (1, 2, 3 ...), and the Menu and the open Menu tabs sort themselves. New Menu tabs added later go at the end.
 
 ## The other Menu tabs
 

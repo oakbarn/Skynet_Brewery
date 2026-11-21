@@ -213,7 +213,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   // Skynet Constants (skn_const_L_p_Gal ...) where a value goes, once a letter is typed (all of them would fill the list)
   if (!atStart && w) for (const [n, v, , , label] of SKYNET_CONSTANTS) add(n + nsp, `Skynet Constant ${showConstant(v)}, ${label}`, n);     // skn_const_L_p_Gal: Liters per Gallon
   if (!atStart && w.length >= 2) for (const [n, , what] of SKYNET_FUNCTIONS) add(n + '(', `Skynet temperature: ${what}`, n);      // toF( toC(
-  // Skynet internal Globals (skn_Boil_Temp ...: Settings > Boil temperature, Rule 1.18), read only, where a value goes
+  // Skynet internal Globals (skn_Boil_Temp ...: ☰ Menu > Default settings > Boil temperature, Rule 1.18), read only, where a value goes
   if (!atStart && w) for (const [n, what] of SKN_GLOBALS) add(n + nsp, `Skynet internal Global, read only: ${what}`, n);
   // and / or only after a value (if Pump == true an...)
   const afterValue = /\S\s+$/.test(pre) && !/(==|!=|<=|>=|<|>|=|\+|-|\*|\/|\(|\bif|\belseif|\bwait|\bnot|\band|\bor)\s*$/i.test(pre);

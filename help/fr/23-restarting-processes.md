@@ -39,7 +39,7 @@ Un Process cassé pourrait se relancer pour toujours, donc les relances sont com
 
 Réglez le problème, puis lancez le Process à la main. Le lancer ou appuyer vous-même sur Restart n'est jamais compté et commence un nouveau compte.
 
-Changez le nombre, et choisissez l'alarme, dans **Settings > Panel settings** :
+Changez le nombre, et choisissez l'alarme, dans **☰ Menu > Default settings** :
 
 - **Most restarts a minute for one Process** (le plus de relances par minute pour un Process : de 1 à 60, 5 si vous ne le changez pas)
 - **Alarm to sound when a Process is stopped for restarting too often** (l'alarme qui sonne quand un Process est arrêté pour trop de relances : n'importe quel Alarm Widget, ou None)

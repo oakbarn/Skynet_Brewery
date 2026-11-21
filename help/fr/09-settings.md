@@ -1,4 +1,4 @@
-# Settings (réglages) {#settings}
+# Admin Settings (réglages d'administration) {#admin-settings}
 
 ## Partir d'un Schema d'exemple (Admins) {#start-from-a-sample-schema-admins}
 
@@ -22,34 +22,13 @@ Ajoutez des personnes et donnez un rôle à chacune :
 
 Essayez une journée de brassage sans toucher au matériel, avec le temps qui passe plus vite ou qui saute en avant. Voir [Mode simulation](20-simulation).
 
-## Panel settings (réglages du panel, Admins) {#panel-settings-admins}
+## Déplacé dans Default settings {#moved-to-default-settings}
 
-- **Title** : le nom en haut de l'écran.
-- **Look (theme)** : l'apparence de tout le Panel (Office Black, Dark Gray, White ou Skynet Night), enregistrée tout de suite. **Use this Look
-  on every Tab** donne à chaque Tab les couleurs du Look, et **Put the Tabs back** l'annule. Voir [Les Looks du panneau (thèmes)](151-panel-looks).
-- **Media folders** : où sont gardés les images et les sons, un par ligne.
-- **API key** : le mot de passe que les autres programmes (Node-RED et autres) doivent envoyer. Voir [API (les autres programmes)](11-api).
-- **BeerXML mapping** : quelles variables une recette BeerSmith remplit.
-- **Start these processes when the server starts** : cochez les Processes qui doivent toujours tourner.
-
-## Panel settings: screen, Tabs and alerts (Admins) {#panel-settings-screen-tabs-and-alerts-admins}
-
-Ceux-ci changent les choses déjà faites et la façon dont tout le panel marche, pour chaque Schema (ils étaient avant sur l'onglet Default ; Règle Skynet 2.42). Chacun d'eux est aussi dans [Réglages par défaut](155-default-settings), avec Units, les cases Boil temperature et les Default folders : les deux endroits changent le même réglage.
-
-- **The Brain** : **Shut Down Brain Option** (désactivé au départ). Activé : les Admins ont ☰ Menu > **⏼ Shut down the Brain's computer** ([Fermer Skynet Brewer et la mise en veille](95-closing-skynet-brewer)).
-- **Tabs** : **Tab Style**, l'aspect de chaque Tab qui n'a pas de Tab Style à lui ([Tab Styles](101-tab-styles)).
-- **Menu Bar** : cacher la Menu Bar sur les Tabs ([La barre de menus](40-menu-bar)).
-- **Sound** : **Sound on** (cet écran, tout de suite) et **Turn Sound On when starting**.
-- **On startup** : le Zoom et le plein écran avec lesquels le panel démarre ([Zoom et plein écran](41-zoom-and-full-screen)).
-- **Rich Text Embedded Code** : **\L Rich Text Code Size (px)**.
-- **Hover Help** : **Hover Delay (ms)** ([L'aide au survol dans les boîtes de dialogue](147-hover-help)).
-- **Pulse buttons** : **Push Lockout (s)** : combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte, en secondes (0,1 à 60, 3 sauf si vous le changez). Chaque bouton change le sien dans ses Properties.
-- **Phones and tablets** : peuvent-ils modifier, et déplacer les choses ([Téléphones et tablettes](45-phones-and-tablets)).
-- **Grain weight label** et le label des points de densité ([L'onglet Recipe](99-recipe-tab)).
-- **Hop alerts** : minutes d'avertissement, alertes réunies, un son, les dire à voix haute, et la voix du navigateur.
-- **Order of the Menu** : tapez un numéro pour déplacer un onglet de menu.
-
-Appuyez sur **Save** en dessous.
+Depuis le 2026-11-21 (Règle Skynet 2.42), la **Boil temperature**, les **Panel settings** (Title, Look, Media folders, Default folders,
+API key, BeerXML mapping, les Processes qui démarrent avec le serveur, la limite de redémarrages et son Alarm), les réglages **screen,
+Tabs and alerts** et l'**Ordre du Menu** sont dans **☰ Menu > [Réglages par défaut](155-default-settings)**, enregistrés par son seul
+**Save**. Cette page s'appelle maintenant **Admin Settings** : comptes, utilisateurs, mots de passe, Approved Devices, envoi des codes et
+Patron. Default settings a un bouton **🔐 Admin Settings** qui l'ouvre.
 
 ## Pictures (images) {#pictures}
 

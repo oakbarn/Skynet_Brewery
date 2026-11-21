@@ -181,7 +181,7 @@ sim.apply();
 hw.start();
 const control = new Control(store);
 control.start();
-// The boil temperature here and now (Settings > Boil temperature, Rules 1.18 and 2.27): skn_Boil_Temp for every Process.
+// The boil temperature here and now (☰ Menu > Default settings > Boil temperature, Rules 1.18 and 2.27): skn_Boil_Temp for every Process.
 // The BruControl Import program has no running Brain, so it never asks for a weather report.
 const boil = new BoilTemp(DATA, { store });
 if (!IMPORT_BUILD) boil.start();
@@ -976,7 +976,7 @@ async function route(req, res) {
     engine.start(first, me.name || 'user'); return ok(res);
   }
   // Simulation mode: everyone sees it, admins change it
-  // Settings > Boil temperature: the airport's ICAO code, Elevation and a typed pressure. Everyone sees it, Admins change it.
+  // ☰ Menu > Default settings > Boil temperature: the airport's ICAO code, Elevation and a typed pressure. Everyone sees it, Admins change it.
   if (p === '/ui/boiltemp' && m === 'GET') return ok(res, boil.status());
   if (p === '/ui/boiltemp' && m === 'PUT') { try { return ok(res, await boil.save(await jsonBody(req))); } catch (e) { return fail(res, 400, e.message); } }
   if (p === '/ui/boiltemp/test' && m === 'POST') return ok(res, await boil.refresh());      // Test: fetch the report now
@@ -1433,7 +1433,7 @@ async function route(req, res) {
   if (p === '/ui/poweroff' && m === 'POST') {
     if (me.role !== 'admin') return fail(res, 403, 'Only an admin can do that');
     if (IMPORT_BUILD) return fail(res, 400, 'The Importer never shuts down the computer');
-    if (!store.config.brewDefaults?.shutDownBrain) return fail(res, 400, 'Shut Down Brain Option is Off (Settings > Panel settings)');
+    if (!store.config.brewDefaults?.shutDownBrain) return fail(res, 400, 'Shut Down Brain Option is Off (☰ Menu > Default settings)');
     if (!(await startPowerOff())) return fail(res, 400, cannotWhy());
     console.log(`The Brain's computer is shut down from the panel by ${me?.name ?? 'an admin'}`);
     broadcast('closing', { by: me?.name ?? '', poweroff: true });

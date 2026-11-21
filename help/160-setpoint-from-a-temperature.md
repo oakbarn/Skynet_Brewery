@@ -21,7 +21,7 @@ Every Temperature Probe's display on a running Tab shows two lines, like a panel
   - A probe nothing uses keeps its own Display color.
 - **SV** under it, in a **green box**: its **Setpoint**, for example **152.0 °F**.
 
-Both lines show in **Settings > Panel settings > Units** (Skynet Rule 2.59): **°F** in US, **°C** in Metric, whatever the probe keeps its
+Both lines show in **☰ Menu > Default settings > Units** (Skynet Rule 2.59): **°F** in US, **°C** in Metric, whatever the probe keeps its
 numbers in. A probe kept in °C (the 3 Vessel Sample) shows **150.0 °F** in US; a Setpoint typed in °F is saved in °C. Each line keeps all its digits and its °F or °C together on one line, inside the display; a long number makes both lines smaller
 to fit. There is no Visible switch: PV and SV are part of the display.
 

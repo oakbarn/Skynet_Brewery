@@ -84,7 +84,7 @@ ou calculez-le sur sa propre ligne. Une consigne plus chaude que l'ébullition e
 
 Quand vous enregistrez un Process avec un nouveau chemin de fichier qui n'est pas sur le Brain (le Raspberry Pi), un avertissement s'affiche. Cela arrive pour un chemin Windows comme `C:\Brewing\Sounds\Hops.wav`, un chemin en dehors des dossiers media, ou un fichier qui n'est pas encore dans un dossier media. Les téléphones et les autres ordinateurs ne peuvent pas atteindre ces fichiers. Mettez le fichier dans un dossier media avec l'écran [Media (images et sons)](07-media) et utilisez son chemin là-bas, par exemple `sounds/Hops.wav`.
 
-Cochez **Do not show this warning again** pour ne plus voir les avertissements. Réactivez-les dans **Settings > Panel settings**.
+Cochez **Do not show this warning again** pour ne plus voir les avertissements. Réactivez-les dans **☰ Menu > Default settings**.
 
 ## Bon à savoir {#good-to-know}
 

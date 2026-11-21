@@ -10,13 +10,13 @@ brasserie et calcule la température à laquelle l'eau bout **ici et maintenant*
 
 ## Mise en place {#set-it-up}
 
-Ouvrez **Settings > Boil temperature (air pressure)** (Admins). Les mêmes cases sont dans **☰ Menu > Default settings > Units and your brewery**.
+Ouvrez **☰ Menu > Default settings > Boil temperature (air pressure)** (Admins).
 
 | Case | Quoi y mettre |
 |---|---|
 | **Airport (ICAO)** | Le code ICAO de 4 lettres de votre aéroport, par exemple `KORD`. C'est la seule façon de choisir la station météo. |
 | **Elevation** | La hauteur de votre brasserie au-dessus du niveau de la mer (pieds pour les Units US, mètres pour Metric). Elle commence à la hauteur de l'aéroport. Mettez la vôtre. |
-| **Typed air pressure** | Laissez-la vide. Une pression tapée ici est utilisée telle quelle, sans internet. C'est la pression à votre brasserie. Tapez-la en **inHg** (15,9 à 32,05) ou en **hPa** (540 à 1085) ; Skynet sait laquelle par sa taille. |
+| **Typed air pressure** | Ce n'est pas un réglage par défaut, donc elle n'a pas de case ici : elle sera demandée le jour de brassage (l'entretien du jour de brassage, pas encore fait). Une pression tapée avant est gardée et utilisée telle quelle, sans internet. Sautée : le bulletin de l'aéroport, ou une journée standard à votre Elevation. |
 
 Appuyez sur **Test**. Skynet va chercher le bulletin tout de suite et affiche l'aéroport, la pression de l'air et la
 température d'ébullition. **Save** garde les cases.

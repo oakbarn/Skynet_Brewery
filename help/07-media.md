@@ -1,6 +1,6 @@
 # Media (pictures and sounds)
 
-Pictures and sounds live in **media folders** on the Pi. Everywhere in the panel, a picture or sound is given by its **path** inside a media folder, for example `Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg`. The media folders are listed in **Settings > Panel settings**.
+Pictures and sounds live in **media folders** on the Pi. Everywhere in the panel, a picture or sound is given by its **path** inside a media folder, for example `Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg`. The media folders are listed in **☰ Menu > Default settings**.
 
 **Every picture lives in `media/Images`**, sorted into **picture groups** (a folder for Pumps, Valves, Vessels ...), with the Skynet pictures kept apart in `Images/Skynet` (see [Picture groups](57-picture-groups)), backgrounds too. The picture lists in the properties dialogs only show pictures from there. **Every sound lives in `media/sounds`.** Old paths still work: `oakbarn/...` (the old name of Images), a bare picture name like `Skynet_Brewery_Main.svg`, the sample drawings `samples/...`, and sounds kept as `Images/wave/...`.
 

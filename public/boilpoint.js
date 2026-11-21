@@ -1,6 +1,6 @@
 // Boil temperature from the air pressure (Panel Updates entry 16, Rules 1.18 and 2.27).
 // Water boils cooler when the air pressure is low (high up, or a storm coming), so a Process can't just wait for 212 °F.
-// The Brain reads the airport's weather report (METAR) for the ICAO code in Settings > Boil temperature and works out the
+// The Brain reads the airport's weather report (METAR) for the ICAO code in ☰ Menu > Default settings > Boil temperature and works out the
 // Skynet internal Globals below. Used by the Brain (lib/boiltemp.js, lib/engine.js) and the browser (Settings, predictive
 // text, colors). No imports. Data is kept metric (°C, hPa, metres); Units only change what is shown.
 

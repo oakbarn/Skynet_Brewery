@@ -17,14 +17,14 @@ les **lignes** autour d'eux, le **texte**, les **Labels et indications**, et le 
 
 ## Choisir un Look {#picking-a-look}
 
-Les Admins le choisissent dans **Settings > Panel settings > Look (theme)**. Le panneau change tout de suite et c'est enregistré aussitôt. Le Look
+Les Admins le choisissent dans **☰ Menu > Default settings > Look (theme)**. Le panneau change tout de suite et c'est enregistré aussitôt. Le Look
 appartient au Schema, donc chaque Schema peut avoir le sien. Chaque ordinateur, tablette et téléphone qui ouvre le panneau l'affiche, et les
 pages de connexion et d'aide l'utilisent aussi.
 
 ## Les Tabs {#the-tabs}
 
 - **Un nouveau Tab** commence avec les couleurs de Tab du Look : sa couleur de fond, et un Tab Style avec les couleurs de Label et de texte du Look
-  (**Skynet Office Black**, **Skynet Dark Gray** ou **Skynet White**). Un Tab Style choisi dans **Settings > Panel settings: screen, Tabs and alerts** l'emporte, et la couleur d'un Tab
+  (**Skynet Office Black**, **Skynet Dark Gray** ou **Skynet White**). Un Tab Style choisi dans **☰ Menu > Default settings** l'emporte, et la couleur d'un Tab
   Background Profile l'emporte sur la couleur de fond. Vous pouvez changer chacun d'eux dans **Tab settings**, comme avant.
 - **Use this Look on every Tab** donne à chaque Tab du Schema la couleur de fond et le Tab Style du Look. Les images et tout ce qui est sur les
   Tabs restent tels quels. D'abord, il garde une copie des couleurs de chaque Tab.

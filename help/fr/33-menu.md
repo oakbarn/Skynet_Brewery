@@ -31,16 +31,16 @@ Tout le monde peut regarder les onglets de menu. Seul un Admin peut les changer 
 
 **Chaque valeur par défaut se règle ici : ce avec quoi commence une nouvelle chose.** Ce avec quoi commence une nouvelle recette : les Units, la Batch size, l'Equipment Profile, le Mash Profile et le Boil Profile (chacun peut être changé dans la recette elle-même). Le Tab Profile qu'un nouveau Tab reçoit (le Valve Profile et le Pump Profile d'un nouvel élément est celui marqué Default dans sa propre liste). **Labels** et **Text Boxes** : les valeurs par défaut de chaque case de texte (voir [Cases de texte](49-text-boxes)). Les nouveaux Templates de l'utilisateur et Schemas. Appuyez sur **Save**.
 
-Ce qui change les choses déjà faites, ou la façon dont tout le panel marche, est dans **Settings > Panel settings: screen, Tabs and alerts** ([Réglages](09-settings)) : la Menu Bar ([La barre de menus](40-menu-bar)), **Sound**, **On startup** ([Zoom et plein écran](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Rich Text Embedded Code](90-rich-text-embedded-code)), Hover Delay, Phones and tablets ([Téléphones et tablettes](45-phones-and-tablets)), les Hop alerts et l'**ordre du Menu**.
+Ce qui change les choses déjà faites, ou la façon dont tout le panel marche, est dans **☰ Menu > Default settings** ([Réglages](09-settings)) : la Menu Bar ([La barre de menus](40-menu-bar)), **Sound**, **On startup** ([Zoom et plein écran](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Rich Text Embedded Code](90-rich-text-embedded-code)), Hover Delay, Phones and tablets ([Téléphones et tablettes](45-phones-and-tablets)), les Hop alerts et l'**ordre du Menu**.
 
-**Sound** (son ; dans Settings > Panel settings: screen, Tabs and alerts) :
+**Sound** (son ; dans ☰ Menu > Default settings) :
 
 - **Sound on** : la même chose que le bouton du son en haut de la page. Il active ou coupe le son sur cet écran tout de suite, et n'est pas enregistré.
 - **Turn Sound On when starting** : quand ceci est actif, le son s'active tout seul chaque fois que le panel s'ouvre et chaque fois qu'un Schema est chargé, donc vous n'avez pas à appuyer sur **Enable sound**. Appuyez sur **Save** pour le garder.
 
 Les navigateurs (Chrome, Edge, Safari, iPhone et Android) ne laissent une page jouer aucun son tant que vous ne l'avez pas touchée ou cliquée une fois. Donc quand le panel s'ouvre, le bouton du haut dit **Sound on (tap anywhere)** : touchez ou cliquez une fois n'importe où sur la page et le son joue à partir de là. Une alarme qui s'est déclenchée avant ce premier toucher commence dès que vous touchez.
 
-**L'ordre du Menu** (dans Settings > Panel settings: screen, Tabs and alerts) : chaque onglet de menu a un numéro d'Order. Tapez un nouveau numéro pour y déplacer un onglet de menu. Les autres sont renumérotés pour faire de la place (1, 2, 3 ...), et le Menu et les onglets de menu ouverts se trient tout seuls. Les nouveaux onglets de menu ajoutés plus tard vont à la fin.
+**L'ordre du Menu** (dans ☰ Menu > Default settings) : chaque onglet de menu a un numéro d'Order. Tapez un nouveau numéro pour y déplacer un onglet de menu. Les autres sont renumérotés pour faire de la place (1, 2, 3 ...), et le Menu et les onglets de menu ouverts se trient tout seuls. Les nouveaux onglets de menu ajoutés plus tard vont à la fin.
 
 ## Les autres onglets de menu {#the-other-menu-tabs}
 

@@ -37,7 +37,7 @@ A broken Process could restart forever, so restarts are counted. When one Proces
 
 Fix the problem, then start the Process by hand. Starting it or pressing Restart yourself is never counted and begins a new count.
 
-Change the number, and pick the alarm, in **Settings > Panel settings**:
+Change the number, and pick the alarm, in **☰ Menu > Default settings**:
 
 - **Most restarts a minute for one Process** (1 to 60, 5 unless you change it)
 - **Alarm to sound when a Process is stopped for restarting too often** (any Alarm Widget, or None)

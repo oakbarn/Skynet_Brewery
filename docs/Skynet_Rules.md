@@ -952,6 +952,16 @@ Help 155).
 - **THE RULE** (OakBarn Brewery, 2026-11-21: "Default setting can be other places AS WELL but must be on the default Settings Page"):
   **every default setting MUST be on the Default settings page. It MAY also be in other places as well.** Wherever else it shows, it
   is the **same** saved value (no copy): a change in any place shows in all of them. A new default anywhere is added to this page.
+- **Admin Settings** (OakBarn Brewery, 2026-11-21: "Settings: Boil Temperature down to Patron not on This tab, put on Default settings
+  and remove from Admin Tab ... call this the Admin Settings. On the default settings tab just have a Button to access the Admin Tab. On
+  Hamburger Menu change Name to Admin settings"). The Settings page is now **Admin Settings** (the top bar and ☰ Menu > Pages): sample
+  Schemas, accounts, sign-in codes, users, password rules, recovery code, Approved Devices, sending codes, Patron and what follows it.
+  **Moved off it onto Default settings** (gone from Admin Settings): **Boil temperature** (Airport, Elevation, Test), **Panel settings**
+  (Title, Look, Media folders, Default folders, API key, BeerXML mapping, autostart Processes, restart limit and its Alarm), **screen,
+  Tabs and alerts**, and the **Order of the Menu**. They save with the Default settings tab's one Save (the Look still saves at once).
+  The top of Default settings has a **🔐 Admin Settings** button. Older Rules and Help that say "Settings > Panel settings" or "Settings >
+  Boil temperature" now mean ☰ Menu > Default settings. The **Typed air pressure** has no box until the Brew Day interview asks it; a
+  pressure typed before is kept and used.
 - The ☰ Menu tab that was called **Default** is now called **Default settings** (the Rules' "☰ Menu > Default tab" means it). It opens
   only from ☰ Menu. Its settings belong to the panel, so they are the same for every Schema. Admins change them; others look.
 - **Pipes, hoses and sizes** (new, at the top): the **Default pipe size** (1/2" unless changed) and the **Default hose size**. A new
@@ -967,7 +977,7 @@ Help 155).
 - Then the **Order of the Menu**, as before.
 - **Added 2026-11-21 under THE RULE** (OakBarn Brewery: "Several Items are missing on the default settings page. They may also be
   somewhere else but every default needs to be on the Default Settings as well. Missing: US/Metric, ICOA, Brewery Elevation"). These
-  are on the Default settings page and also stay in Settings, the same saved value in both:
+  are on the Default settings page (they also stayed in Settings until Admin Settings, below the Rule's top):
   - **Units and your brewery** (at the top): **Units** (Settings > Panel settings), **Airport (ICAO)** and **Elevation** (Settings >
     Boil temperature, Rule 1.18; Elevation kept in metres, shown in feet or metres per Units, Rule 2.59; the boxes are typed in the
     Units they show, and a box not changed keeps the exact saved number). Airport and Elevation sit under their own title **Boil

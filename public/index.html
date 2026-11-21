@@ -25,7 +25,7 @@
     <button data-view="media">Media</button>
     <button data-view="filemove" class="admin-only" title="Copy files and whole folders from this computer to the Brain">File Move</button>
     <button data-view="import">Import</button>
-    <button data-view="settings">Settings</button>
+    <button data-view="settings" title="Admin Settings: accounts, users, passwords, Approved Devices, sending codes and Patron. Every default is on ☰ Menu &gt; Default settings">Admin Settings</button>
     <button data-view="help">Help</button>
     <button data-view="config" class="admin-only" title="The Schema as a .json file: edit it, or save it to this computer (admin only)">Schema.json</button>
   </nav>
@@ -499,6 +499,10 @@
         <label>Twilio phone number <input id="msTwFrom" placeholder="+15551234567"></label>
       </div>
       <div class="bar"><button id="msSave" class="primary">Save sending settings</button><button id="msTest">Send me a test</button><span id="msResult" class="muted"></span></div>
+    </div>
+    <!-- Boil temperature and Panel settings moved to ☰ Menu > Default settings (OakBarn Brewery, 2026-11-21); kept here hidden so their
+         boxes still work: the Panel settings form below is moved onto the Default settings tab when it opens -->
+    <div class="admin-only hidden" aria-hidden="true">
       <h3 id="sec-boilTemp">Boil temperature (air pressure)</h3>
       <p class="muted">Water boils cooler when the air pressure is low. Skynet reads your airport's weather report every 30 minutes and works out <code>skn_Boil_Temp</code> for your Processes. Help: Boil temperature from the air pressure.</p>
       <div class="form row">
@@ -509,7 +513,7 @@
       <div class="bar"><button id="btSave" class="primary">Save</button><button id="btTest" title="Fetch the airport's report now and show its pressure and the boil temperature">Test</button><span id="btResult"></span></div>
       <h3 id="sec-panel">Panel settings</h3>
     </div>
-    <div class="form admin-only">
+    <div id="panelFormHome" class="hidden"><div id="panelForm" class="form admin-only">
       <label>Title <input id="setTitle"></label>
       <label title="How the whole Panel looks: its back color, boxes, text and labels. Saved right away for this Schema.">Look (theme) <select id="setLook"></select></label>
       <div id="lookPreview" class="lookPreview"></div>
@@ -519,8 +523,8 @@
         <legend>Default folders (two-part paths)</legend>
         <label>Skynet Graphic <input id="setDefSkyG" disabled title="Skynet pictures live here: it can't be changed"></label>
         <label>Skynet Audio <input id="setDefSkyA" disabled title="Skynet sounds live here: it can't be changed"></label>
-        <label>User Graphic <input id="setDefUserG" placeholder="Images" title="Where your own pictures are (normally Images: the picture groups are folders in it)"></label>
-        <label>User Audio <input id="setDefUserA" placeholder="sounds" title="Where your own sounds are (normally sounds)"></label>
+        <label class="hidden">User Graphic <input id="setDefUserG" placeholder="Images" title="Where your own pictures are (normally Images: the picture groups are folders in it)"></label>
+        <label class="hidden">User Audio <input id="setDefUserA" placeholder="sounds" title="Where your own sounds are (normally sounds)"></label>
       </fieldset>
       <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> for outside programs to change a Device or Widget whose .API is Read &amp; Control (<code>/api/items</code>). Ten wrong keys from one address shut it out for 15 minutes.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
@@ -529,9 +533,9 @@
       <div id="setAuto" class="checks"></div>
       <label>Most restarts a minute for one Process. Restarts by the <code>restart</code> command or by "Restart if it fails" past this number leave the Process stopped, so a broken Process cannot restart forever.<input id="setRestartLimit" type="number" min="1" max="60" step="1"></label>
       <label>Alarm to sound when a Process is stopped for restarting too often <select id="setRestartAlarm"></select></label>
-      <button id="saveSettings" class="primary">Save settings</button>
-    </div>
-    <div class="form">
+      <button id="saveSettings" class="primary hidden">Save settings</button>
+    </div></div>
+    <div class="form hidden" aria-hidden="true">
       <h3 id="sec-panelSet">Panel settings: screen, Tabs and alerts</h3>
       <p class="muted">These change what is already made and how the panel works, for every Schema. They are also on ☰ Menu &gt; Default settings: both places change the same setting.</p>
       <div id="panelSet"></div>

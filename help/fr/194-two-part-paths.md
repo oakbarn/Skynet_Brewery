@@ -8,7 +8,7 @@ Chaque image et chaque son a un chemin en deux parties : le **dossier** où il s
 |---|---|---|
 | **Skynet Graphic** | `Images/Skynet` | Non. Les images Skynet sont là. |
 | **Skynet Audio** | `sounds/Skynet` | Non. Les sons Skynet sont là. |
-| **User Graphic** | `Images` | Oui, dans **Settings > Panel settings > Default folders**. Vos groupes d'images sont des dossiers dedans. |
+| **User Graphic** | `Images` | Oui, dans **☰ Menu > Default settings > Default folders**. Vos groupes d'images sont des dossiers dedans. |
 | **User Audio** | `sounds` | Oui, au même endroit. |
 
 ## Dans les Properties {#in-properties}
