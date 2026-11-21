@@ -73,6 +73,7 @@ Templates read the Recipe through names that start with **`skn_rcp_`**. They are
 | `skn_rcp_Hop_Stand` | true when there are Whirlpool hops in a Hop Stand with its temperature and time |
 | `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`, `skn_rcp_Hop_Stand_High_Minutes` (and `_Middle_`, `_Low_`) | true when that Hop Stand has Whirlpool hops; where the chill stops for them and how long it holds |
 | `skn_rcp_Hop_Infuser` | true when a Whirlpool hop goes through the Hop Infuser (Hop Rocket) |
+| `skn_rcp_Mash_Hops`, `skn_rcp_First_Wort_Hops`, `skn_rcp_Whirlpool_Hops`, `skn_rcp_Dry_Hops` | those hops as one line of text for a message, for example "1 oz Cascade, 0.5 oz Citra" (empty when none). Each hop keeps its own unit. The boil hops get Skynet's hop alerts (`start_hop_alerts`) |
 | `skn_rcp_Ferment_Temp` | fermentation and pitching temperature |
 | `skn_rcp_Temp_Units`, `skn_rcp_Volume_Units`, `skn_rcp_Weight_Units` | °F or °C, gal or L, lb or kg: the words of your Units, for messages |
 

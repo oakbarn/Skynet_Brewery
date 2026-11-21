@@ -125,7 +125,7 @@ The Skynet samples:
 | **Three vessel, one pump** (in the panel) | HLT, mash tun and boil kettle, one pump, six valves, pipes, three probes and two heaters. |
 | *(more)* | None yet. Each sample is added one at a time, once it is brought up to the current Skynet Rules. |
 
-Every sample has a **Recipe** tab (filled by a BeerXML import, including mash steps) and a **Brew Day** panel: `gblV_Brew_Status` holds the step, the red/blue advance switch moves to the next step, timers count down, and the hop alarm sounds for each hop addition. Readings such as pH, gravity and volumes are gGlobals with Database and .API set, so they are logged and sent through the API. Run `BrewDay_Flow` to start; tick **Testing** to run it fast.
+Every sample reads the Recipe on **☰ Menu > Recipe** (a BeerSmith .bsmx or BeerXML import) as `skn_rcp_` values, and has a **Brew Day** panel: `gblV_Brew_Status` holds the step, the red/blue advance switch moves to the next step, timers count down, and Skynet's hop alerts (`start_hop_alerts`) show each warning and drop, with no limit on the hops. Readings such as pH, gravity and volumes are gGlobals with Database and .API set, so they are logged and sent through the API. Run `BrewDay_Flow` to start; tick **Testing** to run it fast.
 
 **Manual vessel widget.** For kettles with no connection (BrewZilla, DigiBoil and similar), add **Widgets > Manual vessel**. A process sets what it shows (`setpoint`, `heat`, `pump`, `timer`, `message`) and sets `waiting` to make it blink. The brewer taps it to press **Done**, or to type a reading or a volume; the process waits on `confirmed`.
 
@@ -296,7 +296,7 @@ Any Device or Widget whose **.API** setting is on (its Properties, Database and 
 | `PUT /api/items/<name>` with body `{"value": 152}` or just `152` | Change its main value (Get and Put only) |
 | `PUT /api/items/<name>` with body `{"target": 152}` | Change attributes |
 | `POST /api/items` with body `{"name1": v1, "name2": v2}` | Change several |
-| `POST /api/import/beerxml` with the XML file as the body | Import a recipe |
+| `POST /api/import/beerxml` with the XML file as the body | Import a recipe: it becomes the Recipe (`skn_rcp_` values) |
 | `POST /api/log/<name>` | Send its reading to the database now |
 | `GET /api/log?name=&from=&to=&limit=` | Logged values (from/to in epoch ms; older names of the item included) |
 | `GET /api/log.csv?...` | Same as CSV |
