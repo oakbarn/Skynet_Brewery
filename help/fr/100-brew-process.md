@@ -90,6 +90,7 @@ L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 | `close_all_valves` | ferme chaque vanne de la liste **Close all valves** (toujours les vannes d'eau du robinet), puis demande **Have you closed all Manual Valves?** et attend **✔ Done** |
 | `open_all_valves` | ouvre chaque vanne de la liste **Open all valves** (jamais une vanne d'eau du robinet ; l'état dans lequel on laisse tout après le nettoyage), puis demande **Have you opened all Manual Valves?** et attend **✔ Done** |
 | `all_pumps_off` | arrête chaque pompe |
+| `all_heaters_off` | arrête chaque chauffage : chaque Heating Element (quelle que soit sa méthode, pour que son PID ou son Hysteresis ne le rallume pas), tout ancien contrôle PID, Hysteresis, Duty Cycle ou Deadband, et chaque brûleur à gaz (sa Solenoid Gas Valve fermée, son allumeur arrêté). Les mêmes chauffages que l'Emergency Off. Règle Skynet 6.15. |
 | `open_valve DigiBoil_Spigot` | ouvre une seule vanne. Une vanne manuelle (une Manual valve, un Widget Manual Valve, un robinet de DigiBoil ou de Brewzilla) affiche une fenêtre et attend que ce soit fait à la main ; une vanne motorisée est commandée tout de suite. Voir [DigiBoil et Brewzilla, réglées à la main](158-digiboil-and-brewzilla) |
 | `close_valve DigiBoil_Spigot` | ferme une seule vanne, de la même façon |
 

@@ -81,6 +81,8 @@ assert.match(app, /class: 'qdSpout'/, 'a QD on an IP with nothing on it draws th
 // ---- items 2, 3, 4, 5 ----
 assert.match(app, /const METHODS_SHOWN_KEY = 'skn_methodsShown';/);
 assert.match(app, /if \(!methodsShown\.has\(e\.name\)\) continue;/, 'method buttons start hidden');
+assert.match(app, /const METHODS_HOT_MIN = 25;/, 'Methods hotspot at least 25 px (2026-11-21)');
+assert.match(app, /const plate = right \? l \+ pw : l/, 'Methods hotspot starts at the end plate');
 assert.match(css, /#ws \.hmHot \{ position: absolute;/);
 assert.match(app, /const pidPct = n =>/);
 assert.match(app, /svStatWidth\(e, sv\)/);
