@@ -4334,7 +4334,8 @@ function ipNode(id, ws) {
     const e = elNamed(dn), on = isOn(e.cloneOf || dn), end = id.slice(id.lastIndexOf(':') + 1);
     // a tap water valve that is open is a source: water pushes out of its out end only (Fritz, 2026-10-21: one way; the tap end
     // takes nothing in), or out of both ends when it is set to Both
-    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
+    // (Rule 5.46: its tap side is a node of its own, so computeFlow can see whether water reaches it along a pipe joined there)
+    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === end ? { key: id, push: true, tapValve: dn } : { key: id, tapValveIn: dn }) : { key: 'dev:' + dn, pass: true };
     if (isThermowell(e)) return { closed: true };       // a thermowell fills its opening: no flow (Rule 5.30)
     if (isInline(e)) return { key: 'dev:' + dn, pass: true };
     if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
@@ -4512,6 +4513,38 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = nu
     if (!out?.push) continue;                              // the Hose Bib is closed: nothing flows in
     for (let x = hit; prev.get(x); x = prev.get(x).from) { const st = prev.get(x); dir.set(st.p.id, -st.d); src.set(st.p.id, better(src.get(st.p.id), { tap: true })); }
   }
+  // A Valve set to Tap water with a pipe on its tap side (OakBarn Brewery, 2026-11-21: "Flow is wrong and spurts even when hose bib is
+  // turned off = bug"; Rule 5.46) is fed the same way as a Hose Bib's Inlet (Rule 18.52 #7): with nothing joined on its tap side the
+  // house plumbing is not drawn and it always has water; with a pipe there, water reaches it only along an open way from a source (an
+  // open Hose Bib, a running pump, another Tap water valve that has water), a plain IP end, an open end in the air or an open valve
+  // whose other side has nothing joined. A vessel's port is not a supply. No water there: nothing comes out of it, open or not.
+  // With water, the pipes from that source to its tap side flow toward it and it pushes out of its Out side as before.
+  const tvFed = [];      // { out, hit, prev }: each Tap water valve fed along its tap side pipe
+  {
+    const tvIns = [...nodes].filter(([k, n]) => n.tapValveIn && pipesOn(k, ws).length);
+    const outOf = dn => [...nodes].find(([, n]) => n.tapValve === dn)?.[1];
+    const fed = new Map();      // tap side IP -> the way water reaches it
+    for (const [k, n] of tvIns) { const o = outOf(n.tapValveIn); if (o) o.push = false; }
+    const supply = (u, m) => { if (m?.push) return true; if (m?.pass) return freeEnd(u);
+      if (!m?.end) return false; const g = L().graphics.find(x => x.id === u && x.kind === 'ip'); return !g?.attachTo && !g?.port; };
+    for (let more = true; more;) {
+      more = false;
+      for (const [k, n] of tvIns) {
+        if (fed.has(k)) continue;
+        const prev = new Map([[k, null]]), q = [k]; let hit = null;
+        while (q.length && !hit) {
+          const u = q.shift(), m = nodes.get(u);
+          if (u !== k && supply(u, m)) { hit = u; break; }
+          if (u !== k && !m?.pass) continue;            // a closed or unfed valve, a pump's inlet, a vessel: no way on
+          for (const { v, p, d } of radj.get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); q.push(v); }
+        }
+        if (!hit) continue;
+        fed.set(k, { hit, prev }); more = true;
+        const o = outOf(n.tapValveIn); if (o) o.push = true;
+      }
+    }
+    for (const [k, f] of fed) tvFed.push({ out: [...nodes].find(([, m]) => m.tapValve === nodes.get(k).tapValveIn)?.[0], ...f });
+  }
   for (const [k, n] of nodes) if (n.pull) trace(k, false);      // first what each pump pulls in, so its outlet knows where the flow began
   // a running pump whose inlet sits inside a vessel and has nothing joined to it (a Sump Pump down in an Ice Water Can, Rule 19.8)
   // draws from that vessel: its flow takes the vessel's Out flow color
@@ -4522,6 +4555,13 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = nu
     if (col) pumpSrc.set(devOfIp(k), { vessel: col });
   }
   for (const [k, n] of nodes) if (n.push) trace(k, true);
+  // the pipes that bring it its water move only while water goes on out of it; with every way out closed they stand still (Rule 5.45)
+  const tvStill = new Map();
+  for (const { out, hit, prev } of [...tvFed].reverse()) {      // last fed first: a valve fed from another one marks that one's way out
+    const moves = (adj.get(out) || []).some(({ p }) => dir.has(p.id));
+    for (let x = hit; prev.get(x); x = prev.get(x).from) { const st = prev.get(x);
+      if (moves) { if (!dir.has(st.p.id)) dir.set(st.p.id, -st.d); src.set(st.p.id, better(src.get(st.p.id), { tap: true })); } else tvStill.set(st.p.id, { tap: true }); }
+  }
   // Gravity flow (Rule 5.21, OakBarn Brewery, 2026-11-16: "Assume gravity flow"): with no pump moving it, liquid runs out of a
   // vessel's low opening along every open path, away from the vessel. A closed valve stops it, a Check Valve only lets it go its
   // own way, and an Off pump lets it through. Skynet does not know real heights, so it is drawn lighter and slower (Fritz's pick).
@@ -4549,6 +4589,7 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = nu
   if (still) {
     const stubOf = new Map(); for (const s of stubs) { if (!stubOf.has(s.key)) stubOf.set(s.key, []); stubOf.get(s.key).push(s.p); }
     const moving = id => dir.has(id) || !!grav?.has(id);
+    for (const [id, o] of tvStill) if (!moving(id)) still.set(id, o);
     const seen = new Set(), queue = [];
     for (const [k, n] of nodes) if (n.push) { seen.add(k); queue.push([k, isTapNode(k, n) ? { tap: true } : pumpSrc.get(devOfIp(k)) || {}]); }
     while (queue.length) {
