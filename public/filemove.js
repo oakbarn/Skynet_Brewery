@@ -27,7 +27,7 @@ async function loadMissing() {
   if (!missing.length) { box.append(el('p', { class: 'muted' }, '✔ Every picture and sound the loaded Schema uses is on the Brain.')); $('#fmOnlyMissing').disabled = true; return; }
   $('#fmOnlyMissing').disabled = false;
   box.append(el('p', {}, el('b', {}, `The loaded Schema uses ${pics} picture(s) and ${snds} sound(s) that are not on the Brain yet. `),
-    'If it came from BruControl, pick your BruControl Media folder (usually C:\\BruControl\\Media) below and tick "Only the ones this Schema is missing".'),
+    'If it came from another program, pick that program\'s pictures folder below and tick "Only the ones this Schema is missing".'),
   el('details', {}, el('summary', {}, 'Show the list'), el('ul', { class: 'fmMissList' }, ...missing.map(m => el('li', {}, m.path)))));
 }
 const missingNames = () => new Set(missing.map(m => `${m.kind}:${m.name.toLowerCase()}`));

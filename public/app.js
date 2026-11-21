@@ -19855,7 +19855,7 @@ async function importSchemaFile() {
   const opts = [...dir.files.map(f => [f.name, `${f.name}   (${f.modified})`]), [PC, 'A .json file on this computer…']];
   const w = { pick: dir.files[0]?.name ?? PC, load: false };
   const fields = [['pick', 'Schema file', 'sel', opts],
-    ['_n', dir.exists ? `Files in the Import folder (${dir.folder}), newest first. The BruControl Importer saves its Schemas there.` : `The Import folder (${dir.folder}) is not there yet. The BruControl Importer makes it when it saves a Schema.`, 'note'],
+    ['_n', dir.exists ? `Files in the Import folder (${dir.folder}), newest first. The Importer saves its Schemas there.` : `The Import folder (${dir.folder}) is not there yet. The Importer makes it when it saves a Schema.`, 'note'],
     ['load', 'Load it now (the panel switches to it)', 'bool'],
     ['_p', 'The file becomes a new Schema; no Schema here is changed. Its Processes are added (a Process with the same name that differs is backed up first).', 'note'],
     ['_c', SHARE_NOTICE, 'note']];
@@ -19873,7 +19873,7 @@ async function importSchemaFile() {
   const p = r.processes;
   const lines = [`Schema "${r.made.name}" added.`,
     `Processes: ${p.written.length} added${p.renamed?.length ? ` (you already had ${p.renamed.length} with the same name, so these came in under a new name: ${p.renamed.join(', ')})` : ''}${p.same.length ? `, ${p.same.length} already the same` : ''}${p.failed.length ? `, ${p.failed.length} could not be written` : ''}.`];
-  if (r.draft) lines.push('This is a first draft from the BruControl Importer (made without its questions).');
+  if (r.draft) lines.push('This is a first draft from the Importer (made without its questions).');
   if (r.warningCount) lines.push(`${r.warningCount} notes from the import${r.warningCount > 30 ? ' (the first 30)' : ''}:`, ...r.warnings.slice(0, 30).map(x => '• ' + x));
   if (w.load) await afterSchemaSwitch(`Schema "${r.made.name}" opened and loaded`);
   else { S.schemas = await api('GET', '/ui/schemas'); renderSchemaPick(); toast(`Schema "${r.made.name}" added. Pick it in the Schema list to load it.`); }
