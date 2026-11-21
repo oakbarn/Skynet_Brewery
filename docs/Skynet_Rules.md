@@ -2498,6 +2498,12 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and the pipes and fittings stay), **Move it with its pipes** (Rule 5.19 as before), **🔁 Swap places with...** or **Cancel**.
   Unlocking is never done unless the user picks it. **Don't ask again** lasts until Edit layout is left. A Pipe joined to other
   things offers **🔓 Unlock its ends** (it moves alone) or Cancel. A locked item stays locked (Rule 2.12): no pop-up.
+- **🔓 Unlock its IPs in Properties** (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
+  "The hose got connected to a Tee IP and I could not unlock"): an IP has no dialog of its own (Rule 2.9), so the title line of the
+  Properties of anything with IPs (Device, Widget, Manual Valve, Hose Bib, fitting, vessel, a bundled vessel too) has **🔓 Unlock its
+  IPs**, and a Pipe or Hose has **🔓 Unlock its ends**. It does what the pop-up's button does, at once: each pipe or hose end on it
+  lets go where it is (an open end); ↩ Put back (Ctrl+Z) joins them again. It is greyed out when nothing is joined, when the item is
+  🔒 locked (Rule 2.12: unlock it first) or when its Tab's equipment is locked (lock_Equipment). (Help 153)
 - **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
   gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
 - **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the
