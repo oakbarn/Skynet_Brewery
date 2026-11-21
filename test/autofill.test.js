@@ -127,3 +127,31 @@ const pos = { elements: [{ name: 'Pump', type: 'digitalOut', main: 'state', attr
 assert.deepEqual(attrsAfterDot('Pump', pos).filter(a => a.toLowerCase().startsWith('x')), ['x_hPosition']);
 assert.deepEqual(attrsAfterDot('Pump', pos).filter(a => a.toLowerCase().startsWith('y')), ['y_vPosition']);
 console.log('x and y ok');
+
+// a space on both sides of = and the comparisons (Fritz, 2026-11-21: "if Pump =true" -> "if Pump = true")
+{
+  const one = (line, forced = false) => get(line, line, line, forced)?.list ?? [];
+  const pick = (line, label, forced) => one(line, forced).find(i => (i.label ?? i.text.trim()) === label);
+  const apply = (line, it, typed) => line.slice(0, line.length - typed - (it.back ?? 0)) + it.text;
+  for (const [line, want] of [
+    ['if MB_06_Pump_Wort__HS =', 'if MB_06_Pump_Wort__HS = true'],
+    ['if MB_06_Pump_Wort__HS ==', 'if MB_06_Pump_Wort__HS == true'],
+    ['if MB_06_Pump_Wort__HS=', 'if MB_06_Pump_Wort__HS = true'],
+    ['if MB_06_Pump_Wort__HS!=', 'if MB_06_Pump_Wort__HS != true'],
+    ['if MB_06_Pump_Wort__HS = ', 'if MB_06_Pump_Wort__HS = true'],
+    ['MB_06_Pump_Wort__HS =', 'MB_06_Pump_Wort__HS = true'],
+    ['if MB_06_Pump_Wort__HS =tr', 'if MB_06_Pump_Wort__HS = true'],
+  ]) {
+    const s = get(line, line, line, true), it = s.list.find(i => (i.label ?? i.text.trim()) === 'true');
+    assert.ok(it, line); assert.equal(apply(line, it, s.typed), want);
+  }
+  const g = pick('if tm_Mash.value >gG', 'gGV_HLT', true), s = get('if tm_Mash.value >gG', undefined, undefined, true);
+  assert.equal(apply('if tm_Mash.value >gG', g, s.typed), 'if tm_Mash.value > gGV_HLT');
+  const l = pick('if tm_Mash.value<=', 'gGV_HLT', true);
+  assert.equal(apply('if tm_Mash.value<=', l, 0), 'if tm_Mash.value <= gGV_HLT');
+  // the list shows the name alone
+  assert.ok(one('if MB_06_Pump_Wort__HS =').some(i => i.label === 'true'));
+  // the list of = == != after a name already has the spaces
+  assert.ok(texts('if MB_06_Pump_Wort__HS ').includes('= '));
+  console.log('spaces around = ok');
+}

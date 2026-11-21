@@ -283,7 +283,7 @@ engine.onRecipe = (cmd, args, by) => {
     const rc = useRecipe(got.recipe);
     return `Recipe "${rc.name}" imported from ${path.basename(f)} (${rc.ingredients.fermentables.length} fermentables, ${rc.ingredients.hops.length} hops, ${rc.ingredients.yeasts.length} yeasts, ${rc.ingredients.miscs.length} misc)`;
   }
-  if (cmd === 'start') return hopAlerts.start(args[0], `Process ${by}`);
+  if (cmd === 'start') return hopAlerts.start(args[0], `Process ${by}`, args[1]);
   if (cmd === 'stop') return hopAlerts.stop() ? 'Hop alerts stopped' : 'Hop alerts were not running';
 };
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
@@ -720,9 +720,11 @@ async function route(req, res) {
       const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
       const rc = useRecipe(got.recipe); return ok(res, { ok: true, name: rc.name, names: got.names });
     }
+    // a BeerXML file becomes the Recipe too (its values are the skn_rcp_ names); Globals are filled only when Settings > BeerXML mapping names them
     if (p === '/api/import/beerxml' && m === 'POST') {
-      const xml = await readBody(req);
-      return ok(res, { ok: true, ...importBeerXml(xml, store, store.config.beerxml) });
+      const buf = await readBody(req, 32 * 1024 * 1024, true), got = readRecipeFile(buf, 'recipe.xml'), rc = useRecipe(got.recipe);
+      const map = store.config.beerxml && Object.keys(store.config.beerxml).length ? store.config.beerxml : null;
+      return ok(res, { ok: true, recipe: rc.name, name: rc.name, names: got.names, hops: rc.ingredients.hops.length, ...(map ? { globals: importBeerXml(buf.toString('utf8'), store, map) } : {}) });
     }
     return fail(res, 404, 'Unknown API route');
   }

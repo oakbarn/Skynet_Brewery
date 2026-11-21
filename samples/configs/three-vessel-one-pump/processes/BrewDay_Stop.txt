@@ -6,6 +6,7 @@ stop "BrewDay_Flow"
 stop "looper_Advance_Switch"
 stop "wgt_TMR_Step~timer_BH"
 stop "wgt_TMR_Brew~day_BH"
+stop_hop_alerts
 wgt_ALM_Hop~alarm_BH = false
 wgt_ALM_Step~alarm_BH = false
 wgt_SW_Advance_BH.visible = false

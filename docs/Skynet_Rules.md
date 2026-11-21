@@ -2940,6 +2940,12 @@ with a value has a **Database and .API** box at the end of its Properties:
 6.15 **Close all and Open all valve lists** (Fritz, 2026-10-30). Every valve a Process switches (Electro_Mechanical, such as a
 Motorized Ball Valve) has two switches, **On Close List** and **On Open List** (Fritz, 2026-11-05, renamed from Close all list / Open all list), both **on to start**.
 `close_all_valves` and `open_all_valves` in a Process (and PreBrew's house cleaning) use them; `all_pumps_off` turns every pump off.
+**`all_heaters_off`** (OakBarn Brewery, 2026-11-21: "new command heaters_off and turn off all heaters"; named to match all_pumps_off)
+turns every heater off: every Heating Element on any method (a PWM or analog one goes to 0; its PID, Hysteresis, Duty Cycle or
+Deadband stops with it, so it can't switch back on), every older Duty Cycle, Hysteresis, PID or Deadband control (disabled), and
+every gas burner (its Solenoid Gas Valve closed and its igniter off, as a Flame Out trip, Rule 6.33). It is the same list as step 1
+of Emergency Off (Rule 6.41; one shared piece of code), with no reminder pop-up. Nothing turns back on until a Process or a click
+turns it on. Help 100.
 **A tap water valve is always on Close all and never on Open all**: its Properties show On Close List on and On Open List off,
 both greyed out (Fritz, 2026-11-07: "Tap Water Valves have the Open attribute as false and greyed out"), and the Brain puts it back
 on every save. A Schema from the BruControl Import is put right the same way when it is opened. **The last step of Clean is
@@ -5199,6 +5205,13 @@ that stops the Process and closes the valves (FireHose Off on the Water Tab) is 
 the Water Tab's **Water Override** is set to `utility_FireHose_Manifold_Supply_Water`. Help 239. **Both programs:** the BruControl
 Import adds one when it makes a Tap Water Fill Process (Importer Sandbox; the Importer build is on hold).
 
+16.12 **delay: wait a number of seconds** (OakBarn Brewery, 2026-11-21: "create a command delay.n where n is a delay in seconds so
+delay.7 would delay 7 seconds the next line in the code"; "yes a subclass of sleep in seconds"). `delay 7` waits 7 seconds before the
+next line, the same as `sleep 7000` (sleep counts in milliseconds). It is written with a space, not a dot, because a dot means an
+attribute (Name.attribute, Rule 1.15). Decimals and variables work (`delay 0.5`, `delay vV_Secs`). It runs as a sleep in every way:
+Override, the Override pop-up, Testing speed-up and the timeline. `delay` is a reserved word. Help 22 and 5. **Both programs:** the
+BruControl Import reads Processes with the same reader (BruControl scripts use sleep in ms, so nothing changes there).
+
 ## 17. Recipes
 
 17.1 **The Recipe tab follows Fritz's layout** (☰ Menu > Recipe, 2026-10-31): IMPORT and NEW at the top, Cancel and Save,
@@ -5215,11 +5228,21 @@ public/recipecalc.js and Help 99.
 and mash step, with **no limit** on how many (the old BruControl import stopped at 8 hops). The .bsmx keeps BeerSmith's own
 US units inside (ounces, fluid ounces, °F; a Misc item in its own unit); Skynet keeps every Recipe in kg, L and °C and shows it
 in the Units picked in Settings > Panel settings (Rule 2.42). A Process imports with `import_recipe "path"`. (Fritz, 2026-10-30, Help 99)
+**The Recipe and its hops are Skynet's own values, never gGlobals** (OakBarn Brewery, 2026-11-21: "Those should be back house skynet
+variables"; "if the gGlobals are no longer needed, trash"): every import (Import screen, ☰ Menu > Recipe, `import_recipe`, the API)
+makes the Skynet Recipe, read in a Process only as `skn_rcp_` values (Rule 17.2), and they are not on the Variables screen. gGlobals
+are filled too only when Settings > BeerXML mapping names them (the older way, kept for a Schema whose Processes still read
+gGlobals); the default Schema and the samples have no mapping and no Recipe or hop gGlobals. The text of the hops outside the boil is
+`skn_rcp_Mash_Hops`, `skn_rcp_First_Wort_Hops`, `skn_rcp_Whirlpool_Hops`, `skn_rcp_Dry_Hops`. The BruControl Importer maps the OakBarn
+names (`gblS_Hop1_R1` ...) to the Recipe (Importer sandbox). (Help 8, 99, 100)
 
 17.4 **Skynet orders the hops and makes the hop alerts** (the OakBarn Hop Warnings): Top of Mash, 1st Wort, Start of Boil,
 Bitter, Flavor, Aroma, Whirlpool, Dry Hop; hops at the same time are one Hop Group; each gets a warning (10 minutes, Default
 tab) and a drop alert; **two alerts at the same time become one alert with both**. The user sees only the results (Drops tab).
 `start_hop_alerts` / `start_hop_alerts "Boil_Timer"` / `stop_hop_alerts` in a Process. (Fritz, 2026-10-30, Help 99)
+`start_hop_alerts "Boil_Timer", 1` follows a timer that runs faster than real time: the number is the timer seconds for one boil
+minute (60 = real time, to start; 1 = a Testing switch that runs each minute as one second). The 3 Vessel sample's brew day uses
+it in place of its own 8 hop alarms (2026-11-21).
 
 17.5 **Voice for alerts**: every alert has an audio path in media/Audio/Hops. When the file is there it plays; otherwise the
 browser's own voice reads the alert. Skynet does not fetch voices from a text to voice web site by itself (free sites do not
@@ -6654,6 +6677,8 @@ import.
 ## Change log
 
 - 2026-11-21: Rule 11.3 (OakBarn Brewery: "Wrong. BruControl is a forbidden word in Skynet Panel and Only used in th eImported."): the word BruControl is never shown in the Skynet Panel (screens, menus, balloons, messages, Help, Hover Help, README, Template notes, sample Processes); only the Importer uses it, and the Panel says "the Importer". The 2026-11-10 exception (Help 1, 44 and 67 could name the BruControl Import) is gone. The Panel's own one-step **Import > BruControl Schema** is taken out of the Panel (☰ Menu > Import now has BeerSmith recipe only; lib/brucontrol.js stays for the Importer and its tests); Help 8's BruControl part goes to the extract. Help 143 and 165 stay in help/ for the Importer but are not listed in the Panel's Help. Rule 1.1 no longer defines "BruControl Schema"; Rule 14.3's BruControl Read Me lives in the Importer. Help 1, 8, 44, 67 (English and French). Checked against both programs: the Importer's pages, Build page and Help keep the word. (thread "Remove the word BruControl from the Panel")
+- 2026-11-21: Rule 6.15, `all_heaters_off` (OakBarn Brewery: "new command heaters_off and turn off all heaters", "yes match" = named like all_pumps_off): every Heating Element off (its PID or Hysteresis stops with it), older control Devices disabled, gas burners' Solenoid Gas Valves closed and igniters off. Same code as step 1 of Emergency Off (Rule 6.41). Help 100 and 22.
+- 2026-11-21: Added Rule 16.12 (OakBarn Brewery: "a subclass of sleep in seconds"): `delay 7` waits 7 seconds, the same as `sleep 7000`; decimals and variables work, and it acts as a sleep in every way (Override, Testing speed-up, timeline). Reserved word; in Autofill and the editor colors. Help 22 and 5 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Add a delay command in seconds")
 - 2026-11-21: Added Rule 5.46 (OakBarn Brewery: "Flow is wrong and spurts even when hose bib is turned off = bug"): a Valve with Tap water on and a pipe on its tap side gets its water only along that pipe, as a Hose Bib's Inlet does (Rule 18.52 #7); a closed Hose Bib or valve on that side means no flow and no splash out of it. Fixes the 3 Vessel 1 Pump sample's Brew House Firehose Valve spraying with the Hose Bib off, and the Hose Bib's water standing still under it when on. Help 31 (and French). (thread "Fix wrong water flow and spray")
 - 2026-11-20: Rule 6.15, the Manual valve reminder (OakBarn Brewery): `close_all_valves` is followed by one pop-up "Have you closed all Manual Valves?" and `open_all_valves` by "Have you opened all Manual Valves?"; the Process waits for Done. Only when the Schema has a Manual valve. Help 100.
 - 2026-11-20: Panel Update 8 (OakBarn Brewery, PDF "Panel Update #8", 21 items): Rule 5.28 and 5.45 changed, a Quick Disconnect with nothing on it is open and sprays (was shut, like an End Cap); Rule 6.19 the Methods hotspot (method buttons start hidden; a thin strip just outside the Vessel wall shows or hides them with one click), PID % always two digits, Hysteresis idle / Heat / Cool one width; Rule 6.24 a smooth temperature on the screen (5 s average, 15 s in Simulation; display only); Rule 2.40 a Timer's Digits is called Format, `.format` = `.showas`; Rule 4.4 Timers can be Cloned (item 14 needs nothing); Rule 1.23 Value Widget Format (Fixed, Number, Percent, Scientific, Accounting, Financial, Currency, Currency rounded) with Decimals and a Currency sign; Rule 1.31 Process Widget Hide while running, and the samples' Start Brew Day and Stop (all off) are Process Widgets with no pop-up (items 9, 20, 21); Rule 1.20 a Switch's Slider on top (Layer 1); added Rule 6.41 Emergency Off (Skynet's E-stop button on every page, Image Library picture 238); added Rule 7.26 only what BruControl had gets three backgrounds, a new Skynet Device or Widget has one path (`.path_image`, `.path_audio`), and the Sound Player is now the Audio Widget (AUD, starts hidden); Rule 1.19 there is no Graphic gGlobal (five Kinds; a BruControl Global with a picture imports as a Graphic Widget). Items 10 and 19 (import side, Brew Status as a skn_ value) went to the sandboxes. Help 244, 245 and the pages named in each Rule (English and French).
@@ -7338,6 +7363,7 @@ import.
 - 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-20: Rules 3.20 and 16.4 changed (OakBarn Brewery: "Recipe values like rcp_Strike_Temp yes", "they could be skn_rcp_ so I will know what you are taking about"): Recipe values are `skn_rcp_` names (were `rcp_`) in the code, Templates, Help and these Rules; older Change log lines keep the old name as history.
+- 2026-11-21: Rules 17.3 and 17.4 changed (OakBarn Brewery: "Those should be back house skynet variables", "if the gGlobals are no longer needed, trash"): the Recipe and hop values are only `skn_rcp_` values, never gGlobals; the Recipe and hop gGlobals and the BeerXML mapping are gone from the default Schema and the 3 Vessel sample; its brew day reads `skn_rcp_` values and uses `start_hop_alerts` (new: a number after the timer for a faster Testing timer); new `skn_rcp_Mash_Hops`, `_First_Wort_Hops`, `_Whirlpool_Hops`, `_Dry_Hops`; `/api/import/beerxml` makes the Recipe.
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.

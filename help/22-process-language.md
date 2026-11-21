@@ -182,7 +182,7 @@ These words belong to the Process language, so none of them can be the name of a
 - **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
 - **Joining words:** `and`, `or`, `not`
 - **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
-- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
+- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Places:** `tab`, `workspace`
 - **Skynet Constants:** every name that starts with `skn_const_` (see above)
 
@@ -205,6 +205,18 @@ These two lines do the same thing.
 **The number follows its line** when lines are added or taken out. Skynet does this in the Background and needs no user input.
 
 A goLine to a line the Process does not have is an error, and the Process does not start.
+
+## Wait a number of seconds: delay
+
+`delay` waits a number of seconds before the next line runs. It is the same as `sleep`, which counts in milliseconds (1000 ms = 1 second):
+
+```
+delay 7          waits 7 seconds (the same as sleep 7000)
+delay 0.5        waits half a second
+delay vV_Secs    waits the seconds in a variable
+```
+
+A `delay` works like a `sleep` in every way: an Override moves the Process on, and in Testing it runs faster.
 
 ## Names have no spaces
 

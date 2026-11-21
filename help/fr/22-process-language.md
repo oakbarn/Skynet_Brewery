@@ -184,7 +184,7 @@ Ces mots appartiennent au langage des Processes, donc aucun d'eux ne peut être 
 - **Valeurs :** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
 - **Mots de liaison :** `and`, `or`, `not`
 - **Types de variable :** `value`, `string`, `bool`, `time`, `datetime`
-- **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
+- **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Lieux :** `tab`, `workspace`
 - **Skynet Constants :** chaque nom qui commence par `skn_const_` (voir plus haut)
 
@@ -207,6 +207,18 @@ Ces deux lignes font la même chose.
 **Le numéro suit sa ligne** quand des lignes sont ajoutées ou enlevées. Skynet le fait en coulisse et n'a besoin d'aucune action de votre part.
 
 Un goLine vers une ligne que le Process n'a pas est une erreur, et le Process ne démarre pas.
+
+## Attendre un nombre de secondes : delay {#wait-a-number-of-seconds-delay}
+
+`delay` attend un nombre de secondes avant que la ligne suivante s'exécute. C'est la même chose que `sleep`, qui compte en millisecondes (1000 ms = 1 seconde) :
+
+```
+delay 7          waits 7 seconds (the same as sleep 7000)
+delay 0.5        waits half a second
+delay vV_Secs    waits the seconds in a variable
+```
+
+Un `delay` fonctionne comme un `sleep` en tout point : un Override fait avancer le Process, et en Testing il va plus vite.
 
 ## Les noms n'ont pas d'espaces {#names-have-no-spaces}
 
