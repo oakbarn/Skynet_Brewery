@@ -268,9 +268,10 @@ import_recipe "Recipes/Zombie Dust.bsmx"
 import_recipe "Recipes/All My Recipes.bsmx", "Zombie Dust"
 start_hop_alerts
 start_hop_alerts "Boil_Timer"
+start_hop_alerts "Boil_Timer", 1
 stop_hop_alerts
 ```
 
 - `import_recipe` reads a .bsmx or .xml file on the Brain (a path in the Brain's folder or a media folder) and makes it the Recipe. A second text picks one recipe from a file with many.
-- `start_hop_alerts` starts the hop alerts on Skynet's clock from now; with a timer name it follows that timer instead.
+- `start_hop_alerts` starts the hop alerts on Skynet's clock from now; with a timer name it follows that timer instead. A number after the timer is how many timer seconds make one minute of the boil: 60 (real time) to start; 1 when a Testing switch runs each minute as one second.
 - `stop_hop_alerts` stops them.

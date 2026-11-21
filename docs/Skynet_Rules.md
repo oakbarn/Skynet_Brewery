@@ -73,8 +73,8 @@ Companion documents (look things up there, do not copy them here):
 
 ## 1. Words we use (terminology)
 
-1.1 **Schema** = a setup or configuration, on screen and in the Help. A BruControl .brucfg file is a
-"BruControl Schema". (2026-10-19, PR #42)
+1.1 **Schema** = a setup or configuration, on screen and in the Help. (2026-10-19, PR #42) *Changed 2026-11-21 (Rule 11.3):* the
+words "BruControl Schema" are no longer Panel wording; only the Importer names a BruControl file.
 
 1.2 **Device** = something tied to a port on a PLC board. **Widget** = something that lives only in
 the app, with no PLC port (pipes, IPs, text, pictures, vessels drawn on screen). A Widget must never
@@ -365,7 +365,7 @@ Process picked** when it has none) and a **▶ Start** / **■ Stop** button.
 - **Its name:** in Skynet a script is a Process (Rule 1.4), so it is the Process Widget (OakBarn Brewery, 2026-11-09: "Process Widget").
   It is a **Switch Widget that is a Process subclass** (OakBarn Brewery, 2026-11-18: "A Switch Widget that is a Process subclass"), so
   its type letters are **PSW** (P Process + SW Switch).
-- **BruControl Import:** checked against both programs. The Importer and the older import in the Panel make each BruControl **Script
+- **BruControl Import:** checked against both programs. The Importer (and the older one-step import, taken out of the Panel 2026-11-21, Rule 11.3) make each BruControl **Script
   element** a Process Widget that shows the BruControl Script of the same name (it is that Process once the Processes come in); the
   Script element's variable is kept with what BruControl had (`.bru`), and one BruControl marked as not user controlled gets When
   tapped: none (Rule 2.44). The Importer's Widget pages list it as Process Widget. Help 173.
@@ -1437,7 +1437,8 @@ for a big delete or change. They all ask in **one shared Skynet box** (public/sk
   Patron code; Turn Approved Devices Off; Make a new recovery code; the BruControl Import; Switch / load a Schema; Simulator or Real
   boards; Move in (Brain Move); Save the config file and Put back an old one. The small "leave without saving?" questions stay as
   they are.
-**Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asks in this box.
+**Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asked in this box until it
+was taken out of the Panel (2026-11-21, Rule 11.3).
 Help 28, 48, 119, 188.
 
 2.65 **Find and Replace in every big text editor: Ctrl+F and Ctrl+H on one bar** (OakBarn Brewery, 2026-11-21: "CTRL + F for Find
@@ -2954,6 +2955,12 @@ with a value has a **Database and .API** box at the end of its Properties:
 6.15 **Close all and Open all valve lists** (Fritz, 2026-10-30). Every valve a Process switches (Electro_Mechanical, such as a
 Motorized Ball Valve) has two switches, **On Close List** and **On Open List** (Fritz, 2026-11-05, renamed from Close all list / Open all list), both **on to start**.
 `close_all_valves` and `open_all_valves` in a Process (and PreBrew's house cleaning) use them; `all_pumps_off` turns every pump off.
+**`all_heaters_off`** (OakBarn Brewery, 2026-11-21: "new command heaters_off and turn off all heaters"; named to match all_pumps_off)
+turns every heater off: every Heating Element on any method (a PWM or analog one goes to 0; its PID, Hysteresis, Duty Cycle or
+Deadband stops with it, so it can't switch back on), every older Duty Cycle, Hysteresis, PID or Deadband control (disabled), and
+every gas burner (its Solenoid Gas Valve closed and its igniter off, as a Flame Out trip, Rule 6.33). It is the same list as step 1
+of Emergency Off (Rule 6.41; one shared piece of code), with no reminder pop-up. Nothing turns back on until a Process or a click
+turns it on. Help 100.
 **A tap water valve is always on Close all and never on Open all**: its Properties show On Close List on and On Open List off,
 both greyed out (Fritz, 2026-11-07: "Tap Water Valves have the Open attribute as false and greyed out"), and the Brain puts it back
 on every save. A Schema from the BruControl Import is put right the same way when it is opened. **The last step of Clean is
@@ -3218,9 +3225,10 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 **The Methods hotspot, and a display that does not jump** (OakBarn Brewery, 2026-11-20, Panel Update 8, items 2, 3, 5):
 - **Methods hotspot** ("Get rid of clutter. This area of any graphic (just Outside the Vessel, adjacent to the side of a vessel same
   pixels high and wide as the Red area ... so it would work with any graphic (skynet or User) and as a is a one click hotspot toggle the
-  Methods to be in View or Not"): a Heating Element's method buttons (Rule 6.19) **start hidden**. A thin strip (10 px wide, as high as
-  the Element's picture) just outside the Vessel wall where the Element goes in (beside the picture of an Element on its own Tab
-  spot) shows them with **one click** and hides them with the next. It works with any Vessel picture, Skynet's or the user's. Only
+  Methods to be in View or Not"): a Heating Element's method buttons (Rule 6.19) **start hidden**. A strip as high as the Element's
+  picture where the Element goes in, from the Element's end plate out to 10 px past the Vessel wall and never thinner than 25 px
+  (OakBarn Brewery, 2026-11-21: "Hotspot too small increase to purple area"; it was a 10 px strip outside the wall), or beside the
+  picture of an Element on its own Tab spot, shows them with **one click** and hides them with the next. It works with any Vessel picture, Skynet's or the user's. Only
   this screen remembers it (each phone or PC picks its own); nothing turns On or Off, and every role may use it. Not in Edit layout.
 - **PID % is always two digits** ("have the % as 2 digits always unless 100%"): 00 % to 99 %, then 100 %.
 - **Hysteresis idle, Heat and Cool are the same width** ("have idle, Heat and Cool all the same size so it does not jump"): what an
@@ -4542,12 +4550,20 @@ PR #57)
 Importer Help. Skynet Help and Hover Help take all references to Brucontrol Out. They can be added from the Skynet Pane Help when we
 update it for the Importer Help so keep the extracted help in a Sand Box."; "Hold off on the Import Help until we finish the SkyPanel
 Help").
+  - **BruControl is a forbidden word in the Skynet Panel** (OakBarn Brewery, 2026-11-21: "Wrong. BruControl is a forbidden word in
+    Skynet Panel and Only used in th eImported." [the Importer]). The word is never shown anywhere in the Panel: screens, menus,
+    balloons, messages, pop-ups, Help, Hover Help, the README, Template notes and the sample Processes. It is used **only in the
+    Importer** (its own pages, its Build page, its Help). Where the Panel must point to the Importer it says **the Importer**.
+    Code comments, these Rules and the docs for builders may still say BruControl (no one sees them in the Panel).
+    *This replaces the 2026-11-10 exception* that let a Panel page name the Import screen or "the BruControl Import program"
+    (Help 1, 44 and 67): that exception is gone.
   - **Skynet Panel Help and Hover Help say nothing about BruControl:** no comparisons ("like BruControl's ..."), no "From BruControl"
-    sections, no BruControl words for things, no history of how BruControl did it. A Panel page may only **name** the Import screen
-    or the BruControl Import program where a Panel screen works with it (Help 1, 44 and 67), with no differences.
+    sections, no BruControl words for things, no history of how BruControl did it.
+  - **The Importer's own Help pages** (Help 143 and 165) stay in `help/` for the Importer but are **not listed or searched in the
+    Panel's Help** (`IMPORTER_HELP` in lib/help.js). The Import screen's Help (Help 8) is Panel Help and has no BruControl part.
   - **Nothing taken out is lost:** every BruControl sentence and section taken out is kept in `Sandbox/help/BruControl_Help_Extract.md`,
     with where it was and what is there now. It is the starting point of the Importer Help.
-  - **The Importer Help** (Help 8 for the Panel's Import screen, Help 143 and 165) is the Skynet Panel Help with the BruControl comments
+  - **The Importer Help** (Help 143 and 165, plus what is kept in the extract) is the Skynet Panel Help with the BruControl comments
     added. It is **on hold until the Skynet Panel Help is finished**.
   - **Importer updates go to the Sandbox for now; one Big Merge later** (OakBarn Brewery, 2026-11-12: "For the Most Part, Put Updates to
     the Importer in a Sand Box. We will do a Big Merge to move things over to the Importer."; "I might say add this note only in the
@@ -4559,8 +4575,8 @@ Help").
     the Importer itself"), the change goes straight into the Importer itself as well as Skynet, not into the Sandbox. BruControl text taken out of Skynet text goes to
     `Sandbox/help/BruControl_Help_Extract.md` as before. Example: the README (GitHub front page) is the Skynet version, with no
     BruControl (2026-11-12); its BruControl text is in the extract, ready for the Importer's own Read Me.
-  - **A BruControl Read Me:** maybe one Read Me document in the Skynet Panel for BruControl users. It waits until the Import is done
-    (Rule 14.3).
+  - **A BruControl Read Me:** maybe one Read Me document **in the Importer** (never in the Panel, 2026-11-21) for BruControl users. It
+    waits until the Import is done (Rule 14.3).
 
 11.4 **Hover Help is the same as the Skynet Panel Help** (OakBarn Brewery, 2026-11-10: "The Hover Help will be the exact same as the
 Skynet Panel Help, with BruControl comments added for the Import Help"). A dialog's balloons (Rule 2.38) say the same thing as the Help
@@ -4862,7 +4878,8 @@ only when Fritz says the program is set. (2026-10-26)
 14.2 **Compile check of firmware** inside the app: deferred. (2026-10-04)
 
 14.3 **The Importer Help and a BruControl Read Me** (OakBarn Brewery, 2026-11-10): the Importer Help waits until the Skynet Panel Help is
-finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits until the Import is done (Rule 11.3).
+finished, and a single BruControl Read Me (maybe) waits until the Import is done (Rule 11.3). *Changed 2026-11-21:* that Read Me lives in
+the Importer, never in the Skynet Panel.
 
 14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
 Blickmann Dialogs and Help are done. Call Panel Updates"; **reinstated** 2026-11-18: "All this goes into Update Panel.  Reinstate Rule",
@@ -5204,6 +5221,13 @@ that stops the Process and closes the valves (FireHose Off on the Water Tab) is 
 the Water Tab's **Water Override** is set to `utility_FireHose_Manifold_Supply_Water`. Help 239. **Both programs:** the BruControl
 Import adds one when it makes a Tap Water Fill Process (Importer Sandbox; the Importer build is on hold).
 
+16.12 **delay: wait a number of seconds** (OakBarn Brewery, 2026-11-21: "create a command delay.n where n is a delay in seconds so
+delay.7 would delay 7 seconds the next line in the code"; "yes a subclass of sleep in seconds"). `delay 7` waits 7 seconds before the
+next line, the same as `sleep 7000` (sleep counts in milliseconds). It is written with a space, not a dot, because a dot means an
+attribute (Name.attribute, Rule 1.15). Decimals and variables work (`delay 0.5`, `delay vV_Secs`). It runs as a sleep in every way:
+Override, the Override pop-up, Testing speed-up and the timeline. `delay` is a reserved word. Help 22 and 5. **Both programs:** the
+BruControl Import reads Processes with the same reader (BruControl scripts use sleep in ms, so nothing changes there).
+
 ## 17. Recipes
 
 17.1 **The Recipe tab follows Fritz's layout** (☰ Menu > Recipe, 2026-10-31): IMPORT and NEW at the top, Cancel and Save,
@@ -5220,11 +5244,21 @@ public/recipecalc.js and Help 99.
 and mash step, with **no limit** on how many (the old BruControl import stopped at 8 hops). The .bsmx keeps BeerSmith's own
 US units inside (ounces, fluid ounces, °F; a Misc item in its own unit); Skynet keeps every Recipe in kg, L and °C and shows it
 in the Units picked in Settings > Panel settings (Rule 2.42). A Process imports with `import_recipe "path"`. (Fritz, 2026-10-30, Help 99)
+**The Recipe and its hops are Skynet's own values, never gGlobals** (OakBarn Brewery, 2026-11-21: "Those should be back house skynet
+variables"; "if the gGlobals are no longer needed, trash"): every import (Import screen, ☰ Menu > Recipe, `import_recipe`, the API)
+makes the Skynet Recipe, read in a Process only as `skn_rcp_` values (Rule 17.2), and they are not on the Variables screen. gGlobals
+are filled too only when Settings > BeerXML mapping names them (the older way, kept for a Schema whose Processes still read
+gGlobals); the default Schema and the samples have no mapping and no Recipe or hop gGlobals. The text of the hops outside the boil is
+`skn_rcp_Mash_Hops`, `skn_rcp_First_Wort_Hops`, `skn_rcp_Whirlpool_Hops`, `skn_rcp_Dry_Hops`. The BruControl Importer maps the OakBarn
+names (`gblS_Hop1_R1` ...) to the Recipe (Importer sandbox). (Help 8, 99, 100)
 
 17.4 **Skynet orders the hops and makes the hop alerts** (the OakBarn Hop Warnings): Top of Mash, 1st Wort, Start of Boil,
 Bitter, Flavor, Aroma, Whirlpool, Dry Hop; hops at the same time are one Hop Group; each gets a warning (10 minutes, Default
 tab) and a drop alert; **two alerts at the same time become one alert with both**. The user sees only the results (Drops tab).
 `start_hop_alerts` / `start_hop_alerts "Boil_Timer"` / `stop_hop_alerts` in a Process. (Fritz, 2026-10-30, Help 99)
+`start_hop_alerts "Boil_Timer", 1` follows a timer that runs faster than real time: the number is the timer seconds for one boil
+minute (60 = real time, to start; 1 = a Testing switch that runs each minute as one second). The 3 Vessel sample's brew day uses
+it in place of its own 8 hop alarms (2026-11-21).
 
 17.5 **Voice for alerts**: every alert has an audio path in media/Audio/Hops. When the file is there it plays; otherwise the
 browser's own voice reads the alert. Skynet does not fetch voices from a text to voice web site by itself (free sites do not
@@ -6658,6 +6692,9 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-21: Rule 11.3 (OakBarn Brewery: "Wrong. BruControl is a forbidden word in Skynet Panel and Only used in th eImported."): the word BruControl is never shown in the Skynet Panel (screens, menus, balloons, messages, Help, Hover Help, README, Template notes, sample Processes); only the Importer uses it, and the Panel says "the Importer". The 2026-11-10 exception (Help 1, 44 and 67 could name the BruControl Import) is gone. The Panel's own one-step **Import > BruControl Schema** is taken out of the Panel (☰ Menu > Import now has BeerSmith recipe only; lib/brucontrol.js stays for the Importer and its tests); Help 8's BruControl part goes to the extract. Help 143 and 165 stay in help/ for the Importer but are not listed in the Panel's Help. Rule 1.1 no longer defines "BruControl Schema"; Rule 14.3's BruControl Read Me lives in the Importer. Help 1, 8, 44, 67 (English and French). Checked against both programs: the Importer's pages, Build page and Help keep the word. (thread "Remove the word BruControl from the Panel")
+- 2026-11-21: Rule 6.15, `all_heaters_off` (OakBarn Brewery: "new command heaters_off and turn off all heaters", "yes match" = named like all_pumps_off): every Heating Element off (its PID or Hysteresis stops with it), older control Devices disabled, gas burners' Solenoid Gas Valves closed and igniters off. Same code as step 1 of Emergency Off (Rule 6.41). Help 100 and 22.
+- 2026-11-21: Added Rule 16.12 (OakBarn Brewery: "a subclass of sleep in seconds"): `delay 7` waits 7 seconds, the same as `sleep 7000`; decimals and variables work, and it acts as a sleep in every way (Override, Testing speed-up, timeline). Reserved word; in Autofill and the editor colors. Help 22 and 5 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Add a delay command in seconds")
 - 2026-11-21: Added Rule 5.46 (OakBarn Brewery: "Flow is wrong and spurts even when hose bib is turned off = bug"): a Valve with Tap water on and a pipe on its tap side gets its water only along that pipe, as a Hose Bib's Inlet does (Rule 18.52 #7); a closed Hose Bib or valve on that side means no flow and no splash out of it. Fixes the 3 Vessel 1 Pump sample's Brew House Firehose Valve spraying with the Hose Bib off, and the Hose Bib's water standing still under it when on. Help 31 (and French). (thread "Fix wrong water flow and spray")
 - 2026-11-21: Added Rule 2.65 (OakBarn Brewery: "CTRL + F for Find and CTRL + H also as Find and Replace on same Dialog"): the Process Editor and Schema.json already had it (PR #43); the same Find bar now comes to the Process Template editor and the Help text editor (public/findbar.js): Ctrl+F Find, Ctrl+H the same bar on Replace with, every match lit, Replace / Replace all undo with Ctrl+Z, no Replace row on a read only text, keys taken only while that editor has the focus. Help 30 and 12 (and French). Panel only (the BruControl Import program has no big text editor). (thread "Add Find and Replace to the Process Editor")
 - 2026-11-20: Rule 6.15, the Manual valve reminder (OakBarn Brewery): `close_all_valves` is followed by one pop-up "Have you closed all Manual Valves?" and `open_all_valves` by "Have you opened all Manual Valves?"; the Process waits for Done. Only when the Schema has a Manual valve. Help 100.
@@ -7343,7 +7380,9 @@ import.
 - 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-20: Rules 3.20 and 16.4 changed (OakBarn Brewery: "Recipe values like rcp_Strike_Temp yes", "they could be skn_rcp_ so I will know what you are taking about"): Recipe values are `skn_rcp_` names (were `rcp_`) in the code, Templates, Help and these Rules; older Change log lines keep the old name as history.
+- 2026-11-21: Rules 17.3 and 17.4 changed (OakBarn Brewery: "Those should be back house skynet variables", "if the gGlobals are no longer needed, trash"): the Recipe and hop values are only `skn_rcp_` values, never gGlobals; the Recipe and hop gGlobals and the BeerXML mapping are gone from the default Schema and the 3 Vessel sample; its brew day reads `skn_rcp_` values and uses `start_hop_alerts` (new: a number after the timer for a faster Testing timer); new `skn_rcp_Mash_Hops`, `_First_Wort_Hops`, `_Whirlpool_Hops`, `_Dry_Hops`; `/api/import/beerxml` makes the Recipe.
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.
+- 2026-11-21: Rule 6.19 Methods hotspot made bigger (OakBarn Brewery, screenshot of the 3 Vessel 1 Pump HLT: "Hotspot too small increase to purple area"): the strip now runs from the Element's end plate out to 10 px past the Vessel wall, never thinner than 25 px (was 10 px outside the wall, with a gap after the end plate). Help 150 (and French). Checked against the BruControl Import program: its Build page uses the same Panel drawing, nothing else changes.

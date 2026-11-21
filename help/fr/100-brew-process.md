@@ -73,6 +73,7 @@ Les Templates lisent la recette par des noms qui commencent par **`skn_rcp_`**. 
 | `skn_rcp_Hop_Stand` | true quand il y a des houblons Whirlpool dans un Hop Stand qui a sa température et sa durée |
 | `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`, `skn_rcp_Hop_Stand_High_Minutes` (et `_Middle_`, `_Low_`) | true quand ce Hop Stand a des houblons Whirlpool ; où le refroidissement s'arrête pour eux et combien de temps il tient |
 | `skn_rcp_Hop_Infuser` | true quand un houblon Whirlpool passe par le Hop Infuser (Hop Rocket) |
+| `skn_rcp_Mash_Hops`, `skn_rcp_First_Wort_Hops`, `skn_rcp_Whirlpool_Hops`, `skn_rcp_Dry_Hops` | ces houblons en une ligne de texte pour un message, par exemple "1 oz Cascade, 0.5 oz Citra" (vide s'il n'y en a pas). Chaque houblon garde sa propre unité. Les houblons d'ébullition ont les alertes de houblonnage de Skynet (`start_hop_alerts`) |
 | `skn_rcp_Ferment_Temp` | température de fermentation et d'ensemencement |
 | `skn_rcp_Temp_Units`, `skn_rcp_Volume_Units`, `skn_rcp_Weight_Units` | °F ou °C, gal ou L, lb ou kg : les mots de vos Units, pour les messages |
 
@@ -89,6 +90,7 @@ L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 | `close_all_valves` | ferme chaque vanne de la liste **Close all valves** (toujours les vannes d'eau du robinet), puis demande **Have you closed all Manual Valves?** et attend **✔ Done** |
 | `open_all_valves` | ouvre chaque vanne de la liste **Open all valves** (jamais une vanne d'eau du robinet ; l'état dans lequel on laisse tout après le nettoyage), puis demande **Have you opened all Manual Valves?** et attend **✔ Done** |
 | `all_pumps_off` | arrête chaque pompe |
+| `all_heaters_off` | arrête chaque chauffage : chaque Heating Element (quelle que soit sa méthode, pour que son PID ou son Hysteresis ne le rallume pas), tout ancien contrôle PID, Hysteresis, Duty Cycle ou Deadband, et chaque brûleur à gaz (sa Solenoid Gas Valve fermée, son allumeur arrêté). Les mêmes chauffages que l'Emergency Off. Règle Skynet 6.15. |
 | `open_valve DigiBoil_Spigot` | ouvre une seule vanne. Une vanne manuelle (une Manual valve, un Widget Manual Valve, un robinet de DigiBoil ou de Brewzilla) affiche une fenêtre et attend que ce soit fait à la main ; une vanne motorisée est commandée tout de suite. Voir [DigiBoil et Brewzilla, réglées à la main](158-digiboil-and-brewzilla) |
 | `close_valve DigiBoil_Spigot` | ferme une seule vanne, de la même façon |
 

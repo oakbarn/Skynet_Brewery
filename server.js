@@ -39,7 +39,6 @@ import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { parseWifiReport, hydroFor, decodeBle, hydroForBle } from './public/hydrometer.js';
 import { importBeerXml } from './lib/beerxml.js';
-import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas, tabLockedMsg } from './lib/schemas.js';
@@ -62,7 +61,7 @@ import { MediaFiles } from './lib/mediafiles.js';
 import { FileMove, missingMedia, ownMedia } from './lib/filemove.js';
 import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain } from './lib/values.js';
-import { Help } from './lib/help.js';
+import { Help, IMPORTER_HELP } from './lib/help.js';
 import { englishPieces, exportParts, importParts, keepEnglish, ownKeep, saveOwnKeep, userLanguage, userBalloons, userStatus, userFonts, addUserFont, removeUserFont, packageFonts, fontsCss, fontFileName, FONT_TYPES, PART_KB } from './lib/helplang.js';
 import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
@@ -284,7 +283,7 @@ engine.onRecipe = (cmd, args, by) => {
     const rc = useRecipe(got.recipe);
     return `Recipe "${rc.name}" imported from ${path.basename(f)} (${rc.ingredients.fermentables.length} fermentables, ${rc.ingredients.hops.length} hops, ${rc.ingredients.yeasts.length} yeasts, ${rc.ingredients.miscs.length} misc)`;
   }
-  if (cmd === 'start') return hopAlerts.start(args[0], `Process ${by}`);
+  if (cmd === 'start') return hopAlerts.start(args[0], `Process ${by}`, args[1]);
   if (cmd === 'stop') return hopAlerts.stop() ? 'Hop alerts stopped' : 'Hop alerts were not running';
 };
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
@@ -721,9 +720,11 @@ async function route(req, res) {
       const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
       const rc = useRecipe(got.recipe); return ok(res, { ok: true, name: rc.name, names: got.names });
     }
+    // a BeerXML file becomes the Recipe too (its values are the skn_rcp_ names); Globals are filled only when Settings > BeerXML mapping names them
     if (p === '/api/import/beerxml' && m === 'POST') {
-      const xml = await readBody(req);
-      return ok(res, { ok: true, ...importBeerXml(xml, store, store.config.beerxml) });
+      const buf = await readBody(req, 32 * 1024 * 1024, true), got = readRecipeFile(buf, 'recipe.xml'), rc = useRecipe(got.recipe);
+      const map = store.config.beerxml && Object.keys(store.config.beerxml).length ? store.config.beerxml : null;
+      return ok(res, { ok: true, recipe: rc.name, name: rc.name, names: got.names, hops: rc.ingredients.hops.length, ...(map ? { globals: importBeerXml(buf.toString('utf8'), store, map) } : {}) });
     }
     return fail(res, 404, 'Unknown API route');
   }
@@ -1004,17 +1005,6 @@ async function route(req, res) {
     return ok(res, mqttView());
   }
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
-  if (p === '/ui/import/brucontrol' && m === 'POST') {
-    const q = url.searchParams;
-    { const lk = q.get('preview') !== '1' && (store.config.workspaces || []).find(w => w.equipLocked); if (lk) return fail(res, 409, tabLockedMsg(lk)); }
-    const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'Images', simulate: q.get('simulate') !== '0' });
-    const missingMedia = conv.media.filter(f => { const full = findMedia(f); return !full || !fs.existsSync(full); });
-    const out = { summary: conv.summary, warnings: conv.warnings, missingMedia, mediaCount: conv.media.length, autostart: conv.autostart };
-    if (q.get('preview') === '1') return ok(res, { ok: true, preview: true, ...out });
-    const applied = applyBruControl(conv, { store, engine, mode: q.get('mode') === 'merge' ? 'merge' : 'replace', overwriteScripts: q.get('overwrite') !== '0' });
-    hw.restart();
-    return ok(res, { ok: true, ...out, ...applied });
-  }
   // Config Editor (admin only, see needRole)
   // The Config Editor never shows the hidden keys; on Save each item gets its key back by its name (lib/keys.js)
   // no copy on opening: one is made before every save or restore (Rule 9.17)
@@ -1622,7 +1612,7 @@ async function route(req, res) {
   // Help tab: everyone reads, admins edit
   // ?lang=fr: the French Help (Rule 11.11); a page not translated yet comes in English
   const hl = help.translation(url.searchParams.get('lang'));
-  if (p === '/ui/help' && m === 'GET') return ok(res, hl.list());
+  if (p === '/ui/help' && m === 'GET') return ok(res, hl.list().filter(pg => IMPORT_BUILD || !IMPORTER_HELP.has(pg.name)));      // the Importer's pages are not the Panel's (Rule 11.3)
   if (p === '/ui/help' && m === 'POST') { const { title } = await jsonBody(req); return ok(res, { ok: true, name: hl.create(title) }); }
   const hp = /^\/ui\/help\/([^/]+)$/.exec(p);
   if (hp) {

@@ -73,6 +73,7 @@ Templates read the Recipe through names that start with **`skn_rcp_`**. They are
 | `skn_rcp_Hop_Stand` | true when there are Whirlpool hops in a Hop Stand with its temperature and time |
 | `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`, `skn_rcp_Hop_Stand_High_Minutes` (and `_Middle_`, `_Low_`) | true when that Hop Stand has Whirlpool hops; where the chill stops for them and how long it holds |
 | `skn_rcp_Hop_Infuser` | true when a Whirlpool hop goes through the Hop Infuser (Hop Rocket) |
+| `skn_rcp_Mash_Hops`, `skn_rcp_First_Wort_Hops`, `skn_rcp_Whirlpool_Hops`, `skn_rcp_Dry_Hops` | those hops as one line of text for a message, for example "1 oz Cascade, 0.5 oz Citra" (empty when none). Each hop keeps its own unit. The boil hops get Skynet's hop alerts (`start_hop_alerts`) |
 | `skn_rcp_Ferment_Temp` | fermentation and pitching temperature |
 | `skn_rcp_Temp_Units`, `skn_rcp_Volume_Units`, `skn_rcp_Weight_Units` | °F or °C, gal or L, lb or kg: the words of your Units, for messages |
 
@@ -89,6 +90,7 @@ The Brew Process screen shows every value as it is now.
 | `close_all_valves` | closes every valve on the **Close all valves** list (tap water valves always), then asks **Have you closed all Manual Valves?** and waits for **✔ Done** |
 | `open_all_valves` | opens every valve on the **Open all valves** list (never a tap water valve; how things are left after cleaning), then asks **Have you opened all Manual Valves?** and waits for **✔ Done** |
 | `all_pumps_off` | turns every pump off |
+| `all_heaters_off` | turns every heater off: each Heating Element (on any method, so its PID or Hysteresis can't turn it back on), any older PID, Hysteresis, Duty Cycle or Deadband control, and each gas burner (its Solenoid Gas Valve closed, its igniter off). The same heaters as Emergency Off. Skynet Rule 6.15. |
 | `open_valve DigiBoil_Spigot` | opens any one valve. A Manual one (a Manual valve, a Manual Valve Widget, a DigiBoil or Brewzilla Spigot) pops up and waits until it is done by hand; a motorized one is switched at once. See [DigiBoil and Brewzilla](158-digiboil-and-brewzilla) |
 | `close_valve DigiBoil_Spigot` | closes any one valve, the same way |
 

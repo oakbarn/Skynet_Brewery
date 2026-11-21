@@ -1,7 +1,7 @@
 //BrewDay_Flow
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
-//Brew day, step by step, like BruControl: the message box says what to do, the red label is the question,
+//Brew day, step by step: the message box says what to do, the red label is the question,
 //click the green switch to advance (gblV_Brew_Status + 1). Blue = the panel is working, it moves on by itself.
 //Testing switch on: every minute runs as one second.
 step 1.00000 "Start"
@@ -9,25 +9,8 @@ new string vSMsg
 new string vSHops
 new value vVScale
 new value vVLeft
-new value vVWarn
 new time vT_Step
 new value vVStep
-new value vVH1
-new value vVT1
-new value vVH2
-new value vVT2
-new value vVH3
-new value vVT3
-new value vVH4
-new value vVT4
-new value vVH5
-new value vVT5
-new value vVH6
-new value vVT6
-new value vVH7
-new value vVT7
-new value vVH8
-new value vVT8
 vVScale = 60
 if wgt_SW_Testing_BH == true
 	vVScale = 1
@@ -36,15 +19,7 @@ stop "BrewDay_Stop"
 start "looper_Advance_Switch"
 wgt_TMR_Brew~day_BH = 00:00:00
 start "wgt_TMR_Brew~day_BH"
-gblS_Hop_Warning = ""
-gblB_Hop1_Added = false
-gblB_Hop2_Added = false
-gblB_Hop3_Added = false
-gblB_Hop4_Added = false
-gblB_Hop5_Added = false
-gblB_Hop6_Added = false
-gblB_Hop7_Added = false
-gblB_Hop8_Added = false
+stop_hop_alerts
 BM_22_DO@Pump_Pump_BH = false
 BM_24_DO@Valve_E_HLT~out_BH = false
 BM_25_DO@Valve_E_Mash~tun~out_BH = false
@@ -58,7 +33,10 @@ BM_30_DO@Chill_Chiller~water_BH = false
 [SectionBrew100]
 step 1.00001 "SectionBrew100"
 gblV_Brew_Status = 100
-vSMsg = "Brewing " + gblS_BeerName_R1 + ". Import the BeerSmith recipe (Import > BeerXML) or check the Recipe tab. Strike " + gblV_Desired_Strike + " °C, mash " + gblV_Mash_1_Temp + " °C."
+vSMsg = "Brewing " + skn_rcp_Name + ". Check the Recipe on ☰ Menu > Recipe (Import a BeerSmith .bsmx or BeerXML file there). Strike " + skn_rcp_Strike_Temp + " " + skn_rcp_Temp_Units + ", mash " + skn_rcp_Mash_Step_1_Temp + " " + skn_rcp_Temp_Units + "."
+if skn_rcp_Loaded == false
+	vSMsg = "No Recipe is loaded: import one on ☰ Menu > Recipe, or the Default tab's values are used and there are no hop alerts. Strike " + skn_rcp_Strike_Temp + " " + skn_rcp_Temp_Units + ", mash " + skn_rcp_Mash_Step_1_Temp + " " + skn_rcp_Temp_Units + "."
+endif
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Recipe Ready?"
 gblS_Advance_Label.background = 4
@@ -78,15 +56,15 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 103
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Strike~volume_RP"
-HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = gblV_Desired_Strike
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = skn_rcp_Strike_Temp
 HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = on
-vSMsg = "Heating the HLT to the strike temperature, " + gblV_Desired_Strike + " °C."
+vSMsg = "Heating the HLT to the strike temperature, " + skn_rcp_Strike_Temp + " " + skn_rcp_Temp_Units + "."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
 gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
-wait HLT_Vessel.BM1w1_1_HLT_BH >= gblV_Desired_Strike
+wait HLT_Vessel.BM1w1_1_HLT_BH >= skn_rcp_Strike_Temp
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew104]
 step 1.00003 "SectionBrew104"
@@ -130,64 +108,8 @@ BM_27_DO@Valve_E_To~mash~tun_BH = false
 BM_28_DO@Valve_E_To~kettle_BH = false
 BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
-HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = gblV_Sparge_Temp
-vSHops = ""
-if gblV_Hop1_Group_R1 == -333
-	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop1_Added = true
-	endif
-endif
-if gblV_Hop2_Group_R1 == -333
-	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop2_Added = true
-	endif
-endif
-if gblV_Hop3_Group_R1 == -333
-	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop3_Added = true
-	endif
-endif
-if gblV_Hop4_Group_R1 == -333
-	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop4_Added = true
-	endif
-endif
-if gblV_Hop5_Group_R1 == -333
-	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop5_Added = true
-	endif
-endif
-if gblV_Hop6_Group_R1 == -333
-	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop6_Added = true
-	endif
-endif
-if gblV_Hop7_Group_R1 == -333
-	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop7_Added = true
-	endif
-endif
-if gblV_Hop8_Group_R1 == -333
-	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop8_Added = true
-	endif
-endif
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = skn_rcp_Sparge_Temp
+vSHops = skn_rcp_Mash_Hops
 [SectionBrew150]
 step 1.00005 "SectionBrew150"
 gblV_Brew_Status = 150
@@ -223,16 +145,16 @@ wait gblV_Brew_Status == 153
 wgt_SW_Advance_BH.visible = false
 [Mash_Step_1]
 step 1.00007 "Mash Step 1"
-if gblT_1_Mash_Time_R1 == 00:00:00
+if skn_rcp_Mash_Step_1_Time == 00:00:00
 	goto "Mash_Steps_Done"
 endif
-vVStep = gblT_1_Mash_Time_R1
+vVStep = skn_rcp_Mash_Step_1_Time
 vVStep = vVStep / 60 * vVScale
 vT_Step = vVStep
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Mash step 1: holding " + gblV_Mash_1_Temp + " °C. Recirculating."
+vSMsg = "Mash step 1: holding " + skn_rcp_Mash_Step_1_Temp + " " + skn_rcp_Temp_Units + ". Recirculating."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Mashing: step 1"
 gblS_Advance_Label.background = 5
@@ -242,7 +164,7 @@ wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
 [Mash_Step_2]
 step 1.00008 "Mash Step 2"
-if gblT_2_Mash_Time_R1 == 00:00:00
+if skn_rcp_Mash_Step_2_Time == 00:00:00
 	goto "Mash_Steps_Done"
 endif
 BM_22_DO@Pump_Pump_BH = false
@@ -256,7 +178,7 @@ sleep 1000
 [SectionBrew220]
 step 1.00009 "SectionBrew220"
 gblV_Brew_Status = 220
-vSMsg = "Mash step 2: raise the mash to " + gblV_Mash_2_Temp + " °C, then click."
+vSMsg = "Mash step 2: raise the mash to " + skn_rcp_Mash_Step_2_Temp + " " + skn_rcp_Temp_Units + ", then click."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Step 2 Set?"
 gblS_Advance_Label.background = 4
@@ -275,13 +197,13 @@ BM_25_DO@Valve_E_Mash~tun~out_BH = true
 BM_27_DO@Valve_E_To~mash~tun_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
-vVStep = gblT_2_Mash_Time_R1
+vVStep = skn_rcp_Mash_Step_2_Time
 vVStep = vVStep / 60 * vVScale
 vT_Step = vVStep
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Mash step 2: holding " + gblV_Mash_2_Temp + " °C. Recirculating."
+vSMsg = "Mash step 2: holding " + skn_rcp_Mash_Step_2_Temp + " " + skn_rcp_Temp_Units + ". Recirculating."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Mashing: step 2"
 gblS_Advance_Label.background = 5
@@ -291,7 +213,7 @@ wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
 [Mash_Step_3]
 step 1.00010 "Mash Step 3"
-if gblT_3_Mash_Time_R1 == 00:00:00
+if skn_rcp_Mash_Step_3_Time == 00:00:00
 	goto "Mash_Steps_Done"
 endif
 BM_22_DO@Pump_Pump_BH = false
@@ -305,7 +227,7 @@ sleep 1000
 [SectionBrew230]
 step 1.00011 "SectionBrew230"
 gblV_Brew_Status = 230
-vSMsg = "Mash step 3: raise the mash to " + gblV_Mash_3_Temp + " °C, then click."
+vSMsg = "Mash step 3: raise the mash to " + skn_rcp_Mash_Step_3_Temp + " " + skn_rcp_Temp_Units + ", then click."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Step 3 Set?"
 gblS_Advance_Label.background = 4
@@ -324,13 +246,13 @@ BM_25_DO@Valve_E_Mash~tun~out_BH = true
 BM_27_DO@Valve_E_To~mash~tun_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
-vVStep = gblT_3_Mash_Time_R1
+vVStep = skn_rcp_Mash_Step_3_Time
 vVStep = vVStep / 60 * vVScale
 vT_Step = vVStep
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Mash step 3: holding " + gblV_Mash_3_Temp + " °C. Recirculating."
+vSMsg = "Mash step 3: holding " + skn_rcp_Mash_Step_3_Temp + " " + skn_rcp_Temp_Units + ". Recirculating."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Mashing: step 3"
 gblS_Advance_Label.background = 5
@@ -349,63 +271,7 @@ BM_28_DO@Valve_E_To~kettle_BH = false
 BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 start "wgt_ALM_Step~alarm_BH"
-vSHops = ""
-if gblV_Hop1_Group_R1 == -444
-	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop1_Added = true
-	endif
-endif
-if gblV_Hop2_Group_R1 == -444
-	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop2_Added = true
-	endif
-endif
-if gblV_Hop3_Group_R1 == -444
-	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop3_Added = true
-	endif
-endif
-if gblV_Hop4_Group_R1 == -444
-	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop4_Added = true
-	endif
-endif
-if gblV_Hop5_Group_R1 == -444
-	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop5_Added = true
-	endif
-endif
-if gblV_Hop6_Group_R1 == -444
-	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop6_Added = true
-	endif
-endif
-if gblV_Hop7_Group_R1 == -444
-	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop7_Added = true
-	endif
-endif
-if gblV_Hop8_Group_R1 == -444
-	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop8_Added = true
-	endif
-endif
+vSHops = skn_rcp_First_Wort_Hops
 [SectionBrew300]
 step 1.00013 "SectionBrew300"
 gblV_Brew_Status = 300
@@ -555,68 +421,16 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 401
 wgt_SW_Advance_BH.visible = false
 wgt_ALM_Step~alarm_BH = false
-vVH1 = 9
-if gblV_Hop1_Group_R1 == 919 || gblV_Hop1_Group_R1 == -888
-	if gblS_Hop1_R1 != ""
-		vVH1 = 0
-	endif
-endif
-vVT1 = gblV_TimeHop1_Min_R1 * vVScale
-vVH2 = 9
-if gblV_Hop2_Group_R1 == 919 || gblV_Hop2_Group_R1 == -888
-	if gblS_Hop2_R1 != ""
-		vVH2 = 0
-	endif
-endif
-vVT2 = gblV_TimeHop2_Min_R1 * vVScale
-vVH3 = 9
-if gblV_Hop3_Group_R1 == 919 || gblV_Hop3_Group_R1 == -888
-	if gblS_Hop3_R1 != ""
-		vVH3 = 0
-	endif
-endif
-vVT3 = gblV_TimeHop3_Min_R1 * vVScale
-vVH4 = 9
-if gblV_Hop4_Group_R1 == 919 || gblV_Hop4_Group_R1 == -888
-	if gblS_Hop4_R1 != ""
-		vVH4 = 0
-	endif
-endif
-vVT4 = gblV_TimeHop4_Min_R1 * vVScale
-vVH5 = 9
-if gblV_Hop5_Group_R1 == 919 || gblV_Hop5_Group_R1 == -888
-	if gblS_Hop5_R1 != ""
-		vVH5 = 0
-	endif
-endif
-vVT5 = gblV_TimeHop5_Min_R1 * vVScale
-vVH6 = 9
-if gblV_Hop6_Group_R1 == 919 || gblV_Hop6_Group_R1 == -888
-	if gblS_Hop6_R1 != ""
-		vVH6 = 0
-	endif
-endif
-vVT6 = gblV_TimeHop6_Min_R1 * vVScale
-vVH7 = 9
-if gblV_Hop7_Group_R1 == 919 || gblV_Hop7_Group_R1 == -888
-	if gblS_Hop7_R1 != ""
-		vVH7 = 0
-	endif
-endif
-vVT7 = gblV_TimeHop7_Min_R1 * vVScale
-vVH8 = 9
-if gblV_Hop8_Group_R1 == 919 || gblV_Hop8_Group_R1 == -888
-	if gblS_Hop8_R1 != ""
-		vVH8 = 0
-	endif
-endif
-vVT8 = gblV_TimeHop8_Min_R1 * vVScale
-vVWarn = 10 * vVScale
-vVStep = gblVBoilTime_Minutes * vVScale
+vVStep = skn_rcp_Boil_Time
+vVStep = vVStep / 60 * vVScale
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vVStep
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Boiling. " + gblVBoilTime_Minutes + " minutes. The hop alarm rings at each addition; tap it when the hops are in."
+//Skynet's hop alerts (Rule 17.4) follow the boil timer: every hop and boil adjunct of the Recipe, no limit
+if skn_rcp_Loaded == true
+	start_hop_alerts "wgt_TMR_Step~timer_BH", vVScale
+endif
+vSMsg = "Boiling for " + skn_rcp_Boil_Time + ". Skynet's hop alerts show each warning and each drop on every screen."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Boiling"
 gblS_Advance_Label.background = 5
@@ -625,209 +439,10 @@ wgt_SW_Advance_BH.visible = false
 [Boil_Loop]
 step 1.00020 "Boil Loop"
 vVLeft = wgt_TMR_Step~timer_BH
-if vVH1 == 0
-	if vVLeft <= vVT1 + vVWarn
-		if vVLeft > vVT1
-			vSMsg = "In 10 minutes: " + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1 + " at " + gblV_TimeHop1_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH1 = 1
-		endif
-	endif
-endif
-if vVH1 < 2
-	if vVLeft <= vVT1
-		vSMsg = "ADD NOW: " + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop1_Added = true
-		vVH1 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
-if vVH2 == 0
-	if vVLeft <= vVT2 + vVWarn
-		if vVLeft > vVT2
-			vSMsg = "In 10 minutes: " + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1 + " at " + gblV_TimeHop2_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH2 = 1
-		endif
-	endif
-endif
-if vVH2 < 2
-	if vVLeft <= vVT2
-		vSMsg = "ADD NOW: " + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop2_Added = true
-		vVH2 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
-if vVH3 == 0
-	if vVLeft <= vVT3 + vVWarn
-		if vVLeft > vVT3
-			vSMsg = "In 10 minutes: " + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1 + " at " + gblV_TimeHop3_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH3 = 1
-		endif
-	endif
-endif
-if vVH3 < 2
-	if vVLeft <= vVT3
-		vSMsg = "ADD NOW: " + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop3_Added = true
-		vVH3 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
-if vVH4 == 0
-	if vVLeft <= vVT4 + vVWarn
-		if vVLeft > vVT4
-			vSMsg = "In 10 minutes: " + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1 + " at " + gblV_TimeHop4_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH4 = 1
-		endif
-	endif
-endif
-if vVH4 < 2
-	if vVLeft <= vVT4
-		vSMsg = "ADD NOW: " + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop4_Added = true
-		vVH4 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
-if vVH5 == 0
-	if vVLeft <= vVT5 + vVWarn
-		if vVLeft > vVT5
-			vSMsg = "In 10 minutes: " + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1 + " at " + gblV_TimeHop5_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH5 = 1
-		endif
-	endif
-endif
-if vVH5 < 2
-	if vVLeft <= vVT5
-		vSMsg = "ADD NOW: " + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop5_Added = true
-		vVH5 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
-if vVH6 == 0
-	if vVLeft <= vVT6 + vVWarn
-		if vVLeft > vVT6
-			vSMsg = "In 10 minutes: " + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1 + " at " + gblV_TimeHop6_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH6 = 1
-		endif
-	endif
-endif
-if vVH6 < 2
-	if vVLeft <= vVT6
-		vSMsg = "ADD NOW: " + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop6_Added = true
-		vVH6 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
-if vVH7 == 0
-	if vVLeft <= vVT7 + vVWarn
-		if vVLeft > vVT7
-			vSMsg = "In 10 minutes: " + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1 + " at " + gblV_TimeHop7_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH7 = 1
-		endif
-	endif
-endif
-if vVH7 < 2
-	if vVLeft <= vVT7
-		vSMsg = "ADD NOW: " + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop7_Added = true
-		vVH7 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
-if vVH8 == 0
-	if vVLeft <= vVT8 + vVWarn
-		if vVLeft > vVT8
-			vSMsg = "In 10 minutes: " + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1 + " at " + gblV_TimeHop8_Min_R1 + " min"
-			gblS_Hop_Warning = vSMsg
-			start "wgt_ALM_Warning_BH"
-			vVH8 = 1
-		endif
-	endif
-endif
-if vVH8 < 2
-	if vVLeft <= vVT8
-		vSMsg = "ADD NOW: " + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
-		gblS_Hop_Warning = vSMsg
-		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
-		gblS_Advance_Label.background = 4
-		start "wgt_ALM_Hop~alarm_BH"
-		wait wgt_ALM_Hop~alarm_BH == false
-		gblB_Hop8_Added = true
-		vVH8 = 2
-		gblS_Hop_Warning = ""
-		gblS_Advance_Label = "Boiling"
-		gblS_Advance_Label.background = 5
-	endif
-endif
 if vVLeft <= 15 * vVScale
 	if vVStep != -1
-		gblS_Hop_Warning = "Put the chiller in to sanitize it, and add Whirlfloc."
+		vSMsg = "Boiling. Put the chiller in to sanitize it."
+		gblS_Step_Text = vSMsg
 		start "wgt_ALM_Warning_BH"
 		vVStep = -1
 	endif
@@ -839,8 +454,9 @@ sleep 500
 goto "Boil_Loop"
 [Boil_Done]
 step 1.00021 "Boil Done"
+sleep 1500
+stop_hop_alerts
 stop "wgt_TMR_Step~timer_BH"
-gblS_Hop_Warning = ""
 BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = off
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew480]
@@ -855,63 +471,7 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 481
 wgt_SW_Advance_BH.visible = false
 wgt_ALM_Step~alarm_BH = false
-vSHops = ""
-if gblV_Hop1_Group_R1 == -999
-	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop1_Added = true
-	endif
-endif
-if gblV_Hop2_Group_R1 == -999
-	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop2_Added = true
-	endif
-endif
-if gblV_Hop3_Group_R1 == -999
-	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop3_Added = true
-	endif
-endif
-if gblV_Hop4_Group_R1 == -999
-	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop4_Added = true
-	endif
-endif
-if gblV_Hop5_Group_R1 == -999
-	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop5_Added = true
-	endif
-endif
-if gblV_Hop6_Group_R1 == -999
-	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop6_Added = true
-	endif
-endif
-if gblV_Hop7_Group_R1 == -999
-	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop7_Added = true
-	endif
-endif
-if gblV_Hop8_Group_R1 == -999
-	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
-		vSHops = vSHops + ".  "
-		gblB_Hop8_Added = true
-	endif
-endif
+vSHops = skn_rcp_Whirlpool_Hops
 [SectionBrew500]
 step 1.00023 "SectionBrew500"
 gblV_Brew_Status = 500
@@ -934,12 +494,12 @@ BM_26_DO@Valve_E_Kettle~out_BH = true
 BM_28_DO@Valve_E_To~kettle_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
-vVStep = gblV_Whirlpool_Min * vVScale
+vVStep = skn_rcp_Whirlpool_Minutes * vVScale
 vT_Step = vVStep
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Whirlpool, " + gblV_Whirlpool_Min + " minutes."
+vSMsg = "Whirlpool, " + skn_rcp_Whirlpool_Minutes + " minutes."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Whirlpooling"
 gblS_Advance_Label.background = 5
@@ -948,13 +508,13 @@ wgt_SW_Advance_BH.visible = false
 wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
 BM_30_DO@Chill_Chiller~water_BH = true
-vSMsg = "Chilling to " + gblV_Pitch_Temp + " °C, still whirlpooling."
+vSMsg = "Chilling to " + skn_rcp_Ferment_Temp + " " + skn_rcp_Temp_Units + ", still whirlpooling."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
 gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
-wait BK_Vessel.BM1w1_3_Kettle_BH <= gblV_Pitch_Temp
+wait BK_Vessel.BM1w1_3_Kettle_BH <= skn_rcp_Ferment_Temp
 BM_22_DO@Pump_Pump_BH = false
 BM_24_DO@Valve_E_HLT~out_BH = false
 BM_25_DO@Valve_E_Mash~tun~out_BH = false
@@ -1043,63 +603,7 @@ gblS_Step_Text.background = 4
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 703
 wgt_SW_Advance_BH.visible = false
-vSHops = ""
-if gblV_Hop1_Group_R1 == -111
-	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1 + " (" + gblV_TimeHop1_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop1_Added = true
-	endif
-endif
-if gblV_Hop2_Group_R1 == -111
-	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1 + " (" + gblV_TimeHop2_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop2_Added = true
-	endif
-endif
-if gblV_Hop3_Group_R1 == -111
-	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1 + " (" + gblV_TimeHop3_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop3_Added = true
-	endif
-endif
-if gblV_Hop4_Group_R1 == -111
-	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1 + " (" + gblV_TimeHop4_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop4_Added = true
-	endif
-endif
-if gblV_Hop5_Group_R1 == -111
-	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1 + " (" + gblV_TimeHop5_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop5_Added = true
-	endif
-endif
-if gblV_Hop6_Group_R1 == -111
-	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1 + " (" + gblV_TimeHop6_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop6_Added = true
-	endif
-endif
-if gblV_Hop7_Group_R1 == -111
-	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1 + " (" + gblV_TimeHop7_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop7_Added = true
-	endif
-endif
-if gblV_Hop8_Group_R1 == -111
-	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1 + " (" + gblV_TimeHop8_Min_R1 + " days" + ")"
-		vSHops = vSHops + ".  "
-		gblB_Hop8_Added = true
-	endif
-endif
+vSHops = skn_rcp_Dry_Hops
 vSMsg = "Brew day finished. Dry hops: " + vSHops + " Total time " + wgt_TMR_Brew~day_BH
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Done!"

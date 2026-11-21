@@ -209,7 +209,7 @@ Exemple : la résistance HLT de Tartan sur le port 42 du Main Panel montre **Dut
 clic sur PID pour tenir la température d'empâtage.
 
 **Montrer ou cacher les boutons de méthode.** Les boutons de méthode sont **cachés** au départ, pour que le Tab reste propre. Une
-fine bande juste **à l'extérieur de la paroi du Vessel**, là où entre la résistance (à côté de l'image d'une résistance seule), les
+bande là où entre la résistance, de sa **plaque d'extrémité jusqu'au-delà de la paroi du Vessel** (à côté de l'image d'une résistance seule), les
 montre en **un clic** et les cache au suivant. Ça marche avec n'importe quelle image de Vessel. Chaque écran garde son propre choix, et
 rien ne se met en marche ni ne s'arrête.
 

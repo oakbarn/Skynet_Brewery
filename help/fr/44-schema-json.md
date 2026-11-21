@@ -6,7 +6,7 @@ La page fait deux choses :
 
 1. Elle montre le Schema chargé et les réglages du panel sous forme de texte (`config/brewery.json`), pour que vous puissiez les modifier. **Check**, **Save**, **Find**, **Reload** et **Backups** marchent comme avant (voir *Process editor > The Schema.json editor*).
 2. **Save as .json file** enregistre un Schema comme un seul fichier `.json` sur l'ordinateur que vous utilisez.
-3. **Open a Schema file** ajoute un Schema à partir d'un fichier `.json` : un que le BruControl Importer a enregistré, ou un enregistré avec Save as .json file.
+3. **Open a Schema file** ajoute un Schema à partir d'un fichier `.json` : un que l'Importer a enregistré, ou un enregistré avec Save as .json file.
 
 ## Save as .json file
 
@@ -21,7 +21,7 @@ Le fichier porte le nom de la version du Schema, par exemple `Main_Brewery_20261
 
 1. Cliquez sur **Schema.json** sur la Menu Bar.
 2. Cliquez sur **Open a Schema file**.
-3. Choisissez un fichier du **Import folder** (`C:\Brewing\Import`, où le BruControl Importer enregistre ses fichiers, les plus récents en premier),
+3. Choisissez un fichier du **Import folder** (`C:\Brewing\Import`, où l'Importer enregistre ses fichiers, les plus récents en premier),
    ou **A .json file on this computer…** pour en choisir un n'importe où.
 4. Laissez **Load it now** actif pour y passer tout de suite, ou éteint pour simplement l'ajouter à vos Schemas.
 5. Appuyez sur **Save**.
