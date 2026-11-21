@@ -97,7 +97,10 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     const f = fit(l, w); if (f < 0) return;
     seen.add(text); (f ? second : first).push({ text, hint, label: l === text ? undefined : l, ...(back ? { back } : {}) });
   };
-  const done = () => { const list = [...first, ...second]; return list.length ? { list, typed: q ? w.length + 1 : w.length } : null; };
+  // a space on both sides of = == != < > <= >= += -= (Fritz, 2026-11-21: "if Pump =true" -> "if Pump = true")
+  const opGap = /([^\s=!<>+\-]?)(==|!=|<=|>=|\+=|-=|=|<|>)$/.exec(pre);
+  const spaced = it => !opGap || it.back ? it : opGap[1] ? { ...it, text: ' ' + opGap[2] + ' ' + it.text, label: it.label ?? it.text.trim(), back: opGap[2].length } : { ...it, text: ' ' + it.text, label: it.label ?? it.text.trim() };
+  const done = () => { const list = [...first, ...second].map(spaced); return list.length ? { list, typed: q ? w.length + 1 : w.length } : null; };
   // in quotes the pick keeps its quotes; a name that needs quotes gets them
   const named = (n, hint) => q ? add(`"${n}"`, hint, n) : add(quote(n), hint, n);
   const command = (k, h) => add(G_TEXT[k] ?? (TAKES.has(k) ? k + ' ' : k), h, k);
@@ -127,7 +130,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     return out;
   }
   // Ctrl+Space right after a value in an if or a wait (if Pump == true): and / or
-  if (forced && inCond && !q && /(==|!=|<=|>=|<|>|=)\s*(\S+)$/.test(line) && (!w || /^(true|false|on|off|now)$/i.test(w) || elOf(w) || declared.has(w)))
+  if (forced && inCond && !q && /(==|!=|<=|>=|<|>|=)\s*([^\s=!<>]+)$/.test(line) && (!w || /^(true|false|on|off|now)$/i.test(w) || elOf(w) || declared.has(w)))
     return { list: JOIN.map(([text, hint]) => ({ text: ' ' + text, hint })), typed: 0 };
   // Ctrl+Space right after a whole name ("if Pump" with no space yet): the same list, a space put in front where needed
   if (forced && w && !q) {
