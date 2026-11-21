@@ -3,6 +3,7 @@ import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
 import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, pipeLine, sameSize, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
+import { attachFind } from './findbar.js';      // Find and Replace in the Process Template editor (Rule 2.65)
 import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of every dialog (Rule 18.53)
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -17015,6 +17016,7 @@ async function editProcessTemplate(st, name, copy) {
     h('p', { class: 'muted' }, ro && t.cls === 'skynet' ? 'A Skynet Process Template is never changed. To change it, pick ➕ Add new User Process Template… and change your copy.' :
       'A Process with build lines: {{HLT_Heater}} is the Device picked for that job; @if HLT_Heater … @else … @end uses lines only when one is picked (or not); @each_mash_step … @end repeats lines for each mash step ({{n}} = 1, 2, 3 …). skn_rcp_ names are the Recipe\'s values. See Help: Brew Process.'),
     ta, bar());
+  attachFind(ta);      // Ctrl+F Find and Ctrl+H Replace in this box (Rule 2.65)
   document.body.append(d); d.showModal();
 }
 function renderAboutTab(box) {

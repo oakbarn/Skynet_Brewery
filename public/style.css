@@ -140,11 +140,16 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 #codeHl, #cfgCodeHl { position: absolute; top: 0; left: 0; margin: 0; padding: 8px; font: 13px/1.5 var(--mono); tab-size: 4; white-space: pre; color: transparent; pointer-events: none; }
 #codeHl mark, #cfgCodeHl mark { color: transparent; background: rgba(232, 195, 58, 0.35); border-radius: 2px; }
 #codeHl mark.cur, #cfgCodeHl mark.cur { background: rgba(232, 131, 58, 0.75); outline: 1px solid var(--accent); }
+/* Find and Replace in the Process Template and Help text editors (public/findbar.js, Rule 2.65): the matches on a see-through layer over the box */
+.findLayer { position: absolute; pointer-events: none; overflow: hidden; color: transparent; box-sizing: border-box; margin: 0; z-index: 1; }
+.findLayer[hidden] { display: none; }
+.findLayer mark { color: transparent; background: rgba(232, 195, 58, 0.35); border-radius: 2px; }
+.findLayer mark.cur { background: rgba(232, 131, 58, 0.6); outline: 1px solid var(--accent); }
 /* find and replace */
 .findBar { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; margin-bottom: 8px; }
 .findRow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .findRow input[type=search], .findRow input:not([type]) { flex: 1 1 180px; min-width: 0; font-family: var(--mono); }
-#findCount { min-width: 5.5em; font-size: 12px; }
+#findCount, .findCount { min-width: 5.5em; font-size: 12px; }
 .findAllDlg { width: min(860px, calc(100vw - 16px)); max-height: calc(100vh - 32px); }
 .findAllDlg form { display: flex; flex-direction: column; gap: 8px; }
 .findAllDlg h3 { margin: 0; }

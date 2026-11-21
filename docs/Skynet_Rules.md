@@ -1441,6 +1441,21 @@ for a big delete or change. They all ask in **one shared Skynet box** (public/sk
 was taken out of the Panel (2026-11-21, Rule 11.3).
 Help 28, 48, 119, 188.
 
+2.65 **Find and Replace in every big text editor: Ctrl+F and Ctrl+H on one bar** (OakBarn Brewery, 2026-11-21: "CTRL + F for Find
+and CTRL + H also as Find and Replace on same Dialog"; picked "Add to Template + Help editors"):
+- Every big text editor has the same Find bar above its text: the Process Editor and Schema.json (since PR #43), the Process
+  Template editor (☰ Menu > Brew Process > 👁 View or ✏ Edit) and the Help text editor (✏ Edit page).
+- **Ctrl+F** (⌘+F on a Mac) opens Find. **Ctrl+H** opens the same bar with the cursor in **Replace with** (one bar, never two
+  pop-ups). Typing a highlighted word first puts it in Find.
+- On the bar: match count (`3 of 12`), ▲ ▼ (Enter, Shift+Enter, F3), **Aa** (match case), **Whole word**, ✕ (Esc). Every match is
+  lit; the current one is darker. **Replace** and **Replace all** type through the browser, so **Ctrl+Z** undoes them; nothing is
+  saved until the editor's own Save.
+- A read only text (a Skynet Process Template, or a Brewer) gets Find with no Replace row.
+- The keys are taken from the browser only while that editor or its bar has the focus; anywhere else Ctrl+F is the browser's own
+  Find. They never take the copy, paste, undo or redo keys (Rule 2.32).
+**Both programs:** the BruControl Import program's pages have no big text editor, so nothing changes there.
+Help 30, 12.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -6681,6 +6696,7 @@ import.
 - 2026-11-21: Rule 6.15, `all_heaters_off` (OakBarn Brewery: "new command heaters_off and turn off all heaters", "yes match" = named like all_pumps_off): every Heating Element off (its PID or Hysteresis stops with it), older control Devices disabled, gas burners' Solenoid Gas Valves closed and igniters off. Same code as step 1 of Emergency Off (Rule 6.41). Help 100 and 22.
 - 2026-11-21: Added Rule 16.12 (OakBarn Brewery: "a subclass of sleep in seconds"): `delay 7` waits 7 seconds, the same as `sleep 7000`; decimals and variables work, and it acts as a sleep in every way (Override, Testing speed-up, timeline). Reserved word; in Autofill and the editor colors. Help 22 and 5 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Add a delay command in seconds")
 - 2026-11-21: Added Rule 5.46 (OakBarn Brewery: "Flow is wrong and spurts even when hose bib is turned off = bug"): a Valve with Tap water on and a pipe on its tap side gets its water only along that pipe, as a Hose Bib's Inlet does (Rule 18.52 #7); a closed Hose Bib or valve on that side means no flow and no splash out of it. Fixes the 3 Vessel 1 Pump sample's Brew House Firehose Valve spraying with the Hose Bib off, and the Hose Bib's water standing still under it when on. Help 31 (and French). (thread "Fix wrong water flow and spray")
+- 2026-11-21: Added Rule 2.65 (OakBarn Brewery: "CTRL + F for Find and CTRL + H also as Find and Replace on same Dialog"): the Process Editor and Schema.json already had it (PR #43); the same Find bar now comes to the Process Template editor and the Help text editor (public/findbar.js): Ctrl+F Find, Ctrl+H the same bar on Replace with, every match lit, Replace / Replace all undo with Ctrl+Z, no Replace row on a read only text, keys taken only while that editor has the focus. Help 30 and 12 (and French). Panel only (the BruControl Import program has no big text editor). (thread "Add Find and Replace to the Process Editor")
 - 2026-11-20: Rule 6.15, the Manual valve reminder (OakBarn Brewery): `close_all_valves` is followed by one pop-up "Have you closed all Manual Valves?" and `open_all_valves` by "Have you opened all Manual Valves?"; the Process waits for Done. Only when the Schema has a Manual valve. Help 100.
 - 2026-11-20: Panel Update 8 (OakBarn Brewery, PDF "Panel Update #8", 21 items): Rule 5.28 and 5.45 changed, a Quick Disconnect with nothing on it is open and sprays (was shut, like an End Cap); Rule 6.19 the Methods hotspot (method buttons start hidden; a thin strip just outside the Vessel wall shows or hides them with one click), PID % always two digits, Hysteresis idle / Heat / Cool one width; Rule 6.24 a smooth temperature on the screen (5 s average, 15 s in Simulation; display only); Rule 2.40 a Timer's Digits is called Format, `.format` = `.showas`; Rule 4.4 Timers can be Cloned (item 14 needs nothing); Rule 1.23 Value Widget Format (Fixed, Number, Percent, Scientific, Accounting, Financial, Currency, Currency rounded) with Decimals and a Currency sign; Rule 1.31 Process Widget Hide while running, and the samples' Start Brew Day and Stop (all off) are Process Widgets with no pop-up (items 9, 20, 21); Rule 1.20 a Switch's Slider on top (Layer 1); added Rule 6.41 Emergency Off (Skynet's E-stop button on every page, Image Library picture 238); added Rule 7.26 only what BruControl had gets three backgrounds, a new Skynet Device or Widget has one path (`.path_image`, `.path_audio`), and the Sound Player is now the Audio Widget (AUD, starts hidden); Rule 1.19 there is no Graphic gGlobal (five Kinds; a BruControl Global with a picture imports as a Graphic Widget). Items 10 and 19 (import side, Brew Status as a skn_ value) went to the sandboxes. Help 244, 245 and the pages named in each Rule (English and French).
 
