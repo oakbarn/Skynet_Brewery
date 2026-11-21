@@ -98,7 +98,7 @@ for (const sm of list) {
 
 // ---- run each brew day, fast
 const OLD_NAMES = { testing: 'sw_Status_Testing', advance: 'sw_Advance_BrewStatus', alarms: ['alm_Hops', 'alm_Step', 'alm_Warning'] };
-const NAMES = { 'three-vessel-one-pump': { testing: 'wgt_SW_Testing_BH', advance: 'wgt_SW_Advance_BH', alarms: ['wgt_ALM_Hop~alarm_BH', 'wgt_ALM_Step~alarm_BH', 'wgt_ALM_Warning_BH'] } };
+const NAMES = { 'three-vessel-one-pump': { testing: 'wgt_SW_Testing_BH', advance: 'wgt_SW_Advance_BH', alarms: ['wgt_ALM_Step~alarm_BH', 'wgt_ALM_Warning_BH'] } };
 async function brewDay(id, tweak) {
   const { store, engine, hw } = scratch();
   loadSample(SAMPLES, id, { store, engine, hw });

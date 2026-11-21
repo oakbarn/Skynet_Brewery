@@ -37,6 +37,7 @@ assert.equal(t.tab[0].labelBack, '#eee');
 assert.equal(t.tab[0].labelAlign + t.tab[0].align, 'CenterRight', 'Alignment for the Label and the item');
 for (const id of ['three-vessel-one-pump']) {      // the other samples wait in Sandbox/ (Rule 16.8)
   const c = JSON.parse(fs.readFileSync(new URL(`../samples/configs/${id}/config.json`, import.meta.url)));
-  assert.equal(c.workspaces.find(w => w.name === 'Recipe').style, 'sky_tab_tennyson', `${id}: the Recipe Tab is Tennyson`);
+  // no Recipe Tab: the Recipe is on ☰ Menu > Recipe (OakBarn Brewery, 2026-11-21: "yes to all questions"); a Recipe Tab of the user's own still gets Tennyson
+  assert.ok(!c.workspaces.some(w => w.name === 'Recipe'), `${id}: no Recipe Tab`);
 }
 console.log('styles tests passed');
