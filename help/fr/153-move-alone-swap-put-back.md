@@ -19,6 +19,21 @@ une petite fenêtre demande ce que vous voulez :
 **Don't ask again** déplace les choses avec leurs tuyaux sans demander jusqu'à ce que vous quittiez Edit layout. Sur un Pipe, la fenêtre propose
 **🔓 Unlock its ends** (le tuyau se détache de ce à quoi il est joint et bouge seul), **🗑 Delete Pipe** ou Cancel.
 
+## Unlock its IPs depuis les Properties {#unlock-its-ips-from-properties}
+
+Un IP n'a pas de Properties à lui : il fait partie de l'objet auquel il appartient (Règle 2.9). Donc la **ligne de titre** des
+Properties de tout ce qui a des IPs (un Device, un Widget, une Manual Valve, un Hose Bib, un raccord ou une cuve) a un bouton
+**🔓 Unlock its IPs**, et un Pipe ou un Hose a **🔓 Unlock its ends**. Servez-vous-en quand un tuyau ou un tuyau souple s'est joint à
+quelque chose sans que vous le vouliez, par exemple un tuyau souple qui s'est accroché à l'IP d'un Tee :
+
+1. En **Edit layout**, double-cliquez sur le Tee (ou sur le tuyau souple) pour ouvrir ses Properties.
+2. Appuyez sur **🔓 Unlock its IPs** (sur le tuyau souple : **🔓 Unlock its ends**). Chaque bout de tuyau dessus se détache tout de
+   suite et reste où il est, comme un bout ouvert.
+3. Fermez ou enregistrez (Close ou Save), puis traînez le bout ouvert où vous le voulez. **↩ Put back** (Ctrl+Z) le joint de nouveau.
+
+Le bouton est gris quand rien n'y est joint, quand l'objet est 🔒 verrouillé (déverrouillez-le d'abord) ou quand l'équipement de son
+Tab est verrouillé (lock_Equipment). Posez la souris dessus pour voir pourquoi.
+
 ## Rendre un tuyau plus court ou plus long, et redessiner un tuyau souple {#making-a-pipe-shorter-or-longer-and-redrawing-a-hose}
 
 Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregistré, une fois ses bouts détachés :

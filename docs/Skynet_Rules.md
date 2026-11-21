@@ -2498,6 +2498,12 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and the pipes and fittings stay), **Move it with its pipes** (Rule 5.19 as before), **🔁 Swap places with...** or **Cancel**.
   Unlocking is never done unless the user picks it. **Don't ask again** lasts until Edit layout is left. A Pipe joined to other
   things offers **🔓 Unlock its ends** (it moves alone) or Cancel. A locked item stays locked (Rule 2.12): no pop-up.
+- **🔓 Unlock its IPs in Properties** (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
+  "The hose got connected to a Tee IP and I could not unlock"): an IP has no dialog of its own (Rule 2.9), so the title line of the
+  Properties of anything with IPs (Device, Widget, Manual Valve, Hose Bib, fitting, vessel, a bundled vessel too) has **🔓 Unlock its
+  IPs**, and a Pipe or Hose has **🔓 Unlock its ends**. It does what the pop-up's button does, at once: each pipe or hose end on it
+  lets go where it is (an open end); ↩ Put back (Ctrl+Z) joins them again. It is greyed out when nothing is joined, when the item is
+  🔒 locked (Rule 2.12: unlock it first) or when its Tab's equipment is locked (lock_Equipment). (Help 153)
 - **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
   gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
 - **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the
@@ -2731,6 +2737,23 @@ connected to a Pipe. This is a Bug."; "Flow past a Closed Valve = bug"):
 - **Never past a closed valve:** a pipe joined to a valve goes on the valve's IP on its own side, never on the far IP, where it
   would run under the valve and show flow on the other side. The 3 Vessel 1 Pump sample and the default Schema had the Manifold
   Valve's two pipes the wrong way round (fixed; its Tap water now flows Right to Left, from the tap side to the manifold).
+
+5.46 **A Tap water valve with a pipe on its tap side gets its water along that pipe** (OakBarn Brewery, 2026-11-21, word for
+word: "Flow is wrong and spurts even when hose bib is turned off = bug"). A Valve Device with **Tap water** on (Help 31) is fed the
+same way as a Hose Bib's Inlet (Rule 18.52 #7, "if another valve is on that side, it must be open"):
+- **Nothing joined on its tap side:** the house plumbing is not drawn, so it always has water. Open, it pushes water out of its Out
+  side, as before.
+- **A pipe on its tap side:** it has water only along an open way from a source (an open Hose Bib, a running pump, another Tap water
+  valve that has water), a plain IP end, an open end in the air, or an open valve whose other side has nothing joined. A vessel's port
+  is not a supply. A closed Hose Bib or a closed valve on that side means no water: open or not, nothing comes out of it, no flow and
+  no water splash.
+- **With water:** the pipes from the source to its tap side flow toward it while water goes on out of it; when every way out is
+  closed they stand still (Rule 5.45).
+- Example, the 3 Vessel 1 Pump sample: on the Brew House the Firehose Valve and Manifold Valve Clones are fed by the Hose Bib through
+  a Tee. Before, the Firehose Valve sprayed out of its Quick Disconnect with the Hose Bib closed, and with the Hose Bib open its water
+  stood still under the valve. On the Water Tab both valves are fed from the plain Tap Water Supply IP, so they work as before.
+Help 31 (and French). Checked against both programs: the BruControl Import brings pipes in as they are and draws no flow; nothing
+changes there.
 
 ## 6. Devices, connections and safety
 
@@ -6587,6 +6610,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-21: Added Rule 5.46 (OakBarn Brewery: "Flow is wrong and spurts even when hose bib is turned off = bug"): a Valve with Tap water on and a pipe on its tap side gets its water only along that pipe, as a Hose Bib's Inlet does (Rule 18.52 #7); a closed Hose Bib or valve on that side means no flow and no splash out of it. Fixes the 3 Vessel 1 Pump sample's Brew House Firehose Valve spraying with the Hose Bib off, and the Hose Bib's water standing still under it when on. Help 31 (and French). (thread "Fix wrong water flow and spray")
 - 2026-11-20: Rule 6.15, the Manual valve reminder (OakBarn Brewery): `close_all_valves` is followed by one pop-up "Have you closed all Manual Valves?" and `open_all_valves` by "Have you opened all Manual Valves?"; the Process waits for Done. Only when the Schema has a Manual valve. Help 100.
 - 2026-11-20: Panel Update 8 (OakBarn Brewery, PDF "Panel Update #8", 21 items): Rule 5.28 and 5.45 changed, a Quick Disconnect with nothing on it is open and sprays (was shut, like an End Cap); Rule 6.19 the Methods hotspot (method buttons start hidden; a thin strip just outside the Vessel wall shows or hides them with one click), PID % always two digits, Hysteresis idle / Heat / Cool one width; Rule 6.24 a smooth temperature on the screen (5 s average, 15 s in Simulation; display only); Rule 2.40 a Timer's Digits is called Format, `.format` = `.showas`; Rule 4.4 Timers can be Cloned (item 14 needs nothing); Rule 1.23 Value Widget Format (Fixed, Number, Percent, Scientific, Accounting, Financial, Currency, Currency rounded) with Decimals and a Currency sign; Rule 1.31 Process Widget Hide while running, and the samples' Start Brew Day and Stop (all off) are Process Widgets with no pop-up (items 9, 20, 21); Rule 1.20 a Switch's Slider on top (Layer 1); added Rule 6.41 Emergency Off (Skynet's E-stop button on every page, Image Library picture 238); added Rule 7.26 only what BruControl had gets three backgrounds, a new Skynet Device or Widget has one path (`.path_image`, `.path_audio`), and the Sound Player is now the Audio Widget (AUD, starts hidden); Rule 1.19 there is no Graphic gGlobal (five Kinds; a BruControl Global with a picture imports as a Graphic Widget). Items 10 and 19 (import side, Brew Status as a skn_ value) went to the sandboxes. Help 244, 245 and the pages named in each Rule (English and French).
 

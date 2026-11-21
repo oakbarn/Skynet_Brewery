@@ -4335,7 +4335,8 @@ function ipNode(id, ws) {
     const e = elNamed(dn), on = isOn(e.cloneOf || dn), end = id.slice(id.lastIndexOf(':') + 1);
     // a tap water valve that is open is a source: water pushes out of its out end only (Fritz, 2026-10-21: one way; the tap end
     // takes nothing in), or out of both ends when it is set to Both
-    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
+    // (Rule 5.46: its tap side is a node of its own, so computeFlow can see whether water reaches it along a pipe joined there)
+    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === end ? { key: id, push: true, tapValve: dn } : { key: id, tapValveIn: dn }) : { key: 'dev:' + dn, pass: true };
     if (isThermowell(e)) return { closed: true };       // a thermowell fills its opening: no flow (Rule 5.30)
     if (isInline(e)) return { key: 'dev:' + dn, pass: true };
     if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
@@ -4513,6 +4514,38 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = nu
     if (!out?.push) continue;                              // the Hose Bib is closed: nothing flows in
     for (let x = hit; prev.get(x); x = prev.get(x).from) { const st = prev.get(x); dir.set(st.p.id, -st.d); src.set(st.p.id, better(src.get(st.p.id), { tap: true })); }
   }
+  // A Valve set to Tap water with a pipe on its tap side (OakBarn Brewery, 2026-11-21: "Flow is wrong and spurts even when hose bib is
+  // turned off = bug"; Rule 5.46) is fed the same way as a Hose Bib's Inlet (Rule 18.52 #7): with nothing joined on its tap side the
+  // house plumbing is not drawn and it always has water; with a pipe there, water reaches it only along an open way from a source (an
+  // open Hose Bib, a running pump, another Tap water valve that has water), a plain IP end, an open end in the air or an open valve
+  // whose other side has nothing joined. A vessel's port is not a supply. No water there: nothing comes out of it, open or not.
+  // With water, the pipes from that source to its tap side flow toward it and it pushes out of its Out side as before.
+  const tvFed = [];      // { out, hit, prev }: each Tap water valve fed along its tap side pipe
+  {
+    const tvIns = [...nodes].filter(([k, n]) => n.tapValveIn && pipesOn(k, ws).length);
+    const outOf = dn => [...nodes].find(([, n]) => n.tapValve === dn)?.[1];
+    const fed = new Map();      // tap side IP -> the way water reaches it
+    for (const [k, n] of tvIns) { const o = outOf(n.tapValveIn); if (o) o.push = false; }
+    const supply = (u, m) => { if (m?.push) return true; if (m?.pass) return freeEnd(u);
+      if (!m?.end) return false; const g = L().graphics.find(x => x.id === u && x.kind === 'ip'); return !g?.attachTo && !g?.port; };
+    for (let more = true; more;) {
+      more = false;
+      for (const [k, n] of tvIns) {
+        if (fed.has(k)) continue;
+        const prev = new Map([[k, null]]), q = [k]; let hit = null;
+        while (q.length && !hit) {
+          const u = q.shift(), m = nodes.get(u);
+          if (u !== k && supply(u, m)) { hit = u; break; }
+          if (u !== k && !m?.pass) continue;            // a closed or unfed valve, a pump's inlet, a vessel: no way on
+          for (const { v, p, d } of radj.get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); q.push(v); }
+        }
+        if (!hit) continue;
+        fed.set(k, { hit, prev }); more = true;
+        const o = outOf(n.tapValveIn); if (o) o.push = true;
+      }
+    }
+    for (const [k, f] of fed) tvFed.push({ out: [...nodes].find(([, m]) => m.tapValve === nodes.get(k).tapValveIn)?.[0], ...f });
+  }
   for (const [k, n] of nodes) if (n.pull) trace(k, false);      // first what each pump pulls in, so its outlet knows where the flow began
   // a running pump whose inlet sits inside a vessel and has nothing joined to it (a Sump Pump down in an Ice Water Can, Rule 19.8)
   // draws from that vessel: its flow takes the vessel's Out flow color
@@ -4523,6 +4556,13 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = nu
     if (col) pumpSrc.set(devOfIp(k), { vessel: col });
   }
   for (const [k, n] of nodes) if (n.push) trace(k, true);
+  // the pipes that bring it its water move only while water goes on out of it; with every way out closed they stand still (Rule 5.45)
+  const tvStill = new Map();
+  for (const { out, hit, prev } of [...tvFed].reverse()) {      // last fed first: a valve fed from another one marks that one's way out
+    const moves = (adj.get(out) || []).some(({ p }) => dir.has(p.id));
+    for (let x = hit; prev.get(x); x = prev.get(x).from) { const st = prev.get(x);
+      if (moves) { if (!dir.has(st.p.id)) dir.set(st.p.id, -st.d); src.set(st.p.id, better(src.get(st.p.id), { tap: true })); } else tvStill.set(st.p.id, { tap: true }); }
+  }
   // Gravity flow (Rule 5.21, OakBarn Brewery, 2026-11-16: "Assume gravity flow"): with no pump moving it, liquid runs out of a
   // vessel's low opening along every open path, away from the vessel. A closed valve stops it, a Check Valve only lets it go its
   // own way, and an Off pump lets it through. Skynet does not know real heights, so it is drawn lighter and slower (Fritz's pick).
@@ -4550,6 +4590,7 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null, still = nu
   if (still) {
     const stubOf = new Map(); for (const s of stubs) { if (!stubOf.has(s.key)) stubOf.set(s.key, []); stubOf.get(s.key).push(s.p); }
     const moving = id => dir.has(id) || !!grav?.has(id);
+    for (const [id, o] of tvStill) if (!moving(id)) still.set(id, o);
     const seen = new Set(), queue = [];
     for (const [k, n] of nodes) if (n.push) { seen.add(k); queue.push([k, isTapNode(k, n) ? { tap: true } : pumpSrc.get(devOfIp(k)) || {}]); }
     while (queue.length) {
@@ -4715,6 +4756,33 @@ function unlockJoins(joins) {
     const g = draft.graphics.find(x => x.id === p[k]);
     if (g && at) { g.wasAt = at.map(Math.round); if (ipEnd(was)) g.wasEnd = ipEnd(was); }
   }
+}
+// 🔓 Unlock its IPs in Properties (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
+// Rule 5.37): an IP has no dialog of its own (Rule 2.9), so the Properties of anything with IPs (a Device, Widget, Manual Valve,
+// fitting or vessel) have the grab pop-up's 🔓 Unlock its IPs in the title line, and a Pipe or Hose has 🔓 Unlock its ends. It does
+// the same at once: each pipe end on it lets go where it is (an open end), so it then moves alone. ↩ Put back (Ctrl+Z) joins them
+// again. Greyed out when nothing is joined, or when it is 🔒 locked (Rule 2.12) or on a Tab whose equipment is locked.
+// onLetGo(): after the ends let go (a pipe's own Properties keep its new ends when saved)
+function propsUnlockIps(it, onLetGo) {
+  if (!editing || !it || !(it.kind === 'pipe' || grabIpIds(it).length)) return;
+  const pipe = it.kind === 'pipe', word = pipe ? '🔓 Unlock its ends' : '🔓 Unlock its IPs', who = pipe ? (it.name || (it.hose ? 'This hose' : 'This pipe')) : lockName(it);
+  const joins = grabJoins(it), n = joins.length;
+  const why = profileFrozen(it) ? 'The equipment on this Tab is locked (lock_Equipment); unlock_Equipment first.'
+    : it.locked ? `${who} is 🔒 locked (Rule 2.12). Unlock it first (the 🔒 in this title line, then Save), then open its Properties again.`
+    : !n ? (pipe ? 'Neither end is joined to anything.' : 'No pipe or hose is joined to its IPs.') : '';
+  const tip = (pipe ? `Its ${n === 1 ? 'end lets' : 'ends let'} go of what ${n === 1 ? 'it is' : 'they are'} joined to and stay open, so the ${it.hose ? 'hose' : 'pipe'} moves alone.`
+    : `The ${n === 1 ? 'pipe end' : n + ' pipe ends'} on its IPs let go and stay where they are (open ends), so it moves alone and the pipes and fittings stay.`)
+    + ' It happens at once; ↩ Put back (Ctrl+Z) joins them again (Rule 5.37).' + (why ? `\n\nNot now: ${why}` : '');
+  const b = h('button', { type: 'button', class: 'propsUnlockIps tipLbl', 'data-help': tip, disabled: !!why || null }, word);
+  b.onclick = ev => {
+    ev.preventDefault(); if (b.disabled) return;
+    const now = grabJoins(it); if (!now.length) return;
+    pushUndo(`unlock ${who}`); unlockJoins(now); grabWith.delete(it.id || it.name); onLetGo?.(); renderWs();
+    b.disabled = true; b.textContent = pipe ? '🔓 Ends let go' : '🔓 IPs let go';
+    toast(`🔓 ${who}: ${now.length} ${pipe ? 'end' : 'pipe end'}${now.length > 1 ? 's' : ''} let go. Close or Save, then grab it and move it alone. ↩ Put back (Ctrl+Z) joins ${now.length > 1 ? 'them' : 'it'} again.`, false, 7000);
+  };
+  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b);
+  setTimeout(() => setTimeout(() => { const ttl = $('#dlgTitle'); for (const o of ttl.querySelectorAll('.ttlExtra[data-for="_unlockIps"]')) o.remove(); ttl.append(t); }, 0), 0);      // after the lock, Visible and Hidden Locked
 }
 // an item dropped where something let go of its pipes: each open end whose IP was within REJOIN_PX of the same end of this item
 // (the inlet on an inlet ...) joins it again, as it was (Rule 5.37). Returns how many joined.
@@ -12085,6 +12153,7 @@ async function attrEntry(attr, obj) {
 async function editBundle(v) {
   const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked, x: v.x || 0, y: v.y || 0 };
   const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
+  propsUnlockIps(v);      // 🔓 Unlock its IPs in the title line (Rule 5.37)
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
     ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
     ['x', 'X Horizontal (the whole bundle moves)', 'num'], ['y', 'Y Vertical (the whole bundle moves)', 'num'],
@@ -12368,6 +12437,7 @@ async function editItem(kind, id) {
   // a Heating Element just added from a Method row (OakBarn Brewery's markup: "choosing Duty Cycle one creates a Heating Element Device that
   // first presents the Duty Cycle Attributes"): its Current Method's ⬢ Settings open on top of its Properties
   if (kind === 'el' && item._openMethod) { delete item._openMethod; setTimeout(() => $('#dlgBody .methodPopBtn')?.click(), 50); }
+  propsUnlockIps(item, () => { if (item.kind === 'pipe') { work.from = item.from; work.to = item.to; } });      // 🔓 Unlock its IPs / its ends in the title line (Rule 5.37)
   let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? (isTapMv(item) ? 'Hose Bib Widget' : 'Manual Valve Widget') : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(kind !== 'el' && !isMv(item) && !['text', 'override', 'clone'].includes(type) ? gfxModelOf(fields, item) : fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {
