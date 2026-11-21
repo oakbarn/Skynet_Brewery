@@ -320,6 +320,7 @@ async function load() {
   $('#code').readOnly = !can('admin');
   rememberTheme(applyTheme(document, S.config.theme).key);     // the Look of this Schema (Rule 2.39)
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
+  showBreweryName();
   document.title = S.config.title || 'Skynet Brew Panel';
   showPanelVer();
   officialWarn();
@@ -8664,6 +8665,10 @@ const menuBarHides = () => S?.config?.brewDefaults?.hideMenuBar !== false;
 const menuBarHidden = () => view === 'workspace' && !menuTab && menuBarHides() && !document.body.classList.contains('menuBarOn');
 // Fritz, 2026-10-21: only the Tabs themselves lose the Menu Bar; every Menu tab (Zoom, Default, About ...) and every other page keeps it
 function markOnTabs() { document.body.classList.toggle('onTabs', view === 'workspace' && !menuTab); document.body.classList.toggle('onWorkspace', view === 'workspace'); }
+// the Brewery Name on every Tab's menu bar (OakBarn Brewery, 2026-11-21: "It is Just a Name we can display at the top of every tab menu
+// bar"): ☰ Menu > Default settings > Brewery Name, OakBarn Brewery unless changed
+const BREWERY_NAME = 'OakBarn Brewery';
+function showBreweryName() { const el = $('#barBrewery'); if (el) el.textContent = S.config?.brewDefaults?.breweryName || BREWERY_NAME; }
 function showMenuBar(on) {
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   document.body.classList.toggle('menuBarOn', on);
@@ -16362,6 +16367,7 @@ const RTC_SIZE_TIP = `The size, in pixels, of large text: the \\L code in Proces
 const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
 // the New User Templates and Schemas boxes' hover help (OakBarn Brewery, 2026-11-14: "These are for new User Created only")
 const NEW_TIPS = {
+  brewery: 'Your brewery\'s name, shown at the top of every Tab\'s menu bar. Empty: OakBarn Brewery.',
   look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in Settings > Panel settings.',
   lockout: 'How long a new Pulse button waits before another press counts, in seconds. Each button can change its own in its Properties.' };
 // the Hover Delay box's own hover help (Rule 2.38)
@@ -16370,29 +16376,28 @@ const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover
 const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColor: FRESH_LABEL.fore, labelBackColor: FRESH_LABEL.back, labelAlign: FRESH_LABEL.align,
   labelBold: FRESH_LABEL.bold, labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back,
   textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height });
-// The boil temperature place on Default settings (OakBarn Brewery, 2026-11-21): the same three boxes as Settings > Boil temperature
+// The boil temperature place on Default settings (OakBarn Brewery, 2026-11-21): Airport and Elevation, the same boxes as Settings > Boil
+// temperature. The Typed air pressure is not a default (OakBarn Brewery, 2026-11-21: "not a default but a skynet variable set on a Brew
+// Day"), so it is not here and Default settings never changes it
 const BT_TIPS = {
   airport: 'Your airport\'s 4 letter ICAO code (the code pilots use), for example KORD. It is the weather station Skynet reads the air pressure from, to work out the temperature water boils at here (skn_Boil_Temp). It works only with a correct ICAO code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air. The same box as Settings > Boil temperature. Help: Boil temperature from the air pressure tells how to find your code.',
-  elev: 'The brewery\'s height above sea level, in feet for US Units and metres for Metric (kept in metres). It starts as the airport\'s own height; change it when the brewery sits higher or lower than the airport. The same box as Settings > Boil temperature.',
-  press: 'Leave empty to use the airport\'s report. A pressure typed here is used as it is, with no internet. Type it in inHg (15.9 to 32.05) or hPa (540 to 1085); Skynet knows which by its size. A number outside those is not an air pressure and is not used. The same box as Settings > Boil temperature.' };
+  elev: 'The brewery\'s height above sea level, in feet for US Units and metres for Metric (kept in metres). It starts as the airport\'s own height; change it when the brewery sits higher or lower than the airport. The same box as Settings > Boil temperature.' };
 const MD_TIPS = {
   graphic: 'Where your own pictures are (normally Images: the picture groups are folders in it). Empty: Images. A Process can give only a file name and Skynet looks here first. The same box as Settings > Panel settings > Default folders (Rule 7.23).',
   audio: 'Where your own sounds are (normally sounds). Empty: sounds. A Process can give only a file name and Skynet looks here first. The same box as Settings > Panel settings > Default folders (Rule 7.23).' };
-// the three boxes as they show (feet / inHg for US, metres / hPa for Metric), and what goes back to the Brain: a box not changed keeps
-// the exact saved number
+// the two boxes as they show (feet for US, metres for Metric), and what goes back to the Brain: a box not changed keeps the exact saved
+// number, and the Typed air pressure goes back as it was
 function btBoxes(set, metric) {
-  return { _btAirport: set.airport ?? '', _btElev: set.elevationM == null ? '' : Math.round(metric ? set.elevationM : set.elevationM / BT_FT),
-    _btPress: set.pressureHpa == null ? '' : (metric ? round1(set.pressureHpa) : +(set.pressureHpa / BT_INHG).toFixed(2)) };
+  return { _btAirport: set.airport ?? '', _btElev: set.elevationM == null ? '' : Math.round(metric ? set.elevationM : set.elevationM / BT_FT) };
 }
 function btSend(now, set, was, metric) {
-  const e = now._btElev, p = now._btPress;
+  const e = now._btElev;
   const elevationM = e === '' ? null : String(e) === String(was._btElev) ? set.elevationM : (metric ? +e : +e * BT_FT);
-  const pressure = p === '' ? null : String(p) === String(was._btPress) ? set.pressureHpa : +p;      // read as inHg or hPa by its size
-  return { airport: now._btAirport, elevationM, pressure };
+  return { airport: now._btAirport, elevationM, pressure: set.pressureHpa ?? null };
 }
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
-    newSchemaLook: 'officeBlack', ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
+    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
   const shownMetric = d.units === 'Metric', shownUnits = d.units;      // what the boxes show now; Units changed here applies after Save
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
@@ -16402,9 +16407,14 @@ function renderDefaultTab(box) {
   const fields = w => [['_d', 'Every default is here, for every Schema. Some are also in Settings; both places change the same setting (Rule 2.42).', 'note'],
     ['_ub', 'Units and your brewery', 'head'],
     unitsRow,
+    // Brewery Name (OakBarn Brewery, 2026-11-21: "Default Brewery Name (Patron Level)"; "It is Just a Name we can display at the top of
+    // every tab menu bar"; "greyed out later if not a Patron": Panel Updates)
+    ['breweryName', 'Brewery Name', 'text', null, false, false, { tip: NEW_TIPS.brewery }],
+    // the same boxes and Test as Settings > Boil temperature (air pressure) (OakBarn Brewery, 2026-11-21: "There is no test beside the
+    // ICOA field")
+    ['_btH', 'Boil temperature (air pressure)', 'head'],
     ['_btAirport', 'Airport (ICAO)', 'text', null, false, false, { tip: BT_TIPS.airport }],
     ['_btElev', `Elevation (${shownMetric ? 'm' : 'ft'})`, 'num', null, false, false, { tip: BT_TIPS.elev }],
-    ['_btPress', `Typed air pressure (${shownMetric ? 'hPa' : 'inHg'})`, 'num', null, false, false, { tip: BT_TIPS.press }],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
     ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
@@ -16475,17 +16485,30 @@ function renderDefaultTab(box) {
   Object.assign(d, mdWas);
   const f = paneForm(fields, d, () => { }, !admin);
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
+  // Test beside the Airport (ICAO) box: keeps the Airport and Elevation as typed (as Test in Settings does), fetches the report now
+  // and shows the airport, the air pressure and the boil temperature
+  const btRes = h('div', { class: S.boil?.note ? 'btWarn' : 'muted', style: 'grid-column:1/-1' }, btLine(S.boil));
+  const btTest = h('button', { type: 'button', title: 'Fetch the airport\'s report now and show its pressure and the boil temperature', ...(admin ? {} : { disabled: true }), onclick: guard(async () => {
+    const now = { _btAirport: String(f.box.querySelector('[data-k="_btAirport"]')?.value ?? '').trim().toUpperCase(), _btElev: f.box.querySelector('[data-k="_btElev"]')?.value ?? '' };
+    btRes.textContent = 'Getting the report...';
+    await api('PUT', '/ui/boiltemp', btSend(now, bt, btWas, shownMetric));
+    S.boil = await api('POST', '/ui/boiltemp/test');
+    btRes.textContent = btLine(S.boil); btRes.className = S.boil.note ? 'btWarn' : 'muted'; }) }, 'Test');
+  const apIn = f.box.querySelector('[data-k="_btAirport"]');
+  if (apIn) { const wrap = h('span', { style: 'display:flex;gap:8px;align-items:center' }); apIn.replaceWith(wrap); wrap.append(apIn, btTest); f.box.querySelector('[data-k="_btElev"]')?.closest('.menuForm > *')?.after?.(btRes); }
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
     f.read();
     // the Panel settings boxes are here too (2026-11-21, Rule 2.42): empty = Skynet's own, as in Settings > Panel settings
     for (const k of PANEL_SET_KEYS) if (d[k] === undefined || d[k] === '' || d[k] === null) delete d[k];
+    if (typeof d.breweryName === 'string') d.breweryName = d.breweryName.trim();
+    if (!d.breweryName) delete d.breweryName;
     if (d.pushLockout !== undefined && !(+d.pushLockout >= 0.1 && +d.pushLockout <= 60)) throw new Error('Push Lockout must be 0.1 to 60 seconds (or empty: 3)');
-    const btNow = { _btAirport: String(d._btAirport ?? '').trim().toUpperCase(), _btElev: d._btElev ?? '', _btPress: d._btPress ?? '' };
-    const btChanged = btNow._btAirport !== btWas._btAirport || String(btNow._btElev) !== String(btWas._btElev) || String(btNow._btPress) !== String(btWas._btPress);
+    const btNow = { _btAirport: String(d._btAirport ?? '').trim().toUpperCase(), _btElev: d._btElev ?? '' };
+    const btChanged = btNow._btAirport !== btWas._btAirport || String(btNow._btElev) !== String(btWas._btElev);
     const mdNow = { userGraphic: String(d._mdUserG ?? '').trim(), userAudio: String(d._mdUserA ?? '').trim() };
     const mdChanged = mdNow.userGraphic !== mdWas._mdUserG || mdNow.userAudio !== mdWas._mdUserA;
-    for (const k of ['_btAirport', '_btElev', '_btPress', '_mdUserG', '_mdUserA', '_grainLabel']) delete d[k];
+    for (const k of ['_btAirport', '_btElev', '_mdUserG', '_mdUserA', '_grainLabel']) delete d[k];
     for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight']) if (d[k] === '' || d[k] === null) delete d[k];
     for (const k of Object.keys(d)) if (k.startsWith('ns_')) delete d[k];
     delete d.textWrap;      // Word wrap is always on (2026-11-17)      // the New Schema answers left Default settings (2026-11-17)
@@ -16506,7 +16529,7 @@ function renderDefaultTab(box) {
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
     // the boil temperature place first: the Brain checks it (an Elevation out of range, a pressure that is no air pressure)
     if (btChanged) S.boil = await api('PUT', '/ui/boiltemp', btSend(btNow, bt, btWas, shownMetric));
-    await api('PUT', '/ui/settings', { brewDefaults: d, ...(mdChanged ? { mediaDefaults: mdNow } : {}) }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay);
+    await api('PUT', '/ui/settings', { brewDefaults: d, ...(mdChanged ? { mediaDefaults: mdNow } : {}) }); S.config.brewDefaults = d; showBreweryName(); showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay);
     await tap.save();      // Tap Water is saved with the rest (one Save for the whole tab)
     if (mdChanged) S.config.mediaDefaults = Object.fromEntries(Object.entries(mdNow).filter(([, v]) => v));
     profDirty.default = false; renderWs(); renderMenuPane(); renderPanelSettings(); savedPop('Defaults saved'); });

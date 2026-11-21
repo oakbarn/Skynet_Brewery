@@ -861,6 +861,8 @@ button.barEdit:hover { background: #2a6bd1; }
 button.barEdit:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
 button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
 /* Simulator / Real switch for the whole panel (Fritz, 2026-10-27): green = real boards, yellow stripes = simulator */
+/* the Brewery Name on every Tab's menu bar (☰ Menu > Default settings, 2026-11-21) */
+.barBrewery { font-weight: bold; font-size: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
 button.barSim { min-height: 0; height: 30px; padding: 0 10px; border-radius: 15px; font-weight: bold; white-space: nowrap; background: #2e7d32; color: #fff; border: 1px solid #1b5e20; }
 button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, #fbe36b 8px 16px); color: #000; border-color: #8a6d00; }
 /* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */

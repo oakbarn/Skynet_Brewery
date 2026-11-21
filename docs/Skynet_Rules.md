@@ -968,9 +968,17 @@ Help 155).
 - **Added 2026-11-21 under THE RULE** (OakBarn Brewery: "Several Items are missing on the default settings page. They may also be
   somewhere else but every default needs to be on the Default Settings as well. Missing: US/Metric, ICOA, Brewery Elevation"). These
   are on the Default settings page and also stay in Settings, the same saved value in both:
-  - **Units and your brewery** (at the top): **Units** (Settings > Panel settings), **Airport (ICAO)**, **Elevation** and **Typed air
-    pressure** (Settings > Boil temperature, Rule 1.18; Elevation kept in metres, shown in feet or metres per Units, Rule 2.59; the
-    boxes are typed in the Units they show, and a box not changed keeps the exact saved number).
+  - **Units and your brewery** (at the top): **Units** (Settings > Panel settings), **Airport (ICAO)** and **Elevation** (Settings >
+    Boil temperature, Rule 1.18; Elevation kept in metres, shown in feet or metres per Units, Rule 2.59; the boxes are typed in the
+    Units they show, and a box not changed keeps the exact saved number). Airport and Elevation sit under their own title **Boil
+    temperature (air pressure)**, with a **Test** button beside Airport (ICAO), the same as in Settings (OakBarn Brewery, 2026-11-21:
+    "There is no test beside the ICOA field").
+  - **Brewery Name** (Units and your brewery; OakBarn Brewery, 2026-11-21: "Default Brewery Name (Parton Level)"; "It is Just a Name we
+    can display at the top of every tab menu bar"): shown on every Tab's menu bar; **OakBarn Brewery** unless changed (empty = OakBarn
+    Brewery). Patron Level: later greyed out for anyone who is not a Patron ("greyed out later if not a Patron", Panel Updates).
+  - **Not a default: the Typed air pressure** (OakBarn Brewery, 2026-11-21: "Typed Air Pressure is not a default but a skynet variable
+    set on a Brew Day in the interview. If skipped use standard day"). It is not on Default settings, and saving Default settings never
+    changes it. Skipped (empty): the airport's report, else a standard day (standard air at the brewery's Elevation, Rule 1.18).
   - **Default folders**: User Graphic and User Audio (Settings > Panel settings > Default folders, Rule 7.23).
   - **Panel settings (also in Settings)** (at the bottom): every box of Settings > Panel settings: screen, Tabs and alerts (Shut Down
     Brain Option, Tab Style, Menu Bar, Sound, On startup, \L Rich Text Code Size, Hover Delay, Push Lockout, Phones and tablets, Grain

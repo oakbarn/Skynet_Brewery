@@ -13,12 +13,15 @@ endroits montrent et changent le **même** réglage : changez-le dans l'un et l'
 
 | Réglage | Ce qu'il fait |
 |---|---|
+| **Brewery Name** | Le nom de votre brasserie, affiché en haut de la barre de menu de chaque Tab. Vide : OakBarn Brewery. |
 | **Units** | US (gallons, livres, °F) ou Métrique (litres, kilogrammes, °C). Chaque quantité et température s'affiche dans ce choix. Skynet garde chaque nombre en métrique, donc il change seulement ce que vous voyez et tapez (Règle Skynet 2.59). Aussi dans Settings > Panel settings. |
+| *Boil temperature (air pressure)* | Les deux cases ci-dessous, sous leur propre titre : les mêmes que Settings > Boil temperature (air pressure). |
 | **Airport (ICAO)** | Le code à 4 lettres de l'aéroport le plus proche qui a un bulletin météo (sa station METAR), par exemple `KDFW`. Skynet lit sa pression de l'air pour trouver la température à laquelle l'eau bout ici (`skn_Boil_Temp`). Aussi dans Settings > Boil temperature. |
 | **Elevation** | L'altitude de votre brasserie au-dessus du niveau de la mer : en pieds pour les Units US, en mètres pour Métrique (gardée en mètres). Aussi dans Settings > Boil temperature. |
-| **Typed air pressure** | Laissez vide pour utiliser le bulletin de l'aéroport. Aussi dans Settings > Boil temperature. |
 
 Les cases se tapent dans les Units qu'elles montrent. Changez **Units** et appuyez sur **Save**, et les cases s'affichent ensuite dans les nouvelles Units.
+**Test** à côté d'Airport (ICAO) garde l'Airport et l'Elevation tels que tapés, va chercher le bulletin de l'aéroport tout de suite et montre l'aéroport, la pression de l'air et la température d'ébullition sous Elevation (comme Test dans Settings).
+La **Typed air pressure** n'est pas ici : ce n'est pas un réglage par défaut. C'est la pression de l'air d'un jour de brassage, dans Settings > Boil temperature ; laissée vide, Skynet utilise le bulletin de l'aéroport, ou une journée standard à votre Elevation.
 Comment trouver le code de votre aéroport et votre Elevation : [Température d'ébullition selon la pression de l'air](238-boil-temperature).
 
 ## Tuyaux, flexibles et tailles {#pipes-hoses-and-sizes}

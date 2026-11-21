@@ -13,12 +13,15 @@ and change the **same** setting: change it in one and the other shows it.
 
 | Setting | What it does |
 |---|---|
+| **Brewery Name** | Your brewery's name, shown at the top of every Tab's menu bar. Empty: OakBarn Brewery. |
 | **Units** | US (gallons, pounds, °F) or Metric (liters, kilograms, °C). Every amount and temperature shows in it. Skynet keeps every number in metric, so it only changes what you see and type (Skynet Rule 2.59). Also in Settings > Panel settings. |
+| *Boil temperature (air pressure)* | The two boxes below, under their own title: the same as Settings > Boil temperature (air pressure). |
 | **Airport (ICAO)** | The 4 letter code of your nearest airport with a weather report (its METAR station), for example `KDFW`. Skynet reads its air pressure to work out the temperature water boils at here (`skn_Boil_Temp`). Also in Settings > Boil temperature. |
 | **Elevation** | Your brewery's height above sea level: feet for US Units, metres for Metric (kept in metres). Also in Settings > Boil temperature. |
-| **Typed air pressure** | Leave it empty to use the airport's report. Also in Settings > Boil temperature. |
 
 Boxes are typed in the Units they show. Change **Units** and press **Save**, and the boxes then show in the new Units.
+**Test** beside Airport (ICAO) keeps the Airport and Elevation as typed, fetches the airport's report now and shows the airport, the air pressure and the boil temperature under Elevation (the same as Test in Settings).
+The **Typed air pressure** is not here: it is not a default. It is the air pressure on one Brew Day, in Settings > Boil temperature; left empty, Skynet uses the airport's report, or a standard day at your Elevation.
 How to find your airport's code and your Elevation: [Boil temperature from the air pressure](238-boil-temperature).
 
 ## Pipes, hoses and sizes
