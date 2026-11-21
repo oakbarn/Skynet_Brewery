@@ -1,7 +1,7 @@
 //BrewDay_Flow
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
-//Brew day, step by step, like BruControl: the message box says what to do, the red label is the question,
+//Brew day, step by step: the message box says what to do, the red label is the question,
 //click the green switch to advance (gblV_Brew_Status + 1). Blue = the panel is working, it moves on by itself.
 //Testing switch on: every minute runs as one second.
 step 1.00000 "Start"

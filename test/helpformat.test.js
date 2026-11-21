@@ -4,20 +4,21 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const IMPORT_PAGES = new Set(['08-import.md', '143-brucontrol-importer.md', '165-importer-item-and-widget-pages.md']);
-// pages that only name the Import screen or the BruControl Import program, with no differences (Rule 11.3)
-const NAMES_THE_IMPORT = new Set(['01-getting-started.md', '44-schema-json.md', '67-every-screen-in-the-menu.md']);
+// BruControl is a forbidden word in the Skynet Panel; only the Importer uses it (Rule 11.3, OakBarn Brewery 2026-11-21: "BruControl is
+// a forbidden word in Skynet Panel and Only used in the Importer"). The Importer's own Help pages are kept in help/ but not listed in the Panel.
+import { IMPORTER_HELP } from '../lib/help.js';
 for (const f of fs.readdirSync('help').filter(f => f.endsWith('.md'))) {
   const t = fs.readFileSync(`help/${f}`, 'utf8');
   assert.ok(!/fritz/i.test(t), `help/${f} names a person (Rule 11.5)`);
-  if (IMPORT_PAGES.has(f)) continue;
+  if (IMPORTER_HELP.has(f.slice(0, -3))) continue;
   const lines = t.split('\n').filter(l => /brucontrol/i.test(l));
-  if (NAMES_THE_IMPORT.has(f)) {
-    for (const l of lines) assert.match(l, /BruControl (Schema|Importer)/, `help/${f}: only the Import may be named (Rule 11.3): ${l}`);
-    continue;
-  }
-  assert.deepEqual(lines, [], `help/${f} has BruControl text; it belongs in the Importer Help (Rule 11.3)`);
+  assert.deepEqual(lines, [], `help/${f} has the word BruControl; it is only used in the Importer (Rule 11.3)`);
 }
+for (const f of fs.readdirSync('help/fr').filter(f => f.endsWith('.md') && !IMPORTER_HELP.has(f.slice(0, -3))))
+  assert.ok(!/brucontrol/i.test(fs.readFileSync(`help/fr/${f}`, 'utf8')), `help/fr/${f} has the word BruControl (Rule 11.3)`);
+// the Panel's own page: no BruControl in what it shows (comments left out)
+const shown = fs.readFileSync('public/index.html', 'utf8').split('<!--').map((part, i) => (i ? part.slice(part.indexOf('-->') + 3) : part)).join('');      // each comment cut at its end
+assert.doesNotMatch(shown, /BruControl/i, 'public/index.html shows BruControl (Rule 11.3)');
 // the text taken out of the Help is kept in the Sandbox of the private Skynet_Private repo (Rules 11.3, 13.7), not in this repo
 // the GitHub front page is the Skynet version too: no BruControl (OakBarn Brewery, 2026-11-12); the Importer has its own Read Me
 assert.doesNotMatch(fs.readFileSync('README.md', 'utf8'), /BruControl/, 'README.md is the Skynet version: no BruControl (Rule 11.3)');

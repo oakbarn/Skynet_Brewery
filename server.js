@@ -39,7 +39,6 @@ import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { parseWifiReport, hydroFor, decodeBle, hydroForBle } from './public/hydrometer.js';
 import { importBeerXml } from './lib/beerxml.js';
-import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas, tabLockedMsg } from './lib/schemas.js';
@@ -62,7 +61,7 @@ import { MediaFiles } from './lib/mediafiles.js';
 import { FileMove, missingMedia, ownMedia } from './lib/filemove.js';
 import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain } from './lib/values.js';
-import { Help } from './lib/help.js';
+import { Help, IMPORTER_HELP } from './lib/help.js';
 import { englishPieces, exportParts, importParts, keepEnglish, ownKeep, saveOwnKeep, userLanguage, userBalloons, userStatus, userFonts, addUserFont, removeUserFont, packageFonts, fontsCss, fontFileName, FONT_TYPES, PART_KB } from './lib/helplang.js';
 import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
@@ -1006,17 +1005,6 @@ async function route(req, res) {
     return ok(res, mqttView());
   }
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
-  if (p === '/ui/import/brucontrol' && m === 'POST') {
-    const q = url.searchParams;
-    { const lk = q.get('preview') !== '1' && (store.config.workspaces || []).find(w => w.equipLocked); if (lk) return fail(res, 409, tabLockedMsg(lk)); }
-    const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'Images', simulate: q.get('simulate') !== '0' });
-    const missingMedia = conv.media.filter(f => { const full = findMedia(f); return !full || !fs.existsSync(full); });
-    const out = { summary: conv.summary, warnings: conv.warnings, missingMedia, mediaCount: conv.media.length, autostart: conv.autostart };
-    if (q.get('preview') === '1') return ok(res, { ok: true, preview: true, ...out });
-    const applied = applyBruControl(conv, { store, engine, mode: q.get('mode') === 'merge' ? 'merge' : 'replace', overwriteScripts: q.get('overwrite') !== '0' });
-    hw.restart();
-    return ok(res, { ok: true, ...out, ...applied });
-  }
   // Config Editor (admin only, see needRole)
   // The Config Editor never shows the hidden keys; on Save each item gets its key back by its name (lib/keys.js)
   // no copy on opening: one is made before every save or restore (Rule 9.17)
@@ -1624,7 +1612,7 @@ async function route(req, res) {
   // Help tab: everyone reads, admins edit
   // ?lang=fr: the French Help (Rule 11.11); a page not translated yet comes in English
   const hl = help.translation(url.searchParams.get('lang'));
-  if (p === '/ui/help' && m === 'GET') return ok(res, hl.list());
+  if (p === '/ui/help' && m === 'GET') return ok(res, hl.list().filter(pg => IMPORT_BUILD || !IMPORTER_HELP.has(pg.name)));      // the Importer's pages are not the Panel's (Rule 11.3)
   if (p === '/ui/help' && m === 'POST') { const { title } = await jsonBody(req); return ok(res, { ok: true, name: hl.create(title) }); }
   const hp = /^\/ui\/help\/([^/]+)$/.exec(p);
   if (hp) {

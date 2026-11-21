@@ -15,7 +15,7 @@ export const DATETIME_FORMATS = [['', 'mm/dd/yyyy hh:mm:ss (11/09/2026 14:30:00)
   ['MM/dd/yyyy h:mm tt', '11/09/2026 2:30 PM'], ['MM/dd/yyyy', 'Date only (11/09/2026)'], ['MMM d, yyyy', 'Nov 9, 2026'],
   ['dddd, MMMM d, yyyy', 'Monday, November 9, 2026'], ['h:mm:ss tt', 'Clock (2:30:00 PM)'], ['h:mm tt', 'Clock (2:30 PM)'],
   ['HH:mm', '24-hour clock (14:30)'], ['ddd h:mm tt', 'Day and clock (Mon 2:30 PM)'], ['yyyy-MM-dd HH:mm:ss', '2026-11-09 14:30:00']];
-export const formatChoices = (list, cur) => (cur && !list.some(([k]) => k === cur) ? [...list, [cur, `${cur} (typed or from BruControl)`]] : list);
+export const formatChoices = (list, cur) => (cur && !list.some(([k]) => k === cur) ? [...list, [cur, `${cur} (typed or imported)`]] : list);
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

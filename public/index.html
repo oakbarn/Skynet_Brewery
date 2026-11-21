@@ -238,7 +238,7 @@
       <button id="cfgReload" title="Throw away unsaved changes and read the file again">Reload</button>
       <button id="cfgBackups">Backups</button>
       <button id="cfgExport" title="Save a Schema as a .json file on this computer (your Downloads folder)">Save as .json file</button>
-      <button id="cfgImport" title="Open a Schema file: one the BruControl Importer saved in the Brewing\Import folder, or a .json file on this computer">Open a Schema file</button>
+      <button id="cfgImport" title="Open a Schema file: one the Importer saved in the Brewing\Import folder, or a .json file on this computer">Open a Schema file</button>
     </div>
     <p id="cfgBackupNote" class="cfgNote"></p>
     <div class="editor"><pre id="cfgGutter"></pre><div class="codeWrap"><pre id="cfgCodeHl" aria-hidden="true"></pre><textarea id="cfgCode" spellcheck="false" wrap="off"></textarea></div></div>
@@ -319,21 +319,6 @@
     <button id="importBtn" class="primary op-only">Import</button>
     <pre id="importResult"></pre>
     <p class="muted">Other programs (Node-RED etc.) can POST the .bsmx or .xml file to <code>/api/import/recipe?file=MyBeer.bsmx</code>, or a Process can use <code>import_recipe "Recipes/MyBeer.bsmx"</code>.</p>
-
-    <div class="admin-only">
-    <h3 id="sec-brucontrol">BruControl Schema</h3>
-    <p>Choose a BruControl Schema file (BruControl calls it a configuration file, <code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, Devices, tabs (BruControl workspaces), Widgets and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
-    <input type="file" id="bruFile" accept=".brucfg,.xml">
-    <div class="import-opts">
-      <label>What to do <select id="bruMode"><option value="replace">Replace my Tabs, Devices and Widgets</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
-      <label class="toggle"><input type="checkbox" class="swc" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
-      <label class="toggle"><input type="checkbox" class="swc" id="bruOverwrite" checked> Replace processes with the same name (old copy kept as .bak)</label>
-      <label>Picture folder <input id="bruMedia" value="Images" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
-    </div>
-    <button id="bruPreview">Check file</button>
-    <button id="bruImport" class="primary">Import</button>
-    <pre id="bruResult"></pre>
-    </div>
   </section>
 
   <!-- ===== Media: add pictures and sounds from any browser (looks like Windows File Explorer) ===== -->

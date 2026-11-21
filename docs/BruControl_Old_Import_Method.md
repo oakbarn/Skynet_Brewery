@@ -9,8 +9,8 @@ since 2026-10-04. It is kept so we can look things up while the **new import fun
 built one step at a time. The new function does **not** use the old method. Each step of the new one is decided with Fritz,
 and this page shows how the old method did that part, as a starting point.
 
-The old method is still in the Panel: the older **Import BruControl** page (`/ui/import/brucontrol`) and the BruControl
-samples use it. It is not changed.
+The old method's code (`lib/brucontrol.js`) is kept and is not changed. Its page in the Panel (**Import > BruControl Schema**,
+`/ui/import/brucontrol`) was taken out on 2026-11-21 (Rule 11.3: BruControl is a forbidden word in the Panel; only the Importer uses it).
 
 ## Where it is
 

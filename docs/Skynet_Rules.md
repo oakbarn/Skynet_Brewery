@@ -73,8 +73,8 @@ Companion documents (look things up there, do not copy them here):
 
 ## 1. Words we use (terminology)
 
-1.1 **Schema** = a setup or configuration, on screen and in the Help. A BruControl .brucfg file is a
-"BruControl Schema". (2026-10-19, PR #42)
+1.1 **Schema** = a setup or configuration, on screen and in the Help. (2026-10-19, PR #42) *Changed 2026-11-21 (Rule 11.3):* the
+words "BruControl Schema" are no longer Panel wording; only the Importer names a BruControl file.
 
 1.2 **Device** = something tied to a port on a PLC board. **Widget** = something that lives only in
 the app, with no PLC port (pipes, IPs, text, pictures, vessels drawn on screen). A Widget must never
@@ -365,7 +365,7 @@ Process picked** when it has none) and a **▶ Start** / **■ Stop** button.
 - **Its name:** in Skynet a script is a Process (Rule 1.4), so it is the Process Widget (OakBarn Brewery, 2026-11-09: "Process Widget").
   It is a **Switch Widget that is a Process subclass** (OakBarn Brewery, 2026-11-18: "A Switch Widget that is a Process subclass"), so
   its type letters are **PSW** (P Process + SW Switch).
-- **BruControl Import:** checked against both programs. The Importer and the older import in the Panel make each BruControl **Script
+- **BruControl Import:** checked against both programs. The Importer (and the older one-step import, taken out of the Panel 2026-11-21, Rule 11.3) make each BruControl **Script
   element** a Process Widget that shows the BruControl Script of the same name (it is that Process once the Processes come in); the
   Script element's variable is kept with what BruControl had (`.bru`), and one BruControl marked as not user controlled gets When
   tapped: none (Rule 2.44). The Importer's Widget pages list it as Process Widget. Help 173.
@@ -1437,7 +1437,8 @@ for a big delete or change. They all ask in **one shared Skynet box** (public/sk
   Patron code; Turn Approved Devices Off; Make a new recovery code; the BruControl Import; Switch / load a Schema; Simulator or Real
   boards; Move in (Brain Move); Save the config file and Put back an old one. The small "leave without saving?" questions stay as
   they are.
-**Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asks in this box.
+**Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asked in this box until it
+was taken out of the Panel (2026-11-21, Rule 11.3).
 Help 28, 48, 119, 188.
 
 ## 3. Names and file names
@@ -4533,12 +4534,20 @@ PR #57)
 Importer Help. Skynet Help and Hover Help take all references to Brucontrol Out. They can be added from the Skynet Pane Help when we
 update it for the Importer Help so keep the extracted help in a Sand Box."; "Hold off on the Import Help until we finish the SkyPanel
 Help").
+  - **BruControl is a forbidden word in the Skynet Panel** (OakBarn Brewery, 2026-11-21: "Wrong. BruControl is a forbidden word in
+    Skynet Panel and Only used in th eImported." [the Importer]). The word is never shown anywhere in the Panel: screens, menus,
+    balloons, messages, pop-ups, Help, Hover Help, the README, Template notes and the sample Processes. It is used **only in the
+    Importer** (its own pages, its Build page, its Help). Where the Panel must point to the Importer it says **the Importer**.
+    Code comments, these Rules and the docs for builders may still say BruControl (no one sees them in the Panel).
+    *This replaces the 2026-11-10 exception* that let a Panel page name the Import screen or "the BruControl Import program"
+    (Help 1, 44 and 67): that exception is gone.
   - **Skynet Panel Help and Hover Help say nothing about BruControl:** no comparisons ("like BruControl's ..."), no "From BruControl"
-    sections, no BruControl words for things, no history of how BruControl did it. A Panel page may only **name** the Import screen
-    or the BruControl Import program where a Panel screen works with it (Help 1, 44 and 67), with no differences.
+    sections, no BruControl words for things, no history of how BruControl did it.
+  - **The Importer's own Help pages** (Help 143 and 165) stay in `help/` for the Importer but are **not listed or searched in the
+    Panel's Help** (`IMPORTER_HELP` in lib/help.js). The Import screen's Help (Help 8) is Panel Help and has no BruControl part.
   - **Nothing taken out is lost:** every BruControl sentence and section taken out is kept in `Sandbox/help/BruControl_Help_Extract.md`,
     with where it was and what is there now. It is the starting point of the Importer Help.
-  - **The Importer Help** (Help 8 for the Panel's Import screen, Help 143 and 165) is the Skynet Panel Help with the BruControl comments
+  - **The Importer Help** (Help 143 and 165, plus what is kept in the extract) is the Skynet Panel Help with the BruControl comments
     added. It is **on hold until the Skynet Panel Help is finished**.
   - **Importer updates go to the Sandbox for now; one Big Merge later** (OakBarn Brewery, 2026-11-12: "For the Most Part, Put Updates to
     the Importer in a Sand Box. We will do a Big Merge to move things over to the Importer."; "I might say add this note only in the
@@ -4550,8 +4559,8 @@ Help").
     the Importer itself"), the change goes straight into the Importer itself as well as Skynet, not into the Sandbox. BruControl text taken out of Skynet text goes to
     `Sandbox/help/BruControl_Help_Extract.md` as before. Example: the README (GitHub front page) is the Skynet version, with no
     BruControl (2026-11-12); its BruControl text is in the extract, ready for the Importer's own Read Me.
-  - **A BruControl Read Me:** maybe one Read Me document in the Skynet Panel for BruControl users. It waits until the Import is done
-    (Rule 14.3).
+  - **A BruControl Read Me:** maybe one Read Me document **in the Importer** (never in the Panel, 2026-11-21) for BruControl users. It
+    waits until the Import is done (Rule 14.3).
 
 11.4 **Hover Help is the same as the Skynet Panel Help** (OakBarn Brewery, 2026-11-10: "The Hover Help will be the exact same as the
 Skynet Panel Help, with BruControl comments added for the Import Help"). A dialog's balloons (Rule 2.38) say the same thing as the Help
@@ -4853,7 +4862,8 @@ only when Fritz says the program is set. (2026-10-26)
 14.2 **Compile check of firmware** inside the app: deferred. (2026-10-04)
 
 14.3 **The Importer Help and a BruControl Read Me** (OakBarn Brewery, 2026-11-10): the Importer Help waits until the Skynet Panel Help is
-finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits until the Import is done (Rule 11.3).
+finished, and a single BruControl Read Me (maybe) waits until the Import is done (Rule 11.3). *Changed 2026-11-21:* that Read Me lives in
+the Importer, never in the Skynet Panel.
 
 14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
 Blickmann Dialogs and Help are done. Call Panel Updates"; **reinstated** 2026-11-18: "All this goes into Update Panel.  Reinstate Rule",
@@ -6666,6 +6676,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-21: Rule 11.3 (OakBarn Brewery: "Wrong. BruControl is a forbidden word in Skynet Panel and Only used in th eImported."): the word BruControl is never shown in the Skynet Panel (screens, menus, balloons, messages, Help, Hover Help, README, Template notes, sample Processes); only the Importer uses it, and the Panel says "the Importer". The 2026-11-10 exception (Help 1, 44 and 67 could name the BruControl Import) is gone. The Panel's own one-step **Import > BruControl Schema** is taken out of the Panel (☰ Menu > Import now has BeerSmith recipe only; lib/brucontrol.js stays for the Importer and its tests); Help 8's BruControl part goes to the extract. Help 143 and 165 stay in help/ for the Importer but are not listed in the Panel's Help. Rule 1.1 no longer defines "BruControl Schema"; Rule 14.3's BruControl Read Me lives in the Importer. Help 1, 8, 44, 67 (English and French). Checked against both programs: the Importer's pages, Build page and Help keep the word. (thread "Remove the word BruControl from the Panel")
 - 2026-11-21: Rule 6.15, `all_heaters_off` (OakBarn Brewery: "new command heaters_off and turn off all heaters", "yes match" = named like all_pumps_off): every Heating Element off (its PID or Hysteresis stops with it), older control Devices disabled, gas burners' Solenoid Gas Valves closed and igniters off. Same code as step 1 of Emergency Off (Rule 6.41). Help 100 and 22.
 - 2026-11-21: Added Rule 16.12 (OakBarn Brewery: "a subclass of sleep in seconds"): `delay 7` waits 7 seconds, the same as `sleep 7000`; decimals and variables work, and it acts as a sleep in every way (Override, Testing speed-up, timeline). Reserved word; in Autofill and the editor colors. Help 22 and 5 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Add a delay command in seconds")
 - 2026-11-21: Added Rule 5.46 (OakBarn Brewery: "Flow is wrong and spurts even when hose bib is turned off = bug"): a Valve with Tap water on and a pipe on its tap side gets its water only along that pipe, as a Hose Bib's Inlet does (Rule 18.52 #7); a closed Hose Bib or valve on that side means no flow and no splash out of it. Fixes the 3 Vessel 1 Pump sample's Brew House Firehose Valve spraying with the Hose Bib off, and the Hose Bib's water standing still under it when on. Help 31 (and French). (thread "Fix wrong water flow and spray")
