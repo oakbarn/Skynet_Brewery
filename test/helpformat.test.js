@@ -17,7 +17,8 @@ for (const f of fs.readdirSync('help').filter(f => f.endsWith('.md'))) {
 for (const f of fs.readdirSync('help/fr').filter(f => f.endsWith('.md') && !IMPORTER_HELP.has(f.slice(0, -3))))
   assert.ok(!/brucontrol/i.test(fs.readFileSync(`help/fr/${f}`, 'utf8')), `help/fr/${f} has the word BruControl (Rule 11.3)`);
 // the Panel's own page: no BruControl in what it shows (comments left out)
-assert.doesNotMatch(fs.readFileSync('public/index.html', 'utf8').replace(/<!--[\s\S]*?-->/g, ''), /BruControl/i, 'public/index.html shows BruControl (Rule 11.3)');
+const shown = fs.readFileSync('public/index.html', 'utf8').split('<!--').map((part, i) => (i ? part.slice(part.indexOf('-->') + 3) : part)).join('');      // each comment cut at its end
+assert.doesNotMatch(shown, /BruControl/i, 'public/index.html shows BruControl (Rule 11.3)');
 // the text taken out of the Help is kept in the Sandbox of the private Skynet_Private repo (Rules 11.3, 13.7), not in this repo
 // the GitHub front page is the Skynet version too: no BruControl (OakBarn Brewery, 2026-11-12); the Importer has its own Read Me
 assert.doesNotMatch(fs.readFileSync('README.md', 'utf8'), /BruControl/, 'README.md is the Skynet version: no BruControl (Rule 11.3)');
