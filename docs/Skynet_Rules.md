@@ -949,6 +949,9 @@ thread "Add a Properties hotspot on Vessel Devices", Help 154).
 2.42 **Default settings: every default in one place, opened only from ☰ Menu** (Fritz, 2026-11-07: "We need to create that default
 settings tab (accessed by the Hamburger Menu Only) and let me look at all the Defaults"; thread "Build a Default settings page",
 Help 155).
+- **THE RULE** (OakBarn Brewery, 2026-11-21: "Default setting can be other places AS WELL but must be on the default Settings Page"):
+  **every default setting MUST be on the Default settings page. It MAY also be in other places as well.** Wherever else it shows, it
+  is the **same** saved value (no copy): a change in any place shows in all of them. A new default anywhere is added to this page.
 - The ☰ Menu tab that was called **Default** is now called **Default settings** (the Rules' "☰ Menu > Default tab" means it). It opens
   only from ☰ Menu. Its settings belong to the panel, so they are the same for every Schema. Admins change them; others look.
 - **Pipes, hoses and sizes** (new, at the top): the **Default pipe size** (1/2" unless changed) and the **Default hose size**. A new
@@ -958,15 +961,13 @@ Help 155).
   a new Tab (empty = 10; each Tab still changes it in Tab settings, Rule 5.11).
 - Then the defaults it already had: new Recipes, how amounts show, hop alerts, new Tabs and valves, Menu Bar, Sound, On startup,
   Text, Phones and tablets.
-- *Replaced 2026-11-17 (OakBarn Brewery: "Get rid of Skynet Defaults for New items TMI"):* the list of defaults set somewhere else
-  (Skynet Defaults for New User Created Items) is gone from the tab; those values come from their own Rules. A new default that can be
-  changed is still added here as a setting.
+- *Replaced 2026-11-17 (OakBarn Brewery: "Get rid of Skynet Defaults for New items TMI"):* the look-only list of defaults set somewhere
+  else (Skynet Defaults for New User Created Items) is gone from the tab. A default that can be changed is on this page as a setting
+  (THE RULE above).
 - Then the **Order of the Menu**, as before.
-- **Every default, also the ones set somewhere else** (OakBarn Brewery, 2026-11-21: "Several Items are missing on the default settings
-  page. They may also be somewhere else but every default needs to be on the Default Settings as well. Missing: US/Metric, ICOA,
-  Brewery Elevation"). This replaces the 2026-11-14 and 2026-11-17 moves below for showing: the moved boxes **stay** where they are and
-  **also** show on Default settings. Both places show and change the **same** saved value (no copy), so a change in one shows in the
-  other. On the tab now:
+- **Added 2026-11-21 under THE RULE** (OakBarn Brewery: "Several Items are missing on the default settings page. They may also be
+  somewhere else but every default needs to be on the Default Settings as well. Missing: US/Metric, ICOA, Brewery Elevation"). These
+  are on the Default settings page and also stay in Settings, the same saved value in both:
   - **Units and your brewery** (at the top): **Units** (Settings > Panel settings), **Airport (ICAO)**, **Elevation** and **Typed air
     pressure** (Settings > Boil temperature, Rule 1.18; Elevation kept in metres, shown in feet or metres per Units, Rule 2.59; the
     boxes are typed in the Units they show, and a box not changed keeps the exact saved number).
@@ -976,11 +977,10 @@ Help 155).
     weight label, Hop alerts). The Order of the Menu stays only in Settings (it is not a default).
   - Not added (not a default): passwords, users, Approved Devices, sending codes, Patron, the API key, the BeerXML mapping, Title, Media
     folders, autostart Processes, the restart limit and its Alarm. Profiles keep their own **Default** mark in their own list.
-  - A new default anywhere is added here as a setting, even when it also has its own place.
 - **Taken off (2026-11-17, OakBarn Brewery: "New Schema from Skynet section not needed"):** New Schema from a Skynet Template (Rule 16.6).
-- **Moved off (2026-11-17, OakBarn Brewery):** the **Pump Overlay** is on each Pump Profile, the **Valve Overlay** on each Valve Profile
-  (☰ Menu > Pump Profile, Valve Profile), and **Push Lockout (s)** is a Skynet Panel Setting (Settings > Panel settings). Look of a New
-  Schema stays.
+- **Moved (2026-11-17, OakBarn Brewery):** the **Pump Overlay** is on each Pump Profile and the **Valve Overlay** on each Valve Profile
+  (☰ Menu > Pump Profile, Valve Profile): they belong to each Profile, not to the panel. **Push Lockout (s)** is also in Settings > Panel
+  settings and, under THE RULE, is on this page too (2026-11-21). Look of a New Schema stays.
 - **BruControl Import:** checked. It makes Schemas; these settings are the panel's, so an imported Schema loaded in the Panel uses
   them. It draws no pipes, so its pumps and valves (with no pipe on them) are drawn for the Default pipe size. Its Tabs keep the
   sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39). On the same computer

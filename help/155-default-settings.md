@@ -1,6 +1,6 @@
 # Default settings
 
-**☰ Menu > Default settings** is the one place for **every default** in Skynet (Skynet Rule 2.42). The ones that are also in **Settings** are here too ([Settings](09-settings)): both places change the same setting. It opens only from the
+**☰ Menu > Default settings** has **every default** in Skynet (Skynet Rule 2.42): every default setting **must** be on this page, and it **may** also be in other places as well, such as **Settings** ([Settings](09-settings)). Wherever else it shows, it is the same setting: change it in one place and every place shows it. It opens only from the
 **☰ Menu**. It used to be called the **Default** tab.
 
 These settings belong to the **panel**, so they are the same in every Schema. **Admins** change them and press **Save**; everyone

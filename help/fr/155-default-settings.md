@@ -1,6 +1,6 @@
 # Réglages par défaut {#default-settings}
 
-**☰ Menu > Default settings** est le seul endroit pour **tous les réglages par défaut** de Skynet (Règle Skynet 2.42). Ceux qui sont aussi dans **Settings** sont ici aussi ([Réglages](09-settings)) : les deux endroits changent le même réglage. Il ne s'ouvre que depuis le
+**☰ Menu > Default settings** a **tous les réglages par défaut** de Skynet (Règle Skynet 2.42) : chaque réglage par défaut **doit** être sur cette page, et il **peut** aussi être dans d'autres endroits, comme **Settings** ([Réglages](09-settings)). Où qu'il soit aussi, c'est le même réglage : changez-le à un endroit et chaque endroit le montre. Il ne s'ouvre que depuis le
 **☰ Menu**. Il s'appelait autrefois le Tab **Default**.
 
 Ces réglages appartiennent au **panneau**, donc ils sont les mêmes dans chaque Schema. Les **Admins** les changent et appuient sur **Save** ; tous les
