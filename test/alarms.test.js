@@ -16,7 +16,6 @@ fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
     { name: 'alm_PreHop1', type: 'alarm', kind: 'prehop', sound: 'sounds/pre.wav', hopAlarm: 'alm_Hop1' },
     { name: 'alm_Boil', type: 'alarm', kind: 'brewflow', sound: 'sounds/boil.wav' },
     { name: 'alm_Note', type: 'alarm', kind: 'general', sound: 'sounds/note.wav' },
-    { name: 'alm_Quiet', type: 'alarm', kind: 'hop', soundMode: 'none' },
     { name: 'tm_Boil', type: 'timer', timerType: 'countdown', initial: '00:30:00' },
     { name: 'vB_Flag', type: 'gGlobal', kind: 'bool' },
   ],
@@ -73,8 +72,6 @@ store.setProp('alm_PreHop1', 'active', true);
 assert.deepEqual(playing(), ['alm_Boil'], 'Pre-Hop (3) waits for Brew Flow (1)');
 store.setProp('alm_Hop1', 'active', true);
 assert.deepEqual(playing(), ['alm_Boil'], 'Hop Drop (2) waits for Brew Flow (1) (Rule 7.18, 2026-11-13)');
-store.setProp('alm_Quiet', 'active', true);
-assert.deepEqual(playing(), ['alm_Boil'], 'an alarm with Sound = None makes no sound, so it never takes the speaker');
 store.setProp('alm_Boil', 'active', false);
 assert.deepEqual(playing(), ['alm_Hop1'], 'the waiting Hop alarm sounds as soon as the Brew Flow alarm is off');
 store.setProp('alm_Hop1', 'active', false);
@@ -100,7 +97,7 @@ store.setProp('alm_Boil', 'priority', ''); assert.equal(store.getProp('alm_Boil'
 store.setProp('alm_Boil', 'priority', 1); assert.deepEqual(playing(), ['alm_Boil']);
 store.setProp('alm_Boil', 'finished', true, 'ui'); assert.deepEqual(playing(), ['alm_Note'], 'Boil played to its end: Note plays while Boil still shows');
 assert.throws(() => store.setProp('alm_Boil', 'finished', true), /set by the panel/);
-for (const n of ['alm_Boil', 'alm_Note', SOUND_PLAYER, 'alm_Quiet']) store.setProp(n, 'active', false);
+for (const n of ['alm_Boil', 'alm_Note', SOUND_PLAYER]) store.setProp(n, 'active', false);
 store.setProp('alm_Note', 'priority', ''); store.setProp('alm_Boil', 'priority', '');
 // two of the same Priority at the same moment: the first one On plays first (1a), then the other (1b) (Rule 7.18, 2026-11-13)
 {
@@ -197,7 +194,7 @@ assert.equal(f.report[0].hidesDropped, 2);
   const g = p => st.getProp('alm_Brew', p);
   assert.equal(g('step'), 0); assert.equal(g('setgraphic'), '');
   st.setProp('alm_Brew', 'step', 1);
-  assert.deepEqual([g('step'), g('backcolor'), g('forecolor'), g('sound'), g('soundmode'), g('setgraphic')], [1, '#e74c3c', '', 'sounds/strike.wav', 'custom', '']);
+  assert.deepEqual([g('step'), g('backcolor'), g('forecolor'), g('sound'), g('setgraphic')], [1, '#e74c3c', '', 'sounds/strike.wav', '']);
   st.setProp('alm_Brew', 'step', 'mash');      // by its name; Back color and sound were No Change, so they stay
   assert.deepEqual([g('step'), g('backcolor'), g('forecolor'), g('sound'), g('setgraphic')], [2, '#e74c3c', '#f1c40f', 'sounds/strike.wav', 'none']);
   st.setProp('alm_Brew', 'step', 'Step 3');    // a step with no name is Step 3

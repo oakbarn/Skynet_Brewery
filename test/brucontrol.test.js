@@ -60,8 +60,6 @@ assert.equal(String(store.getProp('tm_Boil', 'resetvalue')), '01:00:00');
 assert.equal(store.getProp('MB_05_Hys', 'enabled'), false);
 assert.equal(store.getProp('VGC_22_Valve', 'enabled'), true);
 
-store.setProp('alm_Done', 'sound', 'None');
-assert.equal(store.getProp('alm_Done', 'soundmode'), 'none');
 
 const ctl = new Control(store);
 const t0 = 1_000_000;
@@ -96,7 +94,7 @@ const started = engine.start('looper_Sample');
 assert.equal(started.ok, true, JSON.stringify(started));
 await new Promise(r => setTimeout(r, 300));
 assert.equal(store.getProp('gblV_Kettle', 'value'), 140);
-assert.equal(store.getProp('alm_Done', 'fileindex'), 2); assert.equal(store.getProp('alm_Done', 'soundmode'), 'custom');
+assert.equal(store.getProp('alm_Done', 'fileindex'), 2);
 assert.equal(store.getProp('VGC_22_Valve', 'background'), '2');
 assert.equal(store.getProp('gblS_Msg', 'visibility'), 'hidden');
 assert.equal(store.getProp('MB_07_PID', 'target'), 155);

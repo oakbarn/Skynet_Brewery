@@ -179,10 +179,10 @@ gV_Strike = gV_Strike + 1
 
 These words belong to the Process language, so none of them can be the name of a Device, Widget, gGlobal or Process variable. Upper and lower case are the same (`NULL` = `null`).
 
-- **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
+- **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`
 - **Joining words:** `and`, `or`, `not`
 - **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
-- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
+- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Places:** `tab`, `workspace`
 - **Skynet Constants:** every name that starts with `skn_const_` (see above)
 

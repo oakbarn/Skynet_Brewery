@@ -14,7 +14,6 @@ Upper and lower case do not matter in commands (`IF` = `if`). A comment starts w
 | Command | Example | What it does |
 |---|---|---|
 | `[Label]` | `[Again]` | Marks a place that `goto` jumps to. |
-| `clear` | `clear` | Kept for BruControl Processes. It does nothing (see Review Notes). |
 | `declare` | `declare value vV_X` | The same as `new`. |
 | `else` | `else` | Inside an `if`: the lines that run when nothing above was true. |
 | `else if` | `else if vV_X > 5` | The same as `elseif`. |
@@ -89,7 +88,7 @@ Text compares as text when both sides are text. `true`/`false` compare as On/Off
 | `00:15:00`, `15:00` | A time: hh:mm:ss, or mm:ss. |
 | `152`, `0.5` | A number. A plain temperature is read in your Units (Rule 2.59). |
 | `countdown`, `countup` | Timer types. |
-| `custom`, `default`, `none` | Alarm sound modes. |
+| `none` | Nothing: a hose `.connect = none`, a pump `.cover = none`, a flow color of None. |
 | `hidden`, `visible`, `hiddenlocked` | For `.visible` (older Processes). |
 | `NULL` | Empty: no value at all (Rule 1.32). |
 | `now` | The date and time now. |
@@ -123,10 +122,8 @@ A date and time shows as MM/DD/YYYY hh:mm:ss. The parts of a Time gGlobal (`.min
 
 ## Analyst's Review Notes
 
-- **Where I drew the line:** "Standard" here means the parts any programming language (and BruControl) has. Skynet's own additions,
+- **Where I drew the line:** "Standard" here means the parts any programming language has. Skynet's own additions,
   even plain ones like `delay` (Rule 16.12), `goLine` (Rule 16.10) and `step`, went to the Skynet list. Move any you'd rather see here.
-- **`clear` does nothing.** The reader accepts it and the runner just goes to the next line. It is a reserved word in Help 22 but its
-  job is never said. Was it BruControl's "clear the output"? If you want it to clear the Process Output, that's a small build.
 - **`play` and `start`** do the same thing to an Alarm or Audio Widget. Not a problem, just two ways.
 - **Date + number counts seconds**, not days (as in Excel). Worth one line in Help 22, which has no date math section today.
 - **No rounding, min / max, absolute value or square root** functions exist. Only `toF( )` and `toC( )` (Skynet list).
