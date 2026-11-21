@@ -35,7 +35,7 @@ const COMMANDS = [
   // gGlobals made in a Process (Fritz, 2026-11-06, Rule 1.24): picking one also fills in the start of the name (gV_ ...)
   ...Object.values(G_DECLARE).map(d => [`new ${d.long}`, `make a gGlobal: ${d.what}`]),
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
-  ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'],
+  ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'], ['all_heaters_off', 'every heater off'],
   ['import_recipe', 'a .bsmx or .xml file'], ['start_hop_alerts', 'hop alerts for the boil'], ['stop_hop_alerts', 'stop the hop alerts'],
   ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
   // the Chiller Overlay (OakBarn Brewery, 2026-11-15, Rule 5.42): picking one opens the list of Chiller Templates, then of Vessels
