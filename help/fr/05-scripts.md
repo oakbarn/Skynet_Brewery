@@ -29,6 +29,7 @@ start "tm_Whirlpool"           start a timer
 alm_Hops = true                sound an alarm
 wait BK_Temp <= 154            wait for a temperature (in your Units)
 sleep 1000                     wait 1 second (1000 ms)
+delay 7                        wait 7 seconds (the same as sleep 7000)
 my_Widget.visible = false      hide something on the screen
 if vVCount > 2 && Pump_Red == true
 elseif ...
