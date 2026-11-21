@@ -18,6 +18,10 @@ These GitHub copies are the main copies (Rule 13.7). This repo is public: privat
 | [Default Settings: Other Places](Default_Settings_Other_Places.md) | Review list: each default set somewhere other than ☰ Menu > Default settings, the other place, and whether it should get a box on the Default tab. |
 | [Outside Links](Outside_Links.md) | Every web link in Help, and whether OakBarn Brewery directed it (Rule 11.10). A test fails on any other. |
 | [Widget Library](Widget_Library.md) | Every Widget, Widget setting and Skynet Template. |
+| [Process Attributes: Devices](Process_Device_Attributes.md) | Every .attribute a Process can use on a Device, by Device type, A to Z. |
+| [Process Attributes: Widgets](Process_Widget_Attributes.md) | Every .attribute a Process can use on a Widget, by Widget type, A to Z. |
+| [Standard Process Commands](Process_Standard_Commands.md) | The general Process language A to Z: if ... endif, goto, wait, sleep, variables, math, comparisons and date math. |
+| [Skynet Process Commands](Process_Skynet_Commands.md) | The Skynet-only Process commands A to Z (all_heaters_off, close_all_valves, delay, start_hop_alerts ...) and Skynet words. |
 | [Media Licenses](Media_Licenses.csv) | A spreadsheet of every picture and sound Skynet ships that is not its own drawing, and the free programs it ships (the Pickr Color Picker): where it came from, its license, and the credit the license asks for. Opens in Excel. |
 | [Image Library](Image_Library.md) | Every Skynet picture, by group. The pictures are in [media/Images/Skynet](../media/Images/Skynet/). |
 | [Minimum equipment and limitations](Minimum_Equipment_and_Limitations.md) | All you need (one computer for the Brain + one Arduino), how far it grows, and what the panel cannot do yet. |
