@@ -37,7 +37,7 @@ for (const f of ['samples/configs/three-vessel-one-pump/config.json', 'config/br
   assert.ok(!s.elements.some(x => ['°F', 'gal', 'oz', 'lb'].includes(x.units)), `${f}: no US units`);
   assert.ok(s.elements.filter(x => x.type === 'temperature').every(x => x.units === '°C'), `${f}: probes in °C`);
   assert.ok(s.graphics.filter(g => g.kind === 'vessel' && g.volume !== undefined).every(g => g.units === 'Metric'), `${f}: Vessels in liters`);
-  assert.equal(s.beerxml.units, 'Metric'); assert.equal(s.beerxml.mash.units, 'C');
+  assert.equal(s.beerxml, undefined, `${f}: no BeerXML mapping: the Recipe is the skn_rcp_ values (2026-11-21)`);
 }
 for (const f of ['samples/configs/three-vessel-one-pump/processes/BrewDay_Flow.txt', 'processes/BrewDay_Flow.txt'])
   assert.ok(!/°F| oz /.test(fs.readFileSync(f, 'utf8')), `${f}: the Process speaks °C and grams`);
@@ -76,7 +76,7 @@ console.log('unitconvert tests passed');
   const { importBeerXml } = await import('../lib/beerxml.js');
   const xml = fs.readFileSync('samples/sample_recipe.xml', 'utf8');
   const fake = () => { const vals = new Map(); return { vals, has: () => true, get: n => ({ name: n }), setProp: (n, p, v) => vals.set(n, v) }; };
-  const map = JSON.parse(fs.readFileSync('samples/configs/three-vessel-one-pump/config.json', 'utf8')).beerxml;
+  const map = { units: 'Metric' };      // a Settings > BeerXML mapping (the samples have none: the Recipe is the skn_rcp_ values)
   const met = fake(), us = fake();
   importBeerXml(xml, met, map); importBeerXml(xml, us, { ...map, units: undefined });
   const b = met.vals.get('gblV_BatchSize_Gal'), bu = us.vals.get('gblV_BatchSize_Gal');

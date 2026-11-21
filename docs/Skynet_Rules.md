@@ -5205,11 +5205,21 @@ public/recipecalc.js and Help 99.
 and mash step, with **no limit** on how many (the old BruControl import stopped at 8 hops). The .bsmx keeps BeerSmith's own
 US units inside (ounces, fluid ounces, °F; a Misc item in its own unit); Skynet keeps every Recipe in kg, L and °C and shows it
 in the Units picked in Settings > Panel settings (Rule 2.42). A Process imports with `import_recipe "path"`. (Fritz, 2026-10-30, Help 99)
+**The Recipe and its hops are Skynet's own values, never gGlobals** (OakBarn Brewery, 2026-11-21: "Those should be back house skynet
+variables"; "if the gGlobals are no longer needed, trash"): every import (Import screen, ☰ Menu > Recipe, `import_recipe`, the API)
+makes the Skynet Recipe, read in a Process only as `skn_rcp_` values (Rule 17.2), and they are not on the Variables screen. gGlobals
+are filled too only when Settings > BeerXML mapping names them (the older way, kept for a Schema whose Processes still read
+gGlobals); the default Schema and the samples have no mapping and no Recipe or hop gGlobals. The text of the hops outside the boil is
+`skn_rcp_Mash_Hops`, `skn_rcp_First_Wort_Hops`, `skn_rcp_Whirlpool_Hops`, `skn_rcp_Dry_Hops`. The BruControl Importer maps the OakBarn
+names (`gblS_Hop1_R1` ...) to the Recipe (Importer sandbox). (Help 8, 99, 100)
 
 17.4 **Skynet orders the hops and makes the hop alerts** (the OakBarn Hop Warnings): Top of Mash, 1st Wort, Start of Boil,
 Bitter, Flavor, Aroma, Whirlpool, Dry Hop; hops at the same time are one Hop Group; each gets a warning (10 minutes, Default
 tab) and a drop alert; **two alerts at the same time become one alert with both**. The user sees only the results (Drops tab).
 `start_hop_alerts` / `start_hop_alerts "Boil_Timer"` / `stop_hop_alerts` in a Process. (Fritz, 2026-10-30, Help 99)
+`start_hop_alerts "Boil_Timer", 1` follows a timer that runs faster than real time: the number is the timer seconds for one boil
+minute (60 = real time, to start; 1 = a Testing switch that runs each minute as one second). The 3 Vessel sample's brew day uses
+it in place of its own 8 hop alarms (2026-11-21).
 
 17.5 **Voice for alerts**: every alert has an audio path in media/Audio/Hops. When the file is there it plays; otherwise the
 browser's own voice reads the alert. Skynet does not fetch voices from a text to voice web site by itself (free sites do not
@@ -7327,6 +7337,7 @@ import.
 - 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-20: Rules 3.20 and 16.4 changed (OakBarn Brewery: "Recipe values like rcp_Strike_Temp yes", "they could be skn_rcp_ so I will know what you are taking about"): Recipe values are `skn_rcp_` names (were `rcp_`) in the code, Templates, Help and these Rules; older Change log lines keep the old name as history.
+- 2026-11-21: Rules 17.3 and 17.4 changed (OakBarn Brewery: "Those should be back house skynet variables", "if the gGlobals are no longer needed, trash"): the Recipe and hop values are only `skn_rcp_` values, never gGlobals; the Recipe and hop gGlobals and the BeerXML mapping are gone from the default Schema and the 3 Vessel sample; its brew day reads `skn_rcp_` values and uses `start_hop_alerts` (new: a number after the timer for a faster Testing timer); new `skn_rcp_Mash_Hops`, `_First_Wort_Hops`, `_Whirlpool_Hops`, `_Dry_Hops`; `/api/import/beerxml` makes the Recipe.
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.18 (Panel Updates entry 13b): each hop line has its own Unit (oz / g) with an oz → g button, each yeast line its own Unit (Packs / g / oz / ml), and the Yeast tab is built from the layout OakBarn Brewery picked ("Use it and Build to keep rule"); Rule 2.59's recipe exception now says built. Help 99.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.

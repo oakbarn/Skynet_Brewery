@@ -228,7 +228,8 @@ picture and text, the import shows the choices above, with the recommended one p
   and °C.
 - **Hop use**: BeerSmith's `F_H_USE` 0 Boil, 1 Dry Hop (days in `F_H_DRY_HOP_TIME`), 2 Mash, 3 First Wort, 4 Aroma becomes
   Whirlpool. BeerXML Aroma also becomes Whirlpool; its dry hop TIME is minutes and becomes days.
-- **Global mapping** (gblV_Hop1_Oz_R1 ...): kept for a BeerXML file only when Settings > BeerXML mapping names Globals.
+- **Global mapping** (gblV_Hop1_Oz_R1 ...): kept for a BeerXML file only when Settings > BeerXML mapping names Globals. The default
+  Schema and the samples have none (2026-11-21): the Recipe is read as `skn_rcp_` values (Rule 17.3).
 - The boxes on the Recipe tab start filled in, as **Calculate** does.
 
 ## 11. Where Skynet has no limit (BruControl did)
