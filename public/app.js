@@ -14618,34 +14618,6 @@ $('#importBtn').onclick = guard(async () => {
   $('#importResult').textContent = out; rcView = null;
 });
 
-// BruControl Schema (.brucfg configuration file)
-function bruReport(r) {
-  const t = r.summary.byType;
-  const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} Devices and Widgets, ${r.summary.scripts} processes`,
-    '  ' + Object.entries(t).map(([k, n]) => `${k} ${n}`).join(', ')];
-  if (r.autostart.length) lines.push(`Processes started with the server: ${r.autostart.join(', ')}`);
-  lines.push(r.missingMedia.length ? `\n${r.missingMedia.length} of ${r.mediaCount} pictures and sounds are not in your media folder yet. Copy them from C:\\BruControl\\Media:\n  ${r.missingMedia.join('\n  ')}` : `All ${r.mediaCount} pictures and sounds were found.`);
-  if (r.warnings.length) lines.push('\nNotes:\n  ' + r.warnings.join('\n  '));
-  if (r.scripts) {
-    lines.push(`\nProcesses written: ${r.scripts.written.length}` + (r.scripts.backedUp.length ? `, ${r.scripts.backedUp.length} older copies kept as .bak` : '') + (r.scripts.skipped.length ? `\nProcesses not replaced: ${r.scripts.skipped.join(', ')}` : ''));
-    lines.push(r.problems.length ? `${r.problems.length} processes have problems (they will not start until fixed):\n` + r.problems.map(p => `  ${p.script}: ` + p.errors.map(e => `line ${e.line}: ${e.msg}`).join('; ') + (p.more ? ` (+${p.more} more)` : '')).join('\n') : 'Every process checks OK.');
-  }
-  return lines.join('\n');
-}
-async function bruSend(preview) {
-  const f = $('#bruFile').files[0]; if (!f) throw new Error('Choose a BruControl .brucfg file first');
-  const q = new URLSearchParams({ mode: $('#bruMode').value, simulate: $('#bruSim').checked ? '1' : '0', overwrite: $('#bruOverwrite').checked ? '1' : '0', media: $('#bruMedia').value.trim(), preview: preview ? '1' : '0' });
-  $('#bruResult').textContent = preview ? 'Reading…' : 'Importing…';
-  try { return await api('POST', '/ui/import/brucontrol?' + q, await f.text(), true); } catch (e) { $('#bruResult').textContent = ''; throw e; }
-}
-$('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
-$('#bruImport').onclick = guard(async () => {
-  const msg = $('#bruMode').value === 'replace' ? 'Replace your Tabs, Devices and Widgets with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old Schema.)' : 'Add this BruControl file to your Schema? Running processes are stopped.';
-  if (!await skyConfirm(msg, { ok: '⬆ Import', danger: $('#bruMode').value === 'replace' })) return;
-  const r = await bruSend(false);
-  $('#bruResult').textContent = bruReport(r);
-  await load(); toast('BruControl Schema imported');
-});
 
 // ---------------------------------------------------------------- settings
 // ---- sample Schemas: on first start, and under Settings
@@ -16032,7 +16004,7 @@ const PAGE_PARTS = {
   globals: [['gGlobal', '#sec-gglobal']],
   log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['1-Wire circuits', '#sec-owCircuits'], ['1-Wire Indexes', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
-  import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
+  import: [['BeerSmith recipe', '#sec-beersmith']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Approved Devices', '#sec-devices'], ['Sending codes (email and text)', '#sec-sending'],
     ['Patron', '#sec-patron'], ['Beer money pop-up', '#sec-beerMoney'],
