@@ -34,12 +34,6 @@
    "vScale": 128.3514
   },
   {
-   "name": "Recipe",
-   "style": "sky_tab_tennyson",
-   "width": 1920,
-   "height": 1040
-  },
-  {
    "name": "Reporting",
    "width": 1920,
    "height": 1040
@@ -139,25 +133,6 @@
    "label": "Brew day",
    "timerType": "countup",
    "look": "led"
-  },
-  {
-   "workspace": "Brew House",
-   "name": "wgt_ALM_Hop~alarm_BH",
-   "type": "alarm",
-   "x": 390,
-   "y": 328,
-   "w": 130,
-   "h": 144,
-   "label": "Hop alarm (tap = added)",
-   "sound": "sounds/alarm_beep.wav",
-   "loop": true,
-   "alarmClass": "basic",
-   "bell": "hop",
-   "backColor": "#21b04b",
-   "foreColor": "#c6ef2a",
-   "setGraphic": "Images/Skynet/Alarms/Alarm_Set_Hop_Cone.svg",
-   "hideName": true,
-   "activeText": ""
   },
   {
    "workspace": "Brew House",
@@ -1119,19 +1094,6 @@
    "fontSize": 15,
    "bold": true,
    "name": "wgt_TXT_Readings_RP"
-  },
-  {
-   "id": "t_rec",
-   "kind": "text",
-   "workspace": "Recipe",
-   "x": 20,
-   "y": 10,
-   "w": 1300,
-   "h": 36,
-   "text": "The Recipe is on ☰ Menu > Recipe: import a BeerSmith .bsmx or BeerXML file there, or type it in. The brew day reads it and Skynet makes the hop alerts.",
-   "fontSize": 18,
-   "bold": true,
-   "name": "wgt_TXT_Recipe~import_RE"
   },
   {
    "id": "v_HLT",
