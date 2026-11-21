@@ -3,6 +3,7 @@
 Admins can change this manual right here, and it is kept on the Pi with everything else.
 
 - **Edit page** opens the page as text with a live preview beside it (below it on a phone). Press **Save page** when done.
+- In the page text, **Ctrl+F** finds a word and **Ctrl+H** opens the same bar to replace it, as in the [Process editor](30-process-editor#find-and-replace).
 - **New page** asks for a title and adds the page at the end of the list.
 - **Delete page** removes it. A copy is kept in `help/backups` on the Pi, and a copy of the old text is kept there every time a page is saved.
 

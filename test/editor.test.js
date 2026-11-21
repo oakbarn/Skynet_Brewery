@@ -6,6 +6,7 @@ import { Engine, compile } from '../lib/engine.js';
 import { modernize } from '../lib/modernize.js';
 import { renumber } from '../lib/scaffold.js';
 import { classify, CLASSES, toHtml, processXml, notepadPlusPlus } from '../public/colorize.js';
+import { findRegex, findAll, findKeyOf } from '../public/findbar.js';
 
 // ---- comments: //, #, ' and /* */ are skipped; quotes are never comments
 const prog = compile([
@@ -85,4 +86,18 @@ for (const old of ['Sparge.2026-10-21-14-05-03', 'Boil.20261023T113005-2']) fs.w
 assert.deepEqual(eng.binList().map(b => b.name).sort(), ['Boil', 'Mash', 'Sparge']);
 assert.deepEqual(eng.names(), ['Fill_old'], 'the Recycle_Bin folder is not a Process');
 fs.rmSync(d, { recursive: true, force: true });
+// ---- Find and Replace in the Process Template and Help text editors (Rule 2.65, public/findbar.js)
+assert.deepEqual(findAll('Pump pump PUMP pumps', findRegex('pump', false, false)), [[0, 4], [5, 9], [10, 14], [15, 19]]);
+assert.deepEqual(findAll('Pump pump PUMP pumps', findRegex('pump', true, false)), [[5, 9], [15, 19]], 'Aa: upper and lower case exactly');
+assert.deepEqual(findAll('skn_rcp skn_rcp_Name a.b', findRegex('skn_rcp', false, true)), [[0, 7]], 'Whole word skips longer names');
+assert.deepEqual(findAll('a.b axb', findRegex('a.b', false, false)), [[0, 3]], 'typed text is plain text, not a pattern');
+assert.equal(findRegex('', false, false), null);
+const key = o => findKeyOf({ key: 'f', ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, ...o });
+assert.equal(key({ ctrlKey: true }), 'find'); assert.equal(key({ metaKey: true }), 'find', '⌘+F on a Mac');
+assert.equal(key({ key: 'h', ctrlKey: true }), 'replace'); assert.equal(key({ key: 'h', metaKey: true }), null, '⌘+H hides the app on a Mac');
+assert.equal(key({ key: 'F3' }), 'next'); assert.equal(key({ key: 'F3', shiftKey: true }), 'prev');
+assert.equal(key({ ctrlKey: true, shiftKey: true }), null); assert.equal(key({}), null);
+const appJs = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), helpJs = fs.readFileSync(new URL('../public/help.js', import.meta.url), 'utf8');
+assert.match(appJs, /async function editProcessTemplate[\s\S]*?attachFind\(ta\)[\s\S]*?d\.showModal\(\)/, 'the Process Template editor has Find and Replace');
+assert.match(helpJs, /attachFind\(\$\('#hpText'\)/, 'the Help text editor has Find and Replace');
 console.log('process editor tests passed');
