@@ -201,6 +201,45 @@
           <button id="colorKey" title="What each color means">Color key</button>
           <button id="constList" title="Skynet Constants: every built in conversion number, with its Label, value and name. Click one to put it at the cursor">📐 Constants</button>
         </div>
+        <div id="insBar" class="bar insBar admin-only">
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="pumps" data-head="Pumps" title="Pumps: Pick one: its Name goes in at the cursor. Lists only the Pumps already in this Schema"></select><select class="insPick" data-g="valves" data-head="Valves" title="Valves: Pick one: its Name goes in at the cursor. Lists only the Valves already in this Schema"></select><select class="insPick" data-g="mvalves" data-head="Manual Valve" title="Manual Valve: Pick one: its Name goes in at the cursor. Lists only the Manual Valves already in this Schema"></select><select class="insPick" data-g="pwm" data-head="PWM" title="PWM: Pick one: its Name goes in at the cursor. Lists only the PWM outputs already in this Schema"></select></div>
+            <div class="insLow"><button type="button" class="insBtn" data-act="dev:visible:true" title="Puts in .visible = true for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it shows on its Tab">.visible = true</button><button type="button" class="insBtn" data-act="dev:visible:false" title="Puts in .visible = false for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it is hidden on its Tab">.visible = false</button><button type="button" class="insBtn" data-act="dev:state:true" title="Puts in .state = true for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it turns on, or a valve opens">.state = true (on/open)</button><button type="button" class="insBtn" data-act="dev:state:false" title="Puts in .state = false for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it turns off, or a valve closes">.state = false (off/closed)</button></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="heat" data-head="Heating Element" title="Heating Element: Pick one: its Name goes in at the cursor. Lists only the Heating Elements already in this Schema"></select></div>
+            <div class="insLow"><button type="button" class="insBtn" data-act="heat:Hysteresis" title="Puts in .method = &quot;Hysteresis&quot; for the Heating Element picked">Hysteresis</button><button type="button" class="insBtn" data-act="heat:PID" title="Puts in .method = &quot;PID&quot; for the Heating Element picked">PID</button><button type="button" class="insBtn" data-act="heat:Precise" title="Puts in .method = &quot;Precise&quot; for the Heating Element picked">Precise</button></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="text" data-head="Text" title="Text: Pick one: its Name goes in at the cursor. Lists only the Text Widgets already in this Schema"></select></div>
+            <div class="insLow"><button type="button" class="insBtn" data-act="text:visible:true" title="Puts in .visible = true for the Text Widget picked: it shows on its Tab">.visible = true</button><button type="button" class="insBtn" data-act="text:visible:false" title="Puts in .visible = false for the Text Widget picked: it is hidden on its Tab">.visible = false</button><button type="button" class="insBtn" data-act="text:text" title="Puts in .text = &quot;&quot; for the Text Widget picked: type its words between the quotes">Text</button></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="audio" data-head="Audio" title="Audio: Pick one: its Name goes in at the cursor. Lists only the Audio Widgets already in this Schema"></select><button type="button" class="insBtn" data-act="audio:path" title="Puts in .path = and the sound file typed in the box under it, for the Audio Widget picked">.path =</button></div>
+            <div class="insLow"><button type="button" class="insBtn" data-act="audio:play:true" title="Puts in .play = true for the Audio Widget picked: it plays">.play = true</button><button type="button" class="insBtn" data-act="audio:play:false" title="Puts in .play = false for the Audio Widget picked: it stops">.play = false</button><input class="insBox" data-for="audio" placeholder="sound file" title="The Audio Widget's sound file: type it, then press Enter or .path = above. Its line goes in at the cursor"></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="graphic" data-head="Graphic" title="Graphic: Pick one: its Name goes in at the cursor. Lists only the Pictures already in this Schema"></select><button type="button" class="insBtn" data-act="graphic:path" title="Puts in .path = and the picture file typed in the box under it, for the Picture picked">.path =</button></div>
+            <div class="insLow"><input class="insBox" data-for="graphic" placeholder="picture file" title="The Picture's file: type it, then press Enter or .path = above. Its line goes in at the cursor"></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="value" data-head="Value" title="Value: Pick one: its Name goes in at the cursor. Lists only the Value Widgets already in this Schema"></select></div>
+            <div class="insLow"><input class="insBox" data-for="value" inputmode="decimal" placeholder="value" title="The value for the Value Widget picked above: type it and press Enter. Its line goes in at the cursor"></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="time" data-head="Time" title="Time: Pick one: its Name goes in at the cursor. Lists only the Time Widgets already in this Schema"></select></div>
+            <div class="insLow"><input class="insBox" data-for="time" type="time" step="1" title="The time (hh:mm:ss) for the Time Widget picked above: set it and press Enter. Its line goes in at the cursor"></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="datetime" data-head="DateTime" title="DateTime: Pick one: its Name goes in at the cursor. Lists only the DateTime Widgets already in this Schema"></select></div>
+            <div class="insLow"><input class="insBox" data-for="datetime" type="datetime-local" title="The date and time for the DateTime Widget picked above: set it and press Enter. Its line goes in at the cursor"></div>
+          </div>
+          <div class="insGrp">
+            <div class="insTop"><select class="insPick" data-g="probe" data-head="Probe" title="Probe: Pick one: its Name goes in at the cursor. Lists only the Temperature Probes already in this Schema"></select></div>
+            <div class="insLow"><button type="button" class="insBtn" data-act="probe:value" title="Puts in .value for the Probe picked: what it reads now (PV)">PV</button><button type="button" class="insBtn" data-act="probe:setpoint" title="Puts in .setpoint for the Probe picked: the temperature it is set to hold (SV)">SV</button></div>
+            <div class="insLow"><input class="insBox" data-for="probe" inputmode="decimal" placeholder="setpoint" title="The Setpoint (SV) for the Probe picked above: type the temperature and press Enter. Its line goes in at the cursor, for example Probe_1.setpoint = 152"></div>
+          </div>
+        </div>
         <div id="findBar" class="findBar hidden">
           <div class="findRow">
             <input id="findText" type="search" placeholder="Find" autocomplete="off" spellcheck="false" enterkeyhint="search">

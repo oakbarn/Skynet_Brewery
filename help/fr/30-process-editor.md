@@ -4,6 +4,18 @@ L'écran **Processes** a une rangée d'outils au-dessus de l'éditeur : **Find**
 
 Chaque étape de l'ajout d'un Process, avec des images : [Pas à pas : ajouter un Process](240-step-by-step-add-a-process).
 
+## La barre Insert {#the-insert-bar}
+
+Sous les outils se trouve la **barre Insert**. Elle met des lignes au curseur pour vous, avec les bons noms et les bons mots.
+
+- **Les listes déroulantes** (Pumps, Valves, Manual Valve, PWM, Heating Element, Text, Audio, Graphic, Value, Time, DateTime, Probe) ne listent que ce qui est déjà dans ce Schema. Choisissez-en un et son nom va au curseur. Rien n'est ajouté au Schema d'ici.
+- **Les boutons** sous une liste mettent le reste de la ligne pour celui choisi : `.visible = true`, `.state = true` (en marche ou ouvert), `.method = "PID"`, `.play = true`, `.value` (PV) ou `.setpoint` (SV). Les boutons `.visible` et `.state` vont avec la dernière Pump, Valve, Manual Valve, PWM ou Heating Element choisie.
+- **Les cases bleu clair** servent à taper une valeur pour la liste ou le bouton juste au-dessus : un fichier son, un fichier image, un nombre, une heure, une date et heure ou la consigne (SV) d'une Probe. Tapez-la et appuyez sur **Entrée** (ou sur le bouton **.path =** au-dessus), et toute la ligne est mise, par exemple `w_Strike_Volume = 7.5`.
+
+Quand le nom est juste avant le curseur, un bouton n'ajoute que sa partie (`.state = true`). Sinon toute la ligne va sur une nouvelle ligne. **Ctrl+Z** la retire.
+
+`Audio_1.play = true` fait jouer un Audio Widget et `= false` l'arrête (comme `.active`).
+
 ## Numéros de ligne et Go to line {#line-numbers-and-go-to-line}
 
 Chaque ligne a son numéro sur le côté gauche. Un numéro rouge est une ligne qui a un problème, un vert est la ligne où en est un Process en marche.
