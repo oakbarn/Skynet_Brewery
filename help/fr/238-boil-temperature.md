@@ -10,7 +10,7 @@ brasserie et calcule la température à laquelle l'eau bout **ici et maintenant*
 
 ## Mise en place {#set-it-up}
 
-Ouvrez **Settings > Boil temperature (air pressure)** (Admins).
+Ouvrez **Settings > Boil temperature (air pressure)** (Admins). Les mêmes cases sont dans **☰ Menu > Default settings > Units and your brewery**.
 
 | Case | Quoi y mettre |
 |---|---|

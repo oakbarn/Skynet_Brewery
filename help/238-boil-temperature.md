@@ -9,7 +9,7 @@ tell when the boil has started.
 
 ## Set it up
 
-Open **Settings > Boil temperature (air pressure)** (Admins).
+Open **Settings > Boil temperature (air pressure)** (Admins). The same boxes are on **☰ Menu > Default settings > Units and your brewery**.
 
 | Box | What to put in |
 |---|---|

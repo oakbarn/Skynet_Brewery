@@ -34,7 +34,7 @@ Try a brew day without touching any hardware, with time running faster or skippi
 
 ## Panel settings: screen, Tabs and alerts (admins)
 
-These change things already made and how the whole panel works, for every Schema (they used to be on the Default tab; Skynet Rule 2.42). What a **new** thing starts with is on [Default settings](155-default-settings).
+These change things already made and how the whole panel works, for every Schema (they used to be on the Default tab; Skynet Rule 2.42). Every one of them is also on [Default settings](155-default-settings), with Units, the Boil temperature boxes and the Default folders: both places change the same setting.
 
 - **The Brain**: **Shut Down Brain Option** (Off to start). On: Admins get ☰ Menu > **⏼ Shut down the Brain's computer** ([Closing Skynet Brewer and Standby](95-closing-skynet-brewer)).
 - **Tabs**: **Tab Style**, the look of every Tab that has no Tab Style of its own ([Tab Styles](101-tab-styles)).

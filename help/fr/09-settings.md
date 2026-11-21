@@ -34,7 +34,7 @@ Essayez une journée de brassage sans toucher au matériel, avec le temps qui pa
 
 ## Panel settings: screen, Tabs and alerts (Admins) {#panel-settings-screen-tabs-and-alerts-admins}
 
-Ceux-ci changent les choses déjà faites et la façon dont tout le panel marche, pour chaque Schema (ils étaient avant sur l'onglet Default ; Règle Skynet 2.42). Ce avec quoi commence une **nouvelle** chose est dans [Réglages par défaut](155-default-settings).
+Ceux-ci changent les choses déjà faites et la façon dont tout le panel marche, pour chaque Schema (ils étaient avant sur l'onglet Default ; Règle Skynet 2.42). Chacun d'eux est aussi dans [Réglages par défaut](155-default-settings), avec Units, les cases Boil temperature et les Default folders : les deux endroits changent le même réglage.
 
 - **The Brain** : **Shut Down Brain Option** (désactivé au départ). Activé : les Admins ont ☰ Menu > **⏼ Shut down the Brain's computer** ([Fermer Skynet Brewer et la mise en veille](95-closing-skynet-brewer)).
 - **Tabs** : **Tab Style**, l'aspect de chaque Tab qui n'a pas de Tab Style à lui ([Tab Styles](101-tab-styles)).
