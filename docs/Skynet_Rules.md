@@ -962,6 +962,21 @@ Help 155).
   (Skynet Defaults for New User Created Items) is gone from the tab; those values come from their own Rules. A new default that can be
   changed is still added here as a setting.
 - Then the **Order of the Menu**, as before.
+- **Every default, also the ones set somewhere else** (OakBarn Brewery, 2026-11-21: "Several Items are missing on the default settings
+  page. They may also be somewhere else but every default needs to be on the Default Settings as well. Missing: US/Metric, ICOA,
+  Brewery Elevation"). This replaces the 2026-11-14 and 2026-11-17 moves below for showing: the moved boxes **stay** where they are and
+  **also** show on Default settings. Both places show and change the **same** saved value (no copy), so a change in one shows in the
+  other. On the tab now:
+  - **Units and your brewery** (at the top): **Units** (Settings > Panel settings), **Airport (ICAO)**, **Elevation** and **Typed air
+    pressure** (Settings > Boil temperature, Rule 1.18; Elevation kept in metres, shown in feet or metres per Units, Rule 2.59; the
+    boxes are typed in the Units they show, and a box not changed keeps the exact saved number).
+  - **Default folders**: User Graphic and User Audio (Settings > Panel settings > Default folders, Rule 7.23).
+  - **Panel settings (also in Settings)** (at the bottom): every box of Settings > Panel settings: screen, Tabs and alerts (Shut Down
+    Brain Option, Tab Style, Menu Bar, Sound, On startup, \L Rich Text Code Size, Hover Delay, Push Lockout, Phones and tablets, Grain
+    weight label, Hop alerts). The Order of the Menu stays only in Settings (it is not a default).
+  - Not added (not a default): passwords, users, Approved Devices, sending codes, Patron, the API key, the BeerXML mapping, Title, Media
+    folders, autostart Processes, the restart limit and its Alarm. Profiles keep their own **Default** mark in their own list.
+  - A new default anywhere is added here as a setting, even when it also has its own place.
 - **Taken off (2026-11-17, OakBarn Brewery: "New Schema from Skynet section not needed"):** New Schema from a Skynet Template (Rule 16.6).
 - **Moved off (2026-11-17, OakBarn Brewery):** the **Pump Overlay** is on each Pump Profile, the **Valve Overlay** on each Valve Profile
   (☰ Menu > Pump Profile, Valve Profile), and **Push Lockout (s)** is a Skynet Panel Setting (Settings > Panel settings). Look of a New

@@ -15714,7 +15714,7 @@ const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
   { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
-  { key: 'default', title: 'Default settings', tip: 'What a new thing starts with: the Default pipe size, new Tabs, new Recipes, Labels and Text Boxes, and the Look of a New Schema', render: renderDefaultTab },
+  { key: 'default', title: 'Default settings', tip: 'Every default in one place: Units, your airport and Elevation, the Default pipe size, new Tabs, new Recipes, Labels and Text Boxes, the Look of a New Schema, the Default folders and the Panel settings', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
   { key: 'etemplates', title: 'Equipment Templates', tip: 'Ready-made chillers, coils, trub filters and RIMS tubes (2 or 4 liquid ports)', render: renderTemplatesTab('vessel', 'equip') },
@@ -16370,12 +16370,41 @@ const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover
 const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColor: FRESH_LABEL.fore, labelBackColor: FRESH_LABEL.back, labelAlign: FRESH_LABEL.align,
   labelBold: FRESH_LABEL.bold, labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back,
   textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height });
+// The boil temperature place on Default settings (OakBarn Brewery, 2026-11-21): the same three boxes as Settings > Boil temperature
+const BT_TIPS = {
+  airport: 'Your airport\'s 4 letter ICAO code (the code pilots use), for example KORD. It is the weather station Skynet reads the air pressure from, to work out the temperature water boils at here (skn_Boil_Temp). It works only with a correct ICAO code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air. The same box as Settings > Boil temperature. Help: Boil temperature from the air pressure tells how to find your code.',
+  elev: 'The brewery\'s height above sea level, in feet for US Units and metres for Metric (kept in metres). It starts as the airport\'s own height; change it when the brewery sits higher or lower than the airport. The same box as Settings > Boil temperature.',
+  press: 'Leave empty to use the airport\'s report. A pressure typed here is used as it is, with no internet. Type it in inHg (15.9 to 32.05) or hPa (540 to 1085); Skynet knows which by its size. A number outside those is not an air pressure and is not used. The same box as Settings > Boil temperature.' };
+const MD_TIPS = {
+  graphic: 'Where your own pictures are (normally Images: the picture groups are folders in it). Empty: Images. A Process can give only a file name and Skynet looks here first. The same box as Settings > Panel settings > Default folders (Rule 7.23).',
+  audio: 'Where your own sounds are (normally sounds). Empty: sounds. A Process can give only a file name and Skynet looks here first. The same box as Settings > Panel settings > Default folders (Rule 7.23).' };
+// the three boxes as they show (feet / inHg for US, metres / hPa for Metric), and what goes back to the Brain: a box not changed keeps
+// the exact saved number
+function btBoxes(set, metric) {
+  return { _btAirport: set.airport ?? '', _btElev: set.elevationM == null ? '' : Math.round(metric ? set.elevationM : set.elevationM / BT_FT),
+    _btPress: set.pressureHpa == null ? '' : (metric ? round1(set.pressureHpa) : +(set.pressureHpa / BT_INHG).toFixed(2)) };
+}
+function btSend(now, set, was, metric) {
+  const e = now._btElev, p = now._btPress;
+  const elevationM = e === '' ? null : String(e) === String(was._btElev) ? set.elevationM : (metric ? +e : +e * BT_FT);
+  const pressure = p === '' ? null : String(p) === String(was._btPress) ? set.pressureHpa : +p;      // read as inHg or hPa by its size
+  return { airport: now._btAirport, elevationM, pressure };
+}
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
     newSchemaLook: 'officeBlack', ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
+  const shownMetric = d.units === 'Metric', shownUnits = d.units;      // what the boxes show now; Units changed here applies after Save
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
-  const fields = w => [['_d', 'Every default is here: what a NEW thing starts with, for every Schema. What changes things already made is in Settings > Panel settings: screen, Tabs and alerts (Rule 2.42).', 'note'],
+  // Every default is here (OakBarn Brewery, 2026-11-21: "every default needs to be on the Default Settings as well"): the ones also
+  // in Settings show here too, and both places change the same saved value (Rule 2.42)
+  const pf = panelSetFields(d), unitsRow = pf.find(x => x[0] === 'units'), panelRows = pf.filter(x => x[0] !== '_un' && x[0] !== 'units');
+  const fields = w => [['_d', 'Every default is here, for every Schema. Some are also in Settings; both places change the same setting (Rule 2.42).', 'note'],
+    ['_ub', 'Units and your brewery', 'head'],
+    unitsRow,
+    ['_btAirport', 'Airport (ICAO)', 'text', null, false, false, { tip: BT_TIPS.airport }],
+    ['_btElev', `Elevation (${shownMetric ? 'm' : 'ft'})`, 'num', null, false, false, { tip: BT_TIPS.elev }],
+    ['_btPress', `Typed air pressure (${shownMetric ? 'hPa' : 'inHg'})`, 'num', null, false, false, { tip: BT_TIPS.press }],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
     ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
@@ -16424,26 +16453,47 @@ function renderDefaultTab(box) {
     ['_nw', 'New User Templates and Schemas', 'head'],
     // Pump Overlay, Valve Overlay and Push Lockout moved (OakBarn Brewery, 2026-11-17: "On Pump Profile", "On Valve Profile",
     // "Skynet Panel Setting"): ☰ Menu > Pump Profile and Valve Profile (Overlay), Settings > Panel settings (Push Lockout)
-    ['newSchemaLook', 'Look of a New Schema', 'sel', THEMES.map(t => [t.key, t.name]), false, false, { tip: NEW_TIPS.look }]];
+    ['newSchemaLook', 'Look of a New Schema', 'sel', THEMES.map(t => [t.key, t.name]), false, false, { tip: NEW_TIPS.look }],
+    // Default folders (Rule 7.23): the same two boxes as Settings > Panel settings > Default folders
+    ['_mdf', 'Default folders', 'head'],
+    ['_mdUserG', 'User Graphic', 'text', null, false, false, { tip: MD_TIPS.graphic }],
+    ['_mdUserA', 'User Audio', 'text', null, false, false, { tip: MD_TIPS.audio }],
+    // Settings > Panel settings: screen, Tabs and alerts, the same boxes (Units is at the top)
+    ['_pss', 'Panel settings (also in Settings)', 'head'],
+    ...panelRows];
   // the recipe defaults are kept as L/kg and °C; the form shows them in the units picked
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
+  d._grainLabel = grainWtLabel(d.units);
+  // the boil temperature place (Settings > Boil temperature): kept in metres and hPa, shown per Units (Rule 2.59)
+  const bt = S.boil?.settings ?? {}, btWas = btBoxes(bt, shownMetric);
+  // S is new after each load(), so the place is asked for again when it is not there (one ask at a time)
+  if (!S.boil && !renderDefaultTab.asking) { renderDefaultTab.asking = true; api('GET', '/ui/boiltemp').then(st => { S.boil = st; if (menuTab === 'default' && !profDirty.default) renderMenuPane(); }).catch(() => { }).finally(() => { renderDefaultTab.asking = false; }); }
+  Object.assign(d, btWas);
+  const mdWas = { _mdUserG: S.config.mediaDefaults?.userGraphic || '', _mdUserA: S.config.mediaDefaults?.userAudio || '' };
+  Object.assign(d, mdWas);
   const f = paneForm(fields, d, () => { }, !admin);
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
     f.read();
-    // what changes things already made is saved in Settings > Panel settings (Rule 2.42): keep what is saved there
-    for (const k of PANEL_SET_KEYS) if (S.config.brewDefaults && k in S.config.brewDefaults) d[k] = S.config.brewDefaults[k]; else delete d[k];
+    // the Panel settings boxes are here too (2026-11-21, Rule 2.42): empty = Skynet's own, as in Settings > Panel settings
+    for (const k of PANEL_SET_KEYS) if (d[k] === undefined || d[k] === '' || d[k] === null) delete d[k];
+    if (d.pushLockout !== undefined && !(+d.pushLockout >= 0.1 && +d.pushLockout <= 60)) throw new Error('Push Lockout must be 0.1 to 60 seconds (or empty: 3)');
+    const btNow = { _btAirport: String(d._btAirport ?? '').trim().toUpperCase(), _btElev: d._btElev ?? '', _btPress: d._btPress ?? '' };
+    const btChanged = btNow._btAirport !== btWas._btAirport || String(btNow._btElev) !== String(btWas._btElev) || String(btNow._btPress) !== String(btWas._btPress);
+    const mdNow = { userGraphic: String(d._mdUserG ?? '').trim(), userAudio: String(d._mdUserA ?? '').trim() };
+    const mdChanged = mdNow.userGraphic !== mdWas._mdUserG || mdNow.userAudio !== mdWas._mdUserA;
+    for (const k of ['_btAirport', '_btElev', '_btPress', '_mdUserG', '_mdUserA', '_grainLabel']) delete d[k];
     for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight']) if (d[k] === '' || d[k] === null) delete d[k];
     for (const k of Object.keys(d)) if (k.startsWith('ns_')) delete d[k];
     delete d.textWrap;      // Word wrap is always on (2026-11-17)      // the New Schema answers left Default settings (2026-11-17)
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
-    const su = displayUnits(d);
+    const su = displayUnits({ ...d, units: shownUnits });      // the boxes were typed in the Units they showed
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
     for (const [k] of HOP_STANDS) { delete d[`hs${k}TempC`]; delete d[`hs${k}Min`]; }      // no Hop Stand defaults (2026-11-19, Rule 17.14)
-    if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(d.units)) * 1000) / 1000;
+    if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(shownUnits)) * 1000) / 1000;
     delete d._w2g; delete d._batch; delete d._tabPipe; delete d._tabHose; delete d._grainLabel; delete d.grainLabel;
     for (const k of ['batchSize', 'equipmentProfile', 'efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime']) delete d[k];      // not on this Tab any more (Default Tab 3)
     for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
@@ -16454,9 +16504,12 @@ function renderDefaultTab(box) {
     if (d.hoverDelay !== undefined && !(Number.isInteger(+d.hoverDelay) && +d.hoverDelay >= 0 && +d.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty)`);
     for (const [k, t, min] of [['labelFontSize', 'Labels Font Size', 6], ['textFontSize', 'Text Boxes Font Size', 6], ['textWidth', 'New Box Width', 10], ['textHeight', 'New Box Height', 10]])
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
-    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay);
+    // the boil temperature place first: the Brain checks it (an Elevation out of range, a pressure that is no air pressure)
+    if (btChanged) S.boil = await api('PUT', '/ui/boiltemp', btSend(btNow, bt, btWas, shownMetric));
+    await api('PUT', '/ui/settings', { brewDefaults: d, ...(mdChanged ? { mediaDefaults: mdNow } : {}) }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay);
     await tap.save();      // Tap Water is saved with the rest (one Save for the whole tab)
-    profDirty.default = false; renderWs(); renderMenuPane(); savedPop('Defaults saved'); });
+    if (mdChanged) S.config.mediaDefaults = Object.fromEntries(Object.entries(mdNow).filter(([, v]) => v));
+    profDirty.default = false; renderWs(); renderMenuPane(); renderPanelSettings(); savedPop('Defaults saved'); });
   const state = h('span', { class: 'muted' }, profDirty.default ? 'Not saved yet' : 'Saved');
   const saveBtn = () => admin ? dlgBtns(h('button', { class: 'primary', onclick: save }, 'Save'), undoBtn(() => profDirty.default, () => { profDirty.default = false; renderMenuPane(); })) : dlgBtns();
   // Freeze (Default Tab 3, Rule 2.51): the title and Save stay at the top while the rest scrolls; no Save further down

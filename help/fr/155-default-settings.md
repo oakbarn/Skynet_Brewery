@@ -1,10 +1,25 @@
 # Réglages par défaut {#default-settings}
 
-**☰ Menu > Default settings** est le seul endroit pour **tous les réglages par défaut** de Skynet : ce avec quoi commence une **nouvelle** chose (Règle Skynet 2.42). Ce qui change les choses déjà faites est dans **Settings > Panel settings: screen, Tabs and alerts** ([Réglages](09-settings)). Il ne s'ouvre que depuis le
+**☰ Menu > Default settings** est le seul endroit pour **tous les réglages par défaut** de Skynet (Règle Skynet 2.42). Ceux qui sont aussi dans **Settings** sont ici aussi ([Réglages](09-settings)) : les deux endroits changent le même réglage. Il ne s'ouvre que depuis le
 **☰ Menu**. Il s'appelait autrefois le Tab **Default**.
 
 Ces réglages appartiennent au **panneau**, donc ils sont les mêmes dans chaque Schema. Les **Admins** les changent et appuient sur **Save** ; tous les
 autres peuvent regarder.
+
+## Unités et votre brasserie {#units-and-your-brewery}
+
+Depuis le 2026-11-21, **chaque réglage par défaut est sur ce Tab**, même ceux qui sont aussi ailleurs (Règle Skynet 2.42). Les deux
+endroits montrent et changent le **même** réglage : changez-le dans l'un et l'autre le montre.
+
+| Réglage | Ce qu'il fait |
+|---|---|
+| **Units** | US (gallons, livres, °F) ou Métrique (litres, kilogrammes, °C). Chaque quantité et température s'affiche dans ce choix. Skynet garde chaque nombre en métrique, donc il change seulement ce que vous voyez et tapez (Règle Skynet 2.59). Aussi dans Settings > Panel settings. |
+| **Airport (ICAO)** | Le code à 4 lettres de l'aéroport le plus proche qui a un bulletin météo (sa station METAR), par exemple `KDFW`. Skynet lit sa pression de l'air pour trouver la température à laquelle l'eau bout ici (`skn_Boil_Temp`). Aussi dans Settings > Boil temperature. |
+| **Elevation** | L'altitude de votre brasserie au-dessus du niveau de la mer : en pieds pour les Units US, en mètres pour Métrique (gardée en mètres). Aussi dans Settings > Boil temperature. |
+| **Typed air pressure** | Laissez vide pour utiliser le bulletin de l'aéroport. Aussi dans Settings > Boil temperature. |
+
+Les cases se tapent dans les Units qu'elles montrent. Changez **Units** et appuyez sur **Save**, et les cases s'affichent ensuite dans les nouvelles Units.
+Comment trouver le code de votre aéroport et votre Elevation : [Température d'ébullition selon la pression de l'air](238-boil-temperature).
 
 ## Tuyaux, flexibles et tailles {#pipes-hoses-and-sizes}
 
@@ -66,7 +81,7 @@ sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6
 
 ## New User Recipes {#new-user-recipes}
 
-Ce avec quoi commence une nouvelle Recette quand vous appuyez sur **NEW** sur le Tab Recipe. Vous pouvez changer chaque chose dans la Recette. **Units** (US ou Métrique) n'est pas ici : c'est un réglage du Skynet Panel, dans **Settings > Panel settings** ([Réglages](09-settings)).
+Ce avec quoi commence une nouvelle Recette quand vous appuyez sur **NEW** sur le Tab Recipe. Vous pouvez changer chaque chose dans la Recette. **Units** (US ou Métrique) est en haut de ce Tab (voir **Unités et votre brasserie**).
 
 ### Batch Size (Gallons) ou Batch Size (Liters) {#batch-size-gallons-or-batch-size-liters}
 
@@ -148,13 +163,20 @@ Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet
 |---|---|
 | **Look of a New Schema** | Le Look (thème) avec lequel commence un nouveau Schema vide. Le Look du Schema ouvert se change dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)). |
 
-Le **Pump Overlay** est maintenant sur chaque **Pump Profile** et le **Valve Overlay** sur chaque **Valve Profile** ([Tab, Valve et Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** est maintenant dans **Settings > Panel settings** (voir plus bas). Ce qui était réglé ici est gardé.
+Le **Pump Overlay** est maintenant sur chaque **Pump Profile** et le **Valve Overlay** sur chaque **Valve Profile** ([Tab, Valve et Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** est dans **Panel settings (aussi dans Settings)** plus bas. Ce qui était réglé ici est gardé.
 
 Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles (par exemple les Pump et Valve Standards, et les raccords qui prennent la taille de leurs tuyaux). Le **Lost Comm** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
 
-## Déplacé dans Settings {#moved-to-settings}
+## Dossiers par défaut {#default-folders}
 
-Ceux-ci changent les choses déjà faites, ou la façon dont tout le panneau marche, donc ce sont des réglages (Settings), pas des réglages par défaut. Ils sont dans **Settings > Panel settings: screen, Tabs and alerts** :
+**User Graphic** et **User Audio** : où sont vos propres images et sons (vide : `Images` et `sounds`). Un Process peut donner seulement
+un nom de fichier et Skynet cherche ici d'abord ([Chemins en deux parties](194-two-part-paths), Règle Skynet 7.23). Les deux mêmes
+cases que Settings > Panel settings > Default folders.
+
+## Panel settings (aussi dans Settings) {#panel-settings-also-in-settings}
+
+Ce sont les cases de **Settings > Panel settings: screen, Tabs and alerts**, montrées ici aussi (Units est en haut). Elles changent la
+façon dont tout le panneau marche, donc un changement atteint les choses déjà faites :
 
 - **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix. Skynet garde chaque nombre en métrique (°C, litres, kilogrammes, cm) : Units change seulement ce que vous voyez et tapez, et le changer ne change jamais un nombre enregistré (Skynet Rule 2.59). Les Mash, Boil et Equipment Profiles, les Vessels et les Vessel Templates affichent leurs nombres dans ce choix à l'ouverture ; leur propre case Units est grisée et suit celle-ci ; sur un Tab en marche, chaque température s'affiche aussi dans ce choix : la lecture d'une sonde (PV), sa consigne (SV), son Dial, et la consigne et les Offsets d'un Heating Element ou d'un Fermentor Control, aussi dans leurs Properties et leurs fenêtres. Une sonde gardée en °C (le 3 Vessel Sample) affiche 150.0 °F en US, et une sonde gardée en °F affiche des °C en Métrique ; ce que vous tapez est enregistré dans les unités de la sonde, et un nombre que vous n'avez pas changé est enregistré exactement comme avant. Un Offset se convertit par 1,8 seulement (1 °C = 1,8 °F), jamais avec le 32. Les articles d'une Recette qui ont leur propre unité la gardent (un ajout en grammes, une levure en Packs ; les houblons sont gardés en kg et s'affichent en oz ou g) ;
 - **Tab Style** (l'aspect de chaque Tab qui n'a pas de Tab Style à lui) ;
@@ -164,8 +186,8 @@ Ceux-ci changent les choses déjà faites, ou la façon dont tout le panneau mar
 - **Push Lockout (s)** : combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte ;
 - **Phones and tablets** (téléphones et tablettes) ;
 - le **Grain weight label** et le label des points de densité ;
-- les **Hop alerts** (alertes houblon) ;
-- l'**Ordre du Menu**.
+- les **Hop alerts** (alertes houblon).
+L'**Ordre du Menu** est seulement dans Settings > Panel settings.
 
 Le Look (thème) du Schema ouvert est dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)), et le Pulse est toujours de 100 ms.
 
