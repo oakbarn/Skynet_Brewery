@@ -4,6 +4,18 @@ The **Processes** screen has a row of tools above the editor: **Find**, **All Pr
 
 Every step of adding a Process, with pictures: [Step by Step: Add a Process](240-step-by-step-add-a-process).
 
+## The Insert bar
+
+Under the tools is the **Insert bar**. It puts lines in at the cursor for you, with the right names and words.
+
+- **The dropdowns** (Pumps, Valves, Manual Valve, PWM, Heating Element, Text, Audio, Graphic, Value, Time, DateTime, Probe) list only what is already in this Schema. Pick one and its Name goes in at the cursor. Nothing is added to the Schema from here.
+- **The buttons** under a dropdown put in the rest of the line for the one picked: `.visible = true`, `.state = true` (on or open), `.method = "PID"`, `.play = true`, `.value` (PV) or `.setpoint` (SV). The `.visible` and `.state` buttons go with whichever Pump, Valve, Manual Valve, PWM or Heating Element was picked last.
+- **The light-blue boxes** are for typing a value for the dropdown or button just above: a sound file, a picture file, a number, a time, a date and time or the Setpoint (SV) of a Probe. Type it and press **Enter** (or the **.path =** button above it), and the whole line goes in, for example `w_Strike_Volume = 7.5`.
+
+When the Name is right before the cursor, a button adds only its part (`.state = true`). Otherwise the whole line goes on a new line. **Ctrl+Z** takes it back out.
+
+`Audio_1.play = true` plays an Audio Widget and `= false` stops it (the same as `.active`).
+
 ## Line numbers and Go to line
 
 Every line has its number down the left side. A red number is a line with a problem, a green one is the line a running Process is on.

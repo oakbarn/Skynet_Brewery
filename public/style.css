@@ -721,6 +721,16 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 .codeWrap.colored #codeHl mark { color: inherit; }
 .editTools { flex-wrap: wrap; }
 .editTools select { max-width: 100%; }
+/* the Insert bar (2026-11-21): one font for every button, dropdown and box; each group is a column, its dropdowns on top and
+   its buttons or light-blue entry boxes under them */
+.insBar { flex-wrap: wrap; align-items: flex-start; gap: 6px 14px; }
+.insBar button, .insBar select, .insBar input { font: inherit; font-size: 14px; }
+.insGrp { display: flex; flex-direction: column; gap: 4px; }
+.insTop, .insLow { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.insBar .insPick { max-width: 14em; }
+.insBar .insBox { background: #a8dcea; color: #102030; border: 1px solid #6fb6c9; border-radius: 4px; padding: 3px 6px; width: 9em; min-height: 26px; box-sizing: border-box; }
+.insBar .insBox[type="datetime-local"] { width: 13em; }
+.insBar .insBox::placeholder { color: #3d6470; }
 .keyList { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center; margin-bottom: 8px; }
 .keyRow { display: contents; }
 /* Skynet Constants list (Process editor, 📐 Constants) */

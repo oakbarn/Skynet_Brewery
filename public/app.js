@@ -13085,7 +13085,7 @@ async function openScript(name) {
   knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
   if (can('admin')) api('POST', '/ui/scripts/check', $('#code').value, true).then(r => { for (const x of r.offBrain ?? []) knownPaths.add(x.path); }).catch(() => { });
   renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole();
-  api('GET', '/ui/scripts/words').then(w => { S.words = w; paintFind(); }).catch(() => { });
+  api('GET', '/ui/scripts/words').then(w => { S.words = w; paintFind(); fillInsBar(); }).catch(() => { });
   fIdx = -1; refreshFind(false);
 }
 function updateScriptState() {
@@ -13481,6 +13481,71 @@ function renderConstRows() {
 }
 $('#constList').onclick = () => { $('#constFind').value = ''; renderConstRows(); $('#constDlg').showModal(); $('#constFind').focus(); };
 $('#constFind').oninput = renderConstRows;
+
+// The Insert bar (OakBarn Brewery, 2026-11-21): under the editor's tools. Each dropdown lists only the items already in this Schema
+// (never an Add); a pick puts its Name at the cursor. A button puts in the attribute for the item picked: just ".state = true" when
+// that Name is right before the cursor, or the whole "Pump_1.state = true" on a new line. A light-blue box is typed into, then Enter
+// (or the .path = button over it) puts in the line for the item picked above it. One font for every button (the bar's own font).
+const INS_DEVS = ['pumps', 'valves', 'mvalves', 'pwm', 'heat'];      // the .visible / .state buttons go with whichever was picked last
+const insPicked = {};
+const insForget = g => { insPicked[g] = ''; };
+function fillInsBar() {
+  const els = S.words?.elements || [];
+  for (const sel of $$('#insBar .insPick')) {
+    const g = sel.dataset.g, names = els.filter(e => e.group === g).map(e => e.name).sort((a, b) => a.localeCompare(b));
+    const keep = names.includes(insPicked[g]) ? insPicked[g] : '';
+    if (!keep) insForget(g);
+    sel.replaceChildren(h('option', { value: '' }, sel.dataset.head),
+      ...(names.length ? names.map(n => h('option', { value: n }, n)) : [h('option', { value: '', disabled: true }, `(no ${sel.dataset.head} in this Schema)`)]));
+    sel.value = keep;
+  }
+  if (!INS_DEVS.some(g => insPicked[g])) insForget('dev');
+}
+function insPut(name, tail) {
+  const ta = $('#code'); if (!curScript || ta.readOnly) return;
+  const a = ta.selectionStart, b = ta.selectionEnd, before = ta.value.slice(0, a);
+  if (name && before.endsWith(name) && !tail) return;
+  let text;
+  if (tail && before.endsWith(name)) text = tail;
+  else {
+    const line = before.slice(before.lastIndexOf('\n') + 1);
+    text = (line.trim() ? '\n' + (/^\s*/.exec(line)[0]) : '') + name + tail;
+  }
+  editCode(a, b, text);
+}
+const insName = g => {
+  const n = g === 'dev' ? insPicked.dev : insPicked[g];
+  if (!n) toast(g === 'dev' ? 'Pick a Pump, Valve, Manual Valve, PWM or Heating Element first' : `Pick one from ${$(`#insBar .insPick[data-g="${g}"]`)?.dataset.head} first`, true);
+  return n;
+};
+const insQuote = v => '"' + String(v).replace(/"/g, "'") + '"';
+function insBox(g) {
+  const box = $(`#insBar .insBox[data-for="${g}"]`), v = box.value.trim(), n = insName(g);
+  if (!n) return;
+  if (!v) { toast('Type in the light-blue box first', true); box.focus(); return; }
+  const tail = g === 'audio' || g === 'graphic' ? '.path = ' + insQuote(v)
+    : g === 'datetime' ? ' = ' + insQuote(v.replace('T', ' '))
+    : g === 'probe' ? '.setpoint = ' + v
+    : g === 'time' ? ' = ' + (v.length === 5 ? v + ':00' : v) : ' = ' + v;
+  insPut(n, tail);
+}
+for (const sel of $$('#insBar .insPick')) sel.addEventListener('change', () => {
+  const g = sel.dataset.g, n = sel.value;
+  if (INS_DEVS.includes(g)) for (const o of $$('#insBar .insPick')) if (o !== sel && INS_DEVS.includes(o.dataset.g)) { o.value = ''; insForget(o.dataset.g); }
+  insPicked[g] = n;
+  if (INS_DEVS.includes(g)) insPicked.dev = n;
+  if (n) insPut(n, '');
+});
+for (const b of $$('#insBar .insBtn')) b.addEventListener('click', () => {
+  const [g, p, v] = b.dataset.act.split(':');
+  if ((g === 'audio' || g === 'graphic') && p === 'path') return insBox(g);
+  const n = insName(g); if (!n) return;
+  if (g === 'heat') return insPut(n, `.method = ${insQuote(p)}`);
+  if (g === 'probe') return insPut(n, '.' + p);
+  if (g === 'text' && p === 'text') { insPut(n, '.text = ""'); const ta = $('#code'); ta.setSelectionRange(ta.selectionStart - 1, ta.selectionStart - 1); return; }
+  insPut(n, `.${p} = ${v}`);
+});
+for (const box of $$('#insBar .insBox')) box.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); insBox(box.dataset.for); } });
 
 // Save to file: the whole Process or the highlighted part, as text or as XML in color; and the Notepad++ colors file
 let lastSel = [0, 0];

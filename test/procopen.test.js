@@ -11,3 +11,6 @@ assert.match(html, /<textarea id="code" placeholder="Pick a Process on the left/
 for (const f of ['help/30-process-editor.md', 'help/fr/30-process-editor.md'])
   assert.match(fs.readFileSync(new URL('../' + f, import.meta.url), 'utf8'), /(opens ready to edit|s'ouvre prêt à modifier)/, f + ' says it');
 console.log('procopen ok');
+
+// the Insert bar's test runs with this one (one less change to the one long test line in package.json, which every PR touches)
+await import('./insertbar.test.js');
