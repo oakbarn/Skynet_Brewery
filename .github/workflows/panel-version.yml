@@ -4,7 +4,7 @@
 # Someone else's copy (a fork) says their user name, for example PR3_brewer42-v.yyyymmdd_hh_mm.
 # It writes version.json at the top of the panel (the panel shows it on the Menu Bar and in ☰ Menu > About),
 # commits it back to the branch, and makes a GitHub tag and Release with the same name.
-# The Release carries the Windows installer (Skynet_Brewer_Setup_<version>.exe), the Full installer with every Skynet picture
+# The Release carries the Windows installer (Skynet_Brewer_Update_<version>.exe), the Full installer with every Skynet picture
 # and sound inside (Skynet_Brewer_Full_Setup_<version>.exe, Rule 9.20), the panel zip, the add-only Skynet Media Setup
 # .exe and zip (pictures and sounds, Rule 9.12), the add-only Sample Schemas Setup .exe and zip (Rule 9.13) and the install files,
 # built by tools/build-release.sh, so anyone can download them from the Releases page without touching the code.
@@ -192,9 +192,9 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq nsis zip
           # the Update Setup also carries the Skynet pictures and sounds added since the last Update Setup (OakBarn Brewery,
-          # 2026-11-17, Rule 9.22): the tag of the newest published Release that has a Skynet_Brewer_Setup .exe
+          # 2026-11-17, Rule 9.22): the tag of the newest published Release that has a Skynet_Brewer_Update (or older Skynet_Brewer_Setup) .exe
           export SKYNET_UPDATE_SINCE=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-            --jq '[.[] | select(.draft | not) | select([.assets[].name | select(test("^Skynet_Brewer_Setup_.+\\.exe$"))] | length > 0) | .tag_name] | first // empty' 2>/dev/null || true)
+            --jq '[.[] | select(.draft | not) | select([.assets[].name | select(test("^Skynet_Brewer_(Update|Setup)_.+\\.exe$"))] | length > 0) | .tag_name] | first // empty' 2>/dev/null || true)
           echo "New pictures, sounds and Sample Schemas since: ${SKYNET_UPDATE_SINCE:-(no earlier Update Setup)}"
           bash tools/build-release.sh "$VERSION"
           # one zip for the first-install folders, so the Release page stays short
@@ -215,7 +215,7 @@ jobs:
             WARN="Windows may say *Windows protected your PC*: click **More info**, then **Run anyway** (this installer is not signed)."
           fi
           cat > notes.md <<NOTES
-          **To install on Windows:** download \`Skynet_Brewer_Setup_$VERSION.exe\` below and double-click it. It makes \`C:\\Brewing\\BrewPanel\` and puts **Skynet Brewer** on the Desktop. $WARN
+          **To install on Windows:** download \`Skynet_Brewer_Update_$VERSION.exe\` below and double-click it. It makes \`C:\\Brewing\\BrewPanel\` and puts **Skynet Brewer** on the Desktop. $WARN
 
           **New on this Windows computer?** download \`Skynet_Brewer_Full_Setup_$VERSION.exe\` instead. It has every Skynet picture, sound and Sample Schema inside. It is always a full install: on a computer that already has Skynet it OVERWRITES everything (it warns first). To update, use the Setup above: it brings the Skynet pictures, sounds and Sample Schemas added since the last one.
 
@@ -231,7 +231,7 @@ jobs:
           # the Language Fonts (Rule 9.24) are on the Release only when they were made (tools/build-release.sh needs npm for them)
           FONT_FILES=$(ls release/Skynet_Language_Fonts_* 2>/dev/null || true)
           gh release create "$VERSION" --title "$VERSION" --notes-file notes.md --generate-notes --latest $FONT_FILES \
-            release/Skynet_Brewer_Setup_*.exe release/Skynet_Brewer_Full_Setup_*.exe release/Skynet_BrewPanel_*.zip release/Skynet_Media_*.zip \
+            release/Skynet_Brewer_Update_*.exe release/Skynet_Brewer_Full_Setup_*.exe release/Skynet_BrewPanel_*.zip release/Skynet_Media_*.zip \
             release/Skynet_Sample_Schemas_*.zip release/ReadMe.txt \
             "release/Install Skynet Brewer.command" release/install-skynet-brewer.sh release/Skynet_Brewer.bat \
             release/First_Install_ReadMes_*.zip release/Minimum_Equipment_and_Limitations.txt

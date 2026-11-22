@@ -11,7 +11,7 @@ The installers get it for you, or tell you how.
 
 The files in this release:
 
-  Skynet_Brewer_Setup_<date>.exe    Windows installer (has the whole panel inside)
+  Skynet_Brewer_Update_<date>.exe    Windows installer (has the whole panel inside)
   Skynet_Brewer_Full_Setup_<date>.exe  The same Windows installer WITH every Skynet picture, sound and
                                     Sample Schema inside: the way on a new computer.
                                     It always OVERWRITES everything. On an old install it asks: install
@@ -76,7 +76,7 @@ the details.
 THE SKYNET PICTURES AND SOUNDS
 --------------------------------------------------
 Windows: nothing extra to run (Rule 9.22). The Full Setup has every Skynet picture and
-  sound; each Update Setup (Skynet_Brewer_Setup_<date>.exe) brings the ones added since
+  sound; each Update Setup (Skynet_Brewer_Update_<date>.exe) brings the ones added since
   the last one, and the panel copies in only the ones you do not have yet.
   Mac/Linux/Pi: put Skynet_Media_<date>.zip next to the installer before you run it,
              or unzip it into the folder that holds BrewPanel (it adds BrewPanel\defaults\media)
@@ -107,7 +107,7 @@ VIDEOS (COMING SOON)
 WINDOWS, THE EASY WAY (INSTALLER)
 ---------------------------------
 1. Close the panel if it is running (Menu > Close Skynet Panel and the Brain).
-2. Double-click Skynet_Brewer_Setup_<date>.exe.
+2. Double-click Skynet_Brewer_Update_<date>.exe.
    Windows may say "Windows protected your PC". Click "More info", then "Run anyway".
    (A brand-new or unsigned installer does this for a while, that is all.)
 3. Keep the folder C:\Brewing\BrewPanel and click Install.

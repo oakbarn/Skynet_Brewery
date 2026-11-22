@@ -376,6 +376,24 @@ Process picked** when it has none) and a **▶ Start** / **■ Stop** button.
   button (the Fire Hose Float buttons) leaves it Off. The 3 Vessel 1 Pump sample and the default Schema: **Start Brew Day** and **Stop
   (all off)** are Process Widgets (they were Label Widgets with an Ask first pop-up), one click, no pop-up; Start Brew Day hides while
   BrewDay_Flow runs.
+- **Group** (OakBarn Brewery, 2026-11-22, Panel Update 9, item 12, the Water tab buttons): a word in its Properties, empty to start.
+  Process Widgets with the same Group word act together, so two of them never run at once. One click on one greys out the Start of
+  all the others (a press on a grey one is refused: "wait until the Water buttons are free again"). While the delay runs every one
+  shows **Delay** and the one pressed says **Started**; once the water flows the one pressed shows **Running** and the others are blank;
+  when it is over every Start works again. The Process says when each part starts with `.phase` on any one of them
+  (`wgt_PSW_X.phase = "running"`, `wgt_PSW_X.phase = "stopped"`; a Process that stops or fails frees the Group too). The 3 Vessel 1
+  Pump sample's ten Water buttons are Group **Water**; **FireHose Off** is left out so it always works. **Both programs:** the BruControl
+  Import makes no Group (BruControl had none).
+
+1.32 **The Water tab's helpers: a Timer can hide its buttons, a float can be forced for a few seconds** (OakBarn Brewery, 2026-11-22,
+Panel Update 9, item 12):
+- **Hide its buttons** (Timer Widget Properties, Off to start): On, its ▶ ■ ↺ and Set buttons are not built, for a Timer only a Process
+  starts and sets. The sample's Water timer and Water delay timer have it On, and the water Process sets the timer back to 00:00:00
+  when it starts.
+- **A click forces it ON for (seconds), then OFF** (a Digital Input's Properties, empty to start): a click on a forced float makes it
+  ON and it goes OFF by itself after that many seconds. The sample's float is labeled **Force floats**, 2 seconds.
+- The sample's two status gGlobals (`gblV_Water_Switch_Status_Water`, `gblV_Valve_Status`) are hidden on the Water tab; they still work.
+**Both programs:** the BruControl Import is not changed (BruControl had neither). Help 92, 173.
 
 1.29 **Layer Order** (OakBarn Brewery, 2026-11-09: "also missing is a new Univeral .attribute .layer"; ".layer is layer Order";
 "BruControl has that field. Have skynet work the same as BruControl"). Every Device, Widget and Semi_Widgets_Device has a
@@ -1453,10 +1471,34 @@ and CTRL + H also as Find and Replace on same Dialog"; picked "Add to Template +
   lit; the current one is darker. **Replace** and **Replace all** type through the browser, so **Ctrl+Z** undoes them; nothing is
   saved until the editor's own Save.
 - A read only text (a Skynet Process Template, or a Brewer) gets Find with no Replace row.
-- The keys are taken from the browser only while that editor or its bar has the focus; anywhere else Ctrl+F is the browser's own
-  Find. They never take the copy, paste, undo or redo keys (Rule 2.32).
-**Both programs:** the BruControl Import program's pages have no big text editor, so nothing changes there.
-Help 30, 12.
+- The keys are taken from the browser only while that editor or its bar has the focus. They never take the copy, paste, undo or redo
+  keys (Rule 2.32).
+- **Changed 2026-11-22** (OakBarn Brewery, Panel Update 9, item 8: "CTRL + F Have the search box come up in the middle top of the
+  screen. Besides the Tab you are on, all searches include the Help"; Fritz picked "Change Rule 2.65"): **anywhere else in the panel,
+  Ctrl+F (⌘+F) opens the Skynet search box** at the top middle of the screen (it was the browser's own Find). Typing lists what matches
+  on the Tab you are on (Devices, Widgets and Vessels, by Label or Name; a click lights it up) and the Help pages (by title and text; a
+  click opens the page). Enter opens the first one; Esc or ✕ closes it. A search changes nothing. While a dialog is open Ctrl+F is left
+  to the browser. Ctrl+H outside an editor stays the browser's (History), see Help 113. (public/skysearch.js, on top by Rule 18.53)
+**Both programs:** the BruControl Import program's pages have no big text editor and no Tabs, so nothing changes there.
+Help 30, 12, 113.
+
+2.66 **The Recipe screens: no clutter, the same size buttons, plain pickers** (OakBarn Brewery, 2026-11-22, Panel Update 9, items 20,
+21, 24c, 25e, 29 and 33):
+- Every Daughter Tab button on the Recipe tab is the **same size**, and the MASH one says **Mash and Sparge Profile**. The CLICK Here /
+  Calculate legend is gone.
+- Every **Delete** on a Recipe line is a real button as tall as the line's boxes, on the same plane as its other buttons.
+- Every **date and time picker** in the Panel has a plain border and a big yellow calendar or clock button ("Date Picker more obvious on
+  all Date Time"), and every Timer's **⏱ Set** button is yellow, its hh mm ss boxes bordered ("Time Picker more obvious on all Timers").
+Both programs: the BruControl Import has no Recipe screens. (Help 99)
+
+2.67 **A change to a Profile, a Template or a Setting is for new things** (OakBarn Brewery, 2026-11-22, Panel Update 9, item 11: "No
+Profile or Template or Skynet Settings change or affects already imported ones in a Tab or Recipe. They are on for new things only.
+Exception: US/Metric changes display on the fly"): what is
+already made keeps what it was made with. A new Template, Equipment Profile, Mash or Boil Profile, or a changed default, is used by
+the next thing made from it; a Device, Widget, Tab or Recipe already made is not changed by it. **The one exception is Units**
+(Rule 2.59): it is display only, so every screen shows the new Units at once (the values are kept metric and never change). To bring
+a new Profile into something already made, pick it again there (for example Brew on, or a Recipe's Mash Profile).
+**Both programs:** the BruControl Import makes new things only, so it follows this already.
 
 ## 3. Names and file names
 
@@ -4050,6 +4092,21 @@ attributes will be .path_image and .path_audio"). A change to Rules 7.10 and 18.
   an Alarm: it has the lowest sound priority (5) and pauses while an Alarm sounds. Type letters **AUD** (Rule 3.14). The Process word
   `SoundPlayer` (the built-in one every panel has) is not changed.
 Help 21.
+7.27 **The Skynet Audio folders, their drawings, and an Audio Widget that shows only while it plays** (OakBarn Brewery, 2026-11-22,
+Panel Update 9, items 1 and 2):
+- **Folders:** `media/sounds/Skynet` has six subfolders, **Songs, Text_to_voice, Fanfare, Beep, Nature, Go_to_work**, and a
+  **Patron** folder with the same six. Every Skynet sound that was loose in `sounds/Skynet` is in **Songs**. On start the Brain makes any
+  folder that is missing and moves a loose Skynet sound into Songs (a copy already in Songs wins; Rule #1, nothing else is touched).
+  A bare file name still finds its sound in any subfolder.
+- **Drawings:** each folder has an original line drawing on a light (250,250,250) background, the music note in blue:
+  `Images/Skynet/Miscellaneous/Skynet_Audio_<folder>.svg` (Skynet pictures 239 to 244, Rule 9.12, Media_Licenses).
+- **The Audio Widget** shows its own picture (`.path_image`) or, with none, the drawing of the folder its sound is in. It is on top
+  (Layer 1) while it plays and hidden when stopped: `.play = true` plays it and shows it, `.play = false` stops and hides it.
+- **The one exception** (to Rules 1.29 and 6.15, which give every Widget `.visible`; OakBarn Brewery: an exception to any Rule): an
+  Audio Widget has **no `.visible`, `.hidden` or Hidden Locked** for a user or a Process. A Process line that sets one is an error that
+  says to use `.play`.
+**Both programs:** the BruControl Import's sound swaps (Sandbox/Importer/Sound_Swaps.md) point at `sounds/Skynet/Songs`. Help 21, 186.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -4457,6 +4514,11 @@ the normal folders. Who may get a Patron pack is Panel Updates entry 27 (on hold
 ordinary file: there is no lock and no warning, and a user may copy one out and use it as their own.
 Both programs: the BruControl Import is not changed (it never brings in the pack). (Help 243)
 
+9.26 **The everyday Windows installer says Update** (OakBarn Brewery, 2026-11-22, Panel Update 9, item 4): the Setup that every release
+makes is **Skynet_Brewer_Update_<version>.exe**, and its first screen says Skynet Brewer Update. It is the same program as before
+(it installs a new panel or updates one, Rule 9.22). The **Full Setup** keeps its name. The release check finds the newest release by
+either name, so an older Setup still updates. Help 18, 19, 183, 184, 191.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -4793,6 +4855,10 @@ English, French, User Language."; "Right to LEFT will Not work but allow"):
 - Still to decide: whether a good User Language can be sent in to ship in a Setup (German, Danish, Norwegian, Italian are coming).
   Both programs: the Panel's Help (the BruControl Import's Build page uses the Panel's Help). (Help 242, lib/helplang.js,
   public/helplang.js, test/helplang.test.js)
+
+11.17 **A Help table's Name column never wraps** (OakBarn Brewery, 2026-11-22, Panel Update 9, item 10a): in a Help table whose first
+column is a name (a `code` or **bold** word alone in its cell, such as `skn_Boil_Temp`), that column is on one line; the other columns
+wrap. Both programs: the BruControl Import's Build page uses the Panel's Help. (public/style.css `.hpTable`)
 
 ## 12. Privacy and sharing
 
@@ -5441,6 +5507,27 @@ a button to turn hop oz into grams because some scales start in grams. Yeast tab
   Skynet_Fields `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amount`, `_Measurement`, `_Attenuation`, `_Min_Temp`, `_Max_Temp`,
   `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`;
   `skn_rcp_Yeast_Name` stays the first yeast. (Help 99) **Both programs:** the BruControl Import has no recipe lines, so nothing changes there.
+
+17.19 **Boil Hops and Pre and Post Boil Hops; Calculate saves; one click adds an Adjunct** (OakBarn Brewery, 2026-11-22, Panel Update 9, items
+19, 22 to 28, 32 and 34):
+- **Hops tab = Boil Hops only.** Each line's title is its **Hop Group**, colored: **Bitter** (orange) above 20 minutes, **Flavor**
+  (yellow) above 5 up to 20, **Aroma** (green) 5 or less. **Drop** shows as a time (75 = 01:15:00). The Boil Group box is gone. The
+  square box sends a hop to the Pre and Post Boil Hops tab.
+- **Pre and Post Boil Hops tab** (new; OakBarn Brewery, 2026-11-22: "the second Hop Page could be Pre and Post Boil Hops"): every hop that is not a Boil Hop, with its **Recipe** and **Actual** AAU and its switches (Mash, 1st
+  Wort, Secondary, Dry Hop, Whirlpool). A switch is kept at once (no Save or Cancel on a line, Rule 2.44); all off sends it back to the
+  Hops tab. Secondary and Dry hops show a **Pull Date** (date + days). A Whirlpool hop's Hop Stand Temperature and Time are the
+  Recipe's own, so the Recipe tab shows them at once.
+- **Calculate** is also at the top right of both hop tabs. It stops with one warning when any hop used (Boil or Post Boil) has an
+  Actual AAU of 0, naming each hop ("Hop 3 (Cascade)"), and opens the tab of the first one. A hop whose **Recipe AAU is 0** is not asked
+  about: an import gives it an Actual of **0.01**. When it works, **Calculate saves** the Recipe.
+- **Adjunct +** is a dropdown: Whirlfloc, Irish Moss, Yeast Nutrient, Gypsum, Calcium Chloride, Epsom Salt, Lactic Acid, Campden
+  Tablet, Gelatin, Coriander Seed, Orange Peel, Priming Sugar, and **Other** (an empty line). A click adds the line with its Type, Use,
+  Measurement and Time; the brewer types the Amount ("Make the Adjunct t button a DDLB and add Whilfloc, Irish Moss, Yeast Nutients and
+  other common adjuncts and click a selection to add. Have an Other Category as a catch all").
+- **Grain and Fermentable lines** are on one line, every box the same height ("Plenty of Room Put all on one line the same height!").
+  The Recipe tab's **Grain Wt.** follows the Grain tab at once. An empty **PPG>SG** says what it waits for (Brew Length?, Potential?,
+  Brew on Tab?): a grain has no points without the Brew on Tab's Brewhouse Efficiency (Rule 17.13).
+**Both programs:** the BruControl Import has no recipe lines; a BeerSmith or BeerXML file's hops get the 0.01 rule. (Help 99)
 
 ## 18. General Dialog Rules
 
@@ -6569,12 +6656,14 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
    like a Manual Valve.  So yes."). Text Widgets, Switches that are not real world things, Processes, Timers and the like
    **cannot be added**: Skynet never puts them in a profile, so nothing is hidden in the view;
    they are not there. A frozen bar (Rule 2.51) holds
-   **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** with the Tab beside them ("Add Transfer
-   to Tab. Since there is room 1 for all 1 for just vessels and 1 for Just Manifold"; one click each, Rule 2.44), then Delete · Save ·
+   **Move** (a dropdown: Entire Profile, Just Vessels, Just Manifold), **To Tab** (a dropdown that starts on **🔨 Build Tab** each time
+   the profile opens) and one **➡ Transfer** (OakBarn Brewery, 2026-11-22, Panel Update 9, item 17, "Tab to Move to DDLB. Always when
+   opened goes to Build Tab but the user may select"; one dropdown, not three check boxes, by Rule 2.6, Fritz picked A; it was three
+   Transfer buttons, 2026-11-17), then Delete · Save ·
    Undo · Close. Under it the profile's Properties, which go with every Transfer and Paste (OakBarn Brewery: "Equipment Profile
    Properties are ones transferred like Effenicy"): they are copied onto the Tab as its own numbers, and a Tab that has numbers shows
    the ones that change in the Replace list (Rule 2.62). Beside the Properties: **🧮 Check the volumes**, **📈 Efficiency** (the
-   Efficiency of the Tab picked beside the ➡ Transfer buttons, Rule 17.13) and **🗂 New Schema
+   Efficiency of the Tab picked in To Tab, Rule 17.13) and **🗂 New Schema
    from this profile ...**. **The old Equipment Profile screen is gone** (OakBarn Brewery, 2026-11-17: "Remove old"; before the first
    Public Production, the Old Ways policy): its form, Equipment list, Paste onto a Tab dialog, Made before Templates list and the
    Settings button. ☰ Menu > Equipment Profile keeps each Tab's row (since 2026-11-19, Rule 2.62: its own numbers, ⚙ Numbers,
@@ -6694,6 +6783,15 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-22: Panel Update 9 Part 1 (OakBarn Brewery, PDF "Panel Update 9", 35 items): added Rule 7.27 (six Skynet Audio folders plus
+  Patron, their drawings, pictures 239 to 244, the Audio Widget shows only while it plays, no `.visible` for it); Rule 9.26 the Windows
+  installer is Skynet_Brewer_Update_<version>.exe; Rule 11.17 a Help table's Name column never wraps; Rule 1.31 Process Widget Group
+  and `.phase`; Rule 1.32 Timer Hide its buttons and a forced float; Rule 2.66 the Recipe screens (same size tab buttons, legend gone,
+  Delete buttons, plain date and time pickers); Rule 2.67 Profile, Template and Setting changes are for new things (Units the
+  exception); Rule 17.19 Boil Hops and Pre and Post Boil Hops, Hop Groups, Calculate saves, AAU 0.01, the Adjunct dropdown, the Grain and
+  Fermentable line; the Equipment Profile view (Rule 19 profile view text) has Move and To Tab dropdowns and one ➡ Transfer (item 17,
+  Rule 2.6); Rule 2.65 changed, Ctrl+F outside an editor opens the Skynet search box (this Tab and Help, item 8); the second hop
+  tab is Pre and Post Boil Hops. Items 13, 30 and 35 went to the sandboxes. Help 18, 19, 21, 92, 99, 113, 173, 183, 184, 186, 191, 238 (English and French).
 - 2026-11-21: An Alarm has no Sound Custom / Default / None any more (OakBarn Brewery: "No Custom or Default or None. Path to a valid file or not. WE will handle that when they are imported"): the Sound dropdown and `.soundmode` are gone, and `custom` / `default` are no longer reserved words. An Alarm plays its sound file, or the Missing Alarm Sound when it has none or it can't play (Rule 7.20: an Alarm is never silent). An exception to Design Rule 1 (Never Take Away), at OakBarn Brewery's word. The Importer turns these over (Importer Sandbox).
 - 2026-11-21: `clear` is no longer a Process command (OakBarn Brewery: "Anything not needed from Brucontrol like clear is not needed"). It did nothing; it is gone from the Process reader, the editor colors and Suggest list, and Help 22. An import drops a `clear` line (Importing Norms section 4).
 - 2026-11-22: The Process reader keeps only Skynet's words (OakBarn Brewery: "enabled is gone, displayname is label. We still have the countdown and countup on timers just different, target is setpoint and hiddenlock is of little use"; "A name attribute is inherent in any Skynet item but it is not an attribute"). A Process writes `Name.attribute` with a dot; `"Name" attribute` without one stops with "Put a dot between a name and its attribute". `.displayname` (use `.label`), `.enabled` on a Heating Element or Fermentor Control (use `.state`), a Timer's `.type` (use `.countdown`), `.target` for a Setpoint (use `.setpoint`; a stepper's `.target` stays) and the word `hiddenlocked` each stop with the Skynet word. Saving a Process no longer rewrites old lines; only the Importer does (lib/modernize.js, Importing Norms 2 to 4). `.hidden` / `.hiddenlock` (the Hidden Lock switch) stay. Help 5, 16, 20, 21, 22, 72, 77, 150, 161, 186 (and French). Checked against the BruControl Import program: it converts these lines before they reach the Panel.

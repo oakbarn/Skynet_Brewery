@@ -37,6 +37,7 @@ export const PROCESS_TIPS = {
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
   imageOff: 'Optional. A picture drawn in it, between the Label and the button, for example a float switch. The ⬢ beside it holds the picture when on. Empty: no picture.',
   hideRunning: 'On: it hides (.visible = false) once its Process starts, and shows again when the Process stops. For a button that starts something, such as Start Brew Day. Off (the usual): it always shows, so one click can stop it too.',
+  group: 'Optional. Process Widgets with the same Group word (for example Water) act together: one click on one greys out the Start of all the others. While the delay runs they all show Delay and the one pressed says Started; once the water flows the one pressed shows Running and the others go blank. A Process sets it with .phase on any one of them: wgt_PSW_X.phase = "running" when the water flows, wgt_PSW_X.phase = "stopped" when it is over; then every Start works again. Empty: it acts on its own.',
   follow: 'The Device or Widget whose state picks the picture: the picture when on while it is on, the picture when off while it is off. None: always the picture when off.',
 };
 // Its optional picture (OakBarn Brewery, 2026-11-20, the Float buttons of the Fire Hose sample): imageOff, imageOn while follow is on

@@ -90,7 +90,7 @@ can't make them impossible. For your brewery, the safe habits are:
 Anyone can check a file at **virustotal.com**. No account is needed.
 
 1. Open `virustotal.com` in your browser.
-2. Click **Choose file** and pick the Setup `.exe` you downloaded (for example `Skynet_Brewer_Setup_<version>.exe`).
+2. Click **Choose file** and pick the Setup `.exe` you downloaded (for example `Skynet_Brewer_Update_<version>.exe`).
 3. Wait a minute or two while about 70 virus scanners look at it.
 4. Read the result. **0** of about 70 is a clean file. With a brand new installer, one or two scanners sometimes **guess** wrong (a
    false positive). If several flag it, don't run it, and tell OakBarn Brewery.

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Skynet Audio folder: Text_to_voice (a man calling out). Skynet's own line drawing (MIT License, Copyright (c) OakBarn Brewery 2026). -->
+  <rect width="300" height="300" fill="#FAFAFA"/>
+  <g fill="none" stroke="#222" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- head, facing right -->
+    <path d="M96 70 C112 44 160 40 176 66 C186 82 186 98 182 108"/>
+    <path d="M96 70 C84 92 86 126 98 146 C108 162 126 172 146 172"/>
+    <!-- hair -->
+    <path d="M96 70 C104 58 116 52 130 52 M110 58 C118 64 130 66 142 62 M142 50 C156 52 168 58 176 66"/>
+    <!-- ear -->
+    <path d="M110 100 C100 96 98 116 110 116"/>
+    <!-- eye closed, brow -->
+    <path d="M156 92 q8 -4 14 0 M152 84 q12 -8 24 -2"/>
+    <!-- nose -->
+    <path d="M182 108 l12 14 l-12 4"/>
+    <!-- open mouth -->
+    <path d="M178 136 C186 134 192 140 190 150 C186 160 174 160 170 150 C168 142 172 136 178 136 Z" fill="#7A2B2B" fill-opacity=".25"/>
+    <!-- two hands cupped round the mouth, like a horn -->
+    <path d="M186 126 L222 106 C232 102 238 108 234 116 L236 182 C240 190 232 196 222 192 L186 164" fill="#F1D3B5" fill-opacity=".6"/>
+    <path d="M222 106 C226 130 226 168 222 192"/>
+    <path d="M200 118 v38 M212 112 v50" stroke-width="3"/>
+    <!-- forearms down to the elbows -->
+    <path d="M196 120 C184 110 168 112 160 124"/>
+    <path d="M198 172 C190 196 176 206 160 212"/>
+    <!-- neck and shirt -->
+    <path d="M118 170 C118 186 112 196 100 206 M150 172 C152 188 160 200 170 208"/>
+    <path d="M60 270 C64 236 82 214 100 206 L134 222 L170 208 C196 216 214 240 220 270"/>
+    <path d="M134 222 V270 M118 214 l16 8 l16 -8"/>
+  </g>
+  <!-- the sound going out -->
+  <g fill="none" stroke="#222" stroke-width="5" stroke-linecap="round">
+    <path d="M246 118 C254 132 254 150 246 164"/>
+    <path d="M262 104 C276 128 276 154 262 178"/>
+    <path d="M278 92 C296 122 296 160 278 190"/>
+  </g>
+</svg>

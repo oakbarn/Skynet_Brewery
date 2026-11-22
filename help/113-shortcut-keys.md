@@ -14,6 +14,22 @@ Entry Dialogs (the red ⬆ Up Arrow, Rule 18.1), the Process editor and Schema.j
 `\n` and `\b` are Rich Text Embedded Codes: see [Text boxes](49-text-boxes) and [Rich Text Embedded Code](90-rich-text-embedded-code).
 Everything these keys type can be taken back with Undo, like any other typing.
 
+## Find and Replace: Ctrl + F and Ctrl + H
+
+> ⚠ **Big warning: Ctrl + H works only inside a big text editor.** Click in the text of the Process Editor, Schema.json,
+> the Process Template editor or the Help text editor first, then press **Ctrl + H** to open Find and Replace. Anywhere else
+> the browser keeps Ctrl + H for itself: in Edge and Chrome it opens the browser's **History**. Nothing is lost; close the
+> History and click back in the text. (Panel Update 9, item 9; Rule 2.65)
+
+| Windows and Linux | Mac | What it does |
+|---|---|---|
+| **Ctrl + F** | **⌘ + F** | In a big text editor: Find. **Anywhere else: the Skynet search box** at the top middle, which searches the Tab you are on and Help |
+| **Ctrl + H** | **Ctrl + H** | Find and Replace (in a big text editor only, see the warning) |
+
+**The Skynet search box (Ctrl + F).** Type a word: it lists the Devices, Widgets and Vessels on the Tab you are on that have it in
+their Label or Name, and the Help pages that have it. Click one: a Device or Widget lights up on the Tab, a Help page opens. **Enter**
+opens the first one, **Esc** or **✕** closes the box. A search never changes anything.
+
 ## Common keys
 
 | | Windows and Linux | Mac |

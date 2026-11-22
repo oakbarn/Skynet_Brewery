@@ -112,20 +112,25 @@ The Yeast tab too: `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amo
 
 The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab** (or **Recipe** in the title) comes back.
 
-- **HOPs**: add, edit or delete hops. The Actual AAU of the hops used in the brew MUST be updated; the amounts are adjusted from it to keep the IBUs.
+- **HOPs**: add, edit or delete the Boil Hops. The Actual AAU of the hops used in the brew MUST be updated; the amounts are adjusted from it to keep the IBUs.
+- **Pre and Post Boil Hops**: the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry Hop and Whirlpool. Their Actual AAU must be updated too.
 - **Drops**: the hop drop groups, the pre warning times and the alert texts, worked out from the hops (see **Hop schedule and alerts**).
 - **Grain**: add, edit or delete grains. Their total weight is the Grain Wt.
 - **Fermentable**: add, edit or delete the other fermentables: adjuncts, extracts, sugars, fruit and juice.
 - **Yeast**: add, edit or delete yeasts and yeast starters.
 - **Adjuncts**: add, edit or delete adjuncts such as Whirlfloc, yeast nutrient or gypsum (BeerSmith calls them Misc).
 - **Waters**: the Water Profile.
-- **MASH**: the Mash Profile.
+- **MASH**: the Mash and Sparge Profile.
 
-The Hops, Grain, Fermentable, Yeast, Adjuncts, MASH and Waters tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+Every Daughter Tab button is the same size.
+
+The Hops, Pre and Post Boil Hops, Grain, Fermentable, Yeast, Adjuncts, MASH and Waters tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
 
 ## The Hops tab
 
-One line for each hop, with no limit. **Add Hop +** puts a new line at the bottom; **Delete** on a line takes it away.
+One line for each Boil Hop, with no limit. **Add Hop +** puts a new line at the bottom; **Delete** on a line takes it away. **Calculate** is at the top right of the Hops and Pre and Post Boil Hops tabs too.
+
+- **The line's title** is its Hop Group, in color: **Bitter Hops** (orange) above 20 minutes, **Flavor Hops** (yellow) above 5 up to 20, **Aroma Hops** (green) 5 minutes or less. It changes as soon as Min changes.
 
 - **Hop N**: the hop's name.
 - **Ounces** (or Grams): the amount in the recipe, in the line's own **Unit**.
@@ -135,16 +140,24 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 
 **oz → g** (next to Add Hop +) turns every hop line in ounces into grams in one press. Grams are more accurate, and some scales start in grams. Only the unit changes; the amount of hops is the same. Press Save to keep it.
 - **Hop N Min**: boil minutes. Min = the Boil Time is a Start of Boil hop.
-- **Hop N Drop**: minutes into the boil when it goes in. **Hop N IBU**: its bitterness. **Hop N Boil Group**: hops that go in at the same time are one group (the Drops tab).
+- **Hop N Drop**: how far into the boil it goes in, as a time: 75 minutes shows **01:15:00**. **Hop N IBU**: its bitterness.
 
-**Outside of Boil Hops.** The square box on a line opens a dialog with switches: **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. Turn one on and press **Save**: the hop is no longer a Boil Hop, so the dialog stays on its line (in place of Min, Drop, IBU and Boil Group) until you turn the switch off and Save. With no switch on, **Cancel** or **Save** closes the dialog.
+**The square box** on a line sends the hop to the **Pre and Post Boil Hops** tab.
 
-- **Secondary Hops** and **DRY Hops**: the date and the days.
+## The Pre and Post Boil Hops tab
+
+The hops that are not Boil Hops, each with its **Recipe** and **Actual** AAU like on the Hops tab, and a box of switches: **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. One click on a switch is kept at once: there is no Save or Cancel on a line. Turn its switch off and the hop is a Boil Hop again, back on the Hops tab. **Delete** is the same size as the line.
+
+- **Secondary Hops** and **DRY Hops**: the date, the days, and the **Pull Date** (the date plus the days: the day to take the hops out).
 - **Whirlpool**: the Whirlpool questions: **Hop Stand**, its **Temperature** and **Time** (they start empty; the Hover Help gives the common numbers, see [The three Hop Stands](35-mash-and-boil-profiles#the-three-hop-stands)), the hop's own **Min**, and **Hop Rocket** when the whirlpool runs through a Hop Rocket.
 
 **Order.** On **Calculate** and on **Save** the lines go in order: Boil Hops by drop time (a Start of Boil hop first, then by Minutes), then Mash, 1st WORT, Secondary, DRY and Whirlpool hops.
 
-**Calculate needs every Actual AAU above 0.** The recipe is based on the Recipe AAU, but the real IBUs of a brew come from the Actual AAU, the AAU on the hop package. When any Actual AAU is 0, nothing is calculated: Skynet switches to the Hops tab, highlights each Actual AAU that is 0 and shows a warning. Press **READ** to close it, fix the Actual AAUs and press Calculate again.
+A change to a Hop Stand's **Temperature** or **Time** on a Whirlpool hop is the Recipe's own Hop Stand: the Recipe tab shows it at once.
+
+**Calculate needs every Actual AAU above 0**, on the Hops tab and the Pre and Post Boil Hops tab. The recipe is based on the Recipe AAU, but the real IBUs of a brew come from the Actual AAU, the AAU on the hop package. When any Actual AAU is 0, nothing is calculated: Skynet switches to the tab of the first one, highlights each Actual AAU that is 0 and shows a warning that names each hop (Hop 3 (Cascade)). Press **READ** to close it, fix the Actual AAUs and press Calculate again. A hop whose Recipe AAU is 0 is not asked about: an import gives it an Actual of 0.01.
+
+**Calculate saves.** When it works out the Recipe, it saves it too.
 
 ## The Grain and Fermentable tabs
 
@@ -152,7 +165,9 @@ A recipe's fermentables are split over two tabs. **Grain** holds the ones of Typ
 
 - **Name**, the weight, **Potential** (the yield, %), **SRM** (the color) and **PPG>SG**, its gravity points (worked out).
 - The weight shows in the **grain weight standard** picked on ☰ Menu > Default (Pounds or Kg). An imported BeerSmith or BeerXML file is shown in it too. Its label, and the PPG>SG label, can be changed only in ☰ Menu > Default settings.
-- **Gravity points** = Potential × 46.214 × pounds × efficiency ÷ gallons in the batch. Grains and adjuncts use the Brewhouse Efficiency of the **Brew on** Tab; extracts, sugars, fruit and juice give all their sugar. The points of every line add up to the **Expected Gravity** box on the Recipe tab (1 + points ÷ 1000), worked out whenever an amount changes, and by Calculate. It needs the Brew Length.
+- **Gravity points** = Potential × 46.214 × pounds × efficiency ÷ gallons in the batch. Grains and adjuncts use the Brewhouse Efficiency of the **Brew on** Tab; extracts, sugars, fruit and juice give all their sugar. The points of every line add up to the **Expected Gravity** box on the Recipe tab (1 + points ÷ 1000), worked out whenever an amount changes, and by Calculate. It needs the Brew Length. An empty **PPG>SG** box says what it is waiting for: **Brew Length?**, **Potential?** or **Brew on Tab?** (a grain has no gravity points without the Brewhouse Efficiency of the Brew on Tab's Equipment Profile, Rule 17.13).
+- The **Grain Wt.** box on the Recipe tab follows the Grain tab at once: the grains and the Adjunct type fermentables.
+- Each line is on one line, every box the same height.
 - **After Boil** (Fermentable tab only): a switch, shown only for the Types a brewer adds during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). On means it goes in after the boil. Grain is never added after the boil, so the Grain tab has none.
 
 Each tab shows its total weight. An import brings every grain field in (notes, protein, moisture and the rest too), ready for later.
@@ -169,7 +184,7 @@ An import fills in what the file has. A BeerSmith .bsmx yeast is a count of Pack
 
 ## The Adjuncts tab
 
-Whirlfloc, yeast nutrient, gypsum, spices: what BeerSmith and BeerXML call Misc. **Adjunct +** adds a line, **Delete** takes one away, no limit.
+Whirlfloc, yeast nutrient, gypsum, spices: what BeerSmith and BeerXML call Misc. **Adjunct +** is a dropdown: click **Whirlfloc**, **Irish Moss**, **Yeast Nutrient**, **Gypsum**, **Calcium Chloride**, **Epsom Salt**, **Lactic Acid**, **Campden Tablet**, **Gelatin**, **Coriander Seed**, **Orange Peel** or **Priming Sugar** to add its line with its Type, Use, Measurement and Time filled in; type the Amount. **Other** adds an empty line for anything else. **Delete** takes one away, no limit.
 
 - **Adjunct N** (the name), **Amount** and **Measurement** (mg, g, oz, lb, kg, ml, tsp, tbsp, cup, pt, qt, l, gal or items).
 - **Type**: Spice, Fining, Water Agent, Herb, Flavor or Other. **Use**: Boil, Mash, Primary, Secondary or Bottling.

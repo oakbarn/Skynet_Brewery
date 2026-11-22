@@ -2,7 +2,7 @@
 # Builds a Skynet Brewer release in release/ (MIT License, Copyright (c) OakBarn Brewery 2026):
 #   Skynet_BrewPanel_<version>.zip         the panel in a BrewPanel folder, for a first install AND for updates: it has no
 #                                          data/, config/, media/ or processes/ (their samples are in defaults/), so it never replaces yours
-#   Skynet_Brewer_Setup_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
+#   Skynet_Brewer_Update_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
 #   Skynet_Brewer_Full_Setup_<version>.exe   the same Windows installer with every Skynet picture and sound inside (Rule 9.20),
 #                                          added the Media Setup's add-only way, so a new install needs no separate Media Setup
 #   Skynet_Media_<version>.zip / Skynet_Media_Setup_<version>.exe   (only when SKYNET_MEDIA_BUILD is not "no", Rule 9.21)
@@ -49,7 +49,7 @@ mkdir -p "$MSTAGE"
 # Except the three fallback sounds (OakBarn Brewery, 2026-11-10, "Keep the Beep", "Song and clip also with the brain"; Rule 9.12):
 # they stay in the panel zip and Setup, in defaults/media, so every Brain can always sound an Alarm or a Sound Player. The panel copies
 # them in only if they are missing (lib/seed.js).
-for f in sounds/alarm_beep.wav sounds/Skynet/Alarm_Sound_Missing.mp3 sounds/Skynet/Find_The_File_Connecting.mp3; do
+for f in sounds/alarm_beep.wav sounds/Skynet/Songs/Alarm_Sound_Missing.mp3 sounds/Skynet/Songs/Find_The_File_Connecting.mp3; do
   [ -f "$MSTAGE/media/$f" ] || continue
   mkdir -p "$STAGE/defaults/media/$(dirname "$f")"
   cp -p "$MSTAGE/media/$f" "$STAGE/defaults/media/$f"
@@ -77,7 +77,7 @@ if [ -n "${SKYNET_UPDATE_SINCE:-}" ] && git rev-parse -q --verify "refs/tags/$SK
       sample_schemas/*) g="${f#sample_schemas/}"; [ -f "$SSTAGE/sample_schemas/$g" ] || continue
         mkdir -p "$STAGE/sample_schemas/$(dirname "$g")"; cp -p "$SSTAGE/sample_schemas/$g" "$STAGE/sample_schemas/$g"; ns=$((ns+1)) ;;
     esac
-  done < <(git diff --name-only --diff-filter=A "$SKYNET_UPDATE_SINCE" HEAD -- media; git diff --name-only --diff-filter=AM "$SKYNET_UPDATE_SINCE" HEAD -- sample_schemas)
+  done < <(git diff --no-renames --name-only --diff-filter=A "$SKYNET_UPDATE_SINCE" HEAD -- media; git diff --name-only --diff-filter=AM "$SKYNET_UPDATE_SINCE" HEAD -- sample_schemas)
   echo "Added since $SKYNET_UPDATE_SINCE, in the Update Setup and panel zip: $nm pictures and sounds, $ns new or changed Sample Schema files"
 fi
 
@@ -143,7 +143,7 @@ cp -p install/pi/ReadMe_Raspberry_Pi.txt install/pi/skynet-first-install-pi.sh "
 cp -p help/27-minimum-equipment.md "$OUT/Minimum_Equipment_and_Limitations.txt"
 
 if command -v makensis >/dev/null; then
-  EXE="Skynet_Brewer_Setup_$VERSION.exe"
+  EXE="Skynet_Brewer_Update_$VERSION.exe"
   # Signing (docs/Code_Signing_Setup.md): only when the release workflow has set everything tools/sign-exe.sh needs.
   # Otherwise the Setup .exe is built unsigned, as before.
   SIGN=()

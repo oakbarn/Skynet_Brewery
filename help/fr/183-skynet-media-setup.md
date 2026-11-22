@@ -3,7 +3,7 @@
 Les images et sons Skynet (pompes, vannes, cuves, sons d'alarme ...) viennent avec les Setups Skynet. **Il n'y a rien de plus à télécharger ni à lancer** (OakBarn Brewery : « No extra steps for a User »).
 
 - **Nouveau sur cet ordinateur Windows :** le **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) a toutes les images et tous les sons Skynet, et tous les Sample Schemas.
-- **À chaque mise à jour :** l'**Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) et le zip du panel portent chaque image et son Skynet ajoutés depuis le dernier Update Setup. Le Brain ajoute ceux qu'il n'a pas encore à son prochain démarrage.
+- **À chaque mise à jour :** l'**Update Setup** (`Skynet_Brewer_Update_<date>.exe`) et le zip du panel portent chaque image et son Skynet ajoutés depuis le dernier Update Setup. Le Brain ajoute ceux qu'il n'a pas encore à son prochain démarrage.
 
 Trois sons viennent toujours avec le panneau lui-même, pour qu'une alarme ou un Audio Widget puisse toujours sonner : le bip d'alarme, la voix « Alarm sound missing » et la chanson « Find The File ».
 
@@ -18,7 +18,7 @@ Sur la même page de téléchargement que le panneau : **https://github.com/oakb
 | Fichier | Pour |
 |---|---|
 | `Skynet_Brewer_Full_Setup_<date>.exe` | Windows, nouvel ordinateur : le panneau **et** toutes les images, sons et Sample Schemas dans un seul fichier |
-| `Skynet_Brewer_Setup_<date>.exe` | Windows, mises à jour : apporte les nouvelles images, sons et Sample Schemas |
+| `Skynet_Brewer_Update_<date>.exe` | Windows, mises à jour : apporte les nouvelles images, sons et Sample Schemas |
 | `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, ou à la main : toutes les images et tous les sons Skynet |
 
 Le zip Media n'est refait que quand Skynet ajoute des images ou des sons. En attendant, chaque nouvelle Release porte le même, donc la date dans son nom peut être plus ancienne que celle du panneau. C'est normal.
@@ -29,7 +29,7 @@ Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.ex
 
 - C'est toujours une installation complète, et il **écrase tout** : chaque Schema, réglage, utilisateur, Process, le journal de brassage, chaque image et son, et le dossier Import. Il remet ensuite tout seul les images et sons Skynet.
 - Si Skynet est déjà installé, il montre **un seul avertissement** : c'est l'installation Full et elle va TOUT ÉCRASER. Sur cette page :
-  - **Get the Update Setup** ouvre la page de téléchargement et ferme le Full Setup. Prenez l'Update Setup (`Skynet_Brewer_Setup_<date>.exe`) quand vous voulez seulement une mise à jour : il garde tout.
+  - **Get the Update Setup** ouvre la page de téléchargement et ferme le Full Setup. Prenez l'Update Setup (`Skynet_Brewer_Update_<date>.exe`) quand vous voulez seulement une mise à jour : il garde tout.
   - **Close and Do Not Install** le ferme, et rien n'est changé.
   - **1. Install with no backup** (installer sans sauvegarde) est déjà choisi. Il écrase tout et vos anciens dossiers sont **supprimés pour de bon**. Impossible de les récupérer.
   - **2. Install and back up my old folders first** (installer et sauvegarder d'abord mes anciens dossiers) : avant d'écraser, vos anciens dossiers (config, data, processes, media, backups et le dossier Import) sont **déplacés, pas supprimés**, dans `C:\Brewing\Skynet_Backups\Before_Full_Setup_<date>`.

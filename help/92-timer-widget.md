@@ -24,6 +24,7 @@ Rest the mouse on a field's name to see what it is for (hover help).
 - **Running at start** (it is already counting when the Brain starts), with **Database and .API ⬢** on its line.
 - **Style** (see above).
 - **Digits**: **hh:mm:ss** (01:30:00) or **hh:mm** (01:30).
+- **Hide its buttons**: on, its ▶ ■ ↺ and Set buttons are not shown, for a Timer that only a Process starts and sets (the Water timer of the 3 Vessel sample). Off to start.
 - **Seconds only in the last minute**: on, a Timer counting down shows just the seconds (**45**) once less than one minute is left.
 - **X**, **Y**, **Width** and **Height**, and the **Widget Type** greyed out last.
 

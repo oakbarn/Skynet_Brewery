@@ -43,7 +43,7 @@ Still locked? Restart the computer, and don't start the panel until the update i
 
 Run the same installer you used the first time, from the new release. It sees the panel is already there and **updates** it:
 
-- **Windows:** `Skynet_Brewer_Setup_<date>.exe`. Keep the same folder (`C:\Brewing\BrewPanel`).
+- **Windows:** `Skynet_Brewer_Update_<date>.exe`. Keep the same folder (`C:\Brewing\BrewPanel`).
 - **Mac:** `Install Skynet Brewer.command` next to the new zip.
 - **Linux / Pi:** `bash install-skynet-brewer.sh` next to the new zip.
 
@@ -81,7 +81,7 @@ When the installer finds the panel already there, it asks what this update does.
    Your Schemas and settings (`config`), brew log and saved values (`data`), Processes (`processes`), pictures and sounds (`media`) are **kept**. The panel opens at admin setup: make the admin account again and write down the new **recovery code**.
 4. **Update the program and keep everything** (recommended, and already picked for you). Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are.
 
-The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and the Linux / Pi installer all ask it. If Windows can't delete a file because a program still has it open, the installer says so: restart the computer and run it again.
+The Windows installer (`Skynet_Brewer_Update_<date>.exe`), the Mac installer and the Linux / Pi installer all ask it. If Windows can't delete a file because a program still has it open, the installer says so: restart the computer and run it again.
 
 > Only want one folder back to the samples? Pick **4** (or **3**), then answer **No** to "Keep all of them as they are?" (above). That moves a folder to `backups` instead of deleting it.
 

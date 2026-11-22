@@ -1,7 +1,7 @@
 // Skynet Brew Panel - server
 // Run:  node --no-warnings server.js   then open http://<this computer>:8080 in any browser
 import { skynetPicId, skynetPicRows, SKYNET_IMAGES } from './lib/skynetpicids.js';
-import { mediaDefaults, userFolderError, cleanFolder, DEFAULT_WORDS } from './public/mediapaths.js';
+import { mediaDefaults, userFolderError, cleanFolder, DEFAULT_WORDS, AUDIO_FOLDERS } from './public/mediapaths.js';
 import http from 'node:http';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -50,7 +50,7 @@ import { newUserRecipe, expectedGravity, measuredEfficiency, averageEfficiency }
 import { Templates } from './lib/templates.js';
 import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { applyKeptSettings } from './lib/freshstart.js';
-import { setupPictureGroups, listGroups } from './lib/picgroups.js';
+import { setupPictureGroups, listGroups, setupAudioFolders } from './lib/picgroups.js';
 import { SkynetPictures } from './lib/skynetpics.js';
 import { MusicPack } from './lib/musicpack.js';
 import { listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
@@ -139,6 +139,8 @@ store.load();
 if (!IMPORT_BUILD && applyKeptSettings(store)) console.log('Modified Fresh Start: your Default settings were put back');
 // Picture groups: the eleven Skynet folders in media/Images are made (lib/picgroups.js)
 setupPictureGroups(store._findMedia('Images'));
+// The Skynet Audio folders (Panel Update 9, Rule 7.27): Songs, Text_to_voice, Fanfare, Beep, Nature, Go_to_work, and under Patron
+if (!IMPORT_BUILD) setupAudioFolders(store._findMedia('sounds'), AUDIO_FOLDERS);
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, PROCESSES, logger);
 // Processes: a temperature is typed and shown in Settings > Units and kept in °C (Rule 2.59, lib/proctemp.js)
@@ -1310,7 +1312,14 @@ async function route(req, res) {
     const name = s[1], act = s[2];
     if (act === 'version' && m === 'POST') return ok(res, { version: engine.newVersion(name) });
     if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
-    if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
+    if (act === 'start' && m === 'POST') {
+      // a Process Widget of a Group (Panel Update 9, item 12): nothing starts while its Group is busy; else its Group goes to delay
+      const w = new URL(req.url, 'http://x').searchParams.get('widget');
+      if (w && store.has(w) && !store.pressGroup(w)) return ok(res, { ok: false, msg: 'Wait: another button of its Group is still going' });
+      const r = engine.start(name, 'user');
+      if (w && store.has(w) && r?.ok === false) try { store.setGroupPhase(w, '', 'user'); } catch { }
+      return ok(res, r);
+    }
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
     if (act === 'restart' && m === 'POST') return ok(res, await engine.restart(name, 'user'));
     if (act === 'order' && m === 'POST') { const { n } = await jsonBody(req); return ok(res, { order: engine.setOrder(name, n) }); }

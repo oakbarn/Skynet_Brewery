@@ -37,6 +37,22 @@ to start) and the **Widget Type**.
 Process stops. Use it for a button that starts something, such as **Start Brew Day** in the samples. Leave it Off on a Start / Stop
 button, so one click can stop the Process too.
 
+**Group** (empty to start): Process Widgets with the same Group word act together, like the Water buttons of the 3 Vessel sample
+(Group **Water**). One click on one greys out the Start of all the others, so two cannot run at once:
+
+1. While the delay runs, every one of them shows **Delay**, and the one pressed says **Started**.
+2. Once the water flows, the one pressed shows **Running** and the others go blank.
+3. When it is over, every Start works again.
+
+The Process says when each part starts, with `.phase` on any Widget of the Group:
+
+```
+wgt_PSW_FireHose~1~Minute_WA.phase = "running"
+wgt_PSW_FireHose~1~Minute_WA.phase = "stopped"
+```
+
+Leave a button that must always work, such as **FireHose Off**, out of the Group.
+
 ## A picture on it
 
 A Process Widget can show a **Picture** between its Label and its button, for example a float switch on a "fill to the float"

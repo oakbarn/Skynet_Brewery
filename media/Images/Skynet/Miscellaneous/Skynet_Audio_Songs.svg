@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Skynet Audio folder: Songs. Skynet's own line drawing (MIT License, Copyright (c) OakBarn Brewery 2026). -->
+  <rect width="300" height="300" fill="#FAFAFA"/>
+  <g fill="none" stroke="#1E63D6" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M112 212 V82 L222 58 V188"/>
+    <path d="M112 112 L222 88"/>
+    <ellipse cx="88" cy="214" rx="26" ry="20" transform="rotate(-18 88 214)"/>
+    <ellipse cx="198" cy="190" rx="26" ry="20" transform="rotate(-18 198 190)"/>
+  </g>
+</svg>

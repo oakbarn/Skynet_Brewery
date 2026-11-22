@@ -3,7 +3,7 @@
 // Copyright © OakBarn Brewery 2026
 // All Fire Hose and Manifold Supply Valve Water on the Fly.
 // OakBarn Brewery's script (07/27/2023, modified 06/27/2026), brought to Skynet for the 3 Vessel 1 Pump sample's
-// Water Tab (Process Sample 1, 2026-11-20). His codes, labels and messages are kept; only what Skynet needs changed:
+// Water Tab (Process Sample 1, 2026-11-20; Panel Update 9: the Water buttons act as one Group). His codes, labels and messages are kept; only what Skynet needs changed:
 //   - a Process Widget on the Water Tab sets the code and starts this Process (no looper switch);
 //   - "Manifold Set?" is an ask with Done (was the Advance switch and gblVEndlessLoop 799 / 800);
 //   - Set Time is a pop-up that asks for the time into gblT_SetTimer_Water (was a Set Timer slot on his Water workspace);
@@ -36,6 +36,9 @@ endif
 BM_33_DO@Valve_E_Manifold~Supply_WA = false
 BM_31_DO@Valve_E_Fire~Hose_WA = false
 wgt_TMR_Water~delay_WA.visible = false
+// the Water timer shows 00:00:00 from the press until the water flows (Panel Update 9, item 12d)
+stop "wgt_TMR_Water_WA"
+wgt_TMR_Water_WA = 00:00:00
 gblS_Water_Text_1_Water = "Wait! Will Auto Advance"
 //...........................................
 //Set Water Valve Status
@@ -235,6 +238,8 @@ if vVPump == 100
 	// Manifold Supply Valve
 	BM_33_DO@Valve_E_Manifold~Supply_WA = true
 endif
+// the water flows: the button pressed shows Running, the other Water buttons stay greyed out (Panel Update 9, item 12a)
+wgt_PSW_FireHose~1~Minute_WA.phase = "running"
 // One wait: the timer reaching 00:00:00 ends it, or the Water Override button (Rule 16.11) shuts it off early
 wait wgt_TMR_Water_WA <= 00:00:00
 goto "Exit_Timer_End"
@@ -256,6 +261,8 @@ endif
 if vVSwitchNumber == 2005
 	BM_33_DO@Valve_E_Manifold~Supply_WA = true
 endif
+// the water flows: the button pressed shows Running, the other Water buttons stay greyed out (Panel Update 9, item 12a)
+wgt_PSW_FireHose~1~Minute_WA.phase = "running"
 // The float being made ends it, or Override shuts it off (his OverRide? here never worked: the quote in
 // if "sw_Advance_Endless state" == true was in the wrong place)
 wait BM_32_DI@Float_Water~float_WA == true
@@ -284,3 +291,5 @@ gblV_Water_Switch_Status_Water = -9999
 BM_33_DO@Valve_E_Manifold~Supply_WA = false
 BM_31_DO@Valve_E_Fire~Hose_WA = false
 gblS_Water_Text_1_Water = "Ready. Pick a Fire Hose or Manifold button."
+// every Water button shows Stopped and its Start works again (Panel Update 9, item 12a)
+wgt_PSW_FireHose~1~Minute_WA.phase = "stopped"

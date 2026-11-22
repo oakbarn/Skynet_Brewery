@@ -43,7 +43,7 @@ Toujours verrouillé ? Redémarrez l'ordinateur, et ne lancez pas le panel avant
 
 Lancez le même programme d'installation que la première fois, celui de la nouvelle version. Il voit que le panel est déjà là et le **met à jour** :
 
-- **Windows :** `Skynet_Brewer_Setup_<date>.exe`. Gardez le même dossier (`C:\Brewing\BrewPanel`).
+- **Windows :** `Skynet_Brewer_Update_<date>.exe`. Gardez le même dossier (`C:\Brewing\BrewPanel`).
 - **Mac :** `Install Skynet Brewer.command` à côté du nouveau zip.
 - **Linux / Pi :** `bash install-skynet-brewer.sh` à côté du nouveau zip.
 
@@ -81,7 +81,7 @@ Quand le programme d'installation trouve le panel déjà là, il demande ce que 
    Vos Schemas et réglages (`config`), le journal de brassage et les valeurs enregistrées (`data`), les Processes (`processes`), les images et les sons (`media`) sont **gardés**. Le panel s'ouvre sur la création de l'admin : recréez le compte admin et notez le nouveau **code de secours**.
 4. **Update the program and keep everything** (mettre à jour le programme et tout garder ; recommandé, et déjà choisi pour vous). Vos Schemas, réglages, utilisateurs et mots de passe, journal de brassage, Processes, images et sons restent tels quels.
 
-Le programme d'installation Windows (`Skynet_Brewer_Setup_<date>.exe`), celui du Mac et celui de Linux / Pi le demandent tous. Si Windows ne peut pas supprimer un fichier parce qu'un programme l'a encore ouvert, le programme d'installation le dit : redémarrez l'ordinateur et relancez-le.
+Le programme d'installation Windows (`Skynet_Brewer_Update_<date>.exe`), celui du Mac et celui de Linux / Pi le demandent tous. Si Windows ne peut pas supprimer un fichier parce qu'un programme l'a encore ouvert, le programme d'installation le dit : redémarrez l'ordinateur et relancez-le.
 
 > Vous voulez remettre un seul dossier aux exemples ? Choisissez **4** (ou **3**), puis répondez **No** à « Keep all of them as they are? » (plus haut). Cela déplace un dossier vers `backups` au lieu de le supprimer.
 

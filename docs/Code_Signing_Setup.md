@@ -1,7 +1,7 @@
 # Signing the Skynet Setup .exe (Azure Artifact Signing)
 
 Windows **Smart App Control** blocks programs that are not signed. Signing puts a digital "seal" on
-`Skynet_Brewer_Setup_<version>.exe` (and on the **Uninstall Skynet Brewer.exe** inside it) that says who made it and
+`Skynet_Brewer_Update_<version>.exe` (and on the **Uninstall Skynet Brewer.exe** inside it) that says who made it and
 that nobody changed it since. We use **Microsoft Artifact Signing** (it used to be called *Trusted Signing*), which
 costs about **$10 a month** (the Basic plan; check the price Azure shows you).
 

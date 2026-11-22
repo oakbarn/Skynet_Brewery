@@ -3,7 +3,7 @@
 The Skynet pictures and sounds (pumps, valves, vessels, alarm sounds ...) come with the Skynet Setups. **There is nothing extra to download or run** (OakBarn Brewery: "No extra steps for a User").
 
 - **New on this Windows computer:** the **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) has every Skynet picture and sound, and every Sample Schema.
-- **Each update:** the **Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) and the panel zip carry every Skynet picture and sound added since the last Update Setup. The Brain adds the ones it does not have yet on its next start.
+- **Each update:** the **Update Setup** (`Skynet_Brewer_Update_<date>.exe`) and the panel zip carry every Skynet picture and sound added since the last Update Setup. The Brain adds the ones it does not have yet on its next start.
 
 Three sounds always come with the panel itself, so an Alarm or Audio Widget can always sound: the alarm beep, the "Alarm sound missing" voice clip and the "Find The File" song.
 
@@ -18,7 +18,7 @@ On the same download page as the panel: **https://github.com/oakbarn/Skynet_Brew
 | File | For |
 |---|---|
 | `Skynet_Brewer_Full_Setup_<date>.exe` | Windows, new computer: the panel **and** every picture, sound and Sample Schema in one file |
-| `Skynet_Brewer_Setup_<date>.exe` | Windows, updates: brings the new pictures, sounds and Sample Schemas |
+| `Skynet_Brewer_Update_<date>.exe` | Windows, updates: brings the new pictures, sounds and Sample Schemas |
 | `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, or by hand: every Skynet picture and sound |
 
 The Media zip is only made new when Skynet adds pictures or sounds. Until then every new Release carries the same one, so the date in its name can be older than the panel's. That is normal.
@@ -29,7 +29,7 @@ New on this computer? Download **`Skynet_Brewer_Full_Setup_<date>.exe`**. It is 
 
 - It is always a full install, and it **overwrites everything**: every Schema, setting, user, Process, the brew log, every picture and sound, and the Import folder. It then puts the Skynet pictures and sounds back by itself.
 - If Skynet is already installed, it shows **one warning** that this is the Full install and will OVERWRITE everything. On that page:
-  - **Get the Update Setup** opens the download page and closes the Full Setup. Use the Update Setup (`Skynet_Brewer_Setup_<date>.exe`) when you only want an update: it keeps everything.
+  - **Get the Update Setup** opens the download page and closes the Full Setup. Use the Update Setup (`Skynet_Brewer_Update_<date>.exe`) when you only want an update: it keeps everything.
   - **Close and Do Not Install** closes it, and nothing is changed.
   - **1. Install with no backup** is already picked. It overwrites everything and your old folders are **deleted for good**. They cannot be brought back.
   - **2. Install and back up my old folders first**: before it overwrites, your old folders (config, data, processes, media, backups and the Import folder) are **moved, not deleted**, to `C:\Brewing\Skynet_Backups\Before_Full_Setup_<date>`.

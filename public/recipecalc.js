@@ -65,7 +65,19 @@ export function sortHops(r) {
   return r;
 }
 // the hops whose Actual AAU is not above zero (Hop lines numbered from 1). Calculate stops and warns while there are any.
-export const hopActualProblems = r => (r?.ingredients?.hops || []).map((h, i) => ({ line: i + 1, name: h.name || '(no name)', aa: h.alphaActual })).filter(x => !(n(x.aa) > 0));
+// A line with a Recipe AAU of 0 is not a real hop (a Naga Pepper put in as a hop, Panel Update 9, item 26): it is never asked about, and
+// the import gives it an Actual AAU of 0.01, which adds no IBU
+const zeroRecipe = h => h.alpha !== null && h.alpha !== undefined && h.alpha !== '' && n(h.alpha) === 0;
+export const hopActualProblems = r => (r?.ingredients?.hops || []).map((h, i) => [h, { line: i + 1, name: h.name || '(no name)', aa: h.alphaActual }]).filter(([h, x]) => !(n(x.aa) > 0) && !zeroRecipe(h)).map(([, x]) => x);
+// the Actual AAU an imported hop starts with: 0 (to be typed from the package), or 0.01 when its Recipe AAU is 0 (Panel Update 9, item 26)
+export const importedActual = alpha => alpha !== null && alpha !== undefined && n(alpha) === 0 ? 0.01 : 0;
+// Hop Groups by boil minutes (OakBarn Brewery, 2026-11-21, Panel Update 9, item 24a): Bitter above 20, Flavor above 5 up to 20, Aroma 5 or less
+export const hopGroupOf = min => { const m = n(min); return m > 20 ? 'bitter' : m > 5 ? 'flavor' : 'aroma'; };
+export const HOP_GROUPS = { bitter: { title: 'Bitter Hops', color: '#f28c28' }, flavor: { title: 'Flavor Hops', color: '#f2d22e' }, aroma: { title: 'Aroma Hops', color: '#3cb043' } };
+// 75 -> "01:15:00" (Panel Update 9, item 24d)
+export const minutesHms = m => { if (m === null || m === undefined || m === '' || !Number.isFinite(+m)) return ''; const t = Math.round(+m * 60), p = x => String(x).padStart(2, '0'); return `${p(Math.floor(t / 3600))}:${p(Math.floor(t / 60) % 60)}:${p(t % 60)}`; };
+// a Dry Hop (or Secondary) Pull Date: its date plus its Days, "YYYY-MM-DD" (Panel Update 9, item 25d); '' when either is missing
+export const pullDate = (date, days) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date ?? '')) || !(n(days) >= 0) || days === null || days === '') return ''; const d = new Date(date + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + Math.round(n(days))); return d.toISOString().slice(0, 10); };
 export const FERMENTABLE_TYPES = { grain: 'Grain', adjunct: 'Adjunct', extract: 'Extract', 'dry extract': 'Dry Extract', sugar: 'Sugar', fruit: 'Fruit', juice: 'Juice', other: 'Other' };
 // The Grain tab holds the fermentables of Type Grain; the Fermentable tab holds every other Type (Fritz, 2026-10-31).
 // After Boil is shown only for the Types a brewer adds during or after the boil.
@@ -76,6 +88,24 @@ export const AFTER_BOIL_TYPES = ['extract', 'dry extract', 'sugar', 'fruit', 'ju
 export const BEERXML_FERM_TYPES = ['adjunct', 'extract', 'dry extract', 'sugar'];
 // The Adjuncts tab (BeerSmith and BeerXML call them Misc): select-only lists from the BeerXML standard
 export const MISC_TYPES = ['Spice', 'Fining', 'Water Agent', 'Herb', 'Flavor', 'Other'];
+// The Adjunct + dropdown (Panel Update 9, item 28: "add Whirlfloc, Irish Moss, Yeast Nutrients and other common adjuncts and click a
+// selection to add. Have an Other Category as a catch all"). A pick adds a line with its name, Type, Use, Measurement and Time filled
+// in; the Amount is left for the brewer. Other adds an empty line. Every box can still be changed.
+export const COMMON_ADJUNCTS = [
+  { name: 'Whirlfloc', type: 'Fining', use: 'boil', unit: 'tablet', time: 15, timeUnit: 'min' },
+  { name: 'Irish Moss', type: 'Fining', use: 'boil', unit: 'tsp', time: 15, timeUnit: 'min' },
+  { name: 'Yeast Nutrient', type: 'Other', use: 'boil', unit: 'tsp', time: 10, timeUnit: 'min' },
+  { name: 'Gypsum', type: 'Water Agent', use: 'mash', unit: 'g', time: 60, timeUnit: 'min' },
+  { name: 'Calcium Chloride', type: 'Water Agent', use: 'mash', unit: 'g', time: 60, timeUnit: 'min' },
+  { name: 'Epsom Salt', type: 'Water Agent', use: 'mash', unit: 'g', time: 60, timeUnit: 'min' },
+  { name: 'Lactic Acid', type: 'Water Agent', use: 'mash', unit: 'ml', time: 60, timeUnit: 'min' },
+  { name: 'Campden Tablet', type: 'Water Agent', use: 'mash', unit: 'tablet', time: 60, timeUnit: 'min' },
+  { name: 'Gelatin', type: 'Fining', use: 'secondary', unit: 'tsp', time: 3, timeUnit: 'day' },
+  { name: 'Coriander Seed', type: 'Spice', use: 'boil', unit: 'oz', time: 5, timeUnit: 'min' },
+  { name: 'Orange Peel', type: 'Spice', use: 'boil', unit: 'oz', time: 5, timeUnit: 'min' },
+  { name: 'Priming Sugar', type: 'Other', use: 'bottling', unit: 'oz', time: 0, timeUnit: 'min' },
+];
+export const OTHER_ADJUNCT = { name: '', type: 'Other', use: 'boil', unit: 'items', time: 15, timeUnit: 'min' };
 export const MISC_TIME_UNITS = { min: 'Minutes', hr: 'Hours', day: 'Days', week: 'Weeks' };
 export const FERM_MEASURES = { lb: 'Pounds (lb)', oz: 'Ounces (oz)', kg: 'Kilograms (kg)', g: 'Grams (g)' };
 // Each hop line and yeast line keeps its own unit, whatever Units says (Rule 2.59 exception, Rule 17.18; OakBarn Brewery, 2026-11-19:
@@ -149,11 +179,11 @@ export const RECIPE_LEVELS = [
   { level: 1, name: '1 Can Kit', title: 'Level 1: Extract Can Kit', type: 'Extract', about: 'For a beginner brewer: a can of hopped malt extract, often with sugar or dry malt extract, then the yeast. No grain and no hops to add.',
     tabs: ['fermentables', 'yeast', 'adjuncts', 'waters'], hide: [...MASH_BOXES, 'skn_rcp_IBU', 'skn_rcp_Whirlpool_Minutes'], fermTypes: ['extract', 'dry extract'] },
   { level: 2, name: '2 Extract', title: 'Level 2: Extract', type: 'Extract', about: 'Malt extract (liquid or dry) boiled with your own hops. No grain.',
-    tabs: ['hops', 'drops', 'fermentables', 'yeast', 'adjuncts', 'waters'], hide: MASH_BOXES, fermTypes: ['extract', 'dry extract'] },
+    tabs: ['hops', 'posthops', 'drops', 'fermentables', 'yeast', 'adjuncts', 'waters'], hide: MASH_BOXES, fermTypes: ['extract', 'dry extract'] },
   { level: 3, name: '3 Partial Grain', title: 'Level 3: Extract with Partial Grain and Hops', type: 'Partial Mash', about: 'Malt extract plus some grain mashed or steeped in a small amount of water, and your own hops.',
-    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
+    tabs: ['hops', 'posthops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
   { level: 4, name: '4 All Grain', title: 'Level 4: All Grain', type: 'All Grain', about: 'All the sugar comes from mashed grain, then the sparge, the boil and your own hops.',
-    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
+    tabs: ['hops', 'posthops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
 ];
 // a Recipe's Level: the one picked, else from its BeerXML type (an imported file), else 4 All Grain
 export function recipeLevel(r) {

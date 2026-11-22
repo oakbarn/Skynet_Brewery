@@ -14,6 +14,23 @@ String Entry (la flèche rouge ⬆, Règle 18.1), l'éditeur de Process et Schem
 `\n` et `\b` sont des Rich Text Embedded Codes : voir [Les zones de texte](49-text-boxes) et [Rich Text Embedded Code](90-rich-text-embedded-code).
 Tout ce que tapent ces touches peut être annulé avec Annuler, comme toute autre frappe.
 
+## Rechercher et remplacer : Ctrl + F et Ctrl + H {#find-and-replace-ctrl-f-and-ctrl-h}
+
+> ⚠ **Gros avertissement : Ctrl + H ne marche que dans un grand éditeur de texte.** Cliquez d'abord dans le texte de l'éditeur
+> de Process, de Schema.json, de l'éditeur de Process Template ou de l'éditeur de texte de l'aide, puis appuyez sur **Ctrl + H**
+> pour ouvrir Rechercher et remplacer. Partout ailleurs, le navigateur garde Ctrl + H pour lui : dans Edge et Chrome, il ouvre
+> l'**Historique** du navigateur. Rien n'est perdu ; fermez l'Historique et cliquez de nouveau dans le texte. (Panel Update 9,
+> point 9 ; Règle 2.65)
+
+| Windows et Linux | Mac | Ce qu'elle fait |
+|---|---|---|
+| **Ctrl + F** | **⌘ + F** | Dans un grand éditeur de texte : Rechercher. **Partout ailleurs : la boîte de recherche Skynet** en haut au milieu, qui cherche dans le Tab où vous êtes et dans l'aide |
+| **Ctrl + H** | **Ctrl + H** | Rechercher et remplacer (dans un grand éditeur de texte seulement, voir l'avertissement) |
+
+**La boîte de recherche Skynet (Ctrl + F).** Tapez un mot : elle liste les Devices, Widgets et cuves du Tab où vous êtes qui l'ont
+dans leur Label ou leur Name, et les pages d'aide qui l'ont. Cliquez sur l'un d'eux : un Device ou un Widget s'allume sur le Tab, une
+page d'aide s'ouvre. **Entrée** ouvre le premier, **Échap** ou **✕** ferme la boîte. Une recherche ne change jamais rien.
+
 ## Touches courantes {#common-keys}
 
 | | Windows et Linux | Mac |

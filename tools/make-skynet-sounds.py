@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Makes the Skynet sound effects in media/sounds/Skynet from plain math (sine waves, noise, envelopes), so they are
+# Makes the Skynet sound effects in media/sounds/Skynet/Songs from plain math (sine waves, noise, envelopes), so they are
 # Skynet's own work with no recording in them (MIT License, Copyright (c) OakBarn Brewery 2026). Each one replaces a
 # copyrighted or unknown-source sound from the OakBarn BruControl media (docs/Media_Licenses.csv, Rule 9.12).
 # Media is add-only (Rule 9.12): never re-make a file that has shipped; a changed sound gets a new name.
@@ -182,7 +182,7 @@ def write_mp3(name, sig, out):
 
 
 if __name__ == '__main__':
-    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), '..', 'media', 'sounds', 'Skynet')
+    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), '..', 'media', 'sounds', 'Skynet', 'Songs')
     os.makedirs(out, exist_ok=True)
     for name, fn in SOUNDS.items():
         write_mp3(name, fn(), out); print(name + '.mp3')

@@ -55,3 +55,17 @@ export const PICTURE_PROPS = ['image', 'backpath', 'backpath_2', 'backpath_3', '
 
 // What a picture list shows (Rule 7.22, 7.23): only the file name, and a Skynet picture's ID number in front: "17 · led_green.svg"
 export const pickLabel = (p, id) => { const f = fileOf(p) || String(p ?? ''); return id ? `${id} · ${f}` : f; };
+
+// The Skynet Audio folders (OakBarn Brewery, 2026-11-21, Panel Update 9, items 1 and 2; Rule 7.27): six subfolders of sounds/Skynet,
+// and the same six under sounds/Skynet/Patron. Each has its own Skynet line drawing, the picture an Audio Widget shows when it has no
+// picture of its own (by the folder its sound is in). All Skynet sounds start in Songs; OakBarn Brewery sorts them later.
+export const AUDIO_FOLDERS = Object.freeze(['Songs', 'Text_to_voice', 'Fanfare', 'Beep', 'Nature', 'Go_to_work']);
+export const AUDIO_PATRON = 'Patron';
+export const audioFolderPic = f => `Images/Skynet/Miscellaneous/Skynet_Audio_${f}.svg`;
+// "sounds/Skynet/Fanfare/Taps.mp3" (or under Patron) -> the Fanfare drawing; any other sound (or none) -> the Songs drawing
+export function audioPicFor(soundPath) {
+  const s = String(soundPath ?? '').replace(/\\/g, '/').replace(/^\.?\/+/, '').replace(/^media\//i, '');
+  const m = /^sounds\/skynet\/(?:patron\/)?([^/]+)\//i.exec(s);
+  const f = m && AUDIO_FOLDERS.find(x => x.toLowerCase() === m[1].toLowerCase());
+  return audioFolderPic(f || 'Songs');
+}

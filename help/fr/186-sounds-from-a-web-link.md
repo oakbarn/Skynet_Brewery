@@ -46,7 +46,7 @@ Ne mettez en ligne que des sons que vous avez le droit de partager (Règle Skyne
 - Un chemin de son qui commence par `http://` ou `https://` est un lien (une URL). Tout le reste est un fichier dans les dossiers media du Brain.
 - Le navigateur joue le lien lui-même (un élément HTML `<audio>`). Le Brain ne le télécharge jamais, donc un téléphone sur Tailscale le joue aussi depuis
   le web.
-- Un son qui ne se charge pas (un événement `error` : un lien, ou un fichier manquant) fait passer une alarme à `sounds/Skynet/Alarm_Sound_Missing.mp3`,
+- Un son qui ne se charge pas (un événement `error` : un lien, ou un fichier manquant) fait passer une alarme à `sounds/Skynet/Songs/Alarm_Sound_Missing.mp3`,
   puis à `sounds/alarm_beep.wav` si celui-ci échoue aussi, jusqu'à ce que la page soit rouverte.
-- Un Audio Widget passe à `sounds/Skynet/Find_The_File_Connecting.mp3` et le joue une fois (Repeat est ignoré pour lui).
+- Un Audio Widget passe à `sounds/Skynet/Songs/Find_The_File_Connecting.mp3` et le joue une fois (Repeat est ignoré pour lui).
 - **Media > Move** et la liste des fichiers manquants sautent les liens : il n'y a pas de fichier à déplacer ou à trouver.

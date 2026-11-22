@@ -6,7 +6,7 @@ This ReadMe walks you through a brand-new install on a Windows 10 or Windows 11 
 one step at a time. You do not need to know anything about programming.
 Do the steps in order and tick each box as you go. It takes about 20 minutes.
 
-(There is also an automatic installer, Skynet_Brewer_Setup_<date>.exe, that does
+(There is also an automatic installer, Skynet_Brewer_Update_<date>.exe, that does
 steps 3 to 9 for you. This ReadMe is the step-by-step way, so you know exactly
 what is on your PC. Use one or the other, not both.)
 
