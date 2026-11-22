@@ -205,7 +205,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #toast.show { opacity: 1; }
 /* Rule 18.53: every pop-up is on top of every dialog (public/ontop.js makes each a popover). Take away the browser's own popover look
    (centered, border, white box) so each keeps its own; zero weight, so each pop-up's own rules win. The holder in a dialog takes no room. */
-:where(.vpop, #soundNag, #buildBack, #undoNote, .alertBar, .mvAskBar, #ovrPop, #brainNotices, #flameOutBox, .jobPickBar, #toast):where([popover]) { inset: auto; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; overflow: visible; width: auto; height: auto; }
+:where(.vpop, #soundNag, #buildBack, #undoNote, .alertBar, .mvAskBar, #brewTimers, #ovrPop, #brainNotices, #flameOutBox, .jobPickBar, #toast):where([popover]) { inset: auto; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; overflow: visible; width: auto; height: auto; }
 .onTopHost { display: contents; }
 #toast.ok { background: #1e7a34; }
 #toast b { display: block; font-size: 1.3em; }
@@ -788,6 +788,12 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 .ovrPopBar { display: flex; gap: 8px; align-items: stretch; }
 .ovrPop .ovrBtn { flex: 1; min-height: 44px; font-size: 1.2em; font-weight: 700; color: #fff; background: #c0392b; border: 2px solid rgba(0,0,0,.45); border-radius: 8px; cursor: pointer; }
 .ovrPop .ovrPopX { min-width: 44px; }
+/* the Skynet Brew Timers (Rule 2.68): top middle of every screen while one runs */
+.brewTimers { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 8px; pointer-events: none; }
+.brewTimer { pointer-events: auto; background: #111; color: #ff4d3a; border: 2px solid #c0392b; border-radius: 8px; padding: 2px 12px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,.4); }
+.brewTimerLbl { font-size: .8em; color: #eee; white-space: nowrap; }
+.brewTimerTime { font: 700 1.6em/1.1 ui-monospace, Consolas, monospace; letter-spacing: 1px; }
+.brewTimer.last5 .brewTimerTime { color: #ffd23a; }
 
 /* ☰ Menu and Menu tabs (Fritz, 2026-10-20) */
 .menuWrap { position: relative; z-index: 40; }
@@ -1695,3 +1701,7 @@ input[type="date"]:disabled::-webkit-calendar-picker-indicator, input[type="time
 #skySearch .skyNone { margin: 2px 8px; }
 .skyFound { outline: 4px solid #ffd400 !important; outline-offset: 3px; animation: skyBlink .5s 4 alternate; }
 @keyframes skyBlink { to { outline-color: transparent; } }
+
+/* a clone picture right-dragged off a Vessel or Equipment Template (Rule 4.9): faint until 100 px away, then it will be made */
+.tplGhost { position: fixed; z-index: 3000; pointer-events: none; opacity: .45; filter: drop-shadow(0 4px 8px rgba(0,0,0,.5)); object-fit: contain; }
+.tplGhost.far { opacity: .9; outline: 2px dashed #2e9e4f; outline-offset: 3px; }

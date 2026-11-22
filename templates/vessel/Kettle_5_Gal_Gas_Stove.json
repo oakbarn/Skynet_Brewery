@@ -1,0 +1,31 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Vessel_Kettle_5_Gal_Gas_Stove.svg",
+  "heatKind": "gas",
+  "units": "US",
+  "volume": 5,
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "size": [
+    150,
+    225
+  ],
+  "ports": {
+    "outlet": {
+      "installed": false,
+      "position": "Stove Low Drain"
+    },
+    "thermowell": {
+      "installed": false,
+      "position": "Center Low"
+    },
+    "tangential": {
+      "installed": false,
+      "position": "Bottom Left"
+    }
+  },
+  "notes": "A 5 gallon kettle on a Manual Gas Stove (OakBarn Brewery, Panel Update 9 item 14): no drains. The stove is manual: a person turns it on and off, so it has no Device."
+}

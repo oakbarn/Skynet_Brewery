@@ -341,7 +341,7 @@ async function load() {
   startupView();
   if (S.importBuild) vbFromHash();      // the BruControl Import's Vessels step: build this vessel
 }
-function renderAll() { renderValves(S.valves); renderOverrides(S.overrides); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
+function renderAll() { renderValves(S.valves); renderOverrides(S.overrides); renderBrewTimers(S.brewTimers); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
 // Memory and work (OakBarn Brewery, 2026-11-12: "I would rather it not be a memory hog over speed"):
 // - while this browser tab can't be seen (another tab, minimized, a phone asleep) the Tab's pictures, pipes and the Output
@@ -398,7 +398,8 @@ function connect() {
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
   es.addEventListener('overrides', e => renderOverrides(S.overrides = JSON.parse(e.data)));      // Override pop-ups (Rule 2.26)
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
-  es.addEventListener('flow', e => { S.flow = JSON.parse(e.data); if (view === 'workspace') renderPipes(); });     // flow colors a Process set (Rule 5.21)
+  es.addEventListener('flow', e => { S.flow = JSON.parse(e.data); if (view === 'workspace') renderPipes(); });
+  es.addEventListener('brewTimers', e => renderBrewTimers(S.brewTimers = JSON.parse(e.data)));      // the Skynet Brew Timers (Rule 2.68)     // flow colors a Process set (Rule 5.21)
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
@@ -658,7 +659,8 @@ const EQ = {
       // 'Front Bottom Center', 'Front Center' and 'Right Side' are the three holes of Fritz's Skynet_BasicElectricBrewKettle.svg (2026-10-23)
       // '... in' positions are the ports of the Skynet Brew Vessel Widgets (Fritz, 2026-10-23): all share one picture box, and the
       // number is the port center's height above the bottom ('Fat ...' = the Brew_Vessel_Big_Mac_Widget, which has its own box)
-      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Front Bottom Center', 0.467, 0.879], ['Center Bottom 1 in', 0.492, 0.934], ['Fat Center Bottom 1 in', 0.494, 0.946], ['VW Center Bottom', 0.5, 0.931]], { on: true }),
+      // 'Stove Low Drain': the 5 gallon kettles on a Manual Electric or Gas Stove (Panel Update 9 item 14, 2026-11-22)
+      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Stove Low Drain', 0.5, 0.653], ['Front Bottom Center', 0.467, 0.879], ['Center Bottom 1 in', 0.492, 0.934], ['Fat Center Bottom 1 in', 0.494, 0.946], ['VW Center Bottom', 0.5, 0.931]], { on: true }),
       // a second drain, for example above the element so it always stays under water (Fritz's Big Fatty, 2026-10-22)
       outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92], ['VW Right Middle', 0.923, 0.641], ['Brewzilla Pump Out', 0.045, 0.523]]),
       // the Vessel Widget's ('VW ...' positions, Skynet_Vessel_Widget.svg, 260 x 320; Fritz, 2026-11-05): a return or fill pipe in at the top
@@ -1747,6 +1749,18 @@ const pressOverride = guard(async (body = {}) => {
 // (show_Override in the Process) or that waits with no Override button set to it (by itself, after 3 seconds in a wait or sleep
 // outside a loop). Each names its Process; one press moves only that Process on. ✕ hides it on this screen until it pops up again.
 const ovrHidden = new Map();      // Process -> since of the pop-up hidden with ✕
+// The Skynet Brew Timers (OakBarn Brewery, 2026-11-22, Panel Update 9 items 10d and 31, Rule 2.68): skn_Boil_Timer, skn_Mash_Timer and
+// skn_Whirlpool_Timer show themselves on every screen while they count down and hide when they are over. hh:mm until 5 minutes are
+// left, then hh:mm:ss (the Brain sends the text). A Process starts them; a person sets only their Labels (☰ Menu > Default settings).
+const BREW_TIMER_TIP = n => `${n}: a Skynet Brew Timer. It always counts down and shows itself on every screen while it runs. A Process uses it: start ${n} (from the Recipe's time, or what the Process set first, ${n} = 01:00:00), wait ${n} <= 00:30:00, stop ${n}, reset ${n}. Only its Label is set here (Rule 2.68).`;
+function renderBrewTimers(list = []) {
+  const run = (list || []).filter(t => t.running);
+  let box = $('#brewTimers');
+  if (!run.length) { box?.remove(); return; }
+  if (!box) { box = h('div', { id: 'brewTimers', class: 'brewTimers', role: 'timer' }); document.body.append(box); }
+  box.replaceChildren(...run.map(t => h('div', { class: 'brewTimer' + (t.left <= 300 ? ' last5' : ''), title: BREW_TIMER_TIP(t.name) },
+    h('div', { class: 'brewTimerLbl' }, t.label), h('div', { class: 'brewTimerTime' }, t.text))));
+}
 function renderOverrides(list = []) {
   for (const [n, t] of ovrHidden) if (!list.some(a => a.process === n && a.since === t)) ovrHidden.delete(n);
   const show = list.filter(a => ovrHidden.get(a.process) !== a.since);
@@ -5463,6 +5477,7 @@ document.addEventListener('pointerdown', ev => { pointerKind = ev.pointerType; }
 document.addEventListener('contextmenu', ev => {
   if (!editing && ev.target.closest?.('div.qdEnd')) { ev.preventDefault(); return; }     // the right button drags a QD hose end (Rule 5.28)
   if (!editing && (qdDrag || Date.now() - qdDragEnded < 1500)) { ev.preventDefault(); return; }     // letting go of a dragged hose end (over a vessel, say) does not open Help
+  if ((can('admin') && ev.target.closest?.('.tplIcon.vesselTpl')) || tplDrag || Date.now() - tplDragEnded < 1500) { ev.preventDefault(); return; }     // a right-drag off a Template (Rule 4.9): a right-click that does not move opens Help on let go
   if (!editing && (chDrag || Date.now() - chDragEnded < 1500 || chillerAt(ev.target))) { ev.preventDefault(); return; }     // the right button moves an Immersion Chiller; a right-click that does not move it opens its Help on let go
   if (ev.shiftKey || pointerKind !== 'mouse') return;     // a finger: see the long press below
   const topic = rightClickTopic(ev.target);
@@ -9770,6 +9785,7 @@ const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(
   CAL_ROW(it, x),
   [SMOOTH_FIELD[0], SMOOTH_FIELD[1], 'num', null, false, false, { tip: SMOOTH_TIP, ...x }],
   ['setpoint', 'Setpoint', 'num', null, false, false, { tip: DEVICE_TIPS.pSetpoint, ...x }],      // its SV (Panel Updates 41)
+  ...boilProbeFields(it, x),
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
 const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial'], ['bar', 'Skynet Bar']];
 function probeDeviceFields(it, item) {
@@ -10458,7 +10474,7 @@ function fieldsOf(item) {
     return [...(isProbeTee(item) ? [['_pt', `${PROBE_TEES[item.probeTee].label}: a Temperature Device (a Skynet drawing). The probe fills one opening, so its IPs are the other two; flow goes either way.`, 'note'],
       ['flipH', 'Flip Horizontal (the picture and its IPs follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IPs follow)', 'bool'], ['rot', 'Rotate (the picture and its IPs follow)', 'sel', EL_ROTATE]] : []),
       ...(isThermowell(item) ? [['_tw', `Thermowell (${item.front ? 'seen from the front, on a front facing IP' : item.thermowell || 'Short'}): a Temperature Device. Its one IP is the face of its TC cap; drop it on an IP (a tee's branch, a vessel port) and it snaps on. On a front facing IP it shows from the front (Rule 5.30).`, 'note'],
-        ['flipH', 'Flip Horizontal (the picture and its IP follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IP follow)', 'bool'], ['rot', 'Rotate (the picture and its IP follow)', 'sel', EL_ROTATE]] : []), ['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
+        ['flipH', 'Flip Horizontal (the picture and its IP follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IP follow)', 'bool'], ['rot', 'Rotate (the picture and its IP follow)', 'sel', EL_ROTATE]] : []), ['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ...boilProbeFields(item), ['info', 'Reading now', 'info']];
   }
   if (item.type === 'hydrometer') return hydroFields(item);
   if (item.type === FERM_TYPE) return fermFields(item);
@@ -10475,6 +10491,14 @@ function fieldsOf(item) {
   return kindFields(item.type, item);
 }
 
+// Boil Probe (OakBarn Brewery, 2026-11-22, Panel Update 9 item 10d, Rule 1.18): the one temperature probe wait_boil reads for the day's
+// boil. Only one probe has it: on every other probe it is greyed out (only the ⛔ on hover, Rule 18.46) and a note names the probe that has it.
+const BOIL_PROBE_TIP = 'Boil Probe: the probe in the boil kettle. A Process line wait_boil waits until it reaches skn_Boil_Temp (the temperature water boils at here and now); wait_boil -1 goes on 1 degree under it, in your Units. Only one probe can be the Boil Probe: switch it off there to give it to another.';
+function boilProbeFields(item, x = {}) {
+  const other = (draft || S.config)?.elements?.find(e => e.type === 'temperature' && e.boilProbe === true && e !== item && e.name !== item.name);
+  return [['boilProbe', 'Boil Probe', 'bool', null, false, false, other ? { grey: true, ...x } : { tip: BOIL_PROBE_TIP, ...x }],
+    ...(other ? [['_bpn', `${other.label ? other.label + ' (' + other.name + ')' : other.name} is the Boil Probe.`, 'note', null, false, false, { keep: true, ...x }]] : [])];
+}
 // ---- the Hydrometer Device (OakBarn Brewery, 2026-11-09, Rule 6.25, public/hydrometer.js) ----
 // "add all the properties of the different Types to the General Hydrometer Properties but Grey it if not applicable to the type"
 // a Hydrometer that talks to Skynet through the web (Wi-Fi to Skynet, or the maker's cloud): its .API is on (Read only) and greyed out
@@ -16673,6 +16697,11 @@ const panelSetFields = w => [
     ['_grainLabel', 'Grain weight label (skn_XML_Grain_WT_Standard_Label)', 'text', null, false, false, { known: true, tip: 'The title of the amount box on the Grain and Fermentable tabs. It comes from Units: Pounds for US, Kg for Metric. Locked: it is not typed in.' }],
     ['grainLabelVisible', 'Grain weight label visible', 'yn', true],
     ['ppgLabel', 'Gravity points label on the Grain and Fermentable tabs. Only changed here', 'text', null, false, false, { tip: 'Empty: PPG>SG.' }],
+    // the Skynet Brew Timers (Rule 2.68, Panel Update 9 items 10d and 31): only their Labels are set here; Skynet owns the rest
+    ['_bt', 'Brew Timers', 'head'],
+    ['boilTimerLabel', 'Boil Timer Label', 'text', null, false, false, { def: 'Boil Timer', tip: BREW_TIMER_TIP('skn_Boil_Timer') }],
+    ['mashTimerLabel', 'Mash Timer Label', 'text', null, false, false, { def: 'Mash Timer', tip: BREW_TIMER_TIP('skn_Mash_Timer') }],
+    ['whirlpoolTimerLabel', 'Whirlpool Timer Label', 'text', null, false, false, { def: 'Whirlpool / Chilling Timer', tip: BREW_TIMER_TIP('skn_Whirlpool_Timer') }],
     ['_h', 'Hop alerts', 'head'],
     ['hopWarnMinutes', 'Warning before each hop drop (minutes; 0 = no warning)', 'num', null, false, false, { def: RECIPE_DEFAULTS.hopWarnMinutes }],
     ['alertMergeMinutes', 'Alerts this close together become one alert (minutes)', 'num', null, false, false, { def: RECIPE_DEFAULTS.alertMergeMinutes }],
@@ -16680,7 +16709,7 @@ const panelSetFields = w => [
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
     ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]]];
 const PANEL_SET_KEYS = ['units', 'shutDownBrain', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'pushLockout', 'touchEdit', 'touchMove',
-  'grainLabelVisible', 'ppgLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
+  'grainLabelVisible', 'ppgLabel', 'boilTimerLabel', 'mashTimerLabel', 'whirlpoolTimerLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
 function menuOrderTable(admin) {
   return h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
@@ -18784,13 +18813,49 @@ function renderTemplatesTab(kind, group) { return box => {
   const list = TPL[kind].filter(t => !group || (group === 'equip') === (t.vesselType && t.vesselType !== 'vessel'));
   for (const t of list) {
     const open = () => openTemplate(kind, t.name);
-    grid.append(h('button', { class: 'tplIcon ' + t.cls, title: `${t.name} (${t.cls === 'skynet' ? 'Skynet' : 'User Bundled'} Template). Double-click for its settings.`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
-      h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : ''));
+    const b = h('button', { class: 'tplIcon ' + t.cls, title: `${t.name} (${t.cls === 'skynet' ? 'Skynet' : 'User Bundled'} Template). Double-click for its settings.${kind === 'vessel' && can('admin') ? ' Right-drag it off to put a copy on the 🔨 Build Tab.' : ''}`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
+      h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : '');
+    if (kind === 'vessel' && can('admin')) { b.classList.add('vesselTpl'); b.addEventListener('pointerdown', ev => tplDragStart(ev, b, t)); }
+    grid.append(b);
   }
   if (!list.length) grid.append(h('p', { class: 'muted' }, 'No Templates yet.'));
   box.append(grid);
 }; }
 
+// Right-drag a clone off a Vessel or Equipment Template (OakBarn Brewery, 2026-11-22, Panel Update 9 item 16, Rule 4.9: "Grab a Item
+// from the Vessel or Equipment Template and drag off clone picture with Right Clicked Draw after 100 + Pixel Movement and right mouse
+// click release, move to the Build tab and open Built Tab with Property Dialog open just as if it had been added with the button" Add
+// equipment). Under 100 px nothing is made, and a right-click that does not move opens Help as always.
+const TPL_DRAG_PX = 100;
+let tplDrag = null, tplDragEnded = 0;
+function tplDragStart(ev, btn, t) {
+  if (ev.button !== 2 || ev.pointerType !== 'mouse') return;
+  ev.preventDefault();
+  const img = btn.querySelector('img'), r = img.getBoundingClientRect();
+  const ghost = h('img', { src: img.src, alt: '', class: 'tplGhost', style: `width:${r.width}px;height:${r.height}px;left:${r.left}px;top:${r.top}px` });
+  tplDrag = { t, x: ev.clientX, y: ev.clientY, dx: ev.clientX - r.left, dy: ev.clientY - r.top, ghost, far: false, moved: false };
+  const mv = e => {
+    if (!tplDrag) return;
+    const d = Math.hypot(e.clientX - tplDrag.x, e.clientY - tplDrag.y);
+    if (d > 8 && !tplDrag.moved) { tplDrag.moved = true; document.body.append(ghost); }
+    tplDrag.far = d > TPL_DRAG_PX;
+    ghost.style.left = (e.clientX - tplDrag.dx) + 'px'; ghost.style.top = (e.clientY - tplDrag.dy) + 'px';
+    ghost.classList.toggle('far', tplDrag.far);
+  };
+  const up = e => {
+    if (e.button !== 2) return;
+    removeEventListener('pointermove', mv); removeEventListener('pointerup', up, true);
+    const d = tplDrag; tplDrag = null; ghost.remove();
+    if (!d?.moved) { const topic = rightClickTopic(btn); if (topic) openHelp(topic); return; }
+    tplDragEnded = Date.now();      // its let go is not a right-click for Help
+    if (!d.far) return;
+    if (menuTab) leaveMenuTab();
+    if (!editing) setEditing(true);
+    if (!editing || !draft) return;
+    vesselToBuild(tplOf('vessel', d.t.name) || d.t);       // on the 🔨 Build Tab, its Properties open, as Add equipment does
+  };
+  addEventListener('pointermove', mv); addEventListener('pointerup', up, true);
+}
 // Add to Tab and Clone: the copy is made on the Build Tab (in Edit layout, Bundled). Finish Build ... then offers the Tab it is
 // going to first (Add to Tab), or As a Template under the new name (Clone).
 function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {

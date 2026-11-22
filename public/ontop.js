@@ -12,7 +12,7 @@
 // popover (public/hoverhelp.js); they are not touched here.
 
 // the pop-ups, lowest first: the one shown last is on top (the old z-index order: the message box is the very top)
-export const ON_TOP = ['.vpop', '#soundNag', '#buildBack', '#undoNote', '.alertBar', '.mvAskBar', '#ovrPop', '#brainNotices', '#flameOutBox', '.jobPickBar', '#skySearch', '#toast'];
+export const ON_TOP = ['.vpop', '#soundNag', '#buildBack', '#undoNote', '.alertBar', '.mvAskBar', '#brewTimers', '#ovrPop', '#brainNotices', '#flameOutBox', '.jobPickBar', '#skySearch', '#toast'];
 const SEL = ON_TOP.join(', ');
 const HOST = 'onTopHost';
 

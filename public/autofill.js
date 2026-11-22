@@ -23,6 +23,7 @@
 import { DEVICE_TYPES } from './colorize.js';
 import { SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstant } from './skconst.js';
 import { SKN_GLOBALS } from './boilpoint.js';
+import { BREW_TIMERS } from './brewtimers.js';
 import { G_DECLARE } from './gkinds.js';
 import { heatMethodKey, heatMethodCode } from './heatmethod.js';
 
@@ -38,6 +39,7 @@ const COMMANDS = [
   ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'], ['all_heaters_off', 'every heater off'],
   ['import_recipe', 'a .bsmx or .xml file'], ['start_hop_alerts', 'hop alerts for the boil'], ['stop_hop_alerts', 'stop the hop alerts'],
   ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
+  ['wait_boil', 'until the Boil Probe reaches skn_Boil_Temp (wait_boil -1: 1 degree under)'],
   // the Chiller Overlay (OakBarn Brewery, 2026-11-15, Rule 5.42): picking one opens the list of Chiller Templates, then of Vessels
   ['place_Chiller', 'draw a Chiller Template in a vessel, with its hoses'], ['remove_Chiller', 'take a placed chiller off again'],
 ];
@@ -217,6 +219,8 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   if (!atStart && w.length >= 2) for (const [n, , what] of SKYNET_FUNCTIONS) add(n + '(', `Skynet temperature: ${what}`, n);      // toF( toC(
   // Skynet internal Globals (skn_Boil_Temp ...: ☰ Menu > Default settings > Boil temperature, Rule 1.18), read only, where a value goes
   if (!atStart && w) for (const [n, what] of SKN_GLOBALS) add(n + nsp, `Skynet internal Global, read only: ${what}`, n);
+  // the Skynet Brew Timers (Rule 2.68): after start, stop, reset and where a value goes
+  if (w) for (const [n, , what] of BREW_TIMERS) add(n + nsp, `Skynet Brew Timer: ${what}`, n);
   // and / or only after a value (if Pump == true an...)
   const afterValue = /\S\s+$/.test(pre) && !/(==|!=|<=|>=|<|>|=|\+|-|\*|\/|\(|\bif|\belseif|\bwait|\bnot|\band|\bor)\s*$/i.test(pre);
   if (!atStart) for (const [k, h] of ANYWHERE) if (afterValue || !['and', 'or'].includes(k)) add(['and', 'or', 'not'].includes(k) ? k + ' ' : k, h, k);

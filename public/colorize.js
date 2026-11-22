@@ -1,5 +1,6 @@
 import { SKYNET_CONSTANT_WORDS } from './skconst.js';
 import { SKN_GLOBALS } from './boilpoint.js';
+import { BREW_TIMERS } from './brewtimers.js';
 // Color coding of Processes (Fritz, 2026-10-19). Used by the Process editor, the XML file export and the Notepad++ colors file.
 // Every character of a Process gets a class by what it does:
 //   cmd   commands (if, wait, start, new value ...) and their words (true, false, now)   blue
@@ -21,14 +22,14 @@ export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'o
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
 
 export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'goline', 'sleep', 'delay', 'wait', 'start', 'stop', 'reset', 'print', 'show', 'send_db', 'dbsend', 'send_db_group', 'start_db_group', 'stop_db_group', 'new', 'play',
-  'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'all_heaters_off', 'take_reading', 'place_chiller', 'remove_chiller', 'show_override', 'hide_override'];
+  'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'all_heaters_off', 'take_reading', 'wait_boil', 'place_chiller', 'remove_chiller', 'show_override', 'hide_override'];
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off', 'null'];      // NULL: the empty value (Rule 1.32)
 export const LOGIC = ['and', 'or', 'not'];
 // gGlobals made in a Process (Rule 1.24): declare is the same as new, and the gGlobal words
 COMMANDS.push('declare', 'gglobalvalue', 'gglobalstring', 'gglobaltime', 'gglobaldatetime', 'gglobalboolean', 'gv', 'gs', 'gt', 'gd', 'gb');
 // element types that sit on a PLC port: Devices. Every other type (but gGlobal) is a Widget.
 export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid', 'deadband', 'hydrometer'];
-const CMD = new Set(COMMANDS), CONST = new Set([...CONSTANTS, ...SKYNET_CONSTANT_WORDS.map(c => c.toLowerCase()), ...SKN_GLOBALS.map(c => c[0].toLowerCase())]), LOG = new Set(LOGIC);
+const CMD = new Set(COMMANDS), CONST = new Set([...CONSTANTS, ...SKYNET_CONSTANT_WORDS.map(c => c.toLowerCase()), ...SKN_GLOBALS.map(c => c[0].toLowerCase()), ...BREW_TIMERS.map(c => c[0].toLowerCase())]), LOG = new Set(LOGIC);
 
 // The colors, for a light page (the files) and for the panel's dark look. Notepad++ uses the light ones.
 export const COLORS = {
@@ -181,7 +182,7 @@ export function notepadPlusPlus(words, texts = []) {
   const vars = [...new Set(texts.flatMap(t => [...String(t).matchAll(/^\s*new\s+\w+\s+([A-Za-z_]\w*)/gim)].map(m => m[1])))].sort().join(' ');
   const general = !words;
   const kw = [
-    [...COMMANDS, ...CONSTANTS, ...SKYNET_CONSTANT_WORDS, ...SKN_GLOBALS.map(c => c[0])].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
+    [...COMMANDS, ...CONSTANTS, ...SKYNET_CONSTANT_WORDS, ...SKN_GLOBALS.map(c => c[0]), ...BREW_TIMERS.map(c => c[0])].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
     group('dev'),
     general ? 'gG' : group('vk'),
     '',

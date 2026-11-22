@@ -244,6 +244,10 @@
   { "id": 241, "file": "Miscellaneous/Skynet_Audio_Go_to_work.svg" },
   { "id": 242, "file": "Miscellaneous/Skynet_Audio_Nature.svg" },
   { "id": 243, "file": "Miscellaneous/Skynet_Audio_Songs.svg" },
-  { "id": 244, "file": "Miscellaneous/Skynet_Audio_Text_to_voice.svg" }
+  { "id": 244, "file": "Miscellaneous/Skynet_Audio_Text_to_voice.svg" },
+  { "id": 245, "file": "Vessels/Vessel_Kettle_5_Gal_Electric_Stove_Low_Drain.svg" },
+  { "id": 246, "file": "Vessels/Vessel_Kettle_5_Gal_Electric_Stove.svg" },
+  { "id": 247, "file": "Vessels/Vessel_Kettle_5_Gal_Gas_Stove_Low_Drain.svg" },
+  { "id": 248, "file": "Vessels/Vessel_Kettle_5_Gal_Gas_Stove.svg" }
  ]
 }

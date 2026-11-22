@@ -1,0 +1,32 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Vessel_Kettle_5_Gal_Electric_Stove_Low_Drain.svg",
+  "heatKind": "electric",
+  "units": "US",
+  "volume": 5,
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "size": [
+    150,
+    225
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Stove Low Drain",
+      "fitting": "Valve_Only"
+    },
+    "thermowell": {
+      "installed": false,
+      "position": "Center Low"
+    },
+    "tangential": {
+      "installed": false,
+      "position": "Bottom Left"
+    }
+  },
+  "notes": "A 5 gallon kettle on a Manual Electric Stove (OakBarn Brewery, Panel Update 9 item 14): a Low Drain on the front near the bottom with a manual ball valve (its Valve is picked when it is on a Tab). The stove is manual: a person turns it on and off, so it has no Device."
+}
