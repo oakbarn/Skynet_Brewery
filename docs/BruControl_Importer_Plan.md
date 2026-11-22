@@ -352,7 +352,7 @@ the program only shows it and measures distances on the screen. Three helpers, u
    tool's terms allow its songs in a program we give away. Fritz makes or picks the file; it goes in `media/sounds/Skynet`.
    **Song file: chosen** (Fritz, 2026-11-07): Fritz made the song **"Skynet - Outlet to Valve"** with Treblo, whose site says
    its songs are free to use. It is 3 min 47 s and ships as an MP3 (plays on Windows, browsers and iPhones):
-   `media/sounds/Skynet/Skynet_Outlet_to_Valve.mp3`. It replaces the played notes. ▶ Play starts it and the button turns into
+   `media/sounds/Skynet/Songs/Skynet_Outlet_to_Valve.mp3`. It replaces the played notes. ▶ Play starts it and the button turns into
    ■ Stop. Fritz also made a 19 second text-to-speech clip (free to use) of the rhyme, which can go beside it.
 
    and then the brewery version:

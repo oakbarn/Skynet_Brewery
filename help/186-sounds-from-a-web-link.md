@@ -46,7 +46,7 @@ Only put up sounds you have the right to share (Skynet Rule 9.12).
 - A sound path that starts with `http://` or `https://` is a link (a URL). Anything else is a file in the media folders on the Brain.
 - The browser plays the link itself (an HTML `<audio>` element). The Brain never downloads it, so a phone on Tailscale plays it from
   the web too.
-- A sound that fails to load (an `error` event: a link, or a missing file) switches an Alarm to `sounds/Skynet/Alarm_Sound_Missing.mp3`,
+- A sound that fails to load (an `error` event: a link, or a missing file) switches an Alarm to `sounds/Skynet/Songs/Alarm_Sound_Missing.mp3`,
   then to `sounds/alarm_beep.wav` if that fails too, until the page is opened again.
-- A Audio Widget switches to `sounds/Skynet/Find_The_File_Connecting.mp3` and plays it once (Repeat is ignored for it).
+- A Audio Widget switches to `sounds/Skynet/Songs/Find_The_File_Connecting.mp3` and plays it once (Repeat is ignored for it).
 - **Media > Move** and the missing files list skip links: there is no file to move or find.

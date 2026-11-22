@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Skynet Audio folder: Beep (a little round bird in a hurry). Skynet's own line drawing (MIT License, Copyright (c) OakBarn Brewery 2026). -->
+  <rect width="300" height="300" fill="#FAFAFA"/>
+  <!-- speech bubble -->
+  <g fill="#FFFFFF" stroke="#222" stroke-width="4" stroke-linejoin="round">
+    <path d="M176 22 H278 Q290 22 290 34 V82 Q290 94 278 94 H214 L192 112 L198 94 H176 Q164 94 164 82 V34 Q164 22 176 22 Z"/>
+  </g>
+  <text x="227" y="68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="28" fill="#222">Beep!</text>
+  <g fill="none" stroke="#222" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- round body -->
+    <path d="M70 172 C70 126 104 100 142 104 C184 108 204 144 196 182 C188 222 146 236 112 228 C84 222 70 200 70 172 Z" fill="#9EC9E8" fill-opacity=".35"/>
+    <!-- belly -->
+    <path d="M110 224 C132 206 170 196 194 190" stroke-width="3"/>
+    <!-- wing -->
+    <path d="M104 160 C116 146 140 150 140 168 C138 184 118 190 100 184" fill="#5B8DB8" fill-opacity=".35"/>
+    <!-- tail feathers -->
+    <path d="M72 158 L40 144 M72 168 L36 168 M74 178 L42 192"/>
+    <!-- eye -->
+    <circle cx="168" cy="140" r="9"/>
+    <circle cx="170" cy="140" r="3" fill="#222"/>
+    <!-- short beak, open -->
+    <path d="M190 150 L216 146 L194 160 L214 166 L192 168" fill="#F2B233" fill-opacity=".6"/>
+    <!-- legs running -->
+    <path d="M128 228 L118 258 L102 262 M118 258 L128 266"/>
+    <path d="M152 226 L170 250 L188 246 M170 250 L172 266"/>
+  </g>
+  <!-- dust and speed lines -->
+  <g fill="none" stroke="#999" stroke-width="4" stroke-linecap="round">
+    <path d="M18 120 H50 M10 200 H44 M22 236 H60"/>
+    <circle cx="34" cy="262" r="10"/><circle cx="58" cy="270" r="7"/><circle cx="16" cy="276" r="6"/>
+  </g>
+</svg>

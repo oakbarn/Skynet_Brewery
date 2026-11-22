@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Skynet Audio folder: Go_to_work (five bearded brewers off to work with their shovels, Texas brush country), from the idea of
+       OakBarn Brewery's own picture for his song "Shovel and Sparge". Skynet's own line drawing (MIT License, Copyright (c) OakBarn Brewery 2026). -->
+  <defs>
+    <g id="brewer" fill="none" stroke="#222" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- shovel over the right shoulder: handle low behind, spade up in front -->
+      <path d="M-24 -38 L22 -118" stroke-width="3.4" stroke="#6B4423"/>
+      <path d="M-28 -32 h10" stroke-width="3.4" stroke="#6B4423"/>
+      <path d="M18 -112 L36 -142 C40 -150 30 -158 24 -152 L8 -124 Z" fill="#B8B8B8"/>
+      <!-- head, cap of hair, nose, big beard -->
+      <circle cx="0" cy="-106" r="10" fill="#FAFAFA"/><circle cx="4" cy="-108" r="1.2" fill="#222"/>
+      <path d="M-10 -106 C-8 -116 6 -118 10 -108"/>
+      <path d="M10 -102 l4 3 l-4 2"/>
+      <path d="M-6 -98 C-11 -82 -3 -74 4 -77 C10 -81 10 -90 8 -97" fill="#8B5A2B" fill-opacity=".5"/>
+      <!-- shirt and apron -->
+      <path d="M-12 -82 C-16 -60 -16 -42 -14 -22 H14 C16 -42 16 -60 12 -82"/>
+      <path d="M-9 -66 H9 L12 -20 H-12 Z" fill="#FFFFFF"/>
+      <!-- arm up holding the handle -->
+      <path d="M10 -80 C20 -74 18 -94 14 -96"/>
+      <!-- the other arm swinging -->
+      <path d="M-10 -78 C-18 -62 -18 -50 -12 -44"/>
+      <!-- legs walking, boots -->
+      <path d="M-6 -22 L-14 12 h-10 M6 -22 L14 12 h10"/>
+    </g>
+  </defs>
+  <rect width="300" height="300" fill="#FAFAFA"/>
+  <!-- the land: far hills, a winding road, cactus and brush -->
+  <g fill="none" stroke="#7A8C7A" stroke-width="2.5" stroke-linecap="round">
+    <path d="M0 112 C40 102 80 108 120 104 C170 98 220 106 300 100"/>
+    <path d="M0 200 C40 190 60 170 110 150 C140 138 170 134 190 120" stroke="#B08A5A"/>
+  </g>
+  <g fill="none" stroke="#5C7A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- prickly pear front left -->
+    <ellipse cx="18" cy="282" rx="10" ry="13"/><ellipse cx="34" cy="270" rx="9" ry="12"/><ellipse cx="46" cy="286" rx="10" ry="12"/>
+    <!-- spiky yucca front right -->
+    <path d="M280 296 L270 270 M280 296 L280 264 M280 296 L290 270 M280 296 L298 280 M280 296 L262 282"/>
+    <!-- mesquite trees far away -->
+    <path d="M40 106 v-14 M30 94 C30 82 52 80 52 94 Z M230 104 v-12 M222 94 C220 82 242 82 240 94 Z"/>
+    <path d="M128 104 v-20 M128 94 l-8 -6 M128 88 l8 -6" />
+  </g>
+  <line x1="0" y1="264" x2="300" y2="264" stroke="#C9B58F" stroke-width="2"/>
+  <!-- the five brewers walking to work, one with a hat -->
+  <use href="#brewer" transform="translate(34 250) scale(1.05)"/>
+  <use href="#brewer" transform="translate(92 252) scale(1.08)"/>
+  <use href="#brewer" transform="translate(150 250) scale(1.05)"/>
+  <use href="#brewer" transform="translate(206 252) scale(1.08)"/>
+  <use href="#brewer" transform="translate(262 250) scale(1.02)"/>
+  <path d="M250 139 h26 M255 139 c0 -12 16 -12 16 0" fill="#E8D8B0" stroke="#222" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

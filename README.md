@@ -339,9 +339,9 @@ credit here (Rule 9.12). The full list with sources is [docs/Media_Licenses.csv]
 
 - **Import program icon** (clinking beer mugs, `public/importer/importer-icon.svg`, `install/windows/importer.ico`): from
   Google Noto Emoji, Apache License 2.0, https://github.com/googlefonts/noto-emoji.
-- **Skynet voice lines** (`media/sounds/Skynet/Skynet_Voice_*.mp3`): Skynet's own words, spoken by the Kokoro text to speech
+- **Skynet voice lines** (`media/sounds/Skynet/Songs/Skynet_Voice_*.mp3`): Skynet's own words, spoken by the Kokoro text to speech
   model (Apache License 2.0, https://huggingface.co/hexgrad/Kokoro-82M), voice bm_george.
-- **Skynet voice lines, Alba** (`media/sounds/Skynet/Skynet_Voice_*_Alba.mp3`): Skynet's own words, spoken by the Piper text to
+- **Skynet voice lines, Alba** (`media/sounds/Skynet/Songs/Skynet_Voice_*_Alba.mp3`): Skynet's own words, spoken by the Piper text to
   speech voice en_GB-alba-medium, trained on the **Alba speech corpus** by Cassia Valentini-Botinhao and Junichi Yamagishi,
   University of Edinburgh (2019), https://doi.org/10.7488/ds/2506, licensed CC BY 4.0
   (https://creativecommons.org/licenses/by/4.0/).

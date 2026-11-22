@@ -36,7 +36,7 @@ import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';    
 import { elementNameError, fileNameError, typedNameError } from './names.js';
 import { isImmersion, takesChiller, spotIn, unbundle } from './chillmove.js';      // move an Immersion Chiller by hand (Rule 5.42)
 import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from './eqpaste.js';      // Paste a profile onto a Tab (Rule 19.6 #2)
-import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, userFolderError } from './mediapaths.js';
+import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, userFolderError, audioPicFor } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner, apiNameItems } from './apiname.js';
@@ -383,7 +383,7 @@ function connect() {
     updateAlarms();          // the sounds play even while the page can't be seen
     if (document.hidden) { pageStale = true; return; }       // drawn once when the page is seen again
     for (const [n, props] of Object.entries(ch)) { if ('state' in props && S.config.graphics.some(g => isMv(g) && g.name === n)) setMvOpen(n, props.state); else updateEl(n); }
-    if (!editing && view === 'workspace' && Object.values(ch).some(p => 'layer' in p)) renderWs();      // a Process changed a Layer Order (Rule 1.29)
+    if (!editing && view === 'workspace' && Object.entries(ch).some(([n, p]) => 'layer' in p || ('active' in p && S.config.elements.some(e => e.type === 'soundPlayer' && e.name === n)))) renderWs();      // a Process changed a Layer Order (Rule 1.29), or an Audio Widget started or stopped (on top while it plays)
     schedulePipes(); updateMeters(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
@@ -536,7 +536,8 @@ const renumberLayers = src => {
 // outside Edit layout a Process may have moved an item (Pump_1.layer = 1): it goes to that place and the rest move down one
 function runStack(stack) {
   if (editing) return stack;
-  const want = o => { const v = !isClone(o) && o.name ? S.values?.[o.name]?.layer : ''; return Number.isInteger(v) && v >= 1 ? v : 0; };
+  // a playing Audio Widget is on top (Layer 1) while it plays (Panel Update 9, item 2f)
+  const want = o => { if (o.type === 'soundPlayer' && o.name && S.values?.[o.name]?.active) return 1; const v = !isClone(o) && o.name ? S.values?.[o.name]?.layer : ''; return Number.isInteger(v) && v >= 1 ? v : 0; };
   const moved = stack.filter(want);
   if (!moved.length) return stack;
   const out = stack.filter(o => !moved.includes(o));
@@ -3238,7 +3239,7 @@ function fillEl(n, e0) {
       if (almHasString(e)) text = editing ? (e.string ?? '') : (v.string ?? e.string ?? '');      // its .string, with Rich Text codes (Rule 7.21)
       almLayers(n, e, v); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`;
-      if (v.path_image || e.pathImage) img = v.path_image || e.pathImage; break;      // its one picture (Audio Widget, Panel Update 8)
+      img = v.path_image || e.pathImage || audioPicFor(v.path || e.path); break;      // its one picture (Audio Widget, Panel Update 8); none: its Skynet Audio folder's drawing (Panel Update 9)
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'chart': fillChart(n, e0, editing ? {} : v); break;          // the Chart Widget (Rule 1.26): its line graph, not a text
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
@@ -3338,7 +3339,7 @@ function fillEl(n, e0) {
     nm.style.color = e.nameColor || ts.titleFore || '#ffffff'; nm.style.backgroundColor = e.nameBg || ts.titleBack || '#000000';
   }
   n.classList.toggle('on', on && e.type !== 'picture');
-  n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true || (e.type === 'alarm' && !!e.alarmClass && !v.active));   // .hidden = true wins over .visible = true; an Alarm Widget shows only while it is On (Rule 7.21; faint in Edit layout)
+  n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true || (e.type === 'alarm' && !!e.alarmClass && !v.active) || (e.type === 'soundPlayer' && !v.active));   // .hidden = true wins over .visible = true; an Alarm Widget shows only while it is On (Rule 7.21; faint in Edit layout)
   n.classList.toggle('fault', !!v.fault);
   // a picture that is not in the media folders (BruControl pictures not copied yet) would leave a see-through
   // button with white text: show the plain gray button with black text instead
@@ -9979,10 +9980,10 @@ function overrideFields(it) {
 // and Off. It could have a graphic path that a Picture could be selected (only 1)"; "Audio Widget conforms more for a name"). It is the
 // older Sound Player with its new name: one sound (.path_audio), Repeat, and one optional picture (.path_image). It pauses for alarms.
 const SND_TIPS = {
-  name: 'How a Process uses it: wgt_AUD_Music_BH = On plays it, wgt_AUD_Music_BH = Off stops it, wgt_AUD_Music_BH.path_audio = "..." changes the sound.',
+  name: 'How a Process uses it: wgt_AUD_Music_BH.play = true plays it and shows it, wgt_AUD_Music_BH.play = false stops it and hides it, wgt_AUD_Music_BH.path_audio = "..." changes the sound. It has no .visible: it shows only while it plays.',
   path: 'Its one sound (.path_audio): a file on the Brain, or a web link to an MP3 (https://...), which needs the internet. Only one sound plays at a time. An Audio Widget has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after.',
   loop: 'On: the sound plays over and over until it is stopped.',
-  image: 'Optional. Its one picture (.path_image), shown when the Audio Widget is made Visible. Empty: no picture.',
+  image: 'Optional. Its one picture (.path_image), shown on top (Layer 1) while it plays and hidden while it is stopped. Empty: the picture of the Skynet Audio folder its sound is in (Songs, Text_to_voice, Fanfare, Beep, Nature or Go_to_work).',
 };
 const AUDIO_WORD = 'Audio Widget';
 const soundPlayerFields = () => [...wgtHead(SND_TIPS),
@@ -12957,9 +12958,9 @@ function soundSrc(e, v) {
 }
 const hasSoundNow = (e, v) => !!soundSrc(e, v);
 // what an Alarm plays when its own sound can't play, in this order (Rule 7.20): the voice clip, then the beep
-const ALARM_FALLBACKS = ['sounds/Skynet/Alarm_Sound_Missing.mp3', 'sounds/alarm_beep.wav'];
+const ALARM_FALLBACKS = ['sounds/Skynet/Songs/Alarm_Sound_Missing.mp3', 'sounds/alarm_beep.wav'];
 // and a Sound Player: OakBarn Brewery's song "Find The File - Connecting" (Treblo), played once
-const PLAYER_FALLBACKS = ['sounds/Skynet/Find_The_File_Connecting.mp3'];
+const PLAYER_FALLBACKS = ['sounds/Skynet/Songs/Find_The_File_Connecting.mp3'];
 // stop a sound and give back the memory its file used
 function freeAudio(a) { try { a._playing = false; a.pause(); a.removeAttribute('src'); a.load(); } catch { } }
 function getAudio(e) {

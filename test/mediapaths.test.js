@@ -65,7 +65,7 @@ const d = fs.mkdtempSync(path.join(os.tmpdir(), 'mpaths'));
 fs.mkdirSync(path.join(d, 'config')); fs.mkdirSync(path.join(d, 'scripts'));
 const M = path.join(d, 'media');
 for (const [f, x] of [['Images/Bell.svg', 'x'], ['Images/Pumps/MyPump.png', 'x'], ['Images/Skynet/Alarms/Alarm_Basic.svg', 'x'], ['Images/Skynet/On_Off/Overlay_Bolt.svg', 'x'],
-  ['Images/Mine/Other.svg', 'x'], ['Images/Mine/Bell.svg', 'x'], ['sounds/ding.mp3', 'x'], ['sounds/Skynet/Alarm_Sound_Missing.mp3', 'x'], ['sounds/Hops/hop.wav', 'x']]) {
+  ['Images/Mine/Other.svg', 'x'], ['Images/Mine/Bell.svg', 'x'], ['sounds/ding.mp3', 'x'], ['sounds/Skynet/Songs/Alarm_Sound_Missing.mp3', 'x'], ['sounds/Hops/hop.wav', 'x']]) {
   fs.mkdirSync(path.dirname(path.join(M, f)), { recursive: true }); fs.writeFileSync(path.join(M, f), x);
 }
 const cfg = path.join(d, 'config', 'c.json');
@@ -90,7 +90,7 @@ assert.equal(P('alm_Brew', 'imageoverlay'), 'Images/Skynet/On_Off/Overlay_Bolt.s
 assert.equal(P('alm_Brew', 'sound'), 'sounds/Hops/hop.wav', 'a sound in the User Audio folder');
 await run('b', 'alm_Brew.backpath = "Bell.svg"\nalm_Brew.sound = "Alarm_Sound_Missing.mp3"\n');
 assert.equal(P('alm_Brew', 'backpath'), 'Images/Bell.svg', 'the User Graphic folder itself before the folders in it');
-assert.equal(P('alm_Brew', 'sound'), 'sounds/Skynet/Alarm_Sound_Missing.mp3', 'then the Skynet Audio folder');
+assert.equal(P('alm_Brew', 'sound'), 'sounds/Skynet/Songs/Alarm_Sound_Missing.mp3', 'then the Skynet Audio folder');
 await run('c', 'alm_Brew.image = "Nowhere.svg"\n');
 assert.equal(P('alm_Brew', 'backpath'), 'Images/Nowhere.svg', 'not found: the User folder and the name');
 assert.equal(String(P('alm_Brew', 'background')), '1');

@@ -49,7 +49,7 @@ mkdir -p "$MSTAGE"
 # Except the three fallback sounds (OakBarn Brewery, 2026-11-10, "Keep the Beep", "Song and clip also with the brain"; Rule 9.12):
 # they stay in the panel zip and Setup, in defaults/media, so every Brain can always sound an Alarm or a Sound Player. The panel copies
 # them in only if they are missing (lib/seed.js).
-for f in sounds/alarm_beep.wav sounds/Skynet/Alarm_Sound_Missing.mp3 sounds/Skynet/Find_The_File_Connecting.mp3; do
+for f in sounds/alarm_beep.wav sounds/Skynet/Songs/Alarm_Sound_Missing.mp3 sounds/Skynet/Songs/Find_The_File_Connecting.mp3; do
   [ -f "$MSTAGE/media/$f" ] || continue
   mkdir -p "$STAGE/defaults/media/$(dirname "$f")"
   cp -p "$MSTAGE/media/$f" "$STAGE/defaults/media/$f"
@@ -77,7 +77,7 @@ if [ -n "${SKYNET_UPDATE_SINCE:-}" ] && git rev-parse -q --verify "refs/tags/$SK
       sample_schemas/*) g="${f#sample_schemas/}"; [ -f "$SSTAGE/sample_schemas/$g" ] || continue
         mkdir -p "$STAGE/sample_schemas/$(dirname "$g")"; cp -p "$SSTAGE/sample_schemas/$g" "$STAGE/sample_schemas/$g"; ns=$((ns+1)) ;;
     esac
-  done < <(git diff --name-only --diff-filter=A "$SKYNET_UPDATE_SINCE" HEAD -- media; git diff --name-only --diff-filter=AM "$SKYNET_UPDATE_SINCE" HEAD -- sample_schemas)
+  done < <(git diff --no-renames --name-only --diff-filter=A "$SKYNET_UPDATE_SINCE" HEAD -- media; git diff --name-only --diff-filter=AM "$SKYNET_UPDATE_SINCE" HEAD -- sample_schemas)
   echo "Added since $SKYNET_UPDATE_SINCE, in the Update Setup and panel zip: $nm pictures and sounds, $ns new or changed Sample Schema files"
 fi
 

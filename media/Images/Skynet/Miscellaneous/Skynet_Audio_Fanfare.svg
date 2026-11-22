@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Skynet Audio folder: Fanfare (a bugle). Skynet's own line drawing (MIT License, Copyright (c) OakBarn Brewery 2026). -->
+  <rect width="300" height="300" fill="#FAFAFA"/>
+  <g fill="none" stroke="#222" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- mouthpiece and lead pipe -->
+    <path d="M28 178 h14 M42 172 v12"/>
+    <path d="M42 178 H150"/>
+    <!-- the coil -->
+    <path d="M150 178 C176 178 182 148 160 140 H66 C44 140 40 112 64 108 H150"/>
+    <!-- the bell -->
+    <path d="M150 108 C178 106 196 96 214 76 L222 66"/>
+    <path d="M150 116 C180 118 200 130 220 150 L228 160"/>
+    <path d="M222 66 C240 80 240 146 228 160"/>
+    <ellipse cx="225" cy="113" rx="9" ry="48" fill="#E8C35A" fill-opacity=".35"/>
+    <!-- bands -->
+    <path d="M96 136 v8 M96 104 v8 M120 174 v8"/>
+    <!-- cord and tassel -->
+    <path d="M84 144 C86 196 116 210 128 222" stroke-width="3"/>
+    <path d="M128 222 l-10 32 M128 222 l-2 34 M128 222 l8 32 M128 222 l14 28" stroke-width="3"/>
+    <circle cx="128" cy="222" r="6" fill="#C0392B"/>
+  </g>
+  <!-- notes coming out of the bell -->
+  <g fill="#222" stroke="#222" stroke-width="4" stroke-linecap="round">
+    <ellipse cx="250" cy="60" rx="8" ry="6"/><path d="M257 59 V30" fill="none"/>
+    <ellipse cx="270" cy="96" rx="7" ry="5"/><path d="M276 95 V70 L288 66" fill="none"/>
+    <ellipse cx="262" cy="140" rx="7" ry="5"/><path d="M268 139 V116" fill="none"/>
+  </g>
+</svg>

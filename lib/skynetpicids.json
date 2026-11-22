@@ -238,6 +238,12 @@
   { "id": 235, "file": "Other_Equipment/Skynet_Float_NC_Open.svg" },
   { "id": 236, "file": "Other_Equipment/Skynet_Float_NO_Closed.svg" },
   { "id": 237, "file": "Other_Equipment/Skynet_Float_NO_Open.svg" },
-  { "id": 238, "file": "On_Off/Skynet_Emergency_Off.svg" }
+  { "id": 238, "file": "On_Off/Skynet_Emergency_Off.svg" },
+  { "id": 239, "file": "Miscellaneous/Skynet_Audio_Beep.svg" },
+  { "id": 240, "file": "Miscellaneous/Skynet_Audio_Fanfare.svg" },
+  { "id": 241, "file": "Miscellaneous/Skynet_Audio_Go_to_work.svg" },
+  { "id": 242, "file": "Miscellaneous/Skynet_Audio_Nature.svg" },
+  { "id": 243, "file": "Miscellaneous/Skynet_Audio_Songs.svg" },
+  { "id": 244, "file": "Miscellaneous/Skynet_Audio_Text_to_voice.svg" }
  ]
 }
