@@ -80,10 +80,23 @@ Ce Global interne de Skynet est mis par Skynet et en lecture seule (Règle 1.18)
 |---|---|
 | `skn_Boil_Temp` | La température d'ébullition du jour à votre brasserie. Skynet la calcule à partir de la pression de l'air à votre Airport et de votre Elevation, toutes deux réglées dans ☰ Menu > Default settings > Boil temperature. Elle s'affiche dans vos Units (°F pour US, °C pour Metric). |
 
-Dans un Process, cette ligne attend que la cuve soit 1 degré sous la température d'ébullition du jour, puis continue :
+## La Boil Probe et wait_boil {#the-boil-probe-and-wait-boil}
+
+Ouvrez les Properties de la sonde de température de votre cuve d'ébullition et activez **Boil Probe**. Une seule sonde peut être la
+Boil Probe : sur toutes les autres sondes, l'interrupteur est grisé, et la ligne en dessous dit quelle sonde l'a. Pour la changer,
+désactivez-la d'abord sur cette sonde.
+
+Dans un Process, cette ligne attend que la Boil Probe soit 1 degré sous la température d'ébullition du jour, puis continue :
 
 ```
-wait BK_Temp >= skn_Boil_Temp - 1
+wait_boil -1
 ```
+
+Le nombre est dans vos Units : avec US c'est 1 °F, avec Metric 1 °C. `wait_boil` seul attend la température d'ébullition elle-même.
+Override et Stop marchent dessus comme sur tout wait. Sans Boil Probe, l'éditeur de Process donne un avertissement.
+
+La forme longue marche toujours : `wait BK_Temp >= skn_Boil_Temp - 1`.
+
+Démarrez ensuite l'horloge d'ébullition avec `start skn_Boil_Timer` : voir [Les Skynet Brew Timers](246-skynet-brew-timers).
 
 Seul le code d'aéroport de 4 lettres quitte le Brain. Rien d'autre sur vous ou votre brasserie n'est envoyé.

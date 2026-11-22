@@ -186,6 +186,7 @@ La façon dont tout le panneau marche, donc un changement atteint les choses dé
 - **Push Lockout (s)** : combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte ;
 - **Phones and tablets** (téléphones et tablettes) ;
 - le **Grain weight label** et le label des points de densité ;
+- les **Brew Timers** : les Labels du Skynet Boil Timer, du Mash Timer et du Whirlpool / Chilling Timer ([Les Skynet Brew Timers](246-skynet-brew-timers)) ;
 - les **Hop alerts** (alertes houblon) ;
 - **Title**, **Look (theme)** (enregistré tout de suite), **Media folders**, **API key**, **BeerXML mapping**, les Processes qui démarrent avec le serveur, et la limite de redémarrages et son Alarm.
 

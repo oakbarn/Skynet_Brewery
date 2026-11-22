@@ -28,6 +28,9 @@ Skynet Templates come with the panel, in its `templates` folder, and an update b
 2. Each Template shows as a small icon with its name, so many of them fit on one screen.
 3. **Double-click** an icon (on a phone, double-tap it) to open its pop-up with the settings.
 4. **New Vessel Template ...** (or **New Bundled Fitting Template ...**) makes a blank one (Admins).
+5. **Right-drag** a Vessel or Equipment Template (Admins): hold the right mouse button on its icon and drag. A faint copy of its picture follows the mouse and turns solid past 100 pixels. Let go there and a copy is made on the **🔨 Build Tab** with its Properties open, the same as **Add equipment**. Under 100 pixels nothing is made, and a right-click that does not move opens Help. (Skynet Rule 4.9)
+
+Four Skynet Vessel Templates are **5 gallon kettles on a stove** (Skynet Rule 19.11): **Kettle_5_Gal_Electric_Stove** and **Kettle_5_Gal_Gas_Stove** have no drains; **Kettle_5_Gal_Electric_Stove_Low_Drain** and **Kettle_5_Gal_Gas_Stove_Low_Drain** have a Low Drain on the front with a manual ball valve (pick its valve when it is on a Tab). The stove is turned on and off by hand, so it has no Device.
 
 The buttons on a Template's pop-up:
 

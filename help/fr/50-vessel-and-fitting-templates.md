@@ -28,6 +28,9 @@ Les Templates Skynet viennent avec le panel, dans son dossier `templates`, et un
 2. Chaque Template s'affiche comme une petite icône avec son nom, pour qu'il en tienne beaucoup sur un écran.
 3. **Double-cliquez** sur une icône (sur un téléphone, touchez-la deux fois) pour ouvrir sa fenêtre avec les réglages.
 4. **New Vessel Template ...** (ou **New Bundled Fitting Template ...**) en crée un vide (Admins).
+5. **Glisser avec le bouton droit** un Vessel ou Equipment Template (Admins) : tenez le bouton droit de la souris sur son icône et glissez. Une copie pâle de son image suit la souris et devient pleine après 100 pixels. Relâchez là et une copie est faite sur le **🔨 Build Tab** avec ses Properties ouvertes, comme avec **Add equipment**. Sous 100 pixels rien n'est fait, et un clic droit qui ne bouge pas ouvre l'Aide. (Règle Skynet 4.9)
+
+Quatre Skynet Vessel Templates sont des **cuves de 5 gallons sur une cuisinière** (Règle Skynet 19.11) : **Kettle_5_Gal_Electric_Stove** et **Kettle_5_Gal_Gas_Stove** n'ont pas de vidange ; **Kettle_5_Gal_Electric_Stove_Low_Drain** et **Kettle_5_Gal_Gas_Stove_Low_Drain** ont une vidange basse à l'avant avec une vanne à bille manuelle (choisissez sa vanne quand elle est sur un Tab). La cuisinière s'allume et s'éteint à la main, elle n'a donc pas de Device.
 
 Les boutons de la fenêtre d'un Template :
 

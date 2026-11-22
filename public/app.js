@@ -18813,9 +18813,10 @@ function renderTemplatesTab(kind, group) { return box => {
   const list = TPL[kind].filter(t => !group || (group === 'equip') === (t.vesselType && t.vesselType !== 'vessel'));
   for (const t of list) {
     const open = () => openTemplate(kind, t.name);
-    const b = h('button', { class: 'tplIcon ' + t.cls, title: `${t.name} (${t.cls === 'skynet' ? 'Skynet' : 'User Bundled'} Template). Double-click for its settings.${kind === 'vessel' && can('admin') ? ' Right-drag it off to put a copy on the 🔨 Build Tab.' : ''}`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
+    const drag = kind === 'vessel' && can('admin'), cls = t.cls === 'skynet' ? 'Skynet' : 'User Bundled';
+    const b = h('button', { class: 'tplIcon ' + t.cls, title: drag ? `${t.name} (${cls} Template). Double-click for its settings. Right-drag it off to put a copy on the 🔨 Build Tab.` : `${t.name} (${cls} Template). Double-click for its settings.`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
       h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : '');
-    if (kind === 'vessel' && can('admin')) { b.classList.add('vesselTpl'); b.addEventListener('pointerdown', ev => tplDragStart(ev, b, t)); }
+    if (drag) { b.classList.add('vesselTpl'); b.addEventListener('pointerdown', ev => tplDragStart(ev, b, t)); }
     grid.append(b);
   }
   if (!list.length) grid.append(h('p', { class: 'muted' }, 'No Templates yet.'));

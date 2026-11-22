@@ -42,7 +42,8 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
 4. **3. Tab** et **4. Name** (le Suggested Name ; vous pouvez taper le vôtre).
 5. **Graphic**, **Path**, **Orientation** et **Flip** (un Thermowell ou un té à sonde).
 6. Les réglages propres à la sonde : **Probe type ⬢**, **Units** et **Decimals**, **Calibration offset** avec **Database and .API ⬢**,
-   et la **Reading now** (lecture actuelle, pour aider à étalonner).
+   **Setpoint**, **Boil Probe** et la **Reading now** (lecture actuelle, pour aider à étalonner). **Boil Probe** marque la seule sonde
+   de votre cuve d'ébullition que `wait_boil` lit ; sur toutes les autres sondes elle est grisée et une ligne dit quelle sonde l'a (voir [Température d'ébullition](238-boil-temperature)).
 7. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, et le **Device Type** grisé.
 
 Un Thermowell s'accroche toujours à un IP, s'affiche de face sur un IP tourné vers l'avant, et un té à sonde coupe toujours un tuyau comme le fait un té

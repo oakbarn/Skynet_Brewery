@@ -3,8 +3,8 @@
   "vtype": "Brew Kettle",
   "image": "Images/Skynet/Vessels/Vessel_Kettle_5_Gal_Gas_Stove.svg",
   "heatKind": "gas",
-  "units": "US",
-  "volume": 5,
+  "units": "Metric",
+  "volume": 18.9271,
   "std": {
     "type": "TC",
     "size": 1.5

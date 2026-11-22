@@ -219,8 +219,8 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   if (!atStart && w.length >= 2) for (const [n, , what] of SKYNET_FUNCTIONS) add(n + '(', `Skynet temperature: ${what}`, n);      // toF( toC(
   // Skynet internal Globals (skn_Boil_Temp ...: ☰ Menu > Default settings > Boil temperature, Rule 1.18), read only, where a value goes
   if (!atStart && w) for (const [n, what] of SKN_GLOBALS) add(n + nsp, `Skynet internal Global, read only: ${what}`, n);
-  // the Skynet Brew Timers (Rule 2.68): after start, stop, reset and where a value goes
-  if (w) for (const [n, , what] of BREW_TIMERS) add(n + nsp, `Skynet Brew Timer: ${what}`, n);
+  // the Skynet Brew Timers (Rule 2.68): after start, stop, reset and where a value goes (never at the start of a line, like the other Skynet names)
+  if (!atStart && w) for (const [n, , what] of BREW_TIMERS) add(n + nsp, `Skynet Brew Timer: ${what}`, n);
   // and / or only after a value (if Pump == true an...)
   const afterValue = /\S\s+$/.test(pre) && !/(==|!=|<=|>=|<|>|=|\+|-|\*|\/|\(|\bif|\belseif|\bwait|\bnot|\band|\bor)\s*$/i.test(pre);
   if (!atStart) for (const [k, h] of ANYWHERE) if (afterValue || !['and', 'or'].includes(k)) add(['and', 'or', 'not'].includes(k) ? k + ' ' : k, h, k);
