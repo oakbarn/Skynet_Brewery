@@ -26,7 +26,7 @@ Built from the code (lib/store.js `attrsOf`, the list the Process editor's 💡 
 | `.backpath` | | Background picture 1 (path). |
 | `.backpath_2` | | Background picture 2 (path). |
 | `.backpath_3` | | Background picture 3 (path). |
-| `.enabled` | | On / off for older controls. On a Heating Element it is the same as `.state` and is not offered (Rule 7.9). |
+| `.enabled` | | On / off for older controls. A Heating Element or Fermentor Control has none: it uses `.state` (Rule 7.9). |
 | `.file` | | File name only of background picture 1 (Rule 7.23). |
 | `.file_2` | | File name only of background picture 2. |
 | `.file_3` | | File name only of background picture 3. |
@@ -37,7 +37,7 @@ Built from the code (lib/store.js `attrsOf`, the list the Process editor's 💡 
 | `.imageoff` | | Picture shown while Off. |
 | `.imageon` | | Picture shown while On. |
 | `.imageoverlay` | | Overlay picture shown while On (Layer 1). |
-| `.label` | `.displayname` | The text shown on the Tab. Empty shows the Name. |
+| `.label` | | The text shown on the Tab. Empty shows the Name. |
 | `.layer` | | Layer Order: 1 is on top (Rule 1.29). `""` puts back its Properties. |
 | `.path` | | Whole path of background picture 1 (Rule 7.23). |
 | `.path_2` | | Whole path of background picture 2. |
@@ -97,7 +97,7 @@ Main value: **`.state`**, On / Off. It has every Pump attribute and every Heatin
 | `.onoffset` | Where it turns On: Setpoint + Offset. Plus cools, minus warms (Rule 6.19). |
 | `.output` | R. Is its port on right now. |
 | `.pv` | R. The smoothed probe reading. |
-| `.setpoint` | The temperature it holds (the older `.target` is the same). |
+| `.setpoint` | The temperature it holds. |
 | | Plus `.cover`, `.coverColor`, `.speed` as a Pump. The other method settings are listed but not used (see Review Notes). |
 
 ### Deadband (`deadband`, older control output, Rule 6.17)
@@ -114,7 +114,7 @@ Main value: **`.value`**, the output %.
 | `.maxoutput` | Highest % it may use. |
 | `.outerbanddrive` | % step outside the inner band. |
 | `.outtime` | Output window in seconds. |
-| `.setpoint` | The temperature it holds (`.target` is the same). |
+| `.setpoint` | The temperature it holds. |
 | `.state` | On / Off (`.enabled` is the same). |
 
 ### Digital Input (`digitalIn`: DI, Float, DIN, Push button, Toggle, Latch, Flow switch, Interlock, E-Stop, Leak, Counter)
@@ -156,7 +156,7 @@ Built into a Fermentor Vessel Device. Main value: **`.state`**, On = it holds th
 | `.heatminrun` | Once Heat is on, it stays on at least this long (seconds). |
 | `.heatoffset` | Heat turns On at Setpoint + this (minus). |
 | `.mode` | Heat & Cool, Heat only or Cool only. |
-| `.setpoint` | The temperature it holds (`.target` is the same). |
+| `.setpoint` | The temperature it holds. |
 
 ### Flow Meter (`flowMeter`)
 
@@ -210,7 +210,7 @@ Main value: **`.state`**, On / Off. Set `.method` to pick how it is controlled. 
 | `.outtime` | Output window in seconds. |
 | `.power` | PWM: the % sent out. |
 | `.pv` | R. Smoothed probe reading (Precise). |
-| `.setpoint` | The temperature it holds (the older `.target` is the same). |
+| `.setpoint` | The temperature it holds. |
 | `.smoothing` | Precise: seconds it averages the probe over. |
 | `.value` | The output % a PID, Deadband or Precise works out. |
 
@@ -240,7 +240,7 @@ Main value: **`.state`**, On / Off.
 |---|---|
 | `.ondelay` | Seconds it must stay Off before it turns On again. |
 | `.onoffset` | Turns On at Setpoint + Offset: -1 heats, +1 cools. |
-| `.setpoint` | The temperature it holds (`.target` is the same). |
+| `.setpoint` | The temperature it holds. |
 
 ### PID (`pid`, older control output)
 
@@ -255,7 +255,7 @@ Main value: **`.value`**, the output %.
 | `.maxintegral` | Highest integral. |
 | `.maxoutput` | Highest % it may use. |
 | `.outtime` | Output window in seconds. |
-| `.setpoint` | The temperature it holds (`.target` is the same). |
+| `.setpoint` | The temperature it holds. |
 | `.state` | On / Off (`.enabled` is the same). |
 
 ### Pump (`digitalOut`, Type ID Pump)

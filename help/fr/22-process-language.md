@@ -38,11 +38,11 @@ if Hop_Text.visible == true
 
 Tout attribut qui n'a que deux choix est `true` ou `false` :
 
-- `.visible` (c'était `visibility = visible / hidden`)
-- `.countdown` pour les minuteries (c'était `type = countdown / countup`)
-- `.running` pour les minuteries, `.loop` pour les alarmes, `.enabled`
+- `.visible`
+- `.countdown` pour les minuteries (`true` compte à rebours, `false` compte en avant)
+- `.running` pour les minuteries, `.loop` pour les alarmes
 
-Si un nom contient d'autres caractères que des lettres, des chiffres et `_`, mettez-le entre guillemets avant le point : `"BK (Front)".visible = true`.
+Un nom n'est pas un attribut : le point va toujours entre le nom et son attribut (`Pump_Red.state`). Si un nom contient d'autres caractères que des lettres, des chiffres et `_`, mettez-le entre guillemets avant le point : `"BK (Front)".visible = true`.
 
 ## Visible et Hidden {#visible-and-hidden}
 
@@ -60,16 +60,6 @@ Pump_Red.hidden = false       // shown again
 (Après la deuxième ligne, la pompe reste cachée même si .visible est true ; la troisième la montre de nouveau.)
 
 Vous pouvez aussi régler les deux dans les **Properties** de l'élément : **Visible** et **Hidden, locked** sont des interrupteurs. Dans Edit layout, un élément caché s'affiche estompé pour que vous puissiez quand même le trouver.
-
-Les Processes plus anciens sont changés pour vous (une fois, au démarrage du panel, et chaque fois qu'un Process est enregistré ou importé). L'ancien fichier est gardé sous `.before-hidden.bak` :
-
-| Ancienne ligne | Nouvelle ligne |
-| --- | --- |
-| `"my Widget" visibility = visible` | `"my Widget".visible = true` |
-| `"my Widget" visibility = hidden` | `"my Widget".visible = false` |
-| `"my Widget" visibility = hiddenlocked` | `"my Widget".visible = false; "my Widget".hidden = true` |
-
-Les anciennes lignes tournent toujours de la même façon si vous les laissez.
 
 ## Un Process tourne-t-il ? {#is-a-process-running}
 
@@ -181,7 +171,7 @@ gV_Strike = gV_Strike + 1
 
 Ces mots appartiennent au langage des Processes, donc aucun d'eux ne peut être le nom d'un Device, d'un Widget, d'un gGlobal ou d'une variable de Process. Les majuscules et les minuscules sont pareilles (`NULL` = `null`).
 
-- **Valeurs :** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`
+- **Valeurs :** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `countdown`, `countup`, `none`
 - **Mots de liaison :** `and`, `or`, `not`
 - **Types de variable :** `value`, `string`, `bool`, `time`, `datetime`
 - **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`

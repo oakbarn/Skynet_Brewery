@@ -123,7 +123,7 @@ print "@ 204 Delay_FireHose"
 gblS_Water_Text_1_Water = "FireHose ON in 20 Seconds! " + vSMsg
 stop "wgt_TMR_Water~delay_WA"
 wgt_TMR_Water~delay_WA = 00:00:20
-wgt_TMR_Water~delay_WA.type = "countdown"
+wgt_TMR_Water~delay_WA.countdown = true
 wgt_TMR_Water~delay_WA.visible = true
 start "wgt_TMR_Water~delay_WA"
 wgt_ALM_Fire~Hose_WA = true
@@ -198,7 +198,7 @@ print "@ 342 Delay Manifold"
 gblS_Water_Text_1_Water = "Manifold Supply Valve ON in 20 Seconds! " + vSMsg
 stop "wgt_TMR_Water~delay_WA"
 wgt_TMR_Water~delay_WA = 00:00:20
-wgt_TMR_Water~delay_WA.type = "countdown"
+wgt_TMR_Water~delay_WA.countdown = true
 wgt_TMR_Water~delay_WA.visible = true
 start "wgt_TMR_Water~delay_WA"
 wgt_ALM_Water~flow_WA = true
@@ -220,12 +220,12 @@ goto "Start_Timers"
 print "@ 395 Start Timers"
 stop "wgt_TMR_Water_WA"
 wgt_TMR_Water_WA = vT_Set
-wgt_TMR_Water_WA.type = "countdown"
+wgt_TMR_Water_WA.countdown = true
 start "wgt_TMR_Water_WA"
 // a hidden count-up timer measures the true run time, from the valve opening to the wait being met or Override (for seconds per gallon)
 stop "wgt_TMR_Water~elapsed_WA"
 wgt_TMR_Water~elapsed_WA = 00:00:00
-wgt_TMR_Water~elapsed_WA.type = "countup"
+wgt_TMR_Water~elapsed_WA.countdown = false
 start "wgt_TMR_Water~elapsed_WA"
 if vVPump == 200
 	// FireHose
@@ -243,12 +243,12 @@ goto "Exit_Timer_End"
 print "@ 458 Start Timers for floats"
 stop "wgt_TMR_Water_WA"
 wgt_TMR_Water_WA = 00:00:00
-wgt_TMR_Water_WA.type = "countup"
+wgt_TMR_Water_WA.countdown = false
 start "wgt_TMR_Water_WA"
 // a hidden count-up timer measures the true run time, from the valve opening to the wait being met or Override (for seconds per gallon)
 stop "wgt_TMR_Water~elapsed_WA"
 wgt_TMR_Water~elapsed_WA = 00:00:00
-wgt_TMR_Water~elapsed_WA.type = "countup"
+wgt_TMR_Water~elapsed_WA.countdown = false
 start "wgt_TMR_Water~elapsed_WA"
 if vVSwitchNumber == 1005
 	BM_31_DO@Valve_E_Fire~Hose_WA = true

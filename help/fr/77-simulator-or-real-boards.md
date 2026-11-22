@@ -14,7 +14,7 @@ Une Interface dont la Connection est **Simulator** (comme le Mega fictif que fai
 ## Ce que fait le simulateur {#what-the-simulator-does}
 
 - Les **minuteries** tournent comme maintenant, plus vite si vous réglez une Speed, et **+1 min**, **Skip to next event** et **Auto skip** marchent comme avant (aide : [Mode simulation](20-simulation)).
-- **Les attentes sur une mesure sont considérées comme atteintes.** Une ligne de Process qui attend une mesure, par exemple `wait "Temp_HLT" value >= 152` ou l'attente du début de l'ébullition, continue toute seule après **60 secondes d'horloge**, comme si la mesure y était arrivée. La sortie du Process le dit : *Simulation: the wait on line 12 is pretended reached after 60 s* (l'attente de la ligne 12 est considérée comme atteinte après 60 s).
+- **Les attentes sur une mesure sont considérées comme atteintes.** Une ligne de Process qui attend une mesure, par exemple `wait Temp_HLT.value >= 152` ou l'attente du début de l'ébullition, continue toute seule après **60 secondes d'horloge**, comme si la mesure y était arrivée. La sortie du Process le dit : *Simulation: the wait on line 12 is pretended reached after 60 s* (l'attente de la ligne 12 est considérée comme atteinte après 60 s).
   - Le temps se règle dans **barre du simulateur > ⚙ Settings > Pretend readings are reached ... after (clock seconds)**. À une Speed de 10×, 60 secondes d'horloge passent en 6 vraies secondes.
   - **Skip to next event** et **Auto skip** la comptent comme un événement, ils sautent donc directement dessus.
   - Désactivez **Pretend readings are reached** pour attendre plutôt la chauffe fictive du simulateur lui-même.

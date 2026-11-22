@@ -48,7 +48,7 @@ Use the switch at the start of a row to turn a jump off without deleting it. Pre
 The panel can work out when each step of a Process will happen, for example *00:10:00 into the mash: check the pH*. Pick a Process and click **Work out timeline**.
 
 - It reads the Process without running it and without switching anything, using the values the panel has right now.
-- `sleep` lines and waits on a timer (`wait "tm_Mash" value >= 00:10:00`, or a countdown reaching `00:00:00`) are counted.
+- `sleep` lines and waits on a timer (`wait tm_Mash.value >= 00:10:00`, or a countdown reaching `00:00:00`) are counted.
 - A wait on anything else, like a temperature or a button, cannot be known ahead. The steps after it are shown as time *after* that line.
 - Steps inside an `if` that cannot be known ahead are marked **(if)**.
 

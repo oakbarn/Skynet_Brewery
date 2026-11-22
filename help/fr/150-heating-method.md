@@ -288,9 +288,7 @@ Elle est câblée directement à son port, vers un SSR ou un contacteur, ou vers
   `.setpoint`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID) ; `.setpoint`, `.deadbandoffset`,
   `.innerbandoffset`, `.initialoutput`, `.innerbanddrive`, `.outerbanddrive`, `.maxoutput`, `.calctime`, `.outtime` (Deadband) ; ceux du PID plus `.holdoutput`, `.smoothing` (Precise).
   Les mêmes noms qu'avaient les anciens Devices séparés Duty Cycle, Hysteresis, PID et Deadband.
-- **`.setpoint` est le Setpoint** (la température qu'elle tient). L'ancien nom **`.target`** marche toujours et est exactement la même
-  chose, en lecture ou en réglage, donc les anciens Processes continuent de marcher. Les nouveaux Processes, Templates et l'aide utilisent `.setpoint`.
-  Les fenêtres l'appellent **Setpoint** (Règle Skynet 6.19).
+- **`.setpoint` est le Setpoint** (la température qu'elle tient), en lecture ou en réglage. Les fenêtres l'appellent **Setpoint** (Règle Skynet 6.19).
 - `.value` est le % de sortie que calcule un PID, un Deadband ou un Precise (en PWM c'est le Power %) (`.pv` est la lecture lissée que tient Precise). `.output` est sa broche en ce moment (lecture seule).
 - **`.method` est le mot pour tout Device qui a plus d'une méthode de régulation** (aujourd'hui la résistance chauffante). Dans l'éditeur de Process,
   tapez `hE_HLT_1.method =` et la liste montre ses méthodes à choisir, entre guillemets. Un Device avec une seule façon de régulation

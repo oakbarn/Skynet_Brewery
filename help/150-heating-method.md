@@ -279,9 +279,7 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
   `.setpoint`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID); `.setpoint`, `.deadbandoffset`,
   `.innerbandoffset`, `.initialoutput`, `.innerbanddrive`, `.outerbanddrive`, `.maxoutput`, `.calctime`, `.outtime` (Deadband); the PID's own plus `.holdoutput`, `.smoothing` (Precise).
   The same names the old separate Duty Cycle, Hysteresis, PID and Deadband Devices had.
-- **`.setpoint` is the Setpoint** (the temperature it holds). The older name **`.target`** still works and is exactly the same
-  thing, read or set, so older Processes keep working. New Processes, Templates and Help use `.setpoint`.
-  Dialogs call it **Setpoint** (Skynet Rule 6.19).
+- **`.setpoint` is the Setpoint** (the temperature it holds), read or set. Dialogs call it **Setpoint** (Skynet Rule 6.19).
 - `.value` is the output % a PID, Deadband or Precise works out (in PWM it is the Power %) (`.pv` is the smoothed reading Precise holds). `.output` is its pin right now (read only).
 - **`.method` is the word for every Device with more than one method of control** (today the Heating Element). In the Process
   editor, type `hE_HLT_1.method =` and the list shows its methods to pick from, in quotes. A Device with only one way of control

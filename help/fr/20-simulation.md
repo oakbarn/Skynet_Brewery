@@ -48,7 +48,7 @@ Utilisez l'interrupteur au début d'une ligne pour désactiver un saut sans le s
 Le panel peut calculer quand chaque étape d'un Process va arriver, par exemple *00:10:00 après le début de l'empâtage : vérifier le pH*. Choisissez un Process et cliquez sur **Work out timeline**.
 
 - Il lit le Process sans le lancer et sans rien commuter, avec les valeurs qu'a le panel en ce moment.
-- Les lignes `sleep` et les attentes sur une minuterie (`wait "tm_Mash" value >= 00:10:00`, ou un compte à rebours qui atteint `00:00:00`) sont comptées.
+- Les lignes `sleep` et les attentes sur une minuterie (`wait tm_Mash.value >= 00:10:00`, ou un compte à rebours qui atteint `00:00:00`) sont comptées.
 - Une attente sur autre chose, comme une température ou un bouton, ne peut pas être connue à l'avance. Les étapes qui suivent sont montrées en temps *après* cette ligne.
 - Les étapes à l'intérieur d'un `if` qui ne peuvent pas être connues à l'avance sont marquées **(if)**.
 

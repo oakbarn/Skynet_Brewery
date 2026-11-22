@@ -21,12 +21,12 @@ The stepper shows its position, and "(not homed)" if it has a home switch it has
 ## In a Process
 
 ```
-"Valve_M" target = 50        go to 50
-"Valve_M" move = -10         go 10 back
-"Valve_M" run = 2            keep turning at 2 per second (0 stops)
-stop "Valve_M"               stop now
-"Valve_M" home = true        find the home switch
-wait "Valve_M" moving == false
+Valve_M.target = 50        go to 50
+Valve_M.move = -10         go 10 back
+Valve_M.run = 2            keep turning at 2 per second (0 stops)
+stop "Valve_M"             stop now
+Valve_M.home = true        find the home switch
+wait Valve_M.moving == false
 ```
 
 The Mega needs the **AccelStepper** library and `USE_STEPPER` set to 1 in its sketch. The details are in `docs/DEVICE_PROTOCOL.md`. The firmware has not yet been tried on a real motor.

@@ -13621,7 +13621,7 @@ const saveScript = guard(async () => {
     ta.setSelectionRange(pos, pos); ta.scrollTop = top;
   }
   dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; notes = r.warnings ?? []; renderProblems(); updateGutter(); refreshFind(false);
-  const note = (r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '') + (r.golines ? ` (${r.golines} goLine number(s) moved with their lines)` : '');
+  const note = (r.golines ? ` (${r.golines} goLine number(s) moved with their lines)` : '');
   if (problems.length || note) toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length); else savedPop('Saved');
   const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
   for (const x of added) knownPaths.add(x.path);

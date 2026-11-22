@@ -24,13 +24,6 @@ Chaque fenêtre Properties qui a un **Label** a aussi un interrupteur **Show lab
 tm_Mash.label = "Mash rest"
 ```
 
-`label` est le mot Skynet. L'ancien mot marche toujours et veut dire la même chose :
-
-```
-tm_Mash.displayname = "Mash rest"
-"tm_Mash" displayname = "Mash rest"
-```
-
-Le bouton **Modernize** change `"tm_Mash" displayname = "..."` en `tm_Mash.label = "..."`.
+`label` est le seul mot pour cela dans un Process.
 
 Voir aussi [Les zones de texte](49-text-boxes) et [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).

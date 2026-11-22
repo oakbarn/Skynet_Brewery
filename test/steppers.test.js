@@ -78,8 +78,8 @@ store.setProp('Free_M', 'enabled', false); store.setProp('Free_M', 'move', 1); r
   const { Engine } = await import('../lib/engine.js');
   const sd = path.join(d, 'scripts'); fs.mkdirSync(sd);
   fs.writeFileSync(path.join(sd, 'Valve_Test.txt'), [
-    '"Valve_M" speed = 100', '"Valve_M" target = 30', 'wait "Valve_M" moving == false', 'print "Valve_M" position',
-    '"Valve_M" move = 10', 'sleep 100', 'stop "Valve_M"', 'wait "Valve_M" moving == false', 'reset "Valve_M"', 'print "Valve_M" position'].join('\n'));
+    'Valve_M.speed = 100', 'Valve_M.target = 30', 'wait Valve_M.moving == false', 'print Valve_M.position',
+    'Valve_M.move = 10', 'sleep 100', 'stop "Valve_M"', 'wait Valve_M.moving == false', 'reset "Valve_M"', 'print Valve_M.position'].join('\n'));
   const eng = new Engine(store, sd, { logNow() { } }), printed = [];
   eng.on('print', p => printed.push(p.text));
   hw.stepTimer = setInterval(() => sim.tick(0.1), 100); hw.stepQuietMs = 500;
