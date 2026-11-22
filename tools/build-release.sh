@@ -2,7 +2,7 @@
 # Builds a Skynet Brewer release in release/ (MIT License, Copyright (c) OakBarn Brewery 2026):
 #   Skynet_BrewPanel_<version>.zip         the panel in a BrewPanel folder, for a first install AND for updates: it has no
 #                                          data/, config/, media/ or processes/ (their samples are in defaults/), so it never replaces yours
-#   Skynet_Brewer_Setup_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
+#   Skynet_Brewer_Update_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
 #   Skynet_Brewer_Full_Setup_<version>.exe   the same Windows installer with every Skynet picture and sound inside (Rule 9.20),
 #                                          added the Media Setup's add-only way, so a new install needs no separate Media Setup
 #   Skynet_Media_<version>.zip / Skynet_Media_Setup_<version>.exe   (only when SKYNET_MEDIA_BUILD is not "no", Rule 9.21)
@@ -143,7 +143,7 @@ cp -p install/pi/ReadMe_Raspberry_Pi.txt install/pi/skynet-first-install-pi.sh "
 cp -p help/27-minimum-equipment.md "$OUT/Minimum_Equipment_and_Limitations.txt"
 
 if command -v makensis >/dev/null; then
-  EXE="Skynet_Brewer_Setup_$VERSION.exe"
+  EXE="Skynet_Brewer_Update_$VERSION.exe"
   # Signing (docs/Code_Signing_Setup.md): only when the release workflow has set everything tools/sign-exe.sh needs.
   # Otherwise the Setup .exe is built unsigned, as before.
   SIGN=()

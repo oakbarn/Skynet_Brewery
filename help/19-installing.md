@@ -19,7 +19,7 @@ Every version on that page is an **Official Skynet update**: once installed, Sky
 
 | File in the release | What it is for |
 |---|---|
-| `Skynet_Brewer_Setup_<date>.exe` | Windows installer. The whole panel is inside it. |
+| `Skynet_Brewer_Update_<date>.exe` | Windows installer. The whole panel is inside it. |
 | `Skynet_Brewer_Full_Setup_<date>.exe` | The same Windows installer with every Skynet picture, sound and Sample Schema inside too. The way on a new computer. See [The Skynet pictures and sounds](183-skynet-media-setup). |
 | `Skynet_BrewPanel_<date>.zip` | The panel itself: a first install or an update by hand, and for Mac, Linux and the Pi. It has no `config`, `data`, `media` or `processes` folders, so unzipping it over your panel can't replace yours. |
 | `Install Skynet Brewer.command` | Mac installer |
@@ -36,7 +36,7 @@ The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewP
 ## Windows: the installer
 
 1. Close the panel if it is running (**☰ Menu > Close Skynet Panel and the Brain**). The installer also stops it by itself.
-2. Double-click `Skynet_Brewer_Setup_<date>.exe` (or `Skynet_Brewer_Full_Setup_<date>.exe`, which also brings the Skynet pictures and sounds). Windows may say **Windows protected your PC**: click **More info**, then **Run anyway**. The installer just isn't signed with a paid certificate. The first screen shows the **Version** it installs, the same name as on the Releases page.
+2. Double-click `Skynet_Brewer_Update_<date>.exe` (or `Skynet_Brewer_Full_Setup_<date>.exe`, which also brings the Skynet pictures and sounds). Windows may say **Windows protected your PC**: click **More info**, then **Run anyway**. The installer just isn't signed with a paid certificate. The first screen shows the **Version** it installs, the same name as on the Releases page.
 3. Keep the folder `C:\Brewing\BrewPanel` and click **Install**.
    - If Node.js is missing, it offers to install it. Windows asks for permission.
    - The **Full Setup** is always a full install that **overwrites everything**. If a Skynet is already there it shows one warning first, with a link to the Update Setup and **Close and Do Not Install**, and asks only one thing: **1. Install with no backup** (already picked: your old folders are deleted for good) or **2. Install and back up my old folders first** (they are moved to `C:\Brewing\Skynet_Backups`).

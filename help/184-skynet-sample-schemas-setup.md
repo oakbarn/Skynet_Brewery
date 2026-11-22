@@ -5,7 +5,7 @@ The panel comes with the **3 Vessel 1 Pump** brewery (HLT, mash tun, boil kettle
 Every **other** Sample Schema (a ready-made brewery) is added **one at a time**, and comes with the Skynet Setups. **There is nothing extra to download or run** (OakBarn Brewery: "No extra steps for a User"):
 
 - **New on this Windows computer:** the **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) has every Sample Schema.
-- **Each update:** the **Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) brings the Sample Schemas added or changed since the last Update Setup.
+- **Each update:** the **Update Setup** (`Skynet_Brewer_Update_<date>.exe`) brings the Sample Schemas added or changed since the last Update Setup.
 - **Mac, Linux, Raspberry Pi or by hand:** unzip `Skynet_Sample_Schemas_<date>.zip` into the folder that holds `BrewPanel` (use `unzip -n`, which never replaces a file), or put it next to the installer before you run it. It adds `BrewPanel/sample_schemas`.
 
 > **There are none yet.** The older samples (Two vessels, one pump, and the BrewZilla brew day) are set aside while each one is brought up to the current Skynet Rules. The separate **Skynet Sample Schemas Setup** .exe is gone: the Update and Full Setups do its job.

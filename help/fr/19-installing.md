@@ -19,7 +19,7 @@ Chaque version sur cette page est une **mise à jour officielle de Skynet** : un
 
 | Fichier de la version | À quoi il sert |
 |---|---|
-| `Skynet_Brewer_Setup_<date>.exe` | Programme d'installation Windows. Tout le panel est dedans. |
+| `Skynet_Brewer_Update_<date>.exe` | Programme d'installation Windows. Tout le panel est dedans. |
 | `Skynet_Brewer_Full_Setup_<date>.exe` | Le même programme d'installation Windows, avec en plus toutes les images, tous les sons et tous les Sample Schemas Skynet. La façon de faire sur un nouvel ordinateur. Voir [Les images et sons Skynet](183-skynet-media-setup). |
 | `Skynet_BrewPanel_<date>.zip` | Le panel lui-même : une première installation ou une mise à jour à la main, et pour Mac, Linux et le Pi. Il n'a pas de dossiers `config`, `data`, `media` ni `processes`, donc le décompresser par-dessus votre panel ne peut pas remplacer les vôtres. |
 | `Install Skynet Brewer.command` | Programme d'installation Mac |
@@ -36,7 +36,7 @@ Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/Bre
 ## Windows : le programme d'installation {#windows-the-installer}
 
 1. Fermez le panel s'il tourne (**☰ Menu > Close Skynet Panel and the Brain**). L'installateur l'arrête aussi tout seul.
-2. Double-cliquez sur `Skynet_Brewer_Setup_<date>.exe` (ou `Skynet_Brewer_Full_Setup_<date>.exe`, qui apporte aussi les images et sons Skynet). Windows peut dire **Windows a protégé votre ordinateur** (Windows protected your PC) : cliquez sur **Informations complémentaires** (More info), puis **Exécuter quand même** (Run anyway). Le programme d'installation n'est simplement pas signé avec un certificat payant. Le premier écran montre la **Version** qu'il installe, le même nom que sur la page Releases.
+2. Double-cliquez sur `Skynet_Brewer_Update_<date>.exe` (ou `Skynet_Brewer_Full_Setup_<date>.exe`, qui apporte aussi les images et sons Skynet). Windows peut dire **Windows a protégé votre ordinateur** (Windows protected your PC) : cliquez sur **Informations complémentaires** (More info), puis **Exécuter quand même** (Run anyway). Le programme d'installation n'est simplement pas signé avec un certificat payant. Le premier écran montre la **Version** qu'il installe, le même nom que sur la page Releases.
 3. Gardez le dossier `C:\Brewing\BrewPanel` et cliquez sur **Install**.
    - Si Node.js manque, il propose de l'installer. Windows demande la permission.
    - Le **Full Setup** est toujours une installation complète qui **écrase tout**. Si un Skynet est déjà là, il montre d'abord un seul avertissement, avec un lien vers l'Update Setup et **Close and Do Not Install**, et ne demande qu'une chose : **1. Install with no backup** (installer sans sauvegarde, déjà choisi : vos anciens dossiers sont supprimés pour de bon) ou **2. Install and back up my old folders first** (installer et sauvegarder d'abord mes anciens dossiers : ils sont déplacés dans `C:\Brewing\Skynet_Backups`).

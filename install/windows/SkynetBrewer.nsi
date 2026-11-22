@@ -34,7 +34,7 @@ Unicode true
   !define VERSION "dev"
 !endif
 !ifndef OUTFILE
-  !define OUTFILE "Skynet_Brewer_Setup.exe"
+  !define OUTFILE "Skynet_Brewer_Update.exe"
 !endif
 !ifdef SIGN_SCRIPT
   !uninstfinalize 'bash "${SIGN_SCRIPT}" "%1" "Uninstall Skynet Brewer.exe"'
@@ -58,8 +58,8 @@ OutFile "${OUTFILE}"
   !define SETUP_KIND "Full Setup"
   !define SETUP_FILE "Skynet_Brewer_Full_Setup_${VERSION}.exe"
 !else
-  !define SETUP_KIND "Setup"
-  !define SETUP_FILE "Skynet_Brewer_Setup_${VERSION}.exe"
+  !define SETUP_KIND "Update"
+  !define SETUP_FILE "Skynet_Brewer_Update_${VERSION}.exe"
 !endif
 InstallDir "C:\Brewing\BrewPanel"
 RequestExecutionLevel user
@@ -102,11 +102,11 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
   !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer (Full)"
   !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer, with every Skynet picture, sound and Sample Schema, and adds a Skynet Brewer shortcut to your Desktop."
 !else
-  !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
+  !define MUI_WELCOMEPAGE_TITLE "Skynet Brewer Update"
   !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop."
 !endif
 !ifdef MEDIA_SRC
-  !define WELCOME_UPDATE "This is a Full install: it overwrites everything. To update a Skynet that is already installed, use the Update Setup (Skynet_Brewer_Setup) instead."
+  !define WELCOME_UPDATE "This is a Full install: it overwrites everything. To update a Skynet that is already installed, use the Update Setup (Skynet_Brewer_Update) instead."
 !else
   !define WELCOME_UPDATE "Updating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
 !endif

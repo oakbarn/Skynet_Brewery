@@ -90,7 +90,7 @@ ne peut pas les rendre impossibles. Pour votre brasserie, les bonnes habitudes s
 Tout le monde peut vérifier un fichier sur **virustotal.com**. Aucun compte n'est nécessaire.
 
 1. Ouvrez `virustotal.com` dans votre navigateur.
-2. Cliquez sur **Choose file** et choisissez le `.exe` du Setup que vous avez téléchargé (par exemple `Skynet_Brewer_Setup_<version>.exe`).
+2. Cliquez sur **Choose file** et choisissez le `.exe` du Setup que vous avez téléchargé (par exemple `Skynet_Brewer_Update_<version>.exe`).
 3. Attendez une minute ou deux pendant qu'environ 70 antivirus l'examinent.
 4. Lisez le résultat. **0** sur environ 70 est un fichier propre. Avec un installateur tout neuf, un ou deux antivirus **devinent** parfois mal (un
    faux positif). Si plusieurs le signalent, ne le lancez pas, et prévenez OakBarn Brewery.
