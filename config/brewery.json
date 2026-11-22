@@ -706,7 +706,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
-   "nameColor": "#ffff00"
+   "nameColor": "#ffff00",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -722,7 +723,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
-   "nameColor": "#ffff00"
+   "nameColor": "#ffff00",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -738,7 +740,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
-   "nameColor": "#ffff00"
+   "nameColor": "#ffff00",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -754,7 +757,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
-   "nameColor": "#ffff00"
+   "nameColor": "#ffff00",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -773,7 +777,8 @@
    "nameColor": "#ffff00",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
-   "follow": "BM_32_DI@Float_Water~float_WA"
+   "follow": "BM_32_DI@Float_Water~float_WA",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -805,7 +810,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
-   "nameColor": "#000000"
+   "nameColor": "#000000",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -821,7 +827,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
-   "nameColor": "#000000"
+   "nameColor": "#000000",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -837,7 +844,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
-   "nameColor": "#000000"
+   "nameColor": "#000000",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -853,7 +861,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
-   "nameColor": "#000000"
+   "nameColor": "#000000",
+   "group": "Water"
   },
   {
    "workspace": "Water",
@@ -872,7 +881,8 @@
    "nameColor": "#000000",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
-   "follow": "BM_32_DI@Float_Water~float_WA"
+   "follow": "BM_32_DI@Float_Water~float_WA",
+   "group": "Water"
   },
   {
    "name": "BM_33_DO@Valve_E_Manifold~Supply_WA",
@@ -928,7 +938,7 @@
    "workspace": "Water",
    "device": "Brewery Mega",
    "channel": 32,
-   "label": "Water float",
+   "label": "Force floats",
    "x": 1250,
    "y": 520,
    "w": 150,
@@ -936,7 +946,8 @@
    "onText": "MADE",
    "offText": "open",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
-   "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg"
+   "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
+   "forceSecs": 2
   },
   {
    "workspace": "Water",
@@ -994,7 +1005,8 @@
    "precision": 0,
    "readOnly": true,
    "backColor": "#000000",
-   "foreColor": "#fafafa"
+   "foreColor": "#fafafa",
+   "visibility": "hidden"
   },
   {
    "workspace": "Water",
@@ -1010,7 +1022,8 @@
    "precision": 0,
    "readOnly": true,
    "backColor": "#000000",
-   "foreColor": "#fafafa"
+   "foreColor": "#fafafa",
+   "visibility": "hidden"
   },
   {
    "workspace": "Water",
@@ -1023,7 +1036,8 @@
    "h": 90,
    "timerType": "countdown",
    "look": "led",
-   "visibility": "hidden"
+   "visibility": "hidden",
+   "hideButtons": true
   },
   {
    "workspace": "Water",
@@ -1048,7 +1062,8 @@
    "w": 250,
    "h": 104,
    "timerType": "countdown",
-   "look": "led"
+   "look": "led",
+   "hideButtons": true
   },
   {
    "workspace": "Water",

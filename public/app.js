@@ -2771,7 +2771,7 @@ function buildEl(e) {
   place(n, elGeom(e));
   if (e.hideName) n.querySelector('.nm').classList.add('hidden');
   styleEl(n, e);
-  if (e.type === 'timer') n.append(h('div', { class: 'btns' },
+  if (e.type === 'timer' && !e.hideButtons) n.append(h('div', { class: 'btns' },
     h('button', { title: 'Start', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', true); } }, '▶'),
     h('button', { title: 'Stop', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', false); } }, '■'),
     h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺'),
@@ -3741,6 +3741,8 @@ async function doTap(e) {
   if ((act === 'toggle' || act === 'dual') && isBoolEl(t)) {      // Dual Action: a click is On / Off (Rule 2.50)
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
     if (isConfirmation(t)) return confirmByHand(t, !cur);      // a Confirmation Widget: do it by hand, then Done (Rule 1.28)
+    const fs = t.type === 'digitalIn' ? Number(t.forceSecs) || 0 : 0;      // a forced float: ON for a few seconds, then OFF (Panel Update 9, item 12f)
+    if (fs > 0 && !cur) { setProp(t.name, 'raw', true); setTimeout(() => setProp(t.name, 'raw', false), fs * 1000); return; }
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
     return setProp(t.name, boolProp(t), !cur);
   }
@@ -4055,21 +4057,28 @@ function setpointDialog(p, t) {
 // (Rule 2.44). An item set to Ask before changing asks first. What it shows comes from the Processes list, so it follows every change.
 const processStatusOf = name => (S.scripts || []).find(x => x.name === String(name ?? '').trim()) ?? null;
 function fillProcessWidget(n, e) {
-  const st = processState(e.process, processStatusOf(e.process)), vl = n.querySelector('.vl');
+  const st = { ...processState(e.process, processStatusOf(e.process)) }, vl = n.querySelector('.vl');
+  // a Group (Panel Update 9, item 12): while the delay timer runs every one shows Delay, the pressed one's button says Started and the
+  // others' Start is greyed out; once the water flows the pressed one shows Running (word and button) and the others go blank, still
+  // greyed out, until the Group is free again
+  const gv = S.values[e.name] || {}, busy = !!(String(e.group ?? '').trim() && gv.phase), mine = busy && !!gv.pressed;
+  if (busy) { st.word = gv.phase === 'delay' ? 'Delay' : mine ? 'Running' : ''; st.running = false; }
+  n.classList.toggle('grpBusy', busy);
   n.classList.add('procw');
   n.classList.toggle('scr-error', !!st.error); n.classList.toggle('scr-missing', !!st.missing);
   const pic = processPicture(e, turnsOn);
-  if (vl) vl.replaceChildren(...(pic ? [h('div', { class: 'procPic', style: `background-image: url("${media(pic)}")` })] : []), h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st)));
-  n.title = st.missing ? `${e.label || e.name}: ${st.word}. Pick its Process in its Properties (double-click it).` : `Process ${e.process}: ${st.word}. One click ${st.running ? 'stops' : 'starts'} it.`;
+  if (vl) vl.replaceChildren(...(pic ? [h('div', { class: 'procPic', style: `background-image: url("${media(pic)}")` })] : []), h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') + (busy && !mine ? ' grey' : '') + (mine ? ' pressed' : '') }, st.missing ? '' : mine ? (gv.phase === 'delay' ? 'Started' : 'Running') : processButton(st)));
+  n.title = st.missing ? `${e.label || e.name}: ${st.word}. Pick its Process in its Properties (double-click it).` : busy ? `${e.label || e.name}: wait until the ${e.group} buttons are free again.` : `Process ${e.process}: ${st.word}. One click ${st.running ? 'stops' : 'starts'} it.`;
   return st.running;
 }
 async function processWidgetTap(e) {
   const name = String(e.process ?? '').trim();
   const st = processState(name, processStatusOf(name));
   if (st.missing) return toast(`${e.label || e.name}: ${st.word}. Double-click it to pick its Process.`, true);
+  if (String(e.group ?? '').trim() && S.values[e.name]?.phase) return;      // its Group is busy: the greyed Start does nothing (Panel Update 9)
   if (e.confirm && !(await choose(`${st.running ? 'Stop' : 'Start'} Process ${name}?`, [[st.running ? safetyWord('Stop') : 'Start', true]]))) return;
   try {
-    const r = await api('POST', `/ui/scripts/${encodeURIComponent(name)}/${st.running ? 'stop' : 'start'}`);
+    const r = await api('POST', `/ui/scripts/${encodeURIComponent(name)}/${st.running ? 'stop' : 'start'}${!st.running && String(e.group ?? '').trim() ? '?widget=' + encodeURIComponent(e.name) : ''}`);
     if (!st.running && !r.ok) toast(r.msg ? `${name}: ${r.msg}` : `${name} did not start`, true);
   } catch (x) { toast(x.message, true); }
 }
@@ -8794,6 +8803,7 @@ const F = {
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
     ['pulse', 'Pulse: ON time per press (ms)', 'num', null, false, false, { def: 100 }], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds)', 'num', null, false, false, { def: 3000 }],
     ...onPressFields(it),      // On Press (Rule 6.38): a DIN button runs a Process, Advances or cancels all alarms
+    ['forceSecs', 'A click forces it ON for (seconds), then OFF', 'num', null, false, false, { tip: 'For a float you force by hand on the Tab (Force floats): one click makes it ON, and after this many seconds it goes OFF again by itself. 0 or empty: a click turns it ON and it stays ON until clicked again (Panel Update 9, item 12f).' }],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms)', 'num', null, false, false, { def: 20 }], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'],
@@ -9998,6 +10008,7 @@ const processWidgetFields = it => {
     ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: PROCESS_TIPS.process }],
     ['confirm', 'Ask before starting or stopping', 'bool', null, false, false, { tip: 'On: one click asks first (Start or Stop). Off (the usual): one click starts or stops it at once (Rule 2.44).' }],
     ['hideRunning', 'Hide while running', 'bool', null, false, false, { tip: PROCESS_TIPS.hideRunning }],      // Panel Update 8
+    ['group', 'Group', 'text', null, false, false, { tip: PROCESS_TIPS.group }],      // Panel Update 9, item 12
     ['imageOff', 'Picture', 'path', null, false, false, { tip: PROCESS_TIPS.imageOff, attr: SEMI_PIC_POP }],
     ['follow', 'Picture turns on with', 'onsrc', null, true, false, { tip: PROCESS_TIPS.follow }],
     ...NOGFX_LOOK(),
@@ -10115,6 +10126,7 @@ const TIMER_TIPS = {
   style: 'Its look. Skynet Styles 🔒 can\'t be changed; ➕ Add new User Style… makes one of your own, with its Back, Text Fore and Text Back colors and its Frame (shape and color).',
   format: 'How the time shows: hours, minutes and seconds (01:30:00), just hours and minutes (01:30), all minutes (90:00) and more (Rule 2.45). A Process can set any format with .format (or .showas), for example tm_Boil.format = "mm:ss"; "" puts back this pick.',
   ss: 'On: a Timer counting down shows only the seconds (45) once less than one minute is left.',
+  btns: 'On: its ▶ ■ ↺ Set buttons are not shown on the Tab, for a Timer that only a Process starts and sets (the Water timer). Off (the usual): they show.',
 };
 // the Timer's Digits (Rule 2.40) and the other Time formats (Rule 2.45)
 const TIMER_FORMATS = [['', 'hh:mm:ss'], ['hm', 'hh:mm'], ...TIME_FORMATS.filter(([k]) => k && k !== 'hh:mm')];
@@ -10127,6 +10139,7 @@ function timerWidgetFields() {
     ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
     ['timerFormat', 'Format', 'sel', TIMER_FORMATS, false, false, { tip: T.format }],      // Panel Update 8: "need Format attribute hh:mm:ss hh:mm" (was Digits)
     ['ssLastMinute', 'Seconds only in the last minute', 'bool', null, false, false, { tip: T.ss }],
+    ['hideButtons', 'Hide its buttons', 'bool', null, false, false, { tip: T.btns }],      // Panel Update 9, item 12c
     ...NOGFX_LOOK(),
     ...wgtPlace()];
 }

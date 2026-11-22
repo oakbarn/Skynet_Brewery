@@ -1313,7 +1313,14 @@ async function route(req, res) {
     const name = s[1], act = s[2];
     if (act === 'version' && m === 'POST') return ok(res, { version: engine.newVersion(name) });
     if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
-    if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
+    if (act === 'start' && m === 'POST') {
+      // a Process Widget of a Group (Panel Update 9, item 12): nothing starts while its Group is busy; else its Group goes to delay
+      const w = new URL(req.url, 'http://x').searchParams.get('widget');
+      if (w && store.has(w) && !store.pressGroup(w)) return ok(res, { ok: false, msg: 'Wait: another button of its Group is still going' });
+      const r = engine.start(name, 'user');
+      if (w && store.has(w) && r?.ok === false) try { store.setGroupPhase(w, '', 'user'); } catch { }
+      return ok(res, r);
+    }
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
     if (act === 'restart' && m === 'POST') return ok(res, await engine.restart(name, 'user'));
     if (act === 'order' && m === 'POST') { const { n } = await jsonBody(req); return ok(res, { order: engine.setOrder(name, n) }); }

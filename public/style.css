@@ -1393,6 +1393,8 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .el.procw .scrBtn { padding: 2px 12px; border-radius: 6px; border: 1px solid var(--muted); background: #164d2a; color: #b6ffcc; font-size: 13px; }
 .el.procw .scrBtn.stop { background: #5a1c16; color: #ffd0c8; }
 .el.procw .scrBtn:empty { display: none; }
+.el.procw .scrBtn.grey { background: #555; color: #bbb; border-color: #777; cursor: not-allowed; }      /* its Group is busy (Panel Update 9, item 12) */
+.el.procw .scrBtn.pressed { background: #b8860b; color: #fff8dc; border-color: #ffd54f; }      /* the one pressed in its Group (Panel Update 9, item 12) */
 .el.procw .procPic { align-self: stretch; flex: 1 1 auto; min-height: 30px; background: center / contain no-repeat; }
 .el.procw.scr-error .scrState { color: var(--bad); }
 .el.procw.scr-missing .scrState { color: var(--muted); font-weight: 400; font-style: italic; }
