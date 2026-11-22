@@ -74,16 +74,13 @@ environ 600 hPa (17,7 inHg) à 4 000 mètres.
 
 ## Dans un Process {#in-a-process}
 
-Ces Globals internes de Skynet sont mis par Skynet et en lecture seule (Règle 1.18) :
+Ce Global interne de Skynet est mis par Skynet et en lecture seule (Règle 1.18) :
 
 | Nom | Ce que c'est |
 |---|---|
-| `skn_Boil_Temp` | La température à laquelle l'eau bout ici et maintenant. Un Process l'utilise en °C, comme toute température (Skynet Rule 2.59) ; dans un message (un texte joint avec `+`, ou un `print` de la valeur seule) elle s'affiche dans vos Units (°F pour US, °C pour Metric) |
-| `skn_Boil_Temp_C` | La même en °C |
-| `skn_Boil_Temp_F` | La même en °F |
-| `skn_Air_Pressure` | La pression de l'air à la brasserie maintenant, en hPa |
+| `skn_Boil_Temp` | La température d'ébullition du jour à votre brasserie. Skynet la calcule à partir de la pression de l'air à votre Airport et de votre Elevation, toutes deux réglées dans ☰ Menu > Default settings > Boil temperature. Elle s'affiche dans vos Units (°F pour US, °C pour Metric). |
 
-Attendez que la cuve soit juste sous l'ébullition, puis continuez :
+Dans un Process, cette ligne attend que la cuve soit 1 degré sous la température d'ébullition du jour, puis continue :
 
 ```
 wait BK_Temp >= skn_Boil_Temp - 1

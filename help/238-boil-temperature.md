@@ -68,16 +68,13 @@ Only real air pressures are used. The lowest ever at sea level was about 870 hPa
 
 ## In a Process
 
-These Skynet internal Globals are set by Skynet and are read only (Rule 1.18):
+This Skynet internal Global is set by Skynet and is read only (Rule 1.18):
 
 | Name | What it is |
 |---|---|
-| `skn_Boil_Temp` | The temperature water boils at here and now. A Process works with it in °C, like every temperature (Skynet Rule 2.59); in a message (text joined with `+`, or a `print` of it alone) it shows in your Units (°F for US, °C for Metric) |
-| `skn_Boil_Temp_C` | The same in °C |
-| `skn_Boil_Temp_F` | The same in °F |
-| `skn_Air_Pressure` | The air pressure at the brewery now, in hPa |
+| `skn_Boil_Temp` | Today's boil temperature at your brewery. Skynet works it out from the air pressure at your Airport and your Elevation, both set in ☰ Menu > Default settings > Boil temperature. It shows in your Units (°F for US, °C for Metric). |
 
-Wait until the kettle is a little under the boil, then go on:
+In a Process, this line waits for the kettle to be 1 degree under today's boil temperature, then goes on:
 
 ```
 wait BK_Temp >= skn_Boil_Temp - 1

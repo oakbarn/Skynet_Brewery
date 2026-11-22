@@ -607,6 +607,9 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .hpTable table { border-collapse: collapse; }
 .hpTable th, .hpTable td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
 .hpTable th { background: var(--panel2); }
+/* No word wrap in a Help table's Name column (OakBarn Brewery, 2026-11-21, Panel Update 9, item 10a; Rule 11.17): a cell that is only an
+   attribute or item name (`skn_Boil_Temp`, **Airport (ICAO)**) is made wide enough for it; the What it is column still wraps */
+.hpTable td:first-child:has(> code:only-child), .hpTable td:first-child:has(> strong:only-child), .hpTable td:first-child:has(> code:only-child) code { white-space: nowrap; }
 .hpEditPanes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
 #hpText { width: 100%; min-height: 60vh; font-family: var(--mono); font-size: 13px; line-height: 1.45; resize: vertical; }
 #hpPreview { border: 1px dashed var(--line); border-radius: 6px; padding: 4px 12px; max-height: 70vh; overflow: auto; }
