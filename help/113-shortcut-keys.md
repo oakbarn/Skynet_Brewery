@@ -14,6 +14,18 @@ Entry Dialogs (the red ⬆ Up Arrow, Rule 18.1), the Process editor and Schema.j
 `\n` and `\b` are Rich Text Embedded Codes: see [Text boxes](49-text-boxes) and [Rich Text Embedded Code](90-rich-text-embedded-code).
 Everything these keys type can be taken back with Undo, like any other typing.
 
+## Find and Replace: Ctrl + F and Ctrl + H
+
+> ⚠ **Big warning: Ctrl + H works only inside a big text editor.** Click in the text of the Process Editor, Schema.json,
+> the Process Template editor or the Help text editor first, then press **Ctrl + H** to open Find and Replace. Anywhere else
+> the browser keeps Ctrl + H for itself: in Edge and Chrome it opens the browser's **History**. Nothing is lost; close the
+> History and click back in the text. (Panel Update 9, item 9; Rule 2.65)
+
+| Windows and Linux | Mac | What it does |
+|---|---|---|
+| **Ctrl + F** | **⌘ + F** | Find (in a big text editor) |
+| **Ctrl + H** | **Ctrl + H** | Find and Replace (in a big text editor only, see the warning) |
+
 ## Common keys
 
 | | Windows and Linux | Mac |

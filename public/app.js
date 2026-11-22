@@ -16427,7 +16427,7 @@ const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColo
 // temperature. The Typed air pressure is not a default (OakBarn Brewery, 2026-11-21: "not a default but a skynet variable set on a Brew
 // Day"), so it is not here and Default settings never changes it
 const BT_TIPS = {
-  airport: 'Your airport\'s 4 letter ICAO code (the code pilots use), for example KORD. It is the weather station Skynet reads the air pressure from, to work out the temperature water boils at here (skn_Boil_Temp). It works only with a correct ICAO code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air. Help: Boil temperature from the air pressure tells how to find your code.',
+  airport: 'Your airport\'s 4 letter ICAO code (the code pilots use), for example KDFW for Dallas Fort Worth. Skynet reads the air pressure from that airport\'s weather report to work out the temperature water boils at here (skn_Boil_Temp). How to get your code: search the internet for ICAO code and the name of the airport nearest you, or look it up in a flight or weather app. In the USA it is K plus the airport\'s 3 letter code (DFW is KDFW); in Canada it starts with C, in the UK with EG. It works only with a correct code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air.',
   elev: 'The brewery\'s height above sea level, in feet for US Units and metres for Metric (kept in metres). It starts as the airport\'s own height; change it when the brewery sits higher or lower than the airport.' };
 const MD_TIPS = {
   graphic: 'Where your own pictures are (normally Images: the picture groups are folders in it). Empty: Images. A Process can give only a file name and Skynet looks here first (Rule 7.23).',
@@ -16729,6 +16729,8 @@ function renderZoomTab(box) {
     canFullScreen
       ? h('div', { class: 'zoomPick' }, h('button', { class: 'primary', onclick: () => { setFullScreen(!fs); back(); } }, fs ? 'Exit full screen' : 'Full screen'))
       : h('p', { class: 'muted' }, 'This browser cannot go full screen (iPhones cannot). On an iPhone, Share > Add to Home Screen opens the panel without the browser bars.'),
+    // Panel Update 9, item 6: the computer's own Full screen key works too
+    h('p', { class: 'muted' }, 'Or use your computer\'s own Full screen key: F11 on Windows, Linux and a Raspberry Pi; Control + Command + F on a Mac. Press it again to come back.'),
     h('p', { class: 'muted' }, 'Full screen hides the browser\'s own bars and the Menu Bar. Esc, or Full screen here again, brings them back. ' +
       'The Default Menu tab sets the zoom and Full screen the panel starts with.'));
 }
