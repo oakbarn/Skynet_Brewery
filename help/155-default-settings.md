@@ -186,6 +186,7 @@ How the whole panel works, so a change reaches things already made. They were on
 - **Push Lockout (s)**: how long a new Pulse push button waits before another press counts;
 - **Phones and tablets**;
 - the **Grain weight label** and the gravity points label;
+- **Brew Timers**: the Labels of the Skynet Boil Timer, Mash Timer and Whirlpool / Chilling Timer ([The Skynet Brew Timers](246-skynet-brew-timers));
 - **Hop alerts**;
 - **Title**, **Look (theme)** (saved at once), **Media folders**, **API key**, **BeerXML mapping**, the Processes that start with the server, and the restart limit and its Alarm.
 

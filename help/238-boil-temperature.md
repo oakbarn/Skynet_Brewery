@@ -74,10 +74,22 @@ This Skynet internal Global is set by Skynet and is read only (Rule 1.18):
 |---|---|
 | `skn_Boil_Temp` | Today's boil temperature at your brewery. Skynet works it out from the air pressure at your Airport and your Elevation, both set in ☰ Menu > Default settings > Boil temperature. It shows in your Units (°F for US, °C for Metric). |
 
-In a Process, this line waits for the kettle to be 1 degree under today's boil temperature, then goes on:
+## The Boil Probe and wait_boil
+
+Open the Properties of the temperature probe in your boil kettle and switch on **Boil Probe**. Only one probe can be the Boil Probe:
+on every other probe the switch is greyed out, and the line under it says which probe has it. To move it, switch it off on that probe first.
+
+In a Process, this line waits for the Boil Probe to be 1 degree under today's boil temperature, then goes on:
 
 ```
-wait BK_Temp >= skn_Boil_Temp - 1
+wait_boil -1
 ```
+
+The number is in your Units: with US it is 1 °F, with Metric 1 °C. `wait_boil` on its own waits for the boil temperature itself.
+Override and Stop work on it as on any wait. With no Boil Probe, the Process editor gives one warning.
+
+The long way still works too: `wait BK_Temp >= skn_Boil_Temp - 1`.
+
+Then start the boil clock with `start skn_Boil_Timer`: see [The Skynet Brew Timers](246-skynet-brew-timers).
 
 Only the 4 letter airport code leaves the Brain. Nothing else about you or your brewery is sent.

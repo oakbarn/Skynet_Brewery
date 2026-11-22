@@ -165,8 +165,14 @@ key, so a rename keeps it): `skn_Boil_Probe_1-3`, `skn_Mash_Probe_1-3`, `skn_HLT
 temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
 at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97) **Built 2026-11-19 (Panel Updates
 entry 16, Help 238):** the four `skn_` Globals (read only; `skn_Boil_Temp` in the panel's Units; data kept in °C and hPa).
-The `skn_` probe roles and `wait_boil` are **not built yet**; until then a Process waits with
-`wait BK_Temp >= skn_Boil_Temp - 1`.
+The `skn_` probe roles are **not built yet**.
+**Built 2026-11-22 (Panel Update 9, item 10d; OakBarn Brewery picked "Rule words: wait_boil, skn_ timers"):** a temperature probe has a
+**Boil Probe** switch in its Properties. Only one probe has it: on every other probe it is greyed out (only the ⛔, Rule 18.46) and a
+line under it names the probe that has it. **`wait_boil`** waits, like a wait (Override and Stop work), until the Boil Probe reaches
+`skn_Boil_Temp`; **`wait_boil -1`** goes on 1 degree under it. The number is in the Units (°F for US, °C for Metric) and is turned
+inside like an offset (x 1.8, no 32, Rule 2.59), so `wait_boil -1` replaces `wait BK_Temp >= skn_Boil_Temp - 1`. With no Boil Probe
+the editor gives one warning and the line stops the Process when it runs. The `wait_boil = 211` form is not built. Panel only (the
+BruControl Import brings in no Boil Probe; a Process it converts keeps its own wait).
 
 1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
 **not a Widget and is never on a Tab** (a Text, Picture, Value, Time or DateTime Widget shows things on a Tab), and its
@@ -1500,6 +1506,21 @@ the next thing made from it; a Device, Widget, Tab or Recipe already made is not
 a new Profile into something already made, pick it again there (for example Brew on, or a Recipe's Mash Profile).
 **Both programs:** the BruControl Import makes new things only, so it follows this already.
 
+2.68 **The Skynet Brew Timers** (OakBarn Brewery, 2026-11-22, Panel Update 9 items 10d and 31: "There should be a skynet Boil Timer
+and Mash Timer"; "Format hh:mm until 5 minutes left the hh:mm:ss"; "Skynet Boil Clock used for Hop Timer, Separate Whirlpool/ Chilling
+Timer"; names picked "Rule words: wait_boil, skn_ timers", Rule 3.20). **`skn_Boil_Timer`, `skn_Mash_Timer` and `skn_Whirlpool_Timer`**:
+- Skynet owns them. They **always count down**. A person sets only their **Labels** (☰ Menu > Default settings > Brew Timers; Boil
+  Timer, Mash Timer, Whirlpool / Chilling Timer to start).
+- Each **shows itself** at the top middle of every screen while it runs, and **hides** when it stops or reaches 0. It reads
+  **hh:mm** until 5 minutes are left, then **hh:mm:ss**.
+- A Process: `skn_Boil_Timer = 01:00:00` (the time left), `start skn_Boil_Timer`, `stop skn_Boil_Timer`, `reset skn_Boil_Timer`,
+  `wait skn_Boil_Timer <= 00:30:00`, and `skn_Boil_Timer.running` (read only). They have no other attribute.
+- `start` with nothing set first (or after `reset`) takes the **Brew Day value** from the loaded Recipe (or the ☰ Menu > Default tab
+  while none is): the boil time; the mash steps' times added up; the Whirlpool Minutes.
+- **Hop alerts run on the Boil Timer:** `start_hop_alerts` with no timer named follows `skn_Boil_Timer` while it runs (Rule 17.4).
+- Fermenters' own timers ("each would need their own DateTime type") are not built. Panel only: the BruControl Import brings in no
+  Skynet Brew Timer.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -1935,6 +1956,14 @@ Tab's name (its Tab ID by Rule 3.2). The copy puts everything that is on the Tab
    are written right after the Save, for the copied Tabs that are still there.
 Help 236. Rules 4.1 and 4.4 were changed for it (OakBarn Brewery, 2026-11-19, picked "Change the Rules"): the copy puts its new
 Widgets straight on the new Tab, not the 🔨 Build Tab, and makes Clones of Devices and of Widgets without ⧉ Clone Device.
+
+4.9 **Right-drag a copy off a Vessel or Equipment Template** (OakBarn Brewery, 2026-11-22, Panel Update 9 item 16: "Grab a Item from
+the Vessel or Equipment Template and drag off clone picture with Right Clicked Draw after 100 + Pixel Movement and right mouse click
+release, move to the Build tab and open Built Tab with Property Dialog open just as if it had been added with the button" Add
+equipment). On ☰ Menu > Vessel Templates or Equipment Templates (Admins), hold the right mouse button on a Template and drag: a faint
+copy of its picture follows the mouse, and turns solid past 100 px. Let go past 100 px and a copy is made on the 🔨 Build Tab (Rule
+4.1) with its Properties open, as Add equipment does. Under 100 px nothing is made. A right-click that does not move opens its Help,
+as everywhere (Rule 2.11). Panel only.
 
 ## 5. Templates and Integrated items
 
@@ -6781,6 +6810,12 @@ import.
 - 2026-11-17: Rule 4.5 (OakBarn Brewery, Panel Updates Sandbox entry 1: "A Heater or Valve could also be PWM so add those that can be on this ddlb"; "Yes"): the PWM / Analog out list also has Heating Element: PWM and the Proportional Valves (Skynet ones and User Defined), the same rows as in the Heating Element and Valves lists. Help 82 and 136 (and French). Both programs: the Importer has no Edit layout bar; nothing changes there.
 - 2026-11-17: Rule 9.20 changed, Rule 9.8 points to it (OakBarn Brewery, Panel Updates Sandbox entry 10: "always a full install and will overwrite any installed folders or files ... the one warning is allowed ... a link to the Update ... a Close and Do Not install Option"): the Full Setup has no choices; one warning page when Skynet is already installed (Get the Update Setup, Close and Do Not Install, Install); old folders moved to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date> first. install/windows/SkynetBrewer.nsi, Help 19 and 183 (and French). Both programs: the Importer is in the same Setup; it is overwritten with the rest, nothing else changes for it.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
+19.11 **5 gallon kettles on a stove** (OakBarn Brewery, 2026-11-22, Panel Update 9 item 14). Four Skynet Vessel Templates, each a
+5 gallon Brew Kettle drawn on its stove (Skynet pictures 245-248): **Kettle_5_Gal_Electric_Stove** and **Kettle_5_Gal_Gas_Stove**
+(no drains), **Kettle_5_Gal_Electric_Stove_Low_Drain** and **Kettle_5_Gal_Gas_Stove_Low_Drain** (a Low Drain on the front near the
+bottom with a manual ball valve: the Valve_Only Bundled Fitting, its valve picked when it is on a Tab). The stove is manual (a person
+turns it on and off), so it has no Device; its Heat Source is Electric or Gas. Both programs show the same Templates.
+
 ## Change log
 
 - 2026-11-22: Panel Update 9 Part 1 (OakBarn Brewery, PDF "Panel Update 9", 35 items): added Rule 7.27 (six Skynet Audio folders plus
@@ -7490,3 +7525,4 @@ import.
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.
 - 2026-11-21: Rule 6.19 Methods hotspot made bigger (OakBarn Brewery, screenshot of the 3 Vessel 1 Pump HLT: "Hotspot too small increase to purple area"): the strip now runs from the Element's end plate out to 10 px past the Vessel wall, never thinner than 25 px (was 10 px outside the wall, with a gap after the end plate). Help 150 (and French). Checked against the BruControl Import program: its Build page uses the same Panel drawing, nothing else changes.
+- 2026-11-22: Rule 1.18 changed, Rules 2.68, 4.9 and 19.11 added (Panel Update 9 Part 2, items 10d, 31, 14 and 16; OakBarn Brewery picked "Rule words: wait_boil, skn_ timers"): the Boil Probe switch and `wait_boil` / `wait_boil -1` built; the Skynet Brew Timers `skn_Boil_Timer`, `skn_Mash_Timer`, `skn_Whirlpool_Timer` (hop alerts follow the Boil Timer); right-drag a copy off a Vessel or Equipment Template; four 5 gallon stove kettles. Item 15 (Vessels and flow) is parked in the Panel Updates Sandbox, entry 52 (OakBarn Brewery: "in Panel Update sandbox as I may rethink it"). Help 22, 138, 155, 238, 246 (new), 50 and French.

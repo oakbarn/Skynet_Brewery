@@ -449,6 +449,7 @@
    "name": "BM1w1_3_Kettle_BH",
    "typeCode": "1W",
    "type": "temperature",
+   "boilProbe": true,
    "workspace": "Brew House",
    "device": "Brewery Mega",
    "sensor": "ds18b20",

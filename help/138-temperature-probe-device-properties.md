@@ -42,7 +42,8 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
 4. **3. Tab** and **4. Name** (the Suggested Name; you may type your own).
 5. **Graphic**, **Path**, **Orientation** and **Flip** (a Thermowell or probe tee).
 6. The probe's own settings: **Probe type ⬢**, **Units** and **Decimals**, **Calibration offset** with **Database and .API ⬢**,
-   and the **Reading now** (to help calibrate).
+   **Setpoint**, **Boil Probe** and the **Reading now** (to help calibrate). **Boil Probe** marks the one probe in your boil kettle
+   that `wait_boil` reads; on every other probe it is greyed out and a line says which probe has it (see [Boil temperature](238-boil-temperature)).
 7. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out.
 
 A Thermowell still snaps onto an IP, shows from the front on a front facing IP, and a probe tee still cuts a pipe as a tee does

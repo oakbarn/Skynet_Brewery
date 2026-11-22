@@ -258,7 +258,7 @@ engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // loc
 // The Recipe (☰ Menu > Recipe): the one in use is config.recipe, saved ones are in config/recipes. Hop alerts run in the background.
 const recipes = new RecipeStore(path.join(path.dirname(CONFIG), 'recipes'));
 const currentRecipe = () => store.config.recipe ?? null;
-const hopAlerts = new HopAlerts({ store, clock: () => clock.now(), send: a => broadcast('hopAlert', a), defaults: () => store.config.brewDefaults ?? {}, recipe: currentRecipe });
+const hopAlerts = new HopAlerts({ store, timers: engine.brewTimers, clock: () => clock.now(), send: a => broadcast('hopAlert', a), defaults: () => store.config.brewDefaults ?? {}, recipe: currentRecipe });
 // a Recipe always has its Brew on Tab when this Schema has a Tab with an Equipment Profile (Rule 17.13); its Expected Gravity uses
 // that Tab's profile's Efficiency and nothing else
 function useRecipe(rc) {
@@ -356,7 +356,8 @@ watchAlarmOutputs(store, { log: text => { console.log(text); broadcast('print', 
 watchDinPresses(store, engine, { log: text => { console.log(text); broadcast('print', { script: 'DIN button', text, ts: Date.now() }); } });
 engine.on('show', ws => broadcast('show', ws));
 engine.on('alert', a => broadcast('alert', a));
-engine.on('flow', f => broadcast('flow', f));           // flow colors a Process set (Rule 5.21)
+engine.on('flow', f => broadcast('flow', f));
+engine.on('brewTimers', v => broadcast('brewTimers', v));      // the Skynet Brew Timers on every screen (Rule 2.68)           // flow colors a Process set (Rule 5.21)
 engine.on('config', () => { store.writeConfig(); broadcast('config', {}); });     // a Process moved a Quick Disconnect hose (Rule 5.34)
 engine.on('overrides', v => broadcast('overrides', v));      // Override pop-ups up now (Rule 2.26)
 engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
@@ -754,7 +755,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), overrides: engine.overrideList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), overrides: engine.overrideList(), flow: engine.flowView(), brewTimers: engine.brewTimers.view(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
   // PID Auto-tune (Rule 6.39, Help 237): admins start or stop it on a Heating Element; it runs on the Brain (lib/control.js)
