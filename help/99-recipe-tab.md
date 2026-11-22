@@ -113,7 +113,7 @@ The Yeast tab too: `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `_Amo
 The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab** (or **Recipe** in the title) comes back.
 
 - **HOPs**: add, edit or delete the Boil Hops. The Actual AAU of the hops used in the brew MUST be updated; the amounts are adjusted from it to keep the IBUs.
-- **Post Boil Hops**: the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry Hop and Whirlpool. Their Actual AAU must be updated too.
+- **Pre and Post Boil Hops**: the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry Hop and Whirlpool. Their Actual AAU must be updated too.
 - **Drops**: the hop drop groups, the pre warning times and the alert texts, worked out from the hops (see **Hop schedule and alerts**).
 - **Grain**: add, edit or delete grains. Their total weight is the Grain Wt.
 - **Fermentable**: add, edit or delete the other fermentables: adjuncts, extracts, sugars, fruit and juice.
@@ -124,11 +124,11 @@ The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab
 
 Every Daughter Tab button is the same size.
 
-The Hops, Post Boil Hops, Grain, Fermentable, Yeast, Adjuncts, MASH and Waters tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+The Hops, Pre and Post Boil Hops, Grain, Fermentable, Yeast, Adjuncts, MASH and Waters tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
 
 ## The Hops tab
 
-One line for each Boil Hop, with no limit. **Add Hop +** puts a new line at the bottom; **Delete** on a line takes it away. **Calculate** is at the top right of the Hops and Post Boil Hops tabs too.
+One line for each Boil Hop, with no limit. **Add Hop +** puts a new line at the bottom; **Delete** on a line takes it away. **Calculate** is at the top right of the Hops and Pre and Post Boil Hops tabs too.
 
 - **The line's title** is its Hop Group, in color: **Bitter Hops** (orange) above 20 minutes, **Flavor Hops** (yellow) above 5 up to 20, **Aroma Hops** (green) 5 minutes or less. It changes as soon as Min changes.
 
@@ -142,9 +142,9 @@ One line for each Boil Hop, with no limit. **Add Hop +** puts a new line at the 
 - **Hop N Min**: boil minutes. Min = the Boil Time is a Start of Boil hop.
 - **Hop N Drop**: how far into the boil it goes in, as a time: 75 minutes shows **01:15:00**. **Hop N IBU**: its bitterness.
 
-**The square box** on a line sends the hop to the **Post Boil Hops** tab.
+**The square box** on a line sends the hop to the **Pre and Post Boil Hops** tab.
 
-## The Post Boil Hops tab
+## The Pre and Post Boil Hops tab
 
 The hops that are not Boil Hops, each with its **Recipe** and **Actual** AAU like on the Hops tab, and a box of switches: **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. One click on a switch is kept at once: there is no Save or Cancel on a line. Turn its switch off and the hop is a Boil Hop again, back on the Hops tab. **Delete** is the same size as the line.
 
@@ -155,7 +155,7 @@ The hops that are not Boil Hops, each with its **Recipe** and **Actual** AAU lik
 
 A change to a Hop Stand's **Temperature** or **Time** on a Whirlpool hop is the Recipe's own Hop Stand: the Recipe tab shows it at once.
 
-**Calculate needs every Actual AAU above 0**, on the Hops tab and the Post Boil Hops tab. The recipe is based on the Recipe AAU, but the real IBUs of a brew come from the Actual AAU, the AAU on the hop package. When any Actual AAU is 0, nothing is calculated: Skynet switches to the tab of the first one, highlights each Actual AAU that is 0 and shows a warning that names each hop (Hop 3 (Cascade)). Press **READ** to close it, fix the Actual AAUs and press Calculate again. A hop whose Recipe AAU is 0 is not asked about: an import gives it an Actual of 0.01.
+**Calculate needs every Actual AAU above 0**, on the Hops tab and the Pre and Post Boil Hops tab. The recipe is based on the Recipe AAU, but the real IBUs of a brew come from the Actual AAU, the AAU on the hop package. When any Actual AAU is 0, nothing is calculated: Skynet switches to the tab of the first one, highlights each Actual AAU that is 0 and shows a warning that names each hop (Hop 3 (Cascade)). Press **READ** to close it, fix the Actual AAUs and press Calculate again. A hop whose Recipe AAU is 0 is not asked about: an import gives it an Actual of 0.01.
 
 **Calculate saves.** When it works out the Recipe, it saves it too.
 

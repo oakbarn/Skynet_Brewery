@@ -24,8 +24,12 @@ Tout ce que tapent ces touches peut être annulé avec Annuler, comme toute autr
 
 | Windows et Linux | Mac | Ce qu'elle fait |
 |---|---|---|
-| **Ctrl + F** | **⌘ + F** | Rechercher (dans un grand éditeur de texte) |
+| **Ctrl + F** | **⌘ + F** | Dans un grand éditeur de texte : Rechercher. **Partout ailleurs : la boîte de recherche Skynet** en haut au milieu, qui cherche dans le Tab où vous êtes et dans l'aide |
 | **Ctrl + H** | **Ctrl + H** | Rechercher et remplacer (dans un grand éditeur de texte seulement, voir l'avertissement) |
+
+**La boîte de recherche Skynet (Ctrl + F).** Tapez un mot : elle liste les Devices, Widgets et cuves du Tab où vous êtes qui l'ont
+dans leur Label ou leur Name, et les pages d'aide qui l'ont. Cliquez sur l'un d'eux : un Device ou un Widget s'allume sur le Tab, une
+page d'aide s'ouvre. **Entrée** ouvre le premier, **Échap** ou **✕** ferme la boîte. Une recherche ne change jamais rien.
 
 ## Touches courantes {#common-keys}
 

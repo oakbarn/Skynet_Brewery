@@ -113,7 +113,7 @@ L'onglet Yeast aussi : `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `
 Les boutons sous les cases ouvrent les Daughter Tabs. **◀ Back to the Recipe tab** (ou **Recipe** dans le titre) revient.
 
 - **HOPs** : ajouter, modifier ou supprimer les houblons d'ébullition. L'AAU réelle des houblons utilisés dans le brassin DOIT être mise à jour ; les quantités sont ajustées à partir d'elle pour garder les IBU.
-- **Post Boil Hops** : les houblons qui ne sont pas des houblons d'ébullition : empâtage, premier moût, secondaire, houblonnage à cru et whirlpool. Leur AAU réelle doit aussi être mise à jour.
+- **Pre and Post Boil Hops** : les houblons qui ne sont pas des houblons d'ébullition : empâtage, premier moût, secondaire, houblonnage à cru et whirlpool. Leur AAU réelle doit aussi être mise à jour.
 - **Drops** : les groupes d'ajouts de houblon, les délais d'avertissement et les textes d'alerte, calculés à partir des houblons (voir **Programme et alertes de houblonnage**).
 - **Grain** : ajouter, modifier ou supprimer des grains. Leur poids total est le Grain Wt.
 - **Fermentable** : ajouter, modifier ou supprimer les autres fermentescibles : adjuvants, extraits, sucres, fruits et jus.
@@ -124,11 +124,11 @@ Les boutons sous les cases ouvrent les Daughter Tabs. **◀ Back to the Recipe t
 
 Tous les boutons des Daughter Tabs ont la même taille.
 
-Les onglets Hops, Post Boil Hops, Grain, Fermentable, Yeast, Adjuncts, MASH et Waters sont construits (plus bas). Les cases propres aux autres onglets viendront ensuite. En attendant, chacun montre ce que la recette contient pour lui, et Waters et MASH ont les listes de profils.
+Les onglets Hops, Pre and Post Boil Hops, Grain, Fermentable, Yeast, Adjuncts, MASH et Waters sont construits (plus bas). Les cases propres aux autres onglets viendront ensuite. En attendant, chacun montre ce que la recette contient pour lui, et Waters et MASH ont les listes de profils.
 
 ## L'onglet Hops {#the-hops-tab}
 
-Une ligne pour chaque houblon d'ébullition, sans limite. **Add Hop +** met une nouvelle ligne en bas ; **Delete** sur une ligne la retire. **Calculate** est aussi en haut à droite des onglets Hops et Post Boil Hops.
+Une ligne pour chaque houblon d'ébullition, sans limite. **Add Hop +** met une nouvelle ligne en bas ; **Delete** sur une ligne la retire. **Calculate** est aussi en haut à droite des onglets Hops et Pre and Post Boil Hops.
 
 - **Le titre de la ligne** est son groupe de houblon, en couleur : **Bitter Hops** (orange, amertume) au-dessus de 20 minutes, **Flavor Hops** (jaune, saveur) au-dessus de 5 jusqu'à 20, **Aroma Hops** (vert, arôme) 5 minutes ou moins. Il change dès que Min change.
 
@@ -142,9 +142,9 @@ Une ligne pour chaque houblon d'ébullition, sans limite. **Add Hop +** met une 
 - **Hop N Min** : les minutes d'ébullition. Min = la durée d'ébullition, c'est un houblon de début d'ébullition.
 - **Hop N Drop** : à quel moment de l'ébullition il est ajouté, en heure : 75 minutes s'affiche **01:15:00**. **Hop N IBU** : son amertume.
 
-**La case carrée** d'une ligne envoie le houblon à l'onglet **Post Boil Hops**.
+**La case carrée** d'une ligne envoie le houblon à l'onglet **Pre and Post Boil Hops**.
 
-## L'onglet Post Boil Hops {#the-post-boil-hops-tab}
+## L'onglet Pre and Post Boil Hops {#the-pre-and-post-boil-hops-tab}
 
 Les houblons qui ne sont pas des houblons d'ébullition, chacun avec son AAU **Recipe** et **Actual** comme sur l'onglet Hops, et une case d'interrupteurs : **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. Un clic sur un interrupteur est gardé tout de suite : il n'y a ni Save ni Cancel sur une ligne. Désactivez son interrupteur et le houblon redevient un houblon d'ébullition, de retour sur l'onglet Hops. **Delete** a la même taille que la ligne.
 
@@ -155,7 +155,7 @@ Les houblons qui ne sont pas des houblons d'ébullition, chacun avec son AAU **R
 
 Un changement de la **Temperature** ou du **Time** d'un Hop Stand sur un houblon Whirlpool est le Hop Stand propre à la recette : le Tab Recipe le montre tout de suite.
 
-**Calculate a besoin que chaque AAU réelle soit au-dessus de 0**, sur l'onglet Hops et sur l'onglet Post Boil Hops. La recette est basée sur l'AAU de la recette, mais les vrais IBU d'un brassin viennent de l'AAU réelle, l'AAU sur le paquet de houblon. Quand une AAU réelle est à 0, rien n'est calculé : Skynet passe à l'onglet du premier, met en surbrillance chaque AAU réelle à 0 et affiche un avertissement qui nomme chaque houblon (Hop 3 (Cascade)). Appuyez sur **READ** pour le fermer, corrigez les AAU réelles et appuyez à nouveau sur Calculate. Un houblon dont l'AAU de la recette est 0 n'est pas demandé : un import lui donne une AAU réelle de 0,01.
+**Calculate a besoin que chaque AAU réelle soit au-dessus de 0**, sur l'onglet Hops et sur l'onglet Pre and Post Boil Hops. La recette est basée sur l'AAU de la recette, mais les vrais IBU d'un brassin viennent de l'AAU réelle, l'AAU sur le paquet de houblon. Quand une AAU réelle est à 0, rien n'est calculé : Skynet passe à l'onglet du premier, met en surbrillance chaque AAU réelle à 0 et affiche un avertissement qui nomme chaque houblon (Hop 3 (Cascade)). Appuyez sur **READ** pour le fermer, corrigez les AAU réelles et appuyez à nouveau sur Calculate. Un houblon dont l'AAU de la recette est 0 n'est pas demandé : un import lui donne une AAU réelle de 0,01.
 
 **Calculate enregistre.** Quand il calcule la recette, il l'enregistre aussi.
 

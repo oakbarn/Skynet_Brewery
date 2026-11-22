@@ -1092,7 +1092,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
   border-radius: 12px 12px 0 0; padding: 6px 14px; box-shadow: 18px 3px 0 -15px #111; cursor: pointer; }
 .rcTabDemo { cursor: default; font-family: Georgia, serif; }
 /* every Daughter Tab button the same size as the widest (Panel Update 9, item 33a) */
-.rcDaughters .rcTabBtn { width: 10.5em; text-align: center; }
+.rcDaughters .rcTabBtn { width: 13em; text-align: center; }
 .rcList li { margin: 3px 0; }
 .rcSoon { font-style: italic; }
 .rcDrop td { font-weight: 600; }
@@ -1682,3 +1682,16 @@ input[type="date"]:disabled::-webkit-calendar-picker-indicator, input[type="time
 /* a Timer's Set button and its hh mm ss boxes stand out too (Panel Update 9, item 21: "Time Picker more obvious on all Timers") */
 .el .btns .tmSet { background: #ffd400; color: #111; border: 2px solid #111; font-weight: 700; }
 .tmBox .vdInput { border: 2px solid #3f48cc; border-radius: 5px; text-align: center; font-size: 1.4em; }
+/* the Skynet search box: Ctrl+F at the top middle, this Tab and Help (Rule 2.65, Panel Update 9, item 8) */
+#skySearch { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: min(640px, calc(100vw - 32px)); max-height: 70vh; margin: 0; inset: 12px auto auto 50%;
+  display: flex; flex-direction: column; background: var(--panel, #222); color: inherit; border: 3px solid #ffd400; border-radius: 10px; box-shadow: 0 8px 30px #000a; padding: 8px; z-index: 1000; }
+#skySearch .skyTop { display: flex; gap: 6px; }
+#skySearch .skyTop input { flex: 1; font-size: 1.2em; padding: 6px 10px; }
+#skySearch .skyList { overflow: auto; margin-top: 6px; }
+#skySearch .skyGroup { font-weight: 700; margin: 8px 4px 4px; border-bottom: 1px solid var(--line, #555); }
+#skySearch .skyHit { display: flex; flex-direction: column; align-items: flex-start; width: 100%; text-align: left; padding: 5px 8px; margin: 2px 0; background: transparent; border: 1px solid transparent; }
+#skySearch .skyHit:hover, #skySearch .skyHit:focus { border-color: #ffd400; }
+#skySearch .skyHit span { font-size: .85em; }
+#skySearch .skyNone { margin: 2px 8px; }
+.skyFound { outline: 4px solid #ffd400 !important; outline-offset: 3px; animation: skyBlink .5s 4 alternate; }
+@keyframes skyBlink { to { outline-color: transparent; } }

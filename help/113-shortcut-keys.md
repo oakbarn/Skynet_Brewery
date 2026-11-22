@@ -23,8 +23,12 @@ Everything these keys type can be taken back with Undo, like any other typing.
 
 | Windows and Linux | Mac | What it does |
 |---|---|---|
-| **Ctrl + F** | **⌘ + F** | Find (in a big text editor) |
+| **Ctrl + F** | **⌘ + F** | In a big text editor: Find. **Anywhere else: the Skynet search box** at the top middle, which searches the Tab you are on and Help |
 | **Ctrl + H** | **Ctrl + H** | Find and Replace (in a big text editor only, see the warning) |
+
+**The Skynet search box (Ctrl + F).** Type a word: it lists the Devices, Widgets and Vessels on the Tab you are on that have it in
+their Label or Name, and the Help pages that have it. Click one: a Device or Widget lights up on the Tab, a Help page opens. **Enter**
+opens the first one, **Esc** or **✕** closes the box. A search never changes anything.
 
 ## Common keys
 

@@ -1471,10 +1471,16 @@ and CTRL + H also as Find and Replace on same Dialog"; picked "Add to Template +
   lit; the current one is darker. **Replace** and **Replace all** type through the browser, so **Ctrl+Z** undoes them; nothing is
   saved until the editor's own Save.
 - A read only text (a Skynet Process Template, or a Brewer) gets Find with no Replace row.
-- The keys are taken from the browser only while that editor or its bar has the focus; anywhere else Ctrl+F is the browser's own
-  Find. They never take the copy, paste, undo or redo keys (Rule 2.32).
-**Both programs:** the BruControl Import program's pages have no big text editor, so nothing changes there.
-Help 30, 12.
+- The keys are taken from the browser only while that editor or its bar has the focus. They never take the copy, paste, undo or redo
+  keys (Rule 2.32).
+- **Changed 2026-11-22** (OakBarn Brewery, Panel Update 9, item 8: "CTRL + F Have the search box come up in the middle top of the
+  screen. Besides the Tab you are on, all searches include the Help"; Fritz picked "Change Rule 2.65"): **anywhere else in the panel,
+  Ctrl+F (⌘+F) opens the Skynet search box** at the top middle of the screen (it was the browser's own Find). Typing lists what matches
+  on the Tab you are on (Devices, Widgets and Vessels, by Label or Name; a click lights it up) and the Help pages (by title and text; a
+  click opens the page). Enter opens the first one; Esc or ✕ closes it. A search changes nothing. While a dialog is open Ctrl+F is left
+  to the browser. Ctrl+H outside an editor stays the browser's (History), see Help 113. (public/skysearch.js, on top by Rule 18.53)
+**Both programs:** the BruControl Import program's pages have no big text editor and no Tabs, so nothing changes there.
+Help 30, 12, 113.
 
 2.66 **The Recipe screens: no clutter, the same size buttons, plain pickers** (OakBarn Brewery, 2026-11-22, Panel Update 9, items 20,
 21, 24c, 25e, 29 and 33):
@@ -5502,12 +5508,12 @@ a button to turn hop oz into grams because some scales start in grams. Yeast tab
   `_Lab`, `_Product_ID`, `_Type`, `_Flocculation`, `_Starter`, `_Starter_Size`, `_Times_Cultured`, `_Mfg_Date`, `_Notes`;
   `skn_rcp_Yeast_Name` stays the first yeast. (Help 99) **Both programs:** the BruControl Import has no recipe lines, so nothing changes there.
 
-17.19 **Boil Hops and Post Boil Hops; Calculate saves; one click adds an Adjunct** (OakBarn Brewery, 2026-11-22, Panel Update 9, items
+17.19 **Boil Hops and Pre and Post Boil Hops; Calculate saves; one click adds an Adjunct** (OakBarn Brewery, 2026-11-22, Panel Update 9, items
 19, 22 to 28, 32 and 34):
 - **Hops tab = Boil Hops only.** Each line's title is its **Hop Group**, colored: **Bitter** (orange) above 20 minutes, **Flavor**
   (yellow) above 5 up to 20, **Aroma** (green) 5 or less. **Drop** shows as a time (75 = 01:15:00). The Boil Group box is gone. The
-  square box sends a hop to the Post Boil Hops tab.
-- **Post Boil Hops tab** (new): every hop that is not a Boil Hop, with its **Recipe** and **Actual** AAU and its switches (Mash, 1st
+  square box sends a hop to the Pre and Post Boil Hops tab.
+- **Pre and Post Boil Hops tab** (new; OakBarn Brewery, 2026-11-22: "the second Hop Page could be Pre and Post Boil Hops"): every hop that is not a Boil Hop, with its **Recipe** and **Actual** AAU and its switches (Mash, 1st
   Wort, Secondary, Dry Hop, Whirlpool). A switch is kept at once (no Save or Cancel on a line, Rule 2.44); all off sends it back to the
   Hops tab. Secondary and Dry hops show a **Pull Date** (date + days). A Whirlpool hop's Hop Stand Temperature and Time are the
   Recipe's own, so the Recipe tab shows them at once.
@@ -6782,9 +6788,10 @@ import.
   installer is Skynet_Brewer_Update_<version>.exe; Rule 11.17 a Help table's Name column never wraps; Rule 1.31 Process Widget Group
   and `.phase`; Rule 1.32 Timer Hide its buttons and a forced float; Rule 2.66 the Recipe screens (same size tab buttons, legend gone,
   Delete buttons, plain date and time pickers); Rule 2.67 Profile, Template and Setting changes are for new things (Units the
-  exception); Rule 17.19 Boil Hops and Post Boil Hops, Hop Groups, Calculate saves, AAU 0.01, the Adjunct dropdown, the Grain and
+  exception); Rule 17.19 Boil Hops and Pre and Post Boil Hops, Hop Groups, Calculate saves, AAU 0.01, the Adjunct dropdown, the Grain and
   Fermentable line; the Equipment Profile view (Rule 19 profile view text) has Move and To Tab dropdowns and one ➡ Transfer (item 17,
-  Rule 2.6). Items 13, 30 and 35 went to the sandboxes. Help 18, 19, 21, 92, 99, 113, 173, 183, 184, 186, 191, 238 (English and French).
+  Rule 2.6); Rule 2.65 changed, Ctrl+F outside an editor opens the Skynet search box (this Tab and Help, item 8); the second hop
+  tab is Pre and Post Boil Hops. Items 13, 30 and 35 went to the sandboxes. Help 18, 19, 21, 92, 99, 113, 173, 183, 184, 186, 191, 238 (English and French).
 - 2026-11-21: An Alarm has no Sound Custom / Default / None any more (OakBarn Brewery: "No Custom or Default or None. Path to a valid file or not. WE will handle that when they are imported"): the Sound dropdown and `.soundmode` are gone, and `custom` / `default` are no longer reserved words. An Alarm plays its sound file, or the Missing Alarm Sound when it has none or it can't play (Rule 7.20: an Alarm is never silent). An exception to Design Rule 1 (Never Take Away), at OakBarn Brewery's word. The Importer turns these over (Importer Sandbox).
 - 2026-11-21: `clear` is no longer a Process command (OakBarn Brewery: "Anything not needed from Brucontrol like clear is not needed"). It did nothing; it is gone from the Process reader, the editor colors and Suggest list, and Help 22. An import drops a `clear` line (Importing Norms section 4).
 - 2026-11-21: Rule 11.3 (OakBarn Brewery: "Wrong. BruControl is a forbidden word in Skynet Panel and Only used in th eImported."): the word BruControl is never shown in the Skynet Panel (screens, menus, balloons, messages, Help, Hover Help, README, Template notes, sample Processes); only the Importer uses it, and the Panel says "the Importer". The 2026-11-10 exception (Help 1, 44 and 67 could name the BruControl Import) is gone. The Panel's own one-step **Import > BruControl Schema** is taken out of the Panel (☰ Menu > Import now has BeerSmith recipe only; lib/brucontrol.js stays for the Importer and its tests); Help 8's BruControl part goes to the extract. Help 143 and 165 stay in help/ for the Importer but are not listed in the Panel's Help. Rule 1.1 no longer defines "BruControl Schema"; Rule 14.3's BruControl Read Me lives in the Importer. Help 1, 8, 44, 67 (English and French). Checked against both programs: the Importer's pages, Build page and Help keep the word. (thread "Remove the word BruControl from the Panel")

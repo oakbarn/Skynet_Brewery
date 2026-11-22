@@ -4,6 +4,7 @@ import { addKey } from './genpw.js';
 import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, pipeLine, sameSize, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { attachFind } from './findbar.js';      // Find and Replace in the Process Template editor (Rule 2.65)
+import { openSkySearch, skySearchOpen } from './skysearch.js';      // Ctrl+F: the Skynet search box, this Tab and Help (Rule 2.65, Panel Update 9, item 8)
 import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of every dialog (Rule 18.53)
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -13365,6 +13366,32 @@ $('#replAll').onclick = () => {
   editCode(0, ta.value.length, ta.value.replace(curRe(), () => $('#replText').value), $('#replText'));
   refreshFind(false); toast(`Replaced ${n} match${n === 1 ? '' : 'es'} - press Save to keep the change`);
 };
+// Ctrl+F (⌘+F) anywhere else in the panel: the Skynet search box at the top middle, the Tab you are on plus Help (Rule 2.65, changed
+// 2026-11-22, Panel Update 9, item 8). A big text editor keeps its own Find bar: its keys are taken there first (defaultPrevented).
+let skyHelpPages = null;
+const skyHelpList = async () => skyHelpPages ??= (await api('GET', '/ui/help').catch(() => [])).map(p => ({ name: p.name, title: p.title, text: p.text || '' }));
+function skySearch() {
+  const shown = view === 'workspace' ? (curWs()?.name ?? wsName) : '';
+  const items = () => {
+    if (!shown) return [];
+    const l = L(), els = (l.elements || []).filter(e => e.workspace === shown).map(e => ({ name: e.name, label: e.label || '', kind: TYPE_TITLE[e.type] || e.type, el: e.name }));
+    const gfx = (l.graphics || []).filter(g => g.workspace === shown && (g.label || g.name) && g.kind !== 'pipe' && g.kind !== 'ip').map(g => ({ name: g.name || g.label, label: g.label || '', kind: g.kind === 'vessel' ? 'Vessel' : g.kind, gid: g.id }));
+    return [...els, ...gfx];
+  };
+  openSkySearch({ tabName: shown, tabItems: items, helpPages: skyHelpList, onHelp: p => openHelp(p.name),
+    onItem: it => {
+      const n = it.gid ? document.querySelector(`#ws [data-gid="${CSS.escape(it.gid)}"]`) : document.querySelector(`#ws .el[data-name="${CSS.escape(it.el)}"]`);
+      if (!n) return toast(`${it.label || it.name} is hidden on this Tab`);
+      n.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
+      n.classList.remove('skyFound'); void n.offsetWidth; n.classList.add('skyFound'); setTimeout(() => n.classList.remove('skyFound'), 4000);
+    } });
+}
+document.addEventListener('keydown', ev => {
+  if (ev.defaultPrevented || !(ev.ctrlKey || ev.metaKey) || ev.altKey || ev.shiftKey || ev.key.toLowerCase() !== 'f') return;
+  if (['scripts', 'config'].includes(view) || ev.target.closest?.('textarea, [contenteditable="true"], [data-findbar]')) return;
+  if (document.querySelector('dialog[open]') && !skySearchOpen()) return;      // a dialog has its own boxes
+  ev.preventDefault(); skySearch();
+});
 document.addEventListener('keydown', ev => {
   if (!['scripts', 'config'].includes(view) || document.querySelector('dialog[open]')) return;
   const k = ev.key.toLowerCase(), mod = ev.ctrlKey || ev.metaKey;
@@ -19162,7 +19189,7 @@ async function askSaveImported(name) {
 let rcView = null, rcWork = null, rcSub = 'recipe';
 const RC_DAUGHTERS = [
   ['hops', 'HOPs', 'Add, Edit or Delete Hops. All Hops details. The Actual AAU of the Hops that are used in the Brew MUST be updated. The Actual AAU varies from the Recipe AAU and to obtain the desired IBUs, they must be calculated from the Actual AAUs and the Hops Amounts are adjusted.'],
-  ['posthops', 'Post Boil Hops', 'Add, Edit or Delete the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry Hop and Whirlpool. Their Actual AAU must be updated too.'],
+  ['posthops', 'Pre and Post Boil Hops', 'Add, Edit or Delete the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry Hop and Whirlpool. Their Actual AAU must be updated too.'],
   ['drops', 'Drops', 'Displays the Calculated Hops Drops Grouping, Pre Warnings Times and Texts. These are filled from the Hop Data once Calculated.'],
   ['grain', 'Grain', 'Add, Edit or Delete Grains. The Total weight of all Grains is used to calculate the Grain Weight for this Brew.'],
   ['fermentables', 'Fermentable', 'Add, Edit or Delete the other Fermentables: Adjuncts, Extracts, Sugars, Fruit and Juice.'],
@@ -19404,7 +19431,7 @@ let rcAAWarn = false;
 async function rcCalculate(rc, changed) {
   const bad = levelShowsTab(rc, 'hops') ? hopActualProblems(rc) : [];     // a Level 1 Can Kit has no HOPs tab: its hops are not checked
   if (bad.length) {
-    // the hops to fix are named (Panel Update 9, item 26); the tab goes to the first one (Boil Hops or Post Boil Hops)
+    // the hops to fix are named (Panel Update 9, item 26); the tab goes to the first one (Boil Hops or Pre and Post Boil Hops)
     rcAAWarn = true; const first = rc.ingredients.hops[bad[0].line - 1]; rcSub = first && !isBoilHop(first) ? 'posthops' : 'hops'; renderMenuPane();
     return readWarning('Actual AAU', ['Any Hop MUST have its Actual AAU set to the AAU on the Hop Package. The Recipe is based on a Recipe AAU, but the real IBUs of a Brew is calculated using the Actual AAU.',
       `Update the Actual AAU of: ${bad.map(x => `Hop ${x.line} (${x.name})`).join(', ')}. Then try Calculate again.`, 'Click the Read Button to exit this dialog.']);
@@ -19430,15 +19457,15 @@ function rcSwitch(on, onChange, title = '') {
   return h('label', { class: 'sw', title }, box, h('span', { class: 'swk' }));
 }
 
-// ---- The Hops tab (Fritz's layout, 2026-10-31) and the Post Boil Hops tab (Panel Update 9, items 22 to 27). One line for each hop,
+// ---- The Hops tab (Fritz's layout, 2026-10-31) and the Pre and Post Boil Hops tab (Panel Update 9, items 22 to 27). One line for each hop,
 // no limit. The Hops tab holds the Boil Hops: the title of each line is its Hop Group, colored (Bitter above 20 minutes orange, Flavor
 // above 5 up to 20 yellow, Aroma 5 or less green), its Drop shows as a time (75 = 01:15:00), and the square box sends it to the Post
-// Boil Hops tab. The Post Boil Hops tab holds every other hop (Mash, 1st WORT, Secondary, DRY, Whirlpool): its switches and boxes change
+// Boil Hops tab. The Pre and Post Boil Hops tab holds every other hop (Mash, 1st WORT, Secondary, DRY, Whirlpool): its switches and boxes change
 // the hop at once (one click, no Save or Cancel of their own), a DRY or Secondary hop shows its Pull Date (its date plus its Days), and
 // a hop whose switches are all turned off goes back to the Hops tab. Calculate (top right on both) checks every Actual AAU, works out
 // the Recipe and saves it. Every box is a Skynet_Field (skn_rcp_Hop_N_...). The lines are put in order on Calculate and on Save.
 const RC_HOP_SW = [['mash', 'Mash Hops'], ['first wort', '1st WORT Hops'], ['secondary', 'Secondary Hops'], ['dry hop', 'DRY Hops'], ['whirlpool', 'Whirlpool']];
-const rcHopOpen = new WeakSet();      // hops sent to the Post Boil Hops tab whose switch is not picked yet (they are still Boil Hops)
+const rcHopOpen = new WeakSet();      // hops sent to the Pre and Post Boil Hops tab whose switch is not picked yet (they are still Boil Hops)
 const isBoilHop = hop => hop.use === 'boil' || !HOP_USES[hop.use];
 // the boxes every hop line has (name, amount, unit, Recipe and Actual AAU, Calc amount), on both tabs
 function rcHopCommon(rc, hop, i, u, c, title, titleColor) {
@@ -19467,7 +19494,7 @@ function rcHopHead(pane, rc, u, changed, title, add) {
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, title), op && add ? h('button', { class: 'hopAdd', onclick: add, title: 'Add a hop line at the bottom' }, 'Add Hop ', h('b', {}, '+')) : '',
     op && ozLines.length ? h('button', { onclick: toGrams, title: 'Turns every hop line in ounces into grams. Grams are more accurate, and some scales start in grams' }, 'oz → g') : '',
     h('span', { class: 'hopAAU' }, 'AAU %'), h('span', { class: 'spacer' }),
-    op ? h('button', { class: 'rcCalcBtn', onclick: guard(() => rcCalculate(rc, changed)), title: 'Checks the Actual AAU of every hop (Boil and Post Boil), puts the hop lines in order, works out the Calc amounts and the whole Recipe, and saves it' }, 'Calculate') : ''));
+    op ? h('button', { class: 'rcCalcBtn', onclick: guard(() => rcCalculate(rc, changed)), title: 'Checks the Actual AAU of every hop (Boil, Pre and Post Boil), puts the hop lines in order, works out the Calc amounts and the whole Recipe, and saves it' }, 'Calculate') : ''));
 }
 const rcHopDelBtn = (rc, i, changed) => h('button', { class: 'hopDel', onclick: guard(() => { const hops = rc.ingredients.hops; if (!confirm(`Delete Hop ${i + 1}${hops[i].name ? ` (${hops[i].name})` : ''}?`)) return; hops.splice(i, 1); changed(); renderMenuPane(); }), title: `Delete Hop ${i + 1}` }, '🗑 Delete');
 function rcHops(pane, rc, u, changed) {
@@ -19487,12 +19514,12 @@ function rcHops(pane, rc, u, changed) {
   const add = guard(() => { hops.push({ name: '', kg: null, unit: u.hopUnit, alpha: null, alphaActual: 0, use: 'boil', time: null, dryDays: null, date: '', wpTempC: null, hopRocket: false }); changed(); renderMenuPane(); });
   rcHopHead(pane, rc, u, changed, 'Hops', add);
   const boilHops = hops.map((hop, i) => [hop, i]).filter(([hop]) => isBoilHop(hop) && !rcHopOpen.has(hop));
-  if (!boilHops.length) pane.append(h('p', { class: 'muted' }, hops.length ? 'No Boil Hops: every hop is on the Post Boil Hops tab.' : 'No hops yet. Press Add Hop, or IMPORT a recipe on the Recipe tab.'));
+  if (!boilHops.length) pane.append(h('p', { class: 'muted' }, hops.length ? 'No Boil Hops: every hop is on the Pre and Post Boil Hops tab.' : 'No hops yet. Press Add Hop, or IMPORT a recipe on the Recipe tab.'));
   for (const [hop, i] of boilHops) {
     const grp = HOP_GROUPS[hopGroupOf(hop.time)];
     const { calc, boxes } = rcHopCommon(rc, hop, i, u, c, grp.title, grp.color);
     const r = { hop, i, calc, drop: h('input', { type: 'text', disabled: true, tabIndex: -1 }), ibu: h('input', { type: 'text', disabled: true, tabIndex: -1 }) };
-    const sq = h('input', { type: 'checkbox', class: 'hopSq', title: 'Send it to the Post Boil Hops tab (Mash, 1st Wort, Secondary, Dry Hop or Whirlpool)' });
+    const sq = h('input', { type: 'checkbox', class: 'hopSq', title: 'Send it to the Pre and Post Boil Hops tab (Mash, 1st Wort, Secondary, Dry Hop or Whirlpool)' });
     sq.onchange = () => { rcHopOpen.add(hop); rcSub = 'posthops'; renderMenuPane(); };
     const line = h('div', { class: 'rcRow hopLine' }, ...boxes, h('div', { class: 'hopSqBox' }, sq),
       rcBox('g', `Hop ${i + 1} Min`, rcInput(hop, 'time', { d: 0, onChange: () => { c.onChange(); renderMenuPane(); } }), { field: F(i, 'Min'), tip: `Boil minutes. ${rc.boilTime || 60} (the Boil Time) = a Start of Boil hop. Above 20 = Bitter, above 5 = Flavor, 5 or less = Aroma` }),
@@ -19502,17 +19529,17 @@ function rcHops(pane, rc, u, changed) {
     rows.push(r); pane.append(line);
   }
   refresh();
-  pane.append(h('p', { class: 'muted' }, `${boilHops.length} Boil Hop${boilHops.length === 1 ? '' : 's'}, IBU ${rcRound(rc.ibuCalc, 0) || '?'} (last Calculate). They are grouped by drop time: a Start of Boil hop (Min = Boil Time) first, then by Minutes. The square box sends a hop to the Post Boil Hops tab. The hop order and the alerts are on the Drops tab (${hopSchedule(rc, D).alerts.length} alerts).`));
+  pane.append(h('p', { class: 'muted' }, `${boilHops.length} Boil Hop${boilHops.length === 1 ? '' : 's'}, IBU ${rcRound(rc.ibuCalc, 0) || '?'} (last Calculate). They are grouped by drop time: a Start of Boil hop (Min = Boil Time) first, then by Minutes. The square box sends a hop to the Pre and Post Boil Hops tab. The hop order and the alerts are on the Drops tab (${hopSchedule(rc, D).alerts.length} alerts).`));
 }
-// ---- The Post Boil Hops tab (Panel Update 9, items 23 and 25): every hop that is not a Boil Hop, and the ones just sent here
+// ---- The Pre and Post Boil Hops tab (Panel Update 9, items 23 and 25): every hop that is not a Boil Hop, and the ones just sent here
 function rcPostHops(pane, rc, u, changed) {
   const hops = rc.ingredients.hops, op = can('operator');
   const rows = [];
   const refresh = () => rows.forEach(({ hop, calc }) => { calc.value = rcRound(kgTo(hopKgToUse(hop), hopUnitOf(hop, u)), 2); });
   const c = { onChange: () => { changed(); refresh(); } };
-  rcHopHead(pane, rc, u, changed, 'Post Boil Hops', null);
+  rcHopHead(pane, rc, u, changed, 'Pre and Post Boil Hops', null);
   const list = hops.map((hop, i) => [hop, i]).filter(([hop]) => !isBoilHop(hop) || rcHopOpen.has(hop));
-  if (!list.length) pane.append(h('p', { class: 'muted' }, 'No Post Boil Hops. On the Hops tab, the square box of a hop sends it here.'));
+  if (!list.length) pane.append(h('p', { class: 'muted' }, 'No Pre and Post Boil Hops. On the Hops tab, the square box of a hop sends it here.'));
   for (const [hop, i] of list) {
     const { calc, boxes } = rcHopCommon(rc, hop, i, u, c, `Hop ${i + 1}`);
     rows.push({ hop, calc });

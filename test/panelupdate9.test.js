@@ -10,6 +10,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Store } from '../lib/store.js';
 import { AUDIO_FOLDERS, AUDIO_PATRON, audioPicFor, audioFolderPic } from '../public/mediapaths.js';
+import { searchTab, searchHelp, snippet } from '../public/skysearch.js';
+import { ON_TOP } from '../public/ontop.js';
 import { hopGroupOf, HOP_GROUPS, minutesHms, pullDate, importedActual, COMMON_ADJUNCTS, OTHER_ADJUNCT, MISC_TYPES, MISC_USES, MISC_LINE_UNITS, MISC_TIME_UNITS } from '../public/recipecalc.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -75,4 +77,16 @@ for (const a of [...COMMON_ADJUNCTS, OTHER_ADJUNCT]) {
 
 // ---- item 10a: a Help Name column never wraps (Rule 11.17)
 assert.match(read('public/style.css'), /\.hpTable td:first-child:has\(> code:only-child\)[^{]*\{[^}]*nowrap/);
+// ---- item 8: the Skynet search box (Rule 2.65 changed): this Tab plus Help, every word, title hits first, on top (Rule 18.53)
+const items = [{ name: 'BM_5_DO@Pump_Red_BH', label: 'Red pump', kind: 'Pump' }, { name: 'wgt_TMR_Mash_BH', label: 'Mash timer', kind: 'Timer' }];
+assert.deepEqual(searchTab(items, 'red PUMP').map(i => i.name), ['BM_5_DO@Pump_Red_BH']);
+assert.deepEqual(searchTab(items, ''), []);
+const pages = [{ name: '1', title: 'Pumps', text: 'a mash pump' }, { name: '2', title: 'Mash tun', text: 'the tun' }];
+assert.deepEqual(searchHelp(pages, 'mash').map(p => p.name), ['2', '1'], 'a title match first');
+assert.match(snippet('lots of words before the mash pump here', 'mash'), /mash pump/);
+assert.ok(ON_TOP.includes('#skySearch'));
+const appSrc = read('public/app.js');
+assert.match(appSrc, /ev\.defaultPrevented[^\n]*key\.toLowerCase\(\) !== 'f'/, 'an editor keeps its own Find');
+// ---- the second hop tab is Pre and Post Boil Hops (OakBarn Brewery, 2026-11-22)
+assert.match(appSrc, /\['posthops', 'Pre and Post Boil Hops'/);
 console.log('panel update 9 tests passed');
