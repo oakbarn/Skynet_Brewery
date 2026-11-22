@@ -17587,6 +17587,8 @@ async function pasteProfile(p, pick = null) {
     ['_n', `"${p.name}" lands on the 🔨 Build Tab. ✅ Finish Build ... > Move to Tab puts it on that Tab, in the same spots. Hardware already on that Tab that is the same (the same board and Port, or a vessel with the same Name) is replaced: you see the list first.`, 'note', null, null, null, { keep: true }]];
   if (pick) Object.assign(o, pick);          // a ➡ Transfer button of the Equipment Profile view: one click, no dialog (Rule 2.44)
   else { if (await dialog(`📋 Paste "${p.name}"`, fields, o) !== 'ok') return; readFields(o); }
+  // To Tab = 🔨 Build Tab (the Equipment Profile view, Panel Update 9, item 17): it is for the Tab a Build goes to (Rule 4.6), else this one
+  if (pick && !o.tab) o.tab = tabById(buildDefs().buildTab, tabs)?.name || here?.name || tabs[0]?.name || '';
   const to = tabs.find(w => w.name === o.tab); if (!to) return toast('Pick the Tab it goes to', true);
   const pieces = pastePieces(p, o.what);
   if (!pieces.graphics.length && !pieces.elements.length) return toast(`"${p.name}" has nothing for ${PASTE_WHAT.find(x => x[0] === o.what)[1]}.`, true);
@@ -17639,10 +17641,10 @@ async function pasteProfile(p, pick = null) {
 // 🗑 Delete · 💾 Save · ↶ Undo · ✕ Close (Rule 2.51). Under them, the profile's Properties that go with it to a Tab ("Equipment Profile
 // Properties are ones transferred like Effenicy"); ⚙ Properties changes them, and 📋 More ... opens everything else on ☰ Menu.
 const EQV_TIPS = {
-  all: 'Put all of this profile\'s hardware on the Tab picked on the right: vessels, pumps, valves, pipes, hoses, fittings, boards and Ports, and its Properties (Efficiency ...). It lands on the 🔨 Build Tab; hardware already on that Tab that is the same is replaced after a list.',
-  vessels: 'Put only the vessels, each with everything on it (its IPs, fittings, heaters and probes), and the profile\'s Properties, on the Tab picked on the right. It lands on the 🔨 Build Tab.',
-  manifold: 'Put only the manifold (pumps, valves, pipes, hoses, fittings, chillers), not the vessels, and the profile\'s Properties, on the Tab picked on the right. A pipe end that went to a vessel is left open. It lands on the 🔨 Build Tab.',
-  to: 'The Tab the ➡ Transfer buttons put the hardware on.',
+  // the Move dropdown, To Tab and one ➡ Transfer (Panel Update 9, item 17; Rule 2.6: more than two answers = a dropdown)
+  what: 'What ➡ Transfer moves. Entire Profile: all of its hardware (vessels, pumps, valves, pipes, hoses, fittings, boards and Ports). Just Vessels: each vessel with everything on it (its IPs, fittings, heaters and probes). Just Manifold: pumps, valves, pipes, hoses, fittings and chillers, not the vessels; a pipe end that went to a vessel is left open. The profile\'s Properties (Efficiency ...) go with each.',
+  to: 'The Tab it goes to. 🔨 Build Tab (every time the profile opens): it stays on the Build Tab, and ✅ Finish Build ... moves it. Or pick a Tab: it lands on the Build Tab for that Tab (Rule 4.1), and hardware already on that Tab that is the same is replaced after a list.',
+  go: 'Move it now, one click: the 🔨 Build Tab opens with it on it.',
   props: 'Change this profile\'s Name, Units and the numbers that go with it to a Tab (Brewhouse efficiency, losses ...). 💾 Save keeps them.',
   vol: 'Check the volumes of a batch with this profile: pre-boil, boiled off, post-boil, into the fermenter and left to bottle or keg.',
   eff: 'Efficiency of a Tab: record the real Brewhouse Efficiency of each brew on it, see the average of the last brews, and put it into that Tab\'s numbers.',
@@ -17657,7 +17659,7 @@ async function eqViewOpen(id) {
   const w = tabOfProfile(id), back = menuTab ? (curWs()?.name ?? wsName) : wsName;
   leaveMenuTab();
   const tabs = S.config.workspaces.filter(x => !x.template && !x.build && !isHiddenTab(x));
-  eqv = { id, back, to: (back && back !== w?.name && tabs.some(x => x.name === back) ? back : tabs.find(x => x !== w)?.name || w?.name || tabs[0]?.name), work: clone(shownIn('equipment', p)), dirty: false, layout: eqLayout(p, full) };
+  eqv = { id, back, to: '', what: 'both', work: clone(shownIn('equipment', p)), dirty: false, layout: eqLayout(p, full) };      // To Tab starts on the Build Tab (Panel Update 9, item 17d)
   wsName = eqv.layout.workspaces[0].name;
   document.body.classList.add('eqViewing'); sel = null;
   renderTabs(); renderWs(); eqViewBar();
@@ -17684,11 +17686,14 @@ function eqViewBar() {
   if (!eqv.dirty) eqv.work = clone(shownIn('equipment', p));      // shown in your Units (Rule 2.59)
   const w = eqv.work, admin = can('admin'), ro = !admin || p.locked, tab = tabOfProfile(p.id);
   const tabs = S.config.workspaces.filter(x => !x.template && !x.build && !isHiddenTab(x));
-  const toSel = h('select', { title: EQV_TIPS.to }, ...tabs.map(x => h('option', { value: x.name, ...(x.name === eqv.to ? { selected: true } : {}) }, tabTitle(x))));
+  const opt = (v, t, cur) => h('option', { value: v, ...(v === cur ? { selected: true } : {}) }, t);
+  const whatSel = h('select', { title: EQV_TIPS.what }, ...[['both', 'Entire Profile'], ['vessels', 'Just Vessels'], ['manifold', 'Just Manifold']].map(([v, t]) => opt(v, t, eqv.what)));
+  whatSel.onchange = () => { eqv.what = whatSel.value; };
+  const toSel = h('select', { title: EQV_TIPS.to }, opt('', '🔨 Build Tab', eqv.to), ...tabs.map(x => opt(x.name, tabTitle(x), eqv.to)));
   toSel.onchange = () => { eqv.to = toSel.value; };
-  const transfer = what => guard(async () => {
+  const transfer = guard(async () => {
     if (eqv.dirty) return toast('💾 Save or ↶ Undo the changes to this profile first', true);
-    const to = eqv.to, pp = S.profiles.find(x => x.id === eqv.id);
+    const to = eqv.to, what = eqv.what, pp = S.profiles.find(x => x.id === eqv.id);
     eqViewClose(true);
     await pasteProfile(pp, { what, tab: to });
   });
@@ -17713,10 +17718,9 @@ function eqViewBar() {
   const bar = h('div', { id: 'eqViewBar', class: 'eqViewBar' },
     h('div', { class: 'bar wrap' },
       h('b', { class: 'eqvTitle' }, `Equipment Profile: ${w.name}`), eqv.dirty ? h('span', { class: 'eqWarn' }, 'Not saved yet') : '',
-      admin ? btn('➡ Transfer All to Tab', transfer('both'), EQV_TIPS.all, 'primary') : '',
-      admin ? btn('➡ Transfer Vessels to Tab', transfer('vessels'), EQV_TIPS.vessels) : '',
-      admin ? btn('➡ Transfer Manifold to Tab', transfer('manifold'), EQV_TIPS.manifold) : '',
-      admin ? h('label', { class: 'eqvTo' }, 'Tab ', toSel) : '',
+      admin ? h('label', { class: 'eqvTo' }, 'Move ', whatSel) : '',
+      admin ? h('label', { class: 'eqvTo' }, 'To Tab ', toSel) : '',
+      admin ? btn('➡ Transfer', transfer, EQV_TIPS.go, 'primary') : '',
       h('span', { class: 'spacer' }),
       admin && !p.locked ? btn('🗑 Delete', del, 'Delete this Equipment Profile (asks first). The Tabs that used it keep their equipment and pipes.', 'danger') : '',
       !ro ? btn('💾 Save', save, 'Save the changes to this profile', 'primary') : '',

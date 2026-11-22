@@ -132,12 +132,12 @@ Picking a profile in the **Open** dropdown shows the profile itself. An Equipmen
 
 The bar on top stays put:
 
-- **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** put that part of the hardware on the **Tab** picked beside them, with one click each. They paste the profile (see **Paste a profile** below): the pieces land on the 🔨 Build Tab, hardware that is the same is replaced after the Replace list, and **↩ Undo** shows after.
+- **Move** (a dropdown: **Entire Profile**, **Just Vessels** or **Just Manifold**), **To Tab** (a dropdown: **🔨 Build Tab** every time the profile opens, or a Tab you pick) and **➡ Transfer**, which moves that part of the hardware with one click. They paste the profile (see **Paste a profile** below): the pieces land on the 🔨 Build Tab, hardware that is the same is replaced after the Replace list, and **↩ Undo** shows after.
 - **🗑 Delete**, **💾 Save**, **↶ Undo** and **✕ Close**, in that order.
 
 Under them are the profile's **Properties**, the numbers that go with it to a Tab: System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency**, Hop utilization and Strike offset. **⚙ Properties** changes them (and the Name, Units and Notes); **💾 Save** keeps them. Beside them:
 
-- **🧮 Check the volumes** and **📈 Efficiency** open their box under the bar (press again to close it). See **Edit or delete an Equipment Profile** above. **📈 Efficiency** shows the Tab picked beside the ➡ Transfer buttons (see **Efficiency of a Tab** above).
+- **🧮 Check the volumes** and **📈 Efficiency** open their box under the bar (press again to close it). See **Edit or delete an Equipment Profile** above. **📈 Efficiency** shows the Tab picked in To Tab (see **Efficiency of a Tab** above).
 - **🗂 New Schema from this profile ...** (see below).
 
 **The Properties go with every Transfer and Paste.** They are copied onto the Tab as its own Equipment numbers. When the Tab already has numbers, the ones that change are in the Replace list ("Brewhouse efficiency 74 % → 72 %"). The paste never changes the profile.
@@ -148,14 +148,14 @@ An Equipment Profile holds **all of the brewery's physical hardware**: the vesse
 
 **🗂 New Schema from this profile ...** (also **Add new Schema ... > Start from > An Equipment Profile**) makes a new Schema with one Tab that starts from a copy of the profile, so its numbers and drawing come too, with every board and every Device already wired: the same Names, Interfaces and Ports. No Processes, Text Widgets, Timers or other Widgets come: the new Schema gets its own. For example, build your brewery once as an Equipment Profile, then make a **Keg Cleaning** Schema from it and write its Processes, Text Boxes and Timers. The new Schema is loaded at once; the one you had stays just as it is.
 
-The **➡ Transfer** buttons put a copy of the profile's hardware on a Tab of the loaded Schema:
+**➡ Transfer** puts a copy of the profile's hardware on a Tab of the loaded Schema:
 
-1. Pick the **Tab** beside them, and press one:
-   - **➡ Transfer All to Tab**: all of it.
-   - **➡ Transfer Vessels to Tab**: each vessel with everything on it (its IPs, fittings, heaters, probes and an immersion chiller in it).
-   - **➡ Transfer Manifold to Tab**: all of the manifold (pumps, valves, pipes, hoses, fittings, plate chillers), not the vessels.
+1. Pick what to **Move** and the **To Tab**, and press **➡ Transfer**. With **🔨 Build Tab**, the pieces are for the Default Tab of the Build (else the Tab you were on):
+   - **Entire Profile**: all of it.
+   - **Just Vessels**: each vessel with everything on it (its IPs, fittings, heaters, probes and an immersion chiller in it).
+   - **Just Manifold**: all of the manifold (pumps, valves, pipes, hoses, fittings, plate chillers), not the vessels.
 2. When that Tab already has hardware that is the same as the profile's (the same board and Port, or a vessel with the same Name), a list shows what will be replaced, and the Tab's own numbers that change (like "Brewhouse efficiency 74 % → 72 %"). Nothing changes until you press **Replace**. **Cancel** leaves everything as it was. A replaced Device keeps working in your Processes.
-3. Edit layout opens and the pieces are on the **🔨 Build Tab**. Press **✅ Finish Build ... > Move to Tab**: they go on the Tab in the same spots. Then press **Save layout**.
+3. Edit layout opens on the **🔨 Build Tab** with the pieces on it. Press **✅ Finish Build ... > Move to Tab**: they go on the Tab in the same spots. Then press **Save layout**.
 
 **↩ Undo** shows for a few seconds after a paste and puts everything back.
 

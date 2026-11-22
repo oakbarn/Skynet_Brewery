@@ -132,12 +132,12 @@ Choisir un profil dans la liste déroulante **Open** montre le profil lui-même.
 
 La barre du haut reste en place :
 
-- **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** et **➡ Transfer Manifold to Tab** (tout, les cuves, le collecteur) mettent cette partie du matériel sur le **Tab** choisi à côté, en un clic chacun. Ils collent le profil (voir **Coller un profil** plus bas) : les pièces arrivent sur le 🔨 Build Tab, le même matériel est remplacé après la liste Replace, et **↩ Undo** s'affiche ensuite.
+- **Move** (une liste : **Entire Profile**, **Just Vessels** ou **Just Manifold** : tout, les cuves, le collecteur), **To Tab** (une liste : **🔨 Build Tab** à chaque ouverture du profil, ou un Tab que vous choisissez) et **➡ Transfer**, qui déplace cette partie du matériel en un clic. Ils collent le profil (voir **Coller un profil** plus bas) : les pièces arrivent sur le 🔨 Build Tab, le même matériel est remplacé après la liste Replace, et **↩ Undo** s'affiche ensuite.
 - **🗑 Delete**, **💾 Save**, **↶ Undo** et **✕ Close**, dans cet ordre.
 
 En dessous, les **Properties** (propriétés) du profil, les nombres qui vont avec lui sur un Tab : System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency**, Hop utilization et Strike offset. **⚙ Properties** les change (et le Nom, les Unités et les Notes) ; **💾 Save** les garde. À côté :
 
-- **🧮 Check the volumes** et **📈 Efficiency** ouvrent leur case sous la barre (appuyez encore pour la fermer). Voir **Modifier ou supprimer un Equipment Profile** plus haut. **📈 Efficiency** montre le Tab choisi à côté des boutons ➡ Transfer (voir **Rendement d'un Tab** plus haut).
+- **🧮 Check the volumes** et **📈 Efficiency** ouvrent leur case sous la barre (appuyez encore pour la fermer). Voir **Modifier ou supprimer un Equipment Profile** plus haut. **📈 Efficiency** montre le Tab choisi dans To Tab (voir **Rendement d'un Tab** plus haut).
 - **🗂 New Schema from this profile ...** (voir plus bas).
 
 **Les Properties vont avec chaque Transfer et chaque collage.** Elles sont copiées sur le Tab comme ses propres Equipment numbers. Quand le Tab a déjà des nombres, ceux qui changent sont dans la liste Replace (« Brewhouse efficiency 74 % → 72 % »). Le collage ne change jamais le profil.
@@ -148,14 +148,14 @@ Un Equipment Profile garde **tout le matériel physique de la brasserie** : les 
 
 **🗂 New Schema from this profile ...** (nouveau Schema à partir de ce profil ; aussi **Add new Schema ... > Start from > An Equipment Profile**) fait un nouveau Schema avec un Tab qui commence par une copie du profil, donc ses nombres et son dessin viennent aussi, avec chaque carte et chaque Device déjà câblés : les mêmes Noms, Interfaces et Ports. Aucun Processus, Text Widget, Minuterie ou autre Widget ne vient : le nouveau Schema a les siens. Par exemple, construisez votre brasserie une fois comme Equipment Profile, puis faites-en un Schema **Keg Cleaning** (nettoyage des fûts) et écrivez ses Processus, Zones de texte et Minuteries. Le nouveau Schema est chargé tout de suite ; celui que vous aviez reste tel quel.
 
-Les boutons **➡ Transfer** mettent une copie du matériel du profil sur un Tab du Schema chargé :
+**➡ Transfer** met une copie du matériel du profil sur un Tab du Schema chargé :
 
-1. Choisissez le **Tab** à côté, et appuyez sur l'un d'eux :
-   - **➡ Transfer All to Tab** : tout.
-   - **➡ Transfer Vessels to Tab** : chaque cuve avec tout ce qui est dessus (ses IP, raccords, éléments chauffants, sondes et un refroidisseur à immersion dedans).
-   - **➡ Transfer Manifold to Tab** : tout le collecteur (pompes, vannes, tuyaux, tuyaux souples, raccords, refroidisseurs à plaques), pas les cuves.
+1. Choisissez quoi déplacer (**Move**) et le **To Tab**, et appuyez sur **➡ Transfer**. Avec **🔨 Build Tab**, les pièces sont pour le Default Tab du Build (sinon le Tab où vous étiez) :
+   - **Entire Profile** : tout.
+   - **Just Vessels** : chaque cuve avec tout ce qui est dessus (ses IP, raccords, éléments chauffants, sondes et un refroidisseur à immersion dedans).
+   - **Just Manifold** : tout le collecteur (pompes, vannes, tuyaux, tuyaux souples, raccords, refroidisseurs à plaques), pas les cuves.
 2. Quand ce Tab a déjà du matériel qui est le même que celui du profil (la même carte et le même Port, ou une cuve du même Nom), une liste montre ce qui sera remplacé, et les propres nombres du Tab qui changent (comme « Brewhouse efficiency 74 % → 72 % »). Rien ne change avant que vous appuyiez sur **Replace** (remplacer). **Cancel** (annuler) laisse tout comme avant. Un Device remplacé continue de marcher dans vos Processus.
-3. Edit layout s'ouvre et les pièces sont sur le **🔨 Build Tab**. Appuyez sur **✅ Finish Build ... > Move to Tab** : elles vont sur le Tab aux mêmes endroits. Puis appuyez sur **Save layout**.
+3. Edit layout s'ouvre sur le **🔨 Build Tab** avec les pièces dessus. Appuyez sur **✅ Finish Build ... > Move to Tab** : elles vont sur le Tab aux mêmes endroits. Puis appuyez sur **Save layout**.
 
 **↩ Undo** (annuler) s'affiche quelques secondes après un collage et remet tout.
 

@@ -6650,12 +6650,14 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
    like a Manual Valve.  So yes."). Text Widgets, Switches that are not real world things, Processes, Timers and the like
    **cannot be added**: Skynet never puts them in a profile, so nothing is hidden in the view;
    they are not there. A frozen bar (Rule 2.51) holds
-   **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** with the Tab beside them ("Add Transfer
-   to Tab. Since there is room 1 for all 1 for just vessels and 1 for Just Manifold"; one click each, Rule 2.44), then Delete · Save ·
+   **Move** (a dropdown: Entire Profile, Just Vessels, Just Manifold), **To Tab** (a dropdown that starts on **🔨 Build Tab** each time
+   the profile opens) and one **➡ Transfer** (OakBarn Brewery, 2026-11-22, Panel Update 9, item 17, "Tab to Move to DDLB. Always when
+   opened goes to Build Tab but the user may select"; one dropdown, not three check boxes, by Rule 2.6, Fritz picked A; it was three
+   Transfer buttons, 2026-11-17), then Delete · Save ·
    Undo · Close. Under it the profile's Properties, which go with every Transfer and Paste (OakBarn Brewery: "Equipment Profile
    Properties are ones transferred like Effenicy"): they are copied onto the Tab as its own numbers, and a Tab that has numbers shows
    the ones that change in the Replace list (Rule 2.62). Beside the Properties: **🧮 Check the volumes**, **📈 Efficiency** (the
-   Efficiency of the Tab picked beside the ➡ Transfer buttons, Rule 17.13) and **🗂 New Schema
+   Efficiency of the Tab picked in To Tab, Rule 17.13) and **🗂 New Schema
    from this profile ...**. **The old Equipment Profile screen is gone** (OakBarn Brewery, 2026-11-17: "Remove old"; before the first
    Public Production, the Old Ways policy): its form, Equipment list, Paste onto a Tab dialog, Made before Templates list and the
    Settings button. ☰ Menu > Equipment Profile keeps each Tab's row (since 2026-11-19, Rule 2.62: its own numbers, ⚙ Numbers,
@@ -6781,7 +6783,8 @@ import.
   and `.phase`; Rule 1.32 Timer Hide its buttons and a forced float; Rule 2.66 the Recipe screens (same size tab buttons, legend gone,
   Delete buttons, plain date and time pickers); Rule 2.67 Profile, Template and Setting changes are for new things (Units the
   exception); Rule 17.19 Boil Hops and Post Boil Hops, Hop Groups, Calculate saves, AAU 0.01, the Adjunct dropdown, the Grain and
-  Fermentable line. Items 13, 30 and 35 went to the sandboxes. Help 18, 19, 21, 92, 99, 113, 173, 183, 184, 186, 191, 238 (English and French).
+  Fermentable line; the Equipment Profile view (Rule 19 profile view text) has Move and To Tab dropdowns and one ➡ Transfer (item 17,
+  Rule 2.6). Items 13, 30 and 35 went to the sandboxes. Help 18, 19, 21, 92, 99, 113, 173, 183, 184, 186, 191, 238 (English and French).
 - 2026-11-21: An Alarm has no Sound Custom / Default / None any more (OakBarn Brewery: "No Custom or Default or None. Path to a valid file or not. WE will handle that when they are imported"): the Sound dropdown and `.soundmode` are gone, and `custom` / `default` are no longer reserved words. An Alarm plays its sound file, or the Missing Alarm Sound when it has none or it can't play (Rule 7.20: an Alarm is never silent). An exception to Design Rule 1 (Never Take Away), at OakBarn Brewery's word. The Importer turns these over (Importer Sandbox).
 - 2026-11-21: `clear` is no longer a Process command (OakBarn Brewery: "Anything not needed from Brucontrol like clear is not needed"). It did nothing; it is gone from the Process reader, the editor colors and Suggest list, and Help 22. An import drops a `clear` line (Importing Norms section 4).
 - 2026-11-21: Rule 11.3 (OakBarn Brewery: "Wrong. BruControl is a forbidden word in Skynet Panel and Only used in th eImported."): the word BruControl is never shown in the Skynet Panel (screens, menus, balloons, messages, Help, Hover Help, README, Template notes, sample Processes); only the Importer uses it, and the Panel says "the Importer". The 2026-11-10 exception (Help 1, 44 and 67 could name the BruControl Import) is gone. The Panel's own one-step **Import > BruControl Schema** is taken out of the Panel (☰ Menu > Import now has BeerSmith recipe only; lib/brucontrol.js stays for the Importer and its tests); Help 8's BruControl part goes to the extract. Help 143 and 165 stay in help/ for the Importer but are not listed in the Panel's Help. Rule 1.1 no longer defines "BruControl Schema"; Rule 14.3's BruControl Read Me lives in the Importer. Help 1, 8, 44, 67 (English and French). Checked against both programs: the Importer's pages, Build page and Help keep the word. (thread "Remove the word BruControl from the Panel")
