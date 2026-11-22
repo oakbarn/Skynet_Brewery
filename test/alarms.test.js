@@ -36,18 +36,18 @@ const run = async (name, text) => {
   const st = engine.list().find(s => s.name === name);
   assert.notEqual(st.state, 'error', st.error);
 };
-await run('a', 'new bool vB\nalm_Note = true\nvB = alm_Note\n"vB_Flag" value = vB');
+await run('a', 'new bool vB\nalm_Note = true\nvB = alm_Note\nvB_Flag.value = vB');
 assert.equal(on('alm_Note'), true); assert.equal(store.getProp('vB_Flag', 'value'), true);
 await run('b', 'if alm_Note == true\n  alm_Note = false\nendif\n"alm_Boil" = true');
 assert.equal(on('alm_Note'), false); assert.equal(on('alm_Boil'), true);
-await run('c', '"alm_Boil" active = false');                       // the old BruControl way still works
+await run('c', 'alm_Boil.active = false');
 assert.equal(on('alm_Boil'), false);
-await run('d', 'SoundPlayer path = "sounds/music.mp3"\nplay SoundPlayer');
+await run('d', 'SoundPlayer.path = "sounds/music.mp3"\nplay SoundPlayer');
 assert.equal(store.getProp(SOUND_PLAYER, 'path'), 'sounds/music.mp3'); assert.equal(on(SOUND_PLAYER), true);
 assert.deepEqual(playing(), [SOUND_PLAYER]);
 
 // wait alm_Name == false: waits until the brewer taps the alarm off
-engine.write('w', 'alm_Boil = true\nwait alm_Boil == false\n"vB_Flag" value = false');
+engine.write('w', 'alm_Boil = true\nwait alm_Boil == false\nvB_Flag.value = false');
 store.setProp('vB_Flag', 'value', true);
 engine.start('w'); await new Promise(r => setTimeout(r, 150));
 assert.equal(engine.running.has('w'), true, 'still waiting');
@@ -122,7 +122,7 @@ store.tickTimers(9 * 60 + 55); assert.equal(on('alm_Hop1'), true, '15:00 left: h
 store.setProp('alm_Hop1', 'active', false, 'ui');
 // a Process can move the times
 store.setProp('tm_Boil', 'value', new TimeVal(30 * 60)); store.tickTimers(0);
-await run('f', '"alm_PreHop1" before = 00:05:00\n"alm_Hop1" at = 00:20:00');
+await run('f', 'alm_PreHop1.before = 00:05:00\nalm_Hop1.at = 00:20:00');
 store.tickTimers(4 * 60 + 58); assert.equal(on('alm_PreHop1'), false);
 store.tickTimers(4); assert.equal(on('alm_PreHop1'), true, '25:00 left = 5 minutes before 20:00');
 store.setProp('tm_Boil', 'running', false);

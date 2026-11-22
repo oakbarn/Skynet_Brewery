@@ -16,7 +16,7 @@ The link must start with `https://` (or `http://`) and point straight at the MP3
 A Process can use one too:
 
 ```
-SoundPlayer path = "https://github.com/oakbarn/Skynet_Brewery/releases/download/Skynet-Sounds/My.Song.mp3"
+SoundPlayer.path = "https://github.com/oakbarn/Skynet_Brewery/releases/download/Skynet-Sounds/My.Song.mp3"
 play SoundPlayer
 ```
 

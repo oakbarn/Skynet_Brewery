@@ -16,7 +16,7 @@ Le lien doit commencer par `https://` (ou `http://`) et pointer directement sur 
 Un Process peut aussi en utiliser un :
 
 ```
-SoundPlayer path = "https://github.com/oakbarn/Skynet_Brewery/releases/download/Skynet-Sounds/My.Song.mp3"
+SoundPlayer.path = "https://github.com/oakbarn/Skynet_Brewery/releases/download/Skynet-Sounds/My.Song.mp3"
 play SoundPlayer
 ```
 

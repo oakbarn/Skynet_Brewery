@@ -52,7 +52,7 @@ export const plainName = n => {
 // The Process language's own words (Help 22, Reserved words): none can be a name. test/null.test.js checks this matches lib/engine.js.
 export const PROCESS_WORDS = new Set(('if elseif else endif goto goline sleep delay wait start stop reset print show send_db dbsend send_db_group start_db_group stop_db_group new ' +
   'play step restart lock_equipment unlock_equipment ask close_all_valves open_all_valves open_valve close_valve all_pumps_off all_heaters_off import_recipe ' +
-  'start_hop_alerts stop_hop_alerts take_reading place_chiller remove_chiller show_override hide_override declare and or not visible hidden countdown countup none hiddenlocked on off null ' +
+  'start_hop_alerts stop_hop_alerts take_reading place_chiller remove_chiller show_override hide_override declare and or not visible hidden countdown countup none on off null ' +
   'value string bool time datetime now true false tab workspace').split(' '));
 
 // Device and Widget names

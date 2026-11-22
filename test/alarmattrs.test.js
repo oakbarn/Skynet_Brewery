@@ -70,7 +70,7 @@ for (const a of ['path', 'label_fore', 'label_back', 'skynet_Layer_2', 'string',
 for (const a of ['visible', 'toggle', 'setgraphic', 'sound']) assert.ok(!offered.includes(a), a);
 
 // a Brew Flow Alarm: alm_Flow = On holds the Process until it is tapped Off
-engine.write('flow', 'alm_Flow = On\n"vB_Done" value = true');
+engine.write('flow', 'alm_Flow = On\nvB_Done.value = true');
 assert.equal(engine.start('flow').ok, true);
 await new Promise(r => setTimeout(r, 400));
 assert.equal(get('vB_Done', 'value'), false, 'still waiting for the Brew Flow Alarm');
@@ -79,7 +79,7 @@ store.setProp('alm_Flow', 'active', false, 'ui');      // tapped Off
 for (let i = 0; i < 50 && engine.running.has('flow'); i++) await new Promise(r => setTimeout(r, 20));
 assert.equal(get('vB_Done', 'value'), true);
 // alm_Flow.state = On waits too; any other Alarm does not
-engine.write('flow2', 'alm_Flow.state = On\nalm_User = On\n"vB_Done" value = false');
+engine.write('flow2', 'alm_Flow.state = On\nalm_User = On\nvB_Done.value = false');
 engine.start('flow2'); await new Promise(r => setTimeout(r, 300)); assert.equal(get('vB_Done', 'value'), true); assert.equal(get('alm_User', 'state'), false);
 store.setProp('alm_Flow', 'active', false, 'ui');
 for (let i = 0; i < 50 && engine.running.has('flow2'); i++) await new Promise(r => setTimeout(r, 20));

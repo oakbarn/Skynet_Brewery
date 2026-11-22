@@ -27,7 +27,6 @@ import { checkControlled } from './public/semi.js';
 import { isCodeValue } from './public/codevalue.js';
 import { controlMethods, offsetSigns } from './public/heatmethod.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, INPUT_PROPS, mainProp, attrsOf, boolAttrs, insertGroup } from './lib/store.js';
-import { modernize } from './lib/modernize.js';
 import { followGoLines } from './lib/goline.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine, tokenize } from './lib/engine.js';
@@ -1336,15 +1335,14 @@ async function route(req, res) {
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, procShow(engine.read(name)), 'text/plain; charset=utf-8'); }      // temperatures in the Units (Rule 2.59)
     if (!act && m === 'PUT') {
       if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file processes/<name>.txt (public/names.js)
-      // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
+      // saved as typed (the Importer changes old files, lib/modernize.js), then every step is renumbered
       // goLine follows its line (Rule 16.10): lines added or taken out above the line it points at change its number
       const body = await readBody(req), gl = followGoLines(engine.exists(name) ? engine.read(name) : null, body);
-      const mod = modernize(gl.text, n => store.get(n));
-      const kept = procKeep(mod.text);      // a plain temperature typed in the Units is kept in °C (Rule 2.59)
+      const kept = procKeep(gl.text);      // a plain temperature typed in the Units is kept in °C (Rule 2.59)
       engine.write(name, kept.text);
       engine.renumber();
       const text = engine.read(name), chk = engine.check(text), uw = unsureWarning(kept.unsure);
-      return ok(res, { ...chk, warnings: uw ? [...(chk.warnings || []), uw] : chk.warnings, text: procShow(text), modernized: mod.changed, golines: gl.changed });
+      return ok(res, { ...chk, warnings: uw ? [...(chk.warnings || []), uw] : chk.warnings, text: procShow(text), golines: gl.changed });
     }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
   }

@@ -14,7 +14,7 @@ An Interface whose Connection is **Simulator** (like the pretend Mega a Skynet S
 ## What the Simulator does
 
 - **Timers** run as now, faster if you set a Speed, and **+1 min**, **Skip to next event** and **Auto skip** work as before (Help: [Simulation mode](20-simulation)).
-- **Waits on a reading are pretended reached.** A Process line that waits on a reading, for example `wait "Temp_HLT" value >= 152` or a wait for the boil to start, moves on by itself after **60 clock seconds**, as if the reading got there. The Process output says so: *Simulation: the wait on line 12 is pretended reached after 60 s*.
+- **Waits on a reading are pretended reached.** A Process line that waits on a reading, for example `wait Temp_HLT.value >= 152` or a wait for the boil to start, moves on by itself after **60 clock seconds**, as if the reading got there. The Process output says so: *Simulation: the wait on line 12 is pretended reached after 60 s*.
   - The time is set in **Simulator bar > ⚙ Settings > Pretend readings are reached ... after (clock seconds)**. At a Speed of 10×, 60 clock seconds go by in 6 real seconds.
   - **Skip to next event** and **Auto skip** count it as an event, so they jump straight to it.
   - Switch **Pretend readings are reached** off to wait for the simulator's own pretend heating instead.

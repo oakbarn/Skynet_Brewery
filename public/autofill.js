@@ -183,7 +183,6 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     const el = elOf(op[1] ?? op[2]); let attr = (op[3] ?? '').toLowerCase();
     if (el && attr === el.main) attr = '';
     if (el?.bools?.includes(attr) || declared.get(op[1] ?? op[2]) === 'bool') for (const [k, h] of ON_OFF) add(k, h);
-    if (el?.type === 'timer' && attr === 'type') { add('countdown', ''); add('countup', ''); }
     // name.onoffset = : (-) Heat and (+) Cool (OakBarn Brewery, 2026-11-10, Rule 6.19)
     if (el?.signs?.[attr]) { for (const s of el.signs[attr]) add(s, s === '-' ? 'Heat: On below the Setpoint' : 'Cool: On above the Setpoint', s === '-' ? '(-) Heat' : '(+) Cool'); if (!w) return done(); }
     // name.method = : the ways this Device can be controlled (Rule 6.19), for example "PID" or "Duty Cycle" on a Heating Element

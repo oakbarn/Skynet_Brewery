@@ -17,12 +17,14 @@ fs.writeFileSync(cfg, JSON.stringify({ mediaRoots: ['./media'], elements: els })
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 const errors = []; eng.on('error', e => errors.push(e));
-const lines = [...store.els.keys()].map(n => `"${n}" displayname = "Shown ${n}"`).join('\n') + '\n';
+const lines = [...store.els.keys()].map(n => `"${n}".label = "Shown ${n}"`).join('\n') + '\n';
 fs.writeFileSync(path.join(d, 'scripts', 'dn.txt'), lines);
 assert.deepEqual(eng.check(lines).errors, []);
 eng.start('dn');
 await new Promise(r => setTimeout(r, 300));
-for (const n of store.els.keys()) assert.equal(store.getProp(n, 'displayname'), `Shown ${n}`, `displayname on ${n}`);
+for (const n of store.els.keys()) assert.equal(store.getProp(n, 'label'), `Shown ${n}`, `label on ${n}`);
+// .displayname is not a Skynet word (Fritz, 2026-11-22: "displayname is label"); the Importer changes it to .label
+assert.match(eng.check(`"${[...store.els.keys()][0]}".displayname = "x"`).errors[0]?.msg ?? '', /the word is \.label/);
 assert.equal(errors.length, 0, JSON.stringify(errors));
 assert.ok(store.els.size >= ELEMENT_TYPES.length + 10);
 

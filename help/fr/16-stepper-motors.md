@@ -21,12 +21,12 @@ Le moteur pas à pas affiche sa position, et « (not homed) » (origine non trou
 ## Dans un Process {#in-a-process}
 
 ```
-"Valve_M" target = 50        go to 50
-"Valve_M" move = -10         go 10 back
-"Valve_M" run = 2            keep turning at 2 per second (0 stops)
-stop "Valve_M"               stop now
-"Valve_M" home = true        find the home switch
-wait "Valve_M" moving == false
+Valve_M.target = 50        go to 50
+Valve_M.move = -10         go 10 back
+Valve_M.run = 2            keep turning at 2 per second (0 stops)
+stop "Valve_M"             stop now
+Valve_M.home = true        find the home switch
+wait Valve_M.moving == false
 ```
 
 (Aller à 50 ; reculer de 10 ; tourner sans arrêt à 2 par seconde, 0 arrête ; arrêter maintenant ; chercher le contact d'origine ; attendre la fin du mouvement.)

@@ -44,8 +44,8 @@ if alm_Hops_1 == true
   ...
 endif
 alm_Hops_1 = false           turn it off
-"alm_Hops_1" at = 00:20:00   move the hop drop to 20:00 left
-"alm_PreHop_1" before = 00:05:00
+alm_Hops_1.at = 00:20:00   move the hop drop to 20:00 left
+alm_PreHop_1.before = 00:05:00
 ```
 
 `alm_Hops_1 = On` and `alm_Hops_1 = Off` work the same as true and false (Rule 16.9). A Process never writes `.active`. One Alarm can change its look and sound step by step: see [The Alarm Chain](172-alarm-chain).
@@ -57,7 +57,7 @@ alm_Hops_1 = false           turn it off
 Every panel has one built-in **SoundPlayer** for music and plain sounds. It is not on any tab; Processes use it:
 
 ```
-SoundPlayer path = "sounds/polka.mp3"
+SoundPlayer.path = "sounds/polka.mp3"
 play SoundPlayer
 stop SoundPlayer
 ```

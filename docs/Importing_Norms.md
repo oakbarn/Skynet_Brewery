@@ -49,7 +49,7 @@ Every Device and Widget has two true / false attributes:
 | --- | --- | --- |
 | `"my_Widget" visibility = visible` | `my_Widget.visible = true` | Built (Process lines) |
 | `"my_Widget" visibility = hidden` | `my_Widget.visible = false` | Built (Process lines) |
-| `"my_Widget" visibility = hiddenlocked` | `my_Widget.visible = false; my_Widget.hidden = true` | Built (Process lines) |
+| `"my_Widget" visibility = hiddenlocked` | `my_Widget.visible = false; my_Widget.hidden = true`; `hiddenlocked` is not a Panel word (OakBarn Brewery, 2026-11-22) | Built (Process lines) |
 | Appearance `Visibility = Visible` | Visible switch on | Built |
 | Appearance `Visibility = Hidden` | Visible switch off | Built |
 | Appearance `Visibility = HiddenLocked` | Visible switch off **and** "Hidden, locked" switch on (`hidden: true`) | Norm (today only a `bru.visibility = "HiddenLocked"` note is kept) |
@@ -65,7 +65,7 @@ Every Device and Widget has two true / false attributes:
 | Interface | Interface (a board) | Built |
 | `DisplayName` (Appearance) | Label | Built |
 | A blank `DisplayName` (BruControl showed the Element Name) | the Label is the BruControl Name and is not shown on the Tab (`.label_visible = false`); the item itself stays visible (Fritz, 2026-11-06) | Not built yet (Importer) |
-| `"tm_Mash" displayname = "Mash"` | `tm_Mash.label = "Mash"` | Built (Process lines) |
+| `"tm_Mash" displayname = "Mash"` | `tm_Mash.label = "Mash"`; the Panel has no `.displayname` (OakBarn Brewery, 2026-11-22: "displayname is label") | Built (Process lines) |
 
 ## 4. Process code in the Skynet style
 
@@ -78,7 +78,10 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | `"alm_Hops" active = true` | `alm_Hops = true` | Built |
 | `wait "alm_Hops" active == false` | `wait alm_Hops == false` | Built |
 | `"tm_Mash" type = countdown` | `tm_Mash.countdown = true` | Built |
-| `"Name" anything = ...` | `Name.anything = ...` | Built |
+| `"Name" anything = ...` | `Name.anything = ...`. The Panel reads only the dot form (OakBarn Brewery, 2026-11-22: "A name attribute is inherent in any Skynet item but it is not an attribute"); a line the Importer can't change stays and the Process Editor marks it | Built |
+| `"HLT_Element" enabled = true` on a Heating Element or Fermentor Control | `HLT_Element.state = true` (OakBarn Brewery, 2026-11-22: "enabled is gone") | Built |
+| `"HLT_PID" target = 152` | `HLT_PID.setpoint = 152` (OakBarn Brewery, 2026-11-22: "target is setpoint"); a stepper's `.target` (go to) stays | Built |
+| `"tm_Mash" type = countup` | `tm_Mash.countdown = false`; a Timer has no `.type` in the Panel | Built |
 | `start "X"` / `stop "X"` where Process X does not exist (BruControl skips it) | the line becomes a comment: `// skipped, no such Process in BruControl either: ...` | Built |
 | `clear` (a line on its own) | dropped: Skynet has no `clear` (OakBarn Brewery, 2026-11-21: "Anything not needed from Brucontrol like clear is not needed") | Norm |
 | An Alarm's Sound = Custom / Default / None (its Properties, or a `sound = Custom` Process line) | not kept: an Alarm's sound is a path to a file or it is not; with none it plays the Missing Alarm Sound (Rule 7.20). The Process line becomes a comment. How the Importer picks the path is in the Importer Sandbox | Built (line), Norm (path) |

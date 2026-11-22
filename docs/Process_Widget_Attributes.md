@@ -38,7 +38,7 @@ All Widgets except the Manual Valve Widget, Pipes and Hoses (below) have these. 
 | `.imageoff` | | Picture shown while Off. |
 | `.imageon` | | Picture shown while On. |
 | `.imageoverlay` | | Overlay picture shown while On (Layer 1). |
-| `.label` | `.displayname` | The text shown on the Tab. Empty shows the Name. |
+| `.label` | | The text shown on the Tab. Empty shows the Name. |
 | `.layer` | | Layer Order: 1 is on top (Rule 1.29). |
 | `.path` | | Whole path of background picture 1 (Rule 7.23). On an Alarm or Audio Widget: its sound. |
 | `.path_2` | | Whole path of background picture 2. |
@@ -282,7 +282,6 @@ Main value: **`.value`**, its time. `start`, `stop` and `reset` work on it too.
 | `.countdown` | true counts down, false counts up. |
 | `.resetvalue` | The time `reset` puts back. |
 | `.running` | true runs it, false stops it. |
-| `.type` | countdown or countup (the older way of `.countdown`). |
 
 ### Value Widget (`valueWidget`, Rule 1.23)
 

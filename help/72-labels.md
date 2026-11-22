@@ -24,13 +24,6 @@ Every Properties dialog that has a **Label** also has a **Show label** switch ri
 tm_Mash.label = "Mash rest"
 ```
 
-`label` is the Skynet word. The older word still works and means the same:
-
-```
-tm_Mash.displayname = "Mash rest"
-"tm_Mash" displayname = "Mash rest"
-```
-
-The **Modernize** button turns `"tm_Mash" displayname = "..."` into `tm_Mash.label = "..."`.
+`label` is the only word for it in a Process.
 
 See also [Text boxes](49-text-boxes) and [Interface, Tab and Device names](46-interface-tab-device-names).

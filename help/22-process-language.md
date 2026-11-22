@@ -38,11 +38,11 @@ if Hop_Text.visible == true
 
 Any attribute with only two choices is `true` or `false`:
 
-- `.visible` (was `visibility = visible / hidden`)
-- `.countdown` for timers (was `type = countdown / countup`)
-- `.running` for timers, `.loop` for alarms, `.enabled`
+- `.visible`
+- `.countdown` for timers (`true` counts down, `false` counts up)
+- `.running` for timers, `.loop` for alarms
 
-If a name has characters other than letters, digits and `_`, put it in quotes before the dot: `"BK (Front)".visible = true`.
+A name is not an attribute: the dot always goes between the name and its attribute (`Pump_Red.state`). If a name has characters other than letters, digits and `_`, put it in quotes before the dot: `"BK (Front)".visible = true`.
 
 ## Visible and Hidden
 
@@ -58,16 +58,6 @@ Pump_Red.hidden = false       // shown again
 ```
 
 You can set both in the item's **Properties** too: **Visible** and **Hidden, locked** are switches. In Edit layout a hidden item shows faded so you can still find it.
-
-Older Processes are changed for you (once, when the panel starts, and whenever a Process is saved or imported). The old file is kept as `.before-hidden.bak`:
-
-| Old line | New line |
-| --- | --- |
-| `"my Widget" visibility = visible` | `"my Widget".visible = true` |
-| `"my Widget" visibility = hidden` | `"my Widget".visible = false` |
-| `"my Widget" visibility = hiddenlocked` | `"my Widget".visible = false; "my Widget".hidden = true` |
-
-The old lines still run the same way if you leave them.
 
 ## Is a Process running?
 
@@ -179,7 +169,7 @@ gV_Strike = gV_Strike + 1
 
 These words belong to the Process language, so none of them can be the name of a Device, Widget, gGlobal or Process variable. Upper and lower case are the same (`NULL` = `null`).
 
-- **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`
+- **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `countdown`, `countup`, `none`
 - **Joining words:** `and`, `or`, `not`
 - **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
 - **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`

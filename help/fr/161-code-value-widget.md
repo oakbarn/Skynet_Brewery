@@ -3,7 +3,7 @@
 Un **Code Value Widget** est un Value Widget qui **fait quelque chose** quand vous le réglez (Règle Skynet 1.27). Il montre sa **Value** sur un Tab dans le **Format** que vous choisissez, avec le **Label** normal d'un Value Widget, et il
 contient quelques lignes de **code Process** dans son attribut **Code**. Chaque fois que vous réglez la Value, ce code s'exécute une fois.
 
-Par exemple, un Code Value Widget pour le Setpoint de température de la cuve d'ébullition. Le Setpoint appartient à la **résistance** de la cuve (son `.setpoint` ; l'ancien `.target` est pareil), celle qui lit la sonde de température de la cuve :
+Par exemple, un Code Value Widget pour le Setpoint de température de la cuve d'ébullition. Le Setpoint appartient à la **résistance** de la cuve (son `.setpoint`), celle qui lit la sonde de température de la cuve :
 
 ```
 MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value}

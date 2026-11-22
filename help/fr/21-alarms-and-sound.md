@@ -44,8 +44,8 @@ if alm_Hops_1 == true
   ...
 endif
 alm_Hops_1 = false           turn it off
-"alm_Hops_1" at = 00:20:00   move the hop drop to 20:00 left
-"alm_PreHop_1" before = 00:05:00
+alm_Hops_1.at = 00:20:00   move the hop drop to 20:00 left
+alm_PreHop_1.before = 00:05:00
 ```
 
 (La faire sonner ; attendre ici que le brasseur l'arrête d'un toucher ; l'arrêter ; déplacer l'ajout de houblon à 20:00 restantes.)
@@ -59,7 +59,7 @@ alm_Hops_1 = false           turn it off
 Chaque panel a un **SoundPlayer** intégré pour la musique et les sons simples. Il n'est sur aucun Tab ; les Processes l'utilisent :
 
 ```
-SoundPlayer path = "sounds/polka.mp3"
+SoundPlayer.path = "sounds/polka.mp3"
 play SoundPlayer
 stop SoundPlayer
 ```
