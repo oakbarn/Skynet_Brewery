@@ -17,20 +17,20 @@ fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
     { name: 'Mash_Temp', type: 'temperature', device: 'MEGA1', units: '°C' }, { name: 'msg', type: 'gGlobal', kind: 'string' }],
 }));
 const scripts = path.join(d, 'scripts'); fs.mkdirSync(scripts);
-fs.writeFileSync(path.join(scripts, 'Mash.txt'), `"tm_Mash" value = 00:00:00
+fs.writeFileSync(path.join(scripts, 'Mash.txt'), `tm_Mash.value = 00:00:00
 start "tm_Mash"
-"Pump" state = true
-wait "tm_Mash" value >= 00:10:00
-"msg" value = "check pH"
+Pump.state = true
+wait tm_Mash.value >= 00:10:00
+msg.value = "check pH"
 sleep 600000
 print "stir"
-wait "Mash_Temp" value > 150
+wait Mash_Temp.value > 150
 print "hot"
 sleep 5000
 print "done"
 `);
-fs.writeFileSync(path.join(scripts, 'Reach.txt'), 'wait "Mash_Temp" value > 500\nprint "reached"\n');
-fs.writeFileSync(path.join(scripts, 'Auto.txt'), 'print "a"\nsleep 1200000\nprint "b"\nwait "Mash_Temp" value > 500\nsleep 1200000\nprint "c"\n');
+fs.writeFileSync(path.join(scripts, 'Reach.txt'), 'wait Mash_Temp.value > 500\nprint "reached"\n');
+fs.writeFileSync(path.join(scripts, 'Auto.txt'), 'print "a"\nsleep 1200000\nprint "b"\nwait Mash_Temp.value > 500\nsleep 1200000\nprint "c"\n');
 const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.load();
 const engine = new Engine(store, scripts, { logNow() { } });
 const hw = new Hardware(store);

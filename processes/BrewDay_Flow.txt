@@ -56,7 +56,7 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 103
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Strike~volume_RP"
-HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = skn_rcp_Strike_Temp
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = skn_rcp_Strike_Temp
 HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = on
 vSMsg = "Heating the HLT to the strike temperature, " + skn_rcp_Strike_Temp + " " + skn_rcp_Temp_Units + "."
 gblS_Step_Text = vSMsg
@@ -108,7 +108,7 @@ BM_27_DO@Valve_E_To~mash~tun_BH = false
 BM_28_DO@Valve_E_To~kettle_BH = false
 BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
-HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = skn_rcp_Sparge_Temp
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = skn_rcp_Sparge_Temp
 vSHops = skn_rcp_Mash_Hops
 [SectionBrew150]
 step 1.00005 "SectionBrew150"
@@ -399,7 +399,7 @@ wait gblV_Brew_Status == 311
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Pre~boil~volume_RP"
 send_db "wgt_VAL_Pre~boil~gravity_RP"
-BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH.target = 101.7
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH.setpoint = 101.7
 BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = on
 vSMsg = "Heating the kettle to a boil."
 gblS_Step_Text = vSMsg

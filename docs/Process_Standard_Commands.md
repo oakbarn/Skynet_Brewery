@@ -7,7 +7,7 @@ and [Process Attributes: Widgets](Process_Widget_Attributes.md).
 
 Built from the Process reader and runner (lib/engine.js, lib/values.js), 2026-11-21. Help 5 and 22 explain more.
 
-Upper and lower case do not matter in commands (`IF` = `if`). A comment starts with `//`, `#` or `'`, or sits between `/*` and `*/`.
+Upper and lower case do not matter in commands (`IF` = `if`). A name and its attribute always have a dot between them (`Pump_1.state`). A comment starts with `//`, `#` or `'`, or sits between `/*` and `*/`.
 
 ## 1. Commands and control flow
 
@@ -89,7 +89,7 @@ Text compares as text when both sides are text. `true`/`false` compare as On/Off
 | `152`, `0.5` | A number. A plain temperature is read in your Units (Rule 2.59). |
 | `countdown`, `countup` | Timer types. |
 | `none` | Nothing: a hose `.connect = none`, a pump `.cover = none`, a flow color of None. |
-| `hidden`, `visible`, `hiddenlocked` | For `.visible` (older Processes). |
+| `hidden`, `visible` | For `.visible`: the same as true, false. |
 | `NULL` | Empty: no value at all (Rule 1.32). |
 | `now` | The date and time now. |
 | `On`, `Off` | The same as `true`, `false` (Rule 16.9). |

@@ -4,7 +4,7 @@ A **Code Value Widget** is a Value Widget that **does something** when you set i
 holds a few lines of **Process code** in its **Code** attribute. Each time you set the Value, that code runs once.
 
 For example, a Code Value Widget for the Brew Kettle's temperature Setpoint. The Setpoint belongs to the Kettle's **Heating
-Element** (its `.setpoint`; the older `.target` is the same), the one that reads the Kettle's Temperature Probe:
+Element** (its `.setpoint`), the one that reads the Kettle's Temperature Probe:
 
 ```
 MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value}

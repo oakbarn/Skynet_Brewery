@@ -55,7 +55,7 @@ Le nom seul veut dire sa valeur principale, et les autres attributs utilisent un
 
 ## Labels
 
-Chaque Device et chaque Widget a un **label** (étiquette) : le nom affiché sur le Tab (vide = son Name). L'ancien mot `displayname` marche toujours et veut dire la même chose. Un Process peut le changer sur n'importe quel type de Device ou de Widget, y compris les gGlobals String, Value et Graphic, les minuteries, les alarmes et les sorties :
+Chaque Device et chaque Widget a un **label** (étiquette) : le nom affiché sur le Tab (vide = son Name). Un Process peut le changer sur n'importe quel type de Device ou de Widget, y compris les gGlobals String, Value et Graphic, les minuteries, les alarmes et les sorties :
 
 ```
 tm_Delay_W1.label = "1 Minute Delay"

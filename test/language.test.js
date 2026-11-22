@@ -47,8 +47,8 @@ endif
 "odd~name".value = 3
 "odd~name".visible = true
 tm_Mash.countdown = true
-print tm_Mash.type
-tm_Mash.displayname = "Mash " + Kettle_SP
+print tm_Mash.countdown
+tm_Mash.label = "Mash " + Kettle_SP
 gGB_Flag = true
 step "Done"
 `);
@@ -58,8 +58,14 @@ assert.equal(store.getProp('alm_Hops', 'active'), false);
 assert.equal(store.getProp('Msg', 'visibility'), 'hidden');
 assert.equal(store.getProp('odd~name', 'value'), 3);
 assert.equal(store.getProp('tm_Mash', 'type'), 'countdown');
-assert.equal(store.getProp('tm_Mash', 'displayname'), 'Mash 186.5');
-assert.deepEqual(prints.slice(0, 4), ['alarm on', '187', 'hidden', 'countdown']);
+assert.equal(store.getProp('tm_Mash', 'label'), 'Mash 186.5');
+assert.deepEqual(prints.slice(0, 4), ['alarm on', '187', 'hidden', 'true']);
+// words a Process no longer has (Fritz, 2026-11-22): each stops with the Skynet word; a Name is not an attribute (no "name" attribute)
+assert.deepEqual(eng.check('tm_Mash.type = countdown\ntm_Mash.displayname = "x"\n"Kettle_SP" value = 1\nif "Pump_Red" state == true\nendif').errors.map(e => e.msg), [
+  'tm_Mash.type: a Timer counts down with tm_Mash.countdown = true, up with tm_Mash.countdown = false',
+  'tm_Mash.displayname: the word is .label (tm_Mash.label)',
+  'Put a dot between a name and its attribute: Kettle_SP.value',
+  'Put a dot between a name and its attribute: Pump_Red.state', 'endif without if']);
 // the Step widget shows the last step a Flow Process reached (proc_a is a Sub by its name, so it stays empty)
 assert.equal(store.getProp('gGStep_Brew', 'value'), '');
 
@@ -208,6 +214,11 @@ assert.deepEqual(compile('print "a;b{}"').errors, []);
 // the rewriter leaves the new spellings alone and still updates BruControl lines written with them
 assert.equal(modernize('if ("Pump_Red" state == true) {\n"Kettle_SP" value++;\n}\n', n => store.get(n)).text, 'if (Pump_Red == true) {\nKettle_SP++;\n}\n');
 
+// the Importer changes the words a Process no longer has (Fritz, 2026-11-22)
+{ const T = { hE_HLT: { type: 'digitalOut', subtype: 'element' }, tm: { type: 'timer' }, W: { type: 'valueWidget' } };
+  assert.equal(modernize('"hE_HLT" enabled = true\n"hE_HLT" target = 152\n"tm" type = countup\n"W" displayname = "x"', n => T[n]).text,
+    'hE_HLT.state = true\nhE_HLT.setpoint = 152\ntm.countdown = false\nW.label = "x"'); }
+
 // ---- .hidden (Fritz, 2026-10-23): a true / false of its own; .hidden = true wins over .visible = true
 assert.ok(attrsOf(store.get('Pump_Red')).includes('hidden'));
 await run('proc_hidden', `Pump_Red.visible = hidden
@@ -219,13 +230,8 @@ assert.equal(store.getProp('Pump_Red', 'hidden'), true);
 assert.equal(store.snapshotOne('Pump_Red').hidden, true);
 assert.throws(() => store.setProp('Pump_Red', 'hidden', 'visible'), /true or false/);
 store.setProp('Pump_Red', 'hidden', false);
-// the old BruControl word still runs: hiddenlocked = .visible false and .hidden true
-await run('proc_hl', `"Pump_Red" visibility = hiddenlocked
-`);
-assert.equal(store.getProp('Pump_Red', 'visible'), false);
-assert.equal(store.getProp('Pump_Red', 'hidden'), true);
-store.setProp('Pump_Red', 'hidden', false); store.setProp('Pump_Red', 'visible', true);
-// ... and is rewritten in the new style
+// hiddenlocked is not a Skynet word (Fritz, 2026-11-22); the Importer rewrites it
+assert.ok(eng.check('Pump_Red.visibility = hiddenlocked').errors.length);
 const hl = modernize(`"Pump_Red" visibility = visible\n"Pump_Red" visibility = hidden\n  "Pump_Red" visibility = hiddenlocked // note`);
 assert.equal(hl.text, `Pump_Red.visible = true\nPump_Red.visible = false\n  Pump_Red.visible = false; Pump_Red.hidden = true // note`);
 await run('proc_hl2', hl.text.split('\n')[2] + '\n');
