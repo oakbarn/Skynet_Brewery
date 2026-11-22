@@ -80,6 +80,8 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | `"tm_Mash" type = countdown` | `tm_Mash.countdown = true` | Built |
 | `"Name" anything = ...` | `Name.anything = ...` | Built |
 | `start "X"` / `stop "X"` where Process X does not exist (BruControl skips it) | the line becomes a comment: `// skipped, no such Process in BruControl either: ...` | Built |
+| `clear` (a line on its own) | dropped: Skynet has no `clear` (OakBarn Brewery, 2026-11-21: "Anything not needed from Brucontrol like clear is not needed") | Norm |
+| An Alarm's Sound = Custom / Default / None (its Properties, or a `sound = Custom` Process line) | not kept: an Alarm's sound is a path to a file or it is not; with none it plays the Missing Alarm Sound (Rule 7.20). The Process line becomes a comment. How the Importer picks the path is in the Importer Sandbox | Built (line), Norm (path) |
 
 ## 5. Names
 
@@ -270,3 +272,5 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-09: Section 8: Interface settings (Enabled, Baud, Response Timeout; Logging listed) are kept (Rule 6.27).
 - 2026-11-09: Section 7: an Alarm's Digital Output goes in slot 1 of its 2 (Rule 7.19).
 - 2026-11-09: Section 8: BruControl's Avg Weight becomes Smoothing % (Rule 6.24).
+- 2026-11-21: Section 4: a BruControl `clear` line is dropped; `clear` is no longer a Skynet Process command.
+- 2026-11-21: Section 4: an Alarm's Sound Custom / Default / None is not kept, and a `sound = Custom` line becomes a comment.

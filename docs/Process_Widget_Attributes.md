@@ -84,12 +84,11 @@ Main value: **`.state`**, On / Off (`.active` is the same). A Brew Flow Alarm se
 | `.label_back` | Back color of its Label. |
 | `.label_fore` | Color of its Label. |
 | `.loop` | true repeats the sound; false plays it once. |
-| `.path` | Its sound file (the older `.sound` still works). |
+| `.path` | Its sound file. A path to a file, or none: with none, or one that can't play, it plays the Missing Alarm Sound (Rule 7.20). The older `.sound` still works. |
 | `.playing` | R. true while its sound is the one playing. |
 | `.playtime` | Pre-Hop and User Alarm: seconds it stays On; 0 = until tapped. |
 | `.priority` | Priority, 0 to 99 with two decimals (Rule 7.18). |
 | `.skynet_Layer_2` | Layer 2 picture (Set Graphic), by name or Skynet Picture number (the older `.setgraphic` still works). |
-| `.soundmode` | custom, default or none. |
 | `.state` | On / Off (the same as the name alone). |
 | `.step` | Alarm Chain step it is on (Rule 7.16). |
 | `.string` | Pre-Hop and User Alarm: the text it shows (Rich Text codes work). |
@@ -324,4 +323,4 @@ Main value: **`.value`**. The Suggest list also offers the attributes every Widg
 - **Override button** Widgets have no Process attributes: `show_Override` / `hide_Override` are commands (Skynet list).
 - **Graph Widget main value:** the code gives it `.value` as its main value, but nothing uses it. I wrote "none in use".
 - Confidence: **High** for which attributes exist (pulled from the running code for each type); **Medium** for a few descriptions
-  taken from code comments (Alarm `.fileindex`, `.soundmode`; Manual Vessel `.reading`, `.volume`).
+  taken from code comments (Alarm `.fileindex`; Manual Vessel `.reading`, `.volume`).

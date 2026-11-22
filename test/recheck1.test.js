@@ -11,7 +11,7 @@ assert.match(fn, /inTitle: true/, 'lock and Hidden Locked in the title line');
 assert.match(fn, /'Active overlay \(Layer 1, on top while it is active\)', kind, list, false, 'b', \{ dbPop: true \}/, 'Database and .API on the Active overlay line');
 assert.match(app, /if \(it\.type === 'alarm' && it\.alarmClass\) return alarmWidgetFields\(it\);/, 'no separate Database box below');
 // nothing taken away (Design Rule 1)
-for (const k of ['bell', 'backColor', 'foreColor', 'setGraphic', 'backpath', 'kind', 'timer', 'hopAlarm', 'before', 'priority', 'string', 'playTime', 'EMAIL_FIELDS', 'ALARM_OUT_FIELDS', 'A.soundMode', 'A.loop'])
+for (const k of ['bell', 'backColor', 'foreColor', 'setGraphic', 'backpath', 'kind', 'timer', 'hopAlarm', 'before', 'priority', 'string', 'playTime', 'EMAIL_FIELDS', 'ALARM_OUT_FIELDS', 'A.sound', 'A.loop'])
   assert.ok(fn.includes(k), k);
 assert.match(fs.readFileSync(new URL('../help/148-every-device-dialog.md', import.meta.url), 'utf8'), /\*\*Alarm Widgets\*\* \(Skynet Rule 18\.50/);
 console.log('recheck part 1 (Alarm Widgets) ok');

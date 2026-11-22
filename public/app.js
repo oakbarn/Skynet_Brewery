@@ -8801,7 +8801,7 @@ const F = {
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
     ['_snote', 'Only one sound plays at a time. An Audio Widget has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
-  alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Picture when sounding', 'path'], ['imageOff', 'Picture when quiet', 'path']],
+  alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Picture when sounding', 'path'], ['imageOff', 'Picture when quiet', 'path']],
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C'], false, false, { tip: MANUAL_UNITS_TIP }], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
     ['_mnote', 'Processes set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
@@ -9079,7 +9079,7 @@ function alarmWidgetFields(it) {
     ...(k === 'hop' ? [['timer', 'Sound by itself on this timer', 'elem', null, false, false, { tip: 'Empty: only from a Process.' }], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
     ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss)', 'text', null, false, false, { def: '00:10:00' }]] : []),
     ['priority', 'Priority (lower plays first)', 'num', null, false, false, { tip: ALM_PRIORITY_TIP }],
-    A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop,
+    A.sound, A.sounds, A.fileIndex, A.loop,
     ...(basic ? [] : [['string', 'Text', 'text', null, false, 'b', { up: 4, tip: ALM_STRING_TIP }], ['playTime', 'Play Time', 'num', null, false, false, { tip: ALM_PLAYTIME_TIP }]]),
     ...EMAIL_FIELDS,
     ...ALARM_OUT_FIELDS,      // Alarm Digital Outputs (Rule 7.19)
@@ -11454,7 +11454,6 @@ const FIELD_TIPS = {
   valueAlign: 'Where its value sits: Left, Centered or Right.',
   border: 'The line around it on the Tab.',
   kind: 'What kind of Alarm this is. The kind sets how it looks and sounds.',
-  soundMode: 'Which sound it plays when it goes off.',
   sound: 'The sound file it plays (a .wav or .mp3 in your media folders).',
   fileIndex: 'The number of the sound file in the list, for a Process that picks the sound by number.',
   loop: 'On: the sound plays again and again until the Alarm is stopped. Off: it plays once.',
@@ -12950,12 +12949,11 @@ document.addEventListener('pointerdown', firstTap, true); document.addEventListe
 // Default tab: "Turn Sound On when starting" turns sound on when the panel opens and when a Schema is loaded
 const soundOnStart = () => { if (S.config.brewDefaults?.soundOnStart && !soundOn) setSound(true); };
 const isSoundEl = e => e.type === 'alarm' || e.type === 'soundPlayer';
-// the sound file an alarm / sound player plays now (Default = the panel's beep)
+// the sound file an alarm / sound player plays now. An Alarm's sound is a path to a file or it is not (OakBarn Brewery, 2026-11-21:
+// "No Custom or Default or None"): with none it plays the Missing Alarm Sound (Rule 7.20, an Alarm is never silent)
 function soundSrc(e, v) {
   if (e.type === 'soundPlayer') return v.path || '';
-  const mode = v.soundmode || (e.sounds ? 'custom' : 'default');
-  if (mode === 'none') return '';
-  return mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound || (mode === 'default' ? 'sounds/alarm_beep.wav' : ''));
+  return e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound || ALARM_FALLBACKS[0];
 }
 const hasSoundNow = (e, v) => !!soundSrc(e, v);
 // what an Alarm plays when its own sound can't play, in this order (Rule 7.20): the voice clip, then the beep
