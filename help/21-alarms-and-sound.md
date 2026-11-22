@@ -65,13 +65,17 @@ stop SoundPlayer
 A sound can also be a **web link to an MP3** (`https://...`), played straight from the web: see [Sounds from a web link](186-sounds-from-a-web-link).
 
 The **Audio Widget** plays one sound on a Tab. It has **one sound** (`.path_audio`), **Repeat sound**, and **one picture** if you want one
-(`.path_image`). A new one starts **hidden**, because it is seldom looked at. A Process turns it On and Off:
+(`.path_image`). It shows only while it plays, on top (Layer 1), and hides when it stops. A Process plays and stops it:
 
 ```
-wgt_AUD_Music_BH.path_audio = "sounds/polka.mp3"
-wgt_AUD_Music_BH = On
-wgt_AUD_Music_BH = Off
+wgt_AUD_Music_BH.path_audio = "sounds/Skynet/Songs/polka.mp3"
+wgt_AUD_Music_BH.play = true
+wgt_AUD_Music_BH.play = false
 ```
+
+It has no `.visible`: a Process line that sets it is an error, since `.play` shows and hides it (Rule 7.27). With no picture of its
+own, it shows the drawing of the Skynet Audio folder its sound is in: **Songs**, **Text_to_voice**, **Fanfare**, **Beep**, **Nature** or
+**Go_to_work** (in `media/sounds/Skynet`, each with the same six folders under **Patron**).
 
 It is not an Alarm. There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Audio Widget on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Audio Widget**.
 

@@ -112,20 +112,25 @@ L'onglet Yeast aussi : `skn_rcp_Yeast_Count`, `skn_rcp_Yeast_N_Name`, `_Form`, `
 
 Les boutons sous les cases ouvrent les Daughter Tabs. **◀ Back to the Recipe tab** (ou **Recipe** dans le titre) revient.
 
-- **HOPs** : ajouter, modifier ou supprimer des houblons. L'AAU réelle des houblons utilisés dans le brassin DOIT être mise à jour ; les quantités sont ajustées à partir d'elle pour garder les IBU.
+- **HOPs** : ajouter, modifier ou supprimer les houblons d'ébullition. L'AAU réelle des houblons utilisés dans le brassin DOIT être mise à jour ; les quantités sont ajustées à partir d'elle pour garder les IBU.
+- **Post Boil Hops** : les houblons qui ne sont pas des houblons d'ébullition : empâtage, premier moût, secondaire, houblonnage à cru et whirlpool. Leur AAU réelle doit aussi être mise à jour.
 - **Drops** : les groupes d'ajouts de houblon, les délais d'avertissement et les textes d'alerte, calculés à partir des houblons (voir **Programme et alertes de houblonnage**).
 - **Grain** : ajouter, modifier ou supprimer des grains. Leur poids total est le Grain Wt.
 - **Fermentable** : ajouter, modifier ou supprimer les autres fermentescibles : adjuvants, extraits, sucres, fruits et jus.
 - **Yeast** : ajouter, modifier ou supprimer des levures et des levains.
 - **Adjuncts** : ajouter, modifier ou supprimer des adjuvants comme le Whirlfloc, un nutriment pour levure ou le gypse (BeerSmith les appelle Misc).
 - **Waters** : le profil d'eau.
-- **MASH** : le profil d'empâtage.
+- **MASH** : le profil d'empâtage et de rinçage (Mash and Sparge Profile).
 
-Les onglets Hops, Grain, Fermentable, Yeast, Adjuncts, MASH et Waters sont construits (plus bas). Les cases propres aux autres onglets viendront ensuite. En attendant, chacun montre ce que la recette contient pour lui, et Waters et MASH ont les listes de profils.
+Tous les boutons des Daughter Tabs ont la même taille.
+
+Les onglets Hops, Post Boil Hops, Grain, Fermentable, Yeast, Adjuncts, MASH et Waters sont construits (plus bas). Les cases propres aux autres onglets viendront ensuite. En attendant, chacun montre ce que la recette contient pour lui, et Waters et MASH ont les listes de profils.
 
 ## L'onglet Hops {#the-hops-tab}
 
-Une ligne pour chaque houblon, sans limite. **Add Hop +** met une nouvelle ligne en bas ; **Delete** sur une ligne la retire.
+Une ligne pour chaque houblon d'ébullition, sans limite. **Add Hop +** met une nouvelle ligne en bas ; **Delete** sur une ligne la retire. **Calculate** est aussi en haut à droite des onglets Hops et Post Boil Hops.
+
+- **Le titre de la ligne** est son groupe de houblon, en couleur : **Bitter Hops** (orange, amertume) au-dessus de 20 minutes, **Flavor Hops** (jaune, saveur) au-dessus de 5 jusqu'à 20, **Aroma Hops** (vert, arôme) 5 minutes ou moins. Il change dès que Min change.
 
 - **Hop N** : le nom du houblon.
 - **Ounces** (ou Grams) : la quantité dans la recette, dans l'**Unit** propre de la ligne.
@@ -135,16 +140,24 @@ Une ligne pour chaque houblon, sans limite. **Add Hop +** met une nouvelle ligne
 
 **oz → g** (à côté de Add Hop +) passe toutes les lignes de houblon en onces en grammes d'un seul appui. Les grammes sont plus précis, et certaines balances démarrent en grammes. Seule l'unité change ; la quantité de houblon reste la même. Appuyez sur Save pour la garder.
 - **Hop N Min** : les minutes d'ébullition. Min = la durée d'ébullition, c'est un houblon de début d'ébullition.
-- **Hop N Drop** : les minutes après le début de l'ébullition où il est ajouté. **Hop N IBU** : son amertume. **Hop N Boil Group** : les houblons ajoutés en même temps forment un groupe (l'onglet Drops).
+- **Hop N Drop** : à quel moment de l'ébullition il est ajouté, en heure : 75 minutes s'affiche **01:15:00**. **Hop N IBU** : son amertume.
 
-**Houblons hors ébullition.** La case carrée d'une ligne ouvre une fenêtre avec des interrupteurs : **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. Activez-en un et appuyez sur **Save** : le houblon n'est plus un houblon d'ébullition, donc la fenêtre reste sur sa ligne (à la place de Min, Drop, IBU et Boil Group) jusqu'à ce que vous désactiviez l'interrupteur et enregistriez. Sans interrupteur activé, **Cancel** ou **Save** ferme la fenêtre.
+**La case carrée** d'une ligne envoie le houblon à l'onglet **Post Boil Hops**.
 
-- **Secondary Hops** et **DRY Hops** : la date et les jours.
+## L'onglet Post Boil Hops {#the-post-boil-hops-tab}
+
+Les houblons qui ne sont pas des houblons d'ébullition, chacun avec son AAU **Recipe** et **Actual** comme sur l'onglet Hops, et une case d'interrupteurs : **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. Un clic sur un interrupteur est gardé tout de suite : il n'y a ni Save ni Cancel sur une ligne. Désactivez son interrupteur et le houblon redevient un houblon d'ébullition, de retour sur l'onglet Hops. **Delete** a la même taille que la ligne.
+
+- **Secondary Hops** et **DRY Hops** : la date, les jours, et la **Pull Date** (la date plus les jours : le jour où retirer les houblons).
 - **Whirlpool** : les questions Whirlpool : **Hop Stand**, sa **Temperature** et son **Time** (elles commencent vides ; l'aide au survol donne les chiffres courants, voir [Les trois Hop Stands](35-mash-and-boil-profiles#the-three-hop-stands)), les **Min** propres au houblon, et **Hop Rocket** quand le whirlpool passe par un Hop Rocket.
 
 **Ordre.** Avec **Calculate** et avec **Save**, les lignes se mettent en ordre : les houblons d'ébullition par moment d'ajout (un houblon de début d'ébullition d'abord, puis par minutes), puis les houblons Mash, 1st WORT, Secondary, DRY et Whirlpool.
 
-**Calculate a besoin que chaque AAU réelle soit au-dessus de 0.** La recette est basée sur l'AAU de la recette, mais les vrais IBU d'un brassin viennent de l'AAU réelle, l'AAU sur le paquet de houblon. Quand une AAU réelle est à 0, rien n'est calculé : Skynet passe à l'onglet Hops, met en surbrillance chaque AAU réelle à 0 et affiche un avertissement. Appuyez sur **READ** pour le fermer, corrigez les AAU réelles et appuyez à nouveau sur Calculate.
+Un changement de la **Temperature** ou du **Time** d'un Hop Stand sur un houblon Whirlpool est le Hop Stand propre à la recette : le Tab Recipe le montre tout de suite.
+
+**Calculate a besoin que chaque AAU réelle soit au-dessus de 0**, sur l'onglet Hops et sur l'onglet Post Boil Hops. La recette est basée sur l'AAU de la recette, mais les vrais IBU d'un brassin viennent de l'AAU réelle, l'AAU sur le paquet de houblon. Quand une AAU réelle est à 0, rien n'est calculé : Skynet passe à l'onglet du premier, met en surbrillance chaque AAU réelle à 0 et affiche un avertissement qui nomme chaque houblon (Hop 3 (Cascade)). Appuyez sur **READ** pour le fermer, corrigez les AAU réelles et appuyez à nouveau sur Calculate. Un houblon dont l'AAU de la recette est 0 n'est pas demandé : un import lui donne une AAU réelle de 0,01.
+
+**Calculate enregistre.** Quand il calcule la recette, il l'enregistre aussi.
 
 ## Les onglets Grain et Fermentable {#the-grain-and-fermentable-tabs}
 
@@ -152,7 +165,9 @@ Les fermentescibles d'une recette sont répartis sur deux onglets. **Grain** con
 
 - **Name**, le poids, **Potential** (le rendement, %), **SRM** (la couleur) et **PPG>SG**, ses points de densité (calculés).
 - Le poids s'affiche dans le **standard de poids du grain** choisi dans ☰ Menu > Default (Pounds ou Kg). Un fichier BeerSmith ou BeerXML importé y est aussi montré. Son étiquette, et l'étiquette PPG>SG, ne peuvent être changées que dans ☰ Menu > Default settings.
-- **Points de densité** = Potential × 46.214 × livres × rendement ÷ gallons du brassin. Les grains et les adjuvants utilisent le rendement de brasserie du Tab **Brew on** ; les extraits, sucres, fruits et jus donnent tout leur sucre. Les points de chaque ligne s'additionnent dans la case **Expected Gravity** (densité attendue) du Tab Recipe (1 + points ÷ 1000), calculée chaque fois qu'une quantité change, et par Calculate. Il faut la Brew Length.
+- **Points de densité** = Potential × 46.214 × livres × rendement ÷ gallons du brassin. Les grains et les adjuvants utilisent le rendement de brasserie du Tab **Brew on** ; les extraits, sucres, fruits et jus donnent tout leur sucre. Les points de chaque ligne s'additionnent dans la case **Expected Gravity** (densité attendue) du Tab Recipe (1 + points ÷ 1000), calculée chaque fois qu'une quantité change, et par Calculate. Il faut la Brew Length. Une case **PPG>SG** vide dit ce qu'elle attend : **Brew Length?**, **Potential?** ou **Brew on Tab?** (un grain n'a pas de points de densité sans le rendement de brasserie de l'Equipment Profile du Tab Brew on, Règle 17.13).
+- La case **Grain Wt.** du Tab Recipe suit l'onglet Grain tout de suite : les grains et les fermentescibles de type Adjunct.
+- Chaque ligne tient sur une ligne, toutes les cases à la même hauteur.
 - **After Boil** (onglet Fermentable seulement) : un interrupteur, montré seulement pour les types qu'un brasseur ajoute pendant ou après l'ébullition (Extract, Dry Extract, Sugar, Fruit, Juice). Activé veut dire qu'il est ajouté après l'ébullition. Le grain n'est jamais ajouté après l'ébullition, donc l'onglet Grain n'en a pas.
 
 Chaque onglet montre son poids total. Un import fait venir chaque champ de grain (notes, protéines, humidité et le reste aussi), prêt pour plus tard.
@@ -169,7 +184,7 @@ Un import remplit ce que le fichier contient. Une levure BeerSmith .bsmx est un 
 
 ## L'onglet Adjuncts {#the-adjuncts-tab}
 
-Whirlfloc, nutriment pour levure, gypse, épices : ce que BeerSmith et BeerXML appellent Misc. **Adjunct +** ajoute une ligne, **Delete** en retire une, sans limite.
+Whirlfloc, nutriment pour levure, gypse, épices : ce que BeerSmith et BeerXML appellent Misc. **Adjunct +** est une liste : cliquez sur **Whirlfloc**, **Irish Moss**, **Yeast Nutrient**, **Gypsum**, **Calcium Chloride**, **Epsom Salt**, **Lactic Acid**, **Campden Tablet**, **Gelatin**, **Coriander Seed**, **Orange Peel** ou **Priming Sugar** pour ajouter sa ligne avec son Type, son Use, sa Measurement et son Time déjà remplis ; tapez la quantité. **Other** ajoute une ligne vide pour tout le reste. **Delete** en retire une, sans limite.
 
 - **Adjunct N** (le nom), **Amount** et **Measurement** (mg, g, oz, lb, kg, ml, tsp, tbsp, cup, pt, qt, l, gal ou items).
 - **Type** : Spice, Fining, Water Agent, Herb, Flavor ou Other. **Use** : Boil, Mash, Primary, Secondary ou Bottling.

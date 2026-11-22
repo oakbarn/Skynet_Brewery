@@ -49,7 +49,7 @@ import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_
 import { ON_PRESS, ON_PRESS_TIPS, pressProcessOf, pressNeedsProcess } from './onpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, HOP_MEASURES, hopUnitOf, YEAST_UNITS, yeastUnitOf, YEAST_FORMS, YEAST_TYPES, YEAST_FLOCS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopGroupOf, HOP_GROUPS, minutesHms, pullDate, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, HOP_MEASURES, hopUnitOf, YEAST_UNITS, yeastUnitOf, YEAST_FORMS, YEAST_TYPES, YEAST_FLOCS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, recipeTotals, COMMON_ADJUNCTS, OTHER_ADJUNCT, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
@@ -2775,7 +2775,7 @@ function buildEl(e) {
     h('button', { title: 'Start', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', true); } }, '▶'),
     h('button', { title: 'Stop', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', false); } }, '■'),
     h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺'),
-    h('button', { class: 'tmSet', title: 'Set the time (hh:mm:ss)', onclick: ev => { ev.stopPropagation(); timerSetDialog(e); } }, 'Set')));
+    h('button', { class: 'tmSet', title: 'Set the time (hh:mm:ss)', onclick: ev => { ev.stopPropagation(); timerSetDialog(e); } }, '⏱ Set')));
   if (editing) { editDeco(n, e); if (e.cloneId ? sel?.kind === 'gfx' && sel.id === e.cloneId : sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
   fillEl(n, e);
   return n;
@@ -8803,7 +8803,7 @@ const F = {
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
     ['pulse', 'Pulse: ON time per press (ms)', 'num', null, false, false, { def: 100 }], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds)', 'num', null, false, false, { def: 3000 }],
     ...onPressFields(it),      // On Press (Rule 6.38): a DIN button runs a Process, Advances or cancels all alarms
-    ['forceSecs', 'A click forces it ON for (seconds), then OFF', 'num', null, false, false, { tip: 'For a float you force by hand on the Tab (Force floats): one click makes it ON, and after this many seconds it goes OFF again by itself. 0 or empty: a click turns it ON and it stays ON until clicked again (Panel Update 9, item 12f).' }],
+    ['forceSecs', 'A click forces it ON for (seconds), then OFF', 'num', null, false, false, { tip: 'For a float you force by hand on the Tab (Force floats): one click makes it ON, and after this many seconds it goes OFF again by itself. 0 or empty: a click turns it ON and it stays ON until clicked again.' }],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms)', 'num', null, false, false, { def: 20 }], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'],
@@ -19158,13 +19158,14 @@ async function askSaveImported(name) {
 let rcView = null, rcWork = null, rcSub = 'recipe';
 const RC_DAUGHTERS = [
   ['hops', 'HOPs', 'Add, Edit or Delete Hops. All Hops details. The Actual AAU of the Hops that are used in the Brew MUST be updated. The Actual AAU varies from the Recipe AAU and to obtain the desired IBUs, they must be calculated from the Actual AAUs and the Hops Amounts are adjusted.'],
+  ['posthops', 'Post Boil Hops', 'Add, Edit or Delete the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry Hop and Whirlpool. Their Actual AAU must be updated too.'],
   ['drops', 'Drops', 'Displays the Calculated Hops Drops Grouping, Pre Warnings Times and Texts. These are filled from the Hop Data once Calculated.'],
   ['grain', 'Grain', 'Add, Edit or Delete Grains. The Total weight of all Grains is used to calculate the Grain Weight for this Brew.'],
   ['fermentables', 'Fermentable', 'Add, Edit or Delete the other Fermentables: Adjuncts, Extracts, Sugars, Fruit and Juice.'],
   ['yeast', 'Yeast', 'Add, Edit or Delete Yeasts and Yeast Starters'],
   ['adjuncts', 'Adjuncts', 'Add, Edit or Delete Adjuncts such as Whirlfloc, Yeast Nutrient or Gypsum.'],
   ['waters', 'Waters', 'Water Profile'],
-  ['mash', 'MASH', 'Mash Profile'],
+  ['mash', 'MASH', 'Mash and Sparge Profile'],
 ];
 const RC_STYLES = ['American Light Lager', 'American Lager', 'Cream Ale', 'American Wheat Beer', 'Blonde Ale', 'Kölsch', 'German Pils', 'Czech Premium Pale Lager', 'Munich Helles',
   'Märzen', 'Vienna Lager', 'Munich Dunkel', 'Schwarzbier', 'Doppelbock', 'Weissbier', 'Witbier', 'Saison', 'Belgian Dubbel', 'Belgian Tripel', 'Belgian Dark Strong Ale',
@@ -19386,9 +19387,8 @@ function rcMain(pane, rc, u, changed) {
     h('div', { class: 'rcLower' },
       h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.filter(([k]) => levelShowsTab(rc, k)).map(([k, t, about]) => h('div', { class: 'rcDRow' },
         h('button', { class: 'rcTabBtn', onclick: () => { rcSub = k; renderMenuPane(); }, title: `Opens the ${t} tab` }, t), h('span', {}, about)))),
-      h('div', { class: 'rcLegend' }, h('div', { class: 'rcDRow' }, h('span', { class: 'rcTabBtn rcTabDemo' }, 'CLICK Here'), h('span', {}, 'opens the Tab')),
-        h('div', { class: 'rcDRow' }, h('span', { class: 'rcCalcBtn rcCalcMini' }, 'Calculate'),
-          h('b', {}, 'calculates Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature. It also calculates the Strike Volume and Temperature Grain Temperature and Grain Ratio.')))),
+      // the CLICK Here and Calculate legend is gone (Panel Update 9, item 33c: "Clutter. Get Rid of it"): the buttons say it in their Hover Help
+    ),
     h('p', { class: 'muted' }, `${rc.name ? `"${rc.name}": ` : ''}${rcFrom(rc)}${rc.sourceFile ? `, ${rc.sourceFile}` : ''}${rc.importedAt ? `, imported ${new Date(rc.importedAt).toLocaleString()}` : ''}. Amounts show in the units picked on ☰ Menu > Default.`));
   // the boxes this Recipe Level does not use are not shown (Rule 17.11); their values stay in the Recipe
   for (const el of pane.querySelectorAll('.rcBox[data-field]')) if (!levelShowsBox(rc, el.dataset.field)) el.remove();
@@ -19397,16 +19397,21 @@ function rcMain(pane, rc, u, changed) {
 // changed and a warning says which hops to fix or delete (Fritz's Hops tab, 2026-10-31).
 // When one is 0, Skynet switches to the Hops tab, highlights the Actual AAU boxes that are 0 and shows Fritz's warning.
 let rcAAWarn = false;
-function rcCalculate(rc, changed) {
-  if (levelShowsTab(rc, 'hops') && hopActualProblems(rc).length) {     // a Level 1 Can Kit has no HOPs tab: its hops are not checked
-    rcAAWarn = true; rcSub = 'hops'; renderMenuPane();
+async function rcCalculate(rc, changed) {
+  const bad = levelShowsTab(rc, 'hops') ? hopActualProblems(rc) : [];     // a Level 1 Can Kit has no HOPs tab: its hops are not checked
+  if (bad.length) {
+    // the hops to fix are named (Panel Update 9, item 26); the tab goes to the first one (Boil Hops or Post Boil Hops)
+    rcAAWarn = true; const first = rc.ingredients.hops[bad[0].line - 1]; rcSub = first && !isBoilHop(first) ? 'posthops' : 'hops'; renderMenuPane();
     return readWarning('Actual AAU', ['Any Hop MUST have its Actual AAU set to the AAU on the Hop Package. The Recipe is based on a Recipe AAU, but the real IBUs of a Brew is calculated using the Actual AAU.',
-      'Fix any Actual AAUs that are Zero and try Calculate again.', 'Click the Read Button to exit this dialog.']);
+      `Update the Actual AAU of: ${bad.map(x => `Hop ${x.line} (${x.name})`).join(', ')}. Then try Calculate again.`, 'Click the Read Button to exit this dialog.']);
   }
   rcAAWarn = false;
   sortHops(rc);
-  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc), undefined, rcEff(rc), rcStrikeOff(rc))); changed(); renderMenuPane();
-  toast('Calculated. Press Save to keep it');
+  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc), undefined, rcEff(rc), rcStrikeOff(rc))); changed();
+  // Calculate also saves (Panel Update 9, item 27: "No need to save button. Do it when it calculates")
+  if (can('operator')) { await api('PUT', '/ui/recipe', rcWork); await rcLoad(); }
+  renderMenuPane();
+  toast('Calculated and saved');
 }
 // a warning that has one button, READ, to close it
 function readWarning(title, lines) {
@@ -19421,136 +19426,134 @@ function rcSwitch(on, onChange, title = '') {
   return h('label', { class: 'sw', title }, box, h('span', { class: 'swk' }));
 }
 
-// ---- The Hops tab (Fritz's layout, 2026-10-31). One line for each hop, no limit: Add Hop puts a new one at the bottom.
-// The square box on a line opens the "Outside of Boil" dialog: Mash, 1st WORT, Secondary, DRY and Whirlpool switches.
-// A hop with one of them on is not a Boil Hop, so the dialog stays on its line, covering Min, Drop, IBU and Boil Group,
-// until the switch is turned off. With no switch on, Cancel or Save closes the dialog. Every box is a Skynet_Field
-// (skn_rcp_Hop_N_...). The lines are put in order (Boil Hops by drop time, then the others) on Calculate and on Save.
+// ---- The Hops tab (Fritz's layout, 2026-10-31) and the Post Boil Hops tab (Panel Update 9, items 22 to 27). One line for each hop,
+// no limit. The Hops tab holds the Boil Hops: the title of each line is its Hop Group, colored (Bitter above 20 minutes orange, Flavor
+// above 5 up to 20 yellow, Aroma 5 or less green), its Drop shows as a time (75 = 01:15:00), and the square box sends it to the Post
+// Boil Hops tab. The Post Boil Hops tab holds every other hop (Mash, 1st WORT, Secondary, DRY, Whirlpool): its switches and boxes change
+// the hop at once (one click, no Save or Cancel of their own), a DRY or Secondary hop shows its Pull Date (its date plus its Days), and
+// a hop whose switches are all turned off goes back to the Hops tab. Calculate (top right on both) checks every Actual AAU, works out
+// the Recipe and saves it. Every box is a Skynet_Field (skn_rcp_Hop_N_...). The lines are put in order on Calculate and on Save.
 const RC_HOP_SW = [['mash', 'Mash Hops'], ['first wort', '1st WORT Hops'], ['secondary', 'Secondary Hops'], ['dry hop', 'DRY Hops'], ['whirlpool', 'Whirlpool']];
-const rcHopOpen = new WeakMap();      // hop -> the dialog's work copy, while its dialog is open and not saved
+const rcHopOpen = new WeakSet();      // hops sent to the Post Boil Hops tab whose switch is not picked yet (they are still Boil Hops)
+const isBoilHop = hop => hop.use === 'boil' || !HOP_USES[hop.use];
+// the boxes every hop line has (name, amount, unit, Recipe and Actual AAU, Calc amount), on both tabs
+function rcHopCommon(rc, hop, i, u, c, title, titleColor) {
+  const op = can('operator'), F = end => hopFieldName(i + 1, end), wt = hopUnitOf(hop, u);
+  const wName = w => w === 'oz' ? 'Ounces' : 'Grams';
+  const ms = rcInput({ unit: wt }, 'unit', { kind: 'sel', list: Object.entries(HOP_MEASURES), ro: !op, onChange: () => {} });
+  ms.addEventListener('change', () => { hop.unit = ms.value; c.onChange(); renderMenuPane(); });
+  const calc = h('input', { type: 'text', disabled: true, tabIndex: -1 });
+  const actual = rcBox('r', 'Actual', rcInput(hop, 'alphaActual', { d: 1, onChange: () => { actual.classList.toggle('hopZero', rcAAWarn && !(+hop.alphaActual > 0)); c.onChange(); } }),
+    { field: F('AA_Actual'), tip: 'The AAU % on the package of the hops on hand. It must be above 0 before Calculate' });
+  actual.classList.toggle('hopZero', rcAAWarn && hopActualProblems({ ingredients: { hops: [hop] } }).length > 0);
+  const name = rcBox('k', title, rcInput(hop, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name'), tip: `Hop ${i + 1}` });
+  if (titleColor) { const hd = name.querySelector('.rcBoxHead'); hd.style.background = titleColor; hd.style.color = '#111'; }
+  return { calc, boxes: [name,
+    rcBox('g', wName(wt), rcInput(hop, 'kg', { d: wt === 'g' ? 1 : 2, to: v => kgTo(v, wt), from: v => toKg(v, wt), ...c }), { field: F('Amount'), tip: 'The amount in the recipe' }),
+    rcBox('g', 'Unit', ms, { field: F('Measurement'), tip: 'This hop line\'s own unit, oz or g, whatever Units says. Changing it turns the amount' }),
+    rcBox('g', 'Recipe', rcInput(hop, 'alpha', { d: 1, ...c }), { field: F('AA_Recipe'), tip: 'AAU % of the hop in the recipe' }),
+    actual,
+    rcBox('c', `Calc ${wt === 'oz' ? 'Oz' : 'g'}`, calc, { field: F('Calc_Amount'), tip: 'The amount to use with the Actual AAU, to get the IBUs of the recipe' })] };
+}
+// the head of both tabs: its title, Add, oz → g, and Calculate on the top right (Panel Update 9, item 22)
+function rcHopHead(pane, rc, u, changed, title, add) {
+  const op = can('operator'), hops = rc.ingredients.hops;
+  const ozLines = hops.filter(x => hopUnitOf(x, u) === 'oz');
+  const toGrams = guard(() => { for (const x of ozLines) x.unit = 'g'; changed(); renderMenuPane(); toast(`${ozLines.length} hop line${ozLines.length === 1 ? '' : 's'} now in grams. Press Save to keep it`); });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, title), op && add ? h('button', { class: 'hopAdd', onclick: add, title: 'Add a hop line at the bottom' }, 'Add Hop ', h('b', {}, '+')) : '',
+    op && ozLines.length ? h('button', { onclick: toGrams, title: 'Turns every hop line in ounces into grams. Grams are more accurate, and some scales start in grams' }, 'oz → g') : '',
+    h('span', { class: 'hopAAU' }, 'AAU %'), h('span', { class: 'spacer' }),
+    op ? h('button', { class: 'rcCalcBtn', onclick: guard(() => rcCalculate(rc, changed)), title: 'Checks the Actual AAU of every hop (Boil and Post Boil), puts the hop lines in order, works out the Calc amounts and the whole Recipe, and saves it' }, 'Calculate') : ''));
+}
+const rcHopDelBtn = (rc, i, changed) => h('button', { class: 'hopDel', onclick: guard(() => { const hops = rc.ingredients.hops; if (!confirm(`Delete Hop ${i + 1}${hops[i].name ? ` (${hops[i].name})` : ''}?`)) return; hops.splice(i, 1); changed(); renderMenuPane(); }), title: `Delete Hop ${i + 1}` }, '🗑 Delete');
 function rcHops(pane, rc, u, changed) {
   const hops = rc.ingredients.hops, D = S.config.brewDefaults || {}, op = can('operator');
-  // each hop line has its own unit, oz or g (Rule 17.18); a line saved before with none follows Units
-  const wName = wt => wt === 'oz' ? 'Ounces' : 'Grams';
   const rows = [];
-  // the boxes worked out from the others: Calc oz, Drop, IBU, Boil Group. Typing in a box updates them all.
+  // the boxes worked out from the others: Calc oz, Drop, IBU. Typing in a box updates them all.
   const refresh = () => {
-    const sch = hopSchedule(rc, D), boil = +rc.boilTime || 60;
-    rows.forEach(({ hop, i, calc, drop, ibu, grp }) => {
+    const boil = +rc.boilTime || 60;
+    rows.forEach(({ hop, calc, drop, ibu }) => {
       calc.value = rcRound(kgTo(hopKgToUse(hop), hopUnitOf(hop, u)), 2);
-      if (!drop) return;
-      drop.value = rcRound(Math.max(0, boil - Math.min(+hop.time || 0, boil)), 0);
+      drop.value = minutesHms(Math.max(0, boil - Math.min(+hop.time || 0, boil)));
       ibu.value = rcRound(hopIbu(rc, hop), 1);
-      grp.value = sch.hopGroups[i] ?? '';
     });
   };
   const c = { onChange: () => { changed(); refresh(); } };
   const F = (i, end) => hopFieldName(i + 1, end);
-  const calcIn = () => h('input', { type: 'text', disabled: true, tabIndex: -1 });
-  // Actual AAU: highlighted while it is 0 after a Calculate was tried
-  const actualBox = (hop, i) => {
-    const b = rcBox('r', 'Actual', rcInput(hop, 'alphaActual', { d: 1, onChange: () => { b.classList.toggle('hopZero', rcAAWarn && !(+hop.alphaActual > 0)); c.onChange(); } }),
-      { field: F(i, 'AA_Actual'), tip: 'The AAU % on the package of the hops on hand. It must be above 0 before Calculate' });
-    b.classList.toggle('hopZero', rcAAWarn && !(+hop.alphaActual > 0));
-    return b;
-  };
   const add = guard(() => { hops.push({ name: '', kg: null, unit: u.hopUnit, alpha: null, alphaActual: 0, use: 'boil', time: null, dryDays: null, date: '', wpTempC: null, hopRocket: false }); changed(); renderMenuPane(); });
-  const del = i => guard(() => { if (!confirm(`Delete Hop ${i + 1}${hops[i].name ? ` (${hops[i].name})` : ''}?`)) return; hops.splice(i, 1); changed(); renderMenuPane(); });
-  // oz to g: every hop line in ounces turns to grams (the amount is kept, only its unit changes). Some scales start in grams.
-  const ozLines = hops.filter(x => hopUnitOf(x, u) === 'oz');
-  const toGrams = guard(() => { for (const x of ozLines) x.unit = 'g'; changed(); renderMenuPane(); toast(`${ozLines.length} hop line${ozLines.length === 1 ? '' : 's'} now in grams. Press Save to keep it`); });
-  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Hops'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add a hop line at the bottom' }, 'Add Hop ', h('b', {}, '+')) : '',
-    op && ozLines.length ? h('button', { onclick: toGrams, title: 'Turns every hop line in ounces into grams. Grams are more accurate, and some scales start in grams' }, 'oz → g') : '',
-    h('span', { class: 'hopAAU' }, 'AAU %'), h('span', { class: 'muted' }, 'The square box opens the Outside of Boil Hops dialog')));
-  if (!hops.length) pane.append(h('p', { class: 'muted' }, 'No hops yet. Press Add Hop, or IMPORT a recipe on the Recipe tab.'));
-  hops.forEach((hop, i) => {
-    const r = { hop, i, calc: calcIn() }, boilHop = hop.use === 'boil' || !HOP_USES[hop.use], work = rcHopOpen.get(hop);
-    const line = h('div', { class: 'rcRow hopLine' });
-    const sq = h('input', { type: 'checkbox', class: 'hopSq', title: boilHop ? 'Outside of Boil: Mash, 1st Wort, Secondary, Dry Hop or Whirlpool' : 'Not a Boil Hop: turn its switch off to make it a Boil Hop again', ...(!boilHop || work ? { checked: true } : {}) });
-    sq.onchange = () => {
-      if (!boilHop) { sq.checked = true; return; }
-      if (sq.checked) rcHopOpen.set(hop, { use: null }); else rcHopOpen.delete(hop);
-      renderMenuPane();
-    };
-    const wt = hopUnitOf(hop, u);
-    const ms = rcInput({ unit: wt }, 'unit', { kind: 'sel', list: Object.entries(HOP_MEASURES), ro: !op, onChange: () => {} });
-    ms.addEventListener('change', () => { hop.unit = ms.value; changed(); renderMenuPane(); });
-    line.append(
-      rcBox('k', `Hop ${i + 1}`, rcInput(hop, 'name', { kind: 'text', ...c }), { wide: true, field: F(i, 'Name') }),
-      rcBox('g', wName(wt), rcInput(hop, 'kg', { d: wt === 'g' ? 1 : 2, to: v => kgTo(v, wt), from: v => toKg(v, wt), ...c }), { field: F(i, 'Amount'), tip: 'The amount in the recipe' }),
-      rcBox('g', 'Unit', ms, { field: F(i, 'Measurement'), tip: 'This hop line\'s own unit, oz or g, whatever Units says. Changing it turns the amount' }),
-      rcBox('g', 'Recipe', rcInput(hop, 'alpha', { d: 1, ...c }), { field: F(i, 'AA_Recipe'), tip: 'AAU % of the hop in the recipe' }),
-      actualBox(hop, i),
-      rcBox('c', `Calc ${wt === 'oz' ? 'Oz' : 'g'}`, r.calc, { field: F(i, 'Calc_Amount'), tip: 'The amount to use with the Actual AAU, to get the IBUs of the recipe' }),
-      h('div', { class: 'hopSqBox' }, sq));
-    if (boilHop && !work) {
-      r.drop = calcIn(); r.ibu = calcIn(); r.grp = calcIn();
-      line.append(rcBox('g', `Hop ${i + 1} Min`, rcInput(hop, 'time', { d: 0, ...c }), { field: F(i, 'Min'), tip: `Boil minutes. ${rc.boilTime || 60} (the Boil Time) = a Start of Boil hop` }),
-        rcBox('c', `Hop ${i + 1} Drop`, r.drop, { field: F(i, 'Drop'), tip: 'Minutes into the boil when it goes in' }),
-        rcBox('c', `Hop ${i + 1} IBU`, r.ibu, { field: F(i, 'IBU') }),
-        rcBox('c', `Hop ${i + 1} Boil Group`, r.grp, { field: F(i, 'Boil_Group'), tip: 'Hops that go in at the same time are one group (the Drops tab)' }));
-    } else line.append(rcHopDialog(rc, hop, i, u, changed));
-    if (op) line.append(h('button', { class: 'hopDel', onclick: del(i), title: `Delete Hop ${i + 1}` }, '🗑 Delete'));
+  rcHopHead(pane, rc, u, changed, 'Hops', add);
+  const boilHops = hops.map((hop, i) => [hop, i]).filter(([hop]) => isBoilHop(hop) && !rcHopOpen.has(hop));
+  if (!boilHops.length) pane.append(h('p', { class: 'muted' }, hops.length ? 'No Boil Hops: every hop is on the Post Boil Hops tab.' : 'No hops yet. Press Add Hop, or IMPORT a recipe on the Recipe tab.'));
+  for (const [hop, i] of boilHops) {
+    const grp = HOP_GROUPS[hopGroupOf(hop.time)];
+    const { calc, boxes } = rcHopCommon(rc, hop, i, u, c, grp.title, grp.color);
+    const r = { hop, i, calc, drop: h('input', { type: 'text', disabled: true, tabIndex: -1 }), ibu: h('input', { type: 'text', disabled: true, tabIndex: -1 }) };
+    const sq = h('input', { type: 'checkbox', class: 'hopSq', title: 'Send it to the Post Boil Hops tab (Mash, 1st Wort, Secondary, Dry Hop or Whirlpool)' });
+    sq.onchange = () => { rcHopOpen.add(hop); rcSub = 'posthops'; renderMenuPane(); };
+    const line = h('div', { class: 'rcRow hopLine' }, ...boxes, h('div', { class: 'hopSqBox' }, sq),
+      rcBox('g', `Hop ${i + 1} Min`, rcInput(hop, 'time', { d: 0, onChange: () => { c.onChange(); renderMenuPane(); } }), { field: F(i, 'Min'), tip: `Boil minutes. ${rc.boilTime || 60} (the Boil Time) = a Start of Boil hop. Above 20 = Bitter, above 5 = Flavor, 5 or less = Aroma` }),
+      rcBox('c', `Hop ${i + 1} Drop`, r.drop, { field: F(i, 'Drop'), tip: 'How far into the boil it goes in (hh:mm:ss)' }),
+      rcBox('c', `Hop ${i + 1} IBU`, r.ibu, { field: F(i, 'IBU') }),
+      op ? rcHopDelBtn(rc, i, changed) : '');
     rows.push(r); pane.append(line);
-  });
+  }
   refresh();
-  const sch = hopSchedule(rc, D);
-  pane.append(h('p', { class: 'muted' }, `${hops.length} hop${hops.length === 1 ? '' : 's'}, IBU ${rcRound(rc.ibuCalc, 0) || '?'} (last Calculate). Boil Hops are grouped by drop time: a Start of Boil hop (Min = Boil Time) first, then by Minutes. Then the hops that are not Boil Hops: Mash, 1st WORT, Secondary, DRY, Whirlpool. The hop order and the alerts are on the Drops tab (${sch.alerts.length} alerts).`),
-    op ? h('div', { class: 'bar' }, h('button', { class: 'rcCalcBtn', onclick: guard(() => rcCalculate(rc, changed)), title: 'Puts the hop lines in order and works out the whole Recipe. Every Actual AAU must be above 0' }, 'Calculate')) : '');
+  pane.append(h('p', { class: 'muted' }, `${boilHops.length} Boil Hop${boilHops.length === 1 ? '' : 's'}, IBU ${rcRound(rc.ibuCalc, 0) || '?'} (last Calculate). They are grouped by drop time: a Start of Boil hop (Min = Boil Time) first, then by Minutes. The square box sends a hop to the Post Boil Hops tab. The hop order and the alerts are on the Drops tab (${hopSchedule(rc, D).alerts.length} alerts).`));
 }
-// the Outside of Boil Hops dialog of one hop line. It works on a copy; Save puts the copy in the hop, Cancel drops it.
-function rcHopDialog(rc, hop, i, u, changed) {      // rc: the Recipe (was missing: the dialog stopped with "rc is not defined", 2026-11-19)
-  const keep = ['use', 'dryDays', 'date', 'wpTempC', 'stand', 'time', 'hopRocket'];
-  const work = rcHopOpen.get(hop) ?? Object.fromEntries(keep.map(k => [k, hop[k]]));
+// ---- The Post Boil Hops tab (Panel Update 9, items 23 and 25): every hop that is not a Boil Hop, and the ones just sent here
+function rcPostHops(pane, rc, u, changed) {
+  const hops = rc.ingredients.hops, op = can('operator');
+  const rows = [];
+  const refresh = () => rows.forEach(({ hop, calc }) => { calc.value = rcRound(kgTo(hopKgToUse(hop), hopUnitOf(hop, u)), 2); });
+  const c = { onChange: () => { changed(); refresh(); } };
+  rcHopHead(pane, rc, u, changed, 'Post Boil Hops', null);
+  const list = hops.map((hop, i) => [hop, i]).filter(([hop]) => !isBoilHop(hop) || rcHopOpen.has(hop));
+  if (!list.length) pane.append(h('p', { class: 'muted' }, 'No Post Boil Hops. On the Hops tab, the square box of a hop sends it here.'));
+  for (const [hop, i] of list) {
+    const { calc, boxes } = rcHopCommon(rc, hop, i, u, c, `Hop ${i + 1}`);
+    rows.push({ hop, calc });
+    pane.append(h('div', { class: 'rcRow hopLine' }, ...boxes, rcPostHopBox(rc, hop, i, u, changed), op ? rcHopDelBtn(rc, i, changed) : ''));
+  }
+  refresh();
+}
+// the Post Boil boxes of one hop line: they change the hop at once (no Save or Cancel, Rule 2.44's one click; Panel Update 9, item 27)
+function rcPostHopBox(rc, hop, i, u, changed) {
   const box = h('div', { class: 'hopDlg' });
   const F = end => hopFieldName(i + 1, end);
-  const draw = () => {
-    box.replaceChildren();
-    rcHopOpen.set(hop, work);
-    const set = (use, on) => { work.use = on ? use : null; draw(); };      // no Defaults: a Whirlpool hop's Min starts empty (2026-11-19)
-    const sw = ([use, label]) => h('div', { class: 'hopSw' }, h('b', {}, label), rcSwitch(work.use === use, on => set(use, on)));
-    const one = ['secondary', 'dry hop', 'whirlpool'].includes(work.use);
-    if (!one) box.append(...RC_HOP_SW.map(sw));
-    else box.append(sw(RC_HOP_SW.find(x => x[0] === work.use)));
-    if (work.use === 'secondary' || work.use === 'dry hop') {
-      const what = work.use === 'secondary' ? 'Secondary Hop Date' : 'Dry Hop Date';
-      const date = h('input', { type: 'date', value: work.date || '' }); date.onchange = () => { work.date = date.value; };
-      box.append(rcBox('g', what, date, { wide: true, field: F('Date') }), rcBox('g', 'Days', rcInput(work, 'dryDays', { d: 0 }), { field: F('Days') }));
-    }
-    // the Hop Stand it goes in at (three Hop Stands, OakBarn Brewery 2026-11-13: "The whirlpool hop line picks a stand").
-    // The Whirlpool questions (Panel Updates entry 13, OakBarn Brewery: "Hop Questions to ask if a Hop is added to a Recipe that is
-    // Whirlpool. No Defaults. The help can be with the question and what is common", built 2026-11-19): which Hop Stand, its
-    // Temperature and its Time. All start empty unless the Recipe (or its Boil Profile) already has them; the Hover Help gives the
-    // common numbers. The stand's Temperature and Time are the Recipe's, shared by every hop in that stand.
-    const st = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile));
-    if (work.use === 'whirlpool') {
-      work.stand = standOf(work, st); work.wpTempC = null;
-      work._hs ??= Object.fromEntries(st.map(x => [x.key, { tempC: x.tempC, min: x.min }]));
-      const o = work._hs[work.stand];
-      box.append(rcBox('g', 'Hop Stand', rcInput(work, 'stand', { kind: 'sel', list: [['', ''], ...st.map(x => [x.key, x.label])], onChange: draw }), { field: F('Hop_Stand'), tip: HS_PICK_TIP }),
-        ...(o ? [rcBox('r', 'Temperature', rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit) }), { unit: TU(u.tempUnit), field: `skn_rcp_Hop_Stand_${work.stand}_Temp`, tip: HS_TEMP_TIPS[work.stand] }),
-          rcBox('g', 'Time', rcInput(o, 'min', { d: 0 }), { unit: 'min', field: `skn_rcp_Hop_Stand_${work.stand}_Minutes`, tip: HS_TIME_TIP })] : []),
-        rcBox('g', 'Min', rcInput(work, 'time', { d: 0 }), { field: F('Min'), tip: 'How long this hop steeps in the whirlpool (used for its bitterness). The Hop Stand Time is how long the cooling water stays off.' }),
-        h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!work.hopRocket, on => { work.hopRocket = on; }, 'Skynet_Field ' + F('Hop_Rocket'))));
-    }
-    box.append(h('span', { class: 'spacer' }), h('div', { class: 'hopDlgBtns' },
-      h('button', { onclick: () => { rcHopOpen.delete(hop); renderMenuPane(); } }, '✕ Cancel'),
-      h('button', { class: 'primary', onclick: () => {
-        rcHopOpen.delete(hop);
-        if (!work.use) { if (hop.use !== 'boil') { hop.use = 'boil'; changed(); } return renderMenuPane(); }
-        for (const k of keep) hop[k] = work[k];
-        if (work.use === 'whirlpool') {
-          // the stand's answers are the Recipe's own (only what was changed here); one warning if one is missing, and it still saves
-          const st = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile));
-          for (const x of st) { const a = work._hs?.[x.key]; if (a && (a.tempC !== x.tempC || a.min !== x.min)) rc.hopStands = { ...(rc.hopStands || {}), [x.key]: { tempC: a.tempC, min: a.min } }; }
-          if (!standReady(hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile)).find(x => x.key === work.stand))) toast(HS_WARN, true);
-        }
-        changed(); renderMenuPane();
-      } }, '💾 Save')));
+  const bp = () => S.boilProfiles.find(x => x.id === rc.boilProfile);
+  const use = isBoilHop(hop) ? null : hop.use;
+  const set = (w, on) => {
+    if (on) { hop.use = w; rcHopOpen.delete(hop); if (w === 'whirlpool' && !hop.stand) hop.stand = standOf(hop, hopStands(rc, null, bp())); }
+    else { hop.use = 'boil'; rcHopOpen.delete(hop); rcSub = 'hops'; }      // every switch off: it is a Boil Hop again, back on the Hops tab
+    changed(); renderMenuPane();
   };
-  draw();
+  const sw = ([w, label]) => h('div', { class: 'hopSw' }, h('b', {}, label), rcSwitch(use === w, on => set(w, on)));
+  box.append(...(use ? [sw(RC_HOP_SW.find(x => x[0] === use))] : RC_HOP_SW.map(sw)));
+  if (use === 'secondary' || use === 'dry hop') {
+    const what = use === 'secondary' ? 'Secondary Hop Date' : 'Dry Hop Date';
+    const pull = h('input', { type: 'text', disabled: true, tabIndex: -1, value: fmtDay(pullDate(hop.date, hop.dryDays)) });
+    const date = h('input', { type: 'date', value: hop.date || '' }); date.onchange = () => { hop.date = date.value; pull.value = fmtDay(pullDate(hop.date, hop.dryDays)); changed(); };
+    box.append(rcBox('g', what, date, { wide: true, field: F('Date') }),
+      rcBox('g', 'Days', rcInput(hop, 'dryDays', { d: 0, onChange: () => { pull.value = fmtDay(pullDate(hop.date, hop.dryDays)); changed(); } }), { field: F('Days') }),
+      rcBox('c', use === 'secondary' ? 'Pull Date' : 'Dry Hop Pull Date', pull, { wide: true, tip: 'Its date plus its Days: the day to take the hops out (Calculated)' }));
+  }
+  // the Hop Stand it goes in at (three Hop Stands, OakBarn Brewery 2026-11-13; the Whirlpool questions, Panel Updates entry 13). The
+  // stand's Temperature and Time are the Recipe's own, shared by every hop in that stand: a change here is kept in the Recipe at once
+  // (so the Recipe tab's Hop Stand boxes show it; Panel Update 9, item 27: "hop stand middle did not update")
+  if (use === 'whirlpool') {
+    const st = hopStands(rc, null, bp()), cur = st.find(x => x.key === hop.stand);
+    const o = cur ? { tempC: cur.tempC, min: cur.min } : null;
+    const keepStand = () => { rc.hopStands = { ...(rc.hopStands || {}), [hop.stand]: { tempC: o.tempC, min: o.min } }; changed(); if (!standReady({ ...cur, ...o })) toast(HS_WARN, true); };
+    box.append(rcBox('g', 'Hop Stand', rcInput(hop, 'stand', { kind: 'sel', list: [['', ''], ...st.map(x => [x.key, x.label])], onChange: () => { changed(); renderMenuPane(); } }), { field: F('Hop_Stand'), tip: HS_PICK_TIP }),
+      ...(o ? [rcBox('r', 'Temperature', rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), onChange: keepStand }), { unit: TU(u.tempUnit), field: `skn_rcp_Hop_Stand_${hop.stand}_Temp`, tip: HS_TEMP_TIPS[hop.stand] }),
+        rcBox('g', 'Time', rcInput(o, 'min', { d: 0, onChange: keepStand }), { unit: 'min', field: `skn_rcp_Hop_Stand_${hop.stand}_Minutes`, tip: HS_TIME_TIP })] : []),
+      rcBox('g', 'Min', rcInput(hop, 'time', { d: 0, onChange: changed }), { field: F('Min'), tip: 'How long this hop steeps in the whirlpool (used for its bitterness). The Hop Stand Time is how long the cooling water stays off.' }),
+      h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!hop.hopRocket, on => { hop.hopRocket = on; changed(); }, 'Skynet_Field ' + F('Hop_Rocket'))));
+  }
   return box;
 }
+// "2026-12-05" shown as the computer shows a date (12/05/2026 in the USA)
+const fmtDay = d => d ? new Date(d + 'T12:00:00').toLocaleDateString() : '';
 
 // ---- The Grain tab and the Fermentable tab (Fritz, 2026-10-31). One list in the Recipe (ingredients.fermentables): the
 // Grain tab shows the ones of Type Grain (the Type is hidden), the Fermentable tab every other Type, with a Type dropdown.
@@ -19567,9 +19570,15 @@ function rcFerms(pane, rc, u, changed, grainTab) {
   const sum = () => {
     total.textContent = `${rcRound(kgTo(mine.reduce((a, f) => a + (+f.kg || 0), 0), W), 2)} ${W}`;
     const eff = rcEff(rc);
-    for (const [f, el] of pts) el.value = rcRound(gravityPoints(f, rc, eff), 1);
+    // an empty PPG>SG box says what it needs (Panel Update 9, item 34: "PPG>SG did not calculate"): Rule 17.13 gives a grain no points
+    // without the Brew on Tab's Brewhouse Efficiency, and every line needs the Brew Length and its Potential
+    for (const [f, el] of pts) {
+      el.value = rcRound(gravityPoints(f, rc, eff), 1);
+      el.placeholder = el.value ? '' : !(+rc.volumes?.batchLiters > 0) ? 'Brew Length?' : f.yieldPct === null || f.yieldPct === undefined || f.yieldPct === '' ? 'Potential?' : mashedFerm(f) && !eff ? 'Brew on Tab?' : '';
+    }
     rc.expectedSG = expectedGravity(rc, eff);
-    eg.textContent = rc.expectedSG ? rcRound(rc.expectedSG, 3) : !eff && rc.ingredients?.fermentables?.some(mashedFerm) ? '(needs a Brew on Tab with an Equipment Profile, on the Recipe tab)' : '(needs the Brew Length on the Recipe tab)';
+    rc.grainKg = recipeTotals(rc).grainKg;      // the Recipe tab's Grain Wt. follows the Grain tab at once (Panel Update 9, item 19)
+    eg.textContent = rc.expectedSG ? rcRound(rc.expectedSG, 3) : !all.length ? '(no grains or fermentables yet)' : !eff && rc.ingredients?.fermentables?.some(mashedFerm) ? '(needs a Brew on Tab with an Equipment Profile, on the Recipe tab)' : '(needs the Brew Length on the Recipe tab)';
   };
   const live = { onChange: () => { changed(); sum(); } };
   const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : levelFermTypes(rc).includes('adjunct') ? 'adjunct' : levelFermTypes(rc)[0], kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
@@ -19578,7 +19587,7 @@ function rcFerms(pane, rc, u, changed, grainTab) {
     op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `${grainTab ? 'Add ' : ''}${what} `, h('b', {}, '+')) : ''));
   if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : (levelFermTypes(rc).includes('sugar') ? 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.' : 'No extracts yet. Press Add Fermentable for a can of extract or dry extract.')));
   mine.forEach((f, i) => {
-    const n = i + 1, F = end => `skn_rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    const n = i + 1, F = end => `skn_rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine fermLine' });
     line.append(rcBox('g', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
     const pp = h('input', { type: 'text', disabled: true, tabIndex: -1 }); pts.push([f, pp]);
     if (grainTab) line.append(rcBox('g', wLabel, rcInput(f, 'kg', { to: v => kgTo(v, W), from: v => toKg(v, W), ...live }), { field: F('Amount'), tip: 'Amount, in the grain weight standard picked on ☰ Menu > Default' }));
@@ -19614,10 +19623,14 @@ function rcFerms(pane, rc, u, changed, grainTab) {
 function rcAdjuncts(pane, rc, changed) {
   const all = rc.ingredients.miscs, op = can('operator'), c = { onChange: changed };
   const sel = (obj, key, list, rerender) => rcInput(obj, key, { kind: 'sel', list: [...list, ...(list.some(([v]) => v === obj[key]) || !obj[key] ? [] : [[obj[key], obj[key]]])], onChange: () => { changed(); if (rerender) renderMenuPane(); } });
-  const add = guard(() => { all.push({ name: '', type: 'Fining', use: 'boil', amount: null, unit: 'items', time: 15, timeUnit: 'min' }); changed(); renderMenuPane(); });
+  const add = pick => guard(() => { all.push({ ...pick, amount: null }); changed(); renderMenuPane(); })();
+  // Adjunct + is a dropdown (Panel Update 9, item 28): a click on a common adjunct adds its line, Other adds an empty one
+  const addSel = h('select', { class: 'hopAdd adjAdd', title: 'Pick one to add its line at the bottom: Other adds an empty line' },
+    h('option', { value: '' }, 'Adjunct +'), ...COMMON_ADJUNCTS.map((a, i) => h('option', { value: i }, a.name)), h('option', { value: 'other' }, 'Other'));
+  addSel.onchange = () => { const v = addSel.value; addSel.value = ''; if (v !== '') add(v === 'other' ? OTHER_ADJUNCT : COMMON_ADJUNCTS[+v]); };
   const del = (m, n) => guard(() => { if (!confirm(`Delete Adjunct ${n}${m.name ? ` (${m.name})` : ''}?`)) return; all.splice(all.indexOf(m), 1); changed(); renderMenuPane(); });
-  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Adjuncts'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add an adjunct line at the bottom' }, 'Adjunct ', h('b', {}, '+')) : ''));
-  if (!all.length) pane.append(h('p', { class: 'muted' }, 'No adjuncts yet. Press Adjunct + for Whirlfloc, yeast nutrient, gypsum or a spice.'));
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Adjuncts'), op ? addSel : ''));
+  if (!all.length) pane.append(h('p', { class: 'muted' }, 'No adjuncts yet. Pick one from Adjunct +: Whirlfloc, Irish Moss, Yeast Nutrient, a water salt, a spice, or Other.'));
   all.forEach((m, i) => {
     const n = i + 1, F = end => `skn_rcp_Adjunct_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     line.append(rcBox('g', `Adjunct ${n}`, rcInput(m, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }),
@@ -19706,6 +19719,7 @@ function rcWaters(pane, rc, u, changed) {
 function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
   if (k === 'hops') { rcHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'posthops') { rcPostHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'adjuncts') { rcAdjuncts(pane, rc, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'mash') { rcMash(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'yeast') { rcYeast(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }

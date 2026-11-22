@@ -24,6 +24,7 @@ Posez la souris sur le nom d'un champ pour voir à quoi il sert (aide au survol)
 - **Running at start** (elle compte déjà quand le Brain démarre), avec **Database and .API ⬢** sur sa ligne.
 - **Style** (voir plus haut).
 - **Digits** : **hh:mm:ss** (01:30:00) ou **hh:mm** (01:30).
+- **Hide its buttons** : activé, ses boutons ▶ ■ ↺ et Set ne sont pas affichés, pour une minuterie que seul un Process démarre et règle (la minuterie Water de l'exemple 3 Vessel). Désactivé au départ.
 - **Seconds only in the last minute** : activé, une minuterie qui décompte ne montre que les secondes (**45**) quand il reste moins d'une minute.
 - **X**, **Y**, **Width** et **Height**, et le **Widget Type** grisé en dernier.
 

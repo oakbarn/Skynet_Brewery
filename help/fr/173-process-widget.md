@@ -37,6 +37,22 @@ au départ) et le **Widget Type**.
 montre de nouveau quand le Process s'arrête. Pour un bouton qui démarre quelque chose, comme **Start Brew Day** dans les exemples.
 Laissez-le désactivé sur un bouton Start / Stop, pour qu'un clic puisse aussi arrêter le Process.
 
+**Group** (vide au départ) : les Process Widgets qui ont le même mot de groupe agissent ensemble, comme les boutons Water de
+l'exemple 3 Vessel (groupe **Water**). Un clic sur l'un grise le Start de tous les autres, pour que deux ne puissent pas tourner en même temps :
+
+1. Pendant le délai, chacun d'eux affiche **Delay**, et celui qui a été pressé dit **Started**.
+2. Quand l'eau coule, celui qui a été pressé affiche **Running** et les autres se vident.
+3. Quand c'est fini, chaque Start marche de nouveau.
+
+Le Process dit quand chaque partie commence, avec `.phase` sur n'importe quel Widget du groupe :
+
+```
+wgt_PSW_FireHose~1~Minute_WA.phase = "running"
+wgt_PSW_FireHose~1~Minute_WA.phase = "stopped"
+```
+
+Laissez hors du groupe un bouton qui doit toujours marcher, comme **FireHose Off**.
+
 ## Une image dessus {#a-picture-on-it}
 
 Un Process Widget peut montrer une **Picture** entre son Label et son bouton, par exemple un interrupteur à flotteur sur un bouton

@@ -94,10 +94,11 @@ assert.equal(store.getProp('gGV_N', 'value'), 99);
 assert.equal(CLASSES[classify('a = skn_Boil_Temp', {})[4]], 'cmd');
 assert.ok(suggest('gGV_N = skn_B', { elements: [] }).list.some(p => p.text === 'skn_Boil_Temp'));
 
-// ---- the Help page names every one, in English and French
+// ---- the Help page names skn_Boil_Temp, in English and French. The _C, _F and air pressure lines came out of its table
+// (Panel Update 9, item 10c): they still work, the Help just does not list them
 for (const f of ['../help/238-boil-temperature.md', '../help/fr/238-boil-temperature.md']) {
   const t = fs.readFileSync(new URL(f, import.meta.url), 'utf8');
-  for (const n of ['skn_Boil_Temp', 'skn_Boil_Temp_C', 'skn_Boil_Temp_F', 'skn_Air_Pressure']) assert.ok(t.includes('`' + n + '`'), `${f} names ${n}`);
+  assert.ok(t.includes('`skn_Boil_Temp`'), `${f} names skn_Boil_Temp`);
 }
 fs.rmSync(d, { recursive: true, force: true });
 console.log('boiltemp tests passed');

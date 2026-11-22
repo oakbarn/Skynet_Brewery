@@ -14,7 +14,7 @@ String Entry (la flèche rouge ⬆, Règle 18.1), l'éditeur de Process et Schem
 `\n` et `\b` sont des Rich Text Embedded Codes : voir [Les zones de texte](49-text-boxes) et [Rich Text Embedded Code](90-rich-text-embedded-code).
 Tout ce que tapent ces touches peut être annulé avec Annuler, comme toute autre frappe.
 
-## Rechercher et remplacer : Ctrl + F et Ctrl + H {#find-and-replace}
+## Rechercher et remplacer : Ctrl + F et Ctrl + H {#find-and-replace-ctrl-f-and-ctrl-h}
 
 > ⚠ **Gros avertissement : Ctrl + H ne marche que dans un grand éditeur de texte.** Cliquez d'abord dans le texte de l'éditeur
 > de Process, de Schema.json, de l'éditeur de Process Template ou de l'éditeur de texte de l'aide, puis appuyez sur **Ctrl + H**
