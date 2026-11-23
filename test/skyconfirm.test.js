@@ -16,7 +16,7 @@ assert.deepEqual(splitAsk(null), { head: '', text: '' });
 // the big deletes and changes never use the browser's own box
 const app = read('public/app.js'), media = read('public/media.js'), help = read('public/help.js');
 const big = [
-  [app, "Throw away everything on the Build Tab?"], [app, "Delete this item?"], [app, 'and everything on it?'], [app, 'Delete the User Style'],
+  [app, "Throw away everything on the Build Tab?"], /* "Delete this item?" is gone: Ctrl+Z brings a delete back (2026-11-23) */ [app, 'and everything on it?'], [app, 'Delete the User Style'],
   [app, 'Process${todo.length === 1'], [app, 'for good?'], [app, 'It goes to the Recycle Bin'], [app, 'A Process that uses it stops at that line'],
   [app, 'Delete the CSV set'], [app, 'They lose their 1-Wire Index'], [app, 'Remove it anyway?'], [app, 'Remove user ${u.name}?'],
   [app, 'It signs out at once and must be approved again'], [app, 'Turn Approved Devices Off?'], [app, 'Remove the Patron code'],

@@ -299,6 +299,17 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws.editing .gfx.ip:not(.fit) { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000; }
 #ws.editing .gfx.ip.fit { outline: 1px dashed #fff; box-shadow: 0 0 0 1px #000; }
 #ws:not(.editing) .gfx.ip.fit.lonely { visibility: hidden; }
+/* Small IP dots (OakBarn Brewery, 2026-11-23: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small
+   red dots on only become large when you hover on one"; Rule 5.20): in Edit layout a round IP marker is only a small red dot, and only
+   the dot can be pointed at, so IPs close together no longer cover each other. Hovered or selected, it is the full white circle in
+   its colored ring with its letters and its name tag again. A Label set to show stays as it is. */
+#ws.editing .gfx.ip:not(.fit):not(.has-img):not(:hover):not(.sel) { border-color: transparent; background: none; box-shadow: none; pointer-events: none; }
+#ws.editing .gfx.ip:not(.fit):not(.has-img):not(:hover):not(.sel) > span { visibility: hidden; }
+#ws.editing .gfx.ip:not(.fit):not(.has-img)::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #e01b12; border: 2px solid #fff; box-shadow: 0 0 0 1px #000; pointer-events: auto; }
+#ws.editing .gfx.ip:not(.fit):not(.has-img):is(:hover, .sel)::before { display: none; }
+#ws.editing .gfx.ip:not(.fit):not(.has-img):hover { z-index: 40; }
+/* its Edit layout name tag (a Label not set to show) waits for the hover too, so the tags no longer pile up on top of the dots */
+#ws.editing .gfx.ip:not(.fit):not(.has-img):not(:hover):not(.sel) > .iplbl { display: none; }
 /* drawing a pipe or hose: a big cross-hair pointer and a marker that turns green on an IP */
 #ws.drawing, #ws.drawing * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23fff' stroke-width='5'/%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23fff' stroke-width='4'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23e8a33a' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E") 24 24, crosshair !important; }
 .pipes .drawmark { pointer-events: none; fill: none; }
@@ -1814,3 +1825,5 @@ button.icoBtn.stopSign img { width: 30px; height: 30px; }
 button.insCat::after { content: '▾'; color: #9a9a9a; font-size: .85em; margin-left: 5px; }
 #view-scripts .outVarHead { font-weight: 700; margin: 6px 0 2px; color: var(--accent, #4fb3ff); }
 #view-scripts .outVarHead:first-child { margin-top: 0; }
+/* 🔍 Zoom box (Z in Edit layout, Rule 5.37): above the Tab, never takes a click */
+.zoomBox { position: fixed; z-index: 60; pointer-events: none; border: 2px solid #001f5b; box-shadow: 0 4px 16px rgba(0,0,0,.6); background: #111; }

@@ -19,8 +19,8 @@ fenêtre remet le curseur dans le Label.
 
 - **✖ Cancel** est toujours « actif » : il marche même quand le Label est vide, donc vous pouvez toujours quitter la fenêtre. (Si vous avez changé
   quelque chose, il demande quand même d'abord.) **Échap** marche de même.
-- **🗑 Delete** est aussi « actif » : il marche même quand le Label, le Port ou une case nécessaire est vide (il demande quand
-  même « Delete this item? » d'abord).
+- **🗑 Delete** est aussi « actif » : il marche même quand le Label, le Port ou une case nécessaire est vide (il ne demande pas
+  d'abord : l'objet part tout de suite, et **↩ Put back** (Ctrl+Z) le ramène).
 
 ## Le Port aussi {#the-port-too}
 

@@ -4817,7 +4817,19 @@ function propsUnlockIps(it, onLetGo) {
     b.disabled = true; b.textContent = pipe ? '🔓 Ends let go' : '🔓 IPs let go';
     toast(`🔓 ${who}: ${now.length} ${pipe ? 'end' : 'pipe end'}${now.length > 1 ? 's' : ''} let go. Close or Save, then grab it and move it alone. ↩ Put back (Ctrl+Z) joins ${now.length > 1 ? 'them' : 'it'} again.`, false, 7000);
   };
-  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b);
+  // Move it with its pipes (OakBarn Brewery, 2026-11-23: "The Unlock IPs on the dialog is good but add Move with Pipes option"): the
+  // grab pop-up's other choice (Rule 5.19 as before); the next drag moves it with its pipes and does not ask. Greyed out for the same
+  // reasons, and when a 🔒 locked pipe or fitting would have to move with it.
+  const riders = pipe ? [] : lockedRiders(it), whyW = why || (riders.length ? `${riders.slice(0, 3).map(lockName).join(', ')} ${riders.length > 1 ? 'are' : 'is'} 🔒 locked and would move with it. Unlock ${riders.length > 1 ? 'them' : 'it'} first, or use 🔓 Unlock its IPs.` : '');
+  const w = pipe ? null : h('button', { type: 'button', class: 'propsUnlockIps propsMoveWith tipLbl', disabled: !!whyW || null,
+    'data-help': 'As the grab pop-up\'s Move it with its pipes (Rule 5.19): close or Save, then grab it and it moves with its pipes; it does not ask again. A pipe with an open end moves along, a pipe end slides along its own line, and a pipe moved off to the side lets go.' + (whyW ? `\n\nNot now: ${whyW}` : '') }, '↔ Move with pipes');
+  if (w) w.onclick = ev => {
+    ev.preventDefault(); if (w.disabled) return;
+    grabWith.add(it.id || it.name); w.disabled = b.disabled = true; w.textContent = '↔ Moves with its pipes';
+    toast(`Close or Save, then grab ${who} and it moves with its pipes.`, false, 6000);
+  };
+  const b0 = b.onclick; b.onclick = ev => { b0(ev); if (w && b.disabled) w.disabled = true; };
+  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b, w);
   setTimeout(() => setTimeout(() => { const ttl = $('#dlgTitle'); for (const o of ttl.querySelectorAll('.ttlExtra[data-for="_unlockIps"]')) o.remove(); ttl.append(t); }, 0), 0);      // after the lock, Visible and Hidden Locked
 }
 // an item dropped where something let go of its pipes: each open end whose IP was within REJOIN_PX of the same end of this item
@@ -5186,6 +5198,57 @@ document.addEventListener('keydown', ev => {
   if (!editing || !(ev.ctrlKey || ev.metaKey) || ev.shiftKey || ev.key.toLowerCase() !== 'z') return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   ev.preventDefault(); undoLast();
+});
+
+// 🔍 Zoom box (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for 200 pixel
+// square where Join area is zoomed inside the Dialog"; Rule 5.37): in Edit layout, Z (not in a text box) opens a box that shows the
+// 200 screen pixels around the mouse 3 times bigger, and follows the mouse, while dragging too. Look only: it never takes a click.
+// Z again or Esc closes it, and so does leaving Edit layout. The copy of the Tab is drawn in a closed-off part of the page (a shadow
+// root), so nothing else on the panel ever finds it.
+const ZOOM_SRC = 200, ZOOM_X = 3;
+let zoomBox = null;
+function zoomOpen() {
+  const host = h('div', { class: 'zoomBox', 'aria-hidden': 'true' }), root = host.attachShadow({ mode: 'open' });
+  const size = ZOOM_SRC * ZOOM_X;
+  root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; }
+    .zf > .zc { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
+    .zx { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; pointer-events: none;
+      background: linear-gradient(#ffd24a, #ffd24a) center / 2px 100% no-repeat, linear-gradient(#ffd24a, #ffd24a) center / 100% 2px no-repeat; filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000); }
+    .zt { font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 0 8px; }`));
+  const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, `🔍 Zoom ${ZOOM_X}x: ${ZOOM_SRC} pixels around the mouse. Z or Esc closes it.`);
+  root.append(title, frame);
+  document.body.append(host);
+  zoomBox = { host, frame, copy: null, at: null, t: 0, size };
+  zoomDraw(true);
+}
+function zoomClose() { zoomBox?.host.remove(); zoomBox = null; }
+function zoomDraw(fresh = false) {
+  const zb = zoomBox; if (!zb) return;
+  if (!editing) return zoomClose();
+  const ws = $('#ws'), now = Date.now();
+  if (fresh || !zb.copy || now - zb.t > 150) {        // a fresh copy of the Tab at most every 0.15 s, so a drag shows as it goes
+    const c = ws.cloneNode(true); c.classList.add('zc'); c.style.width = ws.offsetWidth + 'px'; c.style.height = ws.offsetHeight + 'px';
+    zb.copy?.remove(); zb.frame.prepend(c); zb.copy = c; zb.t = now;
+    if (!zb.frame.querySelector('.zx')) zb.frame.append(h('div', { class: 'zx' }));
+  }
+  const r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1, [mx, my] = zb.at || [r.left + r.width / 2, r.top + r.height / 2];
+  const lx = (mx - r.left) / z, ly = (my - r.top) / z, k = zb.size / (ZOOM_SRC / z);
+  zb.copy.style.transform = `translate(${zb.size / 2 - lx * k}px, ${zb.size / 2 - ly * k}px) scale(${k})`;
+  // it sits in the top right corner of the Tab area, or the top left when the mouse is there
+  const area = ($('#wsScroll') || ws).getBoundingClientRect(), w = zb.size + 4, left = mx > area.right - w - 20 && my < area.top + w + 40 ? area.left + 8 : area.right - w - 8;
+  Object.assign(zb.host.style, { left: Math.max(4, left) + 'px', top: Math.max(4, area.top + 8) + 'px' });
+}
+let zoomRaf = 0;
+document.addEventListener('pointermove', ev => {
+  if (!zoomBox) return;
+  zoomBox.at = [ev.clientX, ev.clientY];
+  if (!zoomRaf) zoomRaf = requestAnimationFrame(() => { zoomRaf = 0; zoomDraw(); });
+}, true);
+document.addEventListener('keydown', ev => {
+  if (zoomBox && ev.key === 'Escape') { zoomClose(); return; }
+  if (!editing || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat || ev.key.toLowerCase() !== 'z') return;
+  if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
+  ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();
 });
 
 let drag = null, lastPipeTap = null, hitUnit = null;
@@ -12539,7 +12602,10 @@ async function editItem(kind, id) {
           [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
         if (pick === undefined) return;
         if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
-      } else if (!await skyConfirm('Delete this item?', { ok: '🗑 Delete' })) return;
+      }
+      // no "Delete this item?" box (OakBarn Brewery, 2026-11-23: "getting the annoying Do you really want do delete nanny popup. Could a
+      // simple CTRL + Z restore a Delete ?"; Rules 2.64 and 5.37): it goes at once, and ↩ Put back (Ctrl+Z) brings it back
+      const delWho = item.label || item.name || lockName(item); pushUndo(`delete ${delWho}`);
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else if (item.kind === 'pipe') deletePipe(item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
@@ -12556,7 +12622,7 @@ async function editItem(kind, id) {
       }
       draft.graphics = draft.graphics.filter(g => !(isCap(g) && gone.includes(g.capOn)));     // an End Cap on an opening that is gone goes too
       for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
-      sel = null; renderWs(); return;
+      sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000); return;
     }
     const copy = r === 'copy'; if (copy) r = 'ok';           // COPY: save it, then make the copy
     if (r !== 'ok') {      // a new vessel closed with Cancel still gets its default ports

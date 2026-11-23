@@ -884,6 +884,8 @@
  "None = it follows the Tab Flow Color. Flow from a Tap Water Valve is always Blue, and flow that began at a Vessel with an Out flow color takes that color.": "None = il suit la Tab Flow Color. Le flux d'une Tap Water Valve est toujours Blue, et le flux qui a commencé à une cuve avec une couleur de flux Out prend cette couleur.",
  "Off: the tab picture already shows it, so only the moving flow appears.": "Off : l'image du Tab le montre déjà, donc seul le flux qui bouge apparaît.",
  "Flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow.": "Le flux qui commence à cette cuve prend cette couleur, avant toute autre couleur de flux ; None = elle ne colore pas le flux.",
+ "As the grab pop-up's Move it with its pipes (Rule 5.19): close or Save, then grab it and it moves with its pipes; it does not ask again. A pipe with an open end moves along, a pipe end slides along its own line, and a pipe moved off to the side lets go.": "Comme Move it with its pipes dans la fenêtre quand vous attrapez (Règle 5.19) : fermez ou enregistrez (Close ou Save), puis attrapez-le et il bouge avec ses tuyaux ; il ne demande plus. Un tuyau avec un bout ouvert suit, un bout de tuyau glisse le long de sa propre ligne, et un tuyau tiré de côté se détache.",
+ "\n\nNot now: {0}": "\n\nPas maintenant : {0}",
  "Tab_Vessel, made from the Vessel Template {0}. Changing it here does not change the Template.": "Tab_Vessel, fait à partir du Vessel Template {0}. Le changer ici ne change pas le Template.",
  "The only text on it; never blank.": "Le seul texte dessus ; jamais vide.",
  "Label and place": "Label et place",
