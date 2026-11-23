@@ -12946,38 +12946,22 @@ async function editWorkspace() {
 // Browsers play nothing until this screen is tapped or clicked once, so a sound turned on before that waits for the first tap.
 const tappedYet = () => navigator.userActivation ? navigator.userActivation.hasBeenActive : soundTapped;
 let soundTapped = false;
+// The Sound icon on the Menu Bar (Panel Update 10, items 2 and 3b, OakBarn Brewery 2026-11-23: "Toggle sound On an Off with the Icon on
+// the Menu Bar"; "Do Not Enter Overlay when sound is off"; "Replace the Sound Nanny as no longer needed"): one click turns sound on or
+// off. It is the only sound switch: the "Turn sound on?" pop-up, the Enable sound button, the bottom reminder and the copies in the
+// ☰ Menu and Default settings are gone (Rule 2.69).
 function showSound() {
-  $('#soundBtn').textContent = !soundOn ? 'Enable sound' : tappedYet() ? 'Sound on' : 'Sound on (tap anywhere)';
-  // the reminder on the Tab while sound is off (OakBarn Brewery, 2026-11-13: "keep on the Tab and Hamburger Menu if it has not been done")
-  $('#soundNag')?.classList.toggle('hidden', soundOn || view !== 'workspace');
-  document.querySelectorAll('.soundNowSw').forEach(x => { x.checked = soundOn; });
+  const b = $('#barSound'); if (!b) return;
+  b.classList.toggle('off', !soundOn); b.setAttribute('aria-pressed', String(soundOn));
+  b.title = !soundOn ? 'Sound is off (the red Do Not Enter sign): one click turns sound on in this browser'
+    : tappedYet() ? 'Sound is on: one click turns it off in this browser' : 'Sound is on and plays after your first click or tap on this screen. One click here turns it off';
 }
 function setSound(on) {
   soundOn = on; showSound();
   if (soundOn && tappedYet()) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
   updateAlarms();
 }
-$('#soundBtn').onclick = () => setSound(!soundOn);
-$('#soundNag').onclick = () => setSound(true);
-// Ask when the panel first opens (OakBarn Brewery, 2026-11-13: "Ask when first opens"): browsers play nothing until the page is
-// clicked once, so the answer is that click. Once per opening of the panel, only while sound is off; never on top of another dialog.
-let soundAsked = false;
-function askSound() {
-  if (soundOn || soundAsked) return;
-  const d = $('#valDlg');
-  if (d.open) { d.addEventListener('close', () => setTimeout(askSound, 300), { once: true }); return; }
-  soundAsked = true;
-  d.innerHTML = '';
-  const close = on => { d.oncancel = null; d.close(); if (on) setSound(true); };
-  d.append(h('div', { class: 'vdTitle' }, '🔊 Turn sound on?'),
-    h('p', {}, 'Alarms, hop drops, timers and music on this Panel need sound. Your browser only plays sound after you click once, so Skynet asks.'),
-    h('p', { class: 'muted' }, 'Sound is turned on for this browser. Moving between Tabs keeps it on. To have it on every time, use ☰ Menu > Default > Turn Sound On when starting.'),
-    h('div', { class: 'vdBtns' },
-      h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, '🔊 Turn Sound On'),
-      h('button', { type: 'button', class: 'big', onclick: () => close(false) }, 'Not now')));
-  d.oncancel = () => { d.oncancel = null; showSound(); };
-  d.showModal();
-}
+$('#barSound').onclick = () => setSound(!soundOn);
 // the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
 const firstTap = () => {
   soundTapped = true;
@@ -13741,7 +13725,7 @@ $('#scriptAutoRestart').onchange = guard(async ev => {
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 // Emergency Off (Rule 6.41, Panel Update 8): the red mushroom button at the top right, on every page. One click, no pop-up: every Process
 // stops, then the heaters, the pumps, every other output, and the valves close. Brewers and admins (a viewer can't switch anything).
-for (const id of ['#eOff', '#eOffBar']) $(id).onclick = guard(async () => {
+for (const id of ['#eOffBar']) $(id).onclick = guard(async () => {
   if (!can('operator')) return toast('Your account is view only', true);
   await api('POST', '/ui/emergencyoff');
   toast('🛑 Emergency Off: every Process stopped; heaters, pumps and outputs off; valves closed');
@@ -15183,6 +15167,8 @@ $('#simHide').onclick = () => showSimBar(false);
 function renderSimBar() {
   const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden'), btn = $('#barSim');
   btn.textContent = on ? '🧪 Simulator' : '🔌 Real'; btn.classList.toggle('sim', on); btn.setAttribute('aria-pressed', String(on));
+  // the Simulator balloon shows only in Simulator mode; its space stays (Panel Update 10, item 3g). ☰ Menu switches to the Simulator.
+  btn.classList.toggle('keepSpace', !on);
   btn.title = on ? 'Simulator mode: nothing real is switched. Press to switch the whole panel back to the Real boards' : 'Real boards are used. Press to switch the whole panel (every Interface) to the Simulator for testing';
   bar.classList.toggle('hidden', !on);
   document.body.classList.toggle('simOn', on);
@@ -15887,8 +15873,6 @@ function menuItems(list, go) {
   // Rule 10.7 (Fritz, 2026-11-04): in Simulation the Simulator bar is shown or hidden from here
   if (S.sim?.on) list.append(item(simBarHidden() ? '🧪 Show Simulator bar' : '🧪 Hide Simulator bar', () => showSimBar(simBarHidden()),
     { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
-  // sound is off: turn it on from here (OakBarn Brewery, 2026-11-13)
-  if (!soundOn) list.append(item('🔊 Turn Sound On', () => setSound(true), { title: 'Sound is off in this browser. Browsers only play sound after you click once: this is that click' }));
   // the Help language from any screen (OakBarn Brewery, 2026-11-13: "Change to French seamless, maybe on hamburger menu as well";
   // Rule 11.11): the same switch as 🌐 in the Help page list (public/help.js), with the machine translation notice (Rule 11.14)
   // with a User Language (Rule 11.16) it goes on to the next of the three: English, Français, then the User Language
@@ -16723,10 +16707,6 @@ function renderPanelSettings() {
   box.innerHTML = '';
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, ...(S.config.brewDefaults || {}) };
   d._grainLabel = grainWtLabel(d.units);
-  // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
-  const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
-  now.onchange = () => setSound(now.checked);
-  const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
   const f = paneForm(panelSetFields, d, () => { }, !admin);
   const save = guard(async () => {
     f.read();
@@ -16740,7 +16720,7 @@ function renderPanelSettings() {
     showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(cur.hoverDelay);
     renderWs(); renderMenuPane(); savedPop('Panel settings saved'); });
   const order = menuOrderTable(admin);
-  box.append(h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+  box.append(h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
     h('h4', { id: 'sec-menuOrder' }, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
 }
 
@@ -20052,4 +20032,4 @@ async function importSchemaFile() {
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)
-load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); setTimeout(askSound, 800); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

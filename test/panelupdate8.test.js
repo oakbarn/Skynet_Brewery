@@ -104,8 +104,8 @@ assert.match(app, /type === 'soundPlayer'\) e\.visibility = 'hidden';/, 'a new A
 assert.match(app, /\['sliderLayer', 'Slider on top \(Layer 1\)', 'bool'/);
 
 // ---- Emergency Off ----
-assert.match(html, /<button id="eOff" class="eOff"/);
-assert.ok(!/<text\b/.test(html.slice(html.indexOf('id="eOff"'), html.indexOf('</button>', html.indexOf('id="eOff"')))), 'no words in the picture (Rule 7.25)');
+assert.match(html, /<button id="eOffBar" class="eOff"/);   // the one Emergency Off, on the Menu Bar (Panel Update 10, item 3)
+assert.ok(!/<text\b/.test(html.slice(html.indexOf('id="eOffBar"'), html.indexOf('</button>', html.indexOf('id="eOffBar"')))), 'no words in the picture (Rule 7.25)');
 assert.match(server, /if \(p === '\/ui\/emergencyoff' && m === 'POST'\) \{\n    engine\.stopAll\(\);/);
 assert.match(server, /p === '\/ui\/emergencyoff' \|\|/, 'brewers and admins');
 assert.ok(fs.existsSync(path.join(ROOT, 'media/Images/Skynet/On_Off/Skynet_Emergency_Off.svg')));
