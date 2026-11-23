@@ -37,8 +37,8 @@ de brasser avec.
 
 La liste Schema a les deux mêmes choses, donc vous n'avez pas besoin de la page Schema.json pour partager :
 
-- **Export to share ...** (liste déroulante Schema, ou ☰ Menu > 🗂 Schema > **📤 Export to share**) enregistre un Schema dans un fichier `.json`, comme Save as .json file. Envoyez ce fichier à l'autre brasseur.
-- **Import a brewer's Schema ...** (liste déroulante Schema, ou ☰ Menu > 🗂 Schema > **📥 Import a brewer's Schema**) ajoute un fichier Schema qu'un autre brasseur vous a donné, comme Open a Schema file. **L'endroit où le mettre est le Import folder** (`C:\Brewing\Import`), ou choisissez-le n'importe où sur votre ordinateur. Il arrive toujours comme un nouveau Schema : aucun des vôtres n'est écrasé.
+- **Export to share ...** (liste déroulante Schema, ou ☰ Menu > Schema > **📤 Export to share**) enregistre un Schema dans un fichier `.json`, comme Save as .json file. Envoyez ce fichier à l'autre brasseur.
+- **Import a brewer's Schema ...** (liste déroulante Schema, ou ☰ Menu > Schema > **📥 Import a brewer's Schema**) ajoute un fichier Schema qu'un autre brasseur vous a donné, comme Open a Schema file. **L'endroit où le mettre est le Import folder** (`C:\Brewing\Import`), ou choisissez-le n'importe où sur votre ordinateur. Il arrive toujours comme un nouveau Schema : aucun des vôtres n'est écrasé.
 
 > **Skynet ne vérifie pas ce qu'il y a dans un fichier Schema, à l'envoi ou à l'arrivée.** Les images, les sons, les noms et tout ce qu'il contient, et tout droit d'auteur sur eux, regardent les brasseurs entre eux.
 

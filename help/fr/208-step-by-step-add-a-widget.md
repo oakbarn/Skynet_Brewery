@@ -82,7 +82,7 @@ Appuyez sur **Exit** pour quitter Edit layout. Le Garden hose est sur le Tab Bre
 
 Ce qu'il reste à faire :
 
-1. **Tracer son tuyau souple ou son tuyau** : **☰ Menu > ✎ Edit layout > Draw hose** ([Tuyaux et tuyaux souples](24-pipes-and-hoses)).
+1. **Tracer son tuyau souple ou son tuyau** : **🛠 Build (Edit layout) > Draw hose** ([Tuyaux et tuyaux souples](24-pipes-and-hoses)).
 2. **Le changer quand vous voulez** : dans Edit layout, double-cliquez dessus pour ouvrir ses Properties.
 
 ## Si vous vous êtes arrêté avant Finish Build {#if-you-stopped-before-finish-build}

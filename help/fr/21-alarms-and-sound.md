@@ -26,7 +26,7 @@ et 1.1 avant 1.15 avant 1.2, pour que vous puissiez mettre une Alarm entre deux 
 
 ## En ajouter une {#add-one}
 
-**Tabs > ☰ Menu > Edit layout > Add Widget > On-screen controls > Alarm**, puis choisissez d'abord son **Kind** (type). Les réglages en dessous changent selon le type :
+**Tabs > 🛠 Build (Edit layout) > Add Widget > On-screen controls > Alarm**, puis choisissez d'abord son **Kind** (type). Les réglages en dessous changent selon le type :
 
 - **Hop Alarm** : choisissez une **minuterie** et le **temps sur cette minuterie** pour l'ajout de houblon, et elle sonne toute seule. Pour une minuterie d'ébullition en compte à rebours, c'est le temps restant (un houblon à 15 minutes : `00:15:00`). Laissez la minuterie vide pour ne l'activer que depuis un Process.
 - **Pre-Hop Alarm** : choisissez la **Hop Alarm** à laquelle elle va et **combien de temps avant** (vide = `00:10:00`).

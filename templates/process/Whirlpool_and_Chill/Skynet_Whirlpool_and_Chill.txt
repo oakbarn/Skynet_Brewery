@@ -1,4 +1,5 @@
 //Skynet_Whirlpool_and_Chill
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Start the whirlpool, then chill while it spins. With Whirlpool hops in the Recipe the chill stops at each Hop Stand that has hops (High, Middle, Low), the cooling water goes off for that stand's time, then the chill finishes. Whirlpool hops marked Hop Rocket go in the Hop Infuser, with the wort running through it. The trub settles at the end. Use this or Chill.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

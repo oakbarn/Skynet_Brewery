@@ -8,7 +8,7 @@ You can still open a locked item's properties (double-click it) and change it th
 
 ## Lock or unlock one item
 
-1. Pick **☰ Menu > Edit layout**.
+1. Pick **🛠 Build (Edit layout)**.
 2. Click the item.
 3. Press **🔒 Lock** on the Edit layout bar. The button then says **🔓 Unlock**: press it again to unlock.
 4. Press **Save layout**.

@@ -5,7 +5,7 @@ One press switches the **whole panel**, every Interface at once, between the **S
 ## Where the switch is (Admins)
 
 - The round button beside **☰ Menu** on the Tabs bar: **🔌 Real** (green) while the real boards are used, **🧪 Simulator** (yellow stripes) in Simulator mode. Press it to switch.
-- **☰ Menu > 🧪 Switch to Simulator** or **🔌 Switch to Real boards**.
+- **☰ Menu > 🧪 Switch to Simulator** (only while the Real boards are used; in Simulator mode the 🧪 Simulator balloon switches back).
 
 Both do the same. The panel asks first. Every Process stops and every output turns off before the switch, so nothing a pretend brew turned on is ever sent to a real board. A yellow striped **SIMULATION** bar shows for everyone while it is on.
 

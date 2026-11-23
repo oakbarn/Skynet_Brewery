@@ -1755,5 +1755,10 @@
  "Puts {0} in at the cursor: {1}": "Met {0} au curseur : {1}",
  "The Skynet Constants: every built in conversion number. Click one to put it at the cursor": "Les Skynet Constants : chaque nombre de conversion intégré. Cliquez-en un pour le mettre au curseur",
  "The Process open now: its class (picked when it was made), Version and state": "Le Process ouvert : sa classe (choisie à sa création), sa Version et son état",
- "Find in All Processes: find, and replace, in every Process of this Brain": "Find in All Processes : chercher, et remplacer, dans chaque Process de ce Brain"
+ "Find in All Processes: find, and replace, in every Process of this Brain": "Find in All Processes : chercher, et remplacer, dans chaque Process de ce Brain",
+ "The last ☰ Menu choice you picked: ": "Le dernier choix pris dans le ☰ Menu : ",
+ "Help in another language by AI translation: Export the Help for an AI, then Import the translation (Help > 🌐 Languages)": "L'aide dans une autre langue par traduction IA : exportez l'aide pour une IA, puis importez la traduction (Help > 🌐 Languages)",
+ "Pick a Schema to load it (the same list as the Schema on the Top Line). The Schema Menu tab (Menu tabs > Schema) clones, renames, backs up and restores one.": "Choisissez un Schema pour le charger (la même liste que le Schema de la Top Line). Le Menu tab Schema (Menu tabs > Schema) en clone, renomme, sauvegarde et restaure un.",
+ "Every Interface at once: the simulator (nothing real is switched). The Simulator balloon on the Menu Bar switches back to the Real boards": "Toutes les Interfaces à la fois : le simulateur (rien de réel n'est commuté). Le ballon Simulator de la Menu Bar revient aux vraies cartes (Real boards)",
+ "Tell OakBarn Brewery about a bug, on GitHub or by email. Your Skynet version and browser are filled in.": "Signalez un bogue à OakBarn Brewery, sur GitHub ou par e-mail. Votre version de Skynet et votre navigateur sont remplis pour vous."
 }

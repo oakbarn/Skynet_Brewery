@@ -9,7 +9,7 @@ Dès que **Add new Schema** a fait votre nouveau Schema et l'a chargé, la **New
 
 ## Les pages {#the-pages}
 
-1. **About** : le **Name** (déjà rempli) et **What is it for?** (à quoi il sert), une ligne comme *Keg Cleaning* ou *Hot Side, 10 gallon*. Elle s'affiche dans la liste des Schemas de l'onglet **☰ Menu > 🗂 Schema**. Vous pouvez la laisser vide.
+1. **About** : le **Name** (déjà rempli) et **What is it for?** (à quoi il sert), une ligne comme *Keg Cleaning* ou *Hot Side, 10 gallon*. Elle s'affiche dans la liste des Schemas de l'onglet **☰ Menu > Schema**. Vous pouvez la laisser vide.
 2. **Boards** : les cartes (Interfaces) du nouveau Schema, et les vraies cartes de vos autres Schemas. Cochez chacune que ce Schema utilise aussi. Pour ajouter une carte qu'aucun Schema n'a encore, activez **➕ Add a New board after Finish** (ajouter une nouvelle carte après Finish) : après **✔ Finish** la fenêtre **Add Interface** s'ouvre, et après son **Save** la page des Interfaces montre la nouvelle carte. Voir [Interfaces](76-interfaces).
 3. **Tabs** : une case pour chaque Tab, et **➕ Add New Tab** (ajouter un Tab) pour un autre. Dans chaque case :
    - **Tab name** (nom du Tab, par exemple *Main* en *Brew House*).

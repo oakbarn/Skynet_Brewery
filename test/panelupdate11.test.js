@@ -57,3 +57,4 @@ assert.match(app, /\.\.\.\(patron \? \[`\/\/Created by \$\{who\}`, '\/\/MIT Lice
 assert.match(css, /button\.icoBtn \{[^}]*background: #fafafa;/);
 assert.doesNotMatch(css, /(^|[^-])color: ?#fff\b/m, 'no #fff words');
 console.log('Panel Update 11 ok');
+await import('./panelupdate12.test.js');      // Panel Update 12 (run with this one, so package.json is not changed)

@@ -324,7 +324,7 @@ async function load() {
   rememberTheme(applyTheme(document, S.config.theme).key);     // the Look of this Schema (Rule 2.39)
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   showBreweryName();
-  document.title = S.config.title || 'Skynet Brew Panel';
+  windowTitle();      // the window's title line: the Schema, then Official, the version, the time now and Update available (Panel Update 12)
   showPanelVer();
   officialWarn();
   setTextLarge();
@@ -13817,11 +13817,33 @@ $('#scriptAutoRestart').onchange = guard(async ev => {
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 // Emergency Off (Rule 6.41, Panel Update 8): the red mushroom button at the top right, on every page. One click, no pop-up: every Process
 // stops, then the heaters, the pumps, every other output, and the valves close. Brewers and admins (a viewer can't switch anything).
-for (const id of ['#eOffBar']) $(id).onclick = guard(async () => {
+const emergencyOff = guard(async () => {
+  eOffBigClose();
   if (!can('operator')) return toast('Your account is view only', true);
   await api('POST', '/ui/emergencyoff');
   toast('🛑 Emergency Off: every Process stopped; heaters, pumps and outputs off; valves closed');
 });
+for (const id of ['#eOffBar']) $(id).onclick = emergencyOff;
+// Panel Update 12, item 1b (OakBarn Brewery, 2026-11-23: "Hover over Emergency stop for 2 seconds Pop Up to 400 Px or so"): the mouse
+// resting 2 seconds on Emergency Off pops up a 400 px Emergency Off under it, the same button made big (his own picture at 400 px,
+// public/icons/Emergency_Stop_400.png). One click on it does the same as the small one (Rule 6.41, one click, no pop-up asking first).
+// It goes away when the mouse leaves both, with Esc, or after it is clicked. It is a pop-up, so it is on top (Rule 18.53).
+const EOFF_WAIT = 2000, EOFF_BIG = 400;
+let eOffTimer = null, eOffLeave = null;
+function eOffBigClose() { clearTimeout(eOffTimer); clearTimeout(eOffLeave); eOffTimer = eOffLeave = null; $('#eOffBig')?.remove(); }
+function eOffBigOpen() {
+  eOffBigClose();
+  const small = $('#eOffBar'), r = small.getBoundingClientRect();
+  const left = Math.max(8, Math.min(innerWidth - EOFF_BIG - 8, r.left + r.width / 2 - EOFF_BIG / 2));
+  const b = h('button', { id: 'eOffBig', type: 'button', class: 'eOffBig', title: small.title, 'aria-label': 'Emergency Off',
+    style: `left:${left}px; top:${Math.round(r.bottom + 4)}px`, onclick: emergencyOff }, h('img', { src: 'icons/Emergency_Stop_400.png', alt: '' }));
+  b.onmouseenter = () => clearTimeout(eOffLeave);
+  b.onmouseleave = () => { eOffLeave = setTimeout(eOffBigClose, 300); };
+  document.body.append(b); raiseOnTop(b);
+}
+$('#eOffBar').addEventListener('mouseenter', () => { clearTimeout(eOffLeave); if (!$('#eOffBig')) { clearTimeout(eOffTimer); eOffTimer = setTimeout(eOffBigOpen, EOFF_WAIT); } });
+$('#eOffBar').addEventListener('mouseleave', () => { clearTimeout(eOffTimer); eOffTimer = null; if ($('#eOffBig')) eOffLeave = setTimeout(eOffBigClose, 300); });
+addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('#eOffBig')) eOffBigClose(); });
 // the Override and Stop buttons in the Help language (Rule 11.11): again when it is picked here or in another window
 setStopWord(safetyWord);      // a Process Widget's ■ Stop
 function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); const st = $('#stopScript'); st.title = safetyWord('Stop') + ': stop this Process'; st.setAttribute('aria-label', safetyWord('Stop')); }
@@ -13845,9 +13867,12 @@ const NEW_PROC_ABOUT = {
 // Only a Patron gets the Created by, MIT License and Copyright lines (Skynet does not write a Process, so it is not named as its owner).
 // The comment lines are his new words (spelling fixed), with the Process's class in the first one.
 const createdStamp = (now = new Date()) => { const pad = x => String(x).padStart(2, '0'); return `${pad(now.getFullYear() % 100)}${pad(now.getMonth() + 1)}${pad(now.getDate())} ${pad(now.getHours())}h ${pad(now.getMinutes())}M`; };
+const PROCESS_RISK_LINE = '// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.';
 function newProcessText(typed, now = new Date(), cls = '') {
   const patron = !!S.patron?.brewery, who = breweryName(), kind = S.processClasses?.[cls]?.label;
   return [`//${typed}`,
+    // Panel Update 12, item 3 (OakBarn Brewery, 2026-11-23: "Add Comment at top comment Block Second Line after Process Name"): his words
+    PROCESS_RISK_LINE,
     `//Created on ${createdStamp(now)}`,
     // for everyone (OakBarn Brewery, 2026-11-23: "We might want to add that as a comment line regardless for everyone")
     '//This Process was written by its user, not by Skynet',
@@ -16047,33 +16072,73 @@ function procEditorMenu(list, item) {
   }
   list.append(h('hr'));
 }
+// Panel Update 12, item 2f: the last ☰ Menu choice picked, by its words; its copy sits in the gap (lastSpot) once the whole list is made
+const MENU_LAST_KEY = 'bp.menuLast';
+function menuLastSet(key) { try { if (key) localStorage.setItem(MENU_LAST_KEY, key); else localStorage.removeItem(MENU_LAST_KEY); } catch { } }
+function menuLastFill(list, spot) {
+  let key = ''; try { key = localStorage.getItem(MENU_LAST_KEY) || ''; } catch { }
+  const orig = key && [...list.querySelectorAll('.menuItem[data-mkey]')].find(b => b.dataset.mkey === key && !b.closest('.menuLastSpot'));
+  if (!orig) return;
+  const copy = orig.cloneNode(true);
+  copy.classList.remove('cur', 'menuSub'); copy.classList.add('menuLast');
+  copy.title = 'The last ☰ Menu choice you picked: ' + (orig.title || key);
+  copy.onclick = ev => { ev.stopPropagation(); orig.click(); };
+  spot.replaceChildren(h('div', { class: 'menuNote muted' }, 'Last picked'), copy);
+}
+// Panel Update 12, item 2a: the Help language as one-click boxes (Rule 2.6): the same switch as 🌐 in the Help page list (public/help.js)
+function menuHelpLang(list, go) {
+  const hl = $('#hpLang'); if (!hl) return;
+  const row = h('div', { class: 'menuLangRow', role: 'group', 'aria-label': 'Help language', title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English, except the Override and Stop buttons.' });
+  for (const o of [...hl.options]) {
+    const on = o.value === hl.value;
+    row.append(h('button', { type: 'button', class: 'menuLang' + (on ? ' on' : '') + (o.value === 'user' ? ' userLang' : ''), 'aria-pressed': String(on),
+      onclick: go(() => { if (hl.value !== o.value) { hl.value = o.value; hl.dispatchEvent(new Event('change')); } }) }, o.textContent.replace(/^🌐\s*/, '')));
+  }
+  // until a User Language is on this Brain: ➕ Add a Language (Admins), Help > 🌐 Languages (Rule 11.16)
+  if (![...hl.options].some(o => o.value === 'user') && can('admin') && $('#hpLangs'))
+    row.append(h('button', { type: 'button', class: 'menuLang', title: 'Help in another language by AI translation: Export the Help for an AI, then Import the translation (Help > 🌐 Languages)',
+      onclick: go(() => $('#hpLangs').click()) }, '➕ Add a Language'));
+  list.append(h('div', { class: 'menuNote muted' }, '🌐 Help'), row);
+}
 // the ☰ Menu choices: Edit layout, then the Menu tabs in their order, then every page with its parts. `go` wraps each
 // choice (it closes the list first, and in a dialog it closes the dialog).
 function menuItems(list, go) {
-  const item = (label, fn, attrs = {}) => h('button', { type: 'button', role: 'menuitem', class: 'menuItem', ...attrs, onclick: fn ? go(fn) : null }, ...[label].flat());
+  // Panel Update 12, item 2f (OakBarn Brewery, 2026-11-23: "Add the Last Item selected from the Hamburger Menu so it's easy to get back
+  // to it. So a clone of something in the list."): every choice is remembered by its words (each browser its own); the last one picked
+  // gets a copy in the gap where New Schema ... Switch to Real boards were, and that copy clicks the choice itself.
+  const item = (label, fn, attrs = {}) => {
+    const key = attrs.key ?? [label].flat().map(x => typeof x === 'string' ? x : '').join('').trim(); delete attrs.key;
+    return h('button', { type: 'button', role: 'menuitem', class: 'menuItem', 'data-mkey': key, ...attrs, onclick: fn ? go(() => { menuLastSet(key); fn(); }) : null }, ...[label].flat());
+  };
   // Rule 10.7 (Fritz, 2026-11-04): in Simulation the Simulator bar is shown or hidden from here
   if (S.sim?.on) list.append(item(simBarHidden() ? '🧪 Show Simulator bar' : '🧪 Hide Simulator bar', () => showSimBar(simBarHidden()),
     { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
-  // the Help language from any screen (OakBarn Brewery, 2026-11-13: "Change to French seamless, maybe on hamburger menu as well";
-  // Rule 11.11): the same switch as 🌐 in the Help page list (public/help.js), with the machine translation notice (Rule 11.14)
-  // with a User Language (Rule 11.16) it goes on to the next of the three: English, Français, then the User Language
-  { const hl = $('#hpLang'), opts = hl ? [...hl.options] : [], next = opts[(hl?.selectedIndex + 1) % (opts.length || 1)];
-    if (hl && next) list.append(item('🌐 Help in ' + next.textContent.replace(/^🌐\s*/, ''), () => { hl.value = next.value; hl.dispatchEvent(new Event('change')); },
-      { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English, except the Override and Stop buttons.' })); }
-  if (can('admin') && view !== 'scripts') list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
+  // the Help language from any screen (OakBarn Brewery, 2026-11-13: "Change to French seamless, maybe on hamburger menu as well"; Rule 11.11)
+  // Panel Update 12, item 2a (OakBarn Brewery, 2026-11-23: "Help DDLB with English, Francais, and Add a Language until a 3rd Language is
+  // added and then have that Language In its font if there is one as the last item on the list"): three choices, so one-click boxes in a
+  // row (Rule 2.6, fewer than six, pick one): English, Français, then ➕ Add a Language (Admins: Help > 🌐 Languages, Rule 11.16) until a
+  // User Language is on this Brain, then the User Language by its own name, in the Help fonts (Rule 11.16) so its letters show.
+  menuHelpLang(list, go);
   if (view === 'scripts') procEditorMenu(list, item);
-  // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
-  list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
-    { title: 'Pick the Schema to load; add, clone, rename, back up or restore one; add a Sample Schema' }));
-  // Fritz, 2026-11-11: an easy way to begin a new Schema, right under 🗂 Schema (the same box as Schema dropdown > Add new Schema)
-  if (can('admin')) list.append(item('➕ New Schema…', guard(addNewSchema), { title: 'Start a new Schema: a copy of this one, an empty one, or a Skynet Schema Template. Help: Step by Step: Add a Schema' }));
-  // Fritz, 2026-10-27: the Interfaces (boards) are easy to find, add, and switch between simulator and real
-  list.append(item('🔌 Interfaces (boards)', () => { setView('devices'); showPart($('#sec-interfaces')); }, { title: 'The boards your Devices are wired to (Devices page)' }));
-  if (can('admin')) {
-    list.append(item('➕ Add Interface…', guard(async () => { if (await addInterfaceDialog()) { setView('devices'); showPart($('#sec-interfaces')); } }), { title: 'Add a board: a Mega, an ESP32 ... by USB, Ethernet, WiFi, or a Simulator' }));
-    list.append(item(S.sim?.on ? '🔌 Switch to Real boards' : '🧪 Switch to Simulator', guard(() => setSimulator(!S.sim?.on)), { title: 'Every Interface at once: the simulator (nothing real is switched) or the real boards' }));
-  }
+  // Panel Update 12, item 2b (OakBarn Brewery: "Is this not the same as the work Icon? If so, do not need here"): Edit layout is the Build
+  // icon on the Menu Bar (Rule 2.69, no copies), so it is not on the ☰ Menu. While Edit layout is on, the ☰ Menu can't be opened.
+  // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu. Panel Update 12, item 2c (OakBarn Brewery, 2026-11-23: "DDLB of Schema to
+  // select by Clicking on it to make Current"): the Schema dropdown itself (the same one as the Top Line's: pick one and it loads, with
+  // the warning when Processes run), and Add new Schema ... in it (Rule 2.6). Item 2d ("Do not needed as Rare and Add Schema is in c"):
+  // New Schema..., Interfaces (boards) and Add Interface... left the ☰ Menu (Interfaces and Add Interface are under Pages > Devices).
+  { const sel = schemaSelect(), was = sel.onchange;
+    sel.classList.add('menuSchema'); sel.onchange = ev => go(() => was(ev))();      // closes the list (in a dialog: asks about its changes first)
+    list.append(h('label', { class: 'menuItem menuSchemaRow', title: 'Pick a Schema to load it (the same list as the Schema on the Top Line). The Schema Menu tab (Menu tabs > Schema) clones, renames, backs up and restores one.' }, '🗂 Schema ', sel)); }
+  // Switch to Real boards left too: the Simulator balloon on the Menu Bar does it. On the Real boards the balloon is hidden (Rule 2.69),
+  // so Switch to Simulator stays here, the only way to turn the Simulator on (Design Rule 1).
+  if (can('admin') && !S.sim?.on) list.append(item('🧪 Switch to Simulator', guard(() => setSimulator(true)), { title: 'Every Interface at once: the simulator (nothing real is switched). The Simulator balloon on the Menu Bar switches back to the Real boards' }));
+  // Panel Update 12, item 2e (OakBarn Brewery: "Request a Feature is a Parton Perk, But we need Report a Bug for everyone"): 🐞 Report a Bug
+  // for everyone, the same box as ☰ Menu > About > Report a problem (Rule 2.61) with A bug picked
+  list.append(item('🐞 Report a Bug', () => reportDialog({}), { title: 'Tell OakBarn Brewery about a bug, on GitHub or by email. Your Skynet version and browser are filled in.' }));
   list.append(item('⭐ Request a Feature', guard(requestFeature), { title: 'Ask the OakBarn Brewery team for a new feature (a Patron perk)' }));
+  const lastSpot = h('div', { class: 'menuLastSpot' });
+  list.append(lastSpot);
+  queueMicrotask(() => menuLastFill(list, lastSpot));
   list.append(h('hr'));
   if (editing) list.append(h('div', { class: 'menuNote muted' }, 'Save or exit Edit layout to open a Menu tab'));
   list.append(h('div', { class: 'menuNote muted' }, 'Menu tabs'));
@@ -17342,6 +17407,7 @@ function showPanelVer() {
   const n = $('#panelVer'); n.classList.toggle('small', verSmall);
   n.textContent = verSmall ? '🏷' : panelVersionName();
   n.title = verSmall ? `Skynet Brewer version ${panelVersionName()}. Click to show it.` : 'Skynet Brewer version. Click to make it a small icon. ☰ Menu > About says if it is the latest.';
+  windowTitle();      // the title line's ✅ / ❌ follows the Official Skynet check
 }
 $('#panelVer').onclick = () => { verSmall = !verSmall; try { localStorage.setItem('bp.verSmall', verSmall ? '1' : '0'); } catch { } showPanelVer(); };
 const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + officialMark() : '(not stamped)'; };
@@ -17393,6 +17459,25 @@ function officialBox() {
   box.append(h('div', { class: 'bar' }, again, fix, h('button', { title: 'What Official Skynet means', onclick: () => openHelp(['official-skynet-updates']) }, '❓ Help')));
   return box;
 }
+// The window's title line (Panel Update 12, item 1a, OakBarn Brewery 2026-11-23: "Lets make use of this better. It Now has the current
+// loaded Shema. Add to the Right of shema"): the clean window's title bar (Rule 2.36) shows the Schema, then ✅ when this is Official Skynet
+// (❌ when it is not, Rule 9.14), the Skynet Panel version, the date and time now in his Created on form (261123 14h 31M, every minute) and
+// ⬆ Update available when GitHub has a newer version (asked every 10 minutes, lib/version.js). ☰ Menu > Zoom > Full screen hides the line.
+// A browser tab on a phone or another computer shows the same words.
+let updateState = '';
+function windowTitle() {
+  if (!S?.config) return;
+  const parts = [S.config.title || 'Skynet Brew Panel'];
+  if (!S.importBuild) {
+    const st = S.official?.state, mark = st === 'official' ? '✅ ' : officialBad() ? '❌ ' : '';
+    parts.push(mark + (S.panelVersion?.version || 'Not stamped'), createdStamp());
+    if (updateState === 'old') parts.push('⬆ Update available');
+  }
+  document.title = parts.join('  ·  ');
+}
+function checkUpdate() { if (S?.panelVersion?.version && !S.importBuild) api('GET', '/ui/version/latest').then(r => { updateState = r.state; windowTitle(); }).catch(() => { }); }
+setInterval(windowTitle, 15 * 1000);
+setInterval(checkUpdate, 10 * 60 * 1000);
 // Panel version (version.json, stamped by GitHub on every merge) and whether GitHub has a newer one
 function panelVersionBox() {
   const v = S.panelVersion || {}, note = h('div', { class: 'muted' }, v.version ? 'Checking GitHub ...' : '');
@@ -20216,4 +20301,4 @@ async function importSchemaFile() {
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)
-load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); checkUpdate(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

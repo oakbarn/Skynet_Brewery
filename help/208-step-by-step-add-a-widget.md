@@ -82,7 +82,7 @@ Press **Exit** to leave Edit layout. The Garden hose is on the Brew House Tab.
 
 What is left to do:
 
-1. **Draw its hose or pipe**: **☰ Menu > ✎ Edit layout > Draw hose** ([Pipes and hoses](24-pipes-and-hoses)).
+1. **Draw its hose or pipe**: **🛠 Build (Edit layout) > Draw hose** ([Pipes and hoses](24-pipes-and-hoses)).
 2. **Change it any time**: in Edit layout, double-click it to open its Properties.
 
 ## If you stopped before Finish Build

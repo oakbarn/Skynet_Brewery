@@ -5,11 +5,22 @@ The **Menu Bar** is the row with your **Brewery Name** in the middle. At its rig
 - **Simulator balloon** (yellow stripes): shows only in Simulator mode. Press it to go back to the real boards. **☰ Menu > Switch to Simulator** turns the Simulator on.
 - **Build** (the hammer and wrench, admins): Edit layout on and off. It is not needed in the Process Editor, so it is hidden there.
 - **Sound** (the ear with music notes): one click turns sound on, one more turns it off. A red **Do Not Enter** sign sits on its corner while sound is off. See [Alarms and sound](21-alarms-and-sound).
-- **Emergency Off**: one click stops everything (see [Emergency Off](244-emergency-off)).
+- **Emergency Off**: one click stops everything. Rest the mouse on it for 2 seconds and a big one pops up (see [Emergency Off](244-emergency-off)).
 - The yellow **?**: Help.
 - **☰ Menu**: every page and setting (see [The Menu](33-menu)).
 
 An icon that is not needed now is hidden, but its space stays (it shows the background color), so the other icons never move.
+
+## The window's title line
+
+On the Brain's own computer, Skynet's clean window has a title line at the very top (with the window's minimize, size and close buttons). After the Schema's name it shows:
+
+- **✅** when this is Official Skynet, **❌** when it is not (see [Official Skynet updates](191-official-skynet-updates)),
+- the **Skynet Panel version**,
+- the **date and time now**, in the same form as a new Process's Created on line (`261123 14h 31M`: year, month, day, hours and minutes),
+- **⬆ Update available** when GitHub has a newer version (checked every 10 minutes).
+
+**☰ Menu > Zoom > Full screen** hides the title line. On a phone or another computer, the browser tab shows the same words.
 
 ## The Brewery Name
 

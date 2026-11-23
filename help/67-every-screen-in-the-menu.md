@@ -4,7 +4,7 @@ The **☰ Menu** lists every place in the panel you can go to, so nothing is hid
 
 The list has three parts:
 
-1. **Show Menu Bar** and **Edit layout** (Admins).
+1. **Show Menu Bar**, the 🌐 Help language, the **🗂 Schema** dropdown, **🐞 Report a Bug** and the last choice you picked. (**Edit layout** is the 🛠 Build icon on the Menu Bar.)
 2. **Menu tabs**: Zoom, Default, Equipment Profile, Vessel, the Templates, the Profiles, Schema, About ... in their Order (see [The ☰ Menu](33-menu)).
 3. **Pages**: every page of the Menu Bar, and under each page, marked with **↳**, its parts.
 

@@ -8,7 +8,7 @@ In Skynet Brewery you can easily add interactive **Pipes**, **Hoses**, **Pumps**
 
 ## Pipes
 
-1. Pick **☰ Menu > Edit layout** and press **Draw pipe**.
+1. Pick **🛠 Build (Edit layout)** and press **Draw pipe**.
 2. Double-click (or tap) the start, then double-click (or tap) the end. A pipe is one straight piece that runs only **Horizontal, Vertical or at 45 degrees**; it turns only at a fitting (an elbow, tee or cross), which Skynet puts where two pipes meet. See [Pipe angles and upright kettles](105-pipe-angles-and-upright-kettles).
 3. Double-click the pipe to open its settings.
 

@@ -4,7 +4,7 @@ L'équipement est dessiné à l'écran et a des **IP** (points de raccordement) 
 
 ## Ajouter une cuve {#add-a-vessel}
 
-1. **Tabs > ☰ Menu > Edit layout**, choisissez **Vessel** à côté de **Add equipment**, puis touchez **Add equipment**.
+1. **Tabs > 🛠 Build (Edit layout)**, choisissez **Vessel** à côté de **Add equipment**, puis touchez **Add equipment**.
 2. Elle va sur le Tab **Equipment**, qui est toujours là.
 3. Réglez son **Name**, son **Type** (Brew Kettle, HLT, MLT, Mash Tun, Whirlpool), son **Label** et son **Graphic** (un chemin d'image).
 4. Allumez **Installed** pour chaque port de la cuve : **Outlet** (sortie), **Tangential** (entrée tangentielle), **Thermowell** (doigt de gant), **Steam Slayer**, **Sparge** (rinçage) et **CIP** (nettoyage en place). Chacun a une **Position** (par exemple Center Bottom ou Lid) et un **Standard** (par exemple TC 1.5 ou NPT 1/2 FPT).
@@ -35,7 +35,7 @@ Regrouper (bundle) verrouille une cuve et ses IP ensemble comme un seul bloc, po
 
 **Pour regrouper (PC ou iPhone) :**
 
-1. Allez sur le Tab de la cuve et choisissez **☰ Menu > Edit layout**.
+1. Allez sur le Tab de la cuve et choisissez **🛠 Build (Edit layout)**.
 2. Ouvrez les propriétés de la cuve. Sur un PC, **double-cliquez** dessus. Sur un iPhone, **gardez le doigt dessus**.
 3. Appuyez sur **Save**. Le panel demande **Bundle ... with its IPs?** Appuyez sur **OK** pour regrouper, ou sur **Cancel** s'il faut encore faire glisser des IP à leur place.
 4. Ou allumez **Bundled** en bas de ses propriétés et appuyez sur **Save**.
@@ -53,7 +53,7 @@ Regrouper (bundle) verrouille une cuve et ses IP ensemble comme un seul bloc, po
 
 Les nouvelles cuves, refroidisseurs, serpentins et filtres commencent sur le Tab **Equipment**. Pour en déplacer un vers un autre Tab :
 
-1. Allez sur le Tab où il est et choisissez **☰ Menu > Edit layout**.
+1. Allez sur le Tab où il est et choisissez **🛠 Build (Edit layout)**.
 2. Ouvrez ses propriétés. Sur un PC, **double-cliquez** dessus. Sur un iPhone, **gardez le doigt dessus**.
 3. Choisissez le nouveau Tab dans la liste **Tab** près du bas.
 4. Appuyez sur **Save**, puis sur **Save layout**.

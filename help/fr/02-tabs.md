@@ -42,7 +42,7 @@ Faites glisser les éléments déverrouillés pour les déplacer (les éléments
 
 ## Couleur et image de fond {#background-color-and-picture}
 
-Chaque Tab a une image de fond et une couleur de fond. Choisissez **☰ Menu > Edit layout**, puis ouvrez **⚙ Tab settings** (le bouton, ou un double-clic sur un endroit vide ; sur un téléphone, gardez le doigt sur un endroit vide). Pas à pas : [Image et couleur de fond d'un Tab](26-tab-background).
+Chaque Tab a une image de fond et une couleur de fond. Choisissez **🛠 Build (Edit layout)**, puis ouvrez **⚙ Tab settings** (le bouton, ou un double-clic sur un endroit vide ; sur un téléphone, gardez le doigt sur un endroit vide). Pas à pas : [Image et couleur de fond d'un Tab](26-tab-background).
 
 ## Minuteries {#timers}
 

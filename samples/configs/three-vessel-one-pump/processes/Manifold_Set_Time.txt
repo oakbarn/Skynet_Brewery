@@ -1,4 +1,5 @@
 //Manifold_Set_Time
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //The "Set Time" button on the Water Tab (OakBarn Brewery's switch sw_Set_MSV_Time in looper_scrAutoSwitch).

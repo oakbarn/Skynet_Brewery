@@ -5,7 +5,7 @@ Un seul appui fait passer **tout le panel**, toutes les Interfaces à la fois, e
 ## Où est l'interrupteur (Admins) {#where-the-switch-is-admins}
 
 - Le bouton rond à côté de **☰ Menu** sur la barre des Tabs : **🔌 Real** (vert) quand les vraies cartes sont utilisées, **🧪 Simulator** (rayures jaunes) en mode simulateur. Appuyez dessus pour changer.
-- **☰ Menu > 🧪 Switch to Simulator** ou **🔌 Switch to Real boards**.
+- **☰ Menu > 🧪 Switch to Simulator** (seulement avec les vraies cartes ; en mode Simulator, le ballon 🧪 Simulator revient aux vraies cartes).
 
 Les deux font la même chose. Le panel demande d'abord. Chaque Process s'arrête et chaque sortie s'éteint avant le changement, donc rien de ce qu'un brassage fictif a allumé n'est jamais envoyé à une vraie carte. Une barre **SIMULATION** à rayures jaunes s'affiche pour tout le monde tant qu'il est actif.
 

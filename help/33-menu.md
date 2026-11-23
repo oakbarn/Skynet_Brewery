@@ -4,7 +4,14 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 
 - **Show Top Line** / **Hide Top Line**: the Top Line of the panel is hidden on the Tabs page; this brings it back. See [The Menu Bar](40-menu-bar).
 - **Process Editor** (only while it is open): every button of the Process Editor, from New and Save to Stop all and the Colors switch, each doing the same as its button. See [The Process editor](30-process-editor).
-- **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
+- **🌐 Help**: **English** and **Français** in a row; one click picks the language of the Help and the balloons. Until a third language is on the Brain, an Admin also sees **➕ Add a Language**, which opens Help > 🌐 Languages (see [Help in any language](242-help-in-any-language)). Once one is added, it is the last box, written in its own letters.
+- **Edit layout** is not on the ☰ Menu: it is the 🛠 **Build** icon on the Menu Bar (see [The Menu Bar](40-menu-bar)).
+- **🗂 Schema**: the Schema dropdown, the same one as on the Top Line. Pick a Schema and it loads (it warns you first when Processes are running). **Add new Schema ...** and the other Schema jobs are at the end of the list. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
+- **🧪 Switch to Simulator** (Admins, only while the Real boards are used). In Simulator mode the 🧪 Simulator balloon on the Menu Bar switches back. See [Simulator or Real boards](77-simulator-or-real-boards).
+- **🐞 Report a Bug** (everyone): tell OakBarn Brewery about a bug, on GitHub or by email. See [Report a problem](205-report-a-problem).
+- **⭐ Request a Feature**: a Patron perk.
+- **Last picked**: a copy of the last ☰ Menu choice you picked, so one click takes you back to it. Each browser remembers its own.
+- Interfaces (boards) and Add Interface are under **Pages > Devices** at the end of the list.
 - The **Menu tabs**: Zoom (number 1 to start with), Default settings, Equipment Profile, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Profile, Valve Profile and Pump Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.

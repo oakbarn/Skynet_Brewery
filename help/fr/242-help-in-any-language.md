@@ -6,7 +6,7 @@ Seule l'aide est traduite, comme en français : les pages d'aide, les bulles (Ho
 
 ## Trois choix {#three-choices}
 
-**🌐 Help language**, en haut de la liste des pages d'aide, offre alors trois choix : **🌐 English**, **🌐 Français** et la User Language (**🌐 Deutsch**, par exemple). **☰ Menu > 🌐 Help in ...** passe à la suivante. La User Language reste sur votre propre Brain : chaque écran qui utilise ce Brain peut la choisir.
+**🌐 Help language**, en haut de la liste des pages d'aide, offre alors trois choix : **🌐 English**, **🌐 Français** et la User Language (**🌐 Deutsch**, par exemple). Le **☰ Menu** a les mêmes choix côte à côte, un clic chacun ; tant qu'aucune User Language n'est ajoutée, un Admin y voit **➕ Add a Language**, qui ouvre **🌐 Languages**. La User Language reste sur votre propre Brain : chaque écran qui utilise ce Brain peut la choisir.
 
 ## Pas à pas {#step-by-step}
 

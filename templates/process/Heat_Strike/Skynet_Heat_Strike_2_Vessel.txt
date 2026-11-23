@@ -1,4 +1,5 @@
 //Skynet_Heat_Strike_2_Vessel
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: 2 Vessel: fill the boil kettle and heat the strike water in it (there is no Hot Liquor Tank).
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

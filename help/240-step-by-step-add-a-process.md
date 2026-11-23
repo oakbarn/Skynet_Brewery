@@ -138,7 +138,7 @@ Press **Start**. Next to the Process name you see what it is doing: **waiting (l
 
 A **Process Widget** shows a Process on a Tab and starts or stops it with one click (no pop-up first). Add one like any Widget ([Step by Step: Add a Widget](208-step-by-step-add-a-widget)):
 
-1. Go back to the Tab (**Tabs**, or **✖ Close**), then **☰ Menu > ✎ Edit layout**.
+1. Go back to the Tab (**Tabs**, or **✖ Close**), then **🛠 Build (Edit layout)**.
 2. In **Select Widget Type** pick **On-screen controls**, then in **Add Widget** pick **Process Widget**.
 
 ![Select Widget Type and Add Widget](help_pictures/Step_Add_Process_11_Process_Widget_Type.png)
