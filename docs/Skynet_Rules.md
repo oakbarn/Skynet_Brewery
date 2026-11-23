@@ -4172,8 +4172,11 @@ Panel Update 9, items 1 and 2):
   **Patron** folder with the same six. Every Skynet sound that was loose in `sounds/Skynet` is in **Songs**. On start the Brain makes any
   folder that is missing and moves a loose Skynet sound into Songs (a copy already in Songs wins; Rule #1, nothing else is touched).
   A bare file name still finds its sound in any subfolder.
-- **Drawings:** each folder has an original line drawing on a light (250,250,250) background, the music note in blue:
-  `Images/Skynet/Miscellaneous/Skynet_Audio_<folder>.svg` (Skynet pictures 239 to 244, Rule 9.12, Media_Licenses).
+- **Pictures:** each folder has its own picture on a light (250,250,250) background: `Images/Skynet/Miscellaneous/Skynet_Audio_<folder>.svg`
+  (Skynet pictures 239 to 244, Rule 9.12, Media_Licenses). Since Panel Update 10 (OakBarn Brewery, 2026-11-23: "These are for the media
+  catergorys") they are OakBarn Brewery's own pictures (Adobe Firefly), kept inside each .svg as a small JPEG: Songs a music note,
+  Text_to_voice a man shouting, Fanfare a bugle, Beep a desert bird ("no resemblence" to any cartoon), Nature a koi pond, Go_to_work
+  brewers marching off to work. The same file names, so nothing else changes.
 - **The Audio Widget** shows its own picture (`.path_image`) or, with none, the drawing of the folder its sound is in. It is on top
   (Layer 1) while it plays and hidden when stopped: `.play = true` plays it and shows it, `.play = false` stops and hides it.
 - **The one exception** (to Rules 1.29 and 6.15, which give every Widget `.visible`; OakBarn Brewery: an exception to any Rule): an

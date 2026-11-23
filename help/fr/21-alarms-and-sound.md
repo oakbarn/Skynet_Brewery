@@ -76,7 +76,7 @@ wgt_AUD_Music_BH.play = false
 ```
 
 Il n'a pas de `.visible` : une ligne de Process qui le règle est une erreur, puisque `.play` l'affiche et le cache (Règle 7.27). Sans
-image à lui, il montre le dessin du dossier Audio Skynet où se trouve son son : **Songs**, **Text_to_voice**, **Fanfare**, **Beep**,
+image à lui, il montre l'image du dossier Audio Skynet où se trouve son son : **Songs**, **Text_to_voice**, **Fanfare**, **Beep**,
 **Nature** ou **Go_to_work** (dans `media/sounds/Skynet`, chacun avec les six mêmes dossiers sous **Patron**).
 
 Ce n'est pas une Alarme. Il n'y a pas de commande de pause : il se met en pause tout seul pendant qu'une alarme sonne et reprend ensuite. Pour mettre un Audio Widget sur un Tab (touchez-le pour jouer ou arrêter), utilisez **Add Widget > On-screen controls > Audio Widget**.
