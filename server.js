@@ -203,6 +203,7 @@ const FONTS_PKG = path.join(ROOT, 'fonts');            // the add-only Skynet La
 const FONTS_USER = path.join(DATA, 'fonts');           // fonts an Admin added with Add Font to Brain
 const help = new Help(HELP, null, 'en', HELP_USER);                 // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
+engine.on('started', n => broadcast('started', { script: n }));      // Panel Update 13 item 4: the Output's Reset every Start
 if (moved) for (const l of moved.lines) engine.print('system', l);
 const mqtt = new MqttBridge(store, engine);
 if (!STANDBY) mqtt.start();
@@ -1312,10 +1313,11 @@ async function route(req, res) {
     if (done.length) engine.renumber();
     return ok(res, { copied: done, skipped });
   }
-  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order|version))?$/.exec(p);
+  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order|version|vars))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];
     if (act === 'version' && m === 'POST') return ok(res, { version: engine.newVersion(name) });
+    if (act === 'vars' && m === 'GET') return ok(res, engine.varsOf(name));      // Panel Update 13: the Output's All Variables
     if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
     if (act === 'start' && m === 'POST') {
       // a Process Widget of a Group (Panel Update 9, item 12): nothing starts while its Group is busy; else its Group goes to delay

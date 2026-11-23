@@ -55,3 +55,4 @@ const { RISK_LINE } = await import('../lib/brewprocess.js');
 assert.equal(RISK_LINE, RISK);
 assert.match(read('lib/brewprocess.js'), /const head = `\/\/\$\{names\[i\]\}\\n\$\{RISK_LINE\}\\n\/\/Made by/);
 console.log('Panel Update 12 ok');
+import './panelupdate13.test.js';

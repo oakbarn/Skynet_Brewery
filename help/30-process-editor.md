@@ -3,9 +3,17 @@
 The **Processes** screen has two rows of tools above the editor, most of them pictures (icons):
 
 - **The top row:** the Process list box, **New**, then **Delete** (the red trash can), **Recycle Bin**, **Check** (the green check mark), **Start** (red while the Process is stopped, green while it runs), **Stop**, **Restart** and **Save**. Your Brewery Name is in the middle (**Skynet Panel** when you are not a Patron). Then **Predictive text**, **Key** (what each color means), **📐 Constants**, and the Menu Bar: Sound, Emergency Off, the yellow **?** and **☰ Menu** (see [The Menu Bar](40-menu-bar)).
-- **The second row:** **Find** (the magnifying glass), **Find in All Processes** (the magnifying glass on purple: it searches every Process), **Go To** (the arrow) with its **Line / Section** box, then **Insert Line After** with its light-blue box and five buttons: **Conditionals**, **Skynet Special**, **Devices**, **Widgets** and **Common** (see below). At the right are **Undo**, **Save** and **Close**, in the same place on every page.
+- **The second row:** **Stop all** (the red Stop Sign: it stops every running Process), **Find** (the magnifying glass), **Find in All Processes** (the magnifying glass on purple: it searches every Process), **Go To** (the arrow) with its **Line / Section** box, then **Insert Line After** with its light-blue box and five buttons: **Conditionals**, **Skynet Special**, **Devices**, **Widgets** and **Common**, each with a small gray ▾ because it opens a list (see below). At the right are **Undo**, **Save** and **Close**, in the same place on every page.
 
-The Save picture on the top row and the Save button do the same thing. Every one of these is also on the **☰ Menu** while the Process editor is open, under **Process Editor**. The ☰ Menu also has the rest: the name, class, Version and state of the Process, **Update Version**, **Add steps**, **Restart if it fails**, **Suggest**, **Picture**, **Save to file** and **Colors**. **Rename** and **Stop all** are above the Process list. The yellow Simulator bar is off while the Process editor is open; **☰ Menu > Show Simulator bar** brings it back until you leave.
+The Save picture on the top row and the Save button do the same thing. Every one of these is also on the **☰ Menu** while the Process editor is open, under **Process Editor**. The ☰ Menu also has the rest: the name, class, Version and state of the Process, **Update Version**, **Add steps**, **Restart if it fails**, **Suggest**, **Picture**, **Save to file**, **Colors** and **Rename**. The yellow Simulator bar is off while the Process editor is open; **☰ Menu > Show Simulator bar** brings it back until you leave.
+
+**Problems and Output** are in a column to the right of the code:
+
+- **At the top**, the problems Check found (click one to go to its line), or *No problems found*, and **Clear**, which empties the Output window.
+- **Output** has a list with two choices. **Current Process** shows what the Process open in the editor prints. **All Variables** shows the value now of each of its variables (while it runs) and of every gGlobal, kept up to date each second.
+- **Reset every Start** (off to start): when it is on, a Process's old Output lines are cleared each time that Process starts, so you see only this run. Each browser remembers both choices.
+
+On a phone the column is under the code.
 
 Every step of adding a Process, with pictures: [Step by Step: Add a Process](240-step-by-step-add-a-process).
 
