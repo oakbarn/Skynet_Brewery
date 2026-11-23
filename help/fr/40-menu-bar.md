@@ -11,6 +11,8 @@ La **Menu Bar** (barre de menu) est la rangée avec le **nom de votre brasserie*
 
 Une icône qui n'est pas utile en ce moment est cachée, mais sa place reste (on voit la couleur de fond), donc les autres icônes ne bougent jamais.
 
+**Undo, Save et Close** restent vides tant qu'ils ne servent pas. Sur un Tab il n'y a rien à annuler, enregistrer ou fermer, donc rien ne s'affiche. En Edit layout ce sont **↩ Put back**, **Save layout** et **Exit** sur la barre Edit layout. Dans l'éditeur de Processes ils sont à droite de la deuxième rangée.
+
 ## La ligne de titre de la fenêtre {#the-window-s-title-line}
 
 Sur l'ordinateur du Brain, la fenêtre propre de Skynet a une ligne de titre tout en haut (avec les boutons réduire, taille et fermer). Après le nom du Schema, elle montre :
