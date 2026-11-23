@@ -33,3 +33,9 @@ assert.match(fn, /grabWith\.add\(it\.id \|\| it\.name\); w\.disabled = b\.disabl
 assert.match(fn, /const riders = pipe \? \[\] : lockedRiders\(it\)/, 'greyed out when a locked pipe or fitting would move with it');
 assert.match(fn, /'↔ Move with pipes'/);
 console.log('move with pipes ok');
+// 🔍 Zoom box (OakBarn Brewery, 2026-11-23, picked A: the Z key): 200 screen pixels around the mouse, 3 times bigger, look only
+assert.match(app, /const ZOOM_SRC = 200, ZOOM_X = 3;/);
+assert.match(app, /host\.attachShadow\(\{ mode: 'open' \}\)/, 'its copy of the Tab is closed off, so nothing else finds it');
+assert.match(app, /ev\.key\.toLowerCase\(\) !== 'z'\) return;\n[^\n]*closest\?\.\('input, textarea, select, \[contenteditable="true"\], dialog'\)[^\n]*\n  ev\.preventDefault\(\); zoomBox \? zoomClose\(\) : zoomOpen\(\);/, 'Z opens and closes it, never in a text box');
+assert.match(css, /\.zoomBox \{[^}]*pointer-events: none/, 'it never takes a click');
+console.log('zoom box ok');

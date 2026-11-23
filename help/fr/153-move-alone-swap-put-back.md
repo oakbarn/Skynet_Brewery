@@ -37,6 +37,13 @@ quelque chose sans que vous le vouliez, par exemple un tuyau souple qui s'est ac
 Les boutons sont gris quand rien n'y est joint, quand l'objet est 🔒 verrouillé (déverrouillez-le d'abord) ou quand l'équipement de son
 Tab est verrouillé (lock_Equipment). Posez la souris dessus pour voir pourquoi.
 
+## Zoomer sur un raccord (Z) {#zoom-in-on-a-join-z}
+
+En **Edit layout**, appuyez sur **Z** (pas pendant que vous tapez dans une case). Une fenêtre s'ouvre dans le coin du haut du Tab et
+montre les **200 pixels autour de la souris, 3 fois plus grands**, avec une croix jaune là où est la souris. Bougez la souris, ou
+traînez un bout de tuyau ou un objet comme d'habitude, et la fenêtre suit, pour voir exactement où un bout tombe sur un IP. La
+fenêtre sert seulement à regarder : elle ne prend jamais de clic. Appuyez de nouveau sur **Z** ou sur **Échap** pour la fermer.
+
 ## Rendre un tuyau plus court ou plus long, et redessiner un tuyau souple {#making-a-pipe-shorter-or-longer-and-redrawing-a-hose}
 
 Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregistré, une fois ses bouts détachés :

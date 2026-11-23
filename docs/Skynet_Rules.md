@@ -2763,6 +2763,12 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   *Added (OakBarn Brewery, 2026-11-23: "The Unlock IPs on the dialog is good but add Move with Pipes option"):* beside it,
   **↔ Move with pipes** (not on a Pipe or Hose) is the pop-up's other choice: the next drag moves the item with its pipes (Rule 5.19)
   and does not ask. Greyed out for the same reasons, and when a 🔒 locked pipe or fitting would have to move with it.
+- **🔍 Zoom box** (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for
+  200 pixel square where Join area is zoomed inside the Dialog"; he picked A, the Z key, as Ctrl + Click already opens Properties,
+  Rule 2.9): in Edit layout, **Z** (not in a text box or dialog) opens a box in the top corner of the Tab area that shows the 200
+  screen pixels around the mouse **3 times bigger**, with a yellow cross on the mouse spot. It follows the mouse, while dragging a
+  pipe end or an item too, so a join can be watched up close. It is to look at only: it never takes a click. **Z** again or **Esc**
+  closes it, and so does leaving Edit layout. (Help 153)
 - **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
   gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
 - **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the

@@ -5200,6 +5200,57 @@ document.addEventListener('keydown', ev => {
   ev.preventDefault(); undoLast();
 });
 
+// 🔍 Zoom box (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for 200 pixel
+// square where Join area is zoomed inside the Dialog"; Rule 5.37): in Edit layout, Z (not in a text box) opens a box that shows the
+// 200 screen pixels around the mouse 3 times bigger, and follows the mouse, while dragging too. Look only: it never takes a click.
+// Z again or Esc closes it, and so does leaving Edit layout. The copy of the Tab is drawn in a closed-off part of the page (a shadow
+// root), so nothing else on the panel ever finds it.
+const ZOOM_SRC = 200, ZOOM_X = 3;
+let zoomBox = null;
+function zoomOpen() {
+  const host = h('div', { class: 'zoomBox', 'aria-hidden': 'true' }), root = host.attachShadow({ mode: 'open' });
+  const size = ZOOM_SRC * ZOOM_X;
+  root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; }
+    .zf > .zc { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
+    .zx { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; pointer-events: none;
+      background: linear-gradient(#ffd24a, #ffd24a) center / 2px 100% no-repeat, linear-gradient(#ffd24a, #ffd24a) center / 100% 2px no-repeat; filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000); }
+    .zt { font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 0 8px; }`));
+  const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, `🔍 Zoom ${ZOOM_X}x: ${ZOOM_SRC} pixels around the mouse. Z or Esc closes it.`);
+  root.append(title, frame);
+  document.body.append(host);
+  zoomBox = { host, frame, copy: null, at: null, t: 0, size };
+  zoomDraw(true);
+}
+function zoomClose() { zoomBox?.host.remove(); zoomBox = null; }
+function zoomDraw(fresh = false) {
+  const zb = zoomBox; if (!zb) return;
+  if (!editing) return zoomClose();
+  const ws = $('#ws'), now = Date.now();
+  if (fresh || !zb.copy || now - zb.t > 150) {        // a fresh copy of the Tab at most every 0.15 s, so a drag shows as it goes
+    const c = ws.cloneNode(true); c.classList.add('zc'); c.style.width = ws.offsetWidth + 'px'; c.style.height = ws.offsetHeight + 'px';
+    zb.copy?.remove(); zb.frame.prepend(c); zb.copy = c; zb.t = now;
+    if (!zb.frame.querySelector('.zx')) zb.frame.append(h('div', { class: 'zx' }));
+  }
+  const r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1, [mx, my] = zb.at || [r.left + r.width / 2, r.top + r.height / 2];
+  const lx = (mx - r.left) / z, ly = (my - r.top) / z, k = zb.size / (ZOOM_SRC / z);
+  zb.copy.style.transform = `translate(${zb.size / 2 - lx * k}px, ${zb.size / 2 - ly * k}px) scale(${k})`;
+  // it sits in the top right corner of the Tab area, or the top left when the mouse is there
+  const area = ($('#wsScroll') || ws).getBoundingClientRect(), w = zb.size + 4, left = mx > area.right - w - 20 && my < area.top + w + 40 ? area.left + 8 : area.right - w - 8;
+  Object.assign(zb.host.style, { left: Math.max(4, left) + 'px', top: Math.max(4, area.top + 8) + 'px' });
+}
+let zoomRaf = 0;
+document.addEventListener('pointermove', ev => {
+  if (!zoomBox) return;
+  zoomBox.at = [ev.clientX, ev.clientY];
+  if (!zoomRaf) zoomRaf = requestAnimationFrame(() => { zoomRaf = 0; zoomDraw(); });
+}, true);
+document.addEventListener('keydown', ev => {
+  if (zoomBox && ev.key === 'Escape') { zoomClose(); return; }
+  if (!editing || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat || ev.key.toLowerCase() !== 'z') return;
+  if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
+  ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();
+});
+
 let drag = null, lastPipeTap = null, hitUnit = null;
 $('#ws').addEventListener('pointerdown', ev => {
   if (!editing) return;

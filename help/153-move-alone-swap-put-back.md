@@ -37,6 +37,13 @@ pipes, without the pop-up. It is not on a Pipe or Hose, and it is grey when a ðŸ
 The buttons are grey when nothing is joined to it, when the item is ðŸ”’ locked (unlock it first) or when the equipment on its Tab is
 locked (lock_Equipment). Rest the mouse on it to see why.
 
+## Zoom in on a join (Z)
+
+In **Edit layout**, press **Z** (not while typing in a box). A box opens in the top corner of the Tab that shows the **200 pixels
+around the mouse, 3 times bigger**, with a yellow cross where the mouse is. Move the mouse, or drag a pipe end or an item the
+usual way, and the box follows, so you can see exactly where an end lands on an IP. The box is only to look at: it never takes a
+click. Press **Z** again or **Esc** to close it.
+
 ## Making a pipe shorter or longer, and redrawing a hose
 
 A pipe or hose can change after it is saved, once its ends are let go:

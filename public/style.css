@@ -1825,3 +1825,5 @@ button.icoBtn.stopSign img { width: 30px; height: 30px; }
 button.insCat::after { content: '▾'; color: #9a9a9a; font-size: .85em; margin-left: 5px; }
 #view-scripts .outVarHead { font-weight: 700; margin: 6px 0 2px; color: var(--accent, #4fb3ff); }
 #view-scripts .outVarHead:first-child { margin-top: 0; }
+/* 🔍 Zoom box (Z in Edit layout, Rule 5.37): above the Tab, never takes a click */
+.zoomBox { position: fixed; z-index: 60; pointer-events: none; border: 2px solid #001f5b; box-shadow: 0 4px 16px rgba(0,0,0,.6); background: #111; }
