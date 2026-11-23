@@ -13,7 +13,7 @@ liste de choix s'ouvre ; cliquez sur un choix et il est choisi. Skynet utilise u
   dans la liste **Temperature Probe** de l'HLT element, taper **BM1w1_1** saute à **BM1w1_1_HLT_BH**.
 - Les **flèches haut et bas** déplacent d'un choix à la fois. **Entrée** ou **Tab** le garde et passe à la case suivante.
 - Le choix actuel a un fond **Cyan** quand la liste est ouverte (Règle 2.34).
-- **➕ Add new ...** à la fin d'une liste crée un nouveau choix. La fenêtre attend, la nouvelle chose est créée dans sa propre fenêtre, puis vous
+- **➕ Add new ...** en premier dans une liste (après une ligne « (pick ...) », s'il y en a une) crée un nouveau choix. La fenêtre attend, la nouvelle chose est créée dans sa propre fenêtre, puis vous
   revenez avec elle choisie et rien de ce que vous aviez tapé n'est perdu (Règle 18.14).
 - **Double-cliquez** sur une liste déroulante qui choisit un Device, un Widget, un Tab, une cuve ou un IP pour ouvrir les Properties de celui choisi (Règle 2.19).
 - **Posez la souris sur le nom** devant la liste déroulante pour son Hover Help. La liste elle-même ne montre jamais de bulle, donc
@@ -27,7 +27,7 @@ Chaque liste déroulante tire ses choix d'un de ces trois endroits :
 |---|---|---|
 | **Intégrés à Skynet** (une liste fixe avec laquelle Skynet lui-même travaille) | La **Current Method** de l'HLT element : Direct, Duty Cycle, Hysteresis, PID ... | Non |
 | **Votre Schema** (les Devices, Widgets, Tabs et Interfaces que vous avez créés) | La **Temperature Probe** de l'HLT element : BM1w1_1_HLT_BH, BM1w1_2_Mash_BH, BM1w1_3_Kettle_BH | Oui : ➕ Add new ... en crée un nouveau |
-| **Une liste qui grandit** (images, Styles, unités, couleurs ...) | La liste des Tabs : **BH: Brew House**, puis **➕ Add new Tab…** | Oui : ce que vous ajoutez reste dans la liste pour la fois suivante |
+| **Une liste qui grandit** (images, Styles, unités, couleurs ...) | La liste des Tabs : **➕ Add new Tab…**, puis **BH: Brew House** | Oui : ce que vous ajoutez reste dans la liste pour la fois suivante |
 
 - Les noms sont listés **de A à Z**, donc BM1w1_1 vient avant BM1w1_2.
 - Les Interfaces et les Tabs se lisent **ID: Name**, par exemple **BM: Brewery Mega** et **BH: Brew House** (Règle 18.17).

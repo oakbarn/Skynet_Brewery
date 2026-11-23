@@ -13,7 +13,7 @@ list of choices opens; click one and it is picked. Skynet uses a list box wherev
   in the HLT element's **Temperature Probe** list, typing **BM1w1_1** jumps to **BM1w1_1_HLT_BH**.
 - **Up and Down arrows** move one choice at a time. **Enter** or **Tab** keeps it and goes to the next box.
 - The choice picked now has a **Cyan** background when the list is open (Rule 2.34).
-- **➕ Add new ...** at the end of a list makes a new choice. The dialog waits, the new thing is made in its own dialog, then you
+- **➕ Add new ...** first in a list (after a "(pick ...)" line, if there is one) makes a new choice. The dialog waits, the new thing is made in its own dialog, then you
   come back with it picked and nothing you typed lost (Rule 18.14).
 - **Double-click** a list box that picks a Device, Widget, Tab, vessel or IP to open the Properties of the one picked (Rule 2.19).
 - **Rest the mouse on the name** in front of the list box for its Hover Help. The list itself never shows a balloon, so the
@@ -27,7 +27,7 @@ Every list box gets its choices from one of three places:
 |---|---|---|
 | **Built into Skynet** (a fixed list Skynet itself works with) | The HLT element's **Current Method**: Direct, Duty Cycle, Hysteresis, PID ... | No |
 | **Your Schema** (the Devices, Widgets, Tabs and Interfaces you have made) | The HLT element's **Temperature Probe**: BM1w1_1_HLT_BH, BM1w1_2_Mash_BH, BM1w1_3_Kettle_BH | Yes: ➕ Add new ... makes a new one |
-| **A list that grows** (pictures, Styles, units, colors ...) | The Tab list: **BH: Brew House**, then **➕ Add new Tab…** | Yes: what you add stays in the list for next time |
+| **A list that grows** (pictures, Styles, units, colors ...) | The Tab list: **➕ Add new Tab…**, then **BH: Brew House** | Yes: what you add stays in the list for next time |
 
 - Names are listed **A to Z**, so BM1w1_1 comes before BM1w1_2.
 - Interfaces and Tabs read **ID: Name**, for example **BM: Brewery Mega** and **BH: Brew House** (Rule 18.17).

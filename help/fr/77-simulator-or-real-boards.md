@@ -7,7 +7,7 @@ Un seul appui fait passer **tout le panel**, toutes les Interfaces à la fois, e
 - Le bouton rond à côté de **☰ Menu** sur la barre des Tabs : **🔌 Real** (vert) quand les vraies cartes sont utilisées, **🧪 Simulator** (rayures jaunes) en mode simulateur. Appuyez dessus pour changer.
 - **☰ Menu > 🧪 Switch to Simulator** (seulement avec les vraies cartes ; en mode Simulator, le ballon 🧪 Simulator revient aux vraies cartes).
 
-Les deux font la même chose. Le panel demande d'abord. Chaque Process s'arrête et chaque sortie s'éteint avant le changement, donc rien de ce qu'un brassage fictif a allumé n'est jamais envoyé à une vraie carte. Une barre **SIMULATION** à rayures jaunes s'affiche pour tout le monde tant qu'il est actif.
+Les deux font la même chose. **Pas pendant le brassage :** quand un Process Flow, Sub ou Repeat tourne (un Looper tourne tout le temps et ne compte pas), Switch to Simulator est grisé et dit quels Processes tournent ; arrêtez-les d'abord, ou attendez la fin du Brew Day. Revenir aux vraies cartes marche toujours. Le panel demande d'abord. Chaque Process s'arrête et chaque sortie s'éteint avant le changement, donc rien de ce qu'un brassage fictif a allumé n'est jamais envoyé à une vraie carte. Une barre **SIMULATION** à rayures jaunes s'affiche pour tout le monde tant qu'il est actif.
 
 Une Interface dont la Connection est **Simulator** (comme le Mega fictif que fait un Skynet Schema Template quand il n'y a pas de vraie carte) reste fictive même en Real boards. Changez sa Connection avec **⚙ Change** sur la page Devices une fois la carte câblée (aide : [Interfaces](76-interfaces)).
 

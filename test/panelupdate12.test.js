@@ -33,7 +33,7 @@ assert.match(css, /\.menuList \.menuLang\.userLang \{ font-family: var\(--font\)
 assert.doesNotMatch(menu, /Edit layout'/, '2b Edit layout is the Build icon');
 assert.match(menu, /const sel = schemaSelect\(\)/, '2c the Schema dropdown');
 for (const gone of ['➕ New Schema…', '🔌 Interfaces (boards)', '➕ Add Interface…', '🔌 Switch to Real boards']) assert.ok(!menu.includes(`'${gone}'`), '2d ' + gone);
-assert.match(menu, /if \(can\('admin'\) && !S\.sim\?\.on\) list\.append\(item\('🧪 Switch to Simulator'/, 'Switch to Simulator kept (Design Rule 1)');
+assert.match(menu, /if \(can\('admin'\) && !S\.sim\?\.on\) \{[\s\S]{0,200}list\.append\(item\('🧪 Switch to Simulator'/, 'Switch to Simulator kept (Design Rule 1)');
 assert.match(menu, /item\('🐞 Report a Bug', \(\) => reportDialog\(\{\}\)/, '2e Report a Bug for everyone');
 assert.ok(menu.indexOf('🐞 Report a Bug') < menu.indexOf('⭐ Request a Feature'));
 assert.match(menu, /queueMicrotask\(\(\) => menuLastFill\(list, lastSpot\)\);/, '2f Last picked');
@@ -56,3 +56,4 @@ assert.equal(RISK_LINE, RISK);
 assert.match(read('lib/brewprocess.js'), /const head = `\/\/\$\{names\[i\]\}\\n\$\{RISK_LINE\}\\n\/\/Made by/);
 console.log('Panel Update 12 ok');
 import './panelupdate13.test.js';
+await import('./rule26addnew.test.js');       // Rule 2.6 Add new first, Rule 10.12 (run with this one, so package.json is not changed)

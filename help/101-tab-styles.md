@@ -16,7 +16,7 @@ A Tab Style **never writes over** a color, font or size a Device or Widget alrea
 - **Skynet Styles** 🔒 come with Skynet and **can never be changed by a user** (Rule 2.24):
   - **Skynet Default**: everything as it is now.
   - **Tennyson**: the Label is black text (RGB 0 0 0) on light grey (RGB 195 195 195), **Comic Sans MS**, size **16**. The Device or Widget itself stays as it is now (light grey with black text).
-- **➕ Add new User Style…** at the end of the list makes your own, starting from the one picked now. **✏ Edit** beside the list changes or deletes a User Style (greyed out for a Skynet Style). A User Style belongs to the Schema.
+- **➕ Add new User Style…** at the top of the list makes your own, starting from the one picked now. **✏ Edit** beside the list changes or deletes a User Style (greyed out for a Skynet Style). A User Style belongs to the Schema.
 
 ## Where to set it
 

@@ -166,7 +166,7 @@ quickly find it useful. Because of Predictive Text, if you use the Suggested nam
 limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices)
 in the Predictive Text List Box.
 
-If you need to add a new Interface, select **➕ Add new Interface** in the List Box (Bottom Choice). Create the Interface and Save
+If you need to add a new Interface, select **➕ Add new Interface** in the List Box (First Choice). Create the Interface and Save
 it. You will return to this Dialog. The New Interface will be in the List Box and set as your choice.
 
 ## The Tab
