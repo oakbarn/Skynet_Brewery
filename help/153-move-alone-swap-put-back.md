@@ -44,7 +44,15 @@ shows the **200 pixels around the mouse, 2 times bigger**. It stays where it ope
 
 **Work right in the box:** drag a pipe end, an IP or an item in it with the right mouse button, the same as on the Tab, and it
 moves on the Tab too, 2 times finer, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
-double-click opens Properties). Press **Esc** or the red **✕** in its upper right corner to close it.
+double-click opens Properties, except on a red IP). Press **Esc** or the red **✕** in its upper right corner to close it.
+
+**Join two IPs with a trace (only in the Zoom box):** double-click a red IP to start a red trace line, then click the IP to join it
+to. Press **🔧 Auto configure**: the first IP moves onto the second and they join, and what is joined behind it follows so no join
+breaks. A straight pipe gets longer or shorter for the part of the move along its own line, and only the part across it is passed
+on to what is on its other end (a tee slides along its level pipes, the pipe up to an elbow gets shorter), and so on back; a hose
+just bends. If that would break a join, the second IP is tried onto the first instead. If neither works, nothing moves and a
+message says it can't be done automatically: do it by hand, deleting or adding pipes, fittings or joins. **Cancel trace** or
+**Esc** takes the trace away, and ↩ Put back (Ctrl+Z) undoes an Auto configure.
 
 ## Making a pipe shorter or longer, and redrawing a hose
 

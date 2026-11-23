@@ -45,6 +45,17 @@ assert.match(app, /if \(ev\.type === 'pointerdown'\) try \{ zb\.frame\.setPointe
 assert.match(app, /zoomBox = \{ host, frame, copy: null, t: 0, size, lx: \(mx - r\.left\) \/ z, ly: \(my - r\.top\) \/ z/, 'it keeps showing the spot it opened on');
 assert.match(app, /Esc or ✕ closes it\.`\),\n    h\('button', \{ type: 'button', title: 'Close the zoom box \(Esc\)'/, 'a ✕ in its upper right corner');
 console.log('zoom box ok');
+// 🔗 Trace + 🔧 Auto configure, only in the Zoom box (OakBarn Brewery, 2026-11-23, picked A, "has to trace back so no breaks in Ips")
+assert.match(app, /if \(zoomTracePass\(ev, x, y\)\) return;/, 'the box looks at the trace first');
+assert.match(app, /if \(ev\.type === 'dblclick' && \(!tr \|\| tr\.b\)\) \{\n    const ip = zoomIpAt\(x, y\); if \(!ip\) return false;/, 'a double-click on an IP starts it; anywhere else it is a double-click as before');
+assert.match(app, /const one = ma \? zoomTraceBack\(ma, \[b\[0\] - a\[0\], b\[1\] - a\[1\]\], mb\)/, 'what is joined behind is traced back');
+assert.match(app, /const two = one\.fail && mb \? zoomTraceBack\(mb, \[a\[0\] - b\[0\], a\[1\] - b\[1\]\], ma\) : null;/, 'then the other way round');
+assert.match(app, /can't be done automatically without breaking a join or adding a pipe, hose or fitting/, 'else it says to do it by hand');
+assert.match(app, /if \(it === endItem\) return \{ fail:/, 'never moves both ends');
+assert.match(app, /far = \[v\[0\] - along \* ax \/ L, v\[1\] - along \* ay \/ L\];/, 'a straight pipe takes the part along its line');
+assert.match(app, /pushUndo\(`auto configure \$\{tr\.a\.label\}`\);/, 'Put back undoes it');
+assert.match(app, /if \(zoomBox && ev\.key === 'Escape'\) \{ if \(zoomBox\.trace\) zoomTraceEnd\(\); else zoomClose\(\); return; \}/, 'Esc stops the trace first');
+console.log('zoom trace ok');
 // Delete with no "Delete this item?" box; ↩ Put back (Ctrl+Z) brings it back (OakBarn Brewery, 2026-11-23)
 assert.ok(!app.includes("skyConfirm('Delete this item?'"), 'no nanny box on an item\'s Properties Delete');
 assert.match(app, /const delWho = item\.label \|\| item\.name \|\| lockName\(item\); pushUndo\(`delete \$\{delWho\}`\);/, 'Put back has it');

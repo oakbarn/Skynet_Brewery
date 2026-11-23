@@ -2782,7 +2782,19 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   click and double-click in the box goes to the Tab at the same spot, 2 times finer, so a pipe end or an item is dragged onto an IP
   inside the box (the grab pop-up, snapping and joins work as on the Tab). **Esc** or its red **✕** (upper right) closes it, and
   so does leaving Edit layout; its text says so. *Changed (OakBarn Brewery, 2026-11-23: "Try zoom x 2"; "I cannot grab the pipe
-  inside the dialog after I release it"):* 2 times, not 3; a pipe can be grabbed and moved in the box again and again. (Help 153)
+  inside the dialog after I release it"):* 2 times, not 3; a pipe can be grabbed and moved in the box again and again.
+  *Added (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
+  would be red line. The a button to autoconfigure"; he picked "move the first onto the second": "has to trace back so no breaks
+  in Ips"):* **only in the Zoom box**, a double-click on an IP starts a red **trace** and a click on another IP ends it (a
+  double-click on an IP there no longer opens Properties). **🔧 Auto configure** moves the first IP onto the second and joins them,
+  and traces the move back through what is joined behind it so no join breaks (Fritz: "the tee below the elbow ... would have to
+  move right shortening the right pipe and lengthen the left pipe on the tee. The pipe to the elbow would have to shorten"): a
+  straight pipe takes the part of the move along its own line by getting longer or shorter and passes on only the part across it
+  to what is on its other end (fitting, valve, pump, an IP sitting right on another), and so on back; a hose just bends. When that
+  would break a join (it reaches the second IP, a vessel or something locked, a pipe gets too short, or two ways back disagree),
+  the second IP is tried onto the first. If neither works, nothing moves and one toast says it can't be done automatically without
+  breaking a join or adding a pipe, hose or fitting, so do it by hand (delete or add pipes, fittings or joins). Nothing is ever
+  added or deleted by it. **Cancel trace** or Esc takes the trace away; ↩ Put back (Ctrl+Z) undoes it. (Help 153)
 - **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
   gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
 - **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the

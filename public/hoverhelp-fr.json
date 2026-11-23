@@ -591,6 +591,8 @@
  "Select Widget Type: the major kinds of Widget (app only, no board pin). Add Widget then lists only that kind": "Select Widget Type : les grands genres de Widget (application seulement, pas de broche de carte). Add Widget ne liste alors que ce genre",
  "Add Widget: pick one and it is made on the 🔨 Build Tab. Lists the kind picked in Select Widget Type, or every Widget": "Add Widget : choisissez-en un et il est créé sur le 🔨 Build Tab. Liste le genre choisi dans Select Widget Type, ou tous les Widgets",
  "Close the zoom box (Esc)": "Fermer la fenêtre de zoom (Échap)",
+ "Move the IP the trace starts on onto the IP it ends on and join them; everything joined behind it moves along (↩ Put back undoes it)": "Poser l'IP où le tracé commence sur l'IP où il finit et les joindre ; tout ce qui est joint derrière bouge avec (↩ Put back l'annule)",
+ "Take the red trace away": "Enlever le tracé rouge",
  "A Picture on the 🔨 Build Tab": "Une Picture sur le 🔨 Build Tab",
  "A Text on the 🔨 Build Tab": "Un Text sur le 🔨 Build Tab",
  "Manual valve Widget: no board pin, turned by hand. Tap it on the Tab to show open or closed": "Widget de vanne manuelle : pas de broche de carte, tournée à la main. Touchez-la sur le Tab pour la montrer ouverte ou fermée",

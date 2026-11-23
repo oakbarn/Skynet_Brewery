@@ -5218,17 +5218,24 @@ function zoomOpen() {
   const size = ZOOM_SRC * ZOOM_X;
   root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; cursor: crosshair; touch-action: none; }
     .zf > .zc { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
-    .zt { display: flex; align-items: center; gap: 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
-    .zt span { flex: 1; } .zt button { font: 700 14px/1 system-ui, sans-serif; color: #fafafa; background: #c0392b; border: 1px solid #000; border-radius: 4px; padding: 3px 8px; cursor: pointer; }
-    .zt button:hover { background: #e74c3c; }`));
+    .zt { display: flex; flex-wrap: wrap; box-sizing: border-box; width: ${size}px; align-items: center; gap: 4px 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
+    .zt span { flex: 1; min-width: 0; overflow-wrap: anywhere; } .zt button { font: 700 14px/1 system-ui, sans-serif; color: #fafafa; background: #c0392b; border: 1px solid #000; border-radius: 4px; padding: 3px 8px; cursor: pointer; }
+    .zt button:hover { background: #e74c3c; } .zt button.zAuto, .zt button.zDrop { font-size: 12px; background: #2d6cdf; } .zt button.zDrop { background: #555; }
+    .zf > .ztr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }`));
   const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, h('span', {}, `🔍 Zoom ${ZOOM_X}x: work right in here (drag, join, double-click). Esc or ✕ closes it.`),
     h('button', { type: 'button', title: 'Close the zoom box (Esc)', onclick: ev => { ev.stopPropagation(); zoomClose(); } }, '✕'));      // OakBarn Brewery, 2026-11-23: "have a close button upper right corner"
-  root.append(title, frame);
+  // 🔗 Trace (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
+  // would be red line. The a button to autoconfigure"): the red line and its two buttons, shown only while there is a trace
+  const auto = h('button', { type: 'button', class: 'zAuto', title: 'Move the IP the trace starts on onto the IP it ends on and join them; everything joined behind it moves along (↩ Put back undoes it)', onclick: ev => { ev.stopPropagation(); zoomAuto(); } }, '🔧 Auto configure');
+  const drop = h('button', { type: 'button', class: 'zDrop', title: 'Take the red trace away', onclick: ev => { ev.stopPropagation(); zoomTraceEnd(); } }, 'Cancel trace');
+  auto.hidden = drop.hidden = true; title.lastChild.before(auto, drop);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'ztr');
+  root.append(title, frame); frame.append(svg);
   document.body.append(host);
   // it stays on the side of the Tab area away from the spot it shows
   const area = ($('#wsScroll') || ws).getBoundingClientRect(), w = size + 4, left = mx > area.left + area.width / 2 ? area.left + 8 : area.right - w - 8;
   Object.assign(host.style, { left: Math.max(4, left) + 'px', top: Math.max(4, area.top + 8) + 'px' });
-  zoomBox = { host, frame, copy: null, t: 0, size, lx: (mx - r.left) / z, ly: (my - r.top) / z, down: null };
+  zoomBox = { host, frame, copy: null, t: 0, size, lx: (mx - r.left) / z, ly: (my - r.top) / z, down: null, title, auto, drop, svg, trace: null };
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu']) frame.addEventListener(type, zoomPass);
   zoomDraw(true);
 }
@@ -5243,6 +5250,7 @@ function zoomPass(ev) {
   const zb = zoomBox; if (!zb) return;
   ev.stopPropagation(); if (ev.type !== 'pointermove') ev.preventDefault();
   const [x, y] = zoomReal(ev);
+  if (zoomTracePass(ev, x, y)) return;
   zb.host.style.pointerEvents = 'none'; const under = document.elementFromPoint(x, y) || document.body; zb.host.style.pointerEvents = '';
   if (ev.type === 'pointerdown') zb.down = under;
   // as the Tab does, a press keeps its target until let go; but a pipe is drawn again when pressed, so its old drawing is gone
@@ -5258,6 +5266,130 @@ function zoomPass(ev) {
   if (/^pointer(up|cancel)$/.test(ev.type)) { zb.down = null; setTimeout(() => zoomDraw(true), 0); }
   else if (ev.type === 'pointermove' && zb.down) zoomDraw();
 }
+// the IP at a spot of the screen (within 10 screen pixels), or null
+function zoomIpAt(x, y) {
+  const r = $('#ws').getBoundingClientRect(), p = [(x - r.left) / Z(), (y - r.top) / Z()], lim = 10 / Z();
+  let best = null;
+  for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (!c) continue; const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= lim && (!best || d < best.d)) best = { d, id: q.id, label: q.label || q.id }; }
+  return best;
+}
+// 🔗 the trace in the box (Rule 5.37): a double-click on an IP starts it, a click on another IP ends it. While it is being drawn
+// nothing in the box goes to the Tab. Returns true when the event was the trace's.
+function zoomTracePass(ev, x, y) {
+  const zb = zoomBox, tr = zb.trace;
+  if (ev.type === 'dblclick' && (!tr || tr.b)) {
+    const ip = zoomIpAt(x, y); if (!ip) return false;
+    zb.trace = { a: ip, b: null, m: [x, y] }; zoomTraceShow(); return true;
+  }
+  if (!tr || tr.b) return false;
+  if (ev.type === 'pointermove') { tr.m = [x, y]; zoomTraceShow(); return true; }
+  if (ev.type === 'pointerdown') {
+    const ip = zoomIpAt(x, y);
+    if (ip && ip.id !== tr.a.id) { tr.b = ip; zoomTraceShow(); }
+  }
+  return true;
+}
+function zoomTraceEnd() { if (!zoomBox) return; zoomBox.trace = null; zoomTraceShow(); }
+// draws the red line in the box (from the IP to the mouse, or IP to IP) and shows what to do next in the title
+function zoomTraceShow() {
+  const zb = zoomBox; if (!zb) return;
+  const tr = zb.trace, span = zb.title.firstChild;
+  zb.svg.replaceChildren(); zb.auto.hidden = !tr?.b; zb.drop.hidden = !tr;
+  span.textContent = !tr ? `🔍 Zoom ${ZOOM_X}x: work right in here (drag, join, double-click). Esc or ✕ closes it.`
+    : !tr.b ? `🔗 Trace from ${tr.a.label}: click the IP to join it to. Esc stops the trace.`
+      : `🔗 ${tr.a.label} → ${tr.b.label}`;
+  if (!tr) return;
+  const ws = $('#ws'), r = ws.getBoundingClientRect(), z = Z(), f = zb.frame.getBoundingClientRect(), k = ZOOM_X;
+  const box = c => [zb.size / 2 + (c[0] - zb.lx) * k * z, zb.size / 2 + (c[1] - zb.ly) * k * z];
+  const scr = ([sx, sy]) => box([(sx - r.left) / z, (sy - r.top) / z]);
+  const a = ipPoint(tr.a.id, wsName), b = tr.b ? ipPoint(tr.b.id, wsName) : null;
+  if (!a) return zoomTraceEnd();
+  const [x1, y1] = box(a), [x2, y2] = b ? box(b) : scr(tr.m), NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, at) => { const e = document.createElementNS(NS, tag); for (const [n, v] of Object.entries(at)) e.setAttribute(n, v); return e; };
+  zb.svg.append(mk('line', { x1, y1, x2, y2, stroke: '#ff1a1a', 'stroke-width': 3, 'stroke-dasharray': b ? '' : '8 5', 'stroke-linecap': 'round' }),
+    mk('circle', { cx: x1, cy: y1, r: 9, fill: 'none', stroke: '#ff1a1a', 'stroke-width': 3 }), ...(b ? [mk('circle', { cx: x2, cy: y2, r: 9, fill: 'none', stroke: '#ff1a1a', 'stroke-width': 3 })] : []));
+  void f;
+}
+// 🔧 Auto configure (OakBarn Brewery, 2026-11-23, picked A: move the first onto the second; "has to trace back so no breaks in Ips"):
+// the IP the trace starts on moves onto the IP it ends on, and the move is traced back through what is joined behind it so no join
+// breaks. A straight pipe takes the part of the move along its own line by getting longer or shorter, and passes on only the part
+// across it to what is on its other end (a fitting, valve, pump ...), and so on back; a hose just bends; any other pipe moves whole.
+// So an elbow moved down and right shortens the pipe under it, and the tee under that pipe slides right along its level pipes.
+// Nothing moves when the trace back would have to move the IP it ends on, a vessel or something locked, a pipe would get too short,
+// or two ways back disagree (a loop): one toast says which. ↩ Put back (Ctrl+Z) undoes it.
+function zoomMover(id) {           // what moves when this IP moves: an open pipe end is its own coupling, anything else its owner
+  const g = draft.graphics.find(x => x.id === id && x.kind === 'ip' && x.fitting === 'coupling');
+  if (g) return g;
+  const it = [...draft.elements, ...draft.graphics].find(it => it.workspace === wsName && it.kind !== 'pipe' && grabIpIds(it).includes(id)) || null, u = bundleOf(it);
+  return isUnit(u) ? u : it;       // an IP of a Skynet Fitting (an elbow, a tee ...): the whole fitting
+}
+const zoomParts = it => [it, ...draft.graphics.filter(g => g.kind === 'ip' && g.attachTo && g.attachTo === it.id)];     // a fitting and the IPs on it
+function zoomTraceBack(start, d, endItem) {
+  const moves = new Map(), ends = new Map(), todo = [[start, d]], name = it => it?.label || it?.name || it?.id || 'an IP';
+  const zero = v => Math.abs(v[0]) < 0.5 && Math.abs(v[1]) < 0.5, same = (u, v) => zero([u[0] - v[0], u[1] - v[1]]);
+  const all = allIps(wsName).map(q => ({ id: q.id, c: ipPoint(q.id, wsName) })).filter(q => q.c);
+  const isCoupling = it => it.kind === 'ip' && it.fitting === 'coupling';
+  const endMove = (p, k, v) => { const e = ends.get(p) || { from: [0, 0], to: [0, 0] }; if (!zero(e[k]) && !same(e[k], v)) return false; e[k] = v; ends.set(p, e); return true; };
+  while (todo.length) {
+    const [it, v] = todo.shift();
+    if (!it || zero(v)) continue;
+    if (moves.has(it)) { if (!same(moves.get(it), v)) return { fail: `two ways back to ${name(it)} would move it differently (a loop)` }; continue; }
+    if (it === endItem) return { fail: `it is joined back to ${name(it)} through its pipes, so that would have to move too` };
+    if ((it.kind === 'vessel' && !isUnit(it)) || (bundleOf(it) && !isUnit(bundleOf(it)))) return { fail: `the trace back reaches ${name(it)}, part of a vessel, which Auto configure does not move` };
+    if (it.locked || profileFrozen(it)) return { fail: `the trace back reaches ${name(it)}, which is locked` };
+    moves.set(it, v);
+    const joins = isCoupling(it) ? pipesOn(it.id, wsName).map(p => ({ p, k: p.from === it.id ? 'from' : 'to' })) : zoomParts(it).flatMap(grabJoins);
+    for (const { p, k } of joins) {
+      const o = k === 'from' ? 'to' : 'from', pts = p.points || [];
+      if (ends.get(p) && same(ends.get(p)[k], v)) continue;       // the pipe the move came along
+      if (!endMove(p, k, v)) return { fail: `${name(p)} would be pulled two ways` };
+      let far = v;
+      if (p.hose) far = [0, 0];                       // a hose bends
+      else if (pts.length === 2) {                     // a straight pipe takes the part along its line
+        const ax = pts[1][0] - pts[0][0], ay = pts[1][1] - pts[0][1], L = Math.hypot(ax, ay) || 1, along = (v[0] * ax + v[1] * ay) / L;
+        far = [v[0] - along * ax / L, v[1] - along * ay / L];
+      }
+      if (zero(far)) continue;
+      if (!endMove(p, o, far)) return { fail: `${name(p)} would be pulled two ways` };
+      if (p[o]) todo.push([zoomMover(p[o]), far]);
+    }
+    const mine = isCoupling(it) ? [it.id] : zoomParts(it).flatMap(grabIpIds);       // an IP sitting right on another one (a fitting on a fitting): it comes too
+    for (const id of mine) { const c = ipPoint(id, wsName); if (c) for (const q of all) if (!mine.includes(q.id) && Math.hypot(q.c[0] - c[0], q.c[1] - c[1]) <= 1) todo.push([zoomMover(q.id), v]); }
+  }
+  for (const [p, e] of ends) {                       // a straight pipe must keep a length and its direction
+    const pts = p.points; if (p.hose || pts.length !== 2) continue;
+    const a = [pts[0][0] + e.from[0], pts[0][1] + e.from[1]], b = [pts[1][0] + e.to[0], pts[1][1] + e.to[1]];
+    const ox = pts[1][0] - pts[0][0], oy = pts[1][1] - pts[0][1], nx = b[0] - a[0], ny = b[1] - a[1];
+    if (Math.hypot(nx, ny) < 8 || ox * nx + oy * ny <= 0) return { fail: `${name(p)} would get too short` };
+  }
+  return { moves, ends };
+}
+function zoomAuto() {
+  const zb = zoomBox, tr = zb?.trace; if (!tr?.b || !draft) return;
+  const a = ipPoint(tr.a.id, wsName), b = ipPoint(tr.b.id, wsName); if (!a || !b) return zoomTraceEnd();
+  // the first IP onto the second; when that would break a join, the second onto the first (OakBarn Brewery, 2026-11-23: "you would have
+  // to find which place back would work without breaking joins or adding pipe or hose or fitting. If it required that, just abandon
+  // fix and say it cannot be done automatically and has to be done manually")
+  const ma = zoomMover(tr.a.id), mb = zoomMover(tr.b.id);
+  const one = ma ? zoomTraceBack(ma, [b[0] - a[0], b[1] - a[1]], mb) : { fail: `${tr.a.label} can't be moved` };
+  const two = one.fail && mb ? zoomTraceBack(mb, [a[0] - b[0], a[1] - b[1]], ma) : null;
+  const t = one.fail ? two : one;
+  if (!t || t.fail) return toast(`🔗 This can't be done automatically without breaking a join or adding a pipe, hose or fitting (${one.fail}). Do it by hand: delete or add pipes, fittings or joins.`, true, 10000);
+  pushUndo(`auto configure ${tr.a.label}`);
+  const ids = new Map([...t.moves].map(([it, v]) => [it.id || it.name, v]));
+  for (const [it, v] of t.moves) { it.x = (it.x || 0) + v[0]; it.y = (it.y || 0) + v[1]; }
+  for (const g of draft.graphics) if (g.attachTo && ids.has(g.attachTo) && !t.moves.has(g)) { const v = ids.get(g.attachTo); g.x = (g.x || 0) + v[0]; g.y = (g.y || 0) + v[1]; }      // IPs that ride on a moved fitting
+  for (const [p, e] of t.ends) {
+    const n = p.points.length;
+    if (!p.hose && n > 2) { const v = e.from[0] || e.from[1] ? e.from : e.to; p.points = p.points.map(q => [q[0] + v[0], q[1] + v[1]]); continue; }
+    p.points[0] = [p.points[0][0] + e.from[0], p.points[0][1] + e.from[1]]; p.points[n - 1] = [p.points[n - 1][0] + e.to[0], p.points[n - 1][1] + e.to[1]];
+  }
+  rejoinEnds(new Set([tr.a.id, tr.b.id]));            // an open pipe end now on the other IP joins it
+  renderWs();
+  const n = t.moves.size - 1, [m1, m2] = t === one ? [tr.a.label, tr.b.label] : [tr.b.label, tr.a.label];
+  toast(`🔗 ${m1} moved onto ${m2} and joined it${n ? `; ${n} joined thing${n > 1 ? 's' : ''} behind it moved along and their straight pipes got longer or shorter` : ''}. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000);
+  zoomTraceEnd(); zoomDraw(true);
+}
 function zoomDraw(fresh = false) {
   const zb = zoomBox; if (!zb) return;
   if (!editing) return zoomClose();
@@ -5269,6 +5401,7 @@ function zoomDraw(fresh = false) {
   }
   const z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, k = ZOOM_X * z;
   zb.copy.style.transform = `translate(${zb.size / 2 - zb.lx * k}px, ${zb.size / 2 - zb.ly * k}px) scale(${k})`;
+  if (zb.trace) zoomTraceShow();
 }
 let zoomRaf = 0;
 document.addEventListener('pointermove', ev => {
@@ -5277,7 +5410,7 @@ document.addEventListener('pointermove', ev => {
   if (zoomBox && !zoomRaf) zoomRaf = requestAnimationFrame(() => { zoomRaf = 0; zoomDraw(); });      // a drag on the Tab itself shows in the box too
 }, true);
 document.addEventListener('keydown', ev => {
-  if (zoomBox && ev.key === 'Escape') { zoomClose(); return; }
+  if (zoomBox && ev.key === 'Escape') { if (zoomBox.trace) zoomTraceEnd(); else zoomClose(); return; }
   if (!editing || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat || ev.key.toLowerCase() !== 'z') return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();

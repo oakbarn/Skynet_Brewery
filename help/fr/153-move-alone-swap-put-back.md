@@ -45,8 +45,17 @@ montre toujours cet endroit.
 
 **Travaillez directement dans la fenêtre :** traînez-y un bout de tuyau, un IP ou un objet avec le bouton droit de la souris,
 comme sur le Tab, et il bouge aussi sur le Tab, 2 fois plus finement, pour poser un bout exactement sur un IP. Les clics et les
-doubles-clics y marchent aussi (un double-clic ouvre les Properties). Appuyez sur **Échap** ou sur le **✕** rouge dans son coin
-en haut à droite pour la fermer.
+doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge). Appuyez sur **Échap** ou sur le **✕**
+rouge dans son coin en haut à droite pour la fermer.
+
+**Joindre deux IP avec un tracé (seulement dans la fenêtre de zoom) :** double-cliquez sur un IP rouge pour commencer une ligne
+de tracé rouge, puis cliquez sur l'IP auquel le joindre. Appuyez sur **🔧 Auto configure** : le premier IP se pose sur le second
+et ils se joignent, et ce qui est joint derrière suit pour qu'aucun raccord ne se défasse. Un tuyau droit s'allonge ou se raccourcit
+pour la part du déplacement le long de sa ligne, et seule la part en travers passe à ce qui est à son autre bout (un té glisse le
+long de ses tuyaux à niveau, le tuyau qui monte à un coude se raccourcit), et ainsi de suite ; un tuyau souple se plie. Si cela
+défaisait un raccord, le second IP est essayé sur le premier. Si aucun ne marche, rien ne bouge et un message dit que cela ne
+peut pas se faire automatiquement : faites-le à la main, en supprimant ou en ajoutant des tuyaux, des raccords ou des joints.
+**Cancel trace** ou **Échap** enlève le tracé, et ↩ Put back (Ctrl+Z) annule un Auto configure.
 
 ## Rendre un tuyau plus court ou plus long, et redessiner un tuyau souple {#making-a-pipe-shorter-or-longer-and-redrawing-a-hose}
 
