@@ -9,5 +9,17 @@
  "looper_LogTemps": "k8e60539dd8f799ee",
  "BrewDay_Flow": "k1b4f02f593b4c180",
  "BrewDay_Stop": "kc7541da5f8bb2799",
- "looper_Advance_Switch": "kf809837e059ecc48"
+ "looper_Advance_Switch": "kf809837e059ecc48",
+ "FireHose_1_Minute": "ke02232c58744dffb",
+ "FireHose_2_Minutes": "kfc1981553c8d628f",
+ "FireHose_20_Seconds": "ka7ad4eb8b888db30",
+ "FireHose_Float": "kd8dcc3ed66663ba9",
+ "FireHose_Off": "k6e20eef1b0cbac36",
+ "FireHose_Set_Time": "ke21a3ec3e0cff8c8",
+ "Manifold_1_Minute": "k0c199f701a922692",
+ "Manifold_2_Minutes": "ka0ef50b8f52d19ba",
+ "Manifold_3_Minutes": "ke0c4530677f395b8",
+ "Manifold_Float": "kb44f41671851dcc6",
+ "Manifold_Set_Time": "k60128c0f7c8b34c3",
+ "utility_FireHose_Manifold_Supply_Water": "kc888bd58a1f7be33"
 }

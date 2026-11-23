@@ -1,0 +1,19 @@
+{
+  "name": "Tap Water",
+  "notes": "Your own tap water. Fill in its numbers on ☰ Menu > Default settings > Tap Water, from your Water Department's report or a Test Kit.",
+  "units": "Metric",
+  "ca": 0,
+  "mg": 0,
+  "na": 0,
+  "so4": 0,
+  "cl": 0,
+  "hco3": 0,
+  "ph": 7,
+  "distilledPct": 0,
+  "source": "supplier",
+  "chlorine": "unknown",
+  "tap": true,
+  "created": "2026-11-23T16:26:21.051Z",
+  "updated": "2026-11-23T16:26:21.051Z",
+  "_key": "k70297418ba861787"
+}

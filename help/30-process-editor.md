@@ -10,7 +10,7 @@ The Save picture on the top row and the Save button do the same thing. Every one
 **Problems and Output** are in a column to the right of the code:
 
 - **At the top**, the problems Check found (click one to go to its line), or *No problems found*, and **Clear**, which empties the Output window.
-- **Output** has a list with two choices. **Current Process** shows what the Process open in the editor prints. **All Variables** shows the value now of each of its variables (while it runs) and of every gGlobal, kept up to date each second.
+- **Output** has a list with two choices. **Current Process** shows what the Process open in the editor prints. **All Variables** shows the value now of each of its variables (while it runs) and of every gGlobal, kept up to date each second. Under **Running** the list also has every Process running now: pick one and it opens in the editor and becomes the Current Process, until you pick another. Pressing **Start** or **Restart** always shows the Process you just started.
 - **Reset every Start** (off to start): when it is on, a Process's old Output lines are cleared each time that Process starts, so you see only this run. Each browser remembers both choices.
 
 On a phone the column is under the code.
