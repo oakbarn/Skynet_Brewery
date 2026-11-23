@@ -12586,7 +12586,10 @@ async function editItem(kind, id) {
           [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
         if (pick === undefined) return;
         if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
-      } else if (!await skyConfirm('Delete this item?', { ok: '🗑 Delete' })) return;
+      }
+      // no "Delete this item?" box (OakBarn Brewery, 2026-11-23: "getting the annoying Do you really want do delete nanny popup. Could a
+      // simple CTRL + Z restore a Delete ?"; Rules 2.64 and 5.37): it goes at once, and ↩ Put back (Ctrl+Z) brings it back
+      const delWho = item.label || item.name || lockName(item); pushUndo(`delete ${delWho}`);
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else if (item.kind === 'pipe') deletePipe(item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
@@ -12603,7 +12606,7 @@ async function editItem(kind, id) {
       }
       draft.graphics = draft.graphics.filter(g => !(isCap(g) && gone.includes(g.capOn)));     // an End Cap on an opening that is gone goes too
       for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
-      sel = null; renderWs(); return;
+      sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000); return;
     }
     const copy = r === 'copy'; if (copy) r = 'ok';           // COPY: save it, then make the copy
     if (r !== 'ok') {      // a new vessel closed with Cancel still gets its default ports

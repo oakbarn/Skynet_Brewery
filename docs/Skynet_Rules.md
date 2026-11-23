@@ -1475,12 +1475,13 @@ for a big delete or change. They all ask in **one shared Skynet box** (public/sk
 - The question is the heading; the rest of the old message is the text under it, word for word.
 - **One warning only:** one box, no second "Are you sure?", nothing to type or tick (only Remove an Interface keeps its typed ID,
   Rule 2.63). It is a modal dialog, so it is on top of everything (Rule 18.53).
-- Used for: Delete a Tab, a Schema, an item on a Tab, a gGlobal, an Equipment Profile, a Profile, a Device Template, a Template,
+- Used for: Delete a Tab, a Schema, a gGlobal, an Equipment Profile, a Profile, a Device Template, a Template,
   a User Process Template, a User Style, a Process (to the Recycle Bin) and a Process for good, a CSV set, a 1-Wire circuit or Index
   in use, a Help page, media files; Throw away the Build Tab; Replace in many Processes; Remove a user, an Approved Device, the
   Patron code; Turn Approved Devices Off; Make a new recovery code; the BruControl Import; Switch / load a Schema; Simulator or Real
   boards; Move in (Brain Move); Save the config file and Put back an old one. The small "leave without saving?" questions stay as
-  they are.
+  they are. *Not* an item on a Tab (OakBarn Brewery, 2026-11-23): its Properties Delete goes at once and ↩ Put back (Ctrl+Z)
+  brings it back (Rule 5.37).
 **Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asked in this box until it
 was taken out of the Panel (2026-11-21, Rule 11.3).
 Help 28, 48, 119, 188.
@@ -2782,8 +2783,10 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   Manual Valve with no pipes on it, dropped with one of its IPs within 30 pixels of a let-go open end, slides that last bit so the IP
   is on it. A pump's Inlet and Outlet then each go on whichever of its 8 IPs (Rule 5.27) is where the old one's Inlet and Outlet
   were, so a new pump takes a Left (flipped) pump's pipes too; a Hose Bib's one IP the same (Rule 18.48). Then they join. No pop-up.
-- **↩ Put back** on the Edit layout bar, and **Ctrl+Z** (not in a text box): undoes the last move, resize, unlock or swap, up to 30
-  steps, back to how pipes, fittings and items were. It starts fresh each time Edit layout opens. Properties changes are not in it;
+- **↩ Put back** on the Edit layout bar, and **Ctrl+Z** (not in a text box): undoes the last move, resize, unlock, swap or **delete**
+  (OakBarn Brewery, 2026-11-23: "Could a simple CTRL + Z restore a Delete ?": an item deleted from its Properties, with no "Delete
+  this item?" box), up to 30 steps, back to how pipes, fittings and items were. It starts fresh each time Edit layout opens. Other
+  Properties changes are not in it;
   Exit without saving still undoes everything since the last Save layout.
 - **🗑 Delete Pipe / Delete Hose** (OakBarn Brewery, 2026-11-14: "Add Delete Button to Hose and Pipe Disconnect Dialog"): the
   pop-up of a pipe or hose has a red Delete button beside 🔓 Unlock its ends; ↩ Put back (Ctrl+Z) brings it back. Its top is frozen
@@ -6070,8 +6073,10 @@ States the Label Cannot be Blank. Dialog self distructs after 5 seconds"; OakBar
   work, even while the Label or the Port is blank (Rule 18.11 still asks first when something was changed).
 - **Delete is "hot" too** (OakBarn Brewery, 2026-11-14: "I also tried to delete a Hose that had no label but the Delete button warned
   it needed one. Have Delete Delete without those types of issues"): a Delete button (Properties Delete, 🗑 Delete, 🗑 Delete Pipe /
-  Hose, top or bottom) always works, in every dialog, even while the Label, the Port or any needed box (Rule 18.33) is blank. It
-  still asks "Delete this item?" first. Both programs.
+  Hose, top or bottom) always works, in every dialog, even while the Label, the Port or any needed box (Rule 18.33) is blank. Both
+  programs. *Changed (OakBarn Brewery, 2026-11-23: "getting the annoying Do you really want do delete nanny popup. Could a simple
+  CTRL + Z restore a Delete ?"):* an item's Properties Delete no longer asks "Delete this item?": it goes at once, a toast says so,
+  and **↩ Put back** (Ctrl+Z) brings it back (Rule 5.37). A Device with Clones still offers its choices (Rule 4.4).
 - **The same for a Port** when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): Save / ➕ Add
   waits for it with **"⚠ The Port cannot be blank."**, and a blank Port never keeps the focus ("If Port is Nul, it does not retain
   focus ... this allows for an Interface Change").

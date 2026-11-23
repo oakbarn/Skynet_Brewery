@@ -73,7 +73,7 @@ s'alignent. Une vanne ou une Manual Valve sans tuyau glisse sur ses bouts ouvert
 
 ## ↩ Put back (Ctrl+Z)
 
-**↩ Put back** sur la barre Edit layout (ou **Ctrl+Z**) annule le dernier déplacement, redimensionnement, déverrouillage ou échange, pour que les tuyaux et raccords reviennent
+**↩ Put back** sur la barre Edit layout (ou **Ctrl+Z**) annule le dernier déplacement, redimensionnement, déverrouillage, échange ou **suppression** (un Device, un Widget, un tuyau ou tout ce qui est supprimé depuis ses Properties : aucune fenêtre « Delete this item? » ne demande d'abord), pour que les tuyaux et raccords reviennent
 là où ils étaient. Appuyez de nouveau pour revenir plus loin (jusqu'à 30 étapes). Posez la souris dessus pour voir ce qu'il va remettre. Il repart
-à zéro chaque fois que vous ouvrez Edit layout. Les changements faits dans une fenêtre Properties n'y sont pas ; **Exit** sans enregistrer annule quand même
+à zéro chaque fois que vous ouvrez Edit layout. Les autres changements faits dans une fenêtre Properties n'y sont pas ; **Exit** sans enregistrer annule quand même
 tout depuis le dernier Save layout.

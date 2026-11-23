@@ -73,7 +73,7 @@ Rule 5.27), so two pumps of the same size line up. A valve or Manual Valve with 
 
 ## ↩ Put back (Ctrl+Z)
 
-**↩ Put back** on the Edit layout bar (or **Ctrl+Z**) undoes the last move, resize, unlock or swap, so pipes and fittings go back
+**↩ Put back** on the Edit layout bar (or **Ctrl+Z**) undoes the last move, resize, unlock, swap or **delete** (a Device, Widget, pipe or anything deleted from its Properties: no "Delete this item?" box asks first), so pipes and fittings go back
 where they were. Press it again to go back further (up to 30 steps). Rest the mouse on it to see what it will put back. It starts
-fresh each time you open Edit layout. Changes made in a Properties dialog are not in it; **Exit** without saving still undoes
+fresh each time you open Edit layout. Other changes made in a Properties dialog are not in it; **Exit** without saving still undoes
 everything since the last Save layout.
