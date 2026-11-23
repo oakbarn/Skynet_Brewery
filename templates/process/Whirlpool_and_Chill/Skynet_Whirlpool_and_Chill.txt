@@ -31,6 +31,7 @@ ask "Open the chiller cooling water. Press Done when it runs."
 @else
 ask "Turn the chiller cooling water off. Press Done when it is off."
 @end
+  hop_alert "Hop Stand High"
   if skn_rcp_Hop_Infuser == true
 @if Hop_Infuser_Valve
     {{Hop_Infuser_Valve}} = true
@@ -40,7 +41,9 @@ ask "Turn the chiller cooling water off. Press Done when it is off."
     ask "Add the Hop Stand High hops now, at " + skn_rcp_Hop_Stand_High_Temp + skn_rcp_Temp_Units + ". Press Done when they are in."
   endif
   print "Hop Stand High for " + skn_rcp_Hop_Stand_High_Minutes + " minutes, cooling water off"
-  sleep skn_rcp_Hop_Stand_High_Minutes * 60000
+  skn_Whirlpool_Timer = skn_rcp_Hop_Stand_High_Minutes * 60
+  start skn_Whirlpool_Timer
+  wait skn_Whirlpool_Timer <= 00:00:00
 endif
 if skn_rcp_Hop_Stand_Middle == true
   step "Chill to Hop Stand Middle"
@@ -60,6 +63,7 @@ ask "Open the chiller cooling water. Press Done when it runs."
 @else
 ask "Turn the chiller cooling water off. Press Done when it is off."
 @end
+  hop_alert "Hop Stand Middle"
   if skn_rcp_Hop_Infuser == true
 @if Hop_Infuser_Valve
     {{Hop_Infuser_Valve}} = true
@@ -69,7 +73,9 @@ ask "Turn the chiller cooling water off. Press Done when it is off."
     ask "Add the Hop Stand Middle hops now, at " + skn_rcp_Hop_Stand_Middle_Temp + skn_rcp_Temp_Units + ". Press Done when they are in."
   endif
   print "Hop Stand Middle for " + skn_rcp_Hop_Stand_Middle_Minutes + " minutes, cooling water off"
-  sleep skn_rcp_Hop_Stand_Middle_Minutes * 60000
+  skn_Whirlpool_Timer = skn_rcp_Hop_Stand_Middle_Minutes * 60
+  start skn_Whirlpool_Timer
+  wait skn_Whirlpool_Timer <= 00:00:00
 endif
 if skn_rcp_Hop_Stand_Low == true
   step "Chill to Hop Stand Low"
@@ -89,6 +95,7 @@ ask "Open the chiller cooling water. Press Done when it runs."
 @else
 ask "Turn the chiller cooling water off. Press Done when it is off."
 @end
+  hop_alert "Hop Stand Low"
   if skn_rcp_Hop_Infuser == true
 @if Hop_Infuser_Valve
     {{Hop_Infuser_Valve}} = true
@@ -98,7 +105,9 @@ ask "Turn the chiller cooling water off. Press Done when it is off."
     ask "Add the Hop Stand Low hops now, at " + skn_rcp_Hop_Stand_Low_Temp + skn_rcp_Temp_Units + ". Press Done when they are in."
   endif
   print "Hop Stand Low for " + skn_rcp_Hop_Stand_Low_Minutes + " minutes, cooling water off"
-  sleep skn_rcp_Hop_Stand_Low_Minutes * 60000
+  skn_Whirlpool_Timer = skn_rcp_Hop_Stand_Low_Minutes * 60
+  start skn_Whirlpool_Timer
+  wait skn_Whirlpool_Timer <= 00:00:00
 endif
 step "Chill while it spins"
 @if Chill_Water

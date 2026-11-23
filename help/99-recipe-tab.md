@@ -253,6 +253,21 @@ On brew day each alert shows as a bar at the top of every screen (green for a wa
 
 Start the alerts from a Process (below), or with **▶ Start hop alerts** on the Drops tab. They can run on Skynet's own clock from that moment, or follow a countdown **timer** such as the Boil timer, so a paused timer or the Simulator's time skips are followed too.
 
+### Before and after the boil
+
+Some hops go in when the brew gets somewhere, not at a boil minute. The Process sends their alerts at that moment (`hop_alert`, below), and the Drops tab lists them under **Alerts the Process sends**:
+
+| When | Alert |
+| --- | --- |
+| The Strike Water reaches Strike | **Pre Boil** warning: get the Mash and 1st Wort hops ready |
+| Just after the Mash Timer starts | **Mash** drop: the Top of Mash hops |
+| Just after the First Run is complete | **1st Wort** drop: the 1st Wort hops |
+| 10 minutes left in the boil | **Post Boil** warning: every Whirlpool, Hop Stand, Secondary and Dry Hop hop (a timed alert, with the others) |
+| The wort reaches a Hop Stand's temperature | **Hop Stand** drop: that stand's hops. The cooling water is off for its time, on the Whirlpool / Chilling Timer |
+| Every Fermenter is filled | **Fermenter** hops: the Secondary and Dry Hop hops, to set a reminder on your phone |
+
+The Pre Boil, Mash and 1st Wort alerts are for **All Grain** recipes only. A Whirlpool hop with no Hop Stand temperature and time (a BeerXML file has none) still goes in at flame out.
+
 ## Voice and audio files
 
 Each alert can have its own voice file in `media/Audio/Hops`. The Drops tab shows its name. When the file is there, it plays; when not, the browser's own voice reads the alert (every common browser has one, on computers and phones, with no web site needed).
@@ -285,8 +300,12 @@ start_hop_alerts
 start_hop_alerts "Boil_Timer"
 start_hop_alerts "Boil_Timer", 1
 stop_hop_alerts
+hop_alert "Pre Boil"
+hop_alert "Hop Stand High"
+hop_alert "Fermenter"
 ```
 
 - `import_recipe` reads a .bsmx or .xml file on the Brain (a path in the Brain's folder or a media folder) and makes it the Recipe. A second text picks one recipe from a file with many.
 - `start_hop_alerts` starts the hop alerts on Skynet's clock from now; with a timer name it follows that timer instead. A number after the timer is how many timer seconds make one minute of the boil: 60 (real time) to start; 1 when a Testing switch runs each minute as one second.
 - `stop_hop_alerts` stops them.
+- `hop_alert` sends one of the alerts that come before or after the boil (see **Before and after the boil**): `"Pre Boil"`, `"Mash"`, `"1st Wort"`, `"Hop Stand High"`, `"Hop Stand Middle"`, `"Hop Stand Low"` or `"Fermenter"`. With no Recipe, or no such hops, nothing is sent and the Process goes on.

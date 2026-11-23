@@ -2,7 +2,7 @@
 // A Recipe is always kept in kilograms, liters and °C (as BeerXML does). The Default tab says how each amount is shown
 // (Fritz, 2026-10-30): the user only sees the results in their own units.
 
-import { hopStands, standOf } from './brewcalc.js';
+import { hopStands, standOf, standReady, HOP_STANDS } from './brewcalc.js';
 export const KG_LB = 2.20462262, KG_OZ = 35.27396195, L_GAL = 0.264172052, L_QT = 1.05668821, L_FLOZ = 33.8140227;
 export const cToF = c => c * 9 / 5 + 32, fToC = f => (f - 32) * 5 / 9;
 const n = v => Number.isFinite(+v) ? +v : 0;
@@ -291,16 +291,37 @@ export const hopKgToUse = h => n(h.alphaActual) > 0 && n(h.alpha) > 0 ? n(h.kg) 
 // for example a drop and the next group's warning. Boil Misc items (Irish Moss, Whirlfloc, yeast nutrient) get their
 // own warning and drop, and are merged the same way.
 // at = minutes from the start of the boil. Mash and 1st Wort hops come before the boil (no time), Dry Hops after.
-export function hopSchedule(r, d = {}) {
+// The Post Boil hops (OakBarn Brewery, 2026-11-23: "there needs to be a Pre Warning that includes ALL of the Post Boil Hops. That
+// needs to be a 10 minutes remaining in the Boil. Hop stands get own Drop Alert based on Whirlpool/Chiller Timer and Temperatures.
+// Post Boil In Fermenter get alert after all Fermenters are filled to basically set a reminder on their Phone"; Rule 17.20):
+// - one Pre Warning 10 minutes before the end of the boil lists every Whirlpool, Hop Stand, Secondary and Dry Hop hop;
+// - a Whirlpool hop whose Hop Stand has its temperature and time is in that stand's group, with no timed alert: its drop alert
+//   is sent by the Process when the wort reaches the stand's temperature (hop_alert "Hop Stand High"); a Whirlpool hop with no
+//   ready stand keeps its drop at flame out;
+// - the Secondary and Dry Hop hops make one Fermenter reminder (hop_alert "Fermenter"), sent when every Fermenter is filled.
+// The Pre Boil hops (OakBarn Brewery, 2026-11-23: "Pre Boil Hops need a Pre Warning when Strike Water Reaches Strike. Mash Hops need
+// Drop Warning just after Mash Timer Begins. 1st Hops need Drop Warning just after First Run Complete"): hop_alert "Pre Boil",
+// hop_alert "Mash", hop_alert "1st Wort", each sent by the Process at that moment (processAlerts below) All Grain Recipes only ("These will only be for all grain
+// Brewers as the other lower levels have none").
+// bp: the Recipe's Boil Profile (its Hop Stand boxes), as the Process reads them (lib/brewprocess.js).
+export const POST_BOIL_WARN_MINUTES = 10;
+export function hopSchedule(r, d = {}, bp = null) {
   const D = { ...RECIPE_DEFAULTS, ...pickNums(d) }, u = displayUnits(d);
   const boil = n(r?.boilTime) || D.boilTime, warn = Math.max(0, D.hopWarnMinutes), merge = Math.max(0, D.alertMergeMinutes);
   const hopText = h => `${fmtW(hopKgToUse(h), hopUnitOf(h, u))} ${h.name || 'hop'}`;
   const groups = new Map(), hopKey = [];
+  const stands = hopStands(r, null, bp), readyStand = h => { const s = stands.find(x => x.key === standOf(h, stands)); return standReady(s) ? s : null; };
+  const tU = `°${u.tempUnit}`, standTemp = s => `${round(cTo(s.tempC, u.tempUnit), 0)} ${tU}`;
   const add = (key, g, what) => { if (!groups.has(key)) groups.set(key, { ...g, items: [] }); groups.get(key).items.push(what); if (what.kind === 'hop') hopKey.push(key); };
   for (const h of r?.ingredients?.hops || []) {
     const use = HOP_USES[h.use] ? h.use : 'boil', t = n(h.time);
     if (use === 'mash') add('mash', { phase: 'mash', order: 1, label: 'Top of Mash' }, { kind: 'hop', text: hopText(h) });
     else if (use === 'first wort') add('fw', { phase: 'first wort', order: 2, label: '1st Wort' }, { kind: 'hop', text: hopText(h) });
+    else if (use === 'whirlpool' && readyStand(h)) {
+      const s = readyStand(h), si = HOP_STANDS.findIndex(([k]) => k === s.key);
+      add('hs' + s.key, { phase: 'whirlpool', order: 7.1 + si / 10, label: `Hop Stand ${s.label} (${standTemp(s)}, ${s.min} min)`, stand: s.key, standLabel: s.label, tempC: s.tempC, standMin: s.min },
+        { kind: 'hop', text: hopText(h) + (h.hopRocket ? ' (Hop Rocket)' : '') });
+    }
     else if (use === 'whirlpool') add('wp', { phase: 'whirlpool', order: 7, label: 'Whirlpool', at: boil, min: 0 }, { kind: 'hop', text: hopText(h) + (t ? ` (${t} min whirlpool${h.wpTempC != null && h.wpTempC !== '' ? ` at ${round(cTo(h.wpTempC, u.tempUnit), 0)} °${u.tempUnit}` : ''}${h.hopRocket ? ', Hop Rocket' : ''})` : h.hopRocket ? ' (Hop Rocket)' : '') });
     else if (use === 'secondary') add('sec' + n(h.dryDays), { phase: 'secondary', order: 8, label: `Secondary${n(h.dryDays) ? ` (${n(h.dryDays)} days)` : ''}`, days: n(h.dryDays) }, { kind: 'hop', text: hopText(h) });
     else if (use === 'dry hop') add('dry' + n(h.dryDays), { phase: 'dry hop', order: 9, label: `Dry Hop${n(h.dryDays) ? ` (${n(h.dryDays)} days)` : ''}`, days: n(h.dryDays) }, { kind: 'hop', text: hopText(h) });
@@ -321,16 +342,20 @@ export function hopSchedule(r, d = {}) {
   const raw = [];
   for (const g of list.filter(g => g.at !== undefined)) {
     const name = g.phase === 'whirlpool' ? 'the Whirlpool hops' : g.order === 3 ? 'the Start of Boil hops' : `Hop Group ${g.group}`;
-    if (warn && g.at > 0) raw.push({ at: Math.max(0, g.at - warn), kind: 'warn', group: g.group, text: `${warn} minute warning: get ${name} ready: ${g.what}` });
+    if (warn && g.at > 0 && g.phase !== 'whirlpool') raw.push({ at: Math.max(0, g.at - warn), kind: 'warn', group: g.group, text: `${warn} minute warning: get ${name} ready: ${g.what}` });
     raw.push({ at: g.at, kind: 'drop', group: g.group, text: g.phase === 'whirlpool' ? `Flame out. Add the Whirlpool hops now: ${g.what}` : `Add ${name} now: ${g.what}` });
   }
+  // the Post Boil Pre Warning: every hop that goes in after the boil, 10 minutes before its end
+  const post = list.filter(g => ['whirlpool', 'secondary', 'dry hop'].includes(g.phase)), named = g => `${g.label === 'Whirlpool' ? 'Whirlpool (flame out)' : g.label}: ${g.what}`;
+  if (post.length) raw.push({ at: Math.max(0, boil - POST_BOIL_WARN_MINUTES), kind: 'warn', group: null, post: true,
+    text: `${POST_BOIL_WARN_MINUTES} minutes left in the boil: get the Post Boil hops ready: ${post.map(named).join('; ')}` });
   raw.sort((a, b) => a.at - b.at || (a.kind === 'drop' ? -1 : 1));
   const alerts = [], conflicts = [];
   for (const a of raw) {
     const last = alerts[alerts.length - 1];
     if (last && a.at - last.at <= merge) {
       last.parts.push(a); last.kind = last.parts.some(p => p.kind === 'drop') ? 'drop' : 'warn';
-      conflicts.push({ at: last.at, text: `${a.kind === 'drop' ? 'Drop' : 'Warning'} for ${a.group ? 'Hop Group ' + a.group : 'hops'} at ${round(a.at, 1)} min lands with ${last.parts.length > 2 ? 'other alerts' : (last.parts[0].kind === 'drop' ? 'a drop' : 'a warning')} at ${round(last.at, 1)} min: one alert has both` });
+      conflicts.push({ at: last.at, text: `${a.kind === 'drop' ? 'Drop' : 'Warning'} for ${a.group ? 'Hop Group ' + a.group : a.post ? 'the Post Boil hops' : 'hops'} at ${round(a.at, 1)} min lands with ${last.parts.length > 2 ? 'other alerts' : (last.parts[0].kind === 'drop' ? 'a drop' : 'a warning')} at ${round(last.at, 1)} min: one alert has both` });
     } else alerts.push({ at: a.at, kind: a.kind, parts: [a] });
   }
   for (const a of alerts) {
@@ -340,7 +365,20 @@ export function hopSchedule(r, d = {}) {
   }
   // each hop line's Boil Group (the Hop N Boil Group box): its group number, or null when it is not a Boil or Whirlpool hop
   const hopGroups = hopKey.map(k => groups.get(k).group ?? null);
-  return { boilTime: boil, warnMinutes: warn, groups: list, alerts, conflicts, hopGroups };
+  // the alerts a Process sends with hop_alert "<which>" (Rule 17.20), when the brew gets there: they have no boil minute
+  const sent = (which, kind, text, extra) => ({ which, kind, at: null, left: null, text, speak: text, audio: `Audio/Hops/${audioName(0, which + ' ' + text)}`, ...extra });
+  // the Pre Boil alerts are for All Grain (Level 4) only (OakBarn Brewery, 2026-11-23: "These will only be for all grain Brewers as the
+  // other lower levels have none")
+  const of = (...phases) => list.filter(g => phases.includes(g.phase)), allGrain = recipeLevel(r) === 4, pre = allGrain ? of('mash', 'first wort') : [];
+  const processAlerts = [
+    ...(pre.length ? [sent('Pre Boil', 'warn', `The Strike Water is at Strike. Get the Pre Boil hops ready: ${pre.map(g => `${g.label}: ${g.what}`).join('; ')}`)] : []),
+    ...(allGrain ? of('mash') : []).map(g => sent('Mash', 'drop', `The Mash Timer has started. Add the Top of Mash hops now: ${g.what}`)),
+    ...(allGrain ? of('first wort') : []).map(g => sent('1st Wort', 'drop', `The First Run is complete. Add the 1st Wort hops now: ${g.what}`)),
+    ...list.filter(g => g.stand).map(g => sent(`Hop Stand ${g.standLabel}`, 'drop',
+      `Hop Stand ${g.standLabel}: the wort is at ${standTemp({ tempC: g.tempC })}. Add the Hop Stand ${g.standLabel} hops now: ${g.what}. Cooling water off for ${g.standMin} minutes.`, { stand: g.stand, group: g.group })),
+    ...(of('secondary', 'dry hop').length ? [sent('Fermenter', 'drop', `The Fermenters are filled. Set a reminder on your phone for the Fermenter hops: ${of('secondary', 'dry hop').map(g => `${g.label}: ${g.what}`).join('; ')}.`)] : []),
+  ];
+  return { boilTime: boil, warnMinutes: warn, groups: list, alerts, conflicts, hopGroups, processAlerts };
 }
 // the voice file name of an alert: its minute and a short code of its words, so a changed alert needs a new file
 export function audioName(at, text) {

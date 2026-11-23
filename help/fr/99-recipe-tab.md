@@ -253,6 +253,21 @@ Le jour du brassage, chaque alerte s'affiche comme une barre en haut de chaque �
 
 Démarrez les alertes depuis un Process (plus bas), ou avec **▶ Start hop alerts** sur l'onglet Drops. Elles peuvent tourner sur la propre horloge de Skynet à partir de ce moment, ou suivre une **minuterie** à rebours comme la minuterie d'ébullition, donc une minuterie en pause ou les sauts de temps du simulateur sont suivis aussi.
 
+### Avant et après l'ébullition {#before-and-after-the-boil}
+
+Certains houblons sont ajoutés quand le brassage arrive à un moment donné, pas à une minute d'ébullition. Le Process envoie leurs alertes à ce moment-là (`hop_alert`, plus bas), et l'onglet Drops les liste sous **Alerts the Process sends** :
+
+| Quand | Alerte |
+| --- | --- |
+| L'eau d'empâtage (Strike Water) atteint la température Strike | avertissement **Pre Boil** : préparez les houblons Mash et 1st Wort |
+| Juste après le démarrage du Mash Timer | ajout **Mash** : les houblons Top of Mash |
+| Juste après la fin du First Run | ajout **1st Wort** : les houblons 1st Wort |
+| 10 minutes avant la fin de l'ébullition | avertissement **Post Boil** : chaque houblon Whirlpool, Hop Stand, Secondary et Dry Hop (une alerte minutée, avec les autres) |
+| Le moût atteint la température d'un Hop Stand | ajout **Hop Stand** : les houblons de ce stand. L'eau de refroidissement est coupée pendant son temps, sur la minuterie Whirlpool / Chilling |
+| Chaque fermenteur est rempli | houblons **Fermenter** : les houblons Secondary et Dry Hop, pour mettre un rappel sur votre téléphone |
+
+Les alertes Pre Boil, Mash et 1st Wort sont pour les recettes **All Grain** seulement. Un houblon Whirlpool sans température ni temps de Hop Stand (un fichier BeerXML n'en a pas) est toujours ajouté au flame out.
+
 ## Voix et fichiers audio {#voice-and-audio-files}
 
 Chaque alerte peut avoir son propre fichier de voix dans `media/Audio/Hops`. L'onglet Drops montre son nom. Quand le fichier est là, il est joué ; sinon, la voix du navigateur lit l'alerte (chaque navigateur courant en a une, sur ordinateur et téléphone, sans besoin de site web).
@@ -285,8 +300,12 @@ start_hop_alerts
 start_hop_alerts "Boil_Timer"
 start_hop_alerts "Boil_Timer", 1
 stop_hop_alerts
+hop_alert "Pre Boil"
+hop_alert "Hop Stand High"
+hop_alert "Fermenter"
 ```
 
 - `import_recipe` lit un fichier .bsmx ou .xml sur le Brain (un chemin dans le dossier du Brain ou dans un dossier media) et en fait la recette. Un second texte choisit une recette dans un fichier qui en a beaucoup.
 - `start_hop_alerts` démarre les alertes de houblonnage sur l'horloge de Skynet à partir de maintenant ; avec un nom de minuterie, il suit plutôt cette minuterie. Un nombre après la minuterie dit combien de secondes de minuterie font une minute d'ébullition : 60 (temps réel) au départ ; 1 quand un interrupteur Testing fait passer chaque minute en une seconde.
 - `stop_hop_alerts` les arrête.
+- `hop_alert` envoie une des alertes d'avant ou d'après l'ébullition (voir **Avant et après l'ébullition**) : `"Pre Boil"`, `"Mash"`, `"1st Wort"`, `"Hop Stand High"`, `"Hop Stand Middle"`, `"Hop Stand Low"` ou `"Fermenter"`. Sans recette, ou sans ces houblons, rien n'est envoyé et le Process continue.

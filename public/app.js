@@ -20036,7 +20036,7 @@ function rcYeast(pane, rc, u, changed) {
 }
 // Drops: the results only. Skynet's hop order, every alert (merged when two land together) and their voice files
 function rcDrops(pane, rc) {
-  const sch = hopSchedule(rc, S.config.brewDefaults || {}), saved = rcView.schedule, same = !profDirty.recipe;
+  const sch = hopSchedule(rc, S.config.brewDefaults || {}, S.boilProfiles.find(x => x.id === (rc.boilProfile || S.config.brewDefaults?.boilProfile)) || null), saved = rcView.schedule, same = !profDirty.recipe;
   const groups = h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Hop Group'), h('th', {}, 'When'), h('th', {}, 'What goes in'))),
     h('tbody', {}, ...sch.groups.map((g, i) => h('tr', {}, h('td', {}, i + 1), h('td', {}, g.group ?? ''), h('td', {}, g.label), h('td', {}, g.what)))));
   const alerts = h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Minutes into the boil'), h('th', {}, 'Minutes left'), h('th', {}, 'Alert'), h('th', {}, 'Voice file (media/Audio/Hops)'))),
@@ -20046,6 +20046,11 @@ function rcDrops(pane, rc) {
   const timers = S.config.elements.filter(e => e.type === 'timer').map(e => [e.name, e.name]);
   pane.append(h('h3', {}, 'Hop order'), groups, h('h3', {}, `Alerts (${sch.alerts.length}) over a ${sch.boilTime} minute boil, ${sch.warnMinutes} minute warnings`), alerts,
     sch.conflicts.length ? h('ul', { class: 'rcList' }, ...sch.conflicts.map(x => h('li', {}, x.text))) : h('p', { class: 'muted' }, 'No two alerts land at the same time.'),
+    // the alerts a Process sends when the brew gets there (Rule 17.20): hop_alert "Pre Boil", "Mash", "1st Wort", "Hop Stand High" ..., "Fermenter"
+    h('h3', {}, `Alerts the Process sends (${sch.processAlerts.length})`),
+    sch.processAlerts.length ? h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'When'), h('th', {}, 'Process line'), h('th', {}, 'Alert'), h('th', {}, 'Voice file (media/Audio/Hops)'))),
+      h('tbody', {}, ...(same && saved.processAlerts ? saved.processAlerts : sch.processAlerts).map(a => h('tr', { class: a.kind === 'drop' ? 'rcDrop' : '' }, h('td', {}, HOP_ALERT_WHEN[a.which] || a.which),
+        h('td', {}, h('code', {}, `hop_alert "${a.which}"`)), h('td', {}, a.text), h('td', {}, same ? voiceCell(a) : h('span', { class: 'muted' }, 'Save first')))))) : h('p', { class: 'muted' }, 'None: no Pre Boil (All Grain), Hop Stand or Fermenter hops.'),
     h('h3', {}, 'Hop alerts on brew day'), h('p', { class: 'muted' }, 'A Process starts them with start_hop_alerts (or start_hop_alerts "Boil_Timer" to follow the Boil timer) and stops them with stop_hop_alerts. Or start them here.'),
     h('div', { class: 'bar' }, h('span', {}, st.running ? `Running (${st.sent} of ${st.of} sent${st.timer ? `, following ${st.timer}` : ''})` : 'Not running'),
       can('operator') ? [rcInput(run, 'timer', { kind: 'sel', list: [['', 'Skynet clock (from now)'], ...timers] }),
@@ -20053,6 +20058,9 @@ function rcDrops(pane, rc) {
         h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'stop' }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '■ ' + safetyWord('Stop')),
         h('button', { title: 'Show and say the first alert now, to check the sound', onclick: () => (same ? saved : sch).alerts[0] ? hopAlert((same ? saved : sch).alerts[0]) : toast('No alerts', true) }, '🔊 Test the first alert')] : ''));
 }
+// when a Process sends each hop_alert (Rule 17.20)
+const HOP_ALERT_WHEN = { 'Pre Boil': 'The Strike Water reaches Strike', Mash: 'Just after the Mash Timer starts', '1st Wort': 'Just after the First Run is complete',
+  'Hop Stand High': 'The wort is at Hop Stand High', 'Hop Stand Middle': 'The wort is at Hop Stand Middle', 'Hop Stand Low': 'The wort is at Hop Stand Low', Fermenter: 'Every Fermenter is filled' };
 // the voice file of one alert: found, or the steps to make it by hand (a free text to voice web site, then put the file here)
 function voiceCell(a) {
   const name = a.audio.split('/').pop();
