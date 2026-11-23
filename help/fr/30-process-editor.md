@@ -10,7 +10,7 @@ L'image Save de la rangée du haut et le bouton Save font la même chose. Chacun
 **Les problèmes et l'Output** sont dans une colonne à droite du code :
 
 - **En haut**, les problèmes trouvés par Check (cliquez sur l'un d'eux pour aller à sa ligne), ou *No problems found*, et **Clear**, qui vide la fenêtre Output.
-- **Output** a une liste avec deux choix. **Current Process** montre ce qu'affiche (print) le Process ouvert dans l'éditeur. **All Variables** montre la valeur actuelle de chacune de ses variables (pendant qu'il tourne) et de chaque gGlobal, mise à jour chaque seconde.
+- **Output** a une liste. **Current Process** montre ce qu'affiche (print) le Process ouvert dans l'éditeur. **All Variables** montre la valeur actuelle de chacune de ses variables (pendant qu'il tourne) et de chaque gGlobal, mise à jour chaque seconde. Sous **Running**, la liste a aussi chaque Process qui tourne : choisissez-en un, il s'ouvre dans l'éditeur et devient le Current Process, jusqu'à ce que vous en choisissiez un autre. **Start** ou **Restart** montre toujours le Process que vous venez de lancer.
 - **Reset every Start** (désactivé au départ) : quand il est activé, les anciennes lignes Output d'un Process sont effacées chaque fois que ce Process démarre, pour ne voir que cette exécution. Chaque navigateur retient les deux choix.
 
 Sur un téléphone, la colonne est sous le code.

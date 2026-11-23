@@ -50,3 +50,8 @@ assert.match(app, /es\.addEventListener\('started', e => outResetOnStart\(JSON\.
 console.log('Panel Update 13 ok');
 // the five command buttons show a small gray down triangle (they open a list, like a dropdown)
 assert.match(css, /button\.insCat::after \{ content: '▾'; color: #9a9a9a;/);
+// follow-up: the running Processes are in the Output dropdown; picking one opens it; Start and Restart here take precedence
+assert.match(app, /h\('optgroup', \{ label: 'Running' \}, \.\.\.run\.map\(n => h\('option', \{ value: 'run:' \+ n \}, n\)\)\)/);
+assert.match(app, /if \(name !== curScript\) await openScript\(name\);/);
+assert.equal((app.match(/  outFollowStart\(\);\n  const r = await api\('POST', `\/ui\/scripts\/\$\{encodeURIComponent\(curScript\)\}\/(start|restart)`\);/g) || []).length, 2);
+assert.match(app, /es\.addEventListener\('scripts', e => \{ S\.scripts = JSON\.parse\(e\.data\); fillOutPick\(\);/);

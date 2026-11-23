@@ -9,7 +9,7 @@ Les Processes sont les étapes automatiques d'un brassage : ouvrir des vannes, f
 - **Save** et **Check** (Admins). Check trouve les erreurs sans lancer le Process.
 - **Start**, **Arrêt** (Stop) et **Restart** (Operators et Admins). **Tout arrêter** (Stop all, le panneau Stop rouge) arrête tous les Processes. Restart arrête le Process, efface sa mémoire et le relance depuis le début.
 - **Restart if it fails** (Admins) : relancer le Process tout seul s'il s'arrête sur une erreur. Voir *Restarting Processes*.
-- **Output**, à droite du code : **Current Process** montre ce qu'affiche (print) le Process ouvert ; **All Variables** montre les valeurs de ses variables et de chaque gGlobal. **Reset every Start** efface les anciennes lignes d'un Process chaque fois qu'il démarre.
+- **Output**, à droite du code : **Current Process** montre ce qu'affiche (print) le Process ouvert ; **All Variables** montre les valeurs de ses variables et de chaque gGlobal ; sous **Running**, choisissez un Process qui tourne pour l'ouvrir et voir sa sortie. **Reset every Start** efface les anciennes lignes d'un Process chaque fois qu'il démarre.
 
 **Un Process qui contient une erreur ne démarre pas.** Les erreurs sont listées avec leur numéro de ligne ; cliquez sur l'une d'elles pour y aller.
 

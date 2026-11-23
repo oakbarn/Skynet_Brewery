@@ -388,7 +388,7 @@ function connect() {
     if (!editing && view === 'workspace' && Object.entries(ch).some(([n, p]) => 'layer' in p || ('active' in p && S.config.elements.some(e => e.type === 'soundPlayer' && e.name === n)))) renderWs();      // a Process changed a Layer Order (Rule 1.29), or an Audio Widget started or stopped (on top while it plays)
     schedulePipes(); updateMeters(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
-  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
+  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); fillOutPick(); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('media', () => recheckMissingPics());      // pictures added from the panel (File Move): File Not Found looks again
   es.addEventListener('started', e => outResetOnStart(JSON.parse(e.data).script));
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
@@ -13125,7 +13125,7 @@ async function openScript(name) {
   $('#scriptName').textContent = name;
   knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
   if (can('admin')) api('POST', '/ui/scripts/check', $('#code').value, true).then(r => { for (const x of r.offBrain ?? []) knownPaths.add(x.path); }).catch(() => { });
-  renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole();
+  renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); fillOutPick(); renderConsole();
   api('GET', '/ui/scripts/words').then(w => { S.words = w; paintFind(); fillInsBar(); }).catch(() => { });
   fIdx = -1; refreshFind(false);
 }
@@ -13799,6 +13799,7 @@ $('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui
 $('#startScript').onclick = guard(async () => {
   if (!curScript) return;
   if (dirty) await saveScript();
+  outFollowStart();
   const r = await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/start`);
   if (!r.ok) toast(r.line ? `Not started - line ${r.line}: ${r.msg}` : r.msg, true);
 });
@@ -13806,6 +13807,7 @@ $('#stopScript').onclick = guard(() => api('POST', `/ui/scripts/${encodeURICompo
 $('#restartScript').onclick = guard(async () => {
   if (!curScript) return;
   if (dirty) await saveScript();
+  outFollowStart();
   const r = await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/restart`);
   if (!r.ok) toast(r.line ? `Not started - line ${r.line}: ${r.msg}` : r.msg, true);
   else toast('Restarted');
@@ -13978,7 +13980,28 @@ function setOutPick(v, keep = true) {
   if (keep) try { localStorage.setItem(OUT_PICK_KEY, $('#outPick').value); } catch { }
   renderConsole();
 }
-$('#outPick').onchange = () => setOutPick($('#outPick').value);
+// Panel Update 13 follow-up (OakBarn Brewery, 2026-11-23: "Output DDLB add All Current Running Processes to the Box and Just to that in
+// The process Editor for that Process. And That becomes the Current until a different one is chosen in the DDLB. But On Start of a
+// Process from the Left side takes presidence to select what process shows"): every running Process is listed under Running; picking one
+// opens it in the Process Editor, and it is the Current Process (its Output) until another is picked or a Process is started here.
+function fillOutPick() {
+  const op = $('#outPick'); if (!op) return;
+  const keep = op.value === 'vars' ? 'vars' : 'process';
+  const run = (S.scripts || []).filter(x => x.state === 'running').map(x => x.name).sort((a, b) => a.localeCompare(b));
+  op.replaceChildren(h('option', { value: 'process' }, curScript ? `Current Process (${curScript})` : 'Current Process'), h('option', { value: 'vars' }, 'All Variables'),
+    ...(run.length ? [h('optgroup', { label: 'Running' }, ...run.map(n => h('option', { value: 'run:' + n }, n)))] : []));
+  op.value = keep;
+}
+$('#outPick').onchange = guard(async () => {
+  const v = $('#outPick').value;
+  if (!v.startsWith('run:')) return setOutPick(v);
+  const name = v.slice(4);
+  setOutPick('process');
+  if (name !== curScript) await openScript(name);      // the Process Editor goes to it (unsaved changes are asked about first)
+  fillOutPick();
+});
+// a Process started here (Start or Restart) takes precedence: the Output shows it
+function outFollowStart() { setOutPick('process'); fillOutPick(); }
 // item 4: Reset every Start (off to start): when on, a Process's old Output lines are cleared each time that Process starts
 try { setOutPick(localStorage.getItem(OUT_PICK_KEY), false); $('#consoleReset').checked = localStorage.getItem(OUT_RESET_KEY) === 'on'; } catch { }
 $('#consoleReset').onchange = () => { try { localStorage.setItem(OUT_RESET_KEY, $('#consoleReset').checked ? 'on' : 'off'); } catch { } };
