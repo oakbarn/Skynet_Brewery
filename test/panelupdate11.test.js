@@ -49,7 +49,9 @@ assert.match(app, /const simBarHidden = \(\) => \$\('#simBar'\)\.classList\.cont
 // 1d: //Created on YYMMDD HHh MMM on line 2
 const stamp = new Function(app.match(/const createdStamp = (\(now = new Date\(\)\) => \{[\s\S]*?\};)/)[1].replace(/^/, 'return ').replace(/;$/, ''))();
 assert.equal(stamp(new Date(2026, 10, 2, 14, 23)), '261102 14h 23M');
-assert.match(app, /`\/\/Created on \$\{createdStamp\(now\)\}`,\n    \.\.\.\(patron \? \[`\/\/Created by \$\{who\}`\] : \[\]\),/);
+assert.match(app, /`\/\/Created on \$\{createdStamp\(now\)\}`,\n.*\n    '\/\/This Process was written by its user, not by Skynet',/, 'the not-by-Skynet line for everyone');
+// the owner lines only for a Patron: no Created by, MIT License or Copyright for anyone else (Skynet is not named as the owner)
+assert.match(app, /\.\.\.\(patron \? \[`\/\/Created by \$\{who\}`, '\/\/MIT License Granted for all Scripts and Configurations', `\/\/Copyright © \$\{who\} \$\{now\.getFullYear\(\)\}`\] : \[\]\),/);
 
 // every icon on 250,250,250 white; white words are 250,250,250
 assert.match(css, /button\.icoBtn \{[^}]*background: #fafafa;/);

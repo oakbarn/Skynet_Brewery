@@ -13842,15 +13842,18 @@ const NEW_PROC_ABOUT = {
 };
 // Panel Update 11, item 1d (OakBarn Brewery, 2026-11-23: "//Created date time stamp automatically added"): line 2 of every new Process
 // is //Created on YYMMDD HHh MMM, his own form (//Created on 261102 14h 23M); a Patron's Created by line keeps only the Brewery Name.
+// Only a Patron gets the Created by, MIT License and Copyright lines (Skynet does not write a Process, so it is not named as its owner).
 // The comment lines are his new words (spelling fixed), with the Process's class in the first one.
 const createdStamp = (now = new Date()) => { const pad = x => String(x).padStart(2, '0'); return `${pad(now.getFullYear() % 100)}${pad(now.getMonth() + 1)}${pad(now.getDate())} ${pad(now.getHours())}h ${pad(now.getMinutes())}M`; };
 function newProcessText(typed, now = new Date(), cls = '') {
   const patron = !!S.patron?.brewery, who = breweryName(), kind = S.processClasses?.[cls]?.label;
   return [`//${typed}`,
     `//Created on ${createdStamp(now)}`,
-    ...(patron ? [`//Created by ${who}`] : []),
-    '//MIT License Granted for all Scripts and Configurations',
-    `//Copyright © ${patron ? who + ' ' : ''}${now.getFullYear()}`,
+    // for everyone (OakBarn Brewery, 2026-11-23: "We might want to add that as a comment line regardless for everyone")
+    '//This Process was written by its user, not by Skynet',
+    // the owner lines only for a Patron (OakBarn Brewery, 2026-11-23: "Skynet did not write it, so Skynet should not be attached to it.
+    // A better solution might be to avoid the lines for non patron"): no Created by, MIT License or Copyright line for anyone else
+    ...(patron ? [`//Created by ${who}`, '//MIT License Granted for all Scripts and Configurations', `//Copyright © ${who} ${now.getFullYear()}`] : []),
     `/* You should put what this ${kind ? kind + ' ' : ''}Process does and how it fits into your brew day. It is easy to forget,`,
     'and if you visit here in six months, you may not remember why or how you did something. Your future self will thank you',
     'and you will give yourself a pat on the back. */',
