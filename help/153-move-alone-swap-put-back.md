@@ -22,7 +22,7 @@ a small pop-up asks what you want:
 ## Unlock its IPs from Properties
 
 An IP has no Properties of its own: it is part of the item it belongs to (Rule 2.9). So the **title line** of the Properties of
-anything with IPs (a Device, Widget, Manual Valve, Hose Bib, fitting or vessel) has a **🔓 Unlock its IPs** button, and a Pipe or
+anything with IPs (a Device, Widget, Manual Valve, Hose Bib, fitting or vessel) has a **🔓 Unlock its IPs** button and a **↔ Move with pipes** button, and a Pipe or
 Hose has **🔓 Unlock its ends**. Use it when a pipe or hose joined something you did not want, for example a hose that snapped onto a
 Tee's IP:
 
@@ -31,7 +31,10 @@ Tee's IP:
    is, as an open end.
 3. Close or Save, then drag the open end where you want it. **↩ Put back** (Ctrl+Z) joins it again.
 
-The button is grey when nothing is joined to it, when the item is 🔒 locked (unlock it first) or when the equipment on its Tab is
+Beside it, **↔ Move with pipes** is the pop-up's other choice: press it, close or Save, then grab the item and it moves **with** its
+pipes, without the pop-up. It is not on a Pipe or Hose, and it is grey when a 🔒 locked pipe or fitting would have to move with it.
+
+The buttons are grey when nothing is joined to it, when the item is 🔒 locked (unlock it first) or when the equipment on its Tab is
 locked (lock_Equipment). Rest the mouse on it to see why.
 
 ## Making a pipe shorter or longer, and redrawing a hose

@@ -28,3 +28,8 @@ assert.match(css, /:is\(:hover, \.sel\)::before \{ display: none; \}/, 'hovered 
 assert.match(css, /:not\(:hover\):not\(\.sel\) > \.iplbl \{ display: none; \}/, 'its name tag waits for the hover');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /round IP marker is drawn as a \*\*small red dot\*\*/);
 console.log('small IP dots ok');
+// ↔ Move with pipes beside it (OakBarn Brewery, 2026-11-23): the grab pop-up's other choice, not on a pipe or hose
+assert.match(fn, /grabWith\.add\(it\.id \|\| it\.name\); w\.disabled = b\.disabled = true/, 'the next drag moves it with its pipes, without asking');
+assert.match(fn, /const riders = pipe \? \[\] : lockedRiders\(it\)/, 'greyed out when a locked pipe or fitting would move with it');
+assert.match(fn, /'↔ Move with pipes'/);
+console.log('move with pipes ok');

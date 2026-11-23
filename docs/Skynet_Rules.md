@@ -2760,6 +2760,9 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   IPs**, and a Pipe or Hose has **🔓 Unlock its ends**. It does what the pop-up's button does, at once: each pipe or hose end on it
   lets go where it is (an open end); ↩ Put back (Ctrl+Z) joins them again. It is greyed out when nothing is joined, when the item is
   🔒 locked (Rule 2.12: unlock it first) or when its Tab's equipment is locked (lock_Equipment). (Help 153)
+  *Added (OakBarn Brewery, 2026-11-23: "The Unlock IPs on the dialog is good but add Move with Pipes option"):* beside it,
+  **↔ Move with pipes** (not on a Pipe or Hose) is the pop-up's other choice: the next drag moves the item with its pipes (Rule 5.19)
+  and does not ask. Greyed out for the same reasons, and when a 🔒 locked pipe or fitting would have to move with it.
 - **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
   gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
 - **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the

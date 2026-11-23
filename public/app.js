@@ -4817,7 +4817,19 @@ function propsUnlockIps(it, onLetGo) {
     b.disabled = true; b.textContent = pipe ? '🔓 Ends let go' : '🔓 IPs let go';
     toast(`🔓 ${who}: ${now.length} ${pipe ? 'end' : 'pipe end'}${now.length > 1 ? 's' : ''} let go. Close or Save, then grab it and move it alone. ↩ Put back (Ctrl+Z) joins ${now.length > 1 ? 'them' : 'it'} again.`, false, 7000);
   };
-  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b);
+  // Move it with its pipes (OakBarn Brewery, 2026-11-23: "The Unlock IPs on the dialog is good but add Move with Pipes option"): the
+  // grab pop-up's other choice (Rule 5.19 as before); the next drag moves it with its pipes and does not ask. Greyed out for the same
+  // reasons, and when a 🔒 locked pipe or fitting would have to move with it.
+  const riders = pipe ? [] : lockedRiders(it), whyW = why || (riders.length ? `${riders.slice(0, 3).map(lockName).join(', ')} ${riders.length > 1 ? 'are' : 'is'} 🔒 locked and would move with it. Unlock ${riders.length > 1 ? 'them' : 'it'} first, or use 🔓 Unlock its IPs.` : '');
+  const w = pipe ? null : h('button', { type: 'button', class: 'propsUnlockIps propsMoveWith tipLbl', disabled: !!whyW || null,
+    'data-help': 'As the grab pop-up\'s Move it with its pipes (Rule 5.19): close or Save, then grab it and it moves with its pipes; it does not ask again. A pipe with an open end moves along, a pipe end slides along its own line, and a pipe moved off to the side lets go.' + (whyW ? `\n\nNot now: ${whyW}` : '') }, '↔ Move with pipes');
+  if (w) w.onclick = ev => {
+    ev.preventDefault(); if (w.disabled) return;
+    grabWith.add(it.id || it.name); w.disabled = b.disabled = true; w.textContent = '↔ Moves with its pipes';
+    toast(`Close or Save, then grab ${who} and it moves with its pipes.`, false, 6000);
+  };
+  const b0 = b.onclick; b.onclick = ev => { b0(ev); if (w && b.disabled) w.disabled = true; };
+  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b, w);
   setTimeout(() => setTimeout(() => { const ttl = $('#dlgTitle'); for (const o of ttl.querySelectorAll('.ttlExtra[data-for="_unlockIps"]')) o.remove(); ttl.append(t); }, 0), 0);      // after the lock, Visible and Hidden Locked
 }
 // an item dropped where something let go of its pipes: each open end whose IP was within REJOIN_PX of the same end of this item
