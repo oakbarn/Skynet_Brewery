@@ -11,6 +11,8 @@ The **Menu Bar** is the row with your **Brewery Name** in the middle. At its rig
 
 An icon that is not needed now is hidden, but its space stays (it shows the background color), so the other icons never move.
 
+**Undo, Save and Close** are blank until needed. On a Tab there is nothing to undo, save or close, so nothing shows. In Edit layout they are **↩ Put back**, **Save layout** and **Exit** on the Edit layout bar. In the Process Editor they are at the right of the second row.
+
 ## The Brewery Name
 
 The middle of the Menu Bar shows your **Brewery Name** when you are a Patron (type it in **☰ Menu > Default settings**), and **Skynet Panel** when you are not. See [Patron](198-patron).
