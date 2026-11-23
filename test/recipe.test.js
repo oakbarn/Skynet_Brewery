@@ -51,6 +51,15 @@ assert.equal(r.firstMashC, 66.7); assert.ok(r.ibuCalc > 100 && r.ibuCalc < 200, 
 assert.equal(r.whirlpoolMinutes, 20); assert.equal(r.spargeTempC, 75.6);
 // Three Hop Stands, no Defaults (2026-11-19): a whirlpool hop with no temperature gets no stand; its questions are asked in the Recipe
 assert.equal(byName('Citra').stand, undefined); assert.deepEqual(r.hopStands ?? {}, {});
+// a BeerSmith Whirlpool ("Aroma") hop's own F_H_WHIRLPOOL_TEMP (°F) gives it its stand; a Boil hop's is not read (OakBarn Brewery hop test, 2026-11-23)
+{
+  const wp = (n, use, t, f) => `<Hops><F_H_NAME>${n}</F_H_NAME><F_H_ALPHA>5</F_H_ALPHA><F_H_AMOUNT>1</F_H_AMOUNT><F_H_BOIL_TIME>${t}</F_H_BOIL_TIME><F_H_WHIRLPOOL_TEMP>${f}</F_H_WHIRLPOOL_TEMP><F_H_USE>${use}</F_H_USE><F_H_IN_RECIPE>1</F_H_IN_RECIPE></Hops>`;
+  const f = `<Recipe><F_R_NAME>WP</F_R_NAME><F_R_EQUIPMENT><F_E_BOIL_TIME>90</F_E_BOIL_TIME></F_R_EQUIPMENT><Ingredients><Data>${wp('Boil', 0, 60, 194.44064)}${wp('Naga', 4, 60, 154.4)}${wp('Banner', 4, 10, 174.4)}</Data></Ingredients></Recipe>`;
+  const w = readRecipeFile(Buffer.from(f, 'latin1'), 'WP.bsmx').recipe, hn = n => w.ingredients.hops.find(h => h.name === n);
+  assert.equal(hn('Boil').wpTempC, undefined, 'a Boil hop keeps no whirlpool temperature');
+  assert.equal(hn('Naga').wpTempC, 68); assert.equal(hn('Naga').stand, 'Middle'); assert.equal(hn('Banner').stand, 'High');
+  assert.deepEqual(w.hopStands, { Middle: { tempC: 68, min: 60 }, High: { tempC: 79.11, min: 10 } });
+}
 assert.throws(() => readBsmx('<Recipe></Recipe>'), /No recipe/);
 
 // BeerXML brings every ingredient too
