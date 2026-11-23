@@ -1555,11 +1555,32 @@ Help 40, 21. Panel only: the BruControl Import has its own pages.
 - **Top row:** the Process dropdown, **New**, then icons **Delete** (Trash), **Recycle Bin**, **Check** (green check), **Start**
   (red while the Process is stopped, green while it runs), **Stop**, **Restart** and **Save**; the **Brewery Name** in the middle
   (Rule 12.4); **Predictive text**, **Key** (the Color key), **📐 Constants**; then the Menu Bar (Rule 2.69), Build hidden.
-- **Second row:** **Find**, **Go To** with its **Line / Section** dropdown and its light-blue box (a line number, or a Section name:
-  a `step "Sparge"` line or a `[Sparge]` label; the box widens as you type; empty, Go To asks for the line as Ctrl+G does); the other
-  buttons that were there are kept (OakBarn Brewery, 2026-11-23: "A One click rule but also everything on Hamburger"): the name, class,
-  Version, Update Version, state, Add steps, Restart if it fails, All Processes, Suggest, Picture, Save to file, Colors; then **Undo**,
-  **Save** and **Close** at the right. The Save icon and the Save button do the same thing ("Clutter exception").
+- **Second row** (changed 2026-11-23, Panel Update 11, item 1c: "Have the Line like I ask. {common are all other normal command}"):
+  **Find**, **Find in All Processes** (OakBarn Brewery: "a global Process scope find that searches all processes, add it to the right
+  of the find and make the icon with a Purple background and the 250,250,250 white"), **Go To** with its **Line / Section** dropdown
+  and its light-blue box (a line number, or a Section name: a `step "Sparge"`
+  line or a `[Sparge]` label; the box widens as you type; empty, Go To asks for the line as Ctrl+G does); then **Insert Line After**
+  with its light-blue line number box and five buttons, **Conditionals**, **Skynet Special**, **Devices**, **Widgets** and **Common**;
+  then **Undo**, **Save** and **Close** at the right (item 1e: "stay here on every tab. Do not move them!"). The Save icon and the Save
+  button do the same thing ("Clutter exception").
+- **Insert Line After:** a pick goes in as a **new line after the line number in the box**, with that line's indent, and the number
+  moves down one so the next pick goes under it. Clicking or typing in the Process puts the cursor's line in the box; 0 = the top.
+  Each button opens its list under it: **Conditionals** (if, elseif, else, endif, wait, goto, goLine, step, a [label]); **Skynet
+  Special** (Skynet's own commands, the skn_ names, which go in at the cursor, and the Skynet Constants); **Devices** and **Widgets**
+  (the Insert bar's groups, Process sandbox entry 13: only items already in the Schema, pick one, then its action button or
+  light-blue box); **Common** (every other command; worked out from the command list, so a new command lands here by itself). A
+  command closes its list; Devices and Widgets stay open (a click outside, Esc or the same button closes them). After a word that waits
+  for a name (`if `, `wait `, `start ` ...) or a sign (`== `, `and ` ...) a Device or Widget picked goes in at the cursor, and PV / SV
+  after it, so a line can be made by picking.
+- **The other buttons that were on the second row** (the name, class, Version, Update Version, state, Add steps, Restart if it fails,
+  All Processes, Suggest, Picture, Save to file, Colors) are only on the ☰ Menu now (OakBarn Brewery, 2026-11-23: "A One click rule
+  but also everything on Hamburger"); nothing is taken away (Design Rule 1).
+- **The two rows span the whole page** (the Brewery Name centered on it) and the Process list and editor start right under them
+  (item 1f). **The yellow Simulator bar is off** in the Process Editor (item 1a, OakBarn Brewery: "Hide the Yellow bar"); ☰ Menu >
+  Show Simulator bar brings it back until the Process Editor is left (Rule 10.7).
+- **Icons and white** (OakBarn Brewery, 2026-11-23: "The background of all the Icons should not be transparent but the 250,250,250
+  white. Any white text should be 250,250,250 white"): every icon (Process Editor and Menu Bar) sits on #fafafa, never transparent, and
+  white words in the Panel are #fafafa.
 - **Everything is also on the ☰ Menu** while the Process Editor is open (a Process Editor group at the top), each one doing the same as
   its button. Rename and Stop all stay above the Process list.
 - **The Top Line is off** in the Process Editor ("Clutter do not need"); every page is on the ☰ Menu (Rule 2.4) and Close goes back to
@@ -4634,7 +4655,7 @@ the Schema list", Help 83)
 🧪 Hide Simulator bar, per screen. **Hidden, the bar is gone completely** (no strip), so the browser window is free for
 the Panel; a small 🧪 on the ☰ Menu button says it is still Simulation. In Simulator mode **☰ Menu > 🧪 Show Simulator
 bar** brings it back (changed 2026-11-04, Fritz: "keep the browser window as free as possible for the Panel"; it was a
-thin 🧪 SIMULATION strip that always stayed). Hiding changes no setting.
+thin 🧪 SIMULATION strip that always stayed). Hiding changes no setting. **In the Process Editor the bar is off** (2026-11-23, Panel Update 11, item 1a: "Hide the Yellow bar"); ☰ Menu > Show Simulator bar brings it back until the Process Editor is left (Rule 2.70).
 **Each time the Simulator is switched on, the bar opens at 25× speed with Auto skip on**; after that
 the user's choices stay until the next switch on. (2026-10-28, thread "Improve the Simulator bar
 defaults", Help 85)
@@ -4972,7 +4993,8 @@ have any patron e mails on them"):
   new Process gets a Copyright with no name): a Patron's Brewery Name (☰ Menu > Default settings; empty: the name on the Patron code)
   shows on the Menu Bar and in the Process Editor, and is the Copyright and **Created by** of every new Process (Rule 16.13). Not a
   Patron: the Menu Bar shows **Skynet Panel**, the Brewery Name box is greyed out (Rule 18.46) and keeps what was typed, and a new
-  Process says **Copyright © year** with no name. A non-Patron who tries a perk sees a friendly note with the levels and
+  Process has **no Created by, MIT License or Copyright line** (changed 2026-11-23, Panel Update 11, OakBarn Brewery: "Skynet did not write it, so Skynet should not be attached to it. A better solution might be to avoid the lines for non patron"; it
+  was Copyright © year with no name). A non-Patron who tries a perk sees a friendly note with the levels and
   perks and a link to oakbarnbrewery.com, each time. The levels and perks are a first try, to be adjusted.
 Both programs (Settings is the same). (thread "Let users build their own Pump Templates", Help 198)
 
@@ -5386,9 +5408,13 @@ of the New Process and is set when the Process is created and cannot be changed 
 - **The class is never changed after it is saved:** the editor shows it, and the Brain refuses a change. A Process made before this
   keeps the class it had. A rename or a Recycle Bin restore keeps it. A wrong pick: make a new Process and paste the text in.
 - **Spaces become `_`** in the name (`start My_New_Brew_Process`); line 1 keeps the name as typed, like a Label.
-- **The new text:** `//<name as typed>`, (a Patron only) `// Created by <Brewery Name> : <date time>`, `//MIT License Granted for all
-  Scripts and Configurations`, `//Copyright © <Brewery Name> <year>` (not a Patron: `//Copyright © <year>`), then a few comment lines
-  that show how `/* ... */` and `//` comments are written.
+- **The new text** (changed 2026-11-23, Panel Update 11, item 1d: "//Created date time stamp automatically added"): `//<name as
+  typed>`, `//Created on YYMMDD HHh MMM` (his form, `//Created on 261102 14h 23M`, the date and time it was made), `//This Process was written by its user, not by Skynet` (everyone,
+  OakBarn Brewery: "We might want to add that as a comment line regardless for everyone"), (a Patron only)
+  `//Created by <Brewery Name>`, `//MIT License Granted for all Scripts and Configurations` and `//Copyright © <Brewery Name> <year>`
+  (not a Patron: none of these three lines, OakBarn Brewery: "Skynet did not write it, so Skynet should not be attached to it. A better solution might be to avoid the lines for non patron"; Skynet does not write a Process, so it is never named as its
+  owner), then OakBarn Brewery's comment lines (spelling fixed): say what this <class> Process does and how
+  it fits into your brew day, how `/* ... */` and `//` comments are written, and "Thank yourself in the future".
 Help 30. **Both programs:** the BruControl Import sets each Process's class when it brings it in (it guesses it from the name, as before).
 
 ## 17. Recipes
@@ -7593,3 +7619,4 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 - 2026-11-21: Rule 6.19 Methods hotspot made bigger (OakBarn Brewery, screenshot of the 3 Vessel 1 Pump HLT: "Hotspot too small increase to purple area"): the strip now runs from the Element's end plate out to 10 px past the Vessel wall, never thinner than 25 px (was 10 px outside the wall, with a gap after the end plate). Help 150 (and French). Checked against the BruControl Import program: its Build page uses the same Panel drawing, nothing else changes.
 - 2026-11-22: Rule 1.18 changed, Rules 2.68, 4.9 and 19.11 added (Panel Update 9 Part 2, items 10d, 31, 14 and 16; OakBarn Brewery picked "Rule words: wait_boil, skn_ timers"): the Boil Probe switch and `wait_boil` / `wait_boil -1` built; the Skynet Brew Timers `skn_Boil_Timer`, `skn_Mash_Timer`, `skn_Whirlpool_Timer` (hop alerts follow the Boil Timer); right-drag a copy off a Vessel or Equipment Template; four 5 gallon stove kettles. Item 15 (Vessels and flow) is parked in the Panel Updates Sandbox, entry 52 (OakBarn Brewery: "in Panel Update sandbox as I may rethink it"). Help 22, 138, 155, 238, 246 (new), 50 and French.
 - 2026-11-23: Panel Update 10 (OakBarn Brewery, PDF of 5 items). Rule 1.8 changed (the Menu Bar is the Brewery Name row with its icons; the old top line is the Top Line), Rule 2.6 changed (fewer than six pick-one choices are one-click boxes, item 5d), Rules 2.69 (Menu Bar order, kept spaces, Sound icon replaces the Turn sound on? pop-up), 2.70 (Process Editor top in icons, Go To Line or Section, everything also on ☰ Menu) and 16.13 (class picked once in the New Process dialog, new Process text) added, Rule 12.4 (Your Brewery Name Patron perk; a non-Patron sees Skynet Panel) changed. OakBarn Brewery's own icons in public/icons (not the Image Library). Help 2, 13, 21, 30, 33, 40, 155, 198 and French. Checked against both programs: the BruControl Import keeps setting a Process's class when it brings it in; its own pages have no Menu Bar. (thread "Build Panel Update 10")
+- 2026-11-23: Panel Update 11 (OakBarn Brewery, PDF "Panel Update 11", item 1 the Process Editor top, parts a to e). Rule 2.70 changed (second row: Find, Go To, Insert Line After and Conditionals, Skynet Special, Devices, Widgets, Common, then Undo, Save, Close; Find in All Processes as a purple icon right of Find; icon backgrounds and white words are 250,250,250; the other second-row buttons only on the ☰ Menu; the Insert bar's groups now under Devices and Widgets; rows span the page), Rule 10.7 (the Simulator bar is off in the Process Editor) and Rules 16.13 and 12.4 (every new Process says //Created on YYMMDD HHh MMM; new comment lines; the Created by, MIT License and Copyright lines are for a Patron only, so Skynet is never named as the owner of a Process it did not write; every new Process says //This Process was written by its user, not by Skynet). Help 30 and French. Checked against both programs: the BruControl Import has no Process Editor top and writes no new-Process text. (thread "Build Panel Update 11")

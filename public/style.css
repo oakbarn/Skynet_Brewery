@@ -89,13 +89,13 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .el.has-img { background-color: transparent; border-color: transparent; }
 /* A picture with an On overlay has no border round it while on (OakBarn Brewery, 2026-11-09: "On Overlays no Border", Rule 7.8) */
 .el.has-img.on { border-color: transparent; box-shadow: none; }
-.el.has-img .vl { text-shadow: 0 1px 3px #000; color: #fff; }
+.el.has-img .vl { text-shadow: 0 1px 3px #000; color: #fafafa; }
 .el.img-missing { background-color: #c8c8c8; border-color: #888; }
 .el.img-missing .vl { color: #000 !important; text-shadow: none; }
 .el.img-missing.on .vl { color: #1b6e2a !important; }
 .el.img-notfound { background-size: contain !important; background-repeat: no-repeat !important; background-position: center !important; }
 .el.alarm.active { animation: blink 0.8s steps(2) infinite; border-color: var(--bad); }
-@keyframes blink { 50% { background-color: var(--bad); color: #fff; } }
+@keyframes blink { 50% { background-color: var(--bad); color: #fafafa; } }
 .el.timer .btns { display: flex; justify-content: center; gap: 4px; padding-bottom: 3px; }
 .el.timer .btns button { padding: 0 7px; font-size: 12px; }
 .el.vhidden, .gfx.vhidden { display: none; }
@@ -113,7 +113,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .rs-e { right: 0; top: calc(50% - 6px); cursor: ew-resize; } .rs-se { right: 0; bottom: 0; cursor: nwse-resize; } .rs-s { left: calc(50% - 6px); bottom: 0; cursor: ns-resize; }
 .rs-sw { left: 0; bottom: 0; cursor: nesw-resize; } .rs-w { left: 0; top: calc(50% - 6px); cursor: ew-resize; }
 #ws.editing .rs-se, #ws.editing .sel:not(.ip) > .rs { display: block; }
-.geoTip { position: fixed; z-index: 50; pointer-events: none; padding: 2px 6px; border-radius: 4px; background: #001f5b; color: #fff; font: 12px/1.4 monospace; white-space: pre; }
+.geoTip { position: fixed; z-index: 50; pointer-events: none; padding: 2px 6px; border-radius: 4px; background: #001f5b; color: #fafafa; font: 12px/1.4 monospace; white-space: pre; }
 #ws.editing.nomove .rs, #ws.nomove circle.handle { display: none; }   /* phone or tablet: nothing to drag */
 .lock { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: rgba(255,255,255,.85); pointer-events: none; display: none; }
 #ws.editing .lock { display: block; }
@@ -168,7 +168,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 #autofill { position: absolute; z-index: 30; list-style: none; margin: 0; padding: 3px 0; min-width: 200px; max-width: 420px; max-height: 240px; overflow: auto;
   background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.35); font: 13px/1.5 var(--mono); }
 #autofill li { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
-#autofill li.sel { background: var(--accent); color: #fff; }
+#autofill li.sel { background: var(--accent); color: #fafafa; }
 #autofill li.sel .muted { color: #eee; }
 /* predictive text: the rest of the best pick, in gray after the cursor (public/autofill.js) */
 .afGhost { position: absolute; z-index: 5; pointer-events: none; white-space: pre; color: var(--muted); opacity: .75; }
@@ -201,7 +201,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 /* the short notice (OakBarn Brewery, 2026-11-16: "Change its background and Middle of Screen for these types of Info or Warnings and
    Larger. It was small and I did not even see it"): every short info, warning and "✔ Saved" (Rule 2.54) shows here, big, in the
    middle of the screen, on a strong background, then goes on its own. Nothing to click: it never blocks the screen under it. */
-#toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: #1f4e9c; color: #fff; border: 2px solid #fff; padding: 16px 30px; border-radius: 12px; font-size: 1.3em; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 9999; max-width: 80vw; box-shadow: 0 6px 28px rgba(0,0,0,.55); }
+#toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: #1f4e9c; color: #fafafa; border: 2px solid #fff; padding: 16px 30px; border-radius: 12px; font-size: 1.3em; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 9999; max-width: 80vw; box-shadow: 0 6px 28px rgba(0,0,0,.55); }
 #toast.show { opacity: 1; }
 /* Rule 18.53: every pop-up is on top of every dialog (public/ontop.js makes each a popover). Take away the browser's own popover look
    (centered, border, white box) so each keeps its own; zero weight, so each pop-up's own rules win. The holder in a dialog takes no room. */
@@ -214,7 +214,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #buildBack, #undoNote { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--accent, var(--line)); border-radius: 8px; padding: 8px 12px; max-width: 92vw; flex-wrap: wrap; }
 #buildBack .bbX, #undoNote .bbX { padding: 2px 8px; }
 /* Sound is off (OakBarn Brewery, 2026-11-13): a reminder on the Tab until sound is turned on */
-#toast.bad { background: #b3261e; color: #fff; }
+#toast.bad { background: #b3261e; color: #fafafa; }
 #wsSizer { position: relative; margin: 0 auto; }
 body.fullscreen header#top { display: none; }
 body.onTabs.hideMenuBar:not(.menuBarOn) header#top { display: none; }   /* on the Tabs page the Menu Bar is hidden; ☰ Menu > Show Menu Bar brings it back */
@@ -246,11 +246,11 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .el.look-led .vl { color: var(--gInk, #ff4a2a); font-family: var(--mono); font-size: 30px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(255, 74, 42, .6); }
 .el.look-lcd { background: var(--gFace, #0b1a33) !important; border: 2px solid #1d3b6e; }
 .el.look-lcd .vl { color: var(--gInk, #8fd0ff); font-family: var(--mono); font-size: 30px; letter-spacing: 3px; text-shadow: 0 0 6px rgba(143, 208, 255, .6); }
-.el.look-dark { background: #000 !important; color: #fff; border-color: #222; }
-.el.look-dark .vl { color: #fff; font-weight: 400; }
+.el.look-dark { background: #000 !important; color: #fafafa; border-color: #222; }
+.el.look-dark .vl { color: #fafafa; font-weight: 400; }
 .el.look-dark .nm { color: #bbb; }
 .el.look-button { border: 2px solid rgba(255,255,255,.35); box-shadow: 0 3px 0 rgba(0,0,0,.35); }
-.el.look-button .vl { color: #fff; font-weight: 500; }
+.el.look-button .vl { color: #fafafa; font-weight: 500; }
 .el .nm { flex: none; }
 .el.text.look-dark .vl, .el.text.look-button .vl { justify-content: center; align-items: center; text-align: center; }
 .el.alarm.img-alarm:not(.active) { background-color: transparent; border-color: transparent; }
@@ -309,7 +309,7 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .pipes .drawmark.on circle.bk { fill: rgba(63,191,106,.45); }
 .pipes circle.drawmark.set { fill: var(--accent); stroke: #000; stroke-width: 3; }
 #ws.editing .gfx.ip.sel { outline: 2px solid var(--accent); outline-offset: 2px; }
-#ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fff; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
+#ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fafafa; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
 #ws .gfx.ip.devip { font-size: 8px; z-index: 3; }
 #ws.editing .gfx.ip.devip { cursor: crosshair; }
 .pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
@@ -462,7 +462,7 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .pwWrap .eye { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); border: none; background: none; padding: 4px 6px; color: var(--muted); line-height: 0; }
 .pwWrap .eye:hover { color: var(--accent); }
 /* Vessel widget: thermowell mark (not an IP) and the pop-up shown after its ports are placed */
-#ws .gfx.vessel .twell { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 4px; background: #c0392b; color: #fff; font: 700 11px/18px system-ui, sans-serif; text-align: center; box-shadow: 0 0 0 2px rgba(0,0,0,.5); pointer-events: auto; }
+#ws .gfx.vessel .twell { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 4px; background: #c0392b; color: #fafafa; font: 700 11px/18px system-ui, sans-serif; text-align: center; box-shadow: 0 0 0 2px rgba(0,0,0,.5); pointer-events: auto; }
 #ws .gfx.vessel .fmRead { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 2px; white-space: nowrap; padding: 1px 6px; border-radius: 4px; background: rgba(0,0,0,.7); color: #7fe3a0; font: 600 11px/16px system-ui, sans-serif; pointer-events: none; }
 #ws .gfx.vessel .twell.elmark { background: #6b4a1e; }
 #ws .gfx.vessel.heating .twell.elmark { background: #ff7a00; box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 0 12px 4px #ff7a00; }
@@ -677,16 +677,16 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
 
 /* a Process that kept failing: stays on screen until closed */
 .alertBar { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1000; max-width: min(640px, calc(100vw - 32px)); display: flex; gap: 10px; align-items: flex-start;
-  background: #b3261e; color: #fff; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
+  background: #b3261e; color: #fafafa; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
 .alertBar + .alertBar { top: auto; bottom: 10px; }
-.alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
+.alertBar button { background: transparent; color: #fafafa; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
 /* Brain notices (Rule 6.31): a stop or a sleep during a brew (red), a Windows update waiting to restart (yellow) */
 #brainNotices { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1001; width: min(640px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.brainNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fff; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
+.brainNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fafafa; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
 .brainNotice.update { background: #f2c94c; color: #1a1a1a; }
 /* Flame Out (Rule 6.33): a gas burner's gas was shut; red on every screen until closed */
 #flameOutBox { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1002; width: min(640px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.flameOutNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.45); font-weight: 700; font-size: 1.1em; outline: 3px solid #fff; }
+.flameOutNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fafafa; padding: 12px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.45); font-weight: 700; font-size: 1.1em; outline: 3px solid #fff; }
 .flameOutNotice span { flex: 1; }
 .flameOutNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
 .brainNotice span { flex: 1; }
@@ -784,7 +784,7 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 .ovrPopRow { background: var(--panel); color: var(--text); border: 2px solid #c0392b; border-radius: 10px; padding: 8px 10px; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
 .ovrPopWho { margin-bottom: 6px; overflow-wrap: anywhere; }
 .ovrPopBar { display: flex; gap: 8px; align-items: stretch; }
-.ovrPop .ovrBtn { flex: 1; min-height: 44px; font-size: 1.2em; font-weight: 700; color: #fff; background: #c0392b; border: 2px solid rgba(0,0,0,.45); border-radius: 8px; cursor: pointer; }
+.ovrPop .ovrBtn { flex: 1; min-height: 44px; font-size: 1.2em; font-weight: 700; color: #fafafa; background: #c0392b; border: 2px solid rgba(0,0,0,.45); border-radius: 8px; cursor: pointer; }
 .ovrPop .ovrPopX { min-width: 44px; }
 /* the Skynet Brew Timers (Rule 2.68): top middle of every screen while one runs */
 .brewTimers { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 8px; pointer-events: none; }
@@ -883,7 +883,7 @@ button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
 /* Simulator / Real switch for the whole panel (Fritz, 2026-10-27): green = real boards, yellow stripes = simulator */
 /* the Brewery Name on every Tab's menu bar (☰ Menu > Default settings, 2026-11-21) */
 .barBrewery { font-weight: bold; font-size: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
-button.barSim { min-height: 0; height: 30px; padding: 0 10px; border-radius: 15px; font-weight: bold; white-space: nowrap; background: #2e7d32; color: #fff; border: 1px solid #1b5e20; }
+button.barSim { min-height: 0; height: 30px; padding: 0 10px; border-radius: 15px; font-weight: bold; white-space: nowrap; background: #2e7d32; color: #fafafa; border: 1px solid #1b5e20; }
 button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, #fbe36b 8px 16px); color: #000; border-color: #8a6d00; }
 /* Panel Update 10, item 3: the Menu Bar keeps one place and order. An optional icon or balloon that is not needed now is hidden but keeps
    its space, so the scheme color shows there and nothing moves (the Simulator balloon outside Simulator mode, Build for a non-admin) */
@@ -926,8 +926,8 @@ button.barSound:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
 .tplIcon .tplName { font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tplIcon .tplBadge { position: absolute; top: 3px; right: 3px; }
 .tplBadge { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 6px; vertical-align: middle; }
-.tplBadge.skynet { background: #2f6f9f; color: #fff; }
-.tplBadge.user { background: #4a7a3a; color: #fff; }
+.tplBadge.skynet { background: #2f6f9f; color: #fafafa; }
+.tplBadge.user { background: #4a7a3a; color: #fafafa; }
 .tplDlg { width: min(620px, 96vw); }
 .tplHead { display: flex; align-items: flex-start; gap: 8px; }
 .tplHead h3 { flex: 1; margin: 6px 0; }
@@ -1080,7 +1080,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rcRow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 0 0 8px; }
 .rcBox { display: flex; flex-direction: column; flex: 0 1 auto; min-width: 7.5em; max-width: 13em; border: 2px solid #ccc; border-radius: 5px; background: #f2f2f2; overflow: hidden; }
 .rcBox.rcWideBox { width: 14em; max-width: none; }
-.rcBoxHead { padding: 2px 8px; font-family: Georgia, 'Times New Roman', serif; font-size: 1.05em; color: #fff; white-space: nowrap; }
+.rcBoxHead { padding: 2px 8px; font-family: Georgia, 'Times New Roman', serif; font-size: 1.05em; color: #fafafa; white-space: nowrap; }
 .rc-k .rcBoxHead { background: #000; }
 .rc-g .rcBoxHead { background: #d9d9d9; color: #111; }
 .rc-b .rcBoxHead { background: #3f48cc; }
@@ -1094,7 +1094,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rc-c .rcBoxVal input { color: #888; font-family: Georgia, serif; }
 .rc-c { background: #c8c8c8; }
 .rcUnit { color: #666; font-size: .85em; flex: none; }
-.rcCalcBtn { background: #ff7a1a; color: #fff; border: 3px solid #e8141c; border-radius: 10px; font-weight: 800; font-size: 1.2em; padding: 8px 26px; align-self: center; margin-left: auto; }
+.rcCalcBtn { background: #ff7a1a; color: #fafafa; border: 3px solid #e8141c; border-radius: 10px; font-weight: 800; font-size: 1.2em; padding: 8px 26px; align-self: center; margin-left: auto; }
 .rcCalcMini { font-size: .7em; padding: 2px 8px; margin: 0; flex: none; }
 .rcNote { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 10px 0 14px; font-size: 1.05em; }
 .rcMini { background: #8c8c8c; color: #eee; font-family: Georgia, serif; padding: 2px 10px; border-radius: 3px; }
@@ -1370,7 +1370,7 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .elTog .elTogPic { width: 100%; height: 100%; object-fit: contain; display: block; }
 .mBalloons { display: flex; flex-wrap: wrap; gap: 4px; }
 .mBalloons .hmBtn { font-size: 13px; padding: 3px 10px; }
-#ws .hmBtn.cur, .mBalloons .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fff; font-weight: 600; }
+#ws .hmBtn.cur, .mBalloons .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fafafa; font-weight: 600; }
 
 /* ===== the Look (theme) picker, Settings > Panel settings (Rule 2.39) ===== */
 .lookPreview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -2px 0 6px; }
@@ -1577,7 +1577,7 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 .defTab .dlgHead .hh, .defTab .dlgHead a { color: var(--on-accent); }
 /* the Move pop-up's top row (Cancel and its buttons) stays put while the rest scrolls (OakBarn Brewery, 2026-11-14: "Freeze") */
 .grabDlg .grabHead { position: sticky; top: 0; z-index: 5; background: var(--panel); margin: -1em -1em 0; padding: 1em 1em .5em; border-bottom: 1px solid var(--line); }
-.grabDlg button.danger { background: #d32f2f; color: #fff; border-color: #b71c1c; }
+.grabDlg button.danger { background: #d32f2f; color: #fafafa; border-color: #b71c1c; }
 /* IP Type connectors at pipe and hose ends (Rule 5.40): drawn only, never in the way of a click */
 .conn { pointer-events: none; }
 /* Default settings Tab: Freeze (OakBarn Brewery, 2026-11-16, Default Tab 3; Rule 2.51): the title and Save stay at the top while the rest scrolls */
@@ -1587,7 +1587,7 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 .profFreeze .bar { margin: 4px 0 0; }
 /* the purple + Add New button (Rule 2.55): Profiles only, right of the Open list, not frozen */
 .addNewBtn { display: inline-flex; align-items: center; gap: 4px; }
-.addNewBtn .plus { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #7e3fbf; color: #fff; font-weight: bold; font-size: 16px; line-height: 1; }
+.addNewBtn .plus { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #7e3fbf; color: #fafafa; font-weight: bold; font-size: 16px; line-height: 1; }
 /* every button together, frozen in the upper right corner, always in the same order (Rule 2.54): Delete · Save · Undo · Close · ✕ */
 .dlgBtns { float: right; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; margin: 0 0 4px 12px; }
 .dlgBtns .paneClose { display: inline-flex; gap: 6px; }
@@ -1730,7 +1730,7 @@ dialog.newProcDlg { max-width: min(720px, calc(100vw - 32px)); padding: 0; }
 /* Panel Update 10, item 1: the Process Editor top in icons (OakBarn Brewery's own pictures, public/icons). Row 1 holds the Menu Bar
    while the Process Editor is open; the top line (Schema, Tabs, Processes ...) is off here (item 1a) */
 body.onProcEditor header#top { display: none; }
-button.icoBtn { width: 34px; height: 34px; min-height: 0; padding: 2px; border: 1px solid var(--line); border-radius: 5px; background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; line-height: 0; }
+button.icoBtn { width: 34px; height: 34px; min-height: 0; padding: 2px; border: 1px solid var(--line); border-radius: 5px; background: #fafafa; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; line-height: 0; }
 button.icoBtn img { width: 28px; height: 28px; display: block; }
 button.icoBtn:hover { outline: 2px solid var(--accent, #1d56b0); }
 button.icoBtn:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
@@ -1743,3 +1743,35 @@ button.barEdit img, button.eOff img { width: 30px; height: 30px; display: block;
 /* the Build icon is OakBarn Brewery's Hammer and Wrench picture now (Panel Update 10, item 3a), not the blue circle */
 button.barEdit { border: 0; border-radius: 4px; background: transparent; }
 button.barEdit:hover { background: transparent; outline: 2px solid #2a6bd1; }
+
+/* Panel Update 11 (OakBarn Brewery, 2026-11-23): the Process Editor top. The two rows span the whole page (the Brewery Name centered on
+   it), the Process list and the editor start right under row 2 (item 1f), and the Simulator bar is off here (item 1a) */
+body.onProcEditor:not(.simOnEditor) #simBar { display: none !important; }
+.procHead { margin-bottom: 6px; }
+.procHead .bar { margin-bottom: 4px; }
+.procTop { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.procTop .procL, .procTop .procR { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.procTop .procR { justify-content: flex-end; }
+.procExtras { display: none !important; }
+.insCats { display: inline-flex; align-items: center; gap: 4px; margin-left: 14px; flex-wrap: wrap; }
+.insAfterLbl { font-weight: bold; white-space: nowrap; }
+.insAfter { width: 4.5ch; min-width: 4.5ch; text-align: center; background: #a8dcea; color: #102030; border: 1px solid #6fb6c9; border-radius: 4px; font-weight: bold; }
+button.insCat { font-weight: bold; }
+button.insCat.active { background: var(--accent, #1d56b0); color: #fafafa; }
+/* the pop-up under a command button: only the groups of the button picked show */
+#insBar { position: fixed; z-index: 60; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .45); max-width: min(96vw, 1100px); max-height: 70vh; overflow: auto; display: flex; }
+#insBar > .insGrp { display: none; }
+#insBar[data-cat="cond"] > .insGrp[data-cat="cond"], #insBar[data-cat="skn"] > .insGrp[data-cat="skn"], #insBar[data-cat="com"] > .insGrp[data-cat="com"],
+#insBar[data-cat="dev"] > .insGrp[data-cat="dev"], #insBar[data-cat="wgt"] > .insGrp[data-cat="wgt"] { display: flex; }
+.insListRows { display: grid; grid-template-columns: 1fr; gap: 2px; min-width: 22em; }
+button.insCmd { display: grid; grid-template-columns: 11em 1fr; gap: 10px; text-align: left; align-items: baseline; padding: 3px 8px; font-size: 14px; }
+button.insCmd code { font-weight: bold; }
+.insHead { margin: 8px 0 2px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+#view-scripts .editor { margin-top: 0; }
+/* Panel Update 11 (OakBarn Brewery, 2026-11-23: "The background of all the Icons should not be transparent but the 250,250,250 white.
+   Any white text should be 250,250,250 white"): every icon sits on #fafafa (250, 250, 250), never transparent, and white words are
+   #fafafa. Find in All Processes is the Find icon on purple with its glass in that white (public/icons/Find_All.png) */
+button.barEdit, button.barSound, button.barEdit:hover, #top .eOff, .bar .eOff { background: #fafafa; }
+button.icoBtn.findAll { background: #7030a0; padding: 0; }
+button.icoBtn.findAll img { width: 32px; height: 32px; border-radius: 4px; }

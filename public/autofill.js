@@ -27,7 +27,7 @@ import { BREW_TIMERS } from './brewtimers.js';
 import { G_DECLARE } from './gkinds.js';
 import { heatMethodKey, heatMethodCode } from './heatmethod.js';
 
-const COMMANDS = [
+export const COMMANDS = [
   ['if', 'test something'], ['elseif', 'another test'], ['else if', 'another test'], ['else', 'when no test fit'], ['endif', 'end of the if'],
   ['wait', 'until true, or a time'], ['sleep', 'pause, in ms'], ['delay', 'pause, in seconds'], ['goto', 'jump to a [label]'], ['goLine', 'jump to a line number'], ['step', 'start a step'],
   ['start', 'a Process or timer'], ['stop', 'a Process, timer or alarm'], ['restart', 'a Process from the top'], ['reset', 'a timer'],

@@ -3,21 +3,29 @@
 L'écran **Processes** a deux rangées d'outils au-dessus de l'éditeur, la plupart en images (icônes) :
 
 - **La rangée du haut :** la liste des Processes, **New**, puis **Delete** (la poubelle rouge), **Recycle Bin** (corbeille), **Check** (la coche verte), **Start** (rouge quand le Process est arrêté, vert quand il tourne), **Stop**, **Restart** et **Save**. Le nom de votre brasserie est au milieu (**Skynet Panel** si vous n'êtes pas Patron). Puis **Predictive text**, **Key** (ce que veut dire chaque couleur), **📐 Constants**, et la Menu Bar : Sound, Emergency Off, le **?** jaune et **☰ Menu** (voir [La Menu Bar](40-menu-bar)).
-- **La deuxième rangée :** **Find** (la loupe), **Go To** (la flèche) avec sa case **Line / Section**, le nom et la classe du Process, sa Version, **Add steps**, **Restart if it fails**, **All Processes**, **Suggest**, **Picture**, **Save to file**, l'interrupteur **Colors**, et à droite **Undo**, **Save** et **Close**.
+- **La deuxième rangée :** **Find** (la loupe), **Find in All Processes** (la loupe sur fond violet : elle cherche dans chaque Process), **Go To** (la flèche) avec sa case **Line / Section**, puis **Insert Line After** avec sa case bleu clair et cinq boutons : **Conditionals**, **Skynet Special**, **Devices**, **Widgets** et **Common** (voir plus bas). À droite, **Undo**, **Save** et **Close**, à la même place sur chaque page.
 
-L'image Save de la rangée du haut et le bouton Save font la même chose. Chacun d'eux est aussi dans le **☰ Menu** quand l'éditeur de Processes est ouvert, sous **Process Editor**. **Rename** et **Stop all** sont au-dessus de la liste des Processes.
+L'image Save de la rangée du haut et le bouton Save font la même chose. Chacun d'eux est aussi dans le **☰ Menu** quand l'éditeur de Processes est ouvert, sous **Process Editor**. Le ☰ Menu a aussi le reste : le nom, la classe, la Version et l'état du Process, **Update Version**, **Add steps**, **Restart if it fails**, **Suggest**, **Picture**, **Save to file** et **Colors**. **Rename** et **Stop all** sont au-dessus de la liste des Processes. La barre jaune du Simulator est masquée quand l'éditeur de Processes est ouvert ; **☰ Menu > Show Simulator bar** la ramène jusqu'à ce que vous en sortiez.
 
 Chaque étape de l'ajout d'un Process, avec des images : [Pas à pas : ajouter un Process](240-step-by-step-add-a-process).
 
-## La barre Insert {#the-insert-bar}
+## Insert Line After et les cinq boutons {#insert-line-after-and-the-five-buttons}
 
-Sous les outils se trouve la **barre Insert**. Elle met des lignes au curseur pour vous, avec les bons noms et les bons mots.
+**Insert Line After** met des lignes pour vous, avec les bons noms et les bons mots. Sa case bleu clair contient un numéro de ligne : ce que vous choisissez va sur une **nouvelle ligne après cette ligne**, avec le même retrait, et le numéro descend d'un pour que le choix suivant aille dessous. Un clic dans le Process met dans la case la ligne cliquée, ou tapez un numéro (**0** met la ligne tout en haut).
 
-- **Les listes déroulantes** (Pumps, Valves, Manual Valve, PWM, Heating Element, Text, Audio, Graphic, Value, Time, DateTime, Probe) ne listent que ce qui est déjà dans ce Schema. Choisissez-en un et son nom va au curseur. Rien n'est ajouté au Schema d'ici.
-- **Les boutons** sous une liste mettent le reste de la ligne pour celui choisi : `.visible = true`, `.state = true` (en marche ou ouvert), `.method = "PID"`, `.play = true`, `.value` (PV) ou `.setpoint` (SV). Les boutons `.visible` et `.state` vont avec la dernière Pump, Valve, Manual Valve, PWM ou Heating Element choisie.
+- **Conditionals :** `if`, `elseif`, `else`, `endif`, `wait`, `goto`, `goLine`, `step` et un `[label]` où goto peut sauter.
+- **Skynet Special :** les commandes que seul Skynet a (`ask`, `close_all_valves`, `open_all_valves`, `all_pumps_off`, `all_heaters_off`, `wait_boil`, `take_reading`, les alertes houblon, le Chiller et le verrou de l'Equipment), les **noms skn_** (ils vont au curseur) et les **📐 Constants**.
+- **Devices :** Pumps, Valves, Manual Valve, PWM, Heating Element et Probe.
+- **Widgets :** Text, Audio, Graphic, Value, Time et DateTime.
+- **Common :** toutes les autres commandes habituelles (`sleep`, `delay`, `start`, `stop`, `play`, `print`, `show tab`, `new value` ...).
+
+Une commande choisie dans Conditionals, Skynet Special ou Common est mise et la liste se ferme. Devices et Widgets restent ouverts pour d'autres choix ; un clic à côté, **Échap** ou le même bouton les ferment.
+
+- **Les listes déroulantes de Devices et Widgets** ne listent que ce qui est déjà dans ce Schema. Rien n'est ajouté au Schema d'ici. Choisissez-en un d'abord.
+- **Les boutons** sous une liste mettent la ligne pour celui choisi : `.visible = true`, `.state = true` (en marche ou ouvert), `.method = "PID"`, `.play = true`. Les boutons `.visible` et `.state` vont avec la dernière Pump, Valve, Manual Valve, PWM ou Heating Element choisie.
 - **Les cases bleu clair** servent à taper une valeur pour la liste ou le bouton juste au-dessus : un fichier son, un fichier image, un nombre, une heure, une date et heure ou la consigne (SV) d'une Probe. Tapez-la et appuyez sur **Entrée** (ou sur le bouton **.path =** au-dessus), et toute la ligne est mise, par exemple `w_Strike_Volume = 7.5`.
 
-Quand le nom est juste avant le curseur, un bouton n'ajoute que sa partie (`.state = true`). Sinon toute la ligne va sur une nouvelle ligne. **Ctrl+Z** la retire.
+**Faire une ligne en choisissant :** après un mot qui attend un nom (`if `, `wait `, `start ` ...) ou un signe (`== `, `and ` ...), le Device ou le Widget choisi va juste au curseur, puis **PV** (`.value`) ou **SV** (`.setpoint`) après lui. Ainsi Conditionals > **if**, puis Devices > Probe > votre Probe, puis **PV**, donne `if HLT_Probe.value` ; tapez la suite. **Ctrl+Z** retire tout cela.
 
 `Audio_1.play = true` fait jouer un Audio Widget et `= false` l'arrête (comme `.active`).
 
@@ -51,7 +59,7 @@ Choisissez le Process à travailler dans la liste en haut de l'éditeur. **➕ A
    - **Looper** : tourne en arrière-plan tout seul et n'est jamais appelé. Numérotés L1, L2, L3 ... Override et Stop all le laissent tourner.
 3. **La sorte ne peut plus être changée une fois enregistrée.** Elle s'affiche à côté du nom du Process. Si vous avez choisi la mauvaise, faites un nouveau Process et collez-y le texte.
 
-**Close** (ou ✕) ne crée rien. Le nouveau Process commence par quelques lignes : son nom, la ligne MIT License et la ligne **Copyright ©**, puis quelques commentaires qui montrent comment s'écrivent les commentaires (`/* ... */` pour plusieurs lignes, `//` pour une seule). Le nouveau Process d'un Patron indique aussi **Created by** avec le nom de votre brasserie, la date et l'heure, et le Copyright porte le nom de votre brasserie (voir [Patron](198-patron)).
+**Close** (ou ✕) ne crée rien. Le nouveau Process commence par quelques lignes : son nom, **Created on** avec la date et l'heure de sa création (par exemple `//Created on 261123 14h 23M` : année, mois, jour, puis heures et minutes), la ligne `//This Process was written by its user, not by Skynet` (écrit par son utilisateur, pas par Skynet), puis quelques commentaires qui rappellent de dire ce que fait le Process et montrent comment s'écrivent les commentaires (`/* ... */` pour plusieurs lignes, `//` pour une seule). Le nouveau Process d'un Patron indique aussi **Created by** avec le nom de votre brasserie, la ligne MIT License et **Copyright ©** avec le nom de votre brasserie (voir [Patron](198-patron)). Skynet n'a pas écrit votre Process : sans nom de brasserie, ces lignes sont omises ; vous pouvez taper les vôtres.
 
 Un Process a une clé cachée, donc **Rename** ne change que son nom : chaque autre Process qui le lance ou l'arrête est mis à jour tout seul avec le nouveau nom. Voir la page d'aide Name change and hidden keys.
 

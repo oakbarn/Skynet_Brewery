@@ -3,21 +3,29 @@
 The **Processes** screen has two rows of tools above the editor, most of them pictures (icons):
 
 - **The top row:** the Process list box, **New**, then **Delete** (the red trash can), **Recycle Bin**, **Check** (the green check mark), **Start** (red while the Process is stopped, green while it runs), **Stop**, **Restart** and **Save**. Your Brewery Name is in the middle (**Skynet Panel** when you are not a Patron). Then **Predictive text**, **Key** (what each color means), **📐 Constants**, and the Menu Bar: Sound, Emergency Off, the yellow **?** and **☰ Menu** (see [The Menu Bar](40-menu-bar)).
-- **The second row:** **Find** (the magnifying glass), **Go To** (the arrow) with its **Line / Section** box, the name and class of the Process, its Version, **Add steps**, **Restart if it fails**, **All Processes**, **Suggest**, **Picture**, **Save to file**, the **Colors** switch, and at the right **Undo**, **Save** and **Close**.
+- **The second row:** **Find** (the magnifying glass), **Find in All Processes** (the magnifying glass on purple: it searches every Process), **Go To** (the arrow) with its **Line / Section** box, then **Insert Line After** with its light-blue box and five buttons: **Conditionals**, **Skynet Special**, **Devices**, **Widgets** and **Common** (see below). At the right are **Undo**, **Save** and **Close**, in the same place on every page.
 
-The Save picture on the top row and the Save button do the same thing. Every one of these is also on the **☰ Menu** while the Process editor is open, under **Process Editor**. **Rename** and **Stop all** are above the Process list.
+The Save picture on the top row and the Save button do the same thing. Every one of these is also on the **☰ Menu** while the Process editor is open, under **Process Editor**. The ☰ Menu also has the rest: the name, class, Version and state of the Process, **Update Version**, **Add steps**, **Restart if it fails**, **Suggest**, **Picture**, **Save to file** and **Colors**. **Rename** and **Stop all** are above the Process list. The yellow Simulator bar is off while the Process editor is open; **☰ Menu > Show Simulator bar** brings it back until you leave.
 
 Every step of adding a Process, with pictures: [Step by Step: Add a Process](240-step-by-step-add-a-process).
 
-## The Insert bar
+## Insert Line After and the five buttons
 
-Under the tools is the **Insert bar**. It puts lines in at the cursor for you, with the right names and words.
+**Insert Line After** puts lines in for you, with the right names and words. Its light-blue box holds a line number: what you pick goes in as a **new line after that line**, with the same indent, and the number moves down one so your next pick goes under it. Clicking in the Process puts the line you clicked on in the box, or type a number (**0** puts it at the very top).
 
-- **The dropdowns** (Pumps, Valves, Manual Valve, PWM, Heating Element, Text, Audio, Graphic, Value, Time, DateTime, Probe) list only what is already in this Schema. Pick one and its Name goes in at the cursor. Nothing is added to the Schema from here.
-- **The buttons** under a dropdown put in the rest of the line for the one picked: `.visible = true`, `.state = true` (on or open), `.method = "PID"`, `.play = true`, `.value` (PV) or `.setpoint` (SV). The `.visible` and `.state` buttons go with whichever Pump, Valve, Manual Valve, PWM or Heating Element was picked last.
+- **Conditionals:** `if`, `elseif`, `else`, `endif`, `wait`, `goto`, `goLine`, `step` and a `[label]` for goto to jump to.
+- **Skynet Special:** the commands only Skynet has (`ask`, `close_all_valves`, `open_all_valves`, `all_pumps_off`, `all_heaters_off`, `wait_boil`, `take_reading`, the hop alerts, the Chiller and the Equipment lock), the **skn_ names** (they go in at the cursor) and the **📐 Constants**.
+- **Devices:** Pumps, Valves, Manual Valve, PWM, Heating Element and Probe.
+- **Widgets:** Text, Audio, Graphic, Value, Time and DateTime.
+- **Common:** every other normal command (`sleep`, `delay`, `start`, `stop`, `play`, `print`, `show tab`, `new value` ...).
+
+A command picked from Conditionals, Skynet Special or Common goes in and the list closes. Devices and Widgets stay open for more picks; a click outside, **Esc** or the same button closes them.
+
+- **The Devices and Widgets dropdowns** list only what is already in this Schema. Nothing is added to the Schema from here. Pick one first.
+- **The buttons** under a dropdown put in the line for the one picked: `.visible = true`, `.state = true` (on or open), `.method = "PID"`, `.play = true`. The `.visible` and `.state` buttons go with whichever Pump, Valve, Manual Valve, PWM or Heating Element was picked last.
 - **The light-blue boxes** are for typing a value for the dropdown or button just above: a sound file, a picture file, a number, a time, a date and time or the Setpoint (SV) of a Probe. Type it and press **Enter** (or the **.path =** button above it), and the whole line goes in, for example `w_Strike_Volume = 7.5`.
 
-When the Name is right before the cursor, a button adds only its part (`.state = true`). Otherwise the whole line goes on a new line. **Ctrl+Z** takes it back out.
+**Making a line by picking:** after a word that waits for a name (`if `, `wait `, `start ` ...) or a sign (`== `, `and ` ...), a Device or Widget you pick goes in right at the cursor, and **PV** (`.value`) or **SV** (`.setpoint`) after it. So Conditionals > **if**, then Devices > Probe > your Probe, then **PV**, gives `if HLT_Probe.value`; type the rest. **Ctrl+Z** takes any of it back out.
 
 `Audio_1.play = true` plays an Audio Widget and `= false` stops it (the same as `.active`).
 
@@ -51,7 +59,7 @@ Pick the Process to work on in the list box at the top of the editor. **➕ Add 
    - **Looper**: runs in the background on its own and is never called. Numbered L1, L2, L3 ... Override and Stop all leave it running.
 3. **The kind can not be changed once it is saved.** It shows next to the Process name. If you picked the wrong one, make a new Process and paste the text in.
 
-**Close** (or ✕) makes nothing. The new Process starts with a few lines: its name, the MIT License line and the **Copyright ©** line, then some comments that show how comments are written (`/* ... */` for several lines, `//` for one). A Patron's new Process also says **Created by** your Brewery Name with the date and time, and the Copyright has your Brewery Name (see [Patron](198-patron)).
+**Close** (or ✕) makes nothing. The new Process starts with a few lines: its name, **Created on** with the date and time it was made (for example `//Created on 261123 14h 23M`: year, month, day, then hours and minutes), the line `//This Process was written by its user, not by Skynet`, then some comments that remind you to say what the Process does and show how comments are written (`/* ... */` for several lines, `//` for one). A Patron's new Process also says **Created by** your Brewery Name, the MIT License line and **Copyright ©** your Brewery Name (see [Patron](198-patron)). Skynet did not write your Process, so without a Brewery Name these lines are left out; you can type your own.
 
 A Process has a hidden key, so **Rename** only changes its name: every other Process that starts or stops it is updated to the new name by itself. See the Help page Name change and hidden keys.
 
