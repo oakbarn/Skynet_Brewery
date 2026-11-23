@@ -8701,7 +8701,12 @@ function markOnTabs() { document.body.classList.toggle('onTabs', view === 'works
 // the Brewery Name on every Tab's menu bar (OakBarn Brewery, 2026-11-21: "It is Just a Name we can display at the top of every tab menu
 // bar"): ☰ Menu > Default settings > Brewery Name, OakBarn Brewery unless changed
 const BREWERY_NAME = 'OakBarn Brewery';
-function showBreweryName() { const el = $('#barBrewery'); if (el) el.textContent = S.config?.brewDefaults?.breweryName || BREWERY_NAME; }
+// The Brewery Name is a Patron perk (Panel Update 10, item 4, Rule 12.4): a Patron sees the Brewery Name typed in ☰ Menu > Default
+// settings (empty: the name on the Patron code, then OakBarn Brewery); everyone else sees Skynet Panel. The same name is the Copyright and
+// "Created by" of a new Process (item 5).
+const NOT_PATRON_NAME = 'Skynet Panel';
+const breweryName = () => S.patron?.brewery ? (S.config?.brewDefaults?.breweryName || S.patron.name || BREWERY_NAME) : NOT_PATRON_NAME;
+function showBreweryName() { for (const el of document.querySelectorAll('#barBrewery, .barBreweryCopy')) el.textContent = breweryName(); }
 function showMenuBar(on) {
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   document.body.classList.toggle('menuBarOn', on);
@@ -14872,6 +14877,8 @@ function patronPerksList(levels) {
 }
 async function renderPatron() {
   const st = await api('GET', '/ui/patron'), box = $('#patronBox'); box.innerHTML = '';
+  // a Patron code saved or taken away: the Brewery Name perk follows at once (Panel Update 10, item 4)
+  api('GET', '/ui/state').then(x => { S.patron = x.patron; showBreweryName(); }).catch(() => { });
   if (st.active) box.append(h('p', {}, '⭐ ', h('b', {}, `${st.levelName}`), ` for ${st.name || 'this Brain'}, until ${st.expires}. Thank you for helping Skynet grow!`));
   else if (st.hasCode && st.ok) box.append(h('p', { class: 'bad' }, `The Patron code ended on ${st.expires}. Renew on oakbarnbrewery.com, then paste the new code here.`));
   else if (st.hasCode) box.append(h('p', { class: 'bad' }, st.error));
@@ -16462,7 +16469,7 @@ const RTC_SIZE_TIP = `The size, in pixels, of large text: the \\L code in Proces
 const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
 // the New User Templates and Schemas boxes' hover help (OakBarn Brewery, 2026-11-14: "These are for new User Created only")
 const NEW_TIPS = {
-  brewery: 'Your brewery\'s name, shown at the top of every Tab\'s menu bar. Empty: OakBarn Brewery.',
+  brewery: 'Your brewery\'s name, shown on every Tab\'s Menu Bar and in the Process Editor, and the Copyright and "Created by" name of every new Process. A Patron perk (Settings > Patron): not a Patron, the box is greyed out and the Menu Bar shows Skynet Panel. Empty: the name on your Patron code.',
   look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in ☰ Menu > Default settings.',
   lockout: 'How long a new Pulse button waits before another press counts, in seconds. Each button can change its own in its Properties.' };
 // the Hover Delay box's own hover help (Rule 2.38)
@@ -16580,6 +16587,8 @@ function renderDefaultTab(box) {
   Object.assign(d, mdWas);
   const f = paneForm(fields, d, () => { }, !admin);
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
+  // the Brewery Name is a Patron perk (Panel Update 10, item 4): greyed out with the ⛔ for a non-Patron (Rule 18.46); what was typed is kept
+  if (!S.patron?.brewery) { const bn = f.box.querySelector('[data-k="breweryName"]'); if (bn) bn.disabled = true; }
   // Test beside the Airport (ICAO) box: keeps the Airport and Elevation as typed (as Test in Settings does), fetches the report now
   // and shows the airport, the air pressure and the boil temperature
   const btRes = h('div', { class: S.boil?.note ? 'btWarn' : 'muted', style: 'grid-column:1/-1' }, btLine(S.boil));
