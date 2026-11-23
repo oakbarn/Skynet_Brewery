@@ -1,4 +1,5 @@
 //Skynet_Transfer_to_Fermentor
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Let the trub settle, get the fermenters ready, move the wort into the sanitized fermenter and take a gravity reading (OG).
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

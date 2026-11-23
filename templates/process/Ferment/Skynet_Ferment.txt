@@ -1,4 +1,5 @@
 //Skynet_Ferment
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Pitch the yeast and hold the fermentation temperature.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

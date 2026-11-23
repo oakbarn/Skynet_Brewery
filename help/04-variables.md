@@ -1,6 +1,6 @@
 # Variables
 
-Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. The five plain Kinds (String, Value, Boolean, Time, Date Time) are made on the **gGlobal** screen with **➕ New gGlobal** and never sit on a Tab: see [gGlobal Kinds](108-gglobal-kinds). The on-screen kinds (Switch, Push Button, Pulse Button, List, Step, Long String) are still added in **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, then **Add Widget**. The name prefixes below are suggestions; any name works.
+Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. The five plain Kinds (String, Value, Boolean, Time, Date Time) are made on the **gGlobal** screen with **➕ New gGlobal** and never sit on a Tab: see [gGlobal Kinds](108-gglobal-kinds). The on-screen kinds (Switch, Push Button, Pulse Button, List, Step, Long String) are still added in **Tabs > 🛠 Build (Edit layout) > Select Widget Type > gGlobal variables**, then **Add Widget**. The name prefixes below are suggestions; any name works.
 
 gKonstant and gAPI became one class, **gGlobal**, on 2026-10-30. Sending readings to the database and letting outside programs reach an item are now settings that every Device and Widget has, so a separate API class was no longer needed. Older ones are changed when the Brain starts: see [Database and .API on every Device and Widget](98-database-and-api).
 
@@ -40,6 +40,6 @@ Every Device and Widget with a value has a **Database and .API** box at the end 
 
 ## gGlobal List (a dropdown on a tab)
 
-**Tabs > ☰ Menu > Edit layout > Add Widget > gGlobal variables > List (dropdown: Value + Text)** makes a dropdown. Its settings have a two-column table: **Value** (a number) and **Text**. **+ Add row** adds a choice and ✕ removes one.
+**Tabs > 🛠 Build (Edit layout) > Add Widget > gGlobal variables > List (dropdown: Value + Text)** makes a dropdown. Its settings have a two-column table: **Value** (a number) and **Text**. **+ Add row** adds a choice and ✕ removes one.
 
 Example: `gGList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil and Chill. Picking Boil sets the value to 2, and that number is what Processes read (`if gGList_BrewStatus == 2`). A Process that sets it to 3 makes the dropdown show Chill.

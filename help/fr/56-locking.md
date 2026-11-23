@@ -8,7 +8,7 @@ Vous pouvez quand même ouvrir les propriétés d'un élément verrouillé (doub
 
 ## Verrouiller ou déverrouiller un élément {#lock-or-unlock-one-item}
 
-1. Choisissez **☰ Menu > Edit layout**.
+1. Choisissez **🛠 Build (Edit layout)**.
 2. Cliquez sur l'élément.
 3. Appuyez sur **🔒 Lock** dans la barre Edit layout. Le bouton dit alors **🔓 Unlock** : appuyez encore pour déverrouiller.
 4. Appuyez sur **Save layout**.

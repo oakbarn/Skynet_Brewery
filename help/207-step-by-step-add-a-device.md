@@ -96,7 +96,7 @@ Press **Exit** to leave Edit layout. The Wort pump is on the Brew House Tab.
 
 What is left to do:
 
-1. **Draw its pipes or hoses**: **☰ Menu > ✎ Edit layout > Draw pipe** ([Pipes and hoses](24-pipes-and-hoses)).
+1. **Draw its pipes or hoses**: **🛠 Build (Edit layout) > Draw pipe** ([Pipes and hoses](24-pipes-and-hoses)).
 2. **Change it any time**: in Edit layout, double-click it to open its Properties.
 
 ## If you stopped before Finish Build

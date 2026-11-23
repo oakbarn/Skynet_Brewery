@@ -4,7 +4,14 @@ Le bouton **☰ Menu** est en haut à droite de la page **Tabs**, là où était
 
 - **Show Top Line** / **Hide Top Line** : la Top Line (ligne du haut) du panel est cachée sur la page Tabs ; ceci la fait revenir. Voir [La Menu Bar](40-menu-bar).
 - **Process Editor** (seulement quand il est ouvert) : chaque bouton de l'éditeur de Processes, de New et Save jusqu'à Stop all et l'interrupteur Colors, chacun faisant la même chose que son bouton. Voir [L'éditeur de Processes](30-process-editor).
-- **Edit layout** (Admins) : change les Tabs. C'est le premier choix. Pendant que vous êtes dans Edit layout, il indique **Exit Edit layout**. Voir [Tabs (les écrans de votre brasserie)](02-tabs).
+- **🌐 Help** : **English** et **Français** côte à côte ; un clic choisit la langue de l'aide et des bulles. Tant qu'il n'y a pas de troisième langue sur le Brain, un Admin voit aussi **➕ Add a Language**, qui ouvre Help > 🌐 Languages (voir [L'aide dans toutes les langues](242-help-in-any-language)). Une fois ajoutée, elle est la dernière case, écrite avec ses propres lettres.
+- **Edit layout** n'est pas dans le ☰ Menu : c'est l'icône 🛠 **Build** de la Menu Bar (voir [La barre de menus (Menu Bar)](40-menu-bar)).
+- **🗂 Schema** : la liste déroulante des Schemas, la même que sur la Top Line. Choisissez un Schema et il se charge (il vous prévient d'abord si des Processes tournent). **Add new Schema ...** et les autres actions sur les Schemas sont à la fin de la liste. Voir [Changer et cloner des Schemas](48-schema-switching-and-cloning).
+- **🧪 Switch to Simulator** (Admins, seulement avec les vraies cartes). En mode Simulator, le ballon 🧪 Simulator de la Menu Bar revient aux vraies cartes. Voir [Simulator ou vraies cartes](77-simulator-or-real-boards).
+- **🐞 Report a Bug** (tout le monde) : signaler un bogue à OakBarn Brewery, sur GitHub ou par e-mail. Voir [Signaler un problème](205-report-a-problem).
+- **⭐ Request a Feature** : un avantage Patron.
+- **Last picked** : une copie du dernier choix pris dans le ☰ Menu, pour y revenir en un clic. Chaque navigateur garde le sien.
+- Interfaces (boards) et Add Interface sont sous **Pages > Devices**, à la fin de la liste.
 - Les **onglets de menu** (Menu tabs) : Zoom (numéro 1 au départ), Default settings, Equipment Profile, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Profile, Valve Profile et Pump Profile.
 - **File Move Utility** (Admins) ouvre la page File Move. Voir [File Move (copier des fichiers de votre ordinateur vers le Brain)](32-file-move).
 - **Recipe** et **Fermentation** sont grisés. Ils arrivent dans les prochaines étapes.

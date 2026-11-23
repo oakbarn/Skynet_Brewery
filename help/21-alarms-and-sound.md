@@ -26,7 +26,7 @@ and 1.1 before 1.15 before 1.2, so you can put an Alarm in between two others wi
 
 ## Add one
 
-**Tabs > ☰ Menu > Edit layout > Add Widget > On-screen controls > Alarm**, then pick its **Kind** first. The settings below it change with the kind:
+**Tabs > 🛠 Build (Edit layout) > Add Widget > On-screen controls > Alarm**, then pick its **Kind** first. The settings below it change with the kind:
 
 - **Hop Alarm**: pick a **timer** and the **time on that timer** for the hop drop, and it sounds by itself. For a boil count-down timer, that is the time left (a 15-minute hop: `00:15:00`). Leave the timer empty to turn it on only from a Process.
 - **Pre-Hop Alarm**: pick the **Hop Alarm** it goes with and **how long before** (empty = `00:10:00`).

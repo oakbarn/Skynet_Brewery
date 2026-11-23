@@ -1,4 +1,5 @@
 //BrewDay_Flow
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //Brew day, step by step: the message box says what to do, the red label is the question,

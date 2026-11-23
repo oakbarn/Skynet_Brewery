@@ -4,7 +4,7 @@ An **Interface** is a board (PLC) your Devices are wired to: an Arduino Mega 256
 
 ## Finding them
 
-- **☰ Menu > 🔌 Interfaces (boards)** opens the Devices page at the Interfaces list.
+- **☰ Menu > Devices > ↳ Interfaces (boards)** opens the Devices page at the Interfaces list.
 - The **Devices** page has two Tabs: **🔌 Interfaces** (every Interface and **Add Interface**) and **🌡 OneWire Probes** (the 1-Wire circuits, the 1-Wire Indexes and the probes seen, see [Devices and boards](03-devices)).
 
 ## The Interfaces list
@@ -28,7 +28,7 @@ When something is wrong (no answer, an error from the board), the reason is also
 
 There are three ways in, and all three open the same **Add Interface** pop-up:
 
-1. **☰ Menu > ➕ Add Interface…**
+1. **☰ Menu > Devices > ↳ Add Interface**
 2. **Devices page > Add Interface > ➕ Add Interface…**
 3. In the **New Device** box on any Tab: open **2. Interface** and pick **➕ Add new Interface…** at the bottom. When you click Add, you are taken back to the New Device box with the new Interface already picked. The New Device box for a RIMS tube or an electric kettle has the same choice.
 

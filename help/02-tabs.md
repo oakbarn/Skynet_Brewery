@@ -42,7 +42,7 @@ Drag unlocked items to move them (🔒 locked items stay where they are, also in
 
 ## Background color and picture
 
-Each tab has one background picture and a background color. Pick **☰ Menu > Edit layout**, then open **⚙ Tab settings** (the button, or double-click an empty spot; on a phone hold a finger on an empty spot). Step by step: [Tab background picture and color](26-tab-background).
+Each tab has one background picture and a background color. Pick **🛠 Build (Edit layout)**, then open **⚙ Tab settings** (the button, or double-click an empty spot; on a phone hold a finger on an empty spot). Step by step: [Tab background picture and color](26-tab-background).
 
 ## Timers
 

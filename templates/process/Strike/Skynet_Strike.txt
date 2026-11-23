@@ -1,4 +1,5 @@
 //Skynet_Strike
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: 3 Vessel: strike water from the Hot Liquor Tank into the mash tun, recirculate, then the grain a little at a time (dough in) and a vorlauf to set the grain bed.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

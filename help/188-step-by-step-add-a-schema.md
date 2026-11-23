@@ -6,14 +6,14 @@ This guide takes you from nothing to a new Schema on the screen. Only an Admin c
 
 ## Step 1. Open the Add new Schema box
 
-Press **☰ Menu** (top right), then **➕ New Schema…**, just under **🗂 Schema**.
+Press **☰ Menu** (top right), open the **🗂 Schema** dropdown and pick **Add new Schema ...** near the bottom of the list.
 
-![☰ Menu: New Schema](help_pictures/Step_Add_Schema_01_Menu.png)
+![☰ Menu: the Schema dropdown](help_pictures/Step_Add_Schema_01_Menu.png)
 
 Two other ways open the same box:
 
-- **☰ Menu > 🗂 Schema**, then the big **➕ New Schema** button. **❓ Step by step** beside it opens this page.
-- The **Schema** dropdown (on the Top Line, the Schema tab or the About tab), then **Add new Schema ...** near the bottom of the list.
+- **☰ Menu > Schema** (under Menu tabs), then the big **➕ New Schema** button. **❓ Step by step** beside it opens this page.
+- The same **Schema** dropdown on the Top Line, the Schema tab or the About tab.
 
 ![The Schema tab: New Schema button](help_pictures/Step_Add_Schema_02_Schema_Tab.png)
 
@@ -62,7 +62,7 @@ Then the **New Schema Interview** opens (Step 6).
 
 What is left to do:
 
-1. **Draw the pipes** the way yours are: **☰ Menu > Edit layout > Draw pipe** ([Pipes and hoses](24-pipes-and-hoses)).
+1. **Draw the pipes** the way yours are: **🛠 Build (Edit layout) > Draw pipe** ([Pipes and hoses](24-pipes-and-hoses)).
 2. **Check each job** of the Brew Day in **☰ Menu > Brew Process** ([Brew Process](100-brew-process)).
 3. Try a whole Brew Day in the Simulator with **▶ Start Brew Day**.
 
@@ -76,7 +76,7 @@ More about every question: [New Schema from a Skynet Template](157-schema-templa
 
 More about boards: [Interfaces](76-interfaces) and [Simulator or real boards](77-simulator-or-real-boards).
 
-**5b. Add your first things.** The Main Tab is empty. Press **☰ Menu > ✎ Edit layout**. The bar at the top has a button for each kind of thing: **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** and more. Pick one and fill in its box: the Label (what you call it), the Interface (your board), the Port it is wired to, and the Tab. Then **Save layout**.
+**5b. Add your first things.** The Main Tab is empty. Press **🛠 Build (Edit layout)**. The bar at the top has a button for each kind of thing: **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** and more. Pick one and fill in its box: the Label (what you call it), the Interface (your board), the Port it is wired to, and the Tab. Then **Save layout**.
 
 ![The Edit layout bar](help_pictures/Step_Add_Schema_11_Edit_Layout.png)
 

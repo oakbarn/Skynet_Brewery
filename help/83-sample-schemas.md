@@ -19,7 +19,7 @@ The links are added here as soon as the videos are on YouTube.
 
 Only an Admin sees this section.
 
-The same samples are on the **Schema** Menu tab: press **☰ Menu > 🗂 Schema** (at the top of the ☰ Menu), then **➕ Add This Schema Template** beside the sample under **Add a Sample Schema**.
+The same samples are on the **Schema** Menu tab: press **☰ Menu > Schema** (under **Menu tabs**), then **➕ Add This Schema Template** beside the sample under **Add a Sample Schema**.
 
 ## Adding one
 

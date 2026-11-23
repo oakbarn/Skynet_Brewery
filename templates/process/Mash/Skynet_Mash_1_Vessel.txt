@@ -1,4 +1,5 @@
 //Skynet_Mash_1_Vessel
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: 1 Vessel: every mash step of the Recipe, the mash out, then lift the grain basket and sparge over it.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

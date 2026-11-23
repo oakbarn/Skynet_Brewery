@@ -35,7 +35,7 @@ Press **Save** at the top or the bottom of it, or **Close** to put it away. The 
 
 The **1, 2 and 3 vessel** Sample Schemas can be cloned the same way as your own Schemas:
 
-1. Schema dropdown > **Clone a Schema ...** (or ☰ Menu > 🗂 Schema > Clone).
+1. Schema dropdown > **Clone a Schema ...** (or ☰ Menu > Schema > Clone).
 2. In **Schema to clone**, your Schemas are listed first, then the samples marked **🧪 Sample:**
    - **🧪 Sample: BrewZilla brew day (no board)** (one vessel)
    - **🧪 Sample: Two vessels, one pump**

@@ -1,4 +1,5 @@
 //FireHose_1_Minute
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //The "FireHose 1 Minute" button on the Water Tab (OakBarn Brewery's switch sw_Set_FireHose_1_Min in looper_scrAutoSwitch).

@@ -4,6 +4,8 @@ The **Emergency Off** button is the red mushroom button on the yellow plate at t
 
 **One click** shuts the brewery down at once. There is no pop-up.
 
+**Rest the mouse on it for 2 seconds** and a big Emergency Off button, 400 pixels wide, pops up under it, so it is easy to hit. One click on the big one does exactly the same. It goes away when the mouse leaves it, or with Esc.
+
 ## What it does
 
 In this order:

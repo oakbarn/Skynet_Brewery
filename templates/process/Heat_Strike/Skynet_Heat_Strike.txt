@@ -1,4 +1,5 @@
 //Skynet_Heat_Strike
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Fill the Hot Liquor Tank and heat the strike water to the Recipe's strike temperature.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

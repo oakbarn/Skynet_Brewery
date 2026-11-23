@@ -1,4 +1,5 @@
 //Skynet_Mash
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: 3 Vessel: every mash step of the Recipe (temperature, then its time), the mash out, the first wort to the kettle, and the sparge from the Hot Liquor Tank.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

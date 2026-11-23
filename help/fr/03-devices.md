@@ -24,7 +24,7 @@ Le tableau du haut montre chaque carte, sa note de connexion et si elle est conn
 
 ## Mettre un Device sur un Tab {#putting-a-device-on-a-tab}
 
-Dans **Tabs > ☰ Menu > Edit layout**, **Select Device Type** liste les types de Device et **Add Device** liste les Devices de ce type (voir [Barre Edit layout](82-edit-layout-bar)) :
+Dans **Tabs > 🛠 Build (Edit layout)**, **Select Device Type** liste les types de Device et **Add Device** liste les Devices de ce type (voir [Barre Edit layout](82-edit-layout-bar)) :
 
 - **Sorties** (Outputs) : marche/arrêt (relais), PWM %, analogique 0-10 V ou 4-20 mA. Une **Pump** (pompe) et une **Valve** (vanne) sont des sorties toutes prêtes, avec leurs images et leurs points d'écoulement déjà placés.
 - **Entrées numériques** (Digital inputs) : interrupteurs, interrupteurs à flotteur et de niveau, détecteurs de débit, verrouillages de sécurité (interlocks) et boutons. Un **bouton poussoir** (push button) est ON seulement tant qu'on le tient et OFF quand on le lâche. Un **bouton à bascule** (toggle button) reste ON après un appui et OFF après le suivant. Un **bouton à impulsion** (pulse button) donne un court ON par appui.

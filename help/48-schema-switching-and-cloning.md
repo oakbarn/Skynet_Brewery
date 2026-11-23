@@ -12,7 +12,7 @@ The same Schema dropdown is in three places. Use whichever is handy:
 
 Picking another Schema loads it. Only an Admin can load or change a Schema.
 
-To start a **new** Schema, press **☰ Menu > ➕ New Schema…**, or **➕ New Schema** on the **☰ Menu > Schema** tab. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema).
+To start a **new** Schema, press **☰ Menu > 🗂 Schema > Add new Schema ...**, or **➕ New Schema** on the **☰ Menu > Schema** tab. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema).
 
 The **☰ Menu > Schema** tab also lists every Schema on the Brain: what it is for (from the [New Schema Interview](202-new-schema-interview)), how many tabs it has, the Equipment Profile of each Tab and when it was last saved, with a **Load** and a **Create New Copy of Schema** button on each one.
 
@@ -56,7 +56,7 @@ The clone gets everything in the Schema, its saved values too (gGlobals ...). It
 
 A Bundled vessel and its IPs can be copied in one go:
 
-1. Pick **☰ Menu > Edit layout** and double-click the bundled vessel.
+1. Pick **🛠 Build (Edit layout)** and double-click the bundled vessel.
 2. Turn on **Clone: put a copy of this vessel and its IPs next to it** and press **Save**.
 3. The copy is placed just to the right of the first one, still bundled, named "<name> copy". Pipes are not copied: draw new ones to it.
 4. Press **Save layout** to keep it.

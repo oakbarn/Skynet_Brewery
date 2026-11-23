@@ -4,6 +4,8 @@ Le bouton **Emergency Off** (arrêt d'urgence) est le bouton champignon rouge su
 
 **Un clic** arrête la brasserie tout de suite. Il n'y a pas de fenêtre.
 
+**Laissez la souris dessus 2 secondes** et un grand bouton Emergency Off, de 400 pixels de large, apparaît dessous, pour qu'il soit facile à toucher. Un clic sur le grand fait exactement la même chose. Il disparaît quand la souris le quitte, ou avec Échap.
+
 ## Ce qu'il fait {#what-it-does}
 
 Dans cet ordre :

@@ -138,7 +138,7 @@ Appuyez sur **Start**. À côté du nom du Process, vous voyez ce qu'il fait : *
 
 Un **Process Widget** montre un Process sur un Tab et le démarre ou l'arrête d'un clic (sans fenêtre avant). Ajoutez-en un comme n'importe quel Widget ([Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget)) :
 
-1. Revenez au Tab (**Tabs**, ou **✖ Close**), puis **☰ Menu > ✎ Edit layout**.
+1. Revenez au Tab (**Tabs**, ou **✖ Close**), puis **🛠 Build (Edit layout)**.
 2. Dans **Select Widget Type**, choisissez **On-screen controls**, puis dans **Add Widget**, choisissez **Process Widget**.
 
 ![Select Widget Type and Add Widget](help_pictures/Step_Add_Process_11_Process_Widget_Type.png)

@@ -6,6 +6,7 @@ propres mots.
 
 ## Où le trouver {#where}
 
+- **☰ Menu > 🐞 Report a Bug** (tout le monde)
 - **☰ Menu > About > 🐞 Report a problem**
 - **🐞 Report** en haut de chaque page d'aide (à côté de 🖨 Print). Depuis une page d'aide, le nom de la page est rempli pour vous.
 

@@ -35,7 +35,7 @@ Appuyez sur **Save** en haut ou en bas, ou sur **Close** pour le ranger. Les ré
 
 Les Schemas exemples à **1, 2 et 3 cuves** peuvent être clonés de la même façon que vos propres Schemas :
 
-1. Liste des Schemas > **Clone a Schema ...** (ou ☰ Menu > 🗂 Schema > Clone).
+1. Liste des Schemas > **Clone a Schema ...** (ou ☰ Menu > Schema > Clone).
 2. Dans **Schema to clone**, vos Schemas sont listés d'abord, puis les exemples marqués **🧪 Sample:**
    - **🧪 Sample: BrewZilla brew day (no board)** (une cuve)
    - **🧪 Sample: Two vessels, one pump**
