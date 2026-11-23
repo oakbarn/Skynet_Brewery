@@ -310,6 +310,8 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws.editing .gfx.ip:not(.fit):not(.has-img):hover { z-index: 40; }
 /* its Edit layout name tag (a Label not set to show) waits for the hover too, so the tags no longer pile up on top of the dots */
 #ws.editing .gfx.ip:not(.fit):not(.has-img):not(:hover):not(.sel) > .iplbl { display: none; }
+/* 🔍 the Zoom box (Rule 5.37, set further down) takes the mouse: what is done in it is passed to the Tab */
+div.zoomBox { pointer-events: auto; }
 /* drawing a pipe or hose: a big cross-hair pointer and a marker that turns green on an IP */
 #ws.drawing, #ws.drawing * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23fff' stroke-width='5'/%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23fff' stroke-width='4'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23e8a33a' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E") 24 24, crosshair !important; }
 .pipes .drawmark { pointer-events: none; fill: none; }

@@ -5203,48 +5203,74 @@ document.addEventListener('keydown', ev => {
 });
 
 // 🔍 Zoom box (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for 200 pixel
-// square where Join area is zoomed inside the Dialog"; Rule 5.37): in Edit layout, Z (not in a text box) opens a box that shows the
-// 200 screen pixels around the mouse 3 times bigger, and follows the mouse, while dragging too. Look only: it never takes a click.
-// Z again or Esc closes it, and so does leaving Edit layout. The copy of the Tab is drawn in a closed-off part of the page (a shadow
-// root), so nothing else on the panel ever finds it.
+// square where Join area is zoomed inside the Dialog"; then "be able to move within the dialog. Dialog moves now. It needs to stay
+// fixed and move the joins together inside the Dialog"; Rule 5.37): in Edit layout, Z (not in a text box) opens a box that shows the
+// 200 screen pixels around the mouse 3 times bigger. It stays where it opened, on the same spot of the Tab. Work inside it as on the
+// Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 3 times finer, so a pipe end or an item
+// can be dragged onto an IP right there. Esc or its ✕ (upper right) closes it, and so does leaving Edit layout (Z again too). The copy of the Tab is drawn in a
+// closed-off part of the page (a shadow root), so nothing else on the panel ever finds it.
 const ZOOM_SRC = 200, ZOOM_X = 3;
-let zoomBox = null;
+let zoomBox = null, zoomMouse = null;
 function zoomOpen() {
-  const host = h('div', { class: 'zoomBox', 'aria-hidden': 'true' }), root = host.attachShadow({ mode: 'open' });
+  const ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1;
+  const [mx, my] = zoomMouse || [r.left + r.width / 2, r.top + r.height / 2];
+  const host = h('div', { class: 'zoomBox' }), root = host.attachShadow({ mode: 'open' });
   const size = ZOOM_SRC * ZOOM_X;
-  root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; }
+  root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; cursor: crosshair; touch-action: none; }
     .zf > .zc { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
-    .zx { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; pointer-events: none;
-      background: linear-gradient(#ffd24a, #ffd24a) center / 2px 100% no-repeat, linear-gradient(#ffd24a, #ffd24a) center / 100% 2px no-repeat; filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000); }
-    .zt { font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 0 8px; }`));
-  const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, `🔍 Zoom ${ZOOM_X}x: ${ZOOM_SRC} pixels around the mouse. Z or Esc closes it.`);
+    .zt { display: flex; align-items: center; gap: 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
+    .zt span { flex: 1; } .zt button { font: 700 14px/1 system-ui, sans-serif; color: #fafafa; background: #c0392b; border: 1px solid #000; border-radius: 4px; padding: 3px 8px; cursor: pointer; }
+    .zt button:hover { background: #e74c3c; }`));
+  const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, h('span', {}, `🔍 Zoom ${ZOOM_X}x: work right in here (drag, join, double-click). Esc or ✕ closes it.`),
+    h('button', { type: 'button', title: 'Close the zoom box (Esc)', onclick: ev => { ev.stopPropagation(); zoomClose(); } }, '✕'));      // OakBarn Brewery, 2026-11-23: "have a close button upper right corner"
   root.append(title, frame);
   document.body.append(host);
-  zoomBox = { host, frame, copy: null, at: null, t: 0, size };
+  // it stays on the side of the Tab area away from the spot it shows
+  const area = ($('#wsScroll') || ws).getBoundingClientRect(), w = size + 4, left = mx > area.left + area.width / 2 ? area.left + 8 : area.right - w - 8;
+  Object.assign(host.style, { left: Math.max(4, left) + 'px', top: Math.max(4, area.top + 8) + 'px' });
+  zoomBox = { host, frame, copy: null, t: 0, size, lx: (mx - r.left) / z, ly: (my - r.top) / z, down: null };
+  for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu']) frame.addEventListener(type, zoomPass);
   zoomDraw(true);
 }
 function zoomClose() { zoomBox?.host.remove(); zoomBox = null; }
+// the spot on the screen of the Tab that a point in the box stands for
+function zoomReal(ev) {
+  const zb = zoomBox, ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1, f = zb.frame.getBoundingClientRect(), k = ZOOM_X;
+  return [r.left + (zb.lx + (ev.clientX - f.left - zb.size / 2) / (k * z)) * z, r.top + (zb.ly + (ev.clientY - f.top - zb.size / 2) / (k * z)) * z];
+}
+// pass a press, drag, click or double-click in the box on to the Tab, as if it was made there
+function zoomPass(ev) {
+  const zb = zoomBox; if (!zb) return;
+  ev.stopPropagation(); if (ev.type !== 'pointermove') ev.preventDefault();
+  const [x, y] = zoomReal(ev);
+  zb.host.style.pointerEvents = 'none'; const under = document.elementFromPoint(x, y) || document.body; zb.host.style.pointerEvents = '';
+  if (ev.type === 'pointerdown') zb.down = under;
+  const to = zb.down && /^pointer(move|up|cancel)$/.test(ev.type) ? zb.down : under;      // as the Tab does, a press keeps its target until let go
+  const o = { bubbles: true, cancelable: true, composed: true, view: window, clientX: x, clientY: y, screenX: x, screenY: y, button: ev.button, buttons: ev.buttons,
+    detail: ev.detail, ctrlKey: ev.ctrlKey, shiftKey: ev.shiftKey, altKey: ev.altKey, metaKey: ev.metaKey };
+  to.dispatchEvent(ev.type.startsWith('pointer') ? new PointerEvent(ev.type, { ...o, pointerId: ev.pointerId, pointerType: ev.pointerType, isPrimary: ev.isPrimary, width: 1, height: 1 }) : new MouseEvent(ev.type, o));
+  // the Tab's own press takes the pointer (setPointerCapture); the box takes it back after, so the drag goes on coming through it
+  if (ev.type === 'pointerdown') try { zb.frame.setPointerCapture(ev.pointerId); } catch { }
+  if (/^pointer(up|cancel)$/.test(ev.type)) { zb.down = null; setTimeout(() => zoomDraw(true), 0); }
+  else if (ev.type === 'pointermove' && zb.down) zoomDraw();
+}
 function zoomDraw(fresh = false) {
   const zb = zoomBox; if (!zb) return;
   if (!editing) return zoomClose();
   const ws = $('#ws'), now = Date.now();
-  if (fresh || !zb.copy || now - zb.t > 150) {        // a fresh copy of the Tab at most every 0.15 s, so a drag shows as it goes
-    const c = ws.cloneNode(true); c.classList.add('zc'); c.style.width = ws.offsetWidth + 'px'; c.style.height = ws.offsetHeight + 'px';
+  if (fresh || !zb.copy || now - zb.t > 120) {        // a fresh copy of the Tab at most every 0.12 s, so a drag shows as it goes
+    const c = ws.cloneNode(true); c.classList.add('zc'); c.removeAttribute('id'); c.id = 'ws';
+    c.style.width = ws.offsetWidth + 'px'; c.style.height = ws.offsetHeight + 'px';
     zb.copy?.remove(); zb.frame.prepend(c); zb.copy = c; zb.t = now;
-    if (!zb.frame.querySelector('.zx')) zb.frame.append(h('div', { class: 'zx' }));
   }
-  const r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1, [mx, my] = zb.at || [r.left + r.width / 2, r.top + r.height / 2];
-  const lx = (mx - r.left) / z, ly = (my - r.top) / z, k = zb.size / (ZOOM_SRC / z);
-  zb.copy.style.transform = `translate(${zb.size / 2 - lx * k}px, ${zb.size / 2 - ly * k}px) scale(${k})`;
-  // it sits in the top right corner of the Tab area, or the top left when the mouse is there
-  const area = ($('#wsScroll') || ws).getBoundingClientRect(), w = zb.size + 4, left = mx > area.right - w - 20 && my < area.top + w + 40 ? area.left + 8 : area.right - w - 8;
-  Object.assign(zb.host.style, { left: Math.max(4, left) + 'px', top: Math.max(4, area.top + 8) + 'px' });
+  const z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, k = ZOOM_X * z;
+  zb.copy.style.transform = `translate(${zb.size / 2 - zb.lx * k}px, ${zb.size / 2 - zb.ly * k}px) scale(${k})`;
 }
 let zoomRaf = 0;
 document.addEventListener('pointermove', ev => {
-  if (!zoomBox) return;
-  zoomBox.at = [ev.clientX, ev.clientY];
-  if (!zoomRaf) zoomRaf = requestAnimationFrame(() => { zoomRaf = 0; zoomDraw(); });
+  if (zoomBox && ev.composedPath().includes(zoomBox.host)) return;
+  zoomMouse = [ev.clientX, ev.clientY];
+  if (zoomBox && !zoomRaf) zoomRaf = requestAnimationFrame(() => { zoomRaf = 0; zoomDraw(); });      // a drag on the Tab itself shows in the box too
 }, true);
 document.addEventListener('keydown', ev => {
   if (zoomBox && ev.key === 'Escape') { zoomClose(); return; }

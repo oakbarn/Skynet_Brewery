@@ -2774,10 +2774,14 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and does not ask. Greyed out for the same reasons, and when a 🔒 locked pipe or fitting would have to move with it.
 - **🔍 Zoom box** (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for
   200 pixel square where Join area is zoomed inside the Dialog"; he picked A, the Z key, as Ctrl + Click already opens Properties,
-  Rule 2.9): in Edit layout, **Z** (not in a text box or dialog) opens a box in the top corner of the Tab area that shows the 200
-  screen pixels around the mouse **3 times bigger**, with a yellow cross on the mouse spot. It follows the mouse, while dragging a
-  pipe end or an item too, so a join can be watched up close. It is to look at only: it never takes a click. **Z** again or **Esc**
-  closes it, and so does leaving Edit layout. (Help 153)
+  Rule 2.9): in Edit layout, **Z** (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
+  screen pixels around the mouse **3 times bigger**. *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
+  Dialog moves now. It needs to stay fixed and move the joins together inside the Dialog"; "z does not work like the esc. Just
+  change the text that you use the esc button to close and or have a close button upper right corner"):* the box **stays where it
+  opened** (on the side away from the spot it shows) and keeps showing that same spot. **Work right in it:** every press, drag,
+  click and double-click in the box goes to the Tab at the same spot, 3 times finer, so a pipe end or an item is dragged onto an IP
+  inside the box (the grab pop-up, snapping and joins work as on the Tab). **Esc** or its red **✕** (upper right) closes it, and
+  so does leaving Edit layout; its text says so. (Help 153)
 - **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
   gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
 - **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the

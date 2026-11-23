@@ -37,7 +37,12 @@ console.log('move with pipes ok');
 assert.match(app, /const ZOOM_SRC = 200, ZOOM_X = 3;/);
 assert.match(app, /host\.attachShadow\(\{ mode: 'open' \}\)/, 'its copy of the Tab is closed off, so nothing else finds it');
 assert.match(app, /ev\.key\.toLowerCase\(\) !== 'z'\) return;\n[^\n]*closest\?\.\('input, textarea, select, \[contenteditable="true"\], dialog'\)[^\n]*\n  ev\.preventDefault\(\); zoomBox \? zoomClose\(\) : zoomOpen\(\);/, 'Z opens and closes it, never in a text box');
-assert.match(css, /\.zoomBox \{[^}]*pointer-events: none/, 'it never takes a click');
+// it stays put and what is done in it goes to the Tab (OakBarn Brewery, 2026-11-23: "It needs to stay fixed and move the joins
+// together inside the Dialog"; "have a close button upper right corner")
+assert.match(app, /for \(const type of \['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu'\]\) frame\.addEventListener\(type, zoomPass\);/, 'presses, drags and clicks pass to the Tab');
+assert.match(app, /if \(ev\.type === 'pointerdown'\) try \{ zb\.frame\.setPointerCapture\(ev\.pointerId\); \} catch \{ \}/, 'the box takes the pointer back after the Tab\'s own press');
+assert.match(app, /zoomBox = \{ host, frame, copy: null, t: 0, size, lx: \(mx - r\.left\) \/ z, ly: \(my - r\.top\) \/ z/, 'it keeps showing the spot it opened on');
+assert.match(app, /Esc or ✕ closes it\.`\),\n    h\('button', \{ type: 'button', title: 'Close the zoom box \(Esc\)'/, 'a ✕ in its upper right corner');
 console.log('zoom box ok');
 // Delete with no "Delete this item?" box; ↩ Put back (Ctrl+Z) brings it back (OakBarn Brewery, 2026-11-23)
 assert.ok(!app.includes("skyConfirm('Delete this item?'"), 'no nanny box on an item\'s Properties Delete');

@@ -39,10 +39,12 @@ locked (lock_Equipment). Rest the mouse on it to see why.
 
 ## Zoom in on a join (Z)
 
-In **Edit layout**, press **Z** (not while typing in a box). A box opens in the top corner of the Tab that shows the **200 pixels
-around the mouse, 3 times bigger**, with a yellow cross where the mouse is. Move the mouse, or drag a pipe end or an item the
-usual way, and the box follows, so you can see exactly where an end lands on an IP. The box is only to look at: it never takes a
-click. Press **Z** again or **Esc** to close it.
+In **Edit layout**, point at the join and press **Z** (not while typing in a box). A box opens in a top corner of the Tab that
+shows the **200 pixels around the mouse, 3 times bigger**. It stays where it opened and keeps showing that spot.
+
+**Work right in the box:** drag a pipe end, an IP or an item in it with the right mouse button, the same as on the Tab, and it
+moves on the Tab too, 3 times finer, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
+double-click opens Properties). Press **Esc** or the red **✕** in its upper right corner to close it.
 
 ## Making a pipe shorter or longer, and redrawing a hose
 
