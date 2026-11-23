@@ -29,9 +29,15 @@ if skn_rcp_Mash_Steps >= {{n}}
   {{Mash_Timer}}.countdown = true
   {{Mash_Timer}} = skn_rcp_Mash_Step_{{n}}_Time
   start {{Mash_Timer}}
+  if {{n}} == 1
+    hop_alert "Mash"
+  endif
   wait {{Mash_Timer}} <= 00:00:00
   stop {{Mash_Timer}}
 @else
+  if {{n}} == 1
+    hop_alert "Mash"
+  endif
   sleep skn_rcp_Mash_Step_{{n}}_Time * 1000
 @end
 endif
@@ -51,4 +57,5 @@ endif
 {{HLT_Heater}} = off
 @end
 step "Sparge"
+hop_alert "1st Wort"
 ask "Move the hot sparge water out of the kettle (into a cooler or bucket, or pump it over the grain as you go), then run the wort into the kettle and sparge with it. Collect " + skn_rcp_Boil_Volume + " " + skn_rcp_Volume_Units + ". Press Done when the kettle has it all."

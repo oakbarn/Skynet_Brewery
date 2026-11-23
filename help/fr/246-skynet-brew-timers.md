@@ -6,7 +6,7 @@ Skynet a trois minuteries à lui pour le jour de brassage (Règle Skynet 2.68) :
 |---|---|---|
 | `skn_Boil_Timer` | l'ébullition | le temps d'ébullition de la Recipe |
 | `skn_Mash_Timer` | l'empâtage | les temps des paliers d'empâtage de la Recipe, additionnés |
-| `skn_Whirlpool_Timer` | le Whirlpool et le refroidissement | les Whirlpool Minutes de la Recipe |
+| `skn_Whirlpool_Timer` | le Whirlpool et le refroidissement ; les Process Templates Skynet de refroidissement y tiennent aussi chaque Hop Stand | les Whirlpool Minutes de la Recipe |
 
 Sans Recipe chargée, les temps viennent de ☰ Menu > Default settings.
 
