@@ -30,6 +30,8 @@ import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, INP
 import { followGoLines } from './lib/goline.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine, tokenize } from './lib/engine.js';
+import { ErrorLog } from './lib/errorlog.js';      // the Process Error Log and the Fix before next Brew Day list (Rule 10.13)
+import { runCheck } from './lib/checkrun.js';
 import { unitsOnSave, unitsOnShow, unsureWarning } from './lib/proctemp.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { cleanDatabase, ApiGuard, apiList, apiItem, apiPut } from './lib/itemapi.js';
@@ -348,6 +350,12 @@ engine.on('scripts', () => {
   }
 });
 engine.on('print', e => broadcast('print', e));
+// the Process Error Log (Rule 10.13): every Process error by itself; a saved Process keeps a changed error line as its fix
+const errorLog = new ErrorLog(DATA);
+const errorLogChanged = () => { clearTimeout(errorLog._bt); errorLog._bt = setTimeout(() => broadcast('errorlog', { open: errorLog.openCount() }), 200); };
+engine.on('procError', e => { try { errorLog.addError(e); errorLogChanged(); } catch (x) { console.log('Error Log: ' + x.message); } });
+engine.on('written', (name, text) => { if (errorLog.saved(name, text)) errorLogChanged(); });
+const checkState = new Map();      // entry id -> the variables and line where its last Check stopped (for ▶ Override)
 // Alarm Email Notification (Rule 7.17): through the mail server picked in Settings > Sending codes; what happened shows in the Console
 watchAlarmEmails(store, {
   send: (to, subject, text) => { if (!messaging.emailReady()) throw new Error('no mail server is set up (Settings > Sending codes)'); return messaging.sendEmail(to, subject, text); },
@@ -487,7 +495,7 @@ function setBuildDraft(v) {
   store.writeConfig();
 }
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/emergencyoff' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/emergencyoff' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p) || p.startsWith('/ui/errorlog')) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -1292,6 +1300,31 @@ async function route(req, res) {
   }
 
   // scripts
+  // the Process Error Log and the Fix before next Brew Day list (Rule 10.13): everyone reads it, Brewers and Admins add and tick
+  if (p === '/ui/errorlog' && m === 'GET') return ok(res, { items: errorLog.list().map(({ vars, ...e }) => e), open: errorLog.openCount() });
+  if (p === '/ui/errorlog/issue' && m === 'POST') { const b = await jsonBody(req); const e = errorLog.addIssue({ ...b, by: me.name }); errorLogChanged(); return ok(res, e); }
+  s = /^\/ui\/errorlog\/(\d+)(?:\/(fixed|open|check))?$/.exec(p);
+  if (s) {
+    const id = Number(s[1]), act = s[2];
+    if (!act && m === 'DELETE') { checkState.delete(id); const done = errorLog.remove(id); errorLogChanged(); return ok(res, { ok: done }); }
+    if (act === 'fixed' && m === 'POST') { const { note = '' } = await jsonBody(req); const e = errorLog.fixed(id, { by: me.name, note }); errorLogChanged(); return ok(res, e); }
+    if (act === 'open' && m === 'POST') { const e = errorLog.reopen(id); errorLogChanged(); return ok(res, e); }
+    if (act === 'check' && m === 'POST') {
+      // 🧪 Check: a check-only run, nothing real is switched (lib/checkrun.js); override: true goes on past the wait it stopped at
+      const { override = false } = await jsonBody(req), e = errorLog.get(id);
+      if (!e || e.kind !== 'error' || e.widget) return fail(res, 400, 'Only a Process error can be checked');
+      const last = override ? checkState.get(id) : null;
+      if (override && !last) return fail(res, 400, 'Press Check first');
+      const r = await runCheck({ store, dir: engine.dir, name: e.process, line: last ? last.line : e.line, lineText: last ? '' : e.lineText, vars: last ? last.vars : (e.vars ?? []), after: !!last });
+      if (r.ok && r.reached) checkState.set(id, { line: r.reached.line, vars: r.vars }); else checkState.delete(id);
+      const check = { at: Date.now(), by: me.name, ok: r.ok, from: r.from, reached: r.reached ?? null, end: !!r.end, error: r.error ?? null };
+      // no error from just above the error line to the next wait or step: it is fixed, and the fix it keeps is the change to that line
+      if (r.ok && !override && e.status === 'open') errorLog.fixed(id, { by: me.name, check }); else errorLog.setCheck(id, check);
+      errorLogChanged();
+      const { vars, ...rest } = r;
+      return ok(res, { ...rest, entry: errorLog.get(id) && (({ vars, ...x }) => x)(errorLog.get(id)) });
+    }
+  }
   if (p === '/ui/scripts' && m === 'GET') return ok(res, engine.list());
   if (p === '/ui/scripts/check' && m === 'POST') { const kept = procKeep(await readBody(req)), chk = engine.check(kept.text), uw = unsureWarning(kept.unsure); return ok(res, uw ? { ...chk, warnings: [...(chk.warnings || []), uw] } : chk); }
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());

@@ -8,6 +8,7 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 - **Edit layout** is not on the ☰ Menu: it is the 🛠 **Build** icon on the Menu Bar (see [The Menu Bar](40-menu-bar)).
 - **🗂 Schema**: the Schema dropdown, the same one as on the Top Line. Pick a Schema and it loads (it warns you first when Processes are running). **Add new Schema ...** is the first choice; the other Schema jobs are at the end of the list. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **🧪 Switch to Simulator** (Admins, only while the Real boards are used). It is grayed while brewing: while a Process runs (a Looper does not count), stop it first or wait until the Brew Day ends. In Simulator mode the 🧪 Simulator balloon on the Menu Bar switches back. See [Simulator or Real boards](77-simulator-or-real-boards).
+- **🔧 Fix before next Brew Day** (everyone; the number is how many are open): every Process error with its line, what it was and how to fix it, plus your own issues. 🧪 Check runs a fix in a check-only simulation. See [Fix before next Brew Day](247-fix-before-next-brew-day).
 - **🐞 Report a Bug** (everyone): tell OakBarn Brewery about a bug, on GitHub or by email. See [Report a problem](205-report-a-problem).
 - **⭐ Request a Feature**: a Patron perk.
 - **Last picked**: a copy of the last ☰ Menu choice you picked, so one click takes you back to it. Each browser remembers its own.
