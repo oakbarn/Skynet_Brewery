@@ -46,6 +46,6 @@ assert.equal(eng.classOf('My_New_Brew_Process'), 'looper');
 assert.throws(() => eng.setClass('My_New_Brew_Process', 'flow'), /can not be changed/);
 eng.setClass('My_New_Brew_Process', 'looper');      // the same class again is fine
 assert.match(app, /'\/\/MIT License Granted for all Scripts and Configurations',\n\s*`\/\/Copyright © \$\{patron \? who \+ ' ' : ''\}\$\{now\.getFullYear\(\)\}`/, 'Copyright with no name for a non-Patron');
-assert.match(app, /\.\.\.\(patron \? \[`\/\/ Created by \$\{who\} : \$\{stamp\}`\] : \[\]\)/, 'Created by above the MIT line, Patron only');
+assert.match(app, /\.\.\.\(patron \? \[`\/\/Created by \$\{who\}`\] : \[\]\)/, 'Created by above the MIT line, Patron only (its date is on the Created on line since Panel Update 11)');
 console.log('panelupdate10 ok');
 process.exit(0);

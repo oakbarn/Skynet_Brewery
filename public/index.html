@@ -159,15 +159,13 @@
 
   <!-- ===== Processes (internally "scripts") ===== -->
   <section id="view-scripts" class="view">
-    <div class="split">
-      <aside class="scriptList">
-        <div class="bar"><button id="renScript" class="admin-only">Rename</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running process">Stop all</button></div>
-        <ul id="scriptList"></ul>
-      </aside>
-      <div class="editorPane">
+    <!-- Panel Update 11 (OakBarn Brewery, 2026-11-23): the two top rows span the whole page, so the Brewery Name is centered on it and
+         the Process list starts under row 2 (item 1f) -->
+    <div class="procHead">
         <!-- Panel Update 10, item 1 (OakBarn Brewery, 2026-11-23): the Process Editor top in icons. Row 1: the Process, its file buttons and
              the Menu Bar (moved here while the Process Editor is open, the same place and order as on a Tab, item 3) -->
         <div class="bar procTop">
+          <span class="procL">
           <select id="procPick" title="Pick a Process to open, or ➕ Add New Process"></select>
           <button id="newScript" class="admin-only">New</button>
           <button id="delScript" type="button" class="icoBtn admin-only" title="Delete: moves this Process to the Recycle Bin" aria-label="Delete"><img src="icons/Trash.png" alt=""></button>
@@ -177,21 +175,35 @@
           <button id="stopScript" type="button" class="icoBtn op-only" title="Stop this Process" aria-label="Stop this Process"><img src="icons/Stop.png" alt=""></button>
           <button id="restartScript" type="button" class="icoBtn op-only" title="Restart: stop this Process, clear its memory and start it again from the saved file" aria-label="Restart"><img src="icons/Restart.png" alt=""></button>
           <button id="saveScriptIcon" type="button" class="icoBtn admin-only" title="Save (Ctrl+S): the same as the Save button" aria-label="Save"><img src="icons/Save.png" alt=""></button>
-          <span class="spacer"></span>
+          </span>
           <span class="barBrewery barBreweryCopy" title="The Brewery Name: a Patron perk (☰ Menu &gt; Default settings); not a Patron, Skynet Panel"></span>
-          <span class="spacer"></span>
+          <span class="procR">
           <label class="toggle" title="Predictive text: lists of what can come next pop up while you type. Off: only Ctrl+Space or 💡 Suggest open the list"><span class="sw"><input type="checkbox" id="predictOn" checked><span class="swk"></span></span> Predictive text</label>
           <button id="colorKey" type="button" class="icoBtn" title="Key: what each color means" aria-label="Key"><img src="icons/Key_Green.png" alt=""></button>
           <button id="constList" title="Skynet Constants: every built in conversion number, with its Label, value and name. Click one to put it at the cursor">📐 Constants</button>
           <span id="procMenuSlot" class="procMenuSlot"></span>
+          </span>
         </div>
-        <!-- Row 2: Find, Go To (Line or Section and its box), the rest of the Process Editor's buttons (kept, OakBarn Brewery 2026-11-23:
-             "A One click rule but also everything on Hamburger"), then Undo, Save and Close -->
+        <!-- Row 2 (Panel Update 11, item 1c, OakBarn Brewery 2026-11-23: "Have the Line like I ask. {common are all other normal command}"):
+             Find, Go To (Line or Section and its box), Insert Line After and its light-blue box, the five command buttons, then Undo, Save
+             and Close (item 1e: "stay here on every tab. Do not move them!"). The other buttons that were on this row are on the ☰ Menu
+             (Process Editor group); they stay here, hidden, so the ☰ Menu clicks them -->
         <div class="bar procRow2 editTools">
           <button id="findBtn" type="button" class="icoBtn" title="Find (Ctrl+F) and Replace (Ctrl+H)" aria-label="Find"><img src="icons/Find.png" alt=""></button>
+          <button id="findAllBtn" type="button" class="icoBtn findAll" title="Find in All Processes: find, and replace, in every Process of this Brain" aria-label="Find in All Processes"><img src="icons/Find_All.png" alt=""></button>
           <button id="goLine" type="button" class="icoBtn" title="Go To: the line number or the Section typed in the box beside it (Ctrl+G)" aria-label="Go To"><img src="icons/Go_To.png" alt=""></button>
           <select id="goKind" title="Go To a Line (a number) or a Section (its name, as in step &quot;Sparge&quot; or [Sparge])"><option value="line">Line</option><option value="section">Section</option></select>
           <input id="goWhere" class="goWhere" type="text" placeholder="Line" title="Go To: type a line number (Line) or a Section name (Section), then Enter or the Go To icon" autocomplete="off" spellcheck="false">
+          <span class="insCats admin-only">
+            <label class="insAfterLbl" for="insAfter" title="Insert Line After: a line picked from the five buttons goes in as a new line after this line number, then the number moves down one so the next pick goes under it. Clicking in the Process puts the cursor's line here. 0 puts it at the top">Insert Line After</label>
+            <input id="insAfter" class="insAfter" type="text" inputmode="numeric" value="1" autocomplete="off" spellcheck="false" title="The line number a new line goes in after (0: at the top). Clicking in the Process puts the cursor's line here">
+            <button type="button" class="insCat" data-cat="cond" aria-expanded="false" title="Conditionals: if, elseif, else, endif, wait, goto, goLine and step. Pick one: it goes in as a new line after the Insert Line After number">Conditionals</button>
+            <button type="button" class="insCat" data-cat="skn" aria-expanded="false" title="Skynet Special: the Skynet commands (ask, close_all_valves, all_heaters_off, wait_boil, the hop alerts ...), the skn_ names and the Skynet Constants">Skynet Special</button>
+            <button type="button" class="insCat" data-cat="dev" aria-expanded="false" title="Devices: Pumps, Valves, Manual Valve, PWM, Heating Element and Probe. Only the ones already in this Schema. Pick one, then what it should do">Devices</button>
+            <button type="button" class="insCat" data-cat="wgt" aria-expanded="false" title="Widgets: Text, Audio, Graphic, Value, Time and DateTime. Only the ones already in this Schema. Pick one, then what it should do">Widgets</button>
+            <button type="button" class="insCat" data-cat="com" aria-expanded="false" title="Common: every other normal command (sleep, delay, start, stop, play, print, show tab, new value ...)">Common</button>
+          </span>
+          <span id="procExtras" class="procExtras">
           <strong id="scriptName">-</strong>
           <span id="scriptClass" class="procClass" title="Process class (Flow, Sub, Repeat or Looper): picked when the Process is made (New) and never changed after it is saved. It decides how its steps are numbered"></span>
           <span id="scriptVersion" class="muted" title="Process Version (YYMMDD_HH_MM_n)"></span>
@@ -199,7 +211,6 @@
           <span id="scriptState" class="muted"></span>
           <button id="addSteps" class="admin-only" title="Put a step line at the start and after every [label]">Add steps</button>
           <label class="toggle admin-only" title="If this Process stops on an error, start it again by itself (at most the number of times a minute set in Settings)"><span class="sw"><input type="checkbox" id="scriptAutoRestart"><span class="swk"></span></span> Restart if it fails</label>
-          <button id="findAllBtn" title="Find, and replace, in every Process">All Processes</button>
           <button id="suggestBtn" class="admin-only" title="Show what can be typed here (Ctrl+Space)">💡 Suggest</button>
           <button id="picPick" class="admin-only" title="Pick a picture or sound and put its path at the cursor (Alt+P)">Picture</button>
             <select id="saveAs" title="Save this Process, or the highlighted lines, to a file on this computer or phone">
@@ -211,50 +222,64 @@
             <option value="npp">Notepad++ colors file</option>
           </select>
           <label class="toggle" title="Color the Process by what each word does (see Help > Process editor)"><span class="sw"><input type="checkbox" id="colorsOn" checked><span class="swk"></span></span> Colors</label>
+          </span>
           <span class="spacer"></span>
           <button id="editUndo" type="button" class="icoBtn admin-only" title="Undo (Ctrl+Z): takes back the last change typed in the Process" aria-label="Undo"><img src="icons/Undo.png" alt=""></button>
           <button id="saveScript" class="primary admin-only" title="Save (Ctrl+S)">💾 Save</button>
           <span id="procClose"></span>
         </div>
-        <div id="insBar" class="bar insBar admin-only">
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="pumps" data-head="Pumps" title="Pumps: Pick one: its Name goes in at the cursor. Lists only the Pumps already in this Schema"></select><select class="insPick" data-g="valves" data-head="Valves" title="Valves: Pick one: its Name goes in at the cursor. Lists only the Valves already in this Schema"></select><select class="insPick" data-g="mvalves" data-head="Manual Valve" title="Manual Valve: Pick one: its Name goes in at the cursor. Lists only the Manual Valves already in this Schema"></select><select class="insPick" data-g="pwm" data-head="PWM" title="PWM: Pick one: its Name goes in at the cursor. Lists only the PWM outputs already in this Schema"></select></div>
-            <div class="insLow"><button type="button" class="insBtn" data-act="dev:visible:true" title="Puts in .visible = true for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it shows on its Tab">.visible = true</button><button type="button" class="insBtn" data-act="dev:visible:false" title="Puts in .visible = false for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it is hidden on its Tab">.visible = false</button><button type="button" class="insBtn" data-act="dev:state:true" title="Puts in .state = true for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it turns on, or a valve opens">.state = true (on/open)</button><button type="button" class="insBtn" data-act="dev:state:false" title="Puts in .state = false for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it turns off, or a valve closes">.state = false (off/closed)</button></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="heat" data-head="Heating Element" title="Heating Element: Pick one: its Name goes in at the cursor. Lists only the Heating Elements already in this Schema"></select></div>
-            <div class="insLow"><button type="button" class="insBtn" data-act="heat:Hysteresis" title="Puts in .method = &quot;Hysteresis&quot; for the Heating Element picked">Hysteresis</button><button type="button" class="insBtn" data-act="heat:PID" title="Puts in .method = &quot;PID&quot; for the Heating Element picked">PID</button><button type="button" class="insBtn" data-act="heat:Precise" title="Puts in .method = &quot;Precise&quot; for the Heating Element picked">Precise</button></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="text" data-head="Text" title="Text: Pick one: its Name goes in at the cursor. Lists only the Text Widgets already in this Schema"></select></div>
-            <div class="insLow"><button type="button" class="insBtn" data-act="text:visible:true" title="Puts in .visible = true for the Text Widget picked: it shows on its Tab">.visible = true</button><button type="button" class="insBtn" data-act="text:visible:false" title="Puts in .visible = false for the Text Widget picked: it is hidden on its Tab">.visible = false</button><button type="button" class="insBtn" data-act="text:text" title="Puts in .text = &quot;&quot; for the Text Widget picked: type its words between the quotes">Text</button></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="audio" data-head="Audio" title="Audio: Pick one: its Name goes in at the cursor. Lists only the Audio Widgets already in this Schema"></select><button type="button" class="insBtn" data-act="audio:path" title="Puts in .path = and the sound file typed in the box under it, for the Audio Widget picked">.path =</button></div>
-            <div class="insLow"><button type="button" class="insBtn" data-act="audio:play:true" title="Puts in .play = true for the Audio Widget picked: it plays">.play = true</button><button type="button" class="insBtn" data-act="audio:play:false" title="Puts in .play = false for the Audio Widget picked: it stops">.play = false</button><input class="insBox" data-for="audio" placeholder="sound file" title="The Audio Widget's sound file: type it, then press Enter or .path = above. Its line goes in at the cursor"></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="graphic" data-head="Graphic" title="Graphic: Pick one: its Name goes in at the cursor. Lists only the Pictures already in this Schema"></select><button type="button" class="insBtn" data-act="graphic:path" title="Puts in .path = and the picture file typed in the box under it, for the Picture picked">.path =</button></div>
-            <div class="insLow"><input class="insBox" data-for="graphic" placeholder="picture file" title="The Picture's file: type it, then press Enter or .path = above. Its line goes in at the cursor"></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="value" data-head="Value" title="Value: Pick one: its Name goes in at the cursor. Lists only the Value Widgets already in this Schema"></select></div>
-            <div class="insLow"><input class="insBox" data-for="value" inputmode="decimal" placeholder="value" title="The value for the Value Widget picked above: type it and press Enter. Its line goes in at the cursor"></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="time" data-head="Time" title="Time: Pick one: its Name goes in at the cursor. Lists only the Time Widgets already in this Schema"></select></div>
-            <div class="insLow"><input class="insBox" data-for="time" type="time" step="1" title="The time (hh:mm:ss) for the Time Widget picked above: set it and press Enter. Its line goes in at the cursor"></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="datetime" data-head="DateTime" title="DateTime: Pick one: its Name goes in at the cursor. Lists only the DateTime Widgets already in this Schema"></select></div>
-            <div class="insLow"><input class="insBox" data-for="datetime" type="datetime-local" title="The date and time for the DateTime Widget picked above: set it and press Enter. Its line goes in at the cursor"></div>
-          </div>
-          <div class="insGrp">
-            <div class="insTop"><select class="insPick" data-g="probe" data-head="Probe" title="Probe: Pick one: its Name goes in at the cursor. Lists only the Temperature Probes already in this Schema"></select></div>
-            <div class="insLow"><button type="button" class="insBtn" data-act="probe:value" title="Puts in .value for the Probe picked: what it reads now (PV)">PV</button><button type="button" class="insBtn" data-act="probe:setpoint" title="Puts in .setpoint for the Probe picked: the temperature it is set to hold (SV)">SV</button></div>
-            <div class="insLow"><input class="insBox" data-for="probe" inputmode="decimal" placeholder="setpoint" title="The Setpoint (SV) for the Probe picked above: type the temperature and press Enter. Its line goes in at the cursor, for example Probe_1.setpoint = 152"></div>
-          </div>
-        </div>
+    </div>
+    <!-- The five command buttons' pop-up (Panel Update 11, item 1c). Devices and Widgets reuse the Insert bar's groups (Process sandbox
+         entry 13, OakBarn Brewery: "I am rewriting the look and feel of the process editor and will reuse these"); Conditionals, Skynet
+         Special and Common are filled from the Process commands (public/procinsert.js) -->
+    <div id="insBar" class="insBar admin-only hidden" role="dialog" aria-label="Insert a line">
+      <div class="insGrp insList" data-cat="cond"></div>
+      <div class="insGrp insList" data-cat="skn"></div>
+      <div class="insGrp insList" data-cat="com"></div>
+      <div class="insGrp" data-cat="dev">
+        <div class="insTop"><select class="insPick" data-g="pumps" data-head="Pumps" title="Pumps: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Pumps already in this Schema"></select><select class="insPick" data-g="valves" data-head="Valves" title="Valves: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Valves already in this Schema"></select><select class="insPick" data-g="mvalves" data-head="Manual Valve" title="Manual Valve: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Manual Valves already in this Schema"></select><select class="insPick" data-g="pwm" data-head="PWM" title="PWM: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the PWM outputs already in this Schema"></select></div>
+        <div class="insLow"><button type="button" class="insBtn" data-act="dev:visible:true" title="Puts in .visible = true for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it shows on its Tab">.visible = true</button><button type="button" class="insBtn" data-act="dev:visible:false" title="Puts in .visible = false for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it is hidden on its Tab">.visible = false</button><button type="button" class="insBtn" data-act="dev:state:true" title="Puts in .state = true for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it turns on, or a valve opens">.state = true (on/open)</button><button type="button" class="insBtn" data-act="dev:state:false" title="Puts in .state = false for the Pump, Valve, Manual Valve, PWM or Heating Element picked last: it turns off, or a valve closes">.state = false (off/closed)</button></div>
+      </div>
+      <div class="insGrp" data-cat="dev">
+        <div class="insTop"><select class="insPick" data-g="heat" data-head="Heating Element" title="Heating Element: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Heating Elements already in this Schema"></select></div>
+        <div class="insLow"><button type="button" class="insBtn" data-act="heat:Hysteresis" title="Puts in .method = &quot;Hysteresis&quot; for the Heating Element picked">Hysteresis</button><button type="button" class="insBtn" data-act="heat:PID" title="Puts in .method = &quot;PID&quot; for the Heating Element picked">PID</button><button type="button" class="insBtn" data-act="heat:Precise" title="Puts in .method = &quot;Precise&quot; for the Heating Element picked">Precise</button></div>
+      </div>
+      <div class="insGrp" data-cat="wgt">
+        <div class="insTop"><select class="insPick" data-g="text" data-head="Text" title="Text: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Text Widgets already in this Schema"></select></div>
+        <div class="insLow"><button type="button" class="insBtn" data-act="text:visible:true" title="Puts in .visible = true for the Text Widget picked: it shows on its Tab">.visible = true</button><button type="button" class="insBtn" data-act="text:visible:false" title="Puts in .visible = false for the Text Widget picked: it is hidden on its Tab">.visible = false</button><button type="button" class="insBtn" data-act="text:text" title="Puts in .text = &quot;&quot; for the Text Widget picked: type its words between the quotes">Text</button></div>
+      </div>
+      <div class="insGrp" data-cat="wgt">
+        <div class="insTop"><select class="insPick" data-g="audio" data-head="Audio" title="Audio: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Audio Widgets already in this Schema"></select><button type="button" class="insBtn" data-act="audio:path" title="Puts in .path = and the sound file typed in the box under it, for the Audio Widget picked">.path =</button></div>
+        <div class="insLow"><button type="button" class="insBtn" data-act="audio:play:true" title="Puts in .play = true for the Audio Widget picked: it plays">.play = true</button><button type="button" class="insBtn" data-act="audio:play:false" title="Puts in .play = false for the Audio Widget picked: it stops">.play = false</button><input class="insBox" data-for="audio" placeholder="sound file" title="The Audio Widget's sound file: type it, then press Enter or .path = above. Its line goes in at the cursor"></div>
+      </div>
+      <div class="insGrp" data-cat="wgt">
+        <div class="insTop"><select class="insPick" data-g="graphic" data-head="Graphic" title="Graphic: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Pictures already in this Schema"></select><button type="button" class="insBtn" data-act="graphic:path" title="Puts in .path = and the picture file typed in the box under it, for the Picture picked">.path =</button></div>
+        <div class="insLow"><input class="insBox" data-for="graphic" placeholder="picture file" title="The Picture's file: type it, then press Enter or .path = above. Its line goes in at the cursor"></div>
+      </div>
+      <div class="insGrp" data-cat="wgt">
+        <div class="insTop"><select class="insPick" data-g="value" data-head="Value" title="Value: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Value Widgets already in this Schema"></select></div>
+        <div class="insLow"><input class="insBox" data-for="value" inputmode="decimal" placeholder="value" title="The value for the Value Widget picked above: type it and press Enter. Its line goes in at the cursor"></div>
+      </div>
+      <div class="insGrp" data-cat="wgt">
+        <div class="insTop"><select class="insPick" data-g="time" data-head="Time" title="Time: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Time Widgets already in this Schema"></select></div>
+        <div class="insLow"><input class="insBox" data-for="time" type="time" step="1" title="The time (hh:mm:ss) for the Time Widget picked above: set it and press Enter. Its line goes in at the cursor"></div>
+      </div>
+      <div class="insGrp" data-cat="wgt">
+        <div class="insTop"><select class="insPick" data-g="datetime" data-head="DateTime" title="DateTime: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the DateTime Widgets already in this Schema"></select></div>
+        <div class="insLow"><input class="insBox" data-for="datetime" type="datetime-local" title="The date and time for the DateTime Widget picked above: set it and press Enter. Its line goes in at the cursor"></div>
+      </div>
+      <div class="insGrp" data-cat="dev">
+        <div class="insTop"><select class="insPick" data-g="probe" data-head="Probe" title="Probe: Pick one, then what it should do (while a line is being built, as after if or wait, its Name goes in at the cursor). Lists only the Temperature Probes already in this Schema"></select></div>
+        <div class="insLow"><button type="button" class="insBtn" data-act="probe:value" title="Puts in .value for the Probe picked: what it reads now (PV)">PV</button><button type="button" class="insBtn" data-act="probe:setpoint" title="Puts in .setpoint for the Probe picked: the temperature it is set to hold (SV)">SV</button></div>
+        <div class="insLow"><input class="insBox" data-for="probe" inputmode="decimal" placeholder="setpoint" title="The Setpoint (SV) for the Probe picked above: type the temperature and press Enter. Its line goes in at the cursor, for example Probe_1.setpoint = 152"></div>
+      </div>
+    </div>
+    <div class="split">
+      <aside class="scriptList">
+        <div class="bar"><button id="renScript" class="admin-only">Rename</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running process">Stop all</button></div>
+        <ul id="scriptList"></ul>
+      </aside>
+      <div class="editorPane">
         <div id="findBar" class="findBar hidden">
           <div class="findRow">
             <input id="findText" type="search" placeholder="Find" autocomplete="off" spellcheck="false" enterkeyhint="search">

@@ -9,7 +9,7 @@ import { insertGroup, attrsOf, boolAttrs } from '../lib/store.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const html = fs.readFileSync(path.join(root, 'public', 'index.html'), 'utf8');
-const bar = html.slice(html.indexOf('<div id="insBar"'), html.indexOf('<div id="findBar"'));
+const bar = html.slice(html.indexOf('<div id="insBar"'), html.indexOf('<div class="split">'));
 const css = fs.readFileSync(path.join(root, 'public', 'style.css'), 'utf8');
 
 // the groups

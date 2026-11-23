@@ -8,6 +8,7 @@ import { openSkySearch, skySearchOpen } from './skysearch.js';      // Ctrl+F: t
 import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of every dialog (Rule 18.53)
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
+import { CATEGORY_LISTS, SKN_NAMES, commandText, commandNote, lineAfter, lineOf } from './procinsert.js';      // Insert Line After and the five command buttons (Panel Update 11)
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { SKYNET_CONSTANT_GROUPS, SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstant } from './skconst.js';
 import { setRich, NAMED_COLORS, setTempUnitSource } from './richtext.js';
@@ -8705,6 +8706,7 @@ function placeMenuBar() {
   const c = $('#menuCluster'); if (!c) return;
   const onEditor = view === 'scripts';
   document.body.classList.toggle('onProcEditor', onEditor);
+  if (!onEditor) document.body.classList.remove('simOnEditor');      // the Simulator bar is off again next time (Panel Update 11, item 1a)
   if (onEditor) $('#procMenuSlot').append(c); else $('#editMode').after(c);
   $('#barEdit').classList.toggle('keepSpace', onEditor);
   showBreweryName();
@@ -13586,18 +13588,33 @@ function fillInsBar() {
   }
   if (!INS_DEVS.some(g => insPicked[g])) insForget('dev');
 }
+// Panel Update 11 (item 1c): a whole line goes in as a NEW line after the Insert Line After number, then the number moves down one.
+// A tail with no " = " (PV, SV: for an if or wait line) and a Name picked while a line is being built ("if ", "wait ") go in at the
+// cursor instead, so a line can be made by picking: Conditionals > if, Devices > Probe_1, PV.
+const BUILD_END = /(?:^|\s)(?:if|elseif|else if|wait|start|stop|restart|reset|play|print|and|or|not|==|!=|>=|<=|>|<|=|\+=|-=|\+|-|\*|\/)\s$/i;
+function insLine(words, back) {
+  const ta = $('#code'); if (!curScript || ta.readOnly) return;
+  const box = $('#insAfter'), r = lineAfter(ta.value, box.value.trim() === '' ? lineOf(ta.value, ta.selectionStart) : box.value, words);
+  editCode(r.at, r.at, r.text);
+  const caret = r.caret - (back || 0);
+  ta.setSelectionRange(caret, caret); box.value = String(r.line); goShowCaret();
+}
+function insAtCursor(text) {
+  const ta = $('#code'); if (!curScript || ta.readOnly) return;
+  editCode(ta.selectionStart, ta.selectionEnd, text); $('#insAfter').value = String(lineOf(ta.value, ta.selectionStart));
+}
+// the caret is at the end of a line that is being built: the line ends with a word that waits for a name (if, wait, start ...) or a
+// comparison or math sign, then a space; nothing comes after the caret on that line
+const buildingLine = () => { const ta = $('#code'), a = ta.selectionStart, rest = ta.value.slice(a), line = ta.value.slice(ta.value.lastIndexOf('\n', a - 1) + 1, a); return /^[ \t]*(\n|$)/.test(rest) && BUILD_END.test(line); };
 function insPut(name, tail) {
   const ta = $('#code'); if (!curScript || ta.readOnly) return;
-  const a = ta.selectionStart, b = ta.selectionEnd, before = ta.value.slice(0, a);
-  if (name && before.endsWith(name) && !tail) return;
-  let text;
-  if (tail && before.endsWith(name)) text = tail;
-  else {
-    const line = before.slice(before.lastIndexOf('\n') + 1);
-    text = (line.trim() ? '\n' + (/^\s*/.exec(line)[0]) : '') + name + tail;
-  }
-  editCode(a, b, text);
+  const before = ta.value.slice(0, ta.selectionStart);
+  if (!tail) { if (buildingLine() && !before.endsWith(name)) insAtCursor(name); return; }      // a pick alone only picks, unless a line is being built
+  if (before.endsWith(name)) return insAtCursor(tail);
+  if (!/ = /.test(tail) && buildingLine()) return insAtCursor(name + tail);
+  insLine(name + tail);
 }
+function goShowCaret() { const ta = $('#code'); const l = lineOf(ta.value, ta.selectionStart) - 1, lh = parseFloat(getComputedStyle(ta).lineHeight) || 19.5, y = 8 + l * lh; if (y < ta.scrollTop || y + lh > ta.scrollTop + ta.clientHeight) ta.scrollTop = y - ta.clientHeight / 3; syncHl(); fGutter().scrollTop = ta.scrollTop; }
 const insName = g => {
   const n = g === 'dev' ? insPicked.dev : insPicked[g];
   if (!n) toast(g === 'dev' ? 'Pick a Pump, Valve, Manual Valve, PWM or Heating Element first' : `Pick one from ${$(`#insBar .insPick[data-g="${g}"]`)?.dataset.head} first`, true);
@@ -13627,10 +13644,44 @@ for (const b of $$('#insBar .insBtn')) b.addEventListener('click', () => {
   const n = insName(g); if (!n) return;
   if (g === 'heat') return insPut(n, `.method = ${insQuote(p)}`);
   if (g === 'probe') return insPut(n, '.' + p);
-  if (g === 'text' && p === 'text') { insPut(n, '.text = ""'); const ta = $('#code'); ta.setSelectionRange(ta.selectionStart - 1, ta.selectionStart - 1); return; }
+  if (g === 'text' && p === 'text') { insPut(n, '.text = ""'); const ta = $('#code'); ta.setSelectionRange(ta.selectionStart - 1, ta.selectionStart - 1); return; }      // the cursor between the quotes
   insPut(n, `.${p} = ${v}`);
 });
 for (const box of $$('#insBar .insBox')) box.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); insBox(box.dataset.for); } });
+// The five command buttons (Panel Update 11, item 1c): each opens its list under it; Devices and Widgets show the Insert bar's groups.
+// A command picked goes in as a new line after the Insert Line After number and the list closes; Devices and Widgets stay open
+// for the next pick (a click outside, Esc or the same button closes them).
+function fillInsLists() {
+  for (const box of $$('#insBar .insList')) {
+    const cat = box.dataset.cat, rows = CATEGORY_LISTS[cat].map(cmd => h('button', { type: 'button', class: 'insCmd', title: `Puts in a new line: ${commandText(cmd).trim()}${commandNote(cmd) ? ' (' + commandNote(cmd) + ')' : ''}`,
+      onclick: () => { insLine(commandText(cmd)); closeInsPop(); } }, h('code', {}, cmd), h('span', { class: 'muted' }, commandNote(cmd))));
+    if (cat === 'cond') rows.push(h('button', { type: 'button', class: 'insCmd', title: 'Puts in a new line: a [label] that goto jumps to. Type its name between the brackets',
+      onclick: () => { insLine('[]', 1); closeInsPop(); } }, h('code', {}, '[label]'), h('span', { class: 'muted' }, 'a place goto jumps to')));
+    if (cat === 'skn') rows.push(h('div', { class: 'insHead' }, 'skn_ names: put in at the cursor'),
+      ...SKN_NAMES.map(([n, what]) => h('button', { type: 'button', class: 'insCmd', title: `Puts ${n} in at the cursor: ${what}`, onclick: () => { insAtCursor(n); closeInsPop(); } }, h('code', {}, n), h('span', { class: 'muted' }, what))),
+      h('button', { type: 'button', class: 'insCmd', title: 'The Skynet Constants: every built in conversion number. Click one to put it at the cursor', onclick: () => { closeInsPop(); $('#constList').click(); } }, h('code', {}, '📐 Constants'), h('span', { class: 'muted' }, 'every built in conversion number')));
+    box.replaceChildren(h('div', { class: 'insListRows' }, ...rows));
+  }
+}
+fillInsLists();
+let insCat = '';
+function closeInsPop() { insCat = ''; $('#insBar').classList.add('hidden'); for (const b of $$('.insCat')) { b.setAttribute('aria-expanded', 'false'); b.classList.remove('active'); } }
+function openInsPop(btn) {
+  const cat = btn.dataset.cat;
+  if (insCat === cat) return closeInsPop();
+  closeInsPop(); insCat = cat;
+  const bar = $('#insBar'); bar.dataset.cat = cat; bar.classList.remove('hidden');
+  btn.setAttribute('aria-expanded', 'true'); btn.classList.add('active');
+  const r = btn.getBoundingClientRect(), w = bar.offsetWidth;
+  bar.style.top = Math.round(r.bottom + 4) + 'px';
+  bar.style.left = Math.round(Math.max(8, Math.min(r.left, innerWidth - w - 8))) + 'px';
+}
+for (const b of $$('.insCat')) b.addEventListener('click', () => openInsPop(b));
+document.addEventListener('mousedown', ev => { if (insCat && !ev.target.closest('#insBar, .insCat')) closeInsPop(); }, true);
+document.addEventListener('keydown', ev => { if (insCat && ev.key === 'Escape') { closeInsPop(); $('#code').focus(); } });
+// the Insert Line After box follows the cursor's line in the Process; a typed number is kept until the cursor moves again
+for (const ev of ['keyup', 'mouseup', 'touchend']) $('#code').addEventListener(ev, () => { const ta = $('#code'); $('#insAfter').value = String(lineOf(ta.value, ta.selectionStart)); });
+$('#insAfter').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
 
 // Save to file: the whole Process or the highlighted part, as text or as XML in color; and the Notepad++ colors file
 let lastSel = [0, 0];
@@ -13789,24 +13840,24 @@ const NEW_PROC_ABOUT = {
   repeat: 'A small common helper, often a wait place in the Process that calls it. Numbered R1, R2, R3 ... and their steps R1.00000 ...',
   looper: 'Runs in the background on its own and is never called (log the temperatures, watch a float). Numbered L1, L2, L3 ... and their steps L1.00000 ... Override and Stop all leave it running.',
 };
-function newProcessText(typed, now = new Date()) {
-  const patron = !!S.patron?.brewery, who = breweryName(), pad = x => String(x).padStart(2, '0');
-  const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+// Panel Update 11, item 1d (OakBarn Brewery, 2026-11-23: "//Created date time stamp automatically added"): line 2 of every new Process
+// is //Created on YYMMDD HHh MMM, his own form (//Created on 261102 14h 23M); a Patron's Created by line keeps only the Brewery Name.
+// The comment lines are his new words (spelling fixed), with the Process's class in the first one.
+const createdStamp = (now = new Date()) => { const pad = x => String(x).padStart(2, '0'); return `${pad(now.getFullYear() % 100)}${pad(now.getMonth() + 1)}${pad(now.getDate())} ${pad(now.getHours())}h ${pad(now.getMinutes())}M`; };
+function newProcessText(typed, now = new Date(), cls = '') {
+  const patron = !!S.patron?.brewery, who = breweryName(), kind = S.processClasses?.[cls]?.label;
   return [`//${typed}`,
-    ...(patron ? [`// Created by ${who} : ${stamp}`] : []),
+    `//Created on ${createdStamp(now)}`,
+    ...(patron ? [`//Created by ${who}`] : []),
     '//MIT License Granted for all Scripts and Configurations',
     `//Copyright © ${patron ? who + ' ' : ''}${now.getFullYear()}`,
-    '',
-    '/* Put some comments so you know what this',
-    'does six months from now. Your Future self will',
-    'thank you.*/',
-    '',
-    '/* Slash star starts a multi line wrapped comment that',
-    'ends with a star slash */',
-    '',
-    '// Your future self',
-    '// will thank You!',
-    '// Double Slashes are a single line comment',
+    `/* You should put what this ${kind ? kind + ' ' : ''}Process does and how it fits into your brew day. It is easy to forget,`,
+    'and if you visit here in six months, you may not remember why or how you did something. Your future self will thank you',
+    'and you will give yourself a pat on the back. */',
+    '/* Slash Asterisk begins a multi line comment that wraps naturally. You end the comment with an Asterisk Slash. */',
+    '//Thank yourself',
+    '//in the future',
+    '// Slash Slash begins a single line comment. Just press Enter to go to the next line!',
     ''].join('\n');
 }
 // the New Process dialog: resolves with the class picked and saved, or null (Close, ✕, Esc: nothing is made)
@@ -13836,7 +13887,7 @@ $('#newScript').onclick = guard(async () => {
   const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);   // a Process is the file processes/<name>.txt
   if (S.scripts.some(s => s.name.toLowerCase() === n.toLowerCase())) throw new Error('That name is used');
   const cls = await newProcessDialog(typed); if (!cls) return;
-  await api('PUT', '/ui/scripts/' + encodeURIComponent(n), newProcessText(typed), true);
+  await api('PUT', '/ui/scripts/' + encodeURIComponent(n), newProcessText(typed, new Date(), cls), true);
   await api('POST', `/ui/scripts/${encodeURIComponent(n)}/class`, { cls });
   S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n); renderScriptList();
 });
@@ -15250,8 +15301,12 @@ let simPoll = null, simWasOff = false;
 // Hide / Show the Simulator bar (Fritz, 2026-10-28), kept per browser. Hiding changes no setting: the speed and
 // Auto skip stay as they are. Rule 10.7 (Fritz, 2026-11-04): hidden, the bar is gone completely, so the window is free
 // for the Panel; ☰ Menu > Show Simulator bar brings it back, and a small 🧪 on every ☰ Menu button says it is Simulation.
-const simBarHidden = () => $('#simBar').classList.contains('collapsed');
+// Panel Update 11, item 1a (OakBarn Brewery, 2026-11-23: "Not Needed on the Process Editor Tab"): the Simulator bar is off while the
+// Process Editor is open. ☰ Menu > Show Simulator bar brings it back until the Process Editor is left; the saved Hide is not changed.
+const simOffHere = () => document.body.classList.contains('onProcEditor') && !document.body.classList.contains('simOnEditor');
+const simBarHidden = () => $('#simBar').classList.contains('collapsed') || simOffHere();
 function showSimBar(show, fit = true) {
+  if (document.body.classList.contains('onProcEditor')) { document.body.classList.toggle('simOnEditor', show); if (!show) return; }
   $('#simBar').classList.toggle('collapsed', !show);
   document.body.classList.toggle('simBarHidden', !show);
   const b = $('#simHide'); b.setAttribute('aria-expanded', String(show));
@@ -15968,15 +16023,24 @@ const PROC_MENU = [['#newScript', '➕ New Process'], ['#saveScript', '💾 Save
   ['#restartScript', '⟳ Restart'], ['#editUndo', '↶ Undo'], ['#findBtn', '🔍 Find and Replace'], ['#findAllBtn', '🔍 Find in All Processes'], ['#goLine', '➜ Go To'],
   ['#suggestBtn', '💡 Suggest'], ['#picPick', '🖼 Picture'], ['#colorKey', '🔑 Color key'], ['#constList', '📐 Constants'], ['#addSteps', 'Add steps'],
   ['#updVersion', 'Update Version'], ['#renScript', 'Rename'], ['#delScript', '🗑 Delete'], ['#binBtn', '♻ Recycle Bin'], ['#stopAll', '■ Stop all']];
+// Panel Update 11 (item 1c): the buttons that left the second row (name, class, Version, Update Version, state, Add steps, Restart if
+// it fails, All Processes, Suggest, Picture, Save to file, Colors) are only here now; they wait hidden in #procExtras, so a hidden one
+// there still counts. The Process's name, class, Version and state head the group.
+const procShown = b => b.closest('#procExtras') ? getComputedStyle(b).display !== 'none' : !!b.offsetParent;
 function procEditorMenu(list, item) {
   list.append(h('div', { class: 'menuNote muted' }, 'Process Editor'));
+  const s = S.scripts?.find(x => x.name === curScript);
+  if (s) list.append(h('div', { class: 'menuNote muted', title: 'The Process open now: its class (picked when it was made), Version and state' },
+    [$('#scriptName').textContent, $('#scriptClass').textContent, $('#scriptVersion').textContent, $('#scriptState').textContent].filter(Boolean).join(' · ')));
   for (const [sel, label] of PROC_MENU) {
-    const b = $(sel); if (!b || b.disabled || !b.offsetParent) continue;
+    const b = $(sel); if (!b || b.disabled || !procShown(b)) continue;
     list.append(item(label, () => b.click(), { title: b.title || label }));
   }
+  const sa = $('#saveAs');
+  if (curScript && procShown(sa)) for (const o of [...sa.options].filter(o => o.value)) list.append(item('💾 Save to file: ' + o.textContent, () => { sa.value = o.value; sa.dispatchEvent(new Event('change')); }, { title: sa.title }));
   for (const [sel, label] of [['#predictOn', 'Predictive text'], ['#colorsOn', 'Colors'], ['#scriptAutoRestart', 'Restart if it fails']]) {
-    const c = $(sel); if (!c || c.disabled || !c.closest('label')?.offsetParent) continue;
-    list.append(item(`${c.checked ? '☑' : '☐'} ${label}`, () => { c.checked = !c.checked; c.dispatchEvent(new Event('change')); }, { title: c.closest('label').title }));
+    const c = $(sel), l = c?.closest('label'); if (!c || c.disabled || !l || !procShown(l)) continue;
+    list.append(item(`${c.checked ? '☑' : '☐'} ${label}`, () => { c.checked = !c.checked; c.dispatchEvent(new Event('change')); }, { title: l.title }));
   }
   list.append(h('hr'));
 }
