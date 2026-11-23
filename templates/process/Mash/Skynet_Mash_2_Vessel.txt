@@ -55,8 +55,6 @@ endif
 @if HLT_Heater
 {{HLT_Heater}} = off
 @end
-step "First wort"
-ask "Move the hot sparge water out of the kettle (into a cooler or bucket), then run the first wort from the mash tun into the kettle. Press Done when the First Run is complete."
-hop_alert "1st Wort"
 step "Sparge"
-ask "Sparge with the hot water (or pump it over the grain as you go). Collect " + skn_rcp_Boil_Volume + " " + skn_rcp_Volume_Units + " in the kettle. Press Done when the kettle has it all."
+hop_alert "1st Wort"
+ask "Move the hot sparge water out of the kettle (into a cooler or bucket, or pump it over the grain as you go), then run the wort into the kettle and sparge with it. Collect " + skn_rcp_Boil_Volume + " " + skn_rcp_Volume_Units + ". Press Done when the kettle has it all."

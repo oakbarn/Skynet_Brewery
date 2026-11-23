@@ -53,8 +53,8 @@ endif
 {{Mash_Pump}} = false
 @end
 step "First wort"
-ask "Set the valves to run the first wort from the mash tun to the kettle. Press Done when the First Run is complete."
 hop_alert "1st Wort"
+ask "Put any first wort hops in the boil kettle now. Then set the valves to run the first wort from the mash tun to the kettle. Press Done when it is running."
 step "Sparge"
 ask "Sparge with water at " + skn_rcp_Sparge_Temp + skn_rcp_Temp_Units + " from the Hot Liquor Tank, slowly (at least 10 minutes), and collect " + skn_rcp_Boil_Volume + " " + skn_rcp_Volume_Units + " of wort in the boil kettle. Turn the kettle heat on once the wort covers the heating element. Press Done when the kettle has it all."
 @if HLT_Heater

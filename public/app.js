@@ -20059,7 +20059,7 @@ function rcDrops(pane, rc) {
         h('button', { title: 'Show and say the first alert now, to check the sound', onclick: () => (same ? saved : sch).alerts[0] ? hopAlert((same ? saved : sch).alerts[0]) : toast('No alerts', true) }, '🔊 Test the first alert')] : ''));
 }
 // when a Process sends each hop_alert (Rule 17.20)
-const HOP_ALERT_WHEN = { 'Pre Boil': 'The Strike Water reaches Strike', Mash: 'Just after the Mash Timer starts', '1st Wort': 'Just after the First Run is complete',
+const HOP_ALERT_WHEN = { 'Pre Boil': 'The Strike Water reaches Strike', Mash: 'Just after the Mash Timer starts', '1st Wort': 'Just before the First Run starts',
   'Hop Stand High': 'The wort is at Hop Stand High', 'Hop Stand Middle': 'The wort is at Hop Stand Middle', 'Hop Stand Low': 'The wort is at Hop Stand Low', Fermenter: 'Every Fermenter is filled' };
 // the voice file of one alert: found, or the steps to make it by hand (a free text to voice web site, then put the file here)
 function voiceCell(a) {

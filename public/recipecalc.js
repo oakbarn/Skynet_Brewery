@@ -300,7 +300,7 @@ export const hopKgToUse = h => n(h.alphaActual) > 0 && n(h.alpha) > 0 ? n(h.kg) 
 //   ready stand keeps its drop at flame out;
 // - the Secondary and Dry Hop hops make one Fermenter reminder (hop_alert "Fermenter"), sent when every Fermenter is filled.
 // The Pre Boil hops (OakBarn Brewery, 2026-11-23: "Pre Boil Hops need a Pre Warning when Strike Water Reaches Strike. Mash Hops need
-// Drop Warning just after Mash Timer Begins. 1st Hops need Drop Warning just after First Run Complete"): hop_alert "Pre Boil",
+// Drop Warning just after Mash Timer Begins"; "If the go in before 1st Run, thats when the Drop Alert Should be"): hop_alert "Pre Boil",
 // hop_alert "Mash", hop_alert "1st Wort", each sent by the Process at that moment (processAlerts below) All Grain Recipes only ("These will only be for all grain
 // Brewers as the other lower levels have none").
 // bp: the Recipe's Boil Profile (its Hop Stand boxes), as the Process reads them (lib/brewprocess.js).
@@ -373,7 +373,7 @@ export function hopSchedule(r, d = {}, bp = null) {
   const processAlerts = [
     ...(pre.length ? [sent('Pre Boil', 'warn', `The Strike Water is at Strike. Get the Pre Boil hops ready: ${pre.map(g => `${g.label}: ${g.what}`).join('; ')}`)] : []),
     ...(allGrain ? of('mash') : []).map(g => sent('Mash', 'drop', `The Mash Timer has started. Add the Top of Mash hops now: ${g.what}`)),
-    ...(allGrain ? of('first wort') : []).map(g => sent('1st Wort', 'drop', `The First Run is complete. Add the 1st Wort hops now: ${g.what}`)),
+    ...(allGrain ? of('first wort') : []).map(g => sent('1st Wort', 'drop', `The First Run is about to start. Add the 1st Wort hops to the kettle now: ${g.what}`)),
     ...list.filter(g => g.stand).map(g => sent(`Hop Stand ${g.standLabel}`, 'drop',
       `Hop Stand ${g.standLabel}: the wort is at ${standTemp({ tempC: g.tempC })}. Add the Hop Stand ${g.standLabel} hops now: ${g.what}. Cooling water off for ${g.standMin} minutes.`, { stand: g.stand, group: g.group })),
     ...(of('secondary', 'dry hop').length ? [sent('Fermenter', 'drop', `The Fermenters are filled. Set a reminder on your phone for the Fermenter hops: ${of('secondary', 'dry hop').map(g => `${g.label}: ${g.what}`).join('; ')}.`)] : []),

@@ -41,7 +41,7 @@ assert.match(by('Fermenter').text, /The Fermenters are filled\. Set a reminder o
 assert.equal(by('Pre Boil').kind, 'warn');
 assert.match(by('Pre Boil').text, /The Strike Water is at Strike\. Get the Pre Boil hops ready: Top of Mash: 1 oz Hallertauer; 1st Wort: 1 oz Fuggle/);
 assert.match(by('Mash').text, /The Mash Timer has started\. Add the Top of Mash hops now: 1 oz Hallertauer/);
-assert.match(by('1st Wort').text, /The First Run is complete\. Add the 1st Wort hops now: 1 oz Fuggle/);
+assert.match(by('1st Wort').text, /The First Run is about to start\. Add the 1st Wort hops to the kettle now: 1 oz Fuggle/);
 // ... only for All Grain: an Extract or Partial Mash Recipe has none of the three ("the other lower levels have none")
 for (const t of [0, 1]) assert.deepEqual(hopSchedule(readRecipeFile(Buffer.from(file(t), 'latin1'), 'X.bsmx').recipe, {}).processAlerts.map(a => a.which), ['Hop Stand High', 'Hop Stand Middle', 'Fermenter'], `type ${t}: no Pre Boil alerts`);
 
@@ -85,7 +85,8 @@ assert.match(T('templates/process/Transfer_to_Fermentor/Skynet_Transfer_to_Ferme
 const flow = T('samples/configs/three-vessel-one-pump/processes/BrewDay_Flow.txt');
 assert.match(flow, /wait HLT_Vessel\.BM1w1_1_HLT_BH >= skn_rcp_Strike_Temp\n[^\n]*\nhop_alert "Pre Boil"/);
 assert.match(flow, /start "wgt_TMR_Step~timer_BH"\nhop_alert "Mash"\nvSMsg = "Mash step 1/);
-assert.match(flow, /wait gblV_Brew_Status == 303\nhop_alert "1st Wort"/);
+assert.match(flow, /vSHops = skn_rcp_First_Wort_Hops\nhop_alert "1st Wort"\n\[SectionBrew300\]/);
+assert.match(T('templates/process/Mash/Skynet_Mash.txt'), /hop_alert "1st Wort"\nask "Put any first wort hops in the boil kettle now/, 'before the First Run');
 assert.match(flow, /wait gblV_Brew_Status == 603\nhop_alert "Fermenter"/);
 assert.deepEqual(compile(flow).errors, [], 'the 3 Vessel sample still compiles');
 console.log('prepostboil ok');

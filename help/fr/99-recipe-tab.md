@@ -261,7 +261,7 @@ Certains houblons sont ajoutés quand le brassage arrive à un moment donné, pa
 | --- | --- |
 | L'eau d'empâtage (Strike Water) atteint la température Strike | avertissement **Pre Boil** : préparez les houblons Mash et 1st Wort |
 | Juste après le démarrage du Mash Timer | ajout **Mash** : les houblons Top of Mash |
-| Juste après la fin du First Run | ajout **1st Wort** : les houblons 1st Wort |
+| Juste avant le début du First Run | ajout **1st Wort** : les houblons 1st Wort vont dans la cuve d'ébullition |
 | 10 minutes avant la fin de l'ébullition | avertissement **Post Boil** : chaque houblon Whirlpool, Hop Stand, Secondary et Dry Hop (une alerte minutée, avec les autres) |
 | Le moût atteint la température d'un Hop Stand | ajout **Hop Stand** : les houblons de ce stand. L'eau de refroidissement est coupée pendant son temps, sur la minuterie Whirlpool / Chilling |
 | Chaque fermenteur est rempli | houblons **Fermenter** : les houblons Secondary et Dry Hop, pour mettre un rappel sur votre téléphone |

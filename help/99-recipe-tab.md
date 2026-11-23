@@ -261,7 +261,7 @@ Some hops go in when the brew gets somewhere, not at a boil minute. The Process 
 | --- | --- |
 | The Strike Water reaches Strike | **Pre Boil** warning: get the Mash and 1st Wort hops ready |
 | Just after the Mash Timer starts | **Mash** drop: the Top of Mash hops |
-| Just after the First Run is complete | **1st Wort** drop: the 1st Wort hops |
+| Just before the First Run starts | **1st Wort** drop: the 1st Wort hops go in the kettle |
 | 10 minutes left in the boil | **Post Boil** warning: every Whirlpool, Hop Stand, Secondary and Dry Hop hop (a timed alert, with the others) |
 | The wort reaches a Hop Stand's temperature | **Hop Stand** drop: that stand's hops. The cooling water is off for its time, on the Whirlpool / Chilling Timer |
 | Every Fermenter is filled | **Fermenter** hops: the Secondary and Dry Hop hops, to set a reminder on your phone |

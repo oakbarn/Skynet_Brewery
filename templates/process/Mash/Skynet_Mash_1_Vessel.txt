@@ -50,5 +50,5 @@ endif
 {{Mash_Pump}} = false
 @end
 step "Lift the grain basket"
-ask "Lift the grain basket and let it drain. Rinse (sparge) the grain with water at " + skn_rcp_Sparge_Temp + skn_rcp_Temp_Units + " until the vessel has " + skn_rcp_Boil_Volume + " " + skn_rcp_Volume_Units + ". Press Done when the basket is out."
 hop_alert "1st Wort"
+ask "Lift the grain basket and let it drain. Rinse (sparge) the grain with water at " + skn_rcp_Sparge_Temp + skn_rcp_Temp_Units + " until the vessel has " + skn_rcp_Boil_Volume + " " + skn_rcp_Volume_Units + ". Put any first wort hops in. Press Done when the basket is out."
