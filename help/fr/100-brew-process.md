@@ -95,6 +95,7 @@ L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 | `all_heaters_off` | arrête chaque chauffage : chaque Heating Element (quelle que soit sa méthode, pour que son PID ou son Hysteresis ne le rallume pas), tout ancien contrôle PID, Hysteresis, Duty Cycle ou Deadband, et chaque brûleur à gaz (sa Solenoid Gas Valve fermée, son allumeur arrêté). Les mêmes chauffages que l'Emergency Off. Règle Skynet 6.15. |
 | `open_valve DigiBoil_Spigot` | ouvre une seule vanne. Une vanne manuelle (une Manual valve, un Widget Manual Valve, un robinet de DigiBoil ou de Brewzilla) affiche une fenêtre et attend que ce soit fait à la main ; une vanne motorisée est commandée tout de suite. Voir [DigiBoil et Brewzilla, réglées à la main](158-digiboil-and-brewzilla) |
 | `close_valve DigiBoil_Spigot` | ferme une seule vanne, de la même façon |
+| `hop_alert "Hop Stand High"` | envoie une alerte houblon d'avant ou d'après l'ébullition : `"Pre Boil"` (température Strike atteinte), `"Mash"` (le Mash Timer a démarré), `"1st Wort"` (juste avant le début du First Run), `"Hop Stand High"`, `"Middle"` ou `"Low"` (le moût à ce stand), `"Fermenter"` (chaque fermenteur rempli). Pre Boil, Mash et 1st Wort sont pour All Grain seulement. Sans recette ou sans ces houblons : rien n'est envoyé. Voir [Recipe tab](99-recipe-tab) |
 
 ## Close all et Open all valves {#close-all-and-open-all-valves}
 
