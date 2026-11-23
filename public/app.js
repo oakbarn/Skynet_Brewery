@@ -421,6 +421,7 @@ function setView(v, here = false) {
   // the Menu Bar is hidden on the Tabs page; coming back to Tabs hides it again
   if (v === 'help' && helpFrom !== 'help') helpFrom = prev;
   markOnTabs();
+  placeMenuBar();
   showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
@@ -8693,15 +8694,31 @@ document.addEventListener('fullscreenchange', () => {
   refit();
 });
 // the Menu Bar is hidden on the Tabs page (Default tab: "Hide the Menu Bar on Tabs", on unless switched off);
-// ☰ Menu > Show Menu Bar brings it back until you hide it again or leave the Tabs page
+// ☰ Menu > Show Top Line brings it back until you hide it again or leave the Tabs page
 const menuBarHides = () => S?.config?.brewDefaults?.hideMenuBar !== false;
 const menuBarHidden = () => view === 'workspace' && !menuTab && menuBarHides() && !document.body.classList.contains('menuBarOn');
 // Fritz, 2026-10-21: only the Tabs themselves lose the Menu Bar; every Menu tab (Zoom, Default, About ...) and every other page keeps it
+// Panel Update 10 (OakBarn Brewery, 2026-11-23): the Menu Bar (Simulator balloon, Build, Sound, Emergency Off, ?, ☰ Menu) is in the
+// same place and order on a Tab and in the Process Editor (item 3), so it moves with the page. In the Process Editor the top line
+// (Schema, Tabs, Processes ...) is clutter and is off (item 1a; ☰ Menu has every page) and Build is not needed: hidden, its space kept (1k).
+function placeMenuBar() {
+  const c = $('#menuCluster'); if (!c) return;
+  const onEditor = view === 'scripts';
+  document.body.classList.toggle('onProcEditor', onEditor);
+  if (onEditor) $('#procMenuSlot').append(c); else $('#editMode').after(c);
+  $('#barEdit').classList.toggle('keepSpace', onEditor);
+  showBreweryName();
+}
 function markOnTabs() { document.body.classList.toggle('onTabs', view === 'workspace' && !menuTab); document.body.classList.toggle('onWorkspace', view === 'workspace'); }
 // the Brewery Name on every Tab's menu bar (OakBarn Brewery, 2026-11-21: "It is Just a Name we can display at the top of every tab menu
 // bar"): ☰ Menu > Default settings > Brewery Name, OakBarn Brewery unless changed
 const BREWERY_NAME = 'OakBarn Brewery';
-function showBreweryName() { const el = $('#barBrewery'); if (el) el.textContent = S.config?.brewDefaults?.breweryName || BREWERY_NAME; }
+// The Brewery Name is a Patron perk (Panel Update 10, item 4, Rule 12.4): a Patron sees the Brewery Name typed in ☰ Menu > Default
+// settings (empty: the name on the Patron code, then OakBarn Brewery); everyone else sees Skynet Panel. The same name is the Copyright and
+// "Created by" of a new Process (item 5).
+const NOT_PATRON_NAME = 'Skynet Panel';
+const breweryName = () => S.patron?.brewery ? (S.config?.brewDefaults?.breweryName || S.patron.name || BREWERY_NAME) : NOT_PATRON_NAME;
+function showBreweryName() { for (const el of document.querySelectorAll('#barBrewery, .barBreweryCopy')) el.textContent = breweryName(); }
 function showMenuBar(on) {
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   document.body.classList.toggle('menuBarOn', on);
@@ -12946,38 +12963,22 @@ async function editWorkspace() {
 // Browsers play nothing until this screen is tapped or clicked once, so a sound turned on before that waits for the first tap.
 const tappedYet = () => navigator.userActivation ? navigator.userActivation.hasBeenActive : soundTapped;
 let soundTapped = false;
+// The Sound icon on the Menu Bar (Panel Update 10, items 2 and 3b, OakBarn Brewery 2026-11-23: "Toggle sound On an Off with the Icon on
+// the Menu Bar"; "Do Not Enter Overlay when sound is off"; "Replace the Sound Nanny as no longer needed"): one click turns sound on or
+// off. It is the only sound switch: the "Turn sound on?" pop-up, the Enable sound button, the bottom reminder and the copies in the
+// ☰ Menu and Default settings are gone (Rule 2.69).
 function showSound() {
-  $('#soundBtn').textContent = !soundOn ? 'Enable sound' : tappedYet() ? 'Sound on' : 'Sound on (tap anywhere)';
-  // the reminder on the Tab while sound is off (OakBarn Brewery, 2026-11-13: "keep on the Tab and Hamburger Menu if it has not been done")
-  $('#soundNag')?.classList.toggle('hidden', soundOn || view !== 'workspace');
-  document.querySelectorAll('.soundNowSw').forEach(x => { x.checked = soundOn; });
+  const b = $('#barSound'); if (!b) return;
+  b.classList.toggle('off', !soundOn); b.setAttribute('aria-pressed', String(soundOn));
+  b.title = !soundOn ? 'Sound is off (the red Do Not Enter sign): one click turns sound on in this browser'
+    : tappedYet() ? 'Sound is on: one click turns it off in this browser' : 'Sound is on and plays after your first click or tap on this screen. One click here turns it off';
 }
 function setSound(on) {
   soundOn = on; showSound();
   if (soundOn && tappedYet()) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
   updateAlarms();
 }
-$('#soundBtn').onclick = () => setSound(!soundOn);
-$('#soundNag').onclick = () => setSound(true);
-// Ask when the panel first opens (OakBarn Brewery, 2026-11-13: "Ask when first opens"): browsers play nothing until the page is
-// clicked once, so the answer is that click. Once per opening of the panel, only while sound is off; never on top of another dialog.
-let soundAsked = false;
-function askSound() {
-  if (soundOn || soundAsked) return;
-  const d = $('#valDlg');
-  if (d.open) { d.addEventListener('close', () => setTimeout(askSound, 300), { once: true }); return; }
-  soundAsked = true;
-  d.innerHTML = '';
-  const close = on => { d.oncancel = null; d.close(); if (on) setSound(true); };
-  d.append(h('div', { class: 'vdTitle' }, '🔊 Turn sound on?'),
-    h('p', {}, 'Alarms, hop drops, timers and music on this Panel need sound. Your browser only plays sound after you click once, so Skynet asks.'),
-    h('p', { class: 'muted' }, 'Sound is turned on for this browser. Moving between Tabs keeps it on. To have it on every time, use ☰ Menu > Default > Turn Sound On when starting.'),
-    h('div', { class: 'vdBtns' },
-      h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, '🔊 Turn Sound On'),
-      h('button', { type: 'button', class: 'big', onclick: () => close(false) }, 'Not now')));
-  d.oncancel = () => { d.oncancel = null; showSound(); };
-  d.showModal();
-}
+$('#barSound').onclick = () => setSound(!soundOn);
 // the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
 const firstTap = () => {
   soundTapped = true;
@@ -13130,11 +13131,13 @@ function updateScriptState() {
   $('#scriptVersion').textContent = s ? 'Version ' + (s.version || '(none yet)') : '';
   $('#updVersion').disabled = !s;
   const st = $('#scriptState');
-  const sel = $('#scriptClass');
-  sel.disabled = !s || !can('admin');
-  if (s && document.activeElement !== sel) sel.value = s.cls || 'sub';
+  // the class is shown, never changed here (Panel Update 10, item 5): it was picked when the Process was made
+  $('#scriptClass').textContent = s ? (S.processClasses?.[s.cls || 'sub']?.label || 'Sub') : '';
   const ar = $('#scriptAutoRestart');
   ar.disabled = !s || !can('admin'); ar.checked = !!s?.autorestart;
+  // the Start icon: green while this Process runs, red while it is stopped (Panel Update 10, item 1e)
+  const on = s?.state === 'running', si = $('#startScript img');
+  if (si) { si.src = on ? 'icons/Start_Green.png' : 'icons/Start_Red.png'; $('#startScript').classList.toggle('running', on); }
   if (!s) { st.textContent = ''; updateGutter(); return; }
   let t = s.state;
   if (s.state === 'running') t = (s.waiting ? 'waiting' : 'running') + ` (line ${s.line}${s.step ? `, step ${[s.step.num, s.step.name].filter(Boolean).join(' ')}` : ''})` + (s.modified ? ' - edited since start, stop and start to apply' : '');
@@ -13174,7 +13177,26 @@ function askLine() {
   if (!Number.isFinite(l) || l < 1 || l > n) return toast(`Pick a line from 1 to ${n}`, true);
   gotoLine(l, ta);
 }
-$('#goLine').onclick = askLine;
+// Go To (Panel Update 10, items 1p, 1q, 1r): Line takes a number, Section takes a name (a step "Sparge" line or a [Sparge] label). The
+// box widens as it is typed in. An empty box asks for the line, as Ctrl+G does.
+function sectionLine(text, want) {
+  const w = String(want).trim().toLowerCase(), lines = text.split('\n'), name = l => (/^\s*step\b[^"]*"([^"]*)"/i.exec(l) || /^\s*\[([^\]]+)\]/.exec(l) || [])[1];
+  let part = 0;
+  for (let i = 0; i < lines.length; i++) { const n = name(lines[i]); if (n === undefined) continue; if (n.trim().toLowerCase() === w) return i + 1; if (!part && n.toLowerCase().includes(w)) part = i + 1; }
+  return part;
+}
+function goTo() {
+  const box = $('#goWhere'), v = box.value.trim(), ta = fTa();
+  if (!v) return askLine();
+  const n = ta.value.split('\n').length;
+  if ($('#goKind').value === 'line') { const l = parseInt(v, 10); if (!Number.isFinite(l) || l < 1 || l > n) return toast(`Pick a line from 1 to ${n}`, true); return gotoLine(l, ta); }
+  const l = sectionLine(ta.value, v); if (!l) return toast(`No Section "${v}" in this Process (a step "${v}" line or a [${v}] label)`, true);
+  gotoLine(l, ta);
+}
+$('#goLine').onclick = goTo;
+$('#goKind').onchange = () => { $('#goWhere').placeholder = $('#goKind').value === 'line' ? 'Line' : 'Section'; $('#goWhere').focus(); };
+$('#goWhere').addEventListener('input', ev => { ev.target.style.width = Math.max(6, ev.target.value.length + 2) + 'ch'; });
+$('#goWhere').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); goTo(); } });
 $('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; refreshFind(false); });
 $('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; syncHl(); });
 // Predictive text switch: for this person on this computer or phone, like Colors
@@ -13710,7 +13732,10 @@ function offBrainDialog(list) {
   d.showModal();
 }
 $('#saveScript').onclick = saveScript;
-$('#scriptClass').onchange = guard(async ev => { if (curScript) await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/class`, { cls: ev.target.value }); });
+$('#saveScriptIcon').onclick = saveScript;      // the Save icon and the Save button do the same (Panel Update 10, items 1h and 1t)
+// ↶ Undo (item 1s): takes back the last change typed in the Process (the same as Ctrl+Z)
+$('#editUndo').onmousedown = ev => ev.preventDefault();
+$('#editUndo').onclick = () => { const ta = $('#code'); ta.focus(); document.execCommand('undo'); };
 $('#addSteps').onclick = guard(async () => {
   if (!curScript) return;
   const ta = $('#code'), t = await api('POST', '/ui/scripts/addsteps', ta.value, true);
@@ -13741,26 +13766,79 @@ $('#scriptAutoRestart').onchange = guard(async ev => {
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 // Emergency Off (Rule 6.41, Panel Update 8): the red mushroom button at the top right, on every page. One click, no pop-up: every Process
 // stops, then the heaters, the pumps, every other output, and the valves close. Brewers and admins (a viewer can't switch anything).
-for (const id of ['#eOff', '#eOffBar']) $(id).onclick = guard(async () => {
+for (const id of ['#eOffBar']) $(id).onclick = guard(async () => {
   if (!can('operator')) return toast('Your account is view only', true);
   await api('POST', '/ui/emergencyoff');
   toast('🛑 Emergency Off: every Process stopped; heaters, pumps and outputs off; valves closed');
 });
 // the Override and Stop buttons in the Help language (Rule 11.11): again when it is picked here or in another window
 setStopWord(safetyWord);      // a Process Widget's ■ Stop
-function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); $('#stopScript').textContent = safetyWord('Stop'); }
+function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); const st = $('#stopScript'); st.title = safetyWord('Stop') + ': stop this Process'; st.setAttribute('aria-label', safetyWord('Stop')); }
 function safetyRefresh() { safetyWords(); if (curWs()) renderWs(); }
 safetyWords();
 $('#hpLang')?.addEventListener('change', () => setTimeout(safetyRefresh));
 addEventListener('storage', ev => { if (ev.key === LANG_KEY) safetyRefresh(); });
 addEventListener('skynet-userlang', () => safetyRefresh());      // the User Language's Override and Stop words came from the Brain (Rule 11.16)
+// ➕ New Process (Panel Update 10, item 5, OakBarn Brewery 2026-11-23): the name box, then the New Process dialog. One click on Flow, Sub,
+// Repeat or Looper (fewer than six choices and only one may be picked: one-click boxes, not a dropdown, Rule 2.6), then Save. The class
+// is never changed after it is saved. Spaces in the name become _ (start My_New_Brew_Process); line 1 keeps the name as typed, like a
+// Label. A Patron's Brewery Name is the Copyright and the "Created by" (items 5g, 5h, Rule 12.4); everyone else gets a Copyright with no name.
+const NEW_PROC_ABOUT = {
+  flow: 'The brew itself. Flow Processes follow a Brew Day: one Flow Process starts the next. They are numbered 1, 2, 3 ... in the order they start each other, and their steps 1.00000, 1.00001 ...',
+  sub: 'A job used in more than one place (fill a vessel, run a transfer). A Flow Process calls it. Numbered S1, S2, S3 ... and their steps S1.00000 ...',
+  repeat: 'A small common helper, often a wait place in the Process that calls it. Numbered R1, R2, R3 ... and their steps R1.00000 ...',
+  looper: 'Runs in the background on its own and is never called (log the temperatures, watch a float). Numbered L1, L2, L3 ... and their steps L1.00000 ... Override and Stop all leave it running.',
+};
+function newProcessText(typed, now = new Date()) {
+  const patron = !!S.patron?.brewery, who = breweryName(), pad = x => String(x).padStart(2, '0');
+  const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  return [`//${typed}`,
+    ...(patron ? [`// Created by ${who} : ${stamp}`] : []),
+    '//MIT License Granted for all Scripts and Configurations',
+    `//Copyright © ${patron ? who + ' ' : ''}${now.getFullYear()}`,
+    '',
+    '/* Put some comments so you know what this',
+    'does six months from now. Your Future self will',
+    'thank you.*/',
+    '',
+    '/* Slash star starts a multi line wrapped comment that',
+    'ends with a star slash */',
+    '',
+    '// Your future self',
+    '// will thank You!',
+    '// Double Slashes are a single line comment',
+    ''].join('\n');
+}
+// the New Process dialog: resolves with the class picked and saved, or null (Close, ✕, Esc: nothing is made)
+function newProcessDialog(typed) {
+  return new Promise(done => {
+    const d = h('dialog', { class: 'newProcDlg' }); let pick = '';
+    const save = h('button', { type: 'button', class: 'primary', disabled: true, title: 'Pick Flow, Sub, Repeat or Looper first' }, '💾 Save');
+    const finish = v => { d.close(); d.remove(); done(v); };
+    const boxes = Object.entries(S.processClasses || {}).map(([c, def]) => {
+      const b = h('button', { type: 'button', class: 'procClassBox', 'aria-pressed': 'false', title: NEW_PROC_ABOUT[c] || def.about, 'data-cls': c }, h('span', { class: 'pcName' }, def.label), h('span', { class: 'pcTick' }));
+      b.onclick = () => { pick = c; for (const x of d.querySelectorAll('.procClassBox')) x.setAttribute('aria-pressed', String(x === b)); save.disabled = false; save.title = 'Make the Process. Its class can not be changed after this'; };
+      return b;
+    });
+    save.onclick = () => { if (pick) finish(pick); };
+    d.append(h('div', { class: 'dlgTop' }, h('b', {}, 'New Process: ', typed), h('span', { class: 'spacer' }),
+        h('span', { class: 'dlgBtnGroup' }, save, h('button', { type: 'button', onclick: () => finish(null) }, '✕ Close'), h('button', { type: 'button', class: 'boxX', 'aria-label': 'Close', title: 'Close: nothing is made', onclick: () => finish(null) }, '✕'))),
+      h('div', { class: 'procClassRow' }, ...boxes),
+      h('div', { class: 'procClassAbout' }, h('p', {}, 'Click one, then Save. It can not be changed once the Process is saved.'),
+        h('ol', {}, ...Object.entries(S.processClasses || {}).map(([c, def]) => h('li', {}, h('b', {}, def.label), ': ', NEW_PROC_ABOUT[c] || def.about)))));
+    d.oncancel = e => { e.preventDefault(); finish(null); };
+    document.body.append(d); d.showModal();
+  });
+}
 $('#newScript').onclick = guard(async () => {
-  let n = prompt('New process name'); if (!n) return;
-  n = noSpaces(n);
+  const typed = (prompt('New process name') || '').trim(); if (!typed) return;
+  const n = noSpaces(typed);
   const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);   // a Process is the file processes/<name>.txt
-  if (S.scripts.some(s => s.name === n)) throw new Error('That name is used');
-  await api('PUT', '/ui/scripts/' + encodeURIComponent(n), '//' + n + '\n', true);
-  S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n);
+  if (S.scripts.some(s => s.name.toLowerCase() === n.toLowerCase())) throw new Error('That name is used');
+  const cls = await newProcessDialog(typed); if (!cls) return;
+  await api('PUT', '/ui/scripts/' + encodeURIComponent(n), newProcessText(typed), true);
+  await api('POST', `/ui/scripts/${encodeURIComponent(n)}/class`, { cls });
+  S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n); renderScriptList();
 });
 $('#renScript').onclick = guard(async () => {
   if (!curScript) return;
@@ -14888,6 +14966,8 @@ function patronPerksList(levels) {
 }
 async function renderPatron() {
   const st = await api('GET', '/ui/patron'), box = $('#patronBox'); box.innerHTML = '';
+  // a Patron code saved or taken away: the Brewery Name perk follows at once (Panel Update 10, item 4)
+  api('GET', '/ui/state').then(x => { S.patron = x.patron; showBreweryName(); }).catch(() => { });
   if (st.active) box.append(h('p', {}, '⭐ ', h('b', {}, `${st.levelName}`), ` for ${st.name || 'this Brain'}, until ${st.expires}. Thank you for helping Skynet grow!`));
   else if (st.hasCode && st.ok) box.append(h('p', { class: 'bad' }, `The Patron code ended on ${st.expires}. Renew on oakbarnbrewery.com, then paste the new code here.`));
   else if (st.hasCode) box.append(h('p', { class: 'bad' }, st.error));
@@ -15183,6 +15263,8 @@ $('#simHide').onclick = () => showSimBar(false);
 function renderSimBar() {
   const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden'), btn = $('#barSim');
   btn.textContent = on ? '🧪 Simulator' : '🔌 Real'; btn.classList.toggle('sim', on); btn.setAttribute('aria-pressed', String(on));
+  // the Simulator balloon shows only in Simulator mode; its space stays (Panel Update 10, item 3g). ☰ Menu switches to the Simulator.
+  btn.classList.toggle('keepSpace', !on);
   btn.title = on ? 'Simulator mode: nothing real is switched. Press to switch the whole panel back to the Real boards' : 'Real boards are used. Press to switch the whole panel (every Interface) to the Simulator for testing';
   bar.classList.toggle('hidden', !on);
   document.body.classList.toggle('simOn', on);
@@ -15870,7 +15952,7 @@ const paneDirty = () => menuTab === 'equipment' ? eqDirty : !!profDirty[menuTab]
 function renderMenu() {
   if (!S?.profiles) return;
   const list = $('#menuList'); list.innerHTML = '';
-  if (view === 'workspace' && !menuTab && menuBarHides()) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: 'The top line: Schema, Processes, Variables, Log, Settings, Help, Enable sound, Sign out', onclick: () => { closeMenuList(); showMenuBar(menuBarHidden()); } }, menuBarHidden() ? '▼ Show Menu Bar' : '▲ Hide Menu Bar'));
+  if (view === 'workspace' && !menuTab && menuBarHides()) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: 'The Top Line: Schema, Processes, Variables, Log, Settings, Help, Sign out', onclick: () => { closeMenuList(); showMenuBar(menuBarHidden()); } }, menuBarHidden() ? '▼ Show Top Line' : '▲ Hide Top Line'));
   menuItems(list, fn => () => { closeMenuList(); fn(); });
   const tabs = $('#menuTabs'); tabs.innerHTML = '';
   for (const k of menuSorted().map(m => m.key).filter(k => menuOpen.includes(k))) {
@@ -15880,6 +15962,24 @@ function renderMenu() {
   }
   if (menuTab && !paneDirty()) renderMenuPane();
 }
+// The Process Editor's buttons in the ☰ Menu while it is open (Panel Update 10, OakBarn Brewery 2026-11-23: "One click rule but also
+// evertything on Hamburger"): each one clicks the same button on the page, so both always do the same. A hidden or greyed one is left out.
+const PROC_MENU = [['#newScript', '➕ New Process'], ['#saveScript', '💾 Save'], ['#checkScript', '✔ Check'], ['#startScript', '▶ Start'], ['#stopScript', '■ Stop'],
+  ['#restartScript', '⟳ Restart'], ['#editUndo', '↶ Undo'], ['#findBtn', '🔍 Find and Replace'], ['#findAllBtn', '🔍 Find in All Processes'], ['#goLine', '➜ Go To'],
+  ['#suggestBtn', '💡 Suggest'], ['#picPick', '🖼 Picture'], ['#colorKey', '🔑 Color key'], ['#constList', '📐 Constants'], ['#addSteps', 'Add steps'],
+  ['#updVersion', 'Update Version'], ['#renScript', 'Rename'], ['#delScript', '🗑 Delete'], ['#binBtn', '♻ Recycle Bin'], ['#stopAll', '■ Stop all']];
+function procEditorMenu(list, item) {
+  list.append(h('div', { class: 'menuNote muted' }, 'Process Editor'));
+  for (const [sel, label] of PROC_MENU) {
+    const b = $(sel); if (!b || b.disabled || !b.offsetParent) continue;
+    list.append(item(label, () => b.click(), { title: b.title || label }));
+  }
+  for (const [sel, label] of [['#predictOn', 'Predictive text'], ['#colorsOn', 'Colors'], ['#scriptAutoRestart', 'Restart if it fails']]) {
+    const c = $(sel); if (!c || c.disabled || !c.closest('label')?.offsetParent) continue;
+    list.append(item(`${c.checked ? '☑' : '☐'} ${label}`, () => { c.checked = !c.checked; c.dispatchEvent(new Event('change')); }, { title: c.closest('label').title }));
+  }
+  list.append(h('hr'));
+}
 // the ☰ Menu choices: Edit layout, then the Menu tabs in their order, then every page with its parts. `go` wraps each
 // choice (it closes the list first, and in a dialog it closes the dialog).
 function menuItems(list, go) {
@@ -15887,15 +15987,14 @@ function menuItems(list, go) {
   // Rule 10.7 (Fritz, 2026-11-04): in Simulation the Simulator bar is shown or hidden from here
   if (S.sim?.on) list.append(item(simBarHidden() ? '🧪 Show Simulator bar' : '🧪 Hide Simulator bar', () => showSimBar(simBarHidden()),
     { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
-  // sound is off: turn it on from here (OakBarn Brewery, 2026-11-13)
-  if (!soundOn) list.append(item('🔊 Turn Sound On', () => setSound(true), { title: 'Sound is off in this browser. Browsers only play sound after you click once: this is that click' }));
   // the Help language from any screen (OakBarn Brewery, 2026-11-13: "Change to French seamless, maybe on hamburger menu as well";
   // Rule 11.11): the same switch as 🌐 in the Help page list (public/help.js), with the machine translation notice (Rule 11.14)
   // with a User Language (Rule 11.16) it goes on to the next of the three: English, Français, then the User Language
   { const hl = $('#hpLang'), opts = hl ? [...hl.options] : [], next = opts[(hl?.selectedIndex + 1) % (opts.length || 1)];
     if (hl && next) list.append(item('🌐 Help in ' + next.textContent.replace(/^🌐\s*/, ''), () => { hl.value = next.value; hl.dispatchEvent(new Event('change')); },
       { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English, except the Override and Stop buttons.' })); }
-  if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
+  if (can('admin') && view !== 'scripts') list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
+  if (view === 'scripts') procEditorMenu(list, item);
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
     { title: 'Pick the Schema to load; add, clone, rename, back up or restore one; add a Sample Schema' }));
@@ -16478,7 +16577,7 @@ const RTC_SIZE_TIP = `The size, in pixels, of large text: the \\L code in Proces
 const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
 // the New User Templates and Schemas boxes' hover help (OakBarn Brewery, 2026-11-14: "These are for new User Created only")
 const NEW_TIPS = {
-  brewery: 'Your brewery\'s name, shown at the top of every Tab\'s menu bar. Empty: OakBarn Brewery.',
+  brewery: 'Your brewery\'s name, shown on every Tab\'s Menu Bar and in the Process Editor, and the Copyright and "Created by" name of every new Process. A Patron perk (Settings > Patron): not a Patron, the box is greyed out and the Menu Bar shows Skynet Panel. Empty: the name on your Patron code.',
   look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in ☰ Menu > Default settings.',
   lockout: 'How long a new Pulse button waits before another press counts, in seconds. Each button can change its own in its Properties.' };
 // the Hover Delay box's own hover help (Rule 2.38)
@@ -16596,6 +16695,8 @@ function renderDefaultTab(box) {
   Object.assign(d, mdWas);
   const f = paneForm(fields, d, () => { }, !admin);
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
+  // the Brewery Name is a Patron perk (Panel Update 10, item 4): greyed out with the ⛔ for a non-Patron (Rule 18.46); what was typed is kept
+  if (!S.patron?.brewery) { const bn = f.box.querySelector('[data-k="breweryName"]'); if (bn) bn.disabled = true; }
   // Test beside the Airport (ICAO) box: keeps the Airport and Elevation as typed (as Test in Settings does), fetches the report now
   // and shows the airport, the air pressure and the boil temperature
   const btRes = h('div', { class: S.boil?.note ? 'btWarn' : 'muted', style: 'grid-column:1/-1' }, btLine(S.boil));
@@ -16675,7 +16776,7 @@ const panelSetFields = w => [
     ['_ts', 'Tabs', 'head'],
     ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
     ['_m', 'Menu Bar', 'head'],
-    ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool'],
+    ['hideMenuBar', 'Hide the Top Line on Tabs (☰ Menu > Show Top Line brings it back)', 'bool'],
     ['_s', 'Sound', 'head'],
     ['soundOnStart', 'Turn Sound On when starting (when the panel opens or a Schema is loaded)', 'bool'],
     ['_sn', 'Browsers (Chrome, Edge, Safari, iPhone, Android) play no sound until the screen is tapped or clicked once. So with this on, the button at the top says "Sound on (tap anywhere)" until your first tap or click, and the sound is on from then.', 'note'],
@@ -16723,10 +16824,6 @@ function renderPanelSettings() {
   box.innerHTML = '';
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, ...(S.config.brewDefaults || {}) };
   d._grainLabel = grainWtLabel(d.units);
-  // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
-  const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
-  now.onchange = () => setSound(now.checked);
-  const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
   const f = paneForm(panelSetFields, d, () => { }, !admin);
   const save = guard(async () => {
     f.read();
@@ -16740,7 +16837,7 @@ function renderPanelSettings() {
     showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(cur.hoverDelay);
     renderWs(); renderMenuPane(); savedPop('Panel settings saved'); });
   const order = menuOrderTable(admin);
-  box.append(h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+  box.append(h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
     h('h4', { id: 'sec-menuOrder' }, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
 }
 
@@ -20052,4 +20149,4 @@ async function importSchemaFile() {
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)
-load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); setTimeout(askSound, 800); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

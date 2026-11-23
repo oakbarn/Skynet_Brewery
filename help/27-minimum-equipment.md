@@ -181,7 +181,7 @@ Core cost, without sensors and outputs: about **$25-30 for System 1 with a Windo
 - **Browsers:** tested in Chrome and Edge. Safari (iPhone, Mac) and Firefox are not fully tested yet.
 - **Phone layout:** works, but large Tabs are cramped on a phone screen.
 - **No graphs yet** on the Log page (the data can be downloaded as a spreadsheet file).
-- **Alarm sounds** play only on screens where **Enable sound** was pressed once (browsers block sound until you click).
+- **Alarm sounds** play only while the **Sound** icon on the Menu Bar is on, after one click on the screen (browsers block sound until you click).
 - **WiFi is the weakest link.** Use USB or Ethernet for anything that heats or pumps. On every link the board turns all outputs OFF if it hears nothing from the Pi for its lost link delay (10 seconds unless you change it; see [Connection ratings](69-connection-ratings)).
 - **One Brain at a time.** Two panels driving the same boards fight each other.
 - **Away from home only through Tailscale.** Never open a port on your router for the panel.

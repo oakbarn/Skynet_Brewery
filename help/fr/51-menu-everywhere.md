@@ -3,7 +3,7 @@
 Le bouton **☰ Menu** n'est pas seulement sur la page des Tabs. C'est un moyen de circuler depuis presque partout :
 
 - **Les fenêtres qui s'ouvrent** (Properties, régler une valeur ou une minuterie, Find, la Corbeille, les sauvegardes, les avertissements ...) ont un petit bouton **☰** dans leur coin en haut à droite.
-- **Toutes les autres pages** (Processes, Variables, Log, Devices, Media, File Move, Import, Settings, Help, Schema.json) ont un bouton **☰ Menu** sur la Menu Bar, à côté de Enable sound.
+- **Toutes les autres pages** (Processes, Variables, Log, Devices, Media, File Move, Import, Settings, Help, Schema.json) ont un bouton **☰ Menu** sur la Top Line. L'éditeur de Processes a la Menu Bar à la place (voir [La Menu Bar](40-menu-bar)).
 - Sur la page des **Tabs** et sur les **Menu tabs**, il reste où il a toujours été, au bout droit de la ligne des onglets.
 
 ## Ce qu'il contient {#what-is-in-it}

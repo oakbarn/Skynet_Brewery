@@ -12,7 +12,7 @@ Only an **Admin** can load, add, rename, back up, restore or delete a Schema, or
 
 ## Pick and load a Schema
 
-1. The **Schema** dropdown is on the Menu Bar, next to the panel's name, and also on **☰ Menu > Schema** and **☰ Menu > About**. It shows the Schema that is loaded now.
+1. The **Schema** dropdown is on the Top Line, next to the panel's name, and also on **☰ Menu > Schema** and **☰ Menu > About**. It shows the Schema that is loaded now.
 2. Pick another Schema in the list.
 3. The panel asks if you want to load it, with a ⚠ warning if any Process is running. Press **▶ Proceed**.
 4. Running Processes stop, every output is switched off, and the new Schema's tabs, Devices and Widgets take over. The one you left is kept just as it was. Pick it in the list to go back to it.

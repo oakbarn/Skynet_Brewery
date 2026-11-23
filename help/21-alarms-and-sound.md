@@ -74,9 +74,9 @@ wgt_AUD_Music_BH.play = false
 ```
 
 It has no `.visible`: a Process line that sets it is an error, since `.play` shows and hides it (Rule 7.27). With no picture of its
-own, it shows the drawing of the Skynet Audio folder its sound is in: **Songs**, **Text_to_voice**, **Fanfare**, **Beep**, **Nature** or
+own, it shows the picture of the Skynet Audio folder its sound is in: **Songs**, **Text_to_voice**, **Fanfare**, **Beep**, **Nature** or
 **Go_to_work** (in `media/sounds/Skynet`, each with the same six folders under **Patron**).
 
 It is not an Alarm. There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Audio Widget on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Audio Widget**.
 
-When the panel opens with sound off, Skynet asks **🔊 Turn sound on?**: press **🔊 Turn Sound On** (browsers only play sound after one click, so that click is it). While sound is off, a red **🔇 Sound is off** button stays on the Tab and **🔊 Turn Sound On** is at the top of the **☰ Menu**. It is once per browser, not per Tab. You can also press **Enable sound** on the Menu Bar. To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.
+Sound is turned on and off with the **Sound** icon on the Menu Bar (the ear with music notes, next to Emergency Off): one click turns it on, one more turns it off. While sound is off, a red **Do Not Enter** sign sits on its corner. Nothing pops up to ask. It is once per browser, not per Tab. To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default settings** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that. See [The Menu Bar](40-menu-bar).

@@ -12,7 +12,7 @@ exactly as OakBarn Brewery sent it, or whether something in it was changed.
 
 ## Where you see it
 
-- **On the Menu Bar**, after the version name:
+- **On the Top Line**, after the version name:
   - **✓ Official**: every program file is the one OakBarn Brewery sent.
   - **⚠ Changed**: some program files are not the way OakBarn Brewery sent them.
   - **⚠ Not Official**: this Skynet did not come from OakBarn Brewery. It is someone else's copy, or a test copy that was never released.
@@ -75,7 +75,7 @@ can't make them impossible. For your brewery, the safe habits are:
 
 - Get Skynet only from **OakBarn Brewery's Releases page** on GitHub, or from oakbarnbrewery.com.
 - Install and update with the **Setup** (or the installer for your computer).
-- Look for **✓ Official** on the Menu Bar.
+- Look for **✓ Official** on the Top Line.
 
 ## Virus checks
 

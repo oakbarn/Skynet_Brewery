@@ -98,8 +98,13 @@ on Tailscale, and connected to the internet; this is the same for a Pi Brain and
 *Replaced:* "The Brain = the main computer: a Raspberry Pi 4 or newer, or a mini PC. The Brain holds all text, picture and
 Schema files so the panel can be reached from anywhere." (2026-10-26)
 
-1.8 **Menu Bar** = the top line of the page (panel name "Skynet Brewery Panel", Schema dropdown,
-Tabs, Processes and so on). (2026-10-21)
+1.8 **Menu Bar** = the row with the **Brewery Name** in the middle and, at its right, the **Simulator balloon, Build, Sound, Emergency
+Off, ? and ☰ Menu** (Rule 2.69). It is on every Tab and in the Process Editor, in the same place and order (OakBarn Brewery, 2026-11-23,
+Panel Update 10, item 3: "Menu Bar Always here and in the exact same Place and Order"). The line above it on the other pages (panel
+name, Schema dropdown, Tabs, Processes, Variables, Log ...) is the **Top Line**: hidden on the Tabs to start (☰ Menu > Show Top Line),
+and off in the Process Editor ("Clutter do not need", item 1a). Help 40.
+*Replaced:* "Menu Bar = the top line of the page (panel name "Skynet Brewery Panel", Schema dropdown, Tabs, Processes and so on)."
+(2026-10-21)
 
 1.9 **Buttons:** a **Push button** is ON only while held, OFF on release. A **Toggle** stays ON or
 OFF until pressed again. A 100 ms one-shot is a **Pulse**. (2026-10-05, PR #28)
@@ -593,9 +598,14 @@ restated 2026-10-23, PR #94)
 *Replaced:* the first wording on 2026-10-04 asked for Yes/No dropdowns. Fritz corrected it the same
 day.
 
-2.6 **Choices with more than two answers are dropdowns.** A list that can grow ends with
+2.6 **Choices with more than two answers are dropdowns, except a short pick-one.** A list that can grow ends with
 "Add new ...". Behind a dropdown sits a gGlobal List: the list shows text, Processes see the
 number (Value). (2026-10-04, PR #14; how list boxes work, are filled and are limited: Help 189)
+**The short pick-one (OakBarn Brewery, 2026-11-23, Panel Update 10, item 5d: "If there are less than six (6) choices and only one may be
+selected, the One Click Rule overrides the DDLB that takes 2 clicks"):** fewer than six choices of which only one may be picked are
+one-click boxes in a row, not a dropdown (Rules 2.1, 2.44): one click picks it, and the box picked is filled in. The first one is the
+New Process dialog's Flow, Sub, Repeat and Looper (Rule 16.13). It is for new work; the short dropdowns already in Skynet are listed in
+the Panel Updates sandbox to change one at a time. A list that can grow ("Add new ...") stays a dropdown.
 
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
 a swatch, then Custom, which opens the Color Picker (Rule 2.48). (2026-10-05, PR #31) **White** in any color picker is **RGB 250 250 250 (#FAFAFA)**, the same White
@@ -1520,6 +1530,41 @@ Timer"; names picked "Rule words: wait_boil, skn_ timers", Rule 3.20). **`skn_Bo
 - **Hop alerts run on the Boil Timer:** `start_hop_alerts` with no timer named follows `skn_Boil_Timer` while it runs (Rule 17.4).
 - Fermenters' own timers ("each would need their own DateTime type") are not built. Panel only: the BruControl Import brings in no
   Skynet Brew Timer.
+
+2.69 **The Menu Bar: one place, one order, and the Sound icon** (OakBarn Brewery, 2026-11-23, Panel Update 10, items 2 and 3: "Menu Bar
+Always here and in the exact same Place and Order On a Tab. Remove any from a menu Bar or elsewhere"; "Replace Sound Nanny State Dialog
+that is at the start of opening with this Toggle Icon"; "The space behind an optional Icon or balloon is the scheme color and left as
+blank space"):
+- **The order, left to right:** the **Simulator balloon**, **Build** (Edit layout, admins), **Sound**, **Emergency Off** (Rule 6.41), the
+  yellow **?**, **☰ Menu**. The Brewery Name is in the middle (Rule 12.4). It is the same on every Tab and in the Process Editor
+  (Rule 2.70), where the Menu Bar is the right end of the top row.
+- **An optional icon keeps its space:** the Simulator balloon shows only in Simulator mode (☰ Menu > Switch to Simulator); Build shows
+  only to an admin and not in the Process Editor. When hidden, its space stays and shows the scheme color, so nothing moves.
+- **The Sound icon** (OakBarn Brewery's own picture): one click turns sound on or off in this browser; while it is off, the red Do Not
+  Enter sign sits on its corner. It is the only sound switch: the "Turn sound on?" pop-up, the Enable sound button, the red "Sound is
+  off" reminder and the copies in ☰ Menu and Default settings are gone (no nanny pop-ups). Browsers play nothing until the page is
+  clicked once; with **Turn Sound On when starting** (☰ Menu > Default settings) on, sound is on and plays after that first click.
+- **No copies:** the Emergency Off and Enable sound buttons that were on the Top Line are gone; each icon is only on the Menu Bar.
+- **The icons are OakBarn Brewery's own pictures** (made with Adobe Firefly, Rule 9.12), in `public/icons`, made small (96 px) for the
+  Setup exe. They are not Image Library pictures and are not picked by a user.
+- **Undo, Save and Close under it:** in the Process Editor they are at the right of the second row. On a Tab, see the open question
+  (outside Edit layout there is nothing to save or close).
+Help 40, 21. Panel only: the BruControl Import has its own pages.
+
+2.70 **The Process Editor top** (OakBarn Brewery, 2026-11-23, Panel Update 10, item 1, a picture with each part marked a to v):
+- **Top row:** the Process dropdown, **New**, then icons **Delete** (Trash), **Recycle Bin**, **Check** (green check), **Start**
+  (red while the Process is stopped, green while it runs), **Stop**, **Restart** and **Save**; the **Brewery Name** in the middle
+  (Rule 12.4); **Predictive text**, **Key** (the Color key), **📐 Constants**; then the Menu Bar (Rule 2.69), Build hidden.
+- **Second row:** **Find**, **Go To** with its **Line / Section** dropdown and its light-blue box (a line number, or a Section name:
+  a `step "Sparge"` line or a `[Sparge]` label; the box widens as you type; empty, Go To asks for the line as Ctrl+G does); the other
+  buttons that were there are kept (OakBarn Brewery, 2026-11-23: "A One click rule but also everything on Hamburger"): the name, class,
+  Version, Update Version, state, Add steps, Restart if it fails, All Processes, Suggest, Picture, Save to file, Colors; then **Undo**,
+  **Save** and **Close** at the right. The Save icon and the Save button do the same thing ("Clutter exception").
+- **Everything is also on the ☰ Menu** while the Process Editor is open (a Process Editor group at the top), each one doing the same as
+  its button. Rename and Stop all stay above the Process list.
+- **The Top Line is off** in the Process Editor ("Clutter do not need"); every page is on the ☰ Menu (Rule 2.4) and Close goes back to
+  the Tabs.
+Help 30. Panel only.
 
 ## 3. Names and file names
 
@@ -4127,8 +4172,11 @@ Panel Update 9, items 1 and 2):
   **Patron** folder with the same six. Every Skynet sound that was loose in `sounds/Skynet` is in **Songs**. On start the Brain makes any
   folder that is missing and moves a loose Skynet sound into Songs (a copy already in Songs wins; Rule #1, nothing else is touched).
   A bare file name still finds its sound in any subfolder.
-- **Drawings:** each folder has an original line drawing on a light (250,250,250) background, the music note in blue:
-  `Images/Skynet/Miscellaneous/Skynet_Audio_<folder>.svg` (Skynet pictures 239 to 244, Rule 9.12, Media_Licenses).
+- **Pictures:** each folder has its own picture on a light (250,250,250) background: `Images/Skynet/Miscellaneous/Skynet_Audio_<folder>.svg`
+  (Skynet pictures 239 to 244, Rule 9.12, Media_Licenses). Since Panel Update 10 (OakBarn Brewery, 2026-11-23: "These are for the media
+  catergorys") they are OakBarn Brewery's own pictures (Adobe Firefly), kept inside each .svg as a small JPEG: Songs a music note,
+  Text_to_voice a man shouting, Fanfare a bugle, Beep a desert bird ("no resemblence" to any cartoon), Nature a koi pond, Go_to_work
+  brewers marching off to work. The same file names, so nothing else changes.
 - **The Audio Widget** shows its own picture (`.path_image`) or, with none, the drawing of the folder its sound is in. It is on top
   (Layer 1) while it plays and hidden when stopped: `.play = true` plays it and shows it, `.play = false` stops and hides it.
 - **The one exception** (to Rules 1.29 and 6.15, which give every Widget `.visible`; OakBarn Brewery: an exception to any Rule): an
@@ -4919,7 +4967,12 @@ have any patron e mails on them"):
   the like, with their tick boxes) are OakBarn Brewery's own system outside Skynet; no Brain holds them.
 - **Patron: $10 every 6 months** (Rule 12.3). Perks: **Request a Feature** (☰ Menu > ⭐ Request a Feature, sent from the Brain's own
   email account to support@oakbarnbrewery.com, or the user's mail program), **Email alert for new Releases** (outside Skynet), **Send
-  your pump to OakBarn Brewery** (coming with My Pumps). A non-Patron who tries a perk sees a friendly note with the levels and
+  your pump to OakBarn Brewery** (coming with My Pumps), and **Your Brewery Name** (OakBarn Brewery, 2026-11-23, Panel Update 10, items
+  4, 5g, 5h: "Brewery Name Becomes a Patron Perk. If Not a Patron Put in Skynet Panel"; picked on a card: built now, and a non-Patron's
+  new Process gets a Copyright with no name): a Patron's Brewery Name (☰ Menu > Default settings; empty: the name on the Patron code)
+  shows on the Menu Bar and in the Process Editor, and is the Copyright and **Created by** of every new Process (Rule 16.13). Not a
+  Patron: the Menu Bar shows **Skynet Panel**, the Brewery Name box is greyed out (Rule 18.46) and keeps what was typed, and a new
+  Process says **Copyright © year** with no name. A non-Patron who tries a perk sees a friendly note with the levels and
   perks and a link to oakbarnbrewery.com, each time. The levels and perks are a first try, to be adjusted.
 Both programs (Settings is the same). (thread "Let users build their own Pump Templates", Help 198)
 
@@ -5324,6 +5377,19 @@ next line, the same as `sleep 7000` (sleep counts in milliseconds). It is writte
 attribute (Name.attribute, Rule 1.15). Decimals and variables work (`delay 0.5`, `delay vV_Secs`). It runs as a sleep in every way:
 Override, the Override pop-up, Testing speed-up and the timeline. `delay` is a reserved word. Help 22 and 5. **Both programs:** the
 BruControl Import reads Processes with the same reader (BruControl scripts use sleep in ms, so nothing changes there).
+
+16.13 **A new Process picks its class once** (OakBarn Brewery, 2026-11-23, Panel Update 10, item 5: "Flow/Sub/Repeat/Looper becomes part
+of the New Process and is set when the Process is created and cannot be changed once saved"):
+- **New** (or ➕ Add New Process in the Process dropdown) asks the name (the browser's box: "Popup is good"), then the **New Process**
+  dialog: **Flow, Sub, Repeat, Looper** as one-click boxes (Rule 2.6), what each one is and how it is numbered, and **Save**, Close, ✕.
+  Save stays greyed until a box is clicked; Close makes nothing.
+- **The class is never changed after it is saved:** the editor shows it, and the Brain refuses a change. A Process made before this
+  keeps the class it had. A rename or a Recycle Bin restore keeps it. A wrong pick: make a new Process and paste the text in.
+- **Spaces become `_`** in the name (`start My_New_Brew_Process`); line 1 keeps the name as typed, like a Label.
+- **The new text:** `//<name as typed>`, (a Patron only) `// Created by <Brewery Name> : <date time>`, `//MIT License Granted for all
+  Scripts and Configurations`, `//Copyright © <Brewery Name> <year>` (not a Patron: `//Copyright © <year>`), then a few comment lines
+  that show how `/* ... */` and `//` comments are written.
+Help 30. **Both programs:** the BruControl Import sets each Process's class when it brings it in (it guesses it from the name, as before).
 
 ## 17. Recipes
 
@@ -7526,3 +7592,4 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.
 - 2026-11-21: Rule 6.19 Methods hotspot made bigger (OakBarn Brewery, screenshot of the 3 Vessel 1 Pump HLT: "Hotspot too small increase to purple area"): the strip now runs from the Element's end plate out to 10 px past the Vessel wall, never thinner than 25 px (was 10 px outside the wall, with a gap after the end plate). Help 150 (and French). Checked against the BruControl Import program: its Build page uses the same Panel drawing, nothing else changes.
 - 2026-11-22: Rule 1.18 changed, Rules 2.68, 4.9 and 19.11 added (Panel Update 9 Part 2, items 10d, 31, 14 and 16; OakBarn Brewery picked "Rule words: wait_boil, skn_ timers"): the Boil Probe switch and `wait_boil` / `wait_boil -1` built; the Skynet Brew Timers `skn_Boil_Timer`, `skn_Mash_Timer`, `skn_Whirlpool_Timer` (hop alerts follow the Boil Timer); right-drag a copy off a Vessel or Equipment Template; four 5 gallon stove kettles. Item 15 (Vessels and flow) is parked in the Panel Updates Sandbox, entry 52 (OakBarn Brewery: "in Panel Update sandbox as I may rethink it"). Help 22, 138, 155, 238, 246 (new), 50 and French.
+- 2026-11-23: Panel Update 10 (OakBarn Brewery, PDF of 5 items). Rule 1.8 changed (the Menu Bar is the Brewery Name row with its icons; the old top line is the Top Line), Rule 2.6 changed (fewer than six pick-one choices are one-click boxes, item 5d), Rules 2.69 (Menu Bar order, kept spaces, Sound icon replaces the Turn sound on? pop-up), 2.70 (Process Editor top in icons, Go To Line or Section, everything also on ☰ Menu) and 16.13 (class picked once in the New Process dialog, new Process text) added, Rule 12.4 (Your Brewery Name Patron perk; a non-Patron sees Skynet Panel) changed. OakBarn Brewery's own icons in public/icons (not the Image Library). Help 2, 13, 21, 30, 33, 40, 155, 198 and French. Checked against both programs: the BruControl Import keeps setting a Process's class when it brings it in; its own pages have no Menu Bar. (thread "Build Panel Update 10")

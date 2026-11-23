@@ -10,7 +10,7 @@ Un **Tab** est un écran de votre brasserie : une image de fond sur laquelle son
 - **Touchez une valeur** pour ouvrir une grande fenêtre avec des boutons − / + et un pavé numérique.
 - Les éléments réglés sur **Ask before changing** (demander avant de changer) affichent d'abord de grands boutons ON / OFF, pour qu'un geste maladroit sur l'écran ne démarre pas une pompe.
 - Les tuyaux montrent un **écoulement en mouvement** quand le liquide circule vraiment dedans.
-- Les alarmes ne font du bruit qu'après avoir appuyé sur **Enable sound** dans la barre de menus (choisissez d'abord **☰ Menu > Show Menu Bar**), une fois sur chaque écran qui doit les faire sonner (les navigateurs l'exigent).
+- Les alarmes ne font du bruit que lorsque l'icône **Sound** de la Menu Bar est active (sans le panneau rouge Sens interdit), et après un clic sur l'écran (les navigateurs l'exigent). Voir [La Menu Bar](40-menu-bar).
 
 ## Changer la disposition (Admins) {#changing-the-layout-admins}
 

@@ -103,7 +103,7 @@ const BAR = [
   ['#barEdit', ['tabs', 'changing-the-layout-admins']],
   ['#simBar', ['simulator-bar']],
   ['#barSim', ['simulator-or-real-boards']],
-  ['#soundBtn', ['alarms-and-sound']],
+  ['#barSound', ['alarms-and-sound']],
   ['#who', ['login']],
   ['#top', ['getting-started', 'finding-your-way']],
 ];

@@ -132,7 +132,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **☰ Menu**: the button at the top right of the Tabs page. Edit layout is its first choice; the rest open Menu tabs. See [The ☰ Menu](33-menu).
 
-**Menu Bar**: the top line of the page: the panel name, the Schema dropdown, Tabs, Processes and so on. See [The Menu Bar](40-menu-bar).
+**Menu Bar**: the row with the Brewery Name in the middle and the Simulator balloon, Build, Sound, Emergency Off, ? and ☰ Menu at its right, in the same place on every Tab and in the Process Editor. See [The Menu Bar](40-menu-bar).
 
 **Menu tab**: a page opened from the ☰ Menu (Default settings, Equipment Profile, Mash Profile, Boil Profile, the other profiles and Templates). It shows next to the screen tabs, with a ✕ to close it, and has an Order number.
 
@@ -221,6 +221,8 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 **Tailscale**: a free private network between your own devices, for using the panel away from home safely. See [Installing Tailscale on Windows](00-tailscale-windows).
 
 **Template**: a ready-made vessel (Vessel Template) or set of up to four fittings (Bundled Fitting Template), kept in a library. Skynet Templates come with the panel and are only cloned; User Bundled Templates are your own. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+
+**Top Line**: the line at the very top of the other pages: the panel name, the Schema dropdown, Tabs, Processes and so on. Hidden on the Tabs to start, and off in the Process Editor. See [The Menu Bar](40-menu-bar).
 
 ## U
 

@@ -4,7 +4,7 @@ The Help and the balloons (Hover Help) can be read in **English** or in **French
 
 ## Picking the language
 
-1. Open Help (the yellow **?** next to **☰ Menu**, or **Help** on the Menu Bar).
+1. Open Help (the yellow **?** next to **☰ Menu**, or **Help** on the Top Line).
 2. At the top of the page list, pick **🌐 Français** in **🌐 Help language**. Pick **🌐 English** to go back.
 
 The browser remembers the choice, so Help opens in the same language next time on that PC, phone or tablet. Each browser has its own choice: one person can read Help in French while another reads it in English. The balloons on the panel follow the same choice at once, even in a panel window that is already open.
