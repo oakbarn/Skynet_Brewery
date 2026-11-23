@@ -224,6 +224,13 @@ Note: inside a .bsmx file BeerSmith keeps its own US units: weights in **ounces*
 - **Ignore it** (picked to start): the Tab's Efficiency stays as it is.
 - **Put on** the Brew on Tab: the file's number goes into that Tab's own Brewhouse Efficiency. Skynet shows the change first ("72 % → 75 %"), and **↩ Undo** puts the old number back for a few seconds after. It changes every Recipe brewed on that Tab.
 
+**Hop Stands.** BeerSmith and BeerXML have no Skynet Hop Stands, so a recipe with Whirlpool hops asks one more box after the import (and after the Efficiency question):
+
+- Each Whirlpool hop: its **Hop Stand** (High, Middle or Low), or **No Hop Stand** (it goes in at flame out).
+- Each Hop Stand: its **Temperature** and **Time**.
+
+What the file gave is already filled in: a .bsmx file's whirlpool temperature and the hop's minutes. A BeerXML file has none, so those boxes start empty. **Close** keeps the recipe as imported. A Hop Stand you pick with no Temperature or Time gives one warning ("The chill won't stop for this hop.") and still saves.
+
 You can also import from the **Import** page, from Node-RED (POST the file to `/api/import/recipe?file=MyBeer.bsmx`), or from a Process (below).
 
 ## Mash Profile: Skynet or your own

@@ -224,6 +224,13 @@ Note : dans un fichier .bsmx, BeerSmith garde ses propres unités américaines :
 - **Ignore it** (l'ignorer, choisi au départ) : le rendement du Tab reste tel quel.
 - **Put on** le Tab Brew on : le nombre du fichier va dans le propre rendement de ce Tab. Skynet montre d'abord le changement (« 72 % → 75 % »), et **↩ Undo** remet l'ancien nombre pendant quelques secondes après. Cela change chaque recette brassée sur ce Tab.
 
+**Hop Stands.** BeerSmith et BeerXML n'ont pas les Hop Stands de Skynet, donc une recette avec des houblons Whirlpool pose une boîte de plus après l'import (et après la question du rendement) :
+
+- Chaque houblon Whirlpool : son **Hop Stand** (High, Middle ou Low), ou **No Hop Stand** (il est ajouté au flame out).
+- Chaque Hop Stand : sa **température** et son **temps**.
+
+Ce que le fichier donnait est déjà rempli : la température de whirlpool d'un fichier .bsmx et les minutes du houblon. Un fichier BeerXML n'en a pas, donc ces cases commencent vides. **Close** garde la recette telle qu'importée. Un Hop Stand choisi sans température ni temps donne un seul avertissement (« The chill won't stop for this hop. ») et enregistre quand même.
+
 Vous pouvez aussi importer depuis la page **Import**, depuis Node-RED (envoyez le fichier par POST à `/api/import/recipe?file=MyBeer.bsmx`), ou depuis un Process (plus bas).
 
 ## Mash Profile : Skynet ou le vôtre {#mash-profile-skynet-or-your-own}

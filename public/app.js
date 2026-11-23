@@ -19474,6 +19474,31 @@ async function rcFileEfficiency(v) {
   await put(+v);
   undoNote(`${tabTitle(w)}: Brewhouse efficiency ${was ?? '?'} % → ${v} %.`, () => put(was));
 }
+// The Hop Stand interview after an import (OakBarn Brewery, 2026-11-23: "Skynet Hop Stands are something that beersmith does not have so
+// we need to interview User when there are Post Boil Whirlpool Hops"; Rule 17.14): one dialog asks each Whirlpool hop's Hop Stand and
+// the Temperature and Time of the three stands. What the file gave (a .bsmx whirlpool temperature and the hop's minutes) is filled in;
+// a BeerXML file has none. Cancel keeps the Recipe as imported. One warning only: a picked stand left without its Temperature or Time.
+async function rcHopStandInterview() {
+  const rc = rcWork, wps = (rc?.ingredients?.hops || []).map((x, i) => [x, i]).filter(([x]) => x.use === 'whirlpool');
+  if (!wps.length) return;
+  const u = rcUnits(), st = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile)), w = {};
+  const fields = [['_n', `This recipe has ${wps.length} Post Boil Whirlpool hop${wps.length === 1 ? '' : 's'}. Skynet Hop Stands are not in BeerSmith or BeerXML: pick the Hop Stand each one goes in at, and each stand's Temperature and Time (the chill stops there and the cooling water is off for its Time). What the file gave is filled in. No Hop Stand: it goes in at flame out.`, 'note']];
+  for (const [x, i] of wps) { w['s' + i] = standOf(x, st) || ''; fields.push(['s' + i, `Hop ${i + 1} ${x.name || ''}`.trim(), 'sel', [['', 'No Hop Stand (flame out)'], ...st.map(s => [s.key, `Hop Stand ${s.label}`])]]); }
+  for (const s of st) {
+    w[s.key + 'T'] = s.tempC === null ? '' : rcRound(cTo(s.tempC, u.tempUnit), 0); w[s.key + 'M'] = s.min ?? '';
+    fields.push([s.key + 'T', `Hop Stand ${s.label} Temperature (${TU(u.tempUnit)})`, 'num'], [s.key + 'M', `Hop Stand ${s.label} Time (min)`, 'num']);
+  }
+  if (await dialog('Hop Stands', fields, w) !== 'ok') return;
+  readFields(w);
+  const n = v => v === undefined || v === null || v === '' || !Number.isFinite(+v) ? null : +v;
+  for (const [x, i] of wps) { if (w['s' + i]) x.stand = w['s' + i]; else { delete x.stand; x.wpTempC = null; } }      // no stand: its file temperature would pick one again
+  const shown = Object.fromEntries(st.map(s => [s.key, s.tempC === null ? '' : rcRound(cTo(s.tempC, u.tempUnit), 0)]));      // a temperature left as shown keeps the file's exact value
+  rc.hopStands = Object.fromEntries(st.map(s => [s.key, { tempC: n(w[s.key + 'T']) === null ? null : String(w[s.key + 'T']) === String(shown[s.key]) ? s.tempC : toC(+w[s.key + 'T'], u.tempUnit), min: n(w[s.key + 'M']) }]).filter(([, o]) => o.tempC !== null || o.min !== null));
+  await api('PUT', '/ui/recipe', rc); await rcLoad(); renderMenuPane();
+  const now = hopStands(rcWork, null, S.boilProfiles.find(x => x.id === rcWork.boilProfile));
+  const short = [...new Set(wps.map(([, i]) => w['s' + i]).filter(Boolean))].filter(k => !standReady(now.find(s => s.key === k)));
+  if (short.length) toast(`${short.map(k => 'Hop Stand ' + k).join(', ')}: no Temperature or Time. ${HS_WARN}`, true, 8000);
+}
 async function rcLoad() { rcView = await api('GET', '/ui/recipe'); rcWork = clone(rcView.recipe); profDirty.recipe = false; }
 function renderRecipeTab(box) {
   if (!rcView) { box.append(h('h3', {}, 'Recipe'), h('p', { class: 'muted' }, 'Loading ...')); rcLoad().then(renderMenuPane).catch(e => toast(e.message, true)); return; }
@@ -19507,6 +19532,7 @@ function renderRecipeTab(box) {
     }
     await rcLoad(); rcSub = 'recipe'; renderMenuPane(); toast(`Recipe "${r.name}" imported`);
     if (op && r.fileEfficiency) await rcFileEfficiency(r.fileEfficiency);
+    if (op) await rcHopStandInterview();      // after the Efficiency (its note is a toast too), before the library save so the saved copy has the stands
     if (op) await askSaveImported(r.name);
   });
   // the Recipe library: saved Recipes in config/recipes on the Brain

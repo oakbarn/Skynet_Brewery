@@ -89,4 +89,8 @@ assert.match(flow, /vSHops = skn_rcp_First_Wort_Hops\nhop_alert "1st Wort"\n\[Se
 assert.match(T('templates/process/Mash/Skynet_Mash.txt'), /hop_alert "1st Wort"\nask "Put any first wort hops in the boil kettle now/, 'before the First Run');
 assert.match(flow, /wait gblV_Brew_Status == 603\nhop_alert "Fermenter"/);
 assert.deepEqual(compile(flow).errors, [], 'the 3 Vessel sample still compiles');
+// the Hop Stand interview after an import (Rule 17.14, 2026-11-23): after the Efficiency question, before Save to the library
+const app = T('public/app.js');
+assert.match(app, /rcFileEfficiency\(r\.fileEfficiency\);\n\s*if \(op\) await rcHopStandInterview\(\);[^\n]*\n\s*if \(op\) await askSaveImported/);
+assert.match(app, /async function rcHopStandInterview\(\)[\s\S]*?x\.use === 'whirlpool'[\s\S]*?'No Hop Stand \(flame out\)'[\s\S]*?HS_WARN/);
 console.log('prepostboil ok');
