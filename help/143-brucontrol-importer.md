@@ -36,6 +36,11 @@ Click **Start ▶**.
 | Global | gGlobal |
 | Device (a board) | Interface |
 
+**Script output and variables.** In Skynet a Process's printed lines and its variables are still a choice, as in BruControl: in the
+Process editor, the **Output** list beside the code has **Current Process** (what the open Process prints) and **All Variables** (the
+value now of its variables and of every gGlobal). Skynet adds **Reset every Start**: switched on, the old Output lines are cleared each
+time the Process starts. See [The Process editor](30-process-editor).
+
 ## Page 3: Pick your BruControl config file
 
 **📄 Browse for the config file…** opens Windows' own Open box in **Documents\BruControl**, where BruControl keeps its

@@ -189,6 +189,9 @@
              and Close (item 1e: "stay here on every tab. Do not move them!"). The other buttons that were on this row are on the ☰ Menu
              (Process Editor group); they stay here, hidden, so the ☰ Menu clicks them -->
         <div class="bar procRow2 editTools">
+          <!-- Panel Update 13, item 1 (OakBarn Brewery, 2026-11-23: "Remove Rename and Change Stop All to the Stop Sign Icon"): Stop all is the
+               Stop Sign at the left of row 2; Rename is on the ☰ Menu (Process Editor group) -->
+          <button id="stopAll" type="button" class="icoBtn stopSign op-only" title="Stop all: stop every running Process" aria-label="Stop all"><img src="icons/Stop_Sign.png" alt=""></button>
           <button id="findBtn" type="button" class="icoBtn" title="Find (Ctrl+F) and Replace (Ctrl+H)" aria-label="Find"><img src="icons/Find.png" alt=""></button>
           <button id="findAllBtn" type="button" class="icoBtn findAll" title="Find in All Processes: find, and replace, in every Process of this Brain" aria-label="Find in All Processes"><img src="icons/Find_All.png" alt=""></button>
           <button id="goLine" type="button" class="icoBtn" title="Go To: the line number or the Section typed in the box beside it (Ctrl+G)" aria-label="Go To"><img src="icons/Go_To.png" alt=""></button>
@@ -204,6 +207,7 @@
             <button type="button" class="insCat" data-cat="com" aria-expanded="false" title="Common: every other normal command (sleep, delay, start, stop, play, print, show tab, new value ...)">Common</button>
           </span>
           <span id="procExtras" class="procExtras">
+          <button id="renScript" class="admin-only" title="Rename this Process">Rename</button>
           <strong id="scriptName">-</strong>
           <span id="scriptClass" class="procClass" title="Process class (Flow, Sub, Repeat or Looper): picked when the Process is made (New) and never changed after it is saved. It decides how its steps are numbered"></span>
           <span id="scriptVersion" class="muted" title="Process Version (YYMMDD_HH_MM_n)"></span>
@@ -276,7 +280,6 @@
     </div>
     <div class="split">
       <aside class="scriptList">
-        <div class="bar"><button id="renScript" class="admin-only">Rename</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running process">Stop all</button></div>
         <ul id="scriptList"></ul>
       </aside>
       <div class="editorPane">
@@ -297,9 +300,16 @@
           </div>
         </div>
         <div class="editor"><pre id="gutter"></pre><div class="codeWrap"><pre id="codeHl" aria-hidden="true"></pre><textarea id="code" placeholder="Pick a Process on the left (or in Pick a Process...) to see and change it, or press New to make one." spellcheck="false" wrap="off" autocomplete="off" autocapitalize="off"></textarea></div><ul id="autofill" class="hidden"></ul></div>
-        <ul id="problems"></ul>
-        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" class="swc" id="consoleAll"> all processes</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
-        <pre id="console"></pre>
+        <!-- Panel Update 13, items 2-4 (OakBarn Brewery, 2026-11-23): the problems and the Output are to the right of the code ("Revamp so
+             OutPut to the Right of the code"); Current Process or All Variables, a dropdown (item 3, Rule 2.6); Reset every Start (item 4) -->
+        <aside class="outCol">
+          <div class="outTop"><ul id="problems"></ul><button id="clearConsole" title="Clear: empty the Output window now">Clear</button></div>
+          <div class="outBar"><strong>Output</strong>
+            <select id="outPick" title="What the Output shows: Current Process, the lines the Process open in the editor prints; All Variables, the value now of each of its variables (while it runs) and of every gGlobal"><option value="process">Current Process</option><option value="vars">All Variables</option></select>
+            <label class="toggle" title="Reset every Start: when on, a Process's old Output lines are cleared each time that Process starts. Off: the Output keeps everything until Clear"><span class="sw"><input type="checkbox" id="consoleReset"><span class="swk"></span></span> Reset every Start</label>
+          </div>
+          <pre id="console"></pre>
+        </aside>
       </div>
     </div>
   </section>

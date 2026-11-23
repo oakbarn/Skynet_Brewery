@@ -1760,5 +1760,12 @@
  "Help in another language by AI translation: Export the Help for an AI, then Import the translation (Help > 🌐 Languages)": "L'aide dans une autre langue par traduction IA : exportez l'aide pour une IA, puis importez la traduction (Help > 🌐 Languages)",
  "Pick a Schema to load it (the same list as the Schema on the Top Line). The Schema Menu tab (Menu tabs > Schema) clones, renames, backs up and restores one.": "Choisissez un Schema pour le charger (la même liste que le Schema de la Top Line). Le Menu tab Schema (Menu tabs > Schema) en clone, renomme, sauvegarde et restaure un.",
  "Every Interface at once: the simulator (nothing real is switched). The Simulator balloon on the Menu Bar switches back to the Real boards": "Toutes les Interfaces à la fois : le simulateur (rien de réel n'est commuté). Le ballon Simulator de la Menu Bar revient aux vraies cartes (Real boards)",
- "Tell OakBarn Brewery about a bug, on GitHub or by email. Your Skynet version and browser are filled in.": "Signalez un bogue à OakBarn Brewery, sur GitHub ou par e-mail. Votre version de Skynet et votre navigateur sont remplis pour vous."
+ "Tell OakBarn Brewery about a bug, on GitHub or by email. Your Skynet version and browser are filled in.": "Signalez un bogue à OakBarn Brewery, sur GitHub ou par e-mail. Votre version de Skynet et votre navigateur sont remplis pour vous.",
+ "Stop all": "Tout arrêter",
+ ": stop every running Process": " : arrêter chaque Process qui tourne",
+ "Stop all: stop every running Process": "Tout arrêter : arrêter chaque Process qui tourne",
+ "Rename this Process": "Renommer ce Process",
+ "Clear: empty the Output window now": "Clear : vider la fenêtre Output maintenant",
+ "Reset every Start: when on, a Process's old Output lines are cleared each time that Process starts. Off: the Output keeps everything until Clear": "Reset every Start : activé, les anciennes lignes Output d'un Process sont effacées chaque fois que ce Process démarre. Désactivé : l'Output garde tout jusqu'à Clear",
+ "What the Output shows: Current Process, the lines the Process open in the editor prints; All Variables, the value now of each of its variables (while it runs) and of every gGlobal": "Ce que montre l'Output : Current Process, les lignes qu'affiche le Process ouvert dans l'éditeur ; All Variables, la valeur actuelle de chacune de ses variables (pendant qu'il tourne) et de chaque gGlobal"
 }

@@ -3,9 +3,17 @@
 L'écran **Processes** a deux rangées d'outils au-dessus de l'éditeur, la plupart en images (icônes) :
 
 - **La rangée du haut :** la liste des Processes, **New**, puis **Delete** (la poubelle rouge), **Recycle Bin** (corbeille), **Check** (la coche verte), **Start** (rouge quand le Process est arrêté, vert quand il tourne), **Stop**, **Restart** et **Save**. Le nom de votre brasserie est au milieu (**Skynet Panel** si vous n'êtes pas Patron). Puis **Predictive text**, **Key** (ce que veut dire chaque couleur), **📐 Constants**, et la Menu Bar : Sound, Emergency Off, le **?** jaune et **☰ Menu** (voir [La Menu Bar](40-menu-bar)).
-- **La deuxième rangée :** **Find** (la loupe), **Find in All Processes** (la loupe sur fond violet : elle cherche dans chaque Process), **Go To** (la flèche) avec sa case **Line / Section**, puis **Insert Line After** avec sa case bleu clair et cinq boutons : **Conditionals**, **Skynet Special**, **Devices**, **Widgets** et **Common** (voir plus bas). À droite, **Undo**, **Save** et **Close**, à la même place sur chaque page.
+- **La deuxième rangée :** **Tout arrêter** (Stop all, le panneau Stop rouge : il arrête chaque Process qui tourne), **Find** (la loupe), **Find in All Processes** (la loupe sur fond violet : elle cherche dans chaque Process), **Go To** (la flèche) avec sa case **Line / Section**, puis **Insert Line After** avec sa case bleu clair et cinq boutons : **Conditionals**, **Skynet Special**, **Devices**, **Widgets** et **Common**, chacun avec un petit ▾ gris car il ouvre une liste (voir plus bas). À droite, **Undo**, **Save** et **Close**, à la même place sur chaque page.
 
-L'image Save de la rangée du haut et le bouton Save font la même chose. Chacun d'eux est aussi dans le **☰ Menu** quand l'éditeur de Processes est ouvert, sous **Process Editor**. Le ☰ Menu a aussi le reste : le nom, la classe, la Version et l'état du Process, **Update Version**, **Add steps**, **Restart if it fails**, **Suggest**, **Picture**, **Save to file** et **Colors**. **Rename** et **Stop all** sont au-dessus de la liste des Processes. La barre jaune du Simulator est masquée quand l'éditeur de Processes est ouvert ; **☰ Menu > Show Simulator bar** la ramène jusqu'à ce que vous en sortiez.
+L'image Save de la rangée du haut et le bouton Save font la même chose. Chacun d'eux est aussi dans le **☰ Menu** quand l'éditeur de Processes est ouvert, sous **Process Editor**. Le ☰ Menu a aussi le reste : le nom, la classe, la Version et l'état du Process, **Update Version**, **Add steps**, **Restart if it fails**, **Suggest**, **Picture**, **Save to file**, **Colors** et **Rename**. La barre jaune du Simulator est masquée quand l'éditeur de Processes est ouvert ; **☰ Menu > Show Simulator bar** la ramène jusqu'à ce que vous en sortiez.
+
+**Les problèmes et l'Output** sont dans une colonne à droite du code :
+
+- **En haut**, les problèmes trouvés par Check (cliquez sur l'un d'eux pour aller à sa ligne), ou *No problems found*, et **Clear**, qui vide la fenêtre Output.
+- **Output** a une liste avec deux choix. **Current Process** montre ce qu'affiche (print) le Process ouvert dans l'éditeur. **All Variables** montre la valeur actuelle de chacune de ses variables (pendant qu'il tourne) et de chaque gGlobal, mise à jour chaque seconde.
+- **Reset every Start** (désactivé au départ) : quand il est activé, les anciennes lignes Output d'un Process sont effacées chaque fois que ce Process démarre, pour ne voir que cette exécution. Chaque navigateur retient les deux choix.
+
+Sur un téléphone, la colonne est sous le code.
 
 Chaque étape de l'ajout d'un Process, avec des images : [Pas à pas : ajouter un Process](240-step-by-step-add-a-process).
 

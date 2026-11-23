@@ -1789,3 +1789,28 @@ button.insCmd code { font-weight: bold; }
 button.barEdit, button.barSound, button.barEdit:hover, #top .eOff, .bar .eOff { background: #fafafa; }
 button.icoBtn.findAll { background: #7030a0; padding: 0; }
 button.icoBtn.findAll img { width: 32px; height: 32px; border-radius: 4px; }
+
+/* Panel Update 13 (OakBarn Brewery, 2026-11-23): Stop all is the Stop Sign at the left of the Process Editor's row 2 (item 1); the problems
+   and the Output sit in a column to the right of the code (item 2), with Current Process / All Variables as a dropdown (item 3,
+   Rule 2.6) and the Reset every Start switch (item 4) */
+button.icoBtn.stopSign img { width: 30px; height: 30px; }
+#view-scripts .editorPane { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 22%); column-gap: 10px; align-items: stretch; }
+#view-scripts .editorPane > .findBar, #view-scripts .editorPane > .editor { grid-column: 1; }
+#view-scripts .editor { height: max(320px, calc(100vh - 150px)); }
+#view-scripts .outCol { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; gap: 6px; min-height: 0; contain: size; }
+#view-scripts .outTop { display: flex; align-items: flex-start; gap: 8px; }
+#view-scripts .outTop #problems { flex: 1; margin: 0; max-height: 30vh; overflow: auto; }
+#view-scripts .outBar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+#view-scripts .outCol #console { flex: 1; height: auto; min-height: 0; }
+@media (max-width: 800px) {
+  #view-scripts .editorPane { grid-template-columns: 1fr; }
+  #view-scripts .editor { height: 52vh; }
+  #view-scripts .outCol { grid-column: 1; grid-row: auto; contain: none; margin-top: 8px; }
+  #view-scripts .outCol #console { height: 30vh; flex: none; }
+}
+/* Panel Update 13 (OakBarn Brewery, 2026-11-23: "add the little gray down triangles to the Process Buttons as they are sorta DDLBs. I like
+   the way that you present the choices in their own Dialog so do not change that"): Conditionals, Skynet Special, Devices, Widgets and
+   Common each show a small gray ▾; their lists open as before */
+button.insCat::after { content: '▾'; color: #9a9a9a; font-size: .85em; margin-left: 5px; }
+#view-scripts .outVarHead { font-weight: 700; margin: 6px 0 2px; color: var(--accent, #4fb3ff); }
+#view-scripts .outVarHead:first-child { margin-top: 0; }

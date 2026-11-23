@@ -5,11 +5,11 @@ Les Processes sont les étapes automatiques d'un brassage : ouvrir des vannes, f
 ## L'écran Processes {#the-processes-screen}
 
 - La liste de gauche montre chaque Process ; celui qui tourne est marqué. Le petit nombre devant chacun est son **Order** (ordre) : tapez un nouveau nombre pour le déplacer, et les autres se renumérotent tout seuls. Voir [L'ordre des Processes (Process Order)](38-process-order).
-- **New**, **Rename**, **Delete** (Admins).
+- **New**, **Delete** (Admins). **Rename** est dans le **☰ Menu**.
 - **Save** et **Check** (Admins). Check trouve les erreurs sans lancer le Process.
-- **Start**, **Arrêt** (Stop) et **Restart** (Operators et Admins). **Tout arrêter** (Stop all) arrête tous les Processes. Restart arrête le Process, efface sa mémoire et le relance depuis le début.
+- **Start**, **Arrêt** (Stop) et **Restart** (Operators et Admins). **Tout arrêter** (Stop all, le panneau Stop rouge) arrête tous les Processes. Restart arrête le Process, efface sa mémoire et le relance depuis le début.
 - **Restart if it fails** (Admins) : relancer le Process tout seul s'il s'arrête sur une erreur. Voir *Restarting Processes*.
-- **Output** montre ce que les Processes affichent (print). Cochez **all processes** pour voir la sortie de tous les Processes.
+- **Output**, à droite du code : **Current Process** montre ce qu'affiche (print) le Process ouvert ; **All Variables** montre les valeurs de ses variables et de chaque gGlobal. **Reset every Start** efface les anciennes lignes d'un Process chaque fois qu'il démarre.
 
 **Un Process qui contient une erreur ne démarre pas.** Les erreurs sont listées avec leur numéro de ligne ; cliquez sur l'une d'elles pour y aller.
 

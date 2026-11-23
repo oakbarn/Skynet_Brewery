@@ -390,6 +390,7 @@ function connect() {
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('media', () => recheckMissingPics());      // pictures added from the panel (File Move): File Not Found looks again
+  es.addEventListener('started', e => outResetOnStart(JSON.parse(e.data).script));
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
@@ -13846,7 +13847,8 @@ $('#eOffBar').addEventListener('mouseleave', () => { clearTimeout(eOffTimer); eO
 addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('#eOffBig')) eOffBigClose(); });
 // the Override and Stop buttons in the Help language (Rule 11.11): again when it is picked here or in another window
 setStopWord(safetyWord);      // a Process Widget's ■ Stop
-function safetyWords() { $('#stopAll').textContent = safetyWord('Stop all'); const st = $('#stopScript'); st.title = safetyWord('Stop') + ': stop this Process'; st.setAttribute('aria-label', safetyWord('Stop')); }
+function safetyWords() { const sa = $('#stopAll'); sa.title = safetyWord('Stop all') + ': stop every running Process'; sa.setAttribute('aria-label', safetyWord('Stop all'));      // the Stop Sign (Panel Update 13, item 1)
+  const st = $('#stopScript'); st.title = safetyWord('Stop') + ': stop this Process'; st.setAttribute('aria-label', safetyWord('Stop')); }
 function safetyRefresh() { safetyWords(); if (curWs()) renderWs(); }
 safetyWords();
 $('#hpLang')?.addEventListener('change', () => setTimeout(safetyRefresh));
@@ -13938,18 +13940,53 @@ function renderConsole() {
   // the Output is drawn only while it can be seen (the Processes page, this tab in front); otherwise once when it is opened
   if (document.hidden || view !== 'scripts') { consoleStale = true; return; }
   consoleStale = false;
-  const all = $('#consoleAll').checked;
-  const rows = S.console.filter(c => all || !curScript || c.script === curScript).slice(-400);
+  if (outVars()) return renderOutVars();
+  // Panel Update 13 (OakBarn Brewery, 2026-11-23: "you only want the current process in that out Put Box"): the open Process's lines only
+  const rows = S.console.filter(c => !curScript || c.script === curScript).slice(-400);
   const pad = n => String(n).padStart(2, '0');
   $('#console').replaceChildren(...rows.map(c => {
     const d = new Date(c.ts), row = h('div');
-    setRich(row, `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${all ? '[' + c.script + '] ' : ''}${c.text}`);
+    setRich(row, `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${c.text}`);
     return row;
   }));
   $('#console').scrollTop = 1e9;
 }
-$('#consoleAll').onchange = renderConsole;
 $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
+// Panel Update 13, item 3 ("Change Slider to DDLB: Current Process, All Variables"; OakBarn Brewery: "it would show the values for
+// variables (both regular and gGlobals) on the Output"): a dropdown (Rule 2.6, allowed if desired) in place of the all processes slider.
+// All Variables lists the open Process's own variables (while it runs) and then every gGlobal, each with its value now, again each second.
+// Each browser remembers the pick.
+const OUT_PICK_KEY = 'bp.outPick', OUT_RESET_KEY = 'bp.outReset';
+const outVars = () => $('#outPick').value === 'vars';
+let outVarTimer = 0;
+async function renderOutVars() {
+  clearTimeout(outVarTimer);
+  const mine = curScript ? await api('GET', `/ui/scripts/${encodeURIComponent(curScript)}/vars`).catch(() => []) : [];
+  if (!outVars() || view !== 'scripts' || document.hidden) { consoleStale = true; return; }
+  const show = v => v === null || v === undefined || v === '' ? '-' : typeof v === 'object' ? JSON.stringify(v) : String(v);
+  const line = (n, k, v) => h('div', { class: 'outVar' }, h('b', {}, n), h('span', { class: 'muted' }, ` (${k}) `), show(v));
+  const globals = (S.config?.elements || []).filter(e => e.type === 'gGlobal').sort((a, b) => a.name.localeCompare(b.name));
+  $('#console').replaceChildren(
+    h('div', { class: 'outVarHead' }, curScript ? `${curScript}: ${mine.length ? mine.length + ' variable' + (mine.length === 1 ? '' : 's') : 'not running, no variables now'}` : 'No Process open'),
+    ...mine.map(v => line(v.name, v.type, v.value)),
+    h('div', { class: 'outVarHead' }, `gGlobals: ${globals.length}`),
+    ...globals.map(e => line(e.name, e.kind || 'gGlobal', S.values[e.name]?.value)));
+  outVarTimer = setTimeout(renderConsole, 1000);
+}
+function setOutPick(v, keep = true) {
+  $('#outPick').value = v === 'vars' ? 'vars' : 'process';
+  if (keep) try { localStorage.setItem(OUT_PICK_KEY, $('#outPick').value); } catch { }
+  renderConsole();
+}
+$('#outPick').onchange = () => setOutPick($('#outPick').value);
+// item 4: Reset every Start (off to start): when on, a Process's old Output lines are cleared each time that Process starts
+try { setOutPick(localStorage.getItem(OUT_PICK_KEY), false); $('#consoleReset').checked = localStorage.getItem(OUT_RESET_KEY) === 'on'; } catch { }
+$('#consoleReset').onchange = () => { try { localStorage.setItem(OUT_RESET_KEY, $('#consoleReset').checked ? 'on' : 'off'); } catch { } };
+// the Brain says when a Process starts (Start, Restart, a start line, a Process Widget ...), before its first line runs
+function outResetOnStart(name) {
+  if (!$('#consoleReset').checked || !name) return;
+  S.console = S.console.filter(c => c.script !== name); renderConsole();
+}
 
 // ---------------------------------------------------------------- variables page: gGlobal
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
@@ -16066,10 +16103,11 @@ function procEditorMenu(list, item) {
   }
   const sa = $('#saveAs');
   if (curScript && procShown(sa)) for (const o of [...sa.options].filter(o => o.value)) list.append(item('💾 Save to file: ' + o.textContent, () => { sa.value = o.value; sa.dispatchEvent(new Event('change')); }, { title: sa.title }));
-  for (const [sel, label] of [['#predictOn', 'Predictive text'], ['#colorsOn', 'Colors'], ['#scriptAutoRestart', 'Restart if it fails']]) {
+  for (const [sel, label] of [['#predictOn', 'Predictive text'], ['#colorsOn', 'Colors'], ['#scriptAutoRestart', 'Restart if it fails'], ['#consoleReset', 'Output: Reset every Start']]) {
     const c = $(sel), l = c?.closest('label'); if (!c || c.disabled || !l || !procShown(l)) continue;
     list.append(item(`${c.checked ? '☑' : '☐'} ${label}`, () => { c.checked = !c.checked; c.dispatchEvent(new Event('change')); }, { title: l.title }));
   }
+  { const op = $('#outPick'); if (procShown(op)) for (const o of op.options) list.append(item(`${op.value === o.value ? '☑' : '☐'} Output: ${o.textContent}`, () => { op.value = o.value; op.dispatchEvent(new Event('change')); }, { title: op.title })); }
   list.append(h('hr'));
 }
 // Panel Update 12, item 2f: the last ☰ Menu choice picked, by its words; its copy sits in the gap (lastSpot) once the whole list is made

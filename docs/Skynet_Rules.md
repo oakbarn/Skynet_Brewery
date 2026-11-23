@@ -602,10 +602,18 @@ day.
 "Add new ...". Behind a dropdown sits a gGlobal List: the list shows text, Processes see the
 number (Value). (2026-10-04, PR #14; how list boxes work, are filled and are limited: Help 189)
 **The short pick-one (OakBarn Brewery, 2026-11-23, Panel Update 10, item 5d: "If there are less than six (6) choices and only one may be
-selected, the One Click Rule overrides the DDLB that takes 2 clicks"):** fewer than six choices of which only one may be picked are
-one-click boxes in a row, not a dropdown (Rules 2.1, 2.44): one click picks it, and the box picked is filled in. The first one is the
+selected, the One Click Rule overrides the DDLB that takes 2 clicks"):** fewer than six choices (six or fewer since Panel Update 13,
+below) of which only one may be picked are one-click boxes in a row (or, if desired, a dropdown: below) (Rules 2.1, 2.44): one click picks it, and the box picked is filled in. The first one is the
 New Process dialog's Flow, Sub, Repeat and Looper (Rule 16.13). It is for new work; the short dropdowns already in Skynet are listed in
 the Panel Updates sandbox to change one at a time. A list that can grow ("Add new ...") stays a dropdown.
+**A dropdown is allowed for a short pick-one too, if desired; over six it must be one** (OakBarn Brewery, 2026-11-23, Panel Update 13,
+item 3: "Change Slider to DDLB"; on the Rule 2.6 question: "it is the normal way that DDLBs work. and It is actually sort of 3. Click
+Down Arrow to show choices, Slider if list is long. Click to Select. So any DDLB as a way to choose something works that way in any
+program, not just Skynet"; "The rule should be if desired. Not if always just allowed"; "Over 6 must be DDLB"):
+- **More than six choices:** a dropdown, always.
+- **Six or fewer, only one may be picked:** one-click boxes in a row (the short pick-one above), or a dropdown where it suits. The
+  dropdown is allowed, never required. The first one is the Process Editor's Output pick, **Current Process / All Variables**
+  (Rule 2.70). The short dropdowns listed in the Panel Updates sandbox may stay.
 
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
 a swatch, then Custom, which opens the Color Picker (Rule 2.48). (2026-10-05, PR #31) **White** in any color picker is **RGB 250 250 250 (#FAFAFA)**, the same White
@@ -1556,7 +1564,8 @@ Help 40, 21. Panel only: the BruControl Import has its own pages.
   (red while the Process is stopped, green while it runs), **Stop**, **Restart** and **Save**; the **Brewery Name** in the middle
   (Rule 12.4); **Predictive text**, **Key** (the Color key), **📐 Constants**; then the Menu Bar (Rule 2.69), Build hidden.
 - **Second row** (changed 2026-11-23, Panel Update 11, item 1c: "Have the Line like I ask. {common are all other normal command}"):
-  **Find**, **Find in All Processes** (OakBarn Brewery: "a global Process scope find that searches all processes, add it to the right
+  **Stop all** as the red **Stop Sign** icon first (Panel Update 13, item 1: "Remove Rename and Change Stop All to the Stop Sign Icon";
+  OakBarn Brewery's own StopSign.png, public/icons/Stop_Sign.png; its hover word follows Rule 11.11), then **Find**, **Find in All Processes** (OakBarn Brewery: "a global Process scope find that searches all processes, add it to the right
   of the find and make the icon with a Purple background and the 250,250,250 white"), **Go To** with its **Line / Section** dropdown
   and its light-blue box (a line number, or a Section name: a `step "Sparge"`
   line or a `[Sparge]` label; the box widens as you type; empty, Go To asks for the line as Ctrl+G does); then **Insert Line After**
@@ -1565,7 +1574,9 @@ Help 40, 21. Panel only: the BruControl Import has its own pages.
   button do the same thing ("Clutter exception").
 - **Insert Line After:** a pick goes in as a **new line after the line number in the box**, with that line's indent, and the number
   moves down one so the next pick goes under it. Clicking or typing in the Process puts the cursor's line in the box; 0 = the top.
-  Each button opens its list under it: **Conditionals** (if, elseif, else, endif, wait, goto, goLine, step, a [label]); **Skynet
+  Each button has a small gray **▾** (Panel Update 13, OakBarn Brewery, 2026-11-23: "add the little gray down triangles to the
+  Process Buttons as they are sorta DDLBs. I like the way that you present the choices in their own Dialog so do not change that") and
+  opens its list under it: **Conditionals** (if, elseif, else, endif, wait, goto, goLine, step, a [label]); **Skynet
   Special** (Skynet's own commands, the skn_ names, which go in at the cursor, and the Skynet Constants); **Devices** and **Widgets**
   (the Insert bar's groups, Process sandbox entry 13: only items already in the Schema, pick one, then its action button or
   light-blue box); **Common** (every other command; worked out from the command list, so a new command lands here by itself). A
@@ -1582,7 +1593,17 @@ Help 40, 21. Panel only: the BruControl Import has its own pages.
   white. Any white text should be 250,250,250 white"): every icon (Process Editor and Menu Bar) sits on #fafafa, never transparent, and
   white words in the Panel are #fafafa.
 - **Everything is also on the ☰ Menu** while the Process Editor is open (a Process Editor group at the top), each one doing the same as
-  its button. Rename and Stop all stay above the Process list.
+  its button. Nothing is above the Process list any more (Panel Update 13, item 1): **Rename** is on the ☰ Menu only and **Stop all** is
+  the Stop Sign on the second row.
+- **Problems and Output to the right of the code** (Panel Update 13, item 2: "Revamp so OutPut to the Right of the code"): a column
+  beside the editor, as tall as it, with the problems Check found (or No problems found) and **Clear** at the top, then **Output** with
+  its **Current Process / All Variables** dropdown (item 3, Rule 2.6, in place of the all processes slider; OakBarn Brewery: "you only
+  want the current process in that out Put Box", "it would show the values for variables (both regular and gGlobals) on the Output"):
+  Current Process shows only the lines the open Process prints; All Variables lists the open Process's own variables (while it runs) and
+  every gGlobal, each with its value now, again each second. Then the **Reset every Start**
+  switch (item 4: "which basically clears every time the Process is started first"; off to start): on, a Process's old Output lines are
+  cleared each time that Process starts (Start, Restart, a start line, a Process Widget), just before its first line runs. Each browser
+  remembers both. Both are on the ☰ Menu too. On a phone the column is under the code.
 - **The Top Line is off** in the Process Editor ("Clutter do not need"); every page is on the ☰ Menu (Rule 2.4) and Close goes back to
   the Tabs.
 Help 30. Panel only.
@@ -7659,3 +7680,4 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 - 2026-11-23: Panel Update 10 (OakBarn Brewery, PDF of 5 items). Rule 1.8 changed (the Menu Bar is the Brewery Name row with its icons; the old top line is the Top Line), Rule 2.6 changed (fewer than six pick-one choices are one-click boxes, item 5d), Rules 2.69 (Menu Bar order, kept spaces, Sound icon replaces the Turn sound on? pop-up), 2.70 (Process Editor top in icons, Go To Line or Section, everything also on ☰ Menu) and 16.13 (class picked once in the New Process dialog, new Process text) added, Rule 12.4 (Your Brewery Name Patron perk; a non-Patron sees Skynet Panel) changed. OakBarn Brewery's own icons in public/icons (not the Image Library). Help 2, 13, 21, 30, 33, 40, 155, 198 and French. Checked against both programs: the BruControl Import keeps setting a Process's class when it brings it in; its own pages have no Menu Bar. (thread "Build Panel Update 10")
 - 2026-11-23: Panel Update 11 (OakBarn Brewery, PDF "Panel Update 11", item 1 the Process Editor top, parts a to e). Rule 2.70 changed (second row: Find, Go To, Insert Line After and Conditionals, Skynet Special, Devices, Widgets, Common, then Undo, Save, Close; Find in All Processes as a purple icon right of Find; icon backgrounds and white words are 250,250,250; the other second-row buttons only on the ☰ Menu; the Insert bar's groups now under Devices and Widgets; rows span the page), Rule 10.7 (the Simulator bar is off in the Process Editor) and Rules 16.13 and 12.4 (every new Process says //Created on YYMMDD HHh MMM; new comment lines; the Created by, MIT License and Copyright lines are for a Patron only, so Skynet is never named as the owner of a Process it did not write; every new Process says //This Process was written by its user, not by Skynet). Help 30 and French. Checked against both programs: the BruControl Import has no Process Editor top and writes no new-Process text. (thread "Build Panel Update 11")
 - 2026-11-23: Panel Update 12 (OakBarn Brewery, PDF "Panel Update 12", 3 items). Added Rule 2.71 (the window's title line: ✅ or ❌ Official, the Skynet Panel version, the time now, Update available) and Rule 2.72 (the top of the ☰ Menu: Help language boxes with Add a Language, Edit layout off the Menu, the Schema dropdown, New Schema / Interfaces / Add Interface / Switch to Real boards gone, Switch to Simulator kept, Report a Bug for everyone, Last picked). Rule 6.41 item 5 (2 seconds on Emergency Off pops up a 400 px one). Rule 16.13 (line 2 of every Process is "// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible."; every sample Process, Skynet Process Template and built Brew Day Process has it). Help 30, 33, 40, 51, 67, 77, 188, 205, 242, 244 and every page that said ☰ Menu > Edit layout (now 🛠 Build) or ☰ Menu > 🗂 Schema / New Schema / Interfaces (boards) / Add Interface, with French. Checked against both programs: the BruControl Import has no ☰ Menu, no Emergency Off and keeps its own window title; the Processes it brings in are the user's own text and are not changed. (thread "Build Panel Update 12")
+- 2026-11-23: Panel Update 13 (OakBarn Brewery, PDF "Panel Update 13", 4 items, the Process Editor). Rule 2.70 changed (Rename and Stop all no longer above the Process list: Stop all is the Stop Sign icon at the left of the second row, Rename on the ☰ Menu; the problems and the Output in a column to the right of the code; Output's Current Process / All Variables dropdown (the open Process's lines only; All Variables lists the values of its variables and every gGlobal); Reset every Start switch; a small gray ▾ on Conditionals, Skynet Special, Devices, Widgets and Common). Rule 2.6 changed (OakBarn Brewery picked "change the Rule": more than six choices are always a dropdown; six or fewer pick-one choices are one-click boxes or, if desired, a dropdown). Help 5 and 30 and French; Importer Help 143 (Page 2) says script output and variables are still a choice in Skynet, plus Reset every Start. Checked against both programs: the BruControl Import has no Process Editor; it brings in scripts as Processes, unchanged. (thread "Build Panel Update 13")
