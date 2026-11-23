@@ -1,4 +1,5 @@
 //Skynet_Strike_2_Vessel
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: 2 Vessel: strike water from the kettle into the mash tun, then the grain a little at a time (dough in) and a vorlauf.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

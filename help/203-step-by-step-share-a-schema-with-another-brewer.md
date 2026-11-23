@@ -14,7 +14,7 @@ A Schema can be sent to another brewer, who adds it to their own Skynet. **Skyne
 
 ## Step 2. Save the Schema file
 
-Press **☰ Menu > 🗂 Schema**, then **📤 Export to share** under **Share with other brewers**. Pick the Schema and press **Save**. The file goes to the **Downloads** folder of this computer. More: [Schema.json](44-schema-json).
+Press **☰ Menu > Schema**, then **📤 Export to share** under **Share with other brewers**. Pick the Schema and press **Save**. The file goes to the **Downloads** folder of this computer. More: [Schema.json](44-schema-json).
 
 ## Step 3. Save your own pictures and sounds
 
@@ -28,6 +28,6 @@ Put the files in one folder, and send them the way you like: an email with the f
 
 1. **Pictures and sounds first**: on the Brain, **File Move** (a whole folder, see [File Move](32-file-move)) or the **Media** screen (a .zip is unpacked with its folders, see [Media](07-media)).
 2. **Processes**: **File Move**, with **Processes** in *Put them in*.
-3. **The Schema file**: put it in the **Import folder** (`C:\Brewing\Import`), then **☰ Menu > 🗂 Schema > 📥 Import a brewer's Schema**. It always comes in as a new Schema: none of theirs is written over.
+3. **The Schema file**: put it in the **Import folder** (`C:\Brewing\Import`), then **☰ Menu > Schema > 📥 Import a brewer's Schema**. It always comes in as a new Schema: none of theirs is written over.
 
 A picture or sound that did not come shows as missing until it is added.

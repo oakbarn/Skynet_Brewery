@@ -1,4 +1,5 @@
 //Skynet_PreBrew
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Load or check the Recipe, pick the chilling water, pumps off and every valve closed, the equipment checked and locked. The same in every Schema.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

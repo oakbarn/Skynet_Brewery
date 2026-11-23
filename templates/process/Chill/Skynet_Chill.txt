@@ -1,4 +1,5 @@
 //Skynet_Chill
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Chill the wort to the pitching temperature. With Whirlpool hops in the Recipe it stops at each Hop Stand that has hops (High, Middle, Low), the cooling water goes off for that stand's time, then the chill finishes. Whirlpool hops marked Hop Rocket go in the Hop Infuser, with the wort running through it. Use this or Whirlpool and Chill.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

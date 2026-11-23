@@ -14,7 +14,7 @@ Un Schema peut être envoyé à un autre brasseur, qui l'ajoute à son propre Sk
 
 ## Étape 2. Enregistrer le fichier du Schema {#step-2-save-the-schema-file}
 
-Appuyez sur **☰ Menu > 🗂 Schema**, puis sur **📤 Export to share** sous **Share with other brewers**. Choisissez le Schema et appuyez sur **Save**. Le fichier va dans le dossier **Downloads** (Téléchargements) de cet ordinateur. Plus : [Schema.json](44-schema-json).
+Appuyez sur **☰ Menu > Schema**, puis sur **📤 Export to share** sous **Share with other brewers**. Choisissez le Schema et appuyez sur **Save**. Le fichier va dans le dossier **Downloads** (Téléchargements) de cet ordinateur. Plus : [Schema.json](44-schema-json).
 
 ## Étape 3. Enregistrer vos propres images et sons {#step-3-save-your-own-pictures-and-sounds}
 
@@ -28,6 +28,6 @@ Mettez les fichiers dans un même dossier, et envoyez-les comme vous voulez : un
 
 1. **Les images et les sons d'abord** : sur le Brain, **File Move** (tout un dossier, voir [File Move](32-file-move)) ou l'écran **Media** (un .zip est décompressé avec ses dossiers, voir [Media](07-media)).
 2. **Les Processes** : **File Move**, avec **Processes** dans *Put them in*.
-3. **Le fichier du Schema** : mettez-le dans le **dossier Import** (`C:\Brewing\Import`), puis **☰ Menu > 🗂 Schema > 📥 Import a brewer's Schema**. Il arrive toujours comme un nouveau Schema : aucun des leurs n'est écrasé.
+3. **Le fichier du Schema** : mettez-le dans le **dossier Import** (`C:\Brewing\Import`), puis **☰ Menu > Schema > 📥 Import a brewer's Schema**. Il arrive toujours comme un nouveau Schema : aucun des leurs n'est écrasé.
 
 Une image ou un son qui n'est pas venu s'affiche comme manquant jusqu'à ce qu'il soit ajouté.

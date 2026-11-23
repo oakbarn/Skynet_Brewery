@@ -5,6 +5,7 @@ You do not need to know anything about programs: you answer a few plain question
 
 ## Where to find it {#where}
 
+- **☰ Menu > 🐞 Report a Bug** (everyone)
 - **☰ Menu > About > 🐞 Report a problem**
 - **🐞 Report** at the top of every Help page (next to 🖨 Print). From a Help page, the page's name is filled in for you.
 

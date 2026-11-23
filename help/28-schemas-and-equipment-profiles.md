@@ -25,7 +25,7 @@ Processes, logins, MQTT, media folders and the lists behind the dropdowns belong
 
 At the bottom of the **Schema** dropdown:
 
-- **Add new Schema ...** (also **☰ Menu > ➕ New Schema…**): give it a name, then pick what it starts from. Every step, with pictures: [Step by Step: Add a Schema](188-step-by-step-add-a-schema). **A copy of** the loaded Schema copies everything, which is good for trying changes. **An empty Schema** starts with just a Main tab and the Equipment tab. **An Equipment Profile** starts with that profile's hardware already wired ([Paste a profile, or start a new Schema from it](#paste-a-profile-or-start-a-new-schema-from-it)). The new Schema is loaded straight away.
+- **Add new Schema ...** (also **☰ Menu > 🗂 Schema > Add new Schema ...**): give it a name, then pick what it starts from. Every step, with pictures: [Step by Step: Add a Schema](188-step-by-step-add-a-schema). **A copy of** the loaded Schema copies everything, which is good for trying changes. **An empty Schema** starts with just a Main tab and the Equipment tab. **An Equipment Profile** starts with that profile's hardware already wired ([Paste a profile, or start a new Schema from it](#paste-a-profile-or-start-a-new-schema-from-it)). The new Schema is loaded straight away.
 - **Clone a Schema ...**: a copy of any Schema under a new name, loaded only if you say so. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **Rename this Schema ...**: gives the loaded Schema a new name.
 - **Delete a Schema ...**: pick one that is not loaded. It is moved to `config/schemas/deleted`, so it can be got back.

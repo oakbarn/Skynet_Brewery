@@ -4,7 +4,7 @@ Un moteur pas à pas (stepper) tourne jusqu'à une position exacte : une vanne �
 
 ## En ajouter un {#add-one}
 
-**Tabs > ☰ Menu > Edit layout > Select Device Type > Motors**, puis **Add Device**. Réglez ensuite :
+**Tabs > 🛠 Build (Edit layout) > Select Device Type > Motors**, puis **Add Device**. Réglez ensuite :
 
 - **Device** et **Driver board** (carte de commande : A4988, DRV8825, TMC2208 / 2209, TB6600 / DM542, ULN2003 avec un 28BYJ-48, L298N). En choisir une remplit le câblage habituel.
 - **Pins** (broches) : STEP, DIR et ENABLE, ou IN1-IN4 pour les cartes à 4 broches.

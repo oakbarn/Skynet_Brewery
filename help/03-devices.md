@@ -24,7 +24,7 @@ The table at the top shows each board, its connection rating and whether it is c
 
 ## Putting a device on a tab
 
-In **Tabs > ☰ Menu > Edit layout**, **Select Device Type** lists the kinds of Device and **Add Device** lists the Devices of that kind (see [Edit layout bar](82-edit-layout-bar)):
+In **Tabs > 🛠 Build (Edit layout)**, **Select Device Type** lists the kinds of Device and **Add Device** lists the Devices of that kind (see [Edit layout bar](82-edit-layout-bar)):
 
 - **Outputs**: on/off (relays), PWM %, analog 0-10 V or 4-20 mA. A **Pump** and a **Valve** are ready-made outputs with their pictures and flow points already set.
 - **Digital inputs**: switches, float and level switches, flow switches, interlocks, and buttons. A **push button** is ON only while it is held and OFF when released. A **toggle button** stays ON after one press and OFF after the next. A **pulse button** gives one short ON per press.

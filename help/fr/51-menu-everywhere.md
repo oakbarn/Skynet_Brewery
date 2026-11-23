@@ -8,7 +8,7 @@ Le bouton **☰ Menu** n'est pas seulement sur la page des Tabs. C'est un moyen 
 
 ## Ce qu'il contient {#what-is-in-it}
 
-Les mêmes choix que le ☰ Menu de la page des Tabs (voir [Le ☰ Menu](33-menu)) : **Edit layout** (Admins), puis les Menu tabs dans leur ordre (Zoom, Default, Equipment Profile, Vessel, Schema, About ...).
+Les mêmes choix que le ☰ Menu de la page des Tabs (voir [Le ☰ Menu](33-menu)) : la langue de l'aide 🌐, la liste déroulante 🗂 Schema, 🐞 Report a Bug et le dernier choix que vous avez pris, puis les Menu tabs dans leur ordre (Zoom, Default, Equipment Profile, Vessel, Schema, About ...).
 
 Chaque ☰ (aussi celui de la page des Tabs) liste aussi les **Pages** à la fin : Tabs, Processes, Variables, Log et le reste de la Menu Bar, et sous chaque page ses parties (vos Tabs d'écran, Interfaces (cartes), Users, MQTT and voice ...). La page où vous êtes est en gras. Ainsi vous pouvez aller partout même quand la Menu Bar est cachée derrière une fenêtre. Voir [Chaque écran dans le ☰ Menu](67-every-screen-in-the-menu).
 

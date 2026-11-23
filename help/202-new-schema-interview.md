@@ -9,7 +9,7 @@ As soon as **Add new Schema** has made your new Schema and loaded it, the **New 
 
 ## The pages
 
-1. **About**: the **Name** (already filled in) and **What is it for?**, one line such as *Keg Cleaning* or *Hot Side, 10 gallon*. It shows in the Schema list on the **☰ Menu > 🗂 Schema** tab. You may leave it blank.
+1. **About**: the **Name** (already filled in) and **What is it for?**, one line such as *Keg Cleaning* or *Hot Side, 10 gallon*. It shows in the Schema list on the **☰ Menu > Schema** tab. You may leave it blank.
 2. **Boards**: the boards (Interfaces) the new Schema has, and the real boards from your other Schemas. Tick each one this Schema uses too. To add a board no Schema has yet, switch on **➕ Add a New board after Finish**: after **✔ Finish** the **Add Interface** pop-up opens, and after its **Save** the Interfaces page shows the new board. See [Interfaces](76-interfaces).
 3. **Tabs**: a box for each Tab, and **➕ Add New Tab** for another one. In each box:
    - **Tab name** (for example *Main* to *Brew House*).

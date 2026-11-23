@@ -1,4 +1,5 @@
 //Skynet_Boil
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Pre-boil gravity, up to the boil and the hot break, then the boil timer for the Recipe's boil time (hop alerts run on it), with the chiller sanitized near the end.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

@@ -5,13 +5,24 @@ La **Menu Bar** (barre de menu) est la rangée avec le **nom de votre brasserie*
 - **Bulle Simulator** (rayures jaunes) : seulement en mode Simulator. Appuyez dessus pour revenir aux vraies cartes. **☰ Menu > Switch to Simulator** active le Simulator.
 - **Build** (le marteau et la clé, Admins) : Edit layout actif ou non. Pas utile dans l'éditeur de Processes, donc cachée là.
 - **Sound** (l'oreille avec des notes de musique) : un clic active le son, un autre le coupe. Un panneau rouge **Sens interdit** est sur son coin tant que le son est coupé. Voir [Alarmes et son](21-alarms-and-sound).
-- **Emergency Off** : un clic arrête tout (voir [Emergency Off](244-emergency-off)).
+- **Emergency Off** : un clic arrête tout. Laissez la souris dessus 2 secondes et un grand bouton apparaît (voir [Emergency Off](244-emergency-off)).
 - Le **?** jaune : l'aide.
 - **☰ Menu** : chaque page et chaque réglage (voir [Le ☰ Menu](33-menu)).
 
 Une icône qui n'est pas utile en ce moment est cachée, mais sa place reste (on voit la couleur de fond), donc les autres icônes ne bougent jamais.
 
 **Undo, Save et Close** restent vides tant qu'ils ne servent pas. Sur un Tab il n'y a rien à annuler, enregistrer ou fermer, donc rien ne s'affiche. En Edit layout ce sont **↩ Put back**, **Save layout** et **Exit** sur la barre Edit layout. Dans l'éditeur de Processes ils sont à droite de la deuxième rangée.
+
+## La ligne de titre de la fenêtre {#the-window-s-title-line}
+
+Sur l'ordinateur du Brain, la fenêtre propre de Skynet a une ligne de titre tout en haut (avec les boutons réduire, taille et fermer). Après le nom du Schema, elle montre :
+
+- **✅** quand c'est Skynet officiel, **❌** quand ce ne l'est pas (voir [Mises à jour officielles de Skynet](191-official-skynet-updates)),
+- la **version du Skynet Panel**,
+- la **date et l'heure actuelles**, sous la même forme que la ligne Created on d'un nouveau Process (`261123 14h 31M` : année, mois, jour, heures et minutes),
+- **⬆ Update available** quand GitHub a une version plus récente (vérifié toutes les 10 minutes).
+
+**☰ Menu > Zoom > Full screen** cache la ligne de titre. Sur un téléphone ou un autre ordinateur, l'onglet du navigateur montre les mêmes mots.
 
 ## Le nom de la brasserie {#the-brewery-name}
 

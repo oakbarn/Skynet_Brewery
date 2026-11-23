@@ -1,4 +1,5 @@
 //FireHose_Off
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //The "FireHose Off" button on the Water Tab (OakBarn Brewery's switch sw_Set_FireHoseOff in looper_scrAutoSwitch).

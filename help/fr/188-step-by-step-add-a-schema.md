@@ -6,14 +6,14 @@ Ce guide vous mène de rien à un nouveau Schema à l'écran. Seul un Admin peut
 
 ## Étape 1. Ouvrir la case Add new Schema {#step-1-open-the-add-new-schema-box}
 
-Appuyez sur **☰ Menu** (en haut à droite), puis **➕ New Schema…**, juste sous **🗂 Schema**.
+Appuyez sur **☰ Menu** (en haut à droite), ouvrez la liste déroulante **🗂 Schema** et choisissez **Add new Schema ...** vers le bas de la liste.
 
-![☰ Menu : New Schema](help_pictures/Step_Add_Schema_01_Menu.png)
+![☰ Menu : la liste déroulante Schema](help_pictures/Step_Add_Schema_01_Menu.png)
 
 Deux autres façons ouvrent la même case :
 
-- **☰ Menu > 🗂 Schema**, puis le grand bouton **➕ New Schema**. **❓ Step by step** à côté ouvre cette page.
-- La liste déroulante **Schema** (sur la Top Line, le Tab Schema ou le Tab About), puis **Add new Schema ...** vers le bas de la liste.
+- **☰ Menu > Schema** (sous Menu tabs), puis le grand bouton **➕ New Schema**. **❓ Step by step** à côté ouvre cette page.
+- La même liste déroulante **Schema** sur la Top Line, le Tab Schema ou le Tab About.
 
 ![Le Tab Schema : bouton New Schema](help_pictures/Step_Add_Schema_02_Schema_Tab.png)
 
@@ -62,7 +62,7 @@ Puis la **New Schema Interview** s'ouvre (Étape 6).
 
 Ce qu'il reste à faire :
 
-1. **Dessiner les tuyaux** comme sont les vôtres : **☰ Menu > Edit layout > Draw pipe** ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses)).
+1. **Dessiner les tuyaux** comme sont les vôtres : **🛠 Build (Edit layout) > Draw pipe** ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses)).
 2. **Vérifier chaque tâche** du Brew Day dans **☰ Menu > Brew Process** ([Processus de brassage](100-brew-process)).
 3. Essayer tout un Brew Day dans le simulateur avec **▶ Start Brew Day**.
 
@@ -76,7 +76,7 @@ Plus sur chaque question : [Nouveau Schema à partir d'un Skynet Template](157-s
 
 Plus sur les cartes : [Interfaces](76-interfaces) et [Simulateur ou vraies cartes](77-simulator-or-real-boards).
 
-**5b. Ajouter vos premières choses.** Le Main Tab est vide. Appuyez sur **☰ Menu > ✎ Edit layout**. La barre du haut a un bouton pour chaque sorte de chose : **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** et plus. Choisissez-en un et remplissez sa case : le Label (comment vous l'appelez), l'Interface (votre carte), le Port auquel il est câblé, et le Tab. Puis **Save layout**.
+**5b. Ajouter vos premières choses.** Le Main Tab est vide. Appuyez sur **🛠 Build (Edit layout)**. La barre du haut a un bouton pour chaque sorte de chose : **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** et plus. Choisissez-en un et remplissez sa case : le Label (comment vous l'appelez), l'Interface (votre carte), le Port auquel il est câblé, et le Tab. Puis **Save layout**.
 
 ![La barre Edit layout](help_pictures/Step_Add_Schema_11_Edit_Layout.png)
 

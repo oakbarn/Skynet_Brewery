@@ -4,7 +4,7 @@ Une **Interface** est une carte (PLC) à laquelle vos Devices sont câblés : un
 
 ## Les trouver {#finding-them}
 
-- **☰ Menu > 🔌 Interfaces (boards)** ouvre la page Devices à la liste des Interfaces.
+- **☰ Menu > Devices > ↳ Interfaces (boards)** ouvre la page Devices à la liste des Interfaces.
 - La page **Devices** a deux onglets : **🔌 Interfaces** (chaque Interface et **Add Interface**) et **🌡 OneWire Probes** (les 1-Wire circuits, les 1-Wire Indexes et les sondes vues, voir [Devices and boards](03-devices)).
 
 ## La liste des Interfaces {#the-interfaces-list}
@@ -28,7 +28,7 @@ Quand quelque chose ne va pas (no answer, une erreur de la carte), la raison est
 
 Il y a trois façons d'y entrer, et les trois ouvrent la même fenêtre **Add Interface** :
 
-1. **☰ Menu > ➕ Add Interface…**
+1. **☰ Menu > Devices > ↳ Add Interface**
 2. **Page Devices > Add Interface > ➕ Add Interface…**
 3. Dans la fenêtre **New Device** sur n'importe quel Tab : ouvrez **2. Interface** et choisissez **➕ Add new Interface…** en bas. Quand vous cliquez sur Add, vous revenez à la fenêtre New Device avec la nouvelle Interface déjà choisie. La fenêtre New Device d'un tube RIMS ou d'une bouilloire électrique a le même choix.
 

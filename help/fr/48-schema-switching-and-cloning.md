@@ -12,7 +12,7 @@ La même liste déroulante Schema est à trois endroits. Utilisez celle qui vous
 
 Choisir un autre Schema le charge. Seul un Admin peut charger ou changer un Schema.
 
-Pour commencer un **nouveau** Schema, appuyez sur **☰ Menu > ➕ New Schema…**, ou sur **➕ New Schema** sur l'onglet **☰ Menu > Schema**. Voir [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema).
+Pour commencer un **nouveau** Schema, appuyez sur **☰ Menu > 🗂 Schema > Add new Schema ...**, ou sur **➕ New Schema** sur l'onglet **☰ Menu > Schema**. Voir [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema).
 
 L'onglet **☰ Menu > Schema** liste aussi chaque Schema du Brain : à quoi il sert (venu de la [New Schema Interview](202-new-schema-interview)), combien de Tabs il a, le Equipment Profile de chaque Tab et quand il a été enregistré pour la dernière fois, avec un bouton **Load** et un bouton **Create New Copy of Schema** sur chacun.
 
@@ -56,7 +56,7 @@ Le clone reçoit tout ce qu'il y a dans le Schema, y compris ses valeurs enregis
 
 Une cuve regroupée et ses IP peuvent être copiés d'un seul coup :
 
-1. Choisissez **☰ Menu > Edit layout** et double-cliquez sur la cuve regroupée.
+1. Choisissez **🛠 Build (Edit layout)** et double-cliquez sur la cuve regroupée.
 2. Allumez **Clone: put a copy of this vessel and its IPs next to it** (mettre une copie de cette cuve et de ses IP à côté) et appuyez sur **Save**.
 3. La copie est placée juste à droite de la première, toujours regroupée, nommée « <name> copy ». Les tuyaux ne sont pas copiés : dessinez-en de nouveaux vers elle.
 4. Appuyez sur **Save layout** pour la garder.

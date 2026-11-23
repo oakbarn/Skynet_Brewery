@@ -1,4 +1,5 @@
 //BrewDay_Stop
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //Stops the brew day and turns everything off.

@@ -6,7 +6,7 @@ Only the Help is translated, as in French: the Help pages, the balloons (Hover H
 
 ## Three choices
 
-**🌐 Help language**, at the top of the Help page list, then has three choices: **🌐 English**, **🌐 Français** and the User Language (**🌐 Deutsch**, for example). **☰ Menu > 🌐 Help in ...** goes to the next one. The User Language stays on your own Brain: every screen that uses that Brain can pick it.
+**🌐 Help language**, at the top of the Help page list, then has three choices: **🌐 English**, **🌐 Français** and the User Language (**🌐 Deutsch**, for example). The **☰ Menu** has the same choices in a row, one click each; until a User Language is added, an Admin sees **➕ Add a Language** there, which opens **🌐 Languages**. The User Language stays on your own Brain: every screen that uses that Brain can pick it.
 
 ## Step by step
 

@@ -1590,6 +1590,37 @@ Help 40, 21. Panel only: the BruControl Import has its own pages.
   the Tabs.
 Help 30. Panel only.
 
+2.71 **The window's title line** (OakBarn Brewery, 2026-11-23, Panel Update 12, item 1a: "Tab Bar get Rid of with Full Screen"; "Lets
+make use of this better. It Now has the current loaded Shema. Add to the Right of shema"): the clean window (Rule 2.36) always has the
+browser's title line; **☰ Menu > Zoom > Full screen** hides it. While it shows, after the Schema's name it says, in this order:
+1. **✅** when this is Official Skynet, **❌** when it is not (Changed, Not Official or Not checked, Rule 9.14), then the **Skynet Panel
+   version** (version.json);
+2. the **date and time now**, in the Created on form of Rule 16.13 (`261123 14h 31M`), kept up to the minute;
+3. **⬆ Update available**, only when GitHub has a newer version (asked every 10 minutes, the same check as ☰ Menu > About).
+The parts are set apart by ` · `. A browser tab (a phone, another computer) shows the same words. The BruControl Import's Build page
+keeps its own title. Help 40.
+
+2.72 **The top of the ☰ Menu** (OakBarn Brewery, 2026-11-23, Panel Update 12, item 2, a picture of the ☰ Menu marked a to f). In order:
+- **🌐 Help** (item 2a: "Help DDLB with English, Francais, and Add a Language until a 3rd Language is added and then have that Language
+  In its font if there is one as the last item on the list"): **English**, **Français**, then **➕ Add a Language** (Admins; it opens
+  Help > 🌐 Languages, Rule 11.16) until a User Language is on the Brain; then the User Language by its own name, last, in the Help
+  fonts (Rule 11.16) so its letters show. Three choices, so one-click boxes in a row (Rule 2.6, recommended; the card is open).
+- **Edit layout is not on the ☰ Menu** (item 2b: "Is this not the same as the work Icon? If so, do not need here"): it is the Build
+  icon (Rule 2.69, no copies). The ☰ Menu can't be opened while Edit layout is on anyway (Rule 2.52).
+- **🗂 Schema** (item 2c: "DDLB of Schema to select by Clicking on it to make Current"): the Schema dropdown itself, the same list as the
+  Top Line's; picking a Schema loads it (with the warning when Processes run). Add new Schema ... stays at the end with the other Schema
+  jobs (Rule 2.6, recommended; he asked for it first, the card is open).
+- **Gone from the ☰ Menu** (item 2d: "Do not needed as Rare and Add Schema is in c"): ➕ New Schema…, 🔌 Interfaces (boards), ➕ Add
+  Interface… and 🔌 Switch to Real boards. Interfaces and Add Interface stay under Pages > Devices ↳ (Rule 2.4); Switch to Real boards is
+  the Simulator balloon. **🧪 Switch to Simulator stays** (Admins, on the Real boards only): the balloon is hidden then, so it is the
+  only way in (Design Rule 1; recommended, the card is open).
+- **🐞 Report a Bug** for everyone (item 2e: "Request a Feature is a Parton Perk, But we need Report a Bug for everyone"): the Report box
+  of Rule 2.61. **⭐ Request a Feature** stays, a Patron perk.
+- **Last picked** (item 2f: "Add the Last Item selected from the Hamburger Menu so it's easy to get back to it. So a clone of something
+  in the list."): a copy of the last ☰ Menu choice picked, in the gap where item 2d's choices were; it does the same as the choice.
+  Each browser remembers its own (by the choice's words); a choice that is not in the list now (a page this account can't see) shows no copy.
+Then the Menu tabs and the Pages, as before. Help 33, 51, 67. Panel only: the BruControl Import's pages have no ☰ Menu.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -3869,6 +3900,10 @@ Valves close. But that could be a SkyNet Button"; "And maybe fashioned after a r
    Switches Off); last the **valves close**, so a pump never runs against a closed valve. **Manual valves** are turned by hand and stay
    as they are. Timers, Alarms and sounds are left alone. The Console says how many things it switched.
 4. **Both programs:** the BruControl Import program controls nothing, so it has no Emergency Off.
+5. **The big one** (OakBarn Brewery, 2026-11-23, Panel Update 12, item 1b: "Hover over Emergency stop for 2 seconds Pop Up to 400 Px or
+   so"): the mouse resting **2 seconds** on Emergency Off pops up a **400 px** Emergency Off under it (OakBarn Brewery's own picture at
+   400 px, public/icons/Emergency_Stop_400.png). One click on it does the same as the small one; it goes when the mouse leaves both,
+   with Esc, or once clicked. It is a pop-up, so it is on top (Rule 18.53). A phone or tablet has no hover, so it has only the small one.
 Help 244.
 ## 7. Pictures
 
@@ -5412,7 +5447,9 @@ of the New Process and is set when the Process is created and cannot be changed 
   keeps the class it had. A rename or a Recycle Bin restore keeps it. A wrong pick: make a new Process and paste the text in.
 - **Spaces become `_`** in the name (`start My_New_Brew_Process`); line 1 keeps the name as typed, like a Label.
 - **The new text** (changed 2026-11-23, Panel Update 11, item 1d: "//Created date time stamp automatically added"): `//<name as
-  typed>`, `//Created on YYMMDD HHh MMM` (his form, `//Created on 261102 14h 23M`, the date and time it was made), `//This Process was written by its user, not by Skynet` (everyone,
+  typed>`, **line 2 `// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.`** (OakBarn Brewery's words, Panel
+  Update 12, item 3: "Add Comment at top comment Block Second Line after Process Name", "Update all existing sample Processes": every
+  sample Process and Skynet Process Template has it on line 2 too, and so does a Process built by ☰ Menu > Brew Process), `//Created on YYMMDD HHh MMM` (his form, `//Created on 261102 14h 23M`, the date and time it was made), `//This Process was written by its user, not by Skynet` (everyone,
   OakBarn Brewery: "We might want to add that as a comment line regardless for everyone"), (a Patron only)
   `//Created by <Brewery Name>`, `//MIT License Granted for all Scripts and Configurations` and `//Copyright © <Brewery Name> <year>`
   (not a Patron: none of these three lines, OakBarn Brewery: "Skynet did not write it, so Skynet should not be attached to it. A better solution might be to avoid the lines for non patron"; Skynet does not write a Process, so it is never named as its
@@ -7625,3 +7662,4 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 - 2026-11-23: Panel Update 10 (OakBarn Brewery, PDF of 5 items). Rule 1.8 changed (the Menu Bar is the Brewery Name row with its icons; the old top line is the Top Line), Rule 2.6 changed (fewer than six pick-one choices are one-click boxes, item 5d), Rules 2.69 (Menu Bar order, kept spaces, Sound icon replaces the Turn sound on? pop-up), 2.70 (Process Editor top in icons, Go To Line or Section, everything also on ☰ Menu) and 16.13 (class picked once in the New Process dialog, new Process text) added, Rule 12.4 (Your Brewery Name Patron perk; a non-Patron sees Skynet Panel) changed. OakBarn Brewery's own icons in public/icons (not the Image Library). Help 2, 13, 21, 30, 33, 40, 155, 198 and French. Checked against both programs: the BruControl Import keeps setting a Process's class when it brings it in; its own pages have no Menu Bar. (thread "Build Panel Update 10")
 - 2026-11-23: Rule 2.69 settled (OakBarn Brewery): on a Tab, Undo, Save and Close are blank until needed; they show only in Edit layout (↩ Put back, Save layout, Exit). A choice for this place only: what is clutter is judged Tab by Tab, unused buttons are not always removed. Nothing else changed. Help 40 and French. (thread "Build Panel Update 10")
 - 2026-11-23: Panel Update 11 (OakBarn Brewery, PDF "Panel Update 11", item 1 the Process Editor top, parts a to e). Rule 2.70 changed (second row: Find, Go To, Insert Line After and Conditionals, Skynet Special, Devices, Widgets, Common, then Undo, Save, Close; Find in All Processes as a purple icon right of Find; icon backgrounds and white words are 250,250,250; the other second-row buttons only on the ☰ Menu; the Insert bar's groups now under Devices and Widgets; rows span the page), Rule 10.7 (the Simulator bar is off in the Process Editor) and Rules 16.13 and 12.4 (every new Process says //Created on YYMMDD HHh MMM; new comment lines; the Created by, MIT License and Copyright lines are for a Patron only, so Skynet is never named as the owner of a Process it did not write; every new Process says //This Process was written by its user, not by Skynet). Help 30 and French. Checked against both programs: the BruControl Import has no Process Editor top and writes no new-Process text. (thread "Build Panel Update 11")
+- 2026-11-23: Panel Update 12 (OakBarn Brewery, PDF "Panel Update 12", 3 items). Added Rule 2.71 (the window's title line: ✅ or ❌ Official, the Skynet Panel version, the time now, Update available) and Rule 2.72 (the top of the ☰ Menu: Help language boxes with Add a Language, Edit layout off the Menu, the Schema dropdown, New Schema / Interfaces / Add Interface / Switch to Real boards gone, Switch to Simulator kept, Report a Bug for everyone, Last picked). Rule 6.41 item 5 (2 seconds on Emergency Off pops up a 400 px one). Rule 16.13 (line 2 of every Process is "// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible."; every sample Process, Skynet Process Template and built Brew Day Process has it). Help 30, 33, 40, 51, 67, 77, 188, 205, 242, 244 and every page that said ☰ Menu > Edit layout (now 🛠 Build) or ☰ Menu > 🗂 Schema / New Schema / Interfaces (boards) / Add Interface, with French. Checked against both programs: the BruControl Import has no ☰ Menu, no Emergency Off and keeps its own window title; the Processes it brings in are the user's own text and are not changed. (thread "Build Panel Update 12")

@@ -1,5 +1,5 @@
 // Step by Step guides (OakBarn Brewery, 2026-11-11, Rule 11.9): a section of Help listed first, guides titled "Step by Step: ...",
-// a picture of the real screen at each step. The first guide is Add a Schema (Help 188), with ☰ Menu > ➕ New Schema… to begin.
+// a picture of the real screen at each step. The first guide is Add a Schema (Help 188), with ☰ Menu > 🗂 Schema > Add new Schema ... to begin.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read = f => fs.readFileSync(new URL('../' + f, import.meta.url), 'utf8');
@@ -18,7 +18,7 @@ assert.match(help, /'👣 Step by Step'/, 'the section heading in the page list'
 assert.match(help, /optgroup', \{ label: 'Step by Step' \}/, 'and in the page dropdown on a phone');
 
 const app = read('public/app.js');
-assert.match(app, /item\('➕ New Schema…', guard\(addNewSchema\)/, '☰ Menu > New Schema');
+assert.match(app, /const sel = schemaSelect\(\), was = sel\.onchange;/, '☰ Menu > 🗂 Schema dropdown > Add new Schema (Panel Update 12, item 2c)');
 assert.match(app, /'➕ New Schema'\),/, 'the New Schema button on the Schema tab');
 assert.match(app, /if \(v === '__new'\) return addNewSchema\(\);/, 'the Schema dropdown opens the same box');
 assert.match(app, /openHelp\(\['step-by-step-add-a-schema'\]\)/, 'Step by step opens the guide');

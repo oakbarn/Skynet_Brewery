@@ -1,4 +1,5 @@
 //Skynet_Clean
+// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible.
 //About: Rinse, clean (PBW for at least an hour through every pipe and the chiller) and rinse the brewery, then open every valve on the Open List to dry (never a tap water valve). The last step of the Brew Day.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026

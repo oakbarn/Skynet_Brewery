@@ -1,6 +1,6 @@
 # Variables
 
-Les variables contiennent des valeurs que les Processes et les écrans utilisent. L'écran **Variables** les liste toutes avec leurs valeurs. Les cinq Kinds (types) simples (String, Value, Boolean, Time, Date Time) sont créés sur l'écran **gGlobal** avec **➕ New gGlobal** et ne sont jamais posés sur un Tab : voir [Sortes de gGlobal](108-gglobal-kinds). Les types affichés à l'écran (Switch, Push Button, Pulse Button, List, Step, Long String) s'ajoutent toujours dans **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, puis **Add Widget**. Les préfixes de nom ci-dessous sont des suggestions ; n'importe quel nom marche.
+Les variables contiennent des valeurs que les Processes et les écrans utilisent. L'écran **Variables** les liste toutes avec leurs valeurs. Les cinq Kinds (types) simples (String, Value, Boolean, Time, Date Time) sont créés sur l'écran **gGlobal** avec **➕ New gGlobal** et ne sont jamais posés sur un Tab : voir [Sortes de gGlobal](108-gglobal-kinds). Les types affichés à l'écran (Switch, Push Button, Pulse Button, List, Step, Long String) s'ajoutent toujours dans **Tabs > 🛠 Build (Edit layout) > Select Widget Type > gGlobal variables**, puis **Add Widget**. Les préfixes de nom ci-dessous sont des suggestions ; n'importe quel nom marche.
 
 gKonstant et gAPI sont devenus une seule classe, **gGlobal**, le 2026-10-30. Envoyer les lectures à la base de données et laisser des programmes extérieurs atteindre un élément sont maintenant des réglages que chaque Device et chaque Widget possède, donc une classe API séparée n'était plus nécessaire. Les anciens sont convertis au démarrage du Brain : voir [Base de données et .API sur chaque Device et Widget](98-database-and-api).
 
@@ -40,6 +40,6 @@ Chaque Device et Widget qui a une valeur a une case **Database and .API** à la 
 
 ## gGlobal List (une liste déroulante sur un Tab) {#gglobal-list-a-dropdown-on-a-tab}
 
-**Tabs > ☰ Menu > Edit layout > Add Widget > gGlobal variables > List (dropdown: Value + Text)** crée une liste déroulante. Ses réglages ont un tableau à deux colonnes : **Value** (un nombre) et **Text**. **+ Add row** ajoute un choix et ✕ en retire un.
+**Tabs > 🛠 Build (Edit layout) > Add Widget > gGlobal variables > List (dropdown: Value + Text)** crée une liste déroulante. Ses réglages ont un tableau à deux colonnes : **Value** (un nombre) et **Text**. **+ Add row** ajoute un choix et ✕ en retire un.
 
 Exemple : `gGList_BrewStatus` avec 1 = Mash, 2 = Boil, 3 = Chill. Sur le Tab, la liste déroulante affiche Mash, Boil et Chill. Choisir Boil met la valeur à 2, et c'est ce nombre que les Processes lisent (`if gGList_BrewStatus == 2`). Un Process qui la met à 3 fait afficher Chill à la liste déroulante.
