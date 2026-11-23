@@ -5205,11 +5205,11 @@ document.addEventListener('keydown', ev => {
 // 🔍 Zoom box (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for 200 pixel
 // square where Join area is zoomed inside the Dialog"; then "be able to move within the dialog. Dialog moves now. It needs to stay
 // fixed and move the joins together inside the Dialog"; Rule 5.37): in Edit layout, Z (not in a text box) opens a box that shows the
-// 200 screen pixels around the mouse 3 times bigger. It stays where it opened, on the same spot of the Tab. Work inside it as on the
-// Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 3 times finer, so a pipe end or an item
+// 200 screen pixels around the mouse 2 times bigger. It stays where it opened, on the same spot of the Tab. Work inside it as on the
+// Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 2 times finer, so a pipe end or an item
 // can be dragged onto an IP right there. Esc or its ✕ (upper right) closes it, and so does leaving Edit layout (Z again too). The copy of the Tab is drawn in a
 // closed-off part of the page (a shadow root), so nothing else on the panel ever finds it.
-const ZOOM_SRC = 200, ZOOM_X = 3;
+const ZOOM_SRC = 200, ZOOM_X = 2;      // OakBarn Brewery, 2026-11-23: "Try zoom x 2"
 let zoomBox = null, zoomMouse = null;
 function zoomOpen() {
   const ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1;
@@ -5245,7 +5245,11 @@ function zoomPass(ev) {
   const [x, y] = zoomReal(ev);
   zb.host.style.pointerEvents = 'none'; const under = document.elementFromPoint(x, y) || document.body; zb.host.style.pointerEvents = '';
   if (ev.type === 'pointerdown') zb.down = under;
-  const to = zb.down && /^pointer(move|up|cancel)$/.test(ev.type) ? zb.down : under;      // as the Tab does, a press keeps its target until let go
+  // as the Tab does, a press keeps its target until let go; but a pipe is drawn again when pressed, so its old drawing is gone
+  // from the page and would never pass the drag on: then the drag goes to what is under it now (OakBarn Brewery, 2026-11-23:
+  // "it looks like I cannot grab the pipe inside the dialog after I release it")
+  if (zb.down && !zb.down.isConnected) zb.down = under;
+  const to = zb.down && /^pointer(move|up|cancel)$/.test(ev.type) ? zb.down : under;
   const o = { bubbles: true, cancelable: true, composed: true, view: window, clientX: x, clientY: y, screenX: x, screenY: y, button: ev.button, buttons: ev.buttons,
     detail: ev.detail, ctrlKey: ev.ctrlKey, shiftKey: ev.shiftKey, altKey: ev.altKey, metaKey: ev.metaKey };
   to.dispatchEvent(ev.type.startsWith('pointer') ? new PointerEvent(ev.type, { ...o, pointerId: ev.pointerId, pointerType: ev.pointerType, isPrimary: ev.isPrimary, width: 1, height: 1 }) : new MouseEvent(ev.type, o));
