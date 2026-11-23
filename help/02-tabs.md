@@ -10,7 +10,7 @@ A **Tab** is one screen of your brewery: a background picture with pumps, valves
 - **Tap a value** to get a large dialog with − / + buttons and a number pad.
 - Items set to **Ask before changing** show large ON / OFF buttons first, so a bump on the screen does not start a pump.
 - Pipes show **moving flow** when liquid is really moving through them.
-- Alarms only make a sound after you press **Enable sound** in the Menu Bar (pick **☰ Menu > Show Menu Bar** first), once on each screen that should sound them (browsers insist on that).
+- Alarms only make a sound while the **Sound** icon on the Menu Bar is on (no red Do Not Enter sign on it), and after one click on the screen (browsers insist on that). See [The Menu Bar](40-menu-bar).
 
 ## Changing the layout (admins)
 

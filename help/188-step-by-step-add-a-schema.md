@@ -13,7 +13,7 @@ Press **☰ Menu** (top right), then **➕ New Schema…**, just under **🗂 Sc
 Two other ways open the same box:
 
 - **☰ Menu > 🗂 Schema**, then the big **➕ New Schema** button. **❓ Step by step** beside it opens this page.
-- The **Schema** dropdown (on the Menu Bar, the Schema tab or the About tab), then **Add new Schema ...** near the bottom of the list.
+- The **Schema** dropdown (on the Top Line, the Schema tab or the About tab), then **Add new Schema ...** near the bottom of the list.
 
 ![The Schema tab: New Schema button](help_pictures/Step_Add_Schema_02_Schema_Tab.png)
 

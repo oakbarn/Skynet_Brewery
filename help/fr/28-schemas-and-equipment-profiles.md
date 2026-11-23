@@ -12,7 +12,7 @@ Seul un **Admin** peut charger, ajouter, renommer, sauvegarder, restaurer ou sup
 
 ## Choisir et charger un Schema {#pick-and-load-a-schema}
 
-1. La liste déroulante **Schema** est sur la barre de menus, à côté du nom du panel, et aussi sur **☰ Menu > Schema** et **☰ Menu > About**. Elle montre le Schema chargé en ce moment.
+1. La liste déroulante **Schema** est sur la Top Line (ligne du haut), à côté du nom du panel, et aussi sur **☰ Menu > Schema** et **☰ Menu > About**. Elle montre le Schema chargé en ce moment.
 2. Choisissez un autre Schema dans la liste.
 3. Le panel demande si vous voulez le charger, avec un avertissement ⚠ si un Process tourne. Appuyez sur **▶ Proceed**.
 4. Les Processes en marche s'arrêtent, chaque sortie est éteinte, et les Tabs, Devices et Widgets du nouveau Schema prennent le relais. Celui que vous avez quitté est gardé tel quel. Choisissez-le dans la liste pour y revenir.

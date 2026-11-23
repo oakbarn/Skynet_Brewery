@@ -3,7 +3,7 @@
 The **☰ Menu** button is not only on the Tabs page. It is a way to get around from almost anywhere:
 
 - **Windows that pop up** (Properties, setting a value or a timer, Find, the Recycle bin, backups, warnings ...) have a small **☰** button in their top right corner.
-- **Every other page** (Processes, Variables, Log, Devices, Media, File Move, Import, Settings, Help, Schema.json) has a **☰ Menu** button on the Menu Bar, beside Enable sound.
+- **Every other page** (Processes, Variables, Log, Devices, Media, File Move, Import, Settings, Help, Schema.json) has a **☰ Menu** button on the Top Line. The Process editor has the Menu Bar instead (see [The Menu Bar](40-menu-bar)).
 - On the **Tabs** page and the **Menu tabs** it stays where it always was, at the right end of the tab line.
 
 ## What is in it

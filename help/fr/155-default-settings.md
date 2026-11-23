@@ -12,7 +12,7 @@ autres peuvent regarder.
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| **Brewery Name** | Le nom de votre brasserie, affiché en haut de la barre de menu de chaque Tab. Vide : OakBarn Brewery. |
+| **Brewery Name** | Un avantage Patron : le nom de votre brasserie, affiché sur la Menu Bar de chaque Tab et dans l'éditeur de Processes, et le Copyright et le Created by de chaque nouveau Process. Sans être Patron : grisé, et la Menu Bar affiche Skynet Panel. Vide : le nom inscrit sur votre code Patron. Voir [Patron](198-patron). |
 | **Units** | US (gallons, livres, °F) ou Métrique (litres, kilogrammes, °C). Chaque quantité et température s'affiche dans ce choix. Skynet garde chaque nombre en métrique, donc il change seulement ce que vous voyez et tapez (Règle Skynet 2.59). |
 | *Boil temperature (air pressure)* | Les deux cases ci-dessous, sous leur propre titre. |
 | **Airport (ICAO)** | Le code à 4 lettres de l'aéroport le plus proche qui a un bulletin météo (sa station METAR), par exemple `KDFW`. Skynet lit sa pression de l'air pour trouver la température à laquelle l'eau bout ici (`skn_Boil_Temp`). |
@@ -180,7 +180,7 @@ La façon dont tout le panneau marche, donc un changement atteint les choses dé
 
 - **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix. Skynet garde chaque nombre en métrique (°C, litres, kilogrammes, cm) : Units change seulement ce que vous voyez et tapez, et le changer ne change jamais un nombre enregistré (Skynet Rule 2.59). Les Mash, Boil et Equipment Profiles, les Vessels et les Vessel Templates affichent leurs nombres dans ce choix à l'ouverture ; leur propre case Units est grisée et suit celle-ci ; sur un Tab en marche, chaque température s'affiche aussi dans ce choix : la lecture d'une sonde (PV), sa consigne (SV), son Dial, et la consigne et les Offsets d'un Heating Element ou d'un Fermentor Control, aussi dans leurs Properties et leurs fenêtres. Une sonde gardée en °C (le 3 Vessel Sample) affiche 150.0 °F en US, et une sonde gardée en °F affiche des °C en Métrique ; ce que vous tapez est enregistré dans les unités de la sonde, et un nombre que vous n'avez pas changé est enregistré exactement comme avant. Un Offset se convertit par 1,8 seulement (1 °C = 1,8 °F), jamais avec le 32. Les articles d'une Recette qui ont leur propre unité la gardent (un ajout en grammes, une levure en Packs ; les houblons sont gardés en kg et s'affichent en oz ou g) ;
 - **Tab Style** (l'aspect de chaque Tab qui n'a pas de Tab Style à lui) ;
-- **Menu Bar**, **Sound**, **On startup** (Zoom, plein écran) ;
+- **Top Line**, **Sound**, **On startup** (Zoom, plein écran) ;
 - **\L Rich Text Code Size** ;
 - **Hover Delay** ([L'aide au survol dans les boîtes de dialogue](147-hover-help)) ;
 - **Push Lockout (s)** : combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte ;

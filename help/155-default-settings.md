@@ -12,7 +12,7 @@ else can look.
 
 | Setting | What it does |
 |---|---|
-| **Brewery Name** | Your brewery's name, shown at the top of every Tab's menu bar. Empty: OakBarn Brewery. |
+| **Brewery Name** | A Patron perk: your brewery's name, shown on every Tab's Menu Bar and in the Process Editor, and the Copyright and Created by of every new Process. Not a Patron: greyed out, and the Menu Bar shows Skynet Panel. Empty: the name on your Patron code. See [Patron](198-patron). |
 | **Units** | US (gallons, pounds, °F) or Metric (liters, kilograms, °C). Every amount and temperature shows in it. Skynet keeps every number in metric, so it only changes what you see and type (Skynet Rule 2.59). |
 | *Boil temperature (air pressure)* | The two boxes below, under their own title. |
 | **Airport (ICAO)** | The 4 letter code of your nearest airport with a weather report (its METAR station), for example `KDFW`. Skynet reads its air pressure to work out the temperature water boils at here (`skn_Boil_Temp`). |
@@ -180,7 +180,7 @@ How the whole panel works, so a change reaches things already made. They were on
 
 - **Units** (US or Metric): every amount, temperature and Recipe shows in it. Skynet keeps every number in metric (°C, liters, kilograms, cm), so Units only changes what you see and type; switching it never changes a saved number (Skynet Rule 2.59). Mash, Boil and Equipment Profiles, Vessels and Vessel Templates show their numbers in it when they open; the Units box in each of them is greyed out and follows this one; on a running Tab every temperature shows in it too: a probe's reading (PV), its Setpoint (SV), its Dial, and the Setpoint and Offsets of a Heating Element or Fermentor Control, in their Properties and pop-ups as well. A probe kept in °C (the 3 Vessel Sample) shows 150.0 °F in US, and a probe kept in °F shows °C in Metric; what you type is saved in the probe's own units, and a number you did not change is saved exactly as it was. An Offset turns by 1.8 only (1 °C = 1.8 °F), never with the 32. Recipe items that come in their own unit keep it (an addition in grams, a yeast in Packs; hops are kept in kg and show in oz or g);
 - **Tab Style** (the look of every Tab that has no Tab Style of its own);
-- **Menu Bar**, **Sound**, **On startup** (Zoom, Full screen);
+- **Top Line**, **Sound**, **On startup** (Zoom, Full screen);
 - **\L Rich Text Code Size**;
 - **Hover Delay** ([Hover help in dialogs](147-hover-help));
 - **Push Lockout (s)**: how long a new Pulse push button waits before another press counts;

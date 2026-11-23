@@ -13,7 +13,7 @@ Appuyez sur **☰ Menu** (en haut à droite), puis **➕ New Schema…**, juste 
 Deux autres façons ouvrent la même case :
 
 - **☰ Menu > 🗂 Schema**, puis le grand bouton **➕ New Schema**. **❓ Step by step** à côté ouvre cette page.
-- La liste déroulante **Schema** (sur la Menu Bar, le Tab Schema ou le Tab About), puis **Add new Schema ...** vers le bas de la liste.
+- La liste déroulante **Schema** (sur la Top Line, le Tab Schema ou le Tab About), puis **Add new Schema ...** vers le bas de la liste.
 
 ![Le Tab Schema : bouton New Schema](help_pictures/Step_Add_Schema_02_Schema_Tab.png)
 

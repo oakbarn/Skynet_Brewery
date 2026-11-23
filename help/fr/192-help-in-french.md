@@ -4,7 +4,7 @@ L'aide et les bulles (Hover Help) peuvent se lire en **anglais** ou en **frança
 
 ## Choisir la langue {#picking-the-language}
 
-1. Ouvrez l'aide (le **?** jaune à côté de **☰ Menu**, ou **Help** dans la Menu Bar).
+1. Ouvrez l'aide (le **?** jaune à côté de **☰ Menu**, ou **Help** dans la Top Line).
 2. En haut de la liste des pages, choisissez **🌐 Français** dans **🌐 Help language**. Choisissez **🌐 English** pour revenir.
 
 Le navigateur garde ce choix, donc l'aide s'ouvre dans la même langue la fois suivante sur ce PC, ce téléphone ou cette tablette. Chaque navigateur a son propre choix : une personne peut lire l'aide en français pendant qu'une autre la lit en anglais. Les bulles du panneau suivent tout de suite le même choix, même dans une fenêtre du panneau déjà ouverte.

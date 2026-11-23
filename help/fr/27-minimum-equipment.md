@@ -181,7 +181,7 @@ Coût de base, sans capteurs ni sorties : environ **25-30 $ pour le Système 1 a
 - **Navigateurs :** testé dans Chrome et Edge. Safari (iPhone, Mac) et Firefox ne sont pas encore entièrement testés.
 - **Disposition sur téléphone :** ça marche, mais les grands Tabs sont à l'étroit sur un écran de téléphone.
 - **Pas encore de graphiques** sur la page Log (les données peuvent être téléchargées en fichier de tableur).
-- **Les sons d'alarme** ne jouent que sur les écrans où **Enable sound** a été appuyé une fois (les navigateurs bloquent le son jusqu'à ce que vous cliquiez).
+- **Les sons d'alarme** ne jouent que lorsque l'icône **Sound** de la Menu Bar est active, après un clic sur l'écran (les navigateurs bloquent le son jusqu'à ce que vous cliquiez).
 - **Le WiFi est le maillon le plus faible.** Utilisez l'USB ou l'Ethernet pour tout ce qui chauffe ou pompe. Sur chaque liaison, la carte éteint toutes les sorties si elle n'entend plus rien du Pi pendant son délai de perte de liaison (10 secondes si vous ne le changez pas ; voir [Notes de connexion](69-connection-ratings)).
 - **Un seul Brain à la fois.** Deux panels qui commandent les mêmes cartes se battent entre eux.
 - **Hors de chez vous, seulement par Tailscale.** N'ouvrez jamais de port sur votre box pour le panel.

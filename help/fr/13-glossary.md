@@ -132,7 +132,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **☰ Menu** : le bouton en haut à droite de la page Tabs. Edit layout est son premier choix ; les autres ouvrent des onglets de menu. Voir [Le ☰ Menu](33-menu).
 
-**Menu Bar** (barre de menu) : la ligne du haut de la page : le nom du panel, la liste Schema, Tabs, Processes et ainsi de suite. Voir [La Menu Bar](40-menu-bar).
+**Menu Bar** (barre de menu) : la rangée avec le nom de la brasserie au milieu et, à droite, la bulle Simulator, Build, Sound, Emergency Off, ? et ☰ Menu, à la même place sur chaque Tab et dans l'éditeur de Processes. Voir [La Menu Bar](40-menu-bar).
 
 **Menu tab** (onglet de menu) : une page ouverte depuis le ☰ Menu (Default settings, Equipment Profile, Mash Profile, Boil Profile, les autres profils et les Templates). Il s'affiche à côté des Tabs d'écran, avec un ✕ pour le fermer, et a un numéro d'Order.
 
@@ -221,6 +221,8 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 **Tailscale** : un réseau privé gratuit entre vos propres appareils, pour utiliser le panel hors de chez vous en sécurité. Voir [Installer Tailscale sous Windows](00-tailscale-windows).
 
 **Template** (modèle) : une cuve toute prête (Vessel Template) ou un ensemble de jusqu'à quatre raccords (Bundled Fitting Template), gardé dans une bibliothèque. Les Templates Skynet viennent avec le panel et sont seulement clonés ; les User Bundled Templates sont les vôtres. Voir [Modèles de cuves et de raccords](50-vessel-and-fitting-templates).
+
+**Top Line** (ligne du haut) : la ligne tout en haut des autres pages : le nom du panel, la liste Schema, Tabs, Processes et ainsi de suite. Cachée sur les Tabs au départ, et absente dans l'éditeur de Processes. Voir [La Menu Bar](40-menu-bar).
 
 ## U {#u}
 

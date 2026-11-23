@@ -1,6 +1,11 @@
 # L'éditeur de Processes {#the-process-editor}
 
-L'écran **Processes** a une rangée d'outils au-dessus de l'éditeur : **Find**, **All Processes**, **Go to line**, **Save to file**, l'interrupteur **Colors** et le **Color key** (légende des couleurs). Le bouton **Recycle Bin** (corbeille) est sous la liste des Processes.
+L'écran **Processes** a deux rangées d'outils au-dessus de l'éditeur, la plupart en images (icônes) :
+
+- **La rangée du haut :** la liste des Processes, **New**, puis **Delete** (la poubelle rouge), **Recycle Bin** (corbeille), **Check** (la coche verte), **Start** (rouge quand le Process est arrêté, vert quand il tourne), **Stop**, **Restart** et **Save**. Le nom de votre brasserie est au milieu (**Skynet Panel** si vous n'êtes pas Patron). Puis **Predictive text**, **Key** (ce que veut dire chaque couleur), **📐 Constants**, et la Menu Bar : Sound, Emergency Off, le **?** jaune et **☰ Menu** (voir [La Menu Bar](40-menu-bar)).
+- **La deuxième rangée :** **Find** (la loupe), **Go To** (la flèche) avec sa case **Line / Section**, le nom et la classe du Process, sa Version, **Add steps**, **Restart if it fails**, **All Processes**, **Suggest**, **Picture**, **Save to file**, l'interrupteur **Colors**, et à droite **Undo**, **Save** et **Close**.
+
+L'image Save de la rangée du haut et le bouton Save font la même chose. Chacun d'eux est aussi dans le **☰ Menu** quand l'éditeur de Processes est ouvert, sous **Process Editor**. **Rename** et **Stop all** sont au-dessus de la liste des Processes.
 
 Chaque étape de l'ajout d'un Process, avec des images : [Pas à pas : ajouter un Process](240-step-by-step-add-a-process).
 
@@ -16,11 +21,17 @@ Quand le nom est juste avant le curseur, un bouton n'ajoute que sa partie (`.sta
 
 `Audio_1.play = true` fait jouer un Audio Widget et `= false` l'arrête (comme `.active`).
 
-## Numéros de ligne et Go to line {#line-numbers-and-go-to-line}
+## Numéros de ligne et Go To {#line-numbers-and-go-to}
 
 Chaque ligne a son numéro sur le côté gauche. Un numéro rouge est une ligne qui a un problème, un vert est la ligne où en est un Process en marche.
 
-Pour sauter à une ligne, appuyez sur **Go to line** (ou **Ctrl+G** sur un PC), tapez le numéro et appuyez sur **OK**. La ligne est surlignée et amenée à l'écran. Go to line marche aussi dans l'éditeur **Schema.json**.
+**Go To** saute à une ligne ou à une Section :
+
+- Choisissez **Line** dans la case à côté de la flèche Go To, tapez le numéro de ligne dans la case bleu clair et appuyez sur **Entrée** (ou sur la flèche Go To).
+- Choisissez **Section**, tapez le nom de la Section (par exemple **Sparge**) et appuyez sur **Entrée**. Une Section est une ligne `step "Sparge"` ou un label `[Sparge]`. Le nom entier la trouve, une partie aussi. La case bleu clair s'élargit pendant que vous tapez.
+- Avec la case vide, la flèche Go To (ou **Ctrl+G** sur un PC) demande le numéro de ligne. Ctrl+G marche aussi dans l'éditeur **Schema.json**.
+
+La ligne est surlignée et amenée à l'écran.
 
 ## Ouvrir l'éditeur de Processes et choisir un Process {#opening-the-process-editor-and-picking-a-process}
 
@@ -29,6 +40,18 @@ Ouvrez l'éditeur de Processes depuis **☰ Menu > Processes**, ou, pendant que 
 L'éditeur s'ouvre prêt à modifier : il montre le Process que vous aviez ouvert en dernier sur cet ordinateur ou ce téléphone (la première fois, le premier Process de la liste). Cliquez dans la zone et tapez, puis appuyez sur **Save**.
 
 Choisissez le Process à travailler dans la liste en haut de l'éditeur. **➕ Add New Process...** est le premier de cette liste ; viennent ensuite vos Processes, groupés par classe (Flow, Sub, Repeat, Looper) dans leur Order. La liste sur le côté gauche marche toujours aussi, et c'est là que vous changez les numéros d'Order.
+
+## Un nouveau Process {#a-new-process}
+
+1. Appuyez sur **New** (ou choisissez **➕ Add New Process...** dans la liste) et tapez le nom. Les espaces sont permis : ils deviennent **_** dans le nom du Process (**My New Brew Process** devient **My_New_Brew_Process**, c'est ainsi qu'un autre Process le lance : `start My_New_Brew_Process`). La ligne 1 du nouveau Process garde le nom tel que vous l'avez tapé.
+2. La boîte **New Process** demande de quelle sorte il est. Cliquez sur une des quatre cases (elle devient rouge), puis appuyez sur **Save** :
+   - **Flow** : le brassage lui-même. Les Processes Flow suivent un jour de brassage, l'un lançant le suivant. Ils sont numérotés 1, 2, 3 ... dans l'ordre où ils se lancent.
+   - **Sub** : une tâche utilisée à plus d'un endroit (remplir une cuve, faire un transfert), appelée par un Process Flow. Numérotés S1, S2, S3 ...
+   - **Repeat** : un petit outil commun, souvent un endroit d'attente dans le Process qui l'appelle. Numérotés R1, R2, R3 ...
+   - **Looper** : tourne en arrière-plan tout seul et n'est jamais appelé. Numérotés L1, L2, L3 ... Override et Stop all le laissent tourner.
+3. **La sorte ne peut plus être changée une fois enregistrée.** Elle s'affiche à côté du nom du Process. Si vous avez choisi la mauvaise, faites un nouveau Process et collez-y le texte.
+
+**Close** (ou ✕) ne crée rien. Le nouveau Process commence par quelques lignes : son nom, la ligne MIT License et la ligne **Copyright ©**, puis quelques commentaires qui montrent comment s'écrivent les commentaires (`/* ... */` pour plusieurs lignes, `//` pour une seule). Le nouveau Process d'un Patron indique aussi **Created by** avec le nom de votre brasserie, la date et l'heure, et le Copyright porte le nom de votre brasserie (voir [Patron](198-patron)).
 
 Un Process a une clé cachée, donc **Rename** ne change que son nom : chaque autre Process qui le lance ou l'arrête est mis à jour tout seul avec le nouveau nom. Voir la page d'aide Name change and hidden keys.
 
@@ -108,7 +131,7 @@ Un fichier général qui colore les commandes, les commentaires, les nombres, le
 
 **Delete** n'efface pas un Process. Il demande d'abord, puis déplace le Process dans la **Recycle Bin** (le dossier `processes/Recycle_Bin` sur le Brain).
 
-Appuyez sur **Recycle Bin** sous la liste des Processes pour voir ce qui a été supprimé et quand :
+Appuyez sur **Recycle Bin** (la poubelle noire avec les flèches de recyclage, sur la rangée du haut) pour voir ce qui a été supprimé et quand :
 
 - **Look** montre ce qu'il contient, en couleurs.
 - **Restore** vous demande de confirmer, puis remet le Process dans la liste avec sa classe et son réglage « Restart if it fails ». Si un Process de ce nom existe maintenant, on vous demande un autre nom pour le restaurer.
@@ -126,7 +149,7 @@ La même barre (Ctrl+F et Ctrl+H) se trouve dans l'éditeur de **Process Templat
 
 ## L'éditeur Schema.json (Admins) {#the-schema-json-editor-admins}
 
-La page **Schema.json** (Admins seulement, sur la barre de menus ; elle s'appelait **Config** avant) montre tout le fichier de configuration, `config/brewery.json`, sous forme de texte : Tabs, Devices, Widgets, tuyaux, Interfaces et réglages. Elle a les mêmes **Find**, **Replace** et **Go to line**.
+La page **Schema.json** (Admins seulement, sur la Top Line ; elle s'appelait **Config** avant) montre tout le fichier de configuration, `config/brewery.json`, sous forme de texte : Tabs, Devices, Widgets, tuyaux, Interfaces et réglages. Elle a les mêmes **Find**, **Replace** et **Go to line**.
 
 - **Check** teste le fichier comme le panel le charge au démarrage et montre la ligne qui pose problème.
 - **Save** le vérifie d'abord et n'enregistre pas un fichier que le panel ne peut pas charger. Enregistrer arrête les Processes en marche et reconnecte les cartes. L'ancien fichier est d'abord copié dans `config/backups`.

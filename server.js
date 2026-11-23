@@ -1302,7 +1302,7 @@ async function route(req, res) {
       if (engine.exists(to)) { skipped.push(to); continue; }
       checkFileName(to, { ext: false, what: 'Process' });
       engine.write(to, renameInProcess(engine.read(from), names, [...vn, ...vn.map(n => names.get(n))]));
-      try { engine.setClass(to, engine.classOf(from)); } catch { }
+      try { engine.setClass(to, engine.classOf(from), { keep: true }); } catch { }
       done.push({ from, to });
     }
     if (done.length) engine.renumber();

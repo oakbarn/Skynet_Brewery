@@ -887,12 +887,12 @@ button.barSim { min-height: 0; height: 30px; padding: 0 10px; border-radius: 15p
 button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, #fbe36b 8px 16px); color: #000; border-color: #8a6d00; }
 /* Panel Update 10, item 3: the Menu Bar keeps one place and order. An optional icon or balloon that is not needed now is hidden but keeps
    its space, so the scheme color shows there and nothing moves (the Simulator balloon outside Simulator mode, Build for a non-admin) */
-button.barSim.keepSpace { visibility: hidden; }
+button.barSim.keepSpace, button.barEdit.keepSpace { visibility: hidden; }
 body:not(.role-admin) #barSim.admin-only, body:not(.role-admin) #barEdit.admin-only { display: inline-flex !important; visibility: hidden; }
 /* the Sound icon (items 2 and 3b): one click on or off; the red Do Not Enter sign sits over it while sound is off */
 button.barSound { position: relative; width: 30px; height: 30px; min-height: 0; padding: 0; border: 0; background: transparent; cursor: pointer; line-height: 0; }
 button.barSound img { width: 30px; height: 30px; display: block; }
-button.barSound img.dne { position: absolute; inset: 3px; width: 24px; height: 24px; opacity: .9; display: none; }
+button.barSound img.dne { position: absolute; right: -3px; bottom: -3px; width: 18px; height: 18px; display: none; }
 button.barSound.off img.dne { display: block; }
 button.barSound:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
 /* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */
@@ -1713,3 +1713,33 @@ input[type="date"]:disabled::-webkit-calendar-picker-indicator, input[type="time
 /* a clone picture right-dragged off a Vessel or Equipment Template (Rule 4.9): faint until 100 px away, then it will be made */
 .tplGhost { position: fixed; z-index: 3000; pointer-events: none; opacity: .45; filter: drop-shadow(0 4px 8px rgba(0,0,0,.5)); object-fit: contain; }
 .tplGhost.far { opacity: .9; outline: 2px dashed #2e9e4f; outline-offset: 3px; }
+
+/* Panel Update 10, item 5: the New Process dialog. One click on Flow, Sub, Repeat or Looper (Rule 2.6: fewer than six choices, one pick),
+   the picked box turns red, then Save. The class shows beside the Process name and is never changed after it is saved */
+dialog.newProcDlg { max-width: min(720px, calc(100vw - 32px)); padding: 0; }
+.newProcDlg .dlgTop { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.newProcDlg .procClassRow { display: flex; justify-content: space-around; gap: 12px; padding: 14px; flex-wrap: wrap; }
+.newProcDlg .procClassBox { display: flex; flex-direction: column; align-items: center; gap: 6px; background: transparent; border: 0; font-weight: bold; font-size: 1.05em; cursor: pointer; }
+.newProcDlg .pcTick { width: 28px; height: 28px; border: 2px solid var(--text, #ddd); border-radius: 4px; display: block; }
+.newProcDlg .procClassBox[aria-pressed="true"] .pcTick { background: #e0201a; border-color: #e0201a; }
+.newProcDlg .procClassAbout { padding: 0 16px 14px; }
+.newProcDlg .procClassAbout li { margin: 4px 0; }
+.procClass { font-weight: bold; padding: 2px 8px; border: 1px solid var(--line); border-radius: 10px; }
+.procClass:empty { display: none; }
+
+/* Panel Update 10, item 1: the Process Editor top in icons (OakBarn Brewery's own pictures, public/icons). Row 1 holds the Menu Bar
+   while the Process Editor is open; the top line (Schema, Tabs, Processes ...) is off here (item 1a) */
+body.onProcEditor header#top { display: none; }
+button.icoBtn { width: 34px; height: 34px; min-height: 0; padding: 2px; border: 1px solid var(--line); border-radius: 5px; background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; line-height: 0; }
+button.icoBtn img { width: 28px; height: 28px; display: block; }
+button.icoBtn:hover { outline: 2px solid var(--accent, #1d56b0); }
+button.icoBtn:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
+button.icoBtn:disabled { opacity: .45; cursor: default; outline: none; }
+button.barEdit img, button.eOff img { width: 30px; height: 30px; display: block; border-radius: 4px; }
+.procTop, .procRow2 { flex-wrap: wrap; align-items: center; }
+.procMenuSlot, .menuCluster { display: inline-flex; align-items: center; gap: 6px; }
+.procTop .barBrewery { font-size: 1.25em; }
+.goWhere { width: 6ch; min-width: 6ch; max-width: 40ch; background: #bfe9f5; color: #000; font-weight: bold; }
+/* the Build icon is OakBarn Brewery's Hammer and Wrench picture now (Panel Update 10, item 3a), not the blue circle */
+button.barEdit { border: 0; border-radius: 4px; background: transparent; }
+button.barEdit:hover { background: transparent; outline: 2px solid #2a6bd1; }

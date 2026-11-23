@@ -12,7 +12,7 @@ exactement tel qu'OakBarn Brewery l'a envoyé, ou si quelque chose y a été cha
 
 ## Où vous le voyez {#where-you-see-it}
 
-- **Sur la Menu Bar**, après le nom de la version :
+- **Sur la Top Line**, après le nom de la version :
   - **✓ Official** : chaque fichier du programme est celui qu'OakBarn Brewery a envoyé.
   - **⚠ Changed** : certains fichiers du programme ne sont pas comme OakBarn Brewery les a envoyés.
   - **⚠ Not Official** : ce Skynet ne vient pas d'OakBarn Brewery. C'est la copie de quelqu'un d'autre, ou une copie de test jamais publiée.
@@ -75,7 +75,7 @@ ne peut pas les rendre impossibles. Pour votre brasserie, les bonnes habitudes s
 
 - Obtenir Skynet seulement depuis la **page Releases d'OakBarn Brewery** sur GitHub, ou depuis oakbarnbrewery.com.
 - Installer et mettre à jour avec le **Setup** (ou l'installateur de votre ordinateur).
-- Chercher **✓ Official** sur la Menu Bar.
+- Chercher **✓ Official** sur la Top Line.
 
 ## Vérifications antivirus {#virus-checks}
 
