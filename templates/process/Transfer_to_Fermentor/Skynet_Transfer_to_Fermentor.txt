@@ -15,6 +15,7 @@ ask "Press Done when the fermenter has about " + skn_rcp_Batch_Volume + " " + sk
 ask "Move the wort into the fermenter (about " + skn_rcp_Batch_Volume + " " + skn_rcp_Volume_Units + "). Press Done when it is in."
 @end
 close_all_valves
+hop_alert "Fermenter"
 step "Gravity reading"
 ask "Take a gravity reading of the wort (the OG) and write it down. Press Done when you have it."
 print "Wort in the fermenter: " + skn_rcp_Name

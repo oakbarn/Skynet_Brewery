@@ -6,7 +6,7 @@ Skynet has three timers of its own for brew day (Skynet Rule 2.68):
 |---|---|---|
 | `skn_Boil_Timer` | the boil | the Recipe's boil time |
 | `skn_Mash_Timer` | the mash | the Recipe's mash steps' times added up |
-| `skn_Whirlpool_Timer` | the Whirlpool and chilling | the Recipe's Whirlpool Minutes |
+| `skn_Whirlpool_Timer` | the Whirlpool and chilling; the Skynet Chill Process Templates also hold each Hop Stand on it | the Recipe's Whirlpool Minutes |
 
 With no Recipe loaded, the times come from ☰ Menu > Default settings.
 

@@ -224,6 +224,13 @@ Note: inside a .bsmx file BeerSmith keeps its own US units: weights in **ounces*
 - **Ignore it** (picked to start): the Tab's Efficiency stays as it is.
 - **Put on** the Brew on Tab: the file's number goes into that Tab's own Brewhouse Efficiency. Skynet shows the change first ("72 % → 75 %"), and **↩ Undo** puts the old number back for a few seconds after. It changes every Recipe brewed on that Tab.
 
+**Hop Stands.** BeerSmith and BeerXML have no Skynet Hop Stands, so a recipe with Whirlpool hops asks one more box after the import (and after the Efficiency question):
+
+- Each Whirlpool hop: its **Hop Stand** (High, Middle or Low), or **No Hop Stand** (it goes in at flame out).
+- Each Hop Stand: its **Temperature** and **Time**.
+
+What the file gave is already filled in: a .bsmx file's whirlpool temperature and the hop's minutes. A BeerXML file has none, so those boxes start empty. **Close** keeps the recipe as imported. A Hop Stand you pick with no Temperature or Time gives one warning ("The chill won't stop for this hop.") and still saves.
+
 You can also import from the **Import** page, from Node-RED (POST the file to `/api/import/recipe?file=MyBeer.bsmx`), or from a Process (below).
 
 ## Mash Profile: Skynet or your own
@@ -252,6 +259,21 @@ When two alerts land at the same time, for example a drop and the next group's w
 On brew day each alert shows as a bar at the top of every screen (green for a warning, red for a drop) and stays until it is closed. With sound on, it plays the alert sound (if one is set in ☰ Menu > Default settings) and then says the alert out loud.
 
 Start the alerts from a Process (below), or with **▶ Start hop alerts** on the Drops tab. They can run on Skynet's own clock from that moment, or follow a countdown **timer** such as the Boil timer, so a paused timer or the Simulator's time skips are followed too.
+
+### Before and after the boil
+
+Some hops go in when the brew gets somewhere, not at a boil minute. The Process sends their alerts at that moment (`hop_alert`, below), and the Drops tab lists them under **Alerts the Process sends**:
+
+| When | Alert |
+| --- | --- |
+| The Strike Water reaches Strike | **Pre Boil** warning: get the Mash and 1st Wort hops ready |
+| Just after the Mash Timer starts | **Mash** drop: the Top of Mash hops |
+| Just before the First Run starts | **1st Wort** drop: the 1st Wort hops go in the kettle |
+| 10 minutes left in the boil | **Post Boil** warning: every Whirlpool, Hop Stand, Secondary and Dry Hop hop (a timed alert, with the others) |
+| The wort reaches a Hop Stand's temperature | **Hop Stand** drop: that stand's hops. The cooling water is off for its time, on the Whirlpool / Chilling Timer |
+| Every Fermenter is filled | **Fermenter** hops: the Secondary and Dry Hop hops, to set a reminder on your phone |
+
+The Pre Boil, Mash and 1st Wort alerts are for **All Grain** recipes only. A Whirlpool hop with no Hop Stand temperature and time (a BeerXML file has none) still goes in at flame out.
 
 ## Voice and audio files
 
@@ -285,8 +307,12 @@ start_hop_alerts
 start_hop_alerts "Boil_Timer"
 start_hop_alerts "Boil_Timer", 1
 stop_hop_alerts
+hop_alert "Pre Boil"
+hop_alert "Hop Stand High"
+hop_alert "Fermenter"
 ```
 
 - `import_recipe` reads a .bsmx or .xml file on the Brain (a path in the Brain's folder or a media folder) and makes it the Recipe. A second text picks one recipe from a file with many.
 - `start_hop_alerts` starts the hop alerts on Skynet's clock from now; with a timer name it follows that timer instead. A number after the timer is how many timer seconds make one minute of the boil: 60 (real time) to start; 1 when a Testing switch runs each minute as one second.
 - `stop_hop_alerts` stops them.
+- `hop_alert` sends one of the alerts that come before or after the boil (see **Before and after the boil**): `"Pre Boil"`, `"Mash"`, `"1st Wort"`, `"Hop Stand High"`, `"Hop Stand Middle"`, `"Hop Stand Low"` or `"Fermenter"`. With no Recipe, or no such hops, nothing is sent and the Process goes on.

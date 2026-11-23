@@ -22,9 +22,15 @@ if skn_rcp_Mash_Steps >= {{n}}
   {{Mash_Timer}}.countdown = true
   {{Mash_Timer}} = skn_rcp_Mash_Step_{{n}}_Time
   start {{Mash_Timer}}
+  if {{n}} == 1
+    hop_alert "Mash"
+  endif
   wait {{Mash_Timer}} <= 00:00:00
   stop {{Mash_Timer}}
 @else
+  if {{n}} == 1
+    hop_alert "Mash"
+  endif
   sleep skn_rcp_Mash_Step_{{n}}_Time * 1000
 @end
 endif
@@ -47,6 +53,7 @@ endif
 {{Mash_Pump}} = false
 @end
 step "First wort"
+hop_alert "1st Wort"
 ask "Put any first wort hops in the boil kettle now. Then set the valves to run the first wort from the mash tun to the kettle. Press Done when it is running."
 step "Sparge"
 ask "Sparge with water at " + skn_rcp_Sparge_Temp + skn_rcp_Temp_Units + " from the Hot Liquor Tank, slowly (at least 10 minutes), and collect " + skn_rcp_Boil_Volume + " " + skn_rcp_Volume_Units + " of wort in the boil kettle. Turn the kettle heat on once the wort covers the heating element. Press Done when the kettle has it all."
