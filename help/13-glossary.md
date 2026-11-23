@@ -110,7 +110,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Interface**: a board (PLC) Devices are wired to. Its **Interface ID** (like `MB_`, Rule 3.2) starts the names of its Devices. See [Interface, Tab and Device names](46-interface-tab-device-names).
 
-**IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs. IPs only show in Edit layout, as a white circle inside a colored ring.
+**IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs. IPs only show in Edit layout, as a **small red dot**, so IPs close together never cover each other. Rest the mouse on a dot (or select it) and it grows into a white circle inside a colored ring with its letters and name.
 
 ## L
 

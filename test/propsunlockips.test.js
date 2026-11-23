@@ -19,3 +19,12 @@ assert.match(help, /## Unlock its IPs from Properties/);
 assert.match(fr, /\{#unlock-its-ips-from-properties\}/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /\*\*🔓 Unlock its IPs in Properties\*\*/);
 console.log('propsunlockips ok');
+// Small IP dots (OakBarn Brewery, 2026-11-23, Rule 5.20): in Edit layout a round IP marker is a small red dot that only the dot can be
+// pointed at; hovered or selected it is the full circle with its letters and name tag again
+const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+assert.match(css, /#ws\.editing \.gfx\.ip:not\(\.fit\):not\(\.has-img\):not\(:hover\):not\(\.sel\) \{[^}]*pointer-events: none/, 'only the dot takes the mouse');
+assert.match(css, /#ws\.editing \.gfx\.ip:not\(\.fit\):not\(\.has-img\)::before \{[^}]*background: #e01b12[^}]*pointer-events: auto/, 'a small red dot');
+assert.match(css, /:is\(:hover, \.sel\)::before \{ display: none; \}/, 'hovered or selected: the full circle');
+assert.match(css, /:not\(:hover\):not\(\.sel\) > \.iplbl \{ display: none; \}/, 'its name tag waits for the hover');
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /round IP marker is drawn as a \*\*small red dot\*\*/);
+console.log('small IP dots ok');

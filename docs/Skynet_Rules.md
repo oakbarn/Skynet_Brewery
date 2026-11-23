@@ -2264,6 +2264,12 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
 (250,250,250, the same White as Rule 2.7) inside its colored ring, with black letters, like the IP pictures in Help. The ring keeps
 its color (orange for a plain IP, blue for water and valves, green for pumps, purple for probe tees and thermowells). A live IP
 still fills with its ring color. Both programs.
+*Changed (OakBarn Brewery, 2026-11-23: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small red
+dots on only become large when you hiver on one"):* in Edit layout a round IP marker is drawn as a **small red dot** (9 pixels, white
+edge), and only the dot can be pointed at, so IPs close together no longer cover each other. **Hovered or selected**, it grows into the
+white circle in its colored ring with its letters, and its Edit layout name tag shows. A Label set to Show stays as it is. Fittings,
+IPs with a picture and Quick Disconnects are drawings, not markers, and do not change. Pipes still snap to an IP by distance, so
+drawing to a dot works as before. (Help 13)
 
 5.21 **Pipe and Hose Widgets and Flow Colors** (Fritz, 2026-11-03, thread "Add flow colors to pipe and hose Widgets", Help 116):
 - A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose** on the
@@ -7010,6 +7016,7 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 ## Change log
 
+- 2026-11-23: Rule 5.20 changed (OakBarn Brewery: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small red dots on only become large when you hiver on one"): in Edit layout a round IP marker is a small red dot that only the dot can be pointed at; hovered or selected it is the full white circle in its colored ring, with its letters and name tag. Fittings, IPs with a picture and Quick Disconnects do not change. Help 13 (and French). Checked against the BruControl Import program: its build opens the same Edit layout (same style.css), so it gets the same dots; nothing else changes there.
 - 2026-11-22: Panel Update 9 Part 1 (OakBarn Brewery, PDF "Panel Update 9", 35 items): added Rule 7.27 (six Skynet Audio folders plus
   Patron, their drawings, pictures 239 to 244, the Audio Widget shows only while it plays, no `.visible` for it); Rule 9.26 the Windows
   installer is Skynet_Brewer_Update_<version>.exe; Rule 11.17 a Help table's Name column never wraps; Rule 1.31 Process Widget Group
