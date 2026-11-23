@@ -57,3 +57,4 @@ assert.match(read('lib/brewprocess.js'), /const head = `\/\/\$\{names\[i\]\}\\n\
 console.log('Panel Update 12 ok');
 import './panelupdate13.test.js';
 await import('./rule26addnew.test.js');       // Rule 2.6 Add new first, Rule 10.12 (run with this one, so package.json is not changed)
+await import('./errorlog.test.js');       // the Process Error Log, Rule 10.13 (run with this one, so package.json is not changed)

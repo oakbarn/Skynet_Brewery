@@ -32,7 +32,7 @@
  "30-process-editor": "ebca112c4b190a39",
  "31-tap-water-valves": "c2e744cece0a8ad8",
  "32-file-move": "8b3baa577e9a7d38",
- "33-menu": "0f0368fe7804bb6b",
+ "33-menu": "31d1cd91502539ca",
  "34-vessel-tab": "2002cefdad750513",
  "35-mash-and-boil-profiles": "8cc7b98b28305a8d",
  "36-tab-and-valve-profiles": "369599488dda730d",
@@ -239,5 +239,6 @@
  "243-get-music-pack": "4979ed5d5148c28b",
  "244-emergency-off": "727a1e1b0d7ffcf6",
  "245-value-widget-formats": "862fd1499939fe6f",
- "246-skynet-brew-timers": "e1a030f685c7d932"
+ "246-skynet-brew-timers": "e1a030f685c7d932",
+ "247-fix-before-next-brew-day": "1f58940caeeaae71"
 }

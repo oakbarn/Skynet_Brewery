@@ -4799,6 +4799,31 @@ blocked. There is no way to step out of brewing into the Simulator and back (Oak
 "Likely a Bad Idea to allow it"); a Process log with exact line numbers and a list of issues to fix before the next Brew Day are in
 the Panel Updates sandbox instead. **Both programs:** the BruControl Import has no Simulator, so nothing changes there. (Help 85, 77)
 
+10.13 **The Process Error Log: Fix before next Brew Day** (OakBarn Brewery, 2026-11-23, after he set stepping out of a brew into the
+Simulator aside: "Likely a Bad Idea to allow it.  Maybe a Log with exact location in a Process with Line mumbers and a way for a user
+to keep a log of issue that need to be fixed before the next bre day"; "I think just and error log with the line # of the error, what
+the error was and a way to fix it if evident"; "Do a combination of A and C.  Log it, and if it was fixed, the fix.  and the Check
+button could be used to check it in a simulation mode just for the checking"; on how much a Check runs, "I think B is best and use
+the Pop up Override to run from just above the error"; "Go ahead and build it"). Panel Updates entry 55.
+- **☰ Menu > 🔧 Fix before next Brew Day** (everyone reads it; Brewers and Admins add, check and tick off), with the number open.
+- **Every Process error is written by itself:** the time, the Process, the **line number** (the line in the file, as in the Process
+  Editor, blank and comment lines counted), the line's own text, what the error was, and **how to fix it when evident**
+  (public/errorfix.js; nothing when the error's own words already show how). A Process that does not start is written the same way.
+  The same error on the same line again is one entry with a count. A Process saved while it ran is marked, as its lines may have moved.
+- **The fix is kept:** when the Process is saved with the error's line changed, the entry keeps the line as it was and as it is now.
+- **🧪 Check** runs the saved Process in a **check-only simulation** (lib/checkrun.js): its own Engine on a copy of the Brain that
+  reads every Device, Widget and gGlobal as it is now; what it sets stays in the copy (and is listed), nothing goes to a board, the
+  database, the screens or the saved Schema, and a running brew is never touched. It starts **just above the error** (the statement
+  before it, unless that is a wait, step or label) with the variables the Process had at the error, and stops at the **next wait or
+  step** (also a sleep, an ask, a manual valve or reading ask, a lock), at the end, or at an error; 5000 statements or 5 seconds with
+  no wait end it too. **▶ Override** goes on past that wait, like the Override pop-up (Rule 2.26), up to the next one. A Check with no
+  error moves the entry to **Fixed** with its fix.
+- **✔ Fixed** and **↩ Open again** by hand; **Delete**. **➕ Add an issue**: a person's own issue, with the Tab (or the open Process).
+- **Kept on the Brain** (data/errorlog.json): open entries until fixed or deleted, fixed ones 90 days, at most 500.
+- **Recommendations taken** (OakBarn Brewery said build it before these were asked): the Add an issue box is in this list's window;
+  open ones are kept until fixed, fixed ones 90 days; Brewers and Admins add and tick, view-only accounts read.
+**Both programs:** the BruControl Import has no Processes running and no ☰ Menu, so nothing changes there. (Help 247, 33)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
@@ -7765,3 +7790,4 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 - 2026-11-23: Panel Update 13 (OakBarn Brewery, PDF "Panel Update 13", 4 items, the Process Editor). Rule 2.70 changed (Rename and Stop all no longer above the Process list: Stop all is the Stop Sign icon at the left of the second row, Rename on the ☰ Menu; the problems and the Output in a column to the right of the code; Output's Current Process / All Variables dropdown (the open Process's lines only; All Variables lists the values of its variables and every gGlobal); Reset every Start switch; a small gray ▾ on Conditionals, Skynet Special, Devices, Widgets and Common). Rule 2.6 changed (OakBarn Brewery picked "change the Rule": more than six choices are always a dropdown; six or fewer pick-one choices are one-click boxes or, if desired, a dropdown). Help 5 and 30 and French; Importer Help 143 (Page 2) says script output and variables are still a choice in Skynet, plus Reset every Start. Checked against both programs: the BruControl Import has no Process Editor; it brings in scripts as Processes, unchanged. (thread "Build Panel Update 13")
 - 2026-11-23: Rule 2.70 changed (OakBarn Brewery, Panel Update 13 follow-up): the Output dropdown also lists every running Process under Running; picking one opens it in the Process Editor and it is the Current Process until another is picked; Start or Restart there takes precedence. Help 5 and 30 and French. Checked against both programs: the BruControl Import has no Process Editor. (thread "Build Panel Update 13")
 - 2026-11-23: Rule 2.6 changed (OakBarn Brewery, Panel Update 12 follow-up: "I think change the Rule. Add New goes first on every DDLB where appropriate"): in every dropdown that can grow, Add new ... is the first choice (after a "(pick ...)" line), not the last; on screen only, nothing saved changes. Rule 2.72's three open questions answered (Help language boxes OK; Add new Schema first; Switch to Simulator kept). Added Rule 10.12 (OakBarn Brewery: "We want to be able to switch to a simulator except on a Brew Day and Actively brewing"): Switch to Simulator is grayed while a Flow, Sub or Repeat Process runs. Help and French. Checked against both programs: the BruControl Import has no Simulator, and the Panel dropdowns on its Build page follow the same order. (thread "Build Panel Update 12")
+- 2026-11-23: Added Rule 10.13 The Process Error Log, ☰ Menu > 🔧 Fix before next Brew Day (Panel Updates entry 55; OakBarn Brewery: "an error log with the line # of the error, what the error was and a way to fix it if evident"; "Log it, and if it was fixed, the fix.  and the Check button could be used to check it in a simulation mode just for the checking"; "I think B is best and use the Pop up Override to run from just above the error"; "Go ahead and build it"): every Process error by itself with its line, line text, what and how to fix; the fix kept when the line is changed; 🧪 Check in a check-only simulation from just above the error to the next wait or step, ▶ Override past it; your own issues. Help 247 (new) and 33, and French. Checked against both programs: the BruControl Import runs no Processes. (thread "Build Panel Update 12")

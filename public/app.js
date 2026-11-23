@@ -305,6 +305,7 @@ async function load() {
   S = st;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles, S.pumpProfiles] = lists;
   showStandby(S.standby);      // the Brain is in Standby (Rule 6.32): only its Standby page shows
+  api('GET', '/ui/errorlog').then(r => { S.errorOpen = r.open; }).catch(() => { });      // how many are on 🔧 Fix before next Brew Day (Rule 10.13)
   renderBrainNotices(S.brainNotices);
   renderFlameOut(S.flameOut);
   for (const n of chartData.keys()) if (!S.config.elements.some(e => e.name === n)) chartData.delete(n);      // a Graph that is gone: its readings are let go
@@ -388,6 +389,7 @@ function connect() {
     if (!editing && view === 'workspace' && Object.entries(ch).some(([n, p]) => 'layer' in p || ('active' in p && S.config.elements.some(e => e.type === 'soundPlayer' && e.name === n)))) renderWs();      // a Process changed a Layer Order (Rule 1.29), or an Audio Widget started or stopped (on top while it plays)
     schedulePipes(); updateMeters(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
+  es.addEventListener('errorlog', e => { S.errorOpen = JSON.parse(e.data).open ?? 0; if ($('#errLogDlg')?.open) renderErrorLog(); });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); fillOutPick(); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('media', () => recheckMissingPics());      // pictures added from the panel (File Move): File Not Found looks again
   es.addEventListener('started', e => outResetOnStart(JSON.parse(e.data).script));
@@ -16249,6 +16251,90 @@ function menuHelpLang(list, go) {
 }
 // the ☰ Menu choices: Edit layout, then the Menu tabs in their order, then every page with its parts. `go` wraps each
 // choice (it closes the list first, and in a dialog it closes the dialog).
+// ---- 🔧 Fix before next Brew Day: the Process Error Log (Rule 10.13; OakBarn Brewery, 2026-11-23: "an error log with the line # of
+// the error, what the error was and a way to fix it if evident"; "Log it, and if it was fixed, the fix.  and the Check button could be
+// used to check it in a simulation mode just for the checking"; "use the Pop up Override to run from just above the error"). Open ones
+// first. 🧪 Check runs the saved Process from just above the error to the next wait or step in a check-only copy (lib/checkrun.js):
+// nothing real is switched. When it stops at a wait, ▶ Override goes on past it. No error: the entry is fixed and keeps the change.
+const ERR_WHEN = t => new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+async function errorLogDialog() {
+  let d = $('#errLogDlg');
+  if (!d) {
+    d = h('dialog', { id: 'errLogDlg', class: 'errLogDlg', 'data-nomenu': true });
+    d.addEventListener('close', () => d.remove());
+    document.body.append(d);
+  }
+  await renderErrorLog();
+  if (!d.open) d.showModal();
+}
+async function renderErrorLog() {
+  const d = $('#errLogDlg'); if (!d) return;
+  const r = await api('GET', '/ui/errorlog');
+  S.errorOpen = r.open;
+  const brewer = can('operator'), open = r.items.filter(e => e.status === 'open'), done = r.items.filter(e => e.status !== 'open');
+  const txt = h('input', { type: 'text', class: 'errIssue', placeholder: 'An issue to fix before the next Brew Day, for example: the HLT valve sticks', maxlength: 1000 });
+  const addIssue = guard(async () => {
+    if (!txt.value.trim()) return toast('Type the issue first', true);
+    await api('POST', '/ui/errorlog/issue', { text: txt.value, tab: view === 'scripts' ? '' : curWs()?.name ?? '', process: view === 'scripts' ? curScript ?? '' : '' });
+    txt.value = ''; await renderErrorLog();
+  });
+  txt.onkeydown = ev => { if (ev.key === 'Enter') addIssue(); };
+  const close = () => h('button', { type: 'button', onclick: () => d.close() }, 'Close');
+  const wasOpen = !!d.querySelector('.errDone[open]');
+  d._btnOrder = true;
+  d.replaceChildren(...[
+    // Close and ✕ together in the upper right (Rule 2.54); made here, as the list is drawn again after each change
+    h('div', { class: 'bar' }, h('h3', {}, '🔧 Fix before next Brew Day'), h('span', { class: 'spacer' }),
+      h('span', { class: 'dlgBtnGroup' }, close(), h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: () => d.close() }, '✕'))),
+    h('p', { class: 'muted' }, 'Every Process error is written here by itself, with its line. Fix it, then 🧪 Check it: nothing real is switched by a Check.'),
+    brewer ? h('div', { class: 'errAdd' }, txt, h('button', { type: 'button', onclick: addIssue, title: 'Add your own issue to the list' }, '➕ Add an issue')) : null,
+    h('h4', {}, open.length ? `To fix (${open.length})` : 'Nothing to fix'),
+    h('div', { class: 'errList' }, ...open.map(e => errorRow(e, brewer))),
+    done.length ? h('details', { class: 'errDone', ...(wasOpen ? { open: true } : {}) }, h('summary', {}, `Fixed (${done.length})`), ...done.map(e => errorRow(e, brewer))) : null].filter(Boolean));
+}
+function errorRow(e, brewer) {
+  const res = h('div', { class: 'errCheck' });
+  const where = e.kind === 'error'
+    ? [h('b', {}, e.process), ` · line ${e.line}`, e.count > 1 ? ` · ${e.count} times` : '', e.notStarted ? ' · did not start' : '']
+    : [h('b', {}, 'Your issue'), e.by ? ` · ${e.by}` : '', e.process ? ` · ${e.process}${e.line ? ` line ${e.line}` : ''}` : ''];
+  const openLine = guard(async () => {
+    $('#errLogDlg')?.close(); setView('scripts');
+    if (curScript !== e.process) await openScript(e.process);
+    if (curScript === e.process && e.line) gotoLine(e.line);
+  });
+  const showCheck = (c, more) => {
+    if (!c) return res.replaceChildren();
+    const said = c.error ? `❌ Line ${c.error.line}: ${c.error.msg}`
+      : c.reached ? (c.reached.op === 'limit' ? `✅ No error from line ${c.from}; stopped after 5000 lines with no wait` : `✅ No error from line ${c.from} to the ${c.reached.op === 'step' ? 'step' : 'wait'} on line ${c.reached.line}`)
+        : `✅ No error from line ${c.from} to the end`;
+    res.replaceChildren(h('span', {}, said),
+      ...(more?.sets?.length ? [h('span', { class: 'muted' }, ' · it would have set ' + more.sets.slice(0, 4).map(x => `${x.name}${x.prop && x.prop !== 'value' ? '.' + x.prop : ''} = ${x.value}`).join(', ') + (more.sets.length > 4 ? ' ...' : ''))] : []),
+      ...(c.reached && c.reached.op !== 'limit' && brewer ? [h('button', { type: 'button', title: 'Go on past this wait, like the Override pop-up does, and check up to the next wait or step', onclick: guard(() => check(true)) }, '▶ Override')] : []));
+  };
+  const check = async override => {
+    res.replaceChildren(h('span', { class: 'muted' }, '🧪 Checking (nothing real is switched) ...'));
+    const r = await api('POST', `/ui/errorlog/${e.id}/check`, { override });
+    showCheck({ from: r.from, reached: r.reached, end: r.end, error: r.error }, r);
+    if (!override && r.ok) toast('No error: it is on the Fixed list now');
+    if (!r.reached || !r.ok) setTimeout(() => renderErrorLog().catch(() => { }), 2500);
+  };
+  showCheck(e.check);
+  return h('div', { class: 'errRow' + (e.status === 'open' ? '' : ' fixed') },
+    h('div', { class: 'errWhere' }, h('span', { class: 'muted' }, ERR_WHEN(e.lastAt ?? e.at) + ' · '), ...where),
+    e.kind === 'error' ? h('div', { class: 'errWhat' }, e.msg) : h('div', { class: 'errWhat' }, e.text),
+    e.lineText ? h('code', { class: 'errLine' }, e.lineText) : null,
+    e.fix ? h('div', { class: 'errFix' }, '💡 How to fix: ' + e.fix) : null,
+    e.changed ? h('div', { class: 'muted' }, 'The Process was changed after it started, so this line number is of the copy that was running.') : null,
+    e.change ? h('div', { class: 'errChange' }, 'Fixed line: ', h('code', {}, e.change.before || '(empty)'), ' → ', h('code', {}, e.change.after || '(empty)')) : null,
+    e.status !== 'open' ? h('div', { class: 'muted' }, `Fixed ${ERR_WHEN(e.fixedAt)}${e.fixedBy ? ' by ' + e.fixedBy : ''}${e.note ? ': ' + e.note : ''}`) : null,
+    res,
+    h('div', { class: 'errBtns' },
+      e.kind === 'error' && !e.widget ? h('button', { type: 'button', onclick: openLine, title: 'Open this Process in the Process Editor at this line' }, '✎ Open line') : null,
+      e.kind === 'error' && !e.widget && brewer ? h('button', { type: 'button', onclick: guard(() => check(false)), title: 'Run the saved Process from just above this line to the next wait or step, in a check-only simulation: nothing real is switched' }, '🧪 Check') : null,
+      brewer && e.status === 'open' ? h('button', { type: 'button', onclick: guard(async () => { await api('POST', `/ui/errorlog/${e.id}/fixed`, {}); await renderErrorLog(); }), title: 'Mark it fixed' }, '✔ Fixed') : null,
+      brewer && e.status !== 'open' ? h('button', { type: 'button', onclick: guard(async () => { await api('POST', `/ui/errorlog/${e.id}/open`, {}); await renderErrorLog(); }), title: 'Put it back on the list to fix' }, '↩ Open again') : null,
+      brewer ? h('button', { type: 'button', class: 'danger', onclick: guard(async () => { if (!await skyConfirm('Delete this entry?', { ok: 'Delete' })) return; await api('DELETE', `/ui/errorlog/${e.id}`); await renderErrorLog(); }), title: 'Delete this entry' }, 'Delete') : null));
+}
 function menuItems(list, go) {
   // Panel Update 12, item 2f (OakBarn Brewery, 2026-11-23: "Add the Last Item selected from the Hamburger Menu so it's easy to get back
   // to it. So a clone of something in the list."): every choice is remembered by its words (each browser its own); the last one picked
@@ -16288,6 +16374,9 @@ function menuItems(list, go) {
   }
   // Panel Update 12, item 2e (OakBarn Brewery: "Request a Feature is a Parton Perk, But we need Report a Bug for everyone"): 🐞 Report a Bug
   // for everyone, the same box as ☰ Menu > About > Report a problem (Rule 2.61) with A bug picked
+  // the Process Error Log and the Fix before next Brew Day list (Rule 10.13): for everyone, with how many are open
+  list.append(item(['🔧 Fix before next Brew Day', S.errorOpen ? h('span', { class: 'menuCount' }, ` (${S.errorOpen})`) : ''], guard(errorLogDialog),
+    { key: '🔧 Fix before next Brew Day', title: 'The Process Error Log (each error with its line, what it was and how to fix it) and your own issues to fix before the next Brew Day' }));
   list.append(item('🐞 Report a Bug', () => reportDialog({}), { title: 'Tell OakBarn Brewery about a bug, on GitHub or by email. Your Skynet version and browser are filled in.' }));
   list.append(item('⭐ Request a Feature', guard(requestFeature), { title: 'Ask the OakBarn Brewery team for a new feature (a Patron perk)' }));
   const lastSpot = h('div', { class: 'menuLastSpot' });
