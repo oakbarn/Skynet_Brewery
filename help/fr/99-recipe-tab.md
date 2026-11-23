@@ -224,6 +224,13 @@ Note : dans un fichier .bsmx, BeerSmith garde ses propres unités américaines :
 - **Ignore it** (l'ignorer, choisi au départ) : le rendement du Tab reste tel quel.
 - **Put on** le Tab Brew on : le nombre du fichier va dans le propre rendement de ce Tab. Skynet montre d'abord le changement (« 72 % → 75 % »), et **↩ Undo** remet l'ancien nombre pendant quelques secondes après. Cela change chaque recette brassée sur ce Tab.
 
+**Hop Stands.** BeerSmith et BeerXML n'ont pas les Hop Stands de Skynet, donc une recette avec des houblons Whirlpool pose une boîte de plus après l'import (et après la question du rendement) :
+
+- Chaque houblon Whirlpool : son **Hop Stand** (High, Middle ou Low), ou **No Hop Stand** (il est ajouté au flame out).
+- Chaque Hop Stand : sa **température** et son **temps**.
+
+Ce que le fichier donnait est déjà rempli : la température de whirlpool d'un fichier .bsmx et les minutes du houblon. Un fichier BeerXML n'en a pas, donc ces cases commencent vides. **Close** garde la recette telle qu'importée. Un Hop Stand choisi sans température ni temps donne un seul avertissement (« The chill won't stop for this hop. ») et enregistre quand même.
+
 Vous pouvez aussi importer depuis la page **Import**, depuis Node-RED (envoyez le fichier par POST à `/api/import/recipe?file=MyBeer.bsmx`), ou depuis un Process (plus bas).
 
 ## Mash Profile : Skynet ou le vôtre {#mash-profile-skynet-or-your-own}
@@ -252,6 +259,21 @@ Quand deux alertes tombent au même moment, par exemple un ajout et l'avertissem
 Le jour du brassage, chaque alerte s'affiche comme une barre en haut de chaque écran (verte pour un avertissement, rouge pour un ajout) et reste jusqu'à ce qu'on la ferme. Avec le son activé, elle joue le son d'alerte (s'il y en a un de réglé dans ☰ Menu > Default settings) puis dit l'alerte à voix haute.
 
 Démarrez les alertes depuis un Process (plus bas), ou avec **▶ Start hop alerts** sur l'onglet Drops. Elles peuvent tourner sur la propre horloge de Skynet à partir de ce moment, ou suivre une **minuterie** à rebours comme la minuterie d'ébullition, donc une minuterie en pause ou les sauts de temps du simulateur sont suivis aussi.
+
+### Avant et après l'ébullition {#before-and-after-the-boil}
+
+Certains houblons sont ajoutés quand le brassage arrive à un moment donné, pas à une minute d'ébullition. Le Process envoie leurs alertes à ce moment-là (`hop_alert`, plus bas), et l'onglet Drops les liste sous **Alerts the Process sends** :
+
+| Quand | Alerte |
+| --- | --- |
+| L'eau d'empâtage (Strike Water) atteint la température Strike | avertissement **Pre Boil** : préparez les houblons Mash et 1st Wort |
+| Juste après le démarrage du Mash Timer | ajout **Mash** : les houblons Top of Mash |
+| Juste avant le début du First Run | ajout **1st Wort** : les houblons 1st Wort vont dans la cuve d'ébullition |
+| 10 minutes avant la fin de l'ébullition | avertissement **Post Boil** : chaque houblon Whirlpool, Hop Stand, Secondary et Dry Hop (une alerte minutée, avec les autres) |
+| Le moût atteint la température d'un Hop Stand | ajout **Hop Stand** : les houblons de ce stand. L'eau de refroidissement est coupée pendant son temps, sur la minuterie Whirlpool / Chilling |
+| Chaque fermenteur est rempli | houblons **Fermenter** : les houblons Secondary et Dry Hop, pour mettre un rappel sur votre téléphone |
+
+Les alertes Pre Boil, Mash et 1st Wort sont pour les recettes **All Grain** seulement. Un houblon Whirlpool sans température ni temps de Hop Stand (un fichier BeerXML n'en a pas) est toujours ajouté au flame out.
 
 ## Voix et fichiers audio {#voice-and-audio-files}
 
@@ -285,8 +307,12 @@ start_hop_alerts
 start_hop_alerts "Boil_Timer"
 start_hop_alerts "Boil_Timer", 1
 stop_hop_alerts
+hop_alert "Pre Boil"
+hop_alert "Hop Stand High"
+hop_alert "Fermenter"
 ```
 
 - `import_recipe` lit un fichier .bsmx ou .xml sur le Brain (un chemin dans le dossier du Brain ou dans un dossier media) et en fait la recette. Un second texte choisit une recette dans un fichier qui en a beaucoup.
 - `start_hop_alerts` démarre les alertes de houblonnage sur l'horloge de Skynet à partir de maintenant ; avec un nom de minuterie, il suit plutôt cette minuterie. Un nombre après la minuterie dit combien de secondes de minuterie font une minute d'ébullition : 60 (temps réel) au départ ; 1 quand un interrupteur Testing fait passer chaque minute en une seconde.
 - `stop_hop_alerts` les arrête.
+- `hop_alert` envoie une des alertes d'avant ou d'après l'ébullition (voir **Avant et après l'ébullition**) : `"Pre Boil"`, `"Mash"`, `"1st Wort"`, `"Hop Stand High"`, `"Hop Stand Middle"`, `"Hop Stand Low"` ou `"Fermenter"`. Sans recette, ou sans ces houblons, rien n'est envoyé et le Process continue.

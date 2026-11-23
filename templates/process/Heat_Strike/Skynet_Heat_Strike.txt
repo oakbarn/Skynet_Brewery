@@ -17,4 +17,5 @@ wait {{HLT_Probe}} >= skn_rcp_Strike_Temp
 @else
 ask "Press Done when the strike water reaches " + skn_rcp_Strike_Temp + skn_rcp_Temp_Units + "."
 @end
+hop_alert "Pre Boil"
 print "Strike water at " + skn_rcp_Strike_Temp + skn_rcp_Temp_Units

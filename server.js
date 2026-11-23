@@ -259,7 +259,9 @@ engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // loc
 // The Recipe (☰ Menu > Recipe): the one in use is config.recipe, saved ones are in config/recipes. Hop alerts run in the background.
 const recipes = new RecipeStore(path.join(path.dirname(CONFIG), 'recipes'));
 const currentRecipe = () => store.config.recipe ?? null;
-const hopAlerts = new HopAlerts({ store, timers: engine.brewTimers, clock: () => clock.now(), send: a => broadcast('hopAlert', a), defaults: () => store.config.brewDefaults ?? {}, recipe: currentRecipe });
+// the Recipe's Boil Profile (its Hop Stand boxes), picked as the Process picks it (lib/brewprocess.js)
+const boilProfileOf = rc => brewProfiles.boil.list().find(x => x.id === (rc?.boilProfile || store.config.brewDefaults?.boilProfile)) || null;
+const hopAlerts = new HopAlerts({ store, timers: engine.brewTimers, clock: () => clock.now(), send: a => broadcast('hopAlert', a), defaults: () => store.config.brewDefaults ?? {}, recipe: currentRecipe, boilProfile: boilProfileOf });
 // a Recipe always has its Brew on Tab when this Schema has a Tab with an Equipment Profile (Rule 17.13); its Expected Gravity uses
 // that Tab's profile's Efficiency and nothing else
 function useRecipe(rc) {
@@ -287,6 +289,7 @@ engine.onRecipe = (cmd, args, by) => {
   }
   if (cmd === 'start') return hopAlerts.start(args[0], `Process ${by}`, args[1]);
   if (cmd === 'stop') return hopAlerts.stop() ? 'Hop alerts stopped' : 'Hop alerts were not running';
+  if (cmd === 'alert') return hopAlerts.sendAlert(args[0]);      // hop_alert "Mash" (Rule 17.20)
 };
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
 // no daily backup: a Schema is backed up every time a change is saved (OakBarn Brewery, 2026-11-13, Rule 9.17)
@@ -1122,8 +1125,9 @@ async function route(req, res) {
   }
   // The Recipe (☰ Menu > Recipe): everyone sees it, brewers (operators) import, change and save it
   if (p === '/ui/recipe' && m === 'GET') {
-    const v = recipeOut(recipeView(currentRecipe() ?? { ...newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list()), brewOn: defaultBrewOn(store.config, profiles) }, store.config.brewDefaults ?? {}));
-    for (const a of v.schedule.alerts) { const f = store.resolveMedia(a.audio); a.audioFound = !!f && fs.existsSync(f); }
+    const rcNow = currentRecipe() ?? { ...newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list()), brewOn: defaultBrewOn(store.config, profiles) };
+    const v = recipeOut(recipeView(rcNow, store.config.brewDefaults ?? {}, boilProfileOf(rcNow)));
+    for (const a of [...v.schedule.alerts, ...v.schedule.processAlerts]) { const f = store.resolveMedia(a.audio); a.audioFound = !!f && fs.existsSync(f); }
     return ok(res, { ...v, has: !!currentRecipe(), saved: recipes.list(), alerts: hopAlerts.status() });
   }
   // a voice file for one hop alert, made on a text to voice web site and put here: media/Audio/Hops/<name>
@@ -1135,7 +1139,7 @@ async function route(req, res) {
   if (p === '/ui/recipe' && m === 'PUT') {
     const b = await jsonBody(req), was = currentRecipe();
     b.brewOn = 'brewOnRef' in b ? brewOnFromBrowser(b.brewOnRef, store.config) : was?.brewOn ?? null;
-    useRecipe(b); return ok(res, recipeOut(recipeView(currentRecipe(), store.config.brewDefaults ?? {})));
+    useRecipe(b); return ok(res, recipeOut(recipeView(currentRecipe(), store.config.brewDefaults ?? {}, boilProfileOf(currentRecipe()))));
   }
   if (p === '/ui/recipe/new' && m === 'POST') { useRecipe(newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list())); return ok(res); }
   if (p === '/ui/recipe/import' && m === 'POST') {

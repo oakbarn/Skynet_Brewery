@@ -1536,6 +1536,8 @@ Timer"; names picked "Rule words: wait_boil, skn_ timers", Rule 3.20). **`skn_Bo
 - `start` with nothing set first (or after `reset`) takes the **Brew Day value** from the loaded Recipe (or the ☰ Menu > Default tab
   while none is): the boil time; the mash steps' times added up; the Whirlpool Minutes.
 - **Hop alerts run on the Boil Timer:** `start_hop_alerts` with no timer named follows `skn_Boil_Timer` while it runs (Rule 17.4).
+- **Hop Stands hold on the Whirlpool / Chilling Timer:** the Skynet Chill and Whirlpool and Chill Process Templates set `skn_Whirlpool_Timer`
+  to a stand's minutes, start it and wait for it (Rule 17.20, 2026-11-23).
 - Fermenters' own timers ("each would need their own DateTime type") are not built. Panel only: the BruControl Import brings in no
   Skynet Brew Timer.
 
@@ -5505,7 +5507,7 @@ tab) and a drop alert; **two alerts at the same time become one alert with both*
 `start_hop_alerts` / `start_hop_alerts "Boil_Timer"` / `stop_hop_alerts` in a Process. (Fritz, 2026-10-30, Help 99)
 `start_hop_alerts "Boil_Timer", 1` follows a timer that runs faster than real time: the number is the timer seconds for one boil
 minute (60 = real time, to start; 1 = a Testing switch that runs each minute as one second). The 3 Vessel sample's brew day uses
-it in place of its own 8 hop alarms (2026-11-21).
+it in place of its own 8 hop alarms (2026-11-21). The Post Boil Pre Warning and the alerts a Process sends with `hop_alert` are Rule 17.20 (2026-11-23).
 
 17.5 **Voice for alerts**: every alert has an audio path in media/Audio/Hops. When the file is there it plays; otherwise the
 browser's own voice reads the alert. Skynet does not fetch voices from a text to voice web site by itself (free sites do not
@@ -5645,8 +5647,15 @@ HAVE INFO AS AN IMPORT"):
 - Each Whirlpool hop picks its stand. The chill stops at each stand that has hops **and** its temperature and time, highest first,
   cooling water off for its time (Skynet Chill, Whirlpool and Chill). A Process: `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`,
   `skn_rcp_Hop_Stand_High_Minutes` (and Middle, Low); an unanswered Temp or Minutes reads 0.
+- The hold at each stand runs on `skn_Whirlpool_Timer`, and the stand gets its own drop alert (Rule 17.20, 2026-11-23).
 - An imported recipe's whirlpool temperature and time go to the stand that temperature fits: **High** 170 °F (77 °C) and above,
   **Middle** from 140 °F (60 °C), **Low** below. A whirlpool hop with no temperature gets no stand (its questions are asked).
+- **The Hop Stand interview after an import** (OakBarn Brewery, 2026-11-23: "Skynet Hop Stands are something that beersmith does not
+  have so we need to interview User when there are Post Boil Whirlpool Hops"): an IMPORT (.bsmx or BeerXML .xml) with Whirlpool hops
+  opens one **Hop Stands** dialog: each Whirlpool hop's Hop Stand (High, Middle, Low, or No Hop Stand = flame out) and each stand's
+  Temperature and Time. What the file gave is only filled in as the answers (a .bsmx whirlpool temperature and the hop's minutes;
+  BeerXML has none). Close keeps the Recipe as imported. A picked stand left without its Temperature or Time gives the **one
+  warning** above and still saves. It comes after the file's Efficiency question and before Save to the library.
 - Design Rule #1 (Never Take Away): removing the Default settings boxes is allowed because it is before the first Public Production.
 
 17.15 **Saving an imported Recipe** (OakBarn Brewery, 2026-11-13: "saved when user says yes, and then the overwrite question comes up In
@@ -5707,6 +5716,31 @@ a button to turn hop oz into grams because some scales start in grams. Yeast tab
   The Recipe tab's **Grain Wt.** follows the Grain tab at once. An empty **PPG>SG** says what it waits for (Brew Length?, Potential?,
   Brew on Tab?): a grain has no points without the Brew on Tab's Brewhouse Efficiency (Rule 17.13).
 **Both programs:** the BruControl Import has no recipe lines; a BeerSmith or BeerXML file's hops get the 0.01 rule. (Help 99)
+
+17.20 **Pre and Post Boil hop alerts** (OakBarn Brewery, 2026-11-23, after his hop test: "On Hop Stand and Post Boil Warning, there needs
+to be a Pre Warning that includes ALL of the Post Boil Hops. That needs to be a 10 minutes remaining in the Boil. Hop stands get own
+Drop Alert based on Whirlpool/Chiller Timer and Temperatures. Post Boil In Fermenter get alert after all Fermenters are filled to
+basically set a reminder on their Phone"; "Pre Boil Hops need a Pre Warning when Strike Water Reaches Strike. Mash Hops need Drop
+Warning just after Mash Timer Begins. 1st Hops need Drop Warning just after First Run Complete"; "These will only be for all grain
+Brewers as the other lower levels have none"; "If the go in before 1st Run, thats when the Drop Alert Should be"):
+- **Post Boil Pre Warning:** with 10 minutes left in the boil, one warning lists **every** Post Boil hop (Whirlpool, each Hop Stand,
+  Secondary, Dry Hop). It is one of the timed hop alerts (`start_hop_alerts`, Rule 17.4) and merges like the others. The Whirlpool
+  group no longer gets its own warning.
+- **Hop Stand drop:** a Whirlpool hop whose Hop Stand has its temperature and time (Rule 17.14, the Recipe's or its Boil Profile's)
+  has **no flame out drop**. Its stand gets its own drop alert, sent when the chill reaches that stand's temperature, and the stand's
+  hold runs on the **Whirlpool / Chilling Timer** (`skn_Whirlpool_Timer`, Rule 2.68). A Whirlpool hop with no ready stand (a BeerXML
+  file has no whirlpool temperature) keeps its drop at flame out.
+- **Fermenter hops:** the Secondary and Dry Hop hops make one alert after every Fermenter is filled, so the brewer can set a reminder
+  on their phone.
+- **Pre Boil (All Grain, Level 4, only):** one Pre Warning when the Strike Water reaches Strike lists the Mash and 1st Wort hops; the
+  Mash hops get a drop alert just after the Mash Timer starts (the first mash step); the 1st Wort hops get a drop alert just before
+  the First Run starts, when they go in the kettle. Extract and Partial Mash Recipes get none of the three.
+- **A Process sends them:** `hop_alert "Pre Boil"`, `hop_alert "Mash"`, `hop_alert "1st Wort"`, `hop_alert "Hop Stand High"` (Middle,
+  Low), `hop_alert "Fermenter"` (quotes optional; "High" alone is Hop Stand High). Each goes to every screen like the other hop alerts
+  (alert sound, voice file in media/Audio/Hops or the browser's voice). With no Recipe, or no such hops, nothing is sent and the
+  Process goes on. The Skynet Process Templates (Heat Strike, Mash, Chill, Whirlpool and Chill, Transfer to Fermentor) and the 3 Vessel
+  sample's brew day send them. The Recipe's **Drops** tab lists them under **Alerts the Process sends**.
+**Both programs:** the BruControl Import has no recipe lines and no `hop_alert`; nothing changes there. (Help 99, 100, 22)
 
 ## 18. General Dialog Rules
 
@@ -7675,6 +7709,8 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
 - 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.
 - 2026-11-23: No Rule change; bug fix for Rule 17.14 (OakBarn Brewery hop test, HopTest.xml and hoptest.bsmx, 9 hops): a BeerSmith .bsmx Whirlpool ("Aroma") hop's own temperature (F_H_WHIRLPOOL_TEMP, °F) was not read, so its Hop Stand stayed empty; it now goes to the stand it fits (154 °F Middle, 174 °F High) with the hop's minutes. A Boil hop's F_H_WHIRLPOOL_TEMP is not read. BeerXML 1.0 has no whirlpool temperature, so an .xml Whirlpool hop still asks its stand questions. `skn_rcp_Dry_Hops` names every Dry Hop group when there is more than one ("Dry Hop: 1 oz Spalter, Dry Hop (5 days): 1 oz Goldings"). Checked against both programs: the BruControl Import has no recipe lines.
+- 2026-11-23: Added Rule 17.20 Pre and Post Boil hop alerts (OakBarn Brewery, three messages after his hop test): a Post Boil Pre Warning 10 minutes before the end of the boil with every Post Boil hop; each Hop Stand its own drop alert (no flame out drop for hops in a ready stand), its hold on `skn_Whirlpool_Timer`; a Fermenter hops alert when every Fermenter is filled; for All Grain only, a Pre Boil Pre Warning at Strike, the Mash drop after the Mash Timer starts and the 1st Wort drop just before the First Run starts (OakBarn Brewery: "If the go in before 1st Run, thats when the Drop Alert Should be"). New Process command `hop_alert`; Rules 17.4 and 17.14 point to it. The Skynet Process Templates and the 3 Vessel sample send them (its grain message no longer names the Mash hops). Design Rule #1: the flame out drop and Whirlpool warning for stand hops are replaced before the first Public Production. Help 99, 100, 22 and French. Checked against both programs: the BruControl Import has no recipe lines.
+- 2026-11-23: Rule 17.14 changed (OakBarn Brewery: "Skynet Hop Stands are something that beersmith does not have so we need to interview User when there are Post Boil Whirlpool Hops"): an IMPORT with Whirlpool hops asks one Hop Stands dialog (each hop's stand, or No Hop Stand = flame out, and each stand's Temperature and Time); a .bsmx file's whirlpool temperatures and minutes are only the filled-in answers. One warning for a picked stand with no Temperature or Time. Help 99 and French. Checked against both programs: the BruControl Import has no recipe lines.
 - 2026-11-21: Rule 6.19 Methods hotspot made bigger (OakBarn Brewery, screenshot of the 3 Vessel 1 Pump HLT: "Hotspot too small increase to purple area"): the strip now runs from the Element's end plate out to 10 px past the Vessel wall, never thinner than 25 px (was 10 px outside the wall, with a gap after the end plate). Help 150 (and French). Checked against the BruControl Import program: its Build page uses the same Panel drawing, nothing else changes.
 - 2026-11-22: Rule 1.18 changed, Rules 2.68, 4.9 and 19.11 added (Panel Update 9 Part 2, items 10d, 31, 14 and 16; OakBarn Brewery picked "Rule words: wait_boil, skn_ timers"): the Boil Probe switch and `wait_boil` / `wait_boil -1` built; the Skynet Brew Timers `skn_Boil_Timer`, `skn_Mash_Timer`, `skn_Whirlpool_Timer` (hop alerts follow the Boil Timer); right-drag a copy off a Vessel or Equipment Template; four 5 gallon stove kettles. Item 15 (Vessels and flow) is parked in the Panel Updates Sandbox, entry 52 (OakBarn Brewery: "in Panel Update sandbox as I may rethink it"). Help 22, 138, 155, 238, 246 (new), 50 and French.
 - 2026-11-23: Panel Update 10 (OakBarn Brewery, PDF of 5 items). Rule 1.8 changed (the Menu Bar is the Brewery Name row with its icons; the old top line is the Top Line), Rule 2.6 changed (fewer than six pick-one choices are one-click boxes, item 5d), Rules 2.69 (Menu Bar order, kept spaces, Sound icon replaces the Turn sound on? pop-up), 2.70 (Process Editor top in icons, Go To Line or Section, everything also on ☰ Menu) and 16.13 (class picked once in the New Process dialog, new Process text) added, Rule 12.4 (Your Brewery Name Patron perk; a non-Patron sees Skynet Panel) changed. OakBarn Brewery's own icons in public/icons (not the Image Library). Help 2, 13, 21, 30, 33, 40, 155, 198 and French. Checked against both programs: the BruControl Import keeps setting a Process's class when it brings it in; its own pages have no Menu Bar. (thread "Build Panel Update 10")
