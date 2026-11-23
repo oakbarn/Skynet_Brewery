@@ -164,7 +164,7 @@ trouverez vite utile. Grâce au texte prédictif, si vous utilisez le Suggested 
 limités aux seuls devices qui ont un Port sur BM : l'Arduino Brewery Mega sera un choix (parmi tous les autres Devices BM_)
 dans la liste du texte prédictif.
 
-S'il vous faut ajouter une nouvelle Interface, choisissez **➕ Add new Interface** dans la liste (dernier choix). Créez l'Interface et enregistrez-la.
+S'il vous faut ajouter une nouvelle Interface, choisissez **➕ Add new Interface** dans la liste (premier choix). Créez l'Interface et enregistrez-la.
 Vous reviendrez à cette fenêtre. La nouvelle Interface sera dans la liste et choisie.
 
 ## Le Tab {#the-tab}

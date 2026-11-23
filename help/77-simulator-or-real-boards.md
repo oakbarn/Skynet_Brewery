@@ -7,7 +7,7 @@ One press switches the **whole panel**, every Interface at once, between the **S
 - The round button beside **☰ Menu** on the Tabs bar: **🔌 Real** (green) while the real boards are used, **🧪 Simulator** (yellow stripes) in Simulator mode. Press it to switch.
 - **☰ Menu > 🧪 Switch to Simulator** (only while the Real boards are used; in Simulator mode the 🧪 Simulator balloon switches back).
 
-Both do the same. The panel asks first. Every Process stops and every output turns off before the switch, so nothing a pretend brew turned on is ever sent to a real board. A yellow striped **SIMULATION** bar shows for everyone while it is on.
+Both do the same. **Not while brewing:** while a Flow, Sub or Repeat Process runs (a Looper runs all the time and does not count), Switch to Simulator is grayed and says which Processes run; stop them first, or wait until the Brew Day ends. Switching back to the Real boards always works. The panel asks first. Every Process stops and every output turns off before the switch, so nothing a pretend brew turned on is ever sent to a real board. A yellow striped **SIMULATION** bar shows for everyone while it is on.
 
 An Interface whose Connection is **Simulator** (like the pretend Mega a Skynet Schema Template makes when there is no real board) stays pretend even on Real boards. Change its Connection with **⚙ Change** on the Devices page once the board is wired (Help: [Interfaces](76-interfaces)).
 

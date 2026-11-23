@@ -598,8 +598,8 @@ restated 2026-10-23, PR #94)
 *Replaced:* the first wording on 2026-10-04 asked for Yes/No dropdowns. Fritz corrected it the same
 day.
 
-2.6 **Choices with more than two answers are dropdowns, except a short pick-one.** A list that can grow ends with
-"Add new ...". Behind a dropdown sits a gGlobal List: the list shows text, Processes see the
+2.6 **Choices with more than two answers are dropdowns, except a short pick-one.** A list that can grow starts with
+"Add new ..." (below). Behind a dropdown sits a gGlobal List: the list shows text, Processes see the
 number (Value). (2026-10-04, PR #14; how list boxes work, are filled and are limited: Help 189)
 **The short pick-one (OakBarn Brewery, 2026-11-23, Panel Update 10, item 5d: "If there are less than six (6) choices and only one may be
 selected, the One Click Rule overrides the DDLB that takes 2 clicks"):** fewer than six choices (six or fewer since Panel Update 13,
@@ -614,6 +614,13 @@ program, not just Skynet"; "The rule should be if desired. Not if always just al
 - **Six or fewer, only one may be picked:** one-click boxes in a row (the short pick-one above), or a dropdown where it suits. The
   dropdown is allowed, never required. The first one is the Process Editor's Output pick, **Current Process / All Variables**
   (Rule 2.70). The short dropdowns listed in the Panel Updates sandbox may stay.
+**Add new goes first** (OakBarn Brewery, 2026-11-23, on the Panel Update 12 Add new Schema question: "I think change the Rule. Add
+New goes first on every DDLB where appropriate"): in every dropdown that can grow, "Add new ..." is the **first** choice, right
+after a "(pick ...)" line when the list has one (it was the last). Where appropriate means a list the user can add to: Schemas,
+Profiles (Equipment, Brew, Styles and the other purple + Add New Profiles of Rule 2.54), gGlobals, Groups, Steppers, Devices and
+Widgets picked in a dialog, Processes and Process Templates. A fixed list (Units, classes, colors, "Other (type…)") has no Add new
+and is not changed. The order is only on screen: what is saved and picked is not changed, and opening a dropdown never picks
+Add new by itself. Lists that already had Add new first (the Process pick, the Group list) stay as they are.
 
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
 a swatch, then Custom, which opens the Color Picker (Rule 2.48). (2026-10-05, PR #31) **White** in any color picker is **RGB 250 250 250 (#FAFAFA)**, the same White
@@ -1632,16 +1639,17 @@ keeps its own title. Help 40.
 - **🌐 Help** (item 2a: "Help DDLB with English, Francais, and Add a Language until a 3rd Language is added and then have that Language
   In its font if there is one as the last item on the list"): **English**, **Français**, then **➕ Add a Language** (Admins; it opens
   Help > 🌐 Languages, Rule 11.16) until a User Language is on the Brain; then the User Language by its own name, last, in the Help
-  fonts (Rule 11.16) so its letters show. Three choices, so one-click boxes in a row (Rule 2.6, recommended; the card is open).
+  fonts (Rule 11.16) so its letters show. Three choices, so one-click boxes in a row (Rule 2.6; OakBarn Brewery: "I looked at the way you did on the menu and that is Ok").
 - **Edit layout is not on the ☰ Menu** (item 2b: "Is this not the same as the work Icon? If so, do not need here"): it is the Build
   icon (Rule 2.69, no copies). The ☰ Menu can't be opened while Edit layout is on anyway (Rule 2.52).
 - **🗂 Schema** (item 2c: "DDLB of Schema to select by Clicking on it to make Current"): the Schema dropdown itself, the same list as the
-  Top Line's; picking a Schema loads it (with the warning when Processes run). Add new Schema ... stays at the end with the other Schema
-  jobs (Rule 2.6, recommended; he asked for it first, the card is open).
+  Top Line's; picking a Schema loads it (with the warning when Processes run). Add new Schema ... is the first choice (Rule 2.6, Add new goes first;
+  OakBarn Brewery: "I think change the Rule. Add New goes first on every DDLB where appropriate").
 - **Gone from the ☰ Menu** (item 2d: "Do not needed as Rare and Add Schema is in c"): ➕ New Schema…, 🔌 Interfaces (boards), ➕ Add
   Interface… and 🔌 Switch to Real boards. Interfaces and Add Interface stay under Pages > Devices ↳ (Rule 2.4); Switch to Real boards is
   the Simulator balloon. **🧪 Switch to Simulator stays** (Admins, on the Real boards only): the balloon is hidden then, so it is the
-  only way in (Design Rule 1; recommended, the card is open).
+  only way in (Design Rule 1; OakBarn Brewery: "We want to be able to switch to a simulator except on a Brew Day and
+  Actively brewing"). It is grayed while brewing (Rule 10.12).
 - **🐞 Report a Bug** for everyone (item 2e: "Request a Feature is a Parton Perk, But we need Report a Bug for everyone"): the Report box
   of Rule 2.61. **⭐ Request a Feature** stays, a Patron perk.
 - **Last picked** (item 2f: "Add the Last Item selected from the Hamburger Menu so it's easy to get back to it. So a clone of something
@@ -4765,6 +4773,14 @@ setting), Skynet checks and fixes only the **3 Vessel Sample** (samples/configs/
 Template or Tab is searched or changed for it. **Both programs:** the BruControl Import has no Sample Schema to check, so nothing
 changes there.
 
+10.12 **No Switch to Simulator while brewing** (OakBarn Brewery, 2026-11-23, on the Panel Update 12 Simulator question: "We want to
+be able to switch to a simulator except on a Brew Day and Actively brewing"). While a Flow, Sub or Repeat Process runs (a Looper runs
+all the time and does not count), ☰ Menu > 🧪 Switch to Simulator is grayed, and its balloon names the running Processes: stop them
+first, or wait until the Brew Day ends. Any other way in is refused with one message. Switching back to the Real boards is never
+blocked. There is no way to step out of brewing into the Simulator and back (OakBarn Brewery, asked about it for troubleshooting:
+"Likely a Bad Idea to allow it"); a Process log with exact line numbers and a list of issues to fix before the next Brew Day are in
+the Panel Updates sandbox instead. **Both programs:** the BruControl Import has no Simulator, so nothing changes there. (Help 85, 77)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
@@ -7727,3 +7743,4 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 - 2026-11-23: Panel Update 12 (OakBarn Brewery, PDF "Panel Update 12", 3 items). Added Rule 2.71 (the window's title line: ✅ or ❌ Official, the Skynet Panel version, the time now, Update available) and Rule 2.72 (the top of the ☰ Menu: Help language boxes with Add a Language, Edit layout off the Menu, the Schema dropdown, New Schema / Interfaces / Add Interface / Switch to Real boards gone, Switch to Simulator kept, Report a Bug for everyone, Last picked). Rule 6.41 item 5 (2 seconds on Emergency Off pops up a 400 px one). Rule 16.13 (line 2 of every Process is "// Use at YOUR own Risk! Follow Your Own Safety Guidelines. You are Responsible."; every sample Process, Skynet Process Template and built Brew Day Process has it). Help 30, 33, 40, 51, 67, 77, 188, 205, 242, 244 and every page that said ☰ Menu > Edit layout (now 🛠 Build) or ☰ Menu > 🗂 Schema / New Schema / Interfaces (boards) / Add Interface, with French. Checked against both programs: the BruControl Import has no ☰ Menu, no Emergency Off and keeps its own window title; the Processes it brings in are the user's own text and are not changed. (thread "Build Panel Update 12")
 - 2026-11-23: Panel Update 13 (OakBarn Brewery, PDF "Panel Update 13", 4 items, the Process Editor). Rule 2.70 changed (Rename and Stop all no longer above the Process list: Stop all is the Stop Sign icon at the left of the second row, Rename on the ☰ Menu; the problems and the Output in a column to the right of the code; Output's Current Process / All Variables dropdown (the open Process's lines only; All Variables lists the values of its variables and every gGlobal); Reset every Start switch; a small gray ▾ on Conditionals, Skynet Special, Devices, Widgets and Common). Rule 2.6 changed (OakBarn Brewery picked "change the Rule": more than six choices are always a dropdown; six or fewer pick-one choices are one-click boxes or, if desired, a dropdown). Help 5 and 30 and French; Importer Help 143 (Page 2) says script output and variables are still a choice in Skynet, plus Reset every Start. Checked against both programs: the BruControl Import has no Process Editor; it brings in scripts as Processes, unchanged. (thread "Build Panel Update 13")
 - 2026-11-23: Rule 2.70 changed (OakBarn Brewery, Panel Update 13 follow-up): the Output dropdown also lists every running Process under Running; picking one opens it in the Process Editor and it is the Current Process until another is picked; Start or Restart there takes precedence. Help 5 and 30 and French. Checked against both programs: the BruControl Import has no Process Editor. (thread "Build Panel Update 13")
+- 2026-11-23: Rule 2.6 changed (OakBarn Brewery, Panel Update 12 follow-up: "I think change the Rule. Add New goes first on every DDLB where appropriate"): in every dropdown that can grow, Add new ... is the first choice (after a "(pick ...)" line), not the last; on screen only, nothing saved changes. Rule 2.72's three open questions answered (Help language boxes OK; Add new Schema first; Switch to Simulator kept). Added Rule 10.12 (OakBarn Brewery: "We want to be able to switch to a simulator except on a Brew Day and Actively brewing"): Switch to Simulator is grayed while a Flow, Sub or Repeat Process runs. Help and French. Checked against both programs: the BruControl Import has no Simulator, and the Panel dropdowns on its Build page follow the same order. (thread "Build Panel Update 12")

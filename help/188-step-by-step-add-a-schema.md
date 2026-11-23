@@ -6,7 +6,7 @@ This guide takes you from nothing to a new Schema on the screen. Only an Admin c
 
 ## Step 1. Open the Add new Schema box
 
-Press **☰ Menu** (top right), open the **🗂 Schema** dropdown and pick **Add new Schema ...** near the bottom of the list.
+Press **☰ Menu** (top right), open the **🗂 Schema** dropdown and pick **Add new Schema ...**, the first choice in the list.
 
 ![☰ Menu: the Schema dropdown](help_pictures/Step_Add_Schema_01_Menu.png)
 

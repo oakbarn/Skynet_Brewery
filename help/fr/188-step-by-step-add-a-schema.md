@@ -6,7 +6,7 @@ Ce guide vous mène de rien à un nouveau Schema à l'écran. Seul un Admin peut
 
 ## Étape 1. Ouvrir la case Add new Schema {#step-1-open-the-add-new-schema-box}
 
-Appuyez sur **☰ Menu** (en haut à droite), ouvrez la liste déroulante **🗂 Schema** et choisissez **Add new Schema ...** vers le bas de la liste.
+Appuyez sur **☰ Menu** (en haut à droite), ouvrez la liste déroulante **🗂 Schema** et choisissez **Add new Schema ...**, le premier choix de la liste.
 
 ![☰ Menu : la liste déroulante Schema](help_pictures/Step_Add_Schema_01_Menu.png)
 

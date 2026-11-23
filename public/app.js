@@ -6367,6 +6367,20 @@ for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventLis
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
+// Rule 2.6 (OakBarn Brewery, 2026-11-23: "I think change the Rule. Add New goes first on every DDLB where appropriate"): in a list that can
+// grow, Add new ... is the first choice (after a "Pick ..." line when the list starts with one). Done on the finished dropdown, and the
+// choice it had picked stays picked, so nothing saved changes. Add new is found by its words (➕ Add new Tab…, Add new Schema ...).
+const ADD_NEW_WORDS = /^(➕\s*)?Add (a )?new\b/i, PICK_LINE = /^\(?\s*(pick|none yet)/i;
+function addNewFirst(sel) {
+  if (!sel || sel.tagName !== 'SELECT') return sel;
+  const adds = [...sel.querySelectorAll('option')].filter(o => ADD_NEW_WORDS.test(o.textContent.trim()));
+  if (!adds.length) return sel;
+  const keep = sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null, first = sel.firstElementChild;
+  let at = first?.tagName === 'OPTION' && first.value === '' && PICK_LINE.test(first.textContent.trim()) && !adds.includes(first) ? first.nextSibling : sel.firstChild;
+  for (const a of adds) { if (a !== at) sel.insertBefore(a, at); at = a.nextSibling; }
+  if (keep) keep.selected = true; else sel.selectedIndex = -1;
+  return sel;
+}
 // an Interface with no ID yet (Fritz, 2026-11-05: a Suggested Name came out as 22_E_L_Vlv_MBV1__BR) uses the ID the Brain gives it on
 // the next save (Rule 3.2: the first letters of its Name), so the name still starts with it (Rule 3.1)
 const ifaceIdOf = dev => { const ds = S.config.devices || [], d = ds.find(x => x.name === dev); return !d ? '' : d.id || defaultInterfaceId(d.name, ds.filter(x => x !== d).map(x => x.id)); };
@@ -10882,11 +10896,11 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const cur = blank ? obj[key] ?? '' : opts === 'tab' ? obj[key] || SKYNET_STYLES.tab[0].id : styleOf(opts, obj, S.config.userStyles)?.id ?? '';
     const s = h('select', { 'data-k': key, 'data-kind': 'sel' });
     const dflt = () => tabStyleOf({}, S.config.brewDefaults, S.config.userStyles)?.name ?? '';
-    const fill = id => s.replaceChildren(
+    const fill = id => { s.replaceChildren(
       ...(blank ? [h('option', { value: '', ...(id ? {} : { selected: true }) }, `Default (${dflt()})`)] : []),
       h('optgroup', { label: 'Skynet Styles (can\'t be changed)' }, ...SKYNET_STYLES[opts].map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, '🔒 ' + x.name))),
       ...(mine().length ? [h('optgroup', { label: 'User Styles' }, ...mine().map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, x.name)))] : []),
-      h('option', { value: '__add__' }, '➕ Add new User Style…'));
+      h('option', { value: '__add__' }, '➕ Add new User Style…')); addNewFirst(s); };
     fill(cur);
     let prev = cur;
     const edit = h('button', { type: 'button', class: 'nameBtn', title: 'Change this User Style (a Skynet Style can never be changed)' }, '✏ Edit');
@@ -11077,7 +11091,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       const cur = s.value || v || '';
       s.replaceChildren(...(keep ? [h('option', { value: CHAIN_KEEP }, 'No Change')] : []), h('option', { value: '' }, '(none)'),
         ...os.filter(p => p === cur || (isTint(p) ? overlayFits(p, obj) : p === GREEN_RING ? overlayFits(p, obj) && inGroup(p, g) && inSource(p, src) : inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, title: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || (isPath ? pathText(p, os) : p))), h('option', { value: '__add__' }, 'Add new ...'));
-      s.value = cur;
+      s.value = cur; addNewFirst(s);
       showFolder();
     };
     // Two-part paths (Rule 7.23, OakBarn Brewery 2026-11-13): the list shows only the file name (a Skynet picture with its number in
@@ -11312,6 +11326,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'fldPair' }, h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', list: id, placeholder: 'type it, or pick one Skynet heard' }), h('datalist', { id }));
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
+  addNewFirst(input);      // Rule 2.6: Add new ... first
   if (tb && input) {
     Object.assign(input.dataset, { tk: tb.kind, own: tb.own, shown: v ?? '', kept: obj[key] ?? '', ...(tb.as ? { as: tb.as } : {}) });
     input.title = tb.kind === 'q' ? `In ${qUnitShown(tb.own, showUnits(), tb.as)} (☰ Menu > Settings > Units). Saved in ${tb.own}, the units its sensor keeps (Rule 2.59).`
@@ -11343,6 +11358,7 @@ function stepperPick(key, list, v) {
   if (v !== undefined && v !== '' && !items.some(([x]) => String(x) === String(v))) items.push([v, String(v)]);
   const s = h('select', { 'data-k': key, 'data-kind': 'stpick', ...(num ? { 'data-num': '1' } : {}) }, h('option', { value: '' }, '(pick one)'),
     ...items.map(([x, l]) => h('option', { value: x, ...(String(x) === String(v ?? '') ? { selected: true } : {}) }, l)), h('option', { value: '__add__' }, 'Add new ...'));
+  addNewFirst(s);
   let prev = s.value;
   s.addEventListener('change', () => {
     if (s.value === '__add__') {
@@ -14569,6 +14585,7 @@ async function ifaceRemoveDialog(name) {
         const pick = h('select', { 'aria-label': 'Move them to' }, h('option', { value: '' }, '(pick an Interface)'),
           ...others.map(o => { const oid = o.id || ifaceIdOf(o.name); return h('option', { value: o.name }, `${oid ? oid + ': ' : ''}${o.name}`); }),
           h('option', { value: ADD_IFACE }, '➕ Add new Interface…'));
+        addNewFirst(pick);
         const note = h('div', { class: 'ifRmNote' });
         const go = h('button', { type: 'button', class: 'primary', title: 'Move every Device on this Interface to the one picked. A Device whose Port is taken there stays here and is listed.', onclick: guard(async () => {
           let to = pick.value;
@@ -15472,6 +15489,8 @@ $('#simSave').onclick = $('#simSave2').onclick = guard(async () => {
 // Simulator or Real boards, for the whole panel (every Interface at once): the 🔌 Real / 🧪 Simulator button on the Tabs bar
 // (Fritz, 2026-10-27) and the ☰ Menu. Returns false when the admin said no.
 async function setSimulator(on) {
+  // not while brewing (OakBarn Brewery, 2026-11-23): a Flow, Sub or Repeat Process running; Loopers do not count (Rule 10.12)
+  if (on && (S.scripts || []).some(x => x.state === 'running' && x.cls !== 'looper')) return toast('Not while brewing: stop the running Processes first, then switch to the Simulator', true), false;
   if (!await skyConfirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
     : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.', { ok: on ? '🧪 Switch to Simulator' : '🔌 Switch to Real boards' })) return false;
   S.sim = await api('PUT', '/ui/sim', { on });
@@ -15537,6 +15556,7 @@ function fillSchemaSelect(s) {
   s.disabled = !loads || (!can('admin') && sc.list.length < 2);
   s.title = loads ? 'Pick a Schema to load it' : 'Only an admin can load another Schema';
   s.onchange = schemaPicked;
+  addNewFirst(s);      // Rule 2.6: Add new Schema ... first
 }
 // Processes running now: switching the Schema stops them, so you are warned first (Fritz, 2026-10-21)
 const runningProcs = () => (S.scripts || []).filter(x => x.state === 'running');
@@ -16192,7 +16212,14 @@ function menuItems(list, go) {
     list.append(h('label', { class: 'menuItem menuSchemaRow', title: 'Pick a Schema to load it (the same list as the Schema on the Top Line). The Schema Menu tab (Menu tabs > Schema) clones, renames, backs up and restores one.' }, '🗂 Schema ', sel)); }
   // Switch to Real boards left too: the Simulator balloon on the Menu Bar does it. On the Real boards the balloon is hidden (Rule 2.69),
   // so Switch to Simulator stays here, the only way to turn the Simulator on (Design Rule 1).
-  if (can('admin') && !S.sim?.on) list.append(item('🧪 Switch to Simulator', guard(() => setSimulator(true)), { title: 'Every Interface at once: the simulator (nothing real is switched). The Simulator balloon on the Menu Bar switches back to the Real boards' }));
+  // Not while brewing (OakBarn Brewery, 2026-11-23: "We want to be able to switch to a simulator except on a Brew Day and Actively
+  // brewing"): greyed while a Flow, Sub or Repeat Process runs (a Looper runs in the background all the time, so it does not count)
+  if (can('admin') && !S.sim?.on) {
+    const brewing = (S.scripts || []).filter(x => x.state === 'running' && x.cls !== 'looper').map(x => x.name);
+    list.append(item('🧪 Switch to Simulator', guard(() => setSimulator(true)), brewing.length
+      ? { disabled: true, title: `Not while brewing. Running now: ${brewing.slice(0, 3).join(', ') + (brewing.length > 3 ? ' ...' : '')}. Stop them first, or wait until the Brew Day ends.` }
+      : { title: 'Every Interface at once: the simulator (nothing real is switched). The Simulator balloon on the Menu Bar switches back to the Real boards' }));
+  }
   // Panel Update 12, item 2e (OakBarn Brewery: "Request a Feature is a Parton Perk, But we need Report a Bug for everyone"): 🐞 Report a Bug
   // for everyone, the same box as ☰ Menu > About > Report a problem (Rule 2.61) with A bug picked
   list.append(item('🐞 Report a Bug', () => reportDialog({}), { title: 'Tell OakBarn Brewery about a bug, on GitHub or by email. Your Skynet version and browser are filled in.' }));
@@ -17323,6 +17350,7 @@ function renderBrewProcessTab(box) {
       h('optgroup', { label: 'User Process Templates' }, ...list.filter(t => t.cls === 'user').map(t => h('option', { value: t.name, ...(t.name === cur ? { selected: true } : {}) }, t.name))),
       h('option', { value: '__add__' }, '➕ Add new User Process Template…'),
       h('option', { value: '', ...(cur === '' ? { selected: true } : {}) }, '(skip this step)'));
+    addNewFirst(sel);
     sel.onchange = () => {
       if (sel.value === '__add__') { sel.value = cur; return editProcessTemplate(st, cur || 'Skynet_' + st.key, true); }
       bpWork.templates[st.key] = sel.value; renderMenuPane();
@@ -17560,6 +17588,7 @@ function renderEquipTab(box) {
   const pick = h('select', {}, h('option', { value: '' }, S.profiles.length ? 'Pick one to open ...' : '(none yet)'),
     ...S.profiles.map(x => h('option', { value: x.id }, x.name + (tabOfProfile(x.id) ? `  (Tab ${tabOfProfile(x.id).name})` : ''))),
     ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
+  addNewFirst(pick);
   pick.onchange = guard(async () => {
     if (pick.value === '__add__') { pick.value = ''; return newProfile(); }
     if (pick.value) eqViewOpen(pick.value);
@@ -19465,6 +19494,7 @@ function renderBrewProfileTab(kind) {
     if (!profWork[kind] && list.length) { const d = S.config.brewDefaults?.[kind + 'Profile']; profWork[kind] = stepsToFields(clone(shownIn(kind, list.find(x => x.isDefault) || list.find(x => x.id === d) || list[0]))); }
     const pick = h('select', {}, ...(list.length ? [] : [h('option', { value: '' }, '(none yet)')]), ...list.map(x => h('option', { value: x.id, ...(x.id === profWork[kind]?.id ? { selected: true } : {}) }, x.name)),
       ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
+    addNewFirst(pick);
     pick.onchange = guard(async () => {
       if (profDirty[kind] && !confirm(`The open ${K.title} has changes that are not saved. Leave them?`)) { pick.value = profWork[kind]?.id || ''; return; }
       if (pick.value === '__add__') { pick.value = profWork[kind]?.id || ''; return newBrewProfile(kind); }
@@ -19531,7 +19561,7 @@ function profAddWatch(box, map) {
   box.addEventListener('change', e => {
     const s = e.target, kind = map[s?.dataset?.k];
     if (!kind || s.value !== '__add__') return;
-    e.stopImmediatePropagation(); s.value = s.dataset.was ?? s.options[0]?.value ?? '';
+    e.stopImmediatePropagation(); s.value = s.dataset.was ?? [...s.options].find(o => o.value !== '__add__')?.value ?? '';      // Add new is first now (Rule 2.6)
     newBrewProfile(kind, true);
   }, true);
 }
@@ -19725,7 +19755,7 @@ function rcBox(kind, title, el, { wide, unit, tip, field } = {}) {
 function rcInput(obj, key, { kind = 'num', to = v => v, from = v => v, list, d = 2, ro, onChange } = {}) {
   const val = obj[key];
   let el;
-  if (kind === 'sel') el = h('select', {}, ...list.map(([v, t]) => h('option', { value: v, ...(String(v) === String(val ?? '') ? { selected: true } : {}) }, t)));
+  if (kind === 'sel') el = addNewFirst(h('select', {}, ...list.map(([v, t]) => h('option', { value: v, ...(String(v) === String(val ?? '') ? { selected: true } : {}) }, t))));
   else el = h('input', { type: kind === 'num' ? 'number' : 'text', step: 'any', value: kind === 'num' ? rcRound(to(val), d) : (val ?? '') });
   if (ro) { el.disabled = true; el.tabIndex = -1; }
   el.onchange = () => { const v = el.value; obj[key] = kind === 'num' ? (v === '' ? null : from(+v)) : v; onChange?.(); };

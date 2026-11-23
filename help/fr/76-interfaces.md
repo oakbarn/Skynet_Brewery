@@ -30,7 +30,7 @@ Il y a trois façons d'y entrer, et les trois ouvrent la même fenêtre **Add In
 
 1. **☰ Menu > Devices > ↳ Add Interface**
 2. **Page Devices > Add Interface > ➕ Add Interface…**
-3. Dans la fenêtre **New Device** sur n'importe quel Tab : ouvrez **2. Interface** et choisissez **➕ Add new Interface…** en bas. Quand vous cliquez sur Add, vous revenez à la fenêtre New Device avec la nouvelle Interface déjà choisie. La fenêtre New Device d'un tube RIMS ou d'une bouilloire électrique a le même choix.
+3. Dans la fenêtre **New Device** sur n'importe quel Tab : ouvrez **2. Interface** et choisissez **➕ Add new Interface…**, le premier choix. Quand vous cliquez sur Add, vous revenez à la fenêtre New Device avec la nouvelle Interface déjà choisie. La fenêtre New Device d'un tube RIMS ou d'une bouilloire électrique a le même choix.
 
 La fenêtre demande (posez la souris sur chaque nom pour son Hover Help) :
 
