@@ -4,7 +4,7 @@ La **Menu Bar** (barre de menu) est la rangée avec le **nom de votre brasserie*
 
 - **Bulle Simulator** (rayures jaunes) : seulement en mode Simulator. Appuyez dessus pour revenir aux vraies cartes. **☰ Menu > Switch to Simulator** active le Simulator.
 - **Build** (le marteau et la clé, Admins) : Edit layout actif ou non. Pas utile dans l'éditeur de Processes, donc cachée là.
-- **Sound** (l'oreille avec des notes de musique) : un clic active le son, un autre le coupe. Un panneau rouge **Sens interdit** est sur son coin tant que le son est coupé. Voir [Alarmes et son](21-alarms-and-sound).
+- **Sound** (l'oreille avec des notes de musique) : un clic active le son, avec un bip court, et un autre le coupe (sans bip). Un panneau rouge **Sens interdit** est sur son coin tant que le son est coupé. Voir [Alarmes et son](21-alarms-and-sound).
 - **Emergency Off** : un clic arrête tout. Laissez la souris dessus 2 secondes et un grand bouton apparaît (voir [Emergency Off](244-emergency-off)).
 - Le **?** jaune : l'aide.
 - **☰ Menu** : chaque page et chaque réglage (voir [Le ☰ Menu](33-menu)).

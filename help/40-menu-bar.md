@@ -4,7 +4,7 @@ The **Menu Bar** is the row with your **Brewery Name** in the middle. At its rig
 
 - **Simulator balloon** (yellow stripes): shows only in Simulator mode. Press it to go back to the real boards. **☰ Menu > Switch to Simulator** turns the Simulator on.
 - **Build** (the hammer and wrench, admins): Edit layout on and off. It is not needed in the Process Editor, so it is hidden there.
-- **Sound** (the ear with music notes): one click turns sound on, one more turns it off. A red **Do Not Enter** sign sits on its corner while sound is off. See [Alarms and sound](21-alarms-and-sound).
+- **Sound** (the ear with music notes): one click turns sound on, with a quick beep, and one more turns it off (no beep). A red **Do Not Enter** sign sits on its corner while sound is off. See [Alarms and sound](21-alarms-and-sound).
 - **Emergency Off**: one click stops everything. Rest the mouse on it for 2 seconds and a big one pops up (see [Emergency Off](244-emergency-off)).
 - The yellow **?**: Help.
 - **☰ Menu**: every page and setting (see [The Menu](33-menu)).
