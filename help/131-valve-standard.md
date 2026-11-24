@@ -10,18 +10,19 @@ A valve starts at **150 x 150** on a Tab (the same as a pump, so valves and pump
 
 | Orientation | In the 300 x 300 drawing | On a 150 x 150 valve |
 |----|-----|-----|
-| Horizontal | (0, 150) and (300, 150) | the middle of the left and right sides |
-| Vertical Left, Vertical Right | (150, 0) and (150, 300) | the middle of the top and bottom |
+| Horizontal | (75, 150) and (225, 150) | level with the middle, a quarter in from the left and right sides |
+| Vertical Left, Vertical Right | (150, 75) and (150, 225) | on the middle line, a quarter down from the top and up from the bottom |
 | 45 degrees | the Horizontal spots, turned 45 degrees about the middle | |
 | Front (looking down the pipe) | both at (150, 150) | the middle |
-| Front elbow | (150, 150) and (150, 300) | the middle, and the middle of the bottom |
+| Front elbow | (150, 150) and (150, 225) | the middle, and a quarter up from the bottom |
 
-If you resize a valve, the spots grow or shrink with its box. Keep it square so the spots stay on its sides.
+If you resize a valve, the spots grow or shrink with its box. Keep it square so the spots stay on the valve's ends. A valve with your own picture keeps its spots on the middle of the box sides.
 
 ## Drawn to scale
 
-Every Skynet valve drawing is at the same scale in the box. A valve that is shorter than the box has its body tube drawn on, straight, out
-to the edge of the box, ending in a TC ferrule like the end of the valve, where the IP is.
+Every Skynet valve drawing is at the same scale in the box, and every side view is the same length as the Motorized Ball Valve, end to
+end (half the box). Its IPs are on its own ends, a quarter in from the sides of the box; the rest of the box holds the motor or handle.
+Pipes joined to it run right up to its ends.
 
 ## A valve with your own picture
 

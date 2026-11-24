@@ -3,10 +3,7 @@
        mirrored left to right (OakBarn Brewery, 2026-11-18: Vertical Left and Vertical Right switch the picture, Rule 18.43). -->
   <g transform="translate(300 0) scale(-1 1)">
   <!-- The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs
-       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); straight pipe runs out to the edges. -->
-  <!-- the box-edge end looks like the end of the valve (OakBarn Brewery, 2026-11-23: "Make the connections at the edge of the box that look like the end of the valve or Pump"; Rule 5.29): the valve body tube runs out to a TC ferrule on the box edge, where its IP is -->
-  <rect x="135.5" y="0" width="29" height="73.45" fill="#7f7f7f"/><path d="M140.5 0 V73.45" stroke="#a3a3a3" stroke-width="3"/><rect x="129.5" y="0.5" width="41" height="12" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>
-  <rect x="135.5" y="226.55" width="29" height="73.45" fill="#7f7f7f"/><path d="M140.5 226.55 V300.0" stroke="#a3a3a3" stroke-width="3"/><rect x="129.5" y="287.5" width="41" height="12" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>
+       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); no pipe drawn out to the edges (Rule 5.29, 2026-11-23): its IPs are on its own ends. -->
   <g transform="translate(125.8 72.45) scale(1.1)">
   <!-- Skynet drawing: motorised ball valve, closed, vertical pipe. Same size and pipe spot as Valve_Ball_ClosedV-1x1.png. -->
   <rect x="10" y="0" width="24" height="141" fill="#7f7f7f"/>

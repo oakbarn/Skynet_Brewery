@@ -10,18 +10,19 @@ Une vanne commence à **150 x 150** sur un Tab (comme une pompe, donc les vannes
 
 | Orientation | Dans le dessin de 300 x 300 | Sur une vanne de 150 x 150 |
 |----|-----|-----|
-| Horizontal | (0, 150) et (300, 150) | le milieu des côtés gauche et droit |
-| Vertical Left, Vertical Right | (150, 0) et (150, 300) | le milieu du haut et du bas |
+| Horizontal | (75, 150) et (225, 150) | à mi-hauteur, à un quart des côtés gauche et droit |
+| Vertical Left, Vertical Right | (150, 75) et (150, 225) | sur la ligne du milieu, à un quart du haut et du bas |
 | 45 degrees | les places Horizontal, tournées de 45 degrés autour du milieu | |
 | Front (en regardant dans le tuyau) | les deux à (150, 150) | le milieu |
-| Front elbow | (150, 150) et (150, 300) | le milieu, et le milieu du bas |
+| Front elbow | (150, 150) et (150, 225) | le milieu, et à un quart du bas |
 
-Si vous redimensionnez une vanne, les places grandissent ou rétrécissent avec sa case. Gardez-la carrée pour que les places restent sur ses côtés.
+Si vous redimensionnez une vanne, les places grandissent ou rétrécissent avec sa case. Gardez-la carrée pour que les places restent sur les bouts de la vanne. Une vanne avec votre propre image garde ses places au milieu des côtés de la case.
 
 ## Dessinées à l'échelle {#drawn-to-scale}
 
-Chaque dessin de vanne Skynet est à la même échelle dans la case. Une vanne plus courte que la case a son tube de corps prolongé, tout droit,
-jusqu'au bord de la case, où il finit par une virole TC comme le bout de la vanne, là où est l'IP.
+Chaque dessin de vanne Skynet est à la même échelle dans la case, et chaque vue de côté a la même longueur que la Motorized Ball Valve, d'un bout
+à l'autre (la moitié de la case). Ses IP sont sur ses propres bouts, à un quart des côtés de la case ; le reste de la case contient le moteur ou la poignée.
+Les tuyaux qui y sont joints vont jusqu'à ses bouts.
 
 ## Une vanne avec votre propre image {#a-valve-with-your-own-picture}
 

@@ -171,7 +171,7 @@ test('a let-go end of a pipe or hose can be dragged and joins an IP it is droppe
 });
 
 // Box-edge ends (OakBarn Brewery, 2026-11-23: "Make the connections at the edge of the box that look like the end of the valve or Pump"; Rule 5.29)
-test('valve and pump box-edge ends are TC ferrules, not plain pipe stubs', async () => {
+test('Skynet valves have no drawn-on pipe (IPs on their own ends); pump ends are TC ferrules', async () => {
   const fs = await import('node:fs'), dir = new URL('../media/Images/Skynet/Valves/', import.meta.url);
   for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.svg'))) {
     const s = fs.readFileSync(new URL(f, dir), 'utf8');
@@ -179,4 +179,5 @@ test('valve and pump box-edge ends are TC ferrules, not plain pipe stubs', async
   }
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /class="pumpend"/, 'a pump Hose or Pipe ends in a ferrule');
+  assert.match(app, /const VALVE_SKN = \{ h: \[\[0\.25, 0\.5\], \[0\.75, 0\.5\]\]/, 'IPs a quarter in from the box sides');
 });

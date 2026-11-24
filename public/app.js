@@ -2144,7 +2144,13 @@ function sidePt(e, side) {
 // the middle of its top and bottom (150, 0) and (150, 300), a front view (looking down the pipe) both at the middle (150, 150), and a
 // front elbow at the middle and the middle of its bottom (150, 300). A 45 degree valve turns the level spots about the middle.
 const VALVE_STD = { h: [[0, 0.5], [1, 0.5]], v: [[0.5, 0], [0.5, 1]], f: [[0.5, 0.5], [0.5, 0.5]], fe: [[0.5, 0.5], [0.5, 1]] };
-const vstd = (o, kind = o) => ({ o, w: 300, h: 300, ends: VALVE_STD[kind] });
+// Skynet valve pictures have no drawn-on pipe out to the box edges any more (OakBarn Brewery, 2026-11-23: "If we use the same graphic but
+// did away with the extentions" ... "Lets try that"; Rule 5.29 changed): every side-view valve is 150 long, end to end, in the middle
+// of its 300 box, so its IPs are on its own ends, a quarter in from the sides: (75, 150) and (225, 150) level, (150, 75) and (150, 225)
+// upright, the front elbow's bottom end at (150, 225). The box keeps its size so the motor or handle fits in it. A user's own valve
+// picture keeps VALVE_STD (its IPs on the box edges).
+const VALVE_SKN = { h: [[0.25, 0.5], [0.75, 0.5]], v: [[0.5, 0.25], [0.5, 0.75]], f: VALVE_STD.f, fe: [[0.5, 0.5], [0.5, 0.75]] };
+const vstd = (o, kind = o, t = VALVE_SKN) => ({ o, w: 300, h: 300, ends: t[kind] });
 const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h'), BF_V_R: vstd('v'), BF_V_L: vstd('v'),
   BF_Front: vstd('f'), BF_Front_Elbow: vstd('f', 'fe'), BALL_Front: vstd('f'),
   // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...)
@@ -2452,7 +2458,7 @@ const USER_LOOK = { hd: { turn: 0, sx: 1, sy: -1 }, vl: { turn: -90, sx: 1, sy: 
 const userLook = e => e && e.subtype === 'valve' && isUserValvePic(e) ? USER_LOOK[e.orientation] || null : null;
 const USER_LOOK_ENDS = { h: VALVE_STD.h, v: [[0.5, 1], [0.5, 0]] };
 const userValveKind = e => e.orientation === 'v' || e.orientation === 'vl' || e.orientation === 'vr' ? 'v' : e.orientation === 'h' || e.orientation === 'hd' || e.orientation === 'l45' || e.orientation === 'r45' ? 'h' : (e.w || 120) >= (e.h || 60) ? 'h' : 'v';
-const userValveStd = e => isUserValvePic(e) ? (userLook(e) ? { k: 'U', o: userValveKind(e), w: 300, h: 300, ends: USER_LOOK_ENDS[userValveKind(e)] } : { k: 'U', ...vstd(userValveKind(e)) }) : null;
+const userValveStd = e => isUserValvePic(e) ? (userLook(e) ? { k: 'U', o: userValveKind(e), w: 300, h: 300, ends: USER_LOOK_ENDS[userValveKind(e)] } : { k: 'U', ...vstd(userValveKind(e), userValveKind(e), VALVE_STD) }) : null;
 // the picture's size and place in its box (in % of the box) so the user's In and Out spots land on the standard IP spots, or null
 function valveFit(e) {
   if (!isUserValvePic(e) || !pctOk(e.ipInX) || !pctOk(e.ipInY) || !pctOk(e.ipOutX) || !pctOk(e.ipOutY)) return null;
