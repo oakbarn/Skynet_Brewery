@@ -325,3 +325,10 @@ test('an Edit layout bar list lets go of the keyboard once a row is picked', asy
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /function pickRun\(sel\) \{[\s\S]{0,500}sel\.blur\(\);\s+if \(f\) guard\(f\)\(\);/);
 });
+
+// OakBarn Brewery, 2026-11-24: "Clicked Finish Build then Keep building ... but still in non edit mode" (Rule 4.1)
+test('Finish Build > Keep building turns Preview off', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /onclick: \(\) => \{ close\(null\); if \(previewing\) setPreview\(false\); \} \}, 'Keep building'/);
+});

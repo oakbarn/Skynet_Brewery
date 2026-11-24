@@ -91,7 +91,7 @@ Appuyez sur **✅ Finish Build ...** dans la barre Edit layout. Une fenêtre dem
 | **Move to Tab** | Choisissez le Tab (celui choisi pour le nouvel élément est en premier ; sinon celui d'où vous venez) et appuyez sur **Move to Tab**. Tout ce qui est sur le Build Tab y va à sa taille actuelle. Vers le Tab choisi pour lui, il garde sa place du Build Tab ; vers un autre Tab il va au milieu. Il brille en rouge jusqu'à ce qu'on clique dessus. Appuyez ensuite sur **Save layout**. |
 | **As a Template** | Tapez un **Template Name** (sans espaces, unique) et appuyez sur **Save as Template**. Il est enregistré tout de suite dans **☰ Menu**, et le Build Tab se ferme. Utilisez **Add to Tab** sur le Template pour le mettre sur un Tab. |
 | **Throw it away** | Tout ce qui est sur le Build Tab est supprimé (il demande d'abord), et les Ports de ses Devices sont de nouveau libres. |
-| **Keep building** | Retour au Build Tab, rien ne change. |
+| **Keep building** | Retour à la construction sur le Build Tab, rien ne change. Si 👁 Preview était actif, il est désactivé pour que vous puissiez de nouveau déplacer et modifier les éléments. |
 
 Un nouveau Device dont le nom suit encore le nom proposé reçoit l'**ID du Tab** où il va au bout de son nom (par exemple `MB_25_PWM_VlV_Fly~Sparge_SP`). Un nom que vous avez tapé vous-même n'est jamais changé.
 

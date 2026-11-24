@@ -9228,7 +9228,9 @@ function saveBuildDialog(b) {
       ...(buildFor(b) === 'template' && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // a Build for a Template (Build new Equipment Template too) shows As a Template first         // 📁 Templates picked in its Tab list (2026-11-12)         // a clone of a Template is saved as a Template first
       h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }),
         h('button', { title: 'Close this and see the Build Tab the way it looks on Brew Day', onclick: () => { close(null); setPreview(true); } }, '👁 Preview'),
-        h('button', { onclick: () => close(null) }, 'Keep building')));
+        // Keep building goes back to building (OakBarn Brewery, 2026-11-24: "Clicked Finish Build then Keep building as I wanted to change
+        // some stuff but still in non edit mode"): a 👁 Preview left on from before is turned off, so things can be moved and changed again
+        h('button', { title: 'Close this and go on building: things on the Build Tab can be moved and changed', onclick: () => { close(null); if (previewing) setPreview(false); } }, 'Keep building')));
     d.oncancel = ev => { ev.preventDefault(); close(null); };
     document.body.append(d); d.showModal();
   });
