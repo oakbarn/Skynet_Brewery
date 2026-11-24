@@ -185,3 +185,36 @@ test('Skynet valves have no drawn-on pipe (IPs on their own ends); pump ends are
   assert.match(app, /class="pumpend"/, 'a pump Hose or Pipe ends in a ferrule');
   assert.match(app, /const VALVE_SKN = \{ h: VALVE_STD\.h, v: VALVE_STD\.v/, 'IPs on the ends of the cropped box');
 });
+
+// Rule 2.9 changed (OakBarn Brewery, 2026-11-24: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold
+// can be deprecated as it too often brings up the help"; "can alt + Z = Zoom")
+test('the left button held a moment drags outside Edit layout; the right button never drags; no Alt + Z', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const HOLD_MS = 400;/, 'one hold time');
+  assert.match(app, /holdThen\(ev, \(\) => qdGrab\(end, at\)/, 'a QD hose end moves after a left hold');
+  assert.match(app, /holdThen\(ev, \(\) => chGrab\(c, at, false\)\)/, 'a chiller moves after a left hold');
+  assert.match(app, /holdThen\(ev0, \(\) => tplDragGo\(at, btn, t\)\)/, 'a Template icon drags after a left hold');
+  assert.match(app, /if \(ev\.pointerType === 'mouse' && ev\.button === 2\) return;/, 'the right button does not drag in Edit layout');
+  assert.match(app, /ev\.altKey \|\| ev\.repeat \|\| ev\.key\.toLowerCase\(\) !== 'z'\) return;/, 'Z only, never Alt + Z (Rule 2.73)');
+  assert.doesNotMatch(app, /'Move with Held Right Click'/, 'no right-drag hint left');
+});
+
+// Rule 5.37 changed (OakBarn Brewery, 2026-11-24: "the zoom box needs to be bigger ... + 50 px and fill the work area"; "inside the zoom Box,
+// Click to open Tab Properties no longer works but only in the Zoom Box")
+test('the Zoom box fills the work area with the whole manifold and never opens Tab settings', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function zoomManifold\(x, y\)/);
+  assert.match(app, /x0 = Math\.min\(\.\.\.xs\) - ZOOM_PAD/, '50 px all round');
+  assert.match(app, /else if \(!zoomPassing\) editWorkspace\(\);/, 'no Tab settings from a double-click in the box');
+  assert.match(app, /if \(kind === 'tab' && zoomPassing\) return;/, 'no Tab settings from a held press in the box');
+});
+
+// OakBarn Brewery, 2026-11-24: "On a property allow individual Unlock of an IP in addition to Unlock IPs" (Rule 5.37)
+test('Properties have 🔓 Unlock one IP / one end next to Unlock its IPs', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /'🔓 Unlock one end ▾' : '🔓 Unlock one IP ▾'/);
+  assert.match(app, /unlockJoins\(\[j\]\)/, 'only the picked one lets go');
+});

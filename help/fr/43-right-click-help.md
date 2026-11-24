@@ -11,7 +11,7 @@ Faites un clic droit (sur un Mac : Contrôle + clic, ou un clic à deux doigts s
 - **Un endroit vide d'un Tab** : ouvre [Image et couleur de fond d'un Tab](26-tab-background).
 - **La Menu Bar** : la liste Schema, chaque bouton (Tabs, Processes, Devices ...), les Tabs d'écran, le ☰ Menu, et la barre Edit layout.
 
-Dans **Edit layout**, un élément qui n'est **pas** verrouillé garde le bouton droit de la souris pour le faire glisser, comme avant. Le double-clic ouvre toujours les **Properties**.
+Le bouton droit de la souris ne fait jamais glisser (2026-11-24) : dans **Edit layout** aussi, un clic droit sur un élément ouvre son aide. Faites glisser avec le bouton **gauche**. Le double-clic ouvre toujours les **Properties**.
 
 > Vous voulez le menu du clic droit du navigateur (copier, inspecter ...) ? Gardez **Maj** enfoncée pendant le clic droit.
 

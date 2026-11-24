@@ -33,9 +33,9 @@ The Properties title reads **Quick Disconnect Hose**. Its size, color, Label and
 The free end of a QD hose can be moved **at any time**, not only in Edit layout. Its end shows as a yellow dashed ring,
 always on top of everything on the Tab.
 
-- **Computer:** hold the **right mouse button** on the ring and drag (Rule 2.9: the right button drags).
+- **Computer:** hold the **left mouse button** on the ring a moment (less than half a second), then drag. A quick click does not move it. The right button only opens Help.
 - **Phone or tablet:** hold a **finger** on the ring and drag.
-- **Left click:** it does not move the end. After a moment a small pop-up with the red ⛔ says **Move with Held Right Click**. It goes by itself after 3 seconds, or at your next click.
+- **Left click:** it does not move the end. After a moment a small pop-up with the red ⛔ says **Hold the left button a moment, then drag**. It goes by itself after 3 seconds, or at your next click.
 - **Double-click** the ring: the hose's **Properties** open (admins only; Edit layout opens with them). A double-click on an **IP** opens the Properties of the Device or Widget it belongs to.
 
 Any hose end whose **IP Type** is **Quick Disconnect** moves the same way (Help 24), one end at a time.

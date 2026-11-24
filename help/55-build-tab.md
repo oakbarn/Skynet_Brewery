@@ -75,8 +75,8 @@ If you are not in Edit layout yet, it is switched on for you.
 
 You don't have to close your Build to look at the Templates. In Edit layout, **📁 Templates** on the Edit layout bar opens **Vessel Templates**, **Equipment Templates**, **Fitting Templates** or **Build Template**, and the Build stays open. A Template Menu tab you already opened can be clicked too.
 
-- You see what you are getting: **Add to Tab**, **Clone** or a **right-drag** puts the copy on the Build Tab, as always.
-- **B** (or **Insert**): click a Template's icon once, then press **B** (for Build) or **Insert**. A copy goes on the Build Tab and you stay on the Templates, so you can add several.
+- You see what you are getting: **Add to Tab**, **Clone** or a **hold-and-drag** puts the copy on the Build Tab, as always.
+- **B** (or **Right Arrow** or **Insert**): click a Template's icon once, then press **B** (for Build), **→** (Right Arrow) or **Insert**. A copy goes on the Build Tab and you stay on the Templates, so you can add several.
 - While a Template page shows, the Edit layout bar steps aside. Click the **🔨 Build Tab** (or **✖ Close**) to go back to your Build, everything on it as you left it.
 - The other Menu tabs still wait until you press **Save layout** or **Exit** (Skynet Rule 2.52).
 

@@ -471,8 +471,8 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
 - **A double-click outside Edit layout** is two single clicks to a browser, so its first click acts. To open a **Heating Element's**
   method Settings on a running Tab, use **Ctrl + Click** (⌘ + Click on a Mac); a plain click still acts at once (OakBarn Brewery,
   2026-11-17, Rule 6.19).
-- What stays the same: **double-click opens Properties** (Rule 2.9), the right mouse button drags in Edit layout and gives Help
-  outside it (Rule 2.11), view only accounts can't change anything, and an item's own **When tapped** setting (none, process, tab,
+- What stays the same: **double-click opens Properties** (Rule 2.9), the left mouse button drags and the right one gives Help
+  (Rules 2.9, 2.11), view only accounts can't change anything, and an item's own **When tapped** setting (none, process, tab,
   or Ask before changing) still wins, because the user chose it for that one item.
 - **Anything new** is built to this Rule: before a new Device or Widget is finished, its one click is checked against this list.
 - **BruControl Import:** checked. The Importer has no Tabs that run, so it has no clicks of its own; everything it makes is a Panel
@@ -631,8 +631,14 @@ as the pump covers of Rule 7.13 (Fritz, 2026-11-05); an item saved with pure whi
 2.8 **Properties dialogs** have Delete, Cancel and Save at both the top and the bottom. (2026-10-04,
 PR #15)
 
-2.9 **Double-click opens Properties** (hold a finger on phones). **Right mouse button drags.**
-(2026-10-21)
+2.9 **Double-click opens Properties** (hold a finger on phones). **The left mouse button drags; the right button never does.**
+(2026-10-21; changed 2026-11-24)
+*Changed 2026-11-24* (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be
+deprecated as it too often brings up the help"): the right mouse button no longer drags anywhere, in Edit layout or out of it; it only
+opens Help (Rule 2.11). Outside Edit layout, what moves by hand (a Quick Disconnect hose end, Rule 5.40; an Immersion Chiller, Rule 5.42;
+a Template icon, Rule 4.9) moves with the **left button held still a moment (400 ms), then dragged**; a quick left click keeps its normal
+action, and a press that moves before the moment is up does nothing. A finger works as before. *Replaced:* "Right mouse button drags"
+(2026-10-21).
 **Ctrl + Click** (⌘ + Click on a Mac) opens Properties too, in Edit layout (OakBarn Brewery, 2026-11-17: "Maybe the CTRL + Click is
 the way to Bring Up Properties Dialog"; "make sure that the double click for hoses still works"): double-click still opens Properties and
 still finishes drawing a hose; a Ctrl + Click while a pipe or hose is being drawn does nothing. *Fixed 2026-11-17* (OakBarn Brewery:
@@ -647,8 +653,9 @@ also bring Up the Property dialog for the Parent. Double Click on a Yellow Circl
 Part of the Properties of a Hose and Not Outside"): an IP or a hose end has no dialog of its own; its settings are in its parent's
 Properties. So a double-click on the **yellow ring of a hose end** opens that hose's Properties, and a double-click on an **IP** opens
 the Properties of the Device or Widget it belongs to (a Vessel's IP: the Vessel; a Pipe Fitting or a free IP: its own), on a running
-Tab as in Edit layout. Edit layout opens with them (admins only). A Device or a Manual Valve itself keeps its own clicks. A left click
-on the yellow ring does not move it: after a moment a small pop-up with the ⛔ says **Move with Held Right Click** (Rule 5.40).
+Tab as in Edit layout. Edit layout opens with them (admins only). A Device or a Manual Valve itself keeps its own clicks. A quick left click
+on the yellow ring does not move it: after a moment a small pop-up with the ⛔ says **Hold the left button a moment, then drag** (Rule 5.40;
+was "Move with Held Right Click" until 2026-11-24).
 *Replaced:* right-click opening Properties (PR #51) was built, then Fritz turned it down and the PR
 was closed. Do not offer it again.
 
@@ -658,7 +665,8 @@ was closed. Do not offer it again.
 empty spot, the Menu Bar). A yellow "?" sits by ☰ Menu tab headings and Properties titles, **but
 never on a Tab itself.** (2026-10-21, PR #57)
 *Exception (2026-11-05, waiting on Fritz's pick):* the free end of a Quick Disconnect hose moves outside Edit layout, and the right
-button drags it (Rule 5.28).
+button drags it (Rule 5.28). *Changed 2026-11-24 (Rule 2.9):* the right button only ever opens Help, in Edit layout too, on any item,
+locked or not; moving is the left button's (held a moment outside Edit layout).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
@@ -1662,6 +1670,26 @@ keeps its own title. Help 40.
   Each browser remembers its own (by the choice's words); a choice that is not in the list now (a page this account can't see) shows no copy.
 Then the Menu tabs and the Pages, as before. Help 33, 51, 67. Panel only: the BruControl Import's pages have no ☰ Menu.
 
+2.73 **Alt + key shortcuts work everywhere** (OakBarn Brewery, 2026-11-24: "I want things to work universal so ALT + Z and ALT + R are
+Out. and all the Firefox ones as well"). A Panel shortcut with **Alt** uses only a letter that no browser (Chrome, Edge, Firefox, Safari),
+no system (Windows, Mac, Linux, Raspberry Pi OS) and no common graphics overlay keeps for itself. **Allowed Alt + letter:** A, C, G, I, J,
+K, L, M, N, O, P, Q, U, W, X, Y. **Never:** D, E, F (Chrome and Edge), F, E, V, S, B, T, H (Firefox menus), Z (NVIDIA overlay), R (AMD
+overlay), nor Alt + Tab, Space, Esc, F1 to F10, Home or the arrows (Alt + Left / Right are the browser's Back and Forward). **Shift + Alt + letter** is free on all of them except T, I and A
+(Chrome and Edge). **Shift + Alt + arrow** is free too (OakBarn Brewery, 2026-11-24: "Shift + Alt + arrow"), outside text boxes only. **Alt + number is never used** (OakBarn Brewery, 2026-11-24: "What about alt + Number"): Chromium and Firefox on
+Linux and the Pi switch browser tabs with Alt + 1 to 9, and on Windows Alt + number pad digits type characters (Alt + 0176 = °).
+**Shift + Alt + number** is allowed, outside text boxes only. **Alt + ` (the ~ key) is never used** (OakBarn Brewery, 2026-11-24: "alt + tilde"): GNOME switches
+windows with it, on a Mac Option + ` types accents, and the key is ² on a French keyboard and ^ on a German one. **Alt + [** (OakBarn Brewery, 2026-11-24:
+"alt + [") is allowed but read by its place (the key right of P), since it is ^ on a French and Ü on a German keyboard; Help names
+it that way. **Alt + =** ("Alt + =") the same: allowed by its place (the key left of Backspace; ´ on a German keyboard). **Alt + mouse click or drag is never used** (OakBarn Brewery, 2026-11-24: "Can alt + Left Mouse Click work"): many
+Linux desktops, and likely the Pi, move the whole window with it, so the click never reaches the Panel. Shift + click is safe. The older Alt held while
+dragging (place without the snap, Edit layout) still works on Windows and Mac; on a Pi it may move the window instead. The allowed letters come first. **Ctrl + Alt + key is never used** (OakBarn Brewery, 2026-11-24: "any conflicts with CTRL + Alt + Key"): on
+European Windows keyboards Ctrl + Alt is AltGr and types characters (€, @), Linux and the Pi keep many (terminal, lock screen,
+desktops), and on a Mac Control + Option is the VoiceOver key. The key is read by its place (`ev.code`), so a Mac's Option + letter, which types a symbol, works too. In use: Alt + P
+(Picture picker, admins). Never while typing in a box, and never a key Rule 2.32 keeps. The full table, with what each combination does on Windows, Mac, Linux and the Pi, is
+`docs/Skynet_Key_Combinations.md` (and `.csv`), and just the ones still free in `docs/Skynet_Keys_Available.md` ("Give me a second MD of list the keys that
+are available on Skynet") (OakBarn Brewery, 2026-11-24: "make it an MD ... and available as a CSV"); a new
+shortcut is added there too.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2098,12 +2126,12 @@ Tab's name (its Tab ID by Rule 3.2). The copy puts everything that is on the Tab
 Help 236. Rules 4.1 and 4.4 were changed for it (OakBarn Brewery, 2026-11-19, picked "Change the Rules"): the copy puts its new
 Widgets straight on the new Tab, not the 🔨 Build Tab, and makes Clones of Devices and of Widgets without ⧉ Clone Device.
 
-4.9 **Right-drag a copy off a Vessel or Equipment Template** (OakBarn Brewery, 2026-11-22, Panel Update 9 item 16: "Grab a Item from
+4.9 **Drag a copy off a Vessel or Equipment Template** (left button since 2026-11-24, Rule 2.9; was right-drag) (OakBarn Brewery, 2026-11-22, Panel Update 9 item 16: "Grab a Item from
 the Vessel or Equipment Template and drag off clone picture with Right Clicked Draw after 100 + Pixel Movement and right mouse click
 release, move to the Build tab and open Built Tab with Property Dialog open just as if it had been added with the button" Add
-equipment). On ☰ Menu > Vessel Templates or Equipment Templates (Admins), hold the right mouse button on a Template and drag: a faint
+equipment). On ☰ Menu > Vessel Templates or Equipment Templates (Admins), hold the left mouse button on a Template a moment (400 ms), then drag (the right button until 2026-11-24): a faint
 copy of its picture follows the mouse, and turns solid past 100 px. Let go past 100 px and a copy is made on the 🔨 Build Tab (Rule
-4.1) with its Properties open, as Add equipment does. Under 100 px nothing is made. A right-click that does not move opens its Help,
+4.1) with its Properties open, as Add equipment does. Under 100 px nothing is made. A right-click opens its Help,
 as everywhere (Rule 2.11). Panel only.
 
 4.10 **The Templates open from the 🔨 Build Tab, and B or Insert puts a copy on it** (OakBarn Brewery, 2026-11-24: "on the build tab, I
@@ -2115,12 +2143,12 @@ Template"):
 - **📁 Templates** on the Edit layout bar (a dropdown, Rule 2.6) opens **Vessel Templates**, **Equipment Templates**, **Fitting
   Templates** or **Build Template** while Edit layout (Build mode) stays on and the Build stays open. A Template Menu tab already open
   on the Tabs bar can be clicked too. Every other Menu tab still says "Save or exit Edit layout first" (Rule 2.52).
-- Their **Add to Tab**, **Clone** and **right-drag** (Rule 4.9) work as before: the copy goes on the 🔨 Build Tab (Rule 4.1).
-- **B** (for Build) or **Insert** on a Template's icon that has the focus (one click gives it the focus; Admins): a copy goes on the
+- Their **Add to Tab**, **Clone** and **hold-and-drag** (Rule 4.9; a right-drag until 2026-11-24) work as before: the copy goes on the 🔨 Build Tab (Rule 4.1).
+- **B** (for Build), **→ Right Arrow** (OakBarn Brewery, 2026-11-24: "On a Template, could we make the Right Arrow the same as B") or **Insert** on a Template's icon that has the focus (one click gives it the focus; Admins): a copy goes on the
   🔨 Build Tab, the same as Add to Tab (Bundled, its name made for the Tab the Build goes to), and you stay on the Template Menu tab
   with the same Template picked, so several can be put down one after another. Double-click and Enter still open its settings (that is
   why double-click is not used). The keys act only on the icon, never in a text box, and not with Ctrl, Shift, Alt or Cmd. Edit layout
-  turns on when it is off. Many laptops have no Insert key, so B is the one every keyboard has.
+  turns on when it is off. Many laptops have no Insert key, so B and → are the ones every keyboard has.
 - While a Template Menu tab shows over the Build, the Edit layout bar steps aside, and Z (zoom) and Ctrl+Z (Put back) do nothing. A
   click on the 🔨 Build Tab, or the Menu tab's Close, goes back to the Build, everything on it as it was.
 Help 50, 55. Panel only.
@@ -2495,7 +2523,7 @@ Help 127).
   on an IP) passes flow on into a hose or pipe joined to it, and sprays when nothing else is on it.
   *Replaced:* with nothing on it, it was shut, as an End Cap (2026-11-05).
 - **The Quick Disconnect hose** (**Draw QD hose**, Edit layout bar) hangs from a **pump IP**. Its **free end can be moved at any time,
-  not only in Edit layout**: with the **right mouse button** (Rule 2.9) on a computer, a **finger** on a phone or tablet (this is
+  not only in Edit layout**: with the **left mouse button held a moment, then dragged** (Rule 2.9; the right button until 2026-11-24) on a computer, a **finger** on a phone or tablet (this is
   running the brewery, so it works in run mode, Rule 2.35). Dropped on an IP or a Quick Disconnect it joins it (a Quick Disconnect wins
   over the IP under it); anywhere in the **top third of a vessel** it is the same as putting the hose in the vessel's top (the whole top
   third is one big IP); anywhere else the end is loose and no flow shows. Operators and admins can move it, the move is kept at once
@@ -2816,8 +2844,14 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and does not ask. Greyed out for the same reasons, and when a 🔒 locked pipe or fitting would have to move with it.
 - **🔍 Zoom box** (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for
   200 pixel square where Join area is zoomed inside the Dialog"; he picked A, the Z key, as Ctrl + Click already opens Properties,
-  Rule 2.9): in Edit layout, **Z** (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
-  screen pixels around the mouse **3 times bigger** (on a smaller Tab area the box shrinks to fit). *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
+  Rule 2.9): in Edit layout, **Z** (not Alt + Z, Rule 2.73) (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
+  screen pixels around the mouse **3 times bigger** (on a smaller Tab area the box shrinks to fit). *Changed 2026-11-24* (OakBarn Brewery:
+  "the zoom box needs to be bigger. Could be any manifold part. Top, bottom, right and left + 50 px and fill the work area"): the box
+  **fills the work area** and zooms **2.5x** ("Can you also do zoom at 2.5"; was 3x). It is centered on the **whole manifold** under
+  the mouse (the pipes, fittings, valves and pumps joined to the pipe, IP or fitting pointed at, not through a vessel, with **50 Tab
+  pixels** all round) when that fits at 2.5x; otherwise on the mouse, and the view pans from the box's edges. A click, double-click or held press on an empty
+  spot in the box never opens Tab settings ("inside the zoom Box, Click to open Tab Properties no longer works but only in the Zoom
+  Box"); on the Tab itself it still does. *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
   Dialog moves now. It needs to stay fixed and move the joins together inside the Dialog"; "z does not work like the esc. Just
   change the text that you use the esc button to close and or have a close button upper right corner"):* the box **stays where it
   opened** (on the side away from the spot it shows) and keeps showing that same spot. **Work right in it:** every press, drag,
@@ -2969,11 +3003,11 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   in Build Mode"; "QD ends: Hoses only and only grab one end at a time"): a hose end whose IP Type is Quick Disconnect can be
   grabbed and moved outside Edit layout like a QD hose's free end (Rule 5.28), one end at a time; the other end stays. Pipes never
   do, whatever their IP Type.
-- **Unhooking a hose end: a warning only when liquid flows** (OakBarn Brewery, 2026-11-16: "Right Click and hold the Yellow circle is all it should take to move it.  It unhooks without comfirmation and is locked or hanging open when Right Moude buuton release"; "If there is flow a warning,  No flow, no warning"): holding the right mouse button (or a finger) on the
+- **Unhooking a hose end: a warning only when liquid flows** (OakBarn Brewery, 2026-11-16: "Right Click and hold the Yellow circle is all it should take to move it.  It unhooks without comfirmation and is locked or hanging open when Right Moude buuton release"; "If there is flow a warning,  No flow, no warning"): holding the left mouse button a moment (the right button until 2026-11-24, Rule 2.9), or a finger, on the
   yellow ring is all it takes; with no flow there is no pop-up and the end moves at once. With a pump on the hose On, or liquid
   flowing in it, a warning (frozen top, Rule 2.51) says "Turn the pump Off before you unhook it" and the end does not move. Skynet
   keeps checking (every half second) and the warning closes by itself once nothing flows; then hold the ring again. **✖ Exit**
-  closes it. It only warns: it never turns anything On or Off (Rule 2.44). Letting go of the right button never opens Help.
+  closes it. It only warns: it never turns anything On or Off (Rule 2.44). Letting go after a drag never opens Help.
   A hose end left in the air is open: what pushes into the hose (a Tap Water Valve that is On, a running pump) pours out of it, so
   the hose shows flow (and moving it warns). On a plain IP at the open end of a pipe, flow goes on into that pipe. Any open pipe or
   hose end can flow; only End Caps and closed valves stop it. Where flow pours out of an open end, a water splash is drawn (Skynet's
@@ -3031,7 +3065,7 @@ from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, ves
   A chiller a person built and moved in by hand is never taken off by a Process, and `place_Chiller` says that vessel already has one.
 - **Moving an Immersion Chiller by hand on a live Tab** (OakBarn Brewery, 2026-11-17: "Immersion Chillers on a Tab Can be Free Floating
   but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; built as a Rule 14.4 exception: "B Now"): the same as a Quick
-  Disconnect hose end (Rule 5.40). A **right-button hold** (or a finger) on the chiller picks it up, with no pop-up; while water flows
+  Disconnect hose end (Rule 5.40). A **left-button hold of a moment** (the right button until 2026-11-24, Rule 2.9), or a finger, on the chiller picks it up, with no pop-up; while water flows
   through it a warning says so and it does not move (the warning closes by itself once nothing flows). Let go over a vessel (no other
   chiller in it) and it **drops into that vessel**, in its lower middle, the same spot `place_Chiller` uses, and flashes red and yellow
   for 2 seconds; let go anywhere else and it stays there, **free floating**. Its own hoses (a bundled supply and waste hose, or Quick
@@ -7137,6 +7171,8 @@ bottom with a manual ball valve: the Valve_Only Bundled Fitting, its valve picke
 turns it on and off), so it has no Device; its Heat Source is Electric or Gas. Both programs show the same Templates.
 
 ## Change log
+
+- 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("On a property allow individual Unlock of an IP in addition to Unlock IPs"): Properties with 2 or more joined pipe ends also have 🔓 Unlock one IP ▾ (a Pipe or Hose: Unlock one end ▾); the picked one lets go alone. The Zoom box drags and pans with the left button only, fills the work area at 2.5x, centered on the whole manifold (50 px all round) when it fits, and never opens Tab settings from inside it (Rule 5.37). Rule 4.10: → Right Arrow on a Template's icon does the same as B ("On a Template, could we make the Right Arrow the same as B"). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
 - 2026-11-24: Rule 5.37 Zoom box note (OakBarn Brewery: "when I get near an edge with the left mouse click held, it scrolls"): a button held near an edge of the Zoom box moves the view that way; a drag goes along. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 note (OakBarn Brewery, 2026-11-23: "Tried to grab this and it ask me to unlock? It is not connected"): a pipe end with a red ring (on no IP, what it was joined to is gone) can be dragged like a let-go end; grabbed, it gets its coupling, so dropped on an IP it joins. Help 153 (and French). Also ("Why do I have to close or save after unlocking. Two Clicks? Why", Rule 2.44): 🔓 Unlock its IPs / its ends and ↔ Move with pipes in Properties save and close Properties themselves, one click. BruControl Import program: same Edit layout code; nothing else changes there.

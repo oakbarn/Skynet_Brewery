@@ -44,7 +44,7 @@ Vessels, with the **Brew Kettle first**. `remove_Chiller` shows the Vessels too.
 On a Tab (not in Edit layout) an immersion chiller can sit on its own, **free floating**, and be put into a vessel later, the same
 way you move a Quick Disconnect hose end ([Quick Disconnect hoses](127-quick-disconnects-and-qd-hoses)):
 
-1. Hold the **right mouse button** on the chiller (on a phone or tablet, hold it with a finger) and drag. No pop-up asks first.
+1. Hold the **left mouse button** on the chiller a moment (on a phone or tablet, hold it with a finger), then drag. A quick click does not move it. No pop-up asks first.
 2. Let go **over a vessel**: the chiller drops into it, in its lower middle, and flashes red and yellow for 2 seconds. A yellow
    dashed outline shows the vessel while you drag over it.
 3. Let go **anywhere else**: it stays there, free floating.

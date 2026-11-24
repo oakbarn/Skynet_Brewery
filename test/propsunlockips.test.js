@@ -34,7 +34,7 @@ assert.match(fn, /const riders = pipe \? \[\] : lockedRiders\(it\)/, 'greyed out
 assert.match(fn, /'↔ Move with pipes'/);
 console.log('move with pipes ok');
 // 🔍 Zoom box (OakBarn Brewery, 2026-11-23, picked A: the Z key): 200 screen pixels around the mouse, 3 times bigger, look only
-assert.match(app, /const ZOOM_SRC = 200, ZOOM_X = 3;/);
+assert.match(app, /const ZOOM_X = 2.5, ZOOM_PAD = 50;/);
 assert.match(app, /if \(zb\.down && !zb\.down\.isConnected\) zb\.down = under;/, 'a pipe drawn again on press still gets the drag (grab it again and again)');
 assert.match(app, /host\.attachShadow\(\{ mode: 'open' \}\)/, 'its copy of the Tab is closed off, so nothing else finds it');
 assert.match(app, /ev\.key\.toLowerCase\(\) !== 'z'\) return;\n[^\n]*closest\?\.\('input, textarea, select, \[contenteditable="true"\], dialog'\)[^\n]*\n  ev\.preventDefault\(\); zoomBox \? zoomClose\(\) : zoomOpen\(\);/, 'Z opens and closes it, never in a text box');
@@ -42,7 +42,7 @@ assert.match(app, /ev\.key\.toLowerCase\(\) !== 'z'\) return;\n[^\n]*closest\?\.
 // together inside the Dialog"; "have a close button upper right corner")
 assert.match(app, /for \(const type of \['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu'\]\) frame\.addEventListener\(type, zoomPass\);/, 'presses, drags and clicks pass to the Tab');
 assert.match(app, /if \(ev\.type === 'pointerdown'\) try \{ zb\.frame\.setPointerCapture\(ev\.pointerId\); \} catch \{ \}/, 'the box takes the pointer back after the Tab\'s own press');
-assert.match(app, /zoomBox = \{ host, frame, copy: null, t: 0, size, lx: \(mx - r\.left\) \/ z, ly: \(my - r\.top\) \/ z/, 'it keeps showing the spot it opened on');
+assert.match(app, /zoomBox = \{ host, frame, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits \? mf\.cx : \(mx - r\.left\) \/ z, ly: fits \? mf\.cy : \(my - r\.top\) \/ z/, 'it keeps showing the spot it opened on');
 assert.match(app, /Esc or ✕ closes it\.`\),\n    h\('button', \{ type: 'button', title: 'Close the zoom box \(Esc\)'/, 'a ✕ in its upper right corner');
 console.log('zoom box ok');
 // 🔗 Trace + 🔧 Auto configure, only in the Zoom box (OakBarn Brewery, 2026-11-23, picked A, "has to trace back so no breaks in Ips")

@@ -44,7 +44,7 @@ et la liste montre les cuves, avec la **Brew Kettle en premier**. `remove_Chille
 Sur un Tab (pas en Edit layout), un refroidisseur à immersion peut être posé tout seul, **libre**, et mis dans une cuve plus tard,
 de la même façon que vous déplacez un bout de tuyau à raccord rapide ([Tuyaux à raccord rapide](127-quick-disconnects-and-qd-hoses)) :
 
-1. Tenez le **bouton droit de la souris** sur le refroidisseur (sur un téléphone ou une tablette, tenez-le avec un doigt) et glissez.
+1. Tenez le **bouton gauche de la souris** un instant sur le refroidisseur (sur un téléphone ou une tablette, tenez-le avec un doigt), puis glissez. Un clic rapide ne le déplace pas.
    Aucune fenêtre ne demande d'abord.
 2. Lâchez-le **sur une cuve** : le refroidisseur tombe dedans, au milieu en bas, et clignote rouge et jaune pendant 2 secondes. Un
    contour jaune en pointillés montre la cuve pendant que vous glissez dessus.

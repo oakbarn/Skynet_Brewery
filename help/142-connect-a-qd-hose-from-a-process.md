@@ -30,7 +30,7 @@ The Override button does not pass it: the hose has to be placed.
 
 ## Moving it by hand
 
-When a person drags the hose end (right mouse button, or a finger, Help 127), nothing is asked: the end stays where it is let go.
+When a person drags the hose end (left mouse button held a moment, or a finger, Help 127), nothing is asked: the end stays where it is let go.
 Only a Process line waits for **Done**.
 
 ## Predictive text and Check
