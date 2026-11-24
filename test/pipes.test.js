@@ -218,3 +218,24 @@ test('Properties have 🔓 Unlock one IP / one end next to Unlock its IPs', asyn
   assert.match(app, /'🔓 Unlock one end ▾' : '🔓 Unlock one IP ▾'/);
   assert.match(app, /unlockJoins\(\[j\]\)/, 'only the picked one lets go');
 });
+
+// OakBarn Brewery, 2026-11-24: "I removed the elbow so these should all be the red dot and available to connect with the trace";
+// "just the red dot would match what we have rather than the red circle" (Rule 5.37)
+test('a pipe end whose IP is deleted becomes an open end shown as a red dot', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+  assert.match(app, /function openLostEnds\(d\)/);
+  assert.match(app, /openLostEnds\(draft\);\s+\/\/ the pipe ends that were on it/, 'after a delete');
+  assert.match(app, /centerOnPipes\(draft\); openLostEnds\(draft\); \}/, 'and when Edit layout opens');
+  assert.match(css, /#ws\.editing \.gfx\.ip\.fit\.lonely::before \{[^}]*background: #e01b12/, 'a red dot');
+});
+
+// OakBarn Brewery, 2026-11-24: "Scroll Bars in the Zoom Box when needed" (Rule 5.37)
+test('the Zoom box has scroll bars when the zoomed Tab is bigger, and the wheel scrolls', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /bar\.hidden = all <= view \+ 1;/, 'only when needed');
+  assert.match(app, /frame\.addEventListener\('wheel'/);
+  assert.match(app, /function zoomScrollTo\(lx, ly\)/);
+});

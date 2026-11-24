@@ -53,7 +53,9 @@ moves on the Tab too, more finely, so you can put an end exactly on an IP. Click
 double-click opens Properties, except on a red IP).
 
 **Move around in the box:** hold the mouse button down and go near an edge of the box: the view moves that way across the
-manifold, and anything you are dragging goes along. Move away from the edge, or let go, and it stops.
+manifold, and anything you are dragging goes along. Move away from the edge, or let go, and it stops. When the Tab is bigger than
+the box, it has **scroll bars** on its right and bottom edges: drag one, or click along it to jump there. The mouse wheel scrolls
+up and down, and **Shift + wheel** scrolls sideways.
 
 Press **Esc** or the red **✕** in its upper right corner to close it.
 
@@ -80,7 +82,7 @@ A pipe or hose can change after it is saved, once its ends are let go:
 
 A let-go end can be grabbed even where it sits on a pump, valve or vessel IP. On a fitting (a tee, an elbow, any fitting) the
 fitting wins: pressing on it grabs the fitting, not a coupling or let-go end lying on top of it. Grab the coupling or end off
-the fitting instead. An end with a red ring (on no IP, because what it was joined to is gone) can be grabbed and dropped on an IP too. An end that is still joined, a 🔒 locked pipe or hose,
+the fitting instead. An end whose elbow, tee or Device was deleted becomes an open end at once: a small **red dot** like any open IP, which can be grabbed, joined or traced (🔗) in the Zoom box. An end that is still joined, a 🔒 locked pipe or hose,
 and an end on a 🔒 locked IP (one set to No Unlock too) do not move. **↩ Put back** (Ctrl+Z) undoes each drag, and **Save layout**
 keeps the new length or shape.
 

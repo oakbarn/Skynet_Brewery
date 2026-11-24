@@ -308,6 +308,11 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws.editing .gfx.ip:not(.fit):not(.has-img)::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #e01b12; border: 2px solid #fff; box-shadow: 0 0 0 1px #000; pointer-events: auto; }
 /* joined IPs are green dots, open ones stay red (OakBarn Brewery, 2026-11-23: "Change the color of Connected ips to green and unconnected to red") */
 #ws.editing .gfx.ip.joined:not(.fit):not(.has-img)::before { background: #1e9e3a; }
+/* an open pipe end (a coupling on one pipe end) is a red IP dot like any open IP (OakBarn Brewery, 2026-11-24: "these should all be the red dot") */
+#ws.editing .gfx.ip.fit.lonely { outline: none; box-shadow: none; border-color: transparent; background: none; }
+#ws.editing .gfx.ip.fit.lonely > svg { display: none; }
+#ws.editing .gfx.ip.fit.lonely::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #e01b12; border: 2px solid #fff; box-shadow: 0 0 0 1px #000; pointer-events: auto; }
+#ws.editing .gfx.ip.fit.lonely:is(:hover, .sel)::before { width: 15px; height: 15px; margin: -9.5px 0 0 -9.5px; }
 #ws.editing .gfx.ip:not(.fit):not(.has-img):is(:hover, .sel)::before { display: none; }
 #ws.editing .gfx.ip:not(.fit):not(.has-img):hover { z-index: 40; }
 /* its Edit layout name tag (a Label not set to show) waits for the hover too, so the tags no longer pile up on top of the dots */
