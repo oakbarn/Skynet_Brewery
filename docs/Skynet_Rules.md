@@ -7203,7 +7203,23 @@ import.
 bottom with a manual ball valve: the Valve_Only Bundled Fitting, its valve picked when it is on a Tab). The stove is manual (a person
 turns it on and off), so it has no Device; its Heat Source is Electric or Gas. Both programs show the same Templates.
 
+19.12 **The OakBarn Stout Kettle: a 43 gallon skirted kettle** (OakBarn Brewery, 2026-11-24: "Create a Vessel Widget Has 2" Port upper
+Right and a Bottom Drain. 43 gallons Real Dimensions are 21 x 26 with 6" bottom Skirt and drain Has a sight Gauge on left with TC
+fittings"; "With sight gauge TCs"; "Name Vessel OakBarn Stout Kettle"). A Skynet Vessel Widget, **OakBarn_Stout_Kettle** (Skynet
+picture 249), drawn from his sketch at its real size, 21 in wide and 26 in tall (10 units = 1 in), with a line across marking the top
+of the 6 in bottom skirt. Gallons 43 (stored 162.77 L). Its IPs are built in, all facing forward: **Top Inlet** TC 2 at the upper Right
+(Stout Right High 2 in); the sight gauge's **Sight Gauge Top** and **Sight Gauge Bottom** TC ports on the Left (Stout Left High, Stout
+Left Low); a **Tangential** TC port at the Left wall (Stout Left Wall); the **Thermowell** TC 1.5 in the Center (Stout Center); the
+**Outlet** TC 1.5, the Bottom Drain centered in the skirt (Stout Skirt Drain). Its own picture box, so its port positions are named
+Stout .... **Sight Gauge Top** and **Sight Gauge Bottom** are two new vessel ports any vessel can use (Left or Right, High or Low); a
+Sight Glass fitting (Rule 5.32) or a pipe joins them.
+**OakBarn_MLT** (Skynet picture 250; OakBarn Brewery: "create Oakbarn MLT No Tangential, No 2 TCs for sight gauge and upper right
+sparge arm inlet is 1.5 TC") is a Mash Tun with the same body: no Tangential and no sight gauge; the upper Right port is a **Sparge**
+arm inlet, TC 1.5 (Stout Right High); the Thermowell and Bottom Drain are the same. Both programs show the same Templates and ports.
+
 ## Change log
+
+- 2026-11-24: Added Rule 19.12 (OakBarn Brewery: "Create a Vessel Widget Has 2" Port upper Right and a Bottom Drain. 43 gallons Real Dimensions are 21 x 26 with 6" bottom Skirt and drain Has a sight Gauge on left with TC fittings"; "With sight gauge TCs"; "Name Vessel OakBarn Stout Kettle"): the Skynet Vessel Widgets OakBarn_Stout_Kettle (Skynet picture 249) and OakBarn_MLT (picture 250; "create Oakbarn MLT No Tangential, No 2 TCs for sight gauge and upper right sparge arm inlet is 1.5 TC") with their Stout ... port positions, and two new vessel ports, Sight Gauge Top and Sight Gauge Bottom. Help 50 (and French), Widget Library. Checked against both programs: the BruControl Import's Build page uses the same Vessel Templates and ports; its Vessels interview does not look for sight gauges, so nothing else changes there.
 
 - 2026-11-24: Rule 5.37 notes (OakBarn Brewery: "I removed the elbow so these should all be the red dot and available to connect with the trace"; "Removed the Tee"; "just the red dot would match what we have rather than the red circle"): a pipe or hose end whose IP is deleted (an elbow, tee or Device) gets an open end (a coupling) at once, and older such ends get one when Edit layout opens; an open end shows in Edit layout as the small red IP dot (was a coupling ring, or a red circle when on no IP) and can be joined, traced and auto configured in the Zoom box. ("Scroll Bars in the Zoom Box when needed"): the Zoom box has scroll bars on its right and bottom edges when the zoomed Tab is bigger than it; the mouse wheel scrolls (Shift + wheel sideways). Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 

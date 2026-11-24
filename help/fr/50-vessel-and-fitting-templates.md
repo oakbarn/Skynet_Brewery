@@ -34,6 +34,8 @@ Les Templates Skynet viennent avec le panel, dans son dossier `templates`, et un
 
 Quatre Skynet Vessel Templates sont des **cuves de 5 gallons sur une cuisinière** (Règle Skynet 19.11) : **Kettle_5_Gal_Electric_Stove** et **Kettle_5_Gal_Gas_Stove** n'ont pas de vidange ; **Kettle_5_Gal_Electric_Stove_Low_Drain** et **Kettle_5_Gal_Gas_Stove_Low_Drain** ont une vidange basse à l'avant avec une vanne à bille manuelle (choisissez sa vanne quand elle est sur un Tab). La cuisinière s'allume et s'éteint à la main, elle n'a donc pas de Device.
 
+**OakBarn_Stout_Kettle** est une cuve de 43 gallons, 21 pouces de large et 26 pouces de haut, posée sur une jupe de 6 pouces en bas (la ligne en travers de l'image est le haut de la jupe). Elle a un port Tri-Clamp de 2 pouces en haut à droite, un indicateur de niveau à gauche avec un port Tri-Clamp en haut et en bas (**Sight Gauge Top** et **Sight Gauge Bottom**), un port Tri-Clamp sur la paroi gauche, un Thermowell au centre et une vidange par le fond centrée dans la jupe ; chaque port est un IP, prêt pour un tuyau. Reliez les deux ports de l'indicateur de niveau avec un raccord **Sight Glass**. Toute cuve peut utiliser les ports Sight Gauge Top et Bottom. **OakBarn_MLT** est une cuve de brassage (Mash Tun) avec le même corps, sans le port de la paroi gauche ni l'indicateur de niveau ; son port en haut à droite est une entrée de bras d'aspersion (Sparge) Tri-Clamp de 1,5 pouce. (Règle Skynet 19.12)
+
 Les boutons de la fenêtre d'un Template :
 
 - **✕** et **Cancel** : la ferment sans enregistrer.

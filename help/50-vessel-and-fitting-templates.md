@@ -34,6 +34,8 @@ Skynet Templates come with the panel, in its `templates` folder, and an update b
 
 Four Skynet Vessel Templates are **5 gallon kettles on a stove** (Skynet Rule 19.11): **Kettle_5_Gal_Electric_Stove** and **Kettle_5_Gal_Gas_Stove** have no drains; **Kettle_5_Gal_Electric_Stove_Low_Drain** and **Kettle_5_Gal_Gas_Stove_Low_Drain** have a Low Drain on the front with a manual ball valve (pick its valve when it is on a Tab). The stove is turned on and off by hand, so it has no Device.
 
+**OakBarn_Stout_Kettle** is a 43 gallon kettle, 21 inches wide and 26 inches tall, standing on a 6 inch bottom skirt (the line across the picture is the top of the skirt). It has a 2 inch Tri-Clamp port at the upper right, a sight gauge on the left with a Tri-Clamp port at its top and bottom (**Sight Gauge Top** and **Sight Gauge Bottom**), a Tri-Clamp port at the left wall, a Thermowell in the center and a Bottom Drain centered in the skirt; each port is an IP, ready for a pipe. Join the two sight gauge ports with a **Sight Glass** fitting. Any vessel can use the Sight Gauge Top and Bottom ports. **OakBarn_MLT** is a Mash Tun with the same body, without the left wall port or the sight gauge; its upper right port is a 1.5 inch Tri-Clamp Sparge arm inlet. (Skynet Rule 19.12)
+
 The buttons on a Template's pop-up:
 
 - **✕** and **Cancel**: close it without saving.

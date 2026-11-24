@@ -1,0 +1,30 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Mash Tun",
+  "image": "Images/Skynet/Vessels/Skynet_OakBarn_MLT.svg",
+  "units": "Metric",
+  "volume": 162.7728,
+  "size": [
+    230,
+    266
+  ],
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Stout Skirt Drain"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Stout Center"
+    },
+    "sparge": {
+      "installed": true,
+      "position": "Stout Right High"
+    }
+  },
+  "notes": "The OakBarn MLT, a Skynet Vessel Widget (OakBarn Brewery, 2026-11-24): the OakBarn Stout Kettle's 43 gallon body (21 in wide, 26 in tall, 6 in bottom skirt) with no Tangential and no sight gauge. A TC 1.5 Sparge Arm Inlet upper Right, a TC 1.5 Thermowell in the Center and a TC 1.5 Bottom Drain centered in the skirt. Its IPs are built in on the ports."
+}

@@ -248,6 +248,8 @@
   { "id": 245, "file": "Vessels/Vessel_Kettle_5_Gal_Electric_Stove_Low_Drain.svg" },
   { "id": 246, "file": "Vessels/Vessel_Kettle_5_Gal_Electric_Stove.svg" },
   { "id": 247, "file": "Vessels/Vessel_Kettle_5_Gal_Gas_Stove_Low_Drain.svg" },
-  { "id": 248, "file": "Vessels/Vessel_Kettle_5_Gal_Gas_Stove.svg" }
+  { "id": 248, "file": "Vessels/Vessel_Kettle_5_Gal_Gas_Stove.svg" },
+  { "id": 249, "file": "Vessels/Skynet_OakBarn_Stout_Kettle.svg" },
+  { "id": 250, "file": "Vessels/Skynet_OakBarn_MLT.svg" }
  ]
 }

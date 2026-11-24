@@ -1,0 +1,46 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Skynet_OakBarn_Stout_Kettle.svg",
+  "units": "Metric",
+  "volume": 162.7728,
+  "size": [
+    230,
+    266
+  ],
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Stout Skirt Drain"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Stout Center"
+    },
+    "topInlet": {
+      "installed": true,
+      "position": "Stout Right High 2 in",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Stout Left Wall"
+    },
+    "sightTop": {
+      "installed": true,
+      "position": "Stout Left High"
+    },
+    "sightBottom": {
+      "installed": true,
+      "position": "Stout Left Low"
+    }
+  },
+  "notes": "The OakBarn Stout Kettle, a Skynet Vessel Widget (OakBarn Brewery, 2026-11-24): a 43 gallon kettle, 21 in wide and 26 in tall with a 6 in bottom skirt. A TC 2 port upper Right; a sight gauge on the Left with TC ports at its Top and Bottom; a TC port at the Left wall (Tangential); a TC 1.5 Thermowell in the Center; a TC 1.5 Bottom Drain centered in the skirt. Its IPs are built in on the ports."
+}

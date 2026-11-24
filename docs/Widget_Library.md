@@ -447,6 +447,8 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 | Brew_Vessel_NPT_Temperature_Widget | Same, both NPT 1/2 FPT |
 | Brew_Vessel_TC_Temperature_Tangential_Widget | + Tangential Left 4 in (faces forward) |
 | Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget | + Heating element port Right 6 in (TC 2, a mark, no IP) |
+| OakBarn_Stout_Kettle (43 gal, 21 x 26 in with a 6 in bottom skirt, 230 x 266; Rule 19.12) | Outlet Stout Skirt Drain (Bottom Drain centered in the skirt), Thermowell Stout Center, Top Inlet Stout Right High 2 in (TC 2), Sight Gauge Top Stout Left High, Sight Gauge Bottom Stout Left Low, Tangential Stout Left Wall |
+| OakBarn_MLT (Mash Tun, the Stout Kettle's body; Rule 19.12) | Outlet Stout Skirt Drain, Thermowell Stout Center, Sparge Stout Right High (TC 1.5 sparge arm inlet); no Tangential, no sight gauge |
 | Brew_Vessel_Big_Mac_Widget ("the fat one", 291 x 291) | Outlet Fat CB 1 in, Thermowell Fat Center 10 in, Tangential Fat Left 4 in, Sparge Fat Left 11 in (TC 2), Element Fat Right 6 in (TC 2) |
 
 ### Other Skynet Vessel Templates
