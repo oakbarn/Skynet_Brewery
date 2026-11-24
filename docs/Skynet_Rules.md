@@ -2775,14 +2775,14 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
 - **🔍 Zoom box** (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for
   200 pixel square where Join area is zoomed inside the Dialog"; he picked A, the Z key, as Ctrl + Click already opens Properties,
   Rule 2.9): in Edit layout, **Z** (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
-  screen pixels around the mouse **2 times bigger**. *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
+  screen pixels around the mouse **4 times bigger** (on a smaller Tab area the box shrinks to fit). *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
   Dialog moves now. It needs to stay fixed and move the joins together inside the Dialog"; "z does not work like the esc. Just
   change the text that you use the esc button to close and or have a close button upper right corner"):* the box **stays where it
   opened** (on the side away from the spot it shows) and keeps showing that same spot. **Work right in it:** every press, drag,
-  click and double-click in the box goes to the Tab at the same spot, 2 times finer, so a pipe end or an item is dragged onto an IP
+  click and double-click in the box goes to the Tab at the same spot, 4 times finer, so a pipe end or an item is dragged onto an IP
   inside the box (the grab pop-up, snapping and joins work as on the Tab). **Esc** or its red **✕** (upper right) closes it, and
   so does leaving Edit layout; its text says so. *Changed (OakBarn Brewery, 2026-11-23: "Try zoom x 2"; "I cannot grab the pipe
-  inside the dialog after I release it"):* 2 times, not 3; a pipe can be grabbed and moved in the box again and again.
+  inside the dialog after I release it"):* 4 times ("let's try 4 x"; was 3, then 2); a pipe can be grabbed and moved in the box again and again.
   *Added (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
   would be red line. The a button to autoconfigure"; he picked "move the first onto the second": "has to trace back so no breaks
   in Ips"):* **only in the Zoom box**, a double-click on an IP starts a red **trace** and a click on another IP ends it (a
@@ -2790,7 +2790,8 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and traces the move back through what is joined behind it so no join breaks (Fritz: "the tee below the elbow ... would have to
   move right shortening the right pipe and lengthen the left pipe on the tee. The pipe to the elbow would have to shorten"): a
   straight pipe takes the part of the move along its own line by getting longer or shorter and passes on only the part across it
-  to what is on its other end (fitting, valve, pump, an IP sitting right on another), and so on back; a hose just bends. When that
+  to what is on its other end (fitting, valve, pump, an IP sitting right on another), and so on back; a pipe with a bend in it takes
+  the whole move at its first bend (2026-11-24); a hose just bends. When that
   would break a join (it reaches the second IP, a vessel or something locked, a pipe gets too short, or two ways back disagree),
   the second IP is tried onto the first. If neither works, nothing moves and one toast says it can't be done automatically without
   breaking a join or adding a pipe, hose or fitting, so do it by hand (delete or add pipes, fittings or joins). Nothing is ever

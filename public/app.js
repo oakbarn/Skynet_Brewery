@@ -5205,17 +5205,18 @@ document.addEventListener('keydown', ev => {
 // 🔍 Zoom box (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for 200 pixel
 // square where Join area is zoomed inside the Dialog"; then "be able to move within the dialog. Dialog moves now. It needs to stay
 // fixed and move the joins together inside the Dialog"; Rule 5.37): in Edit layout, Z (not in a text box) opens a box that shows the
-// 200 screen pixels around the mouse 2 times bigger. It stays where it opened, on the same spot of the Tab. Work inside it as on the
-// Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 2 times finer, so a pipe end or an item
+// 200 screen pixels around the mouse 4 times bigger. It stays where it opened, on the same spot of the Tab. Work inside it as on the
+// Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 4 times finer, so a pipe end or an item
 // can be dragged onto an IP right there. Esc or its ✕ (upper right) closes it, and so does leaving Edit layout (Z again too). The copy of the Tab is drawn in a
 // closed-off part of the page (a shadow root), so nothing else on the panel ever finds it.
-const ZOOM_SRC = 200, ZOOM_X = 2;      // OakBarn Brewery, 2026-11-23: "Try zoom x 2"
+const ZOOM_SRC = 200, ZOOM_X = 4;      // OakBarn Brewery, 2026-11-23: "Try zoom x 2", then "let's try 4 x"
 let zoomBox = null, zoomMouse = null;
 function zoomOpen() {
   const ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1;
   const [mx, my] = zoomMouse || [r.left + r.width / 2, r.top + r.height / 2];
   const host = h('div', { class: 'zoomBox' }), root = host.attachShadow({ mode: 'open' });
-  const size = ZOOM_SRC * ZOOM_X;
+  // 200 screen pixels 4 times bigger is 800 px: on a smaller Tab area the box shrinks to fit (and shows a little less around the mouse)
+  const fit = ($('#wsScroll') || ws).getBoundingClientRect(), size = Math.max(200, Math.round(Math.min(ZOOM_SRC * ZOOM_X, fit.height - 60, fit.width / 2 - 24)));
   root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; cursor: crosshair; touch-action: none; }
     .zf > .zc { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
     .zt { display: flex; flex-wrap: wrap; box-sizing: border-box; width: ${size}px; align-items: center; gap: 4px 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
@@ -5324,43 +5325,56 @@ function zoomMover(id) {           // what moves when this IP moves: an open pip
   return isUnit(u) ? u : it;       // an IP of a Skynet Fitting (an elbow, a tee ...): the whole fitting
 }
 const zoomParts = it => [it, ...draft.graphics.filter(g => g.kind === 'ip' && g.attachTo && g.attachTo === it.id)];     // a fitting and the IPs on it
+// how each point of a pipe moves when one end moves by v (OakBarn Brewery, 2026-11-24, his Tap water case: a pipe with a bend in it
+// takes the whole move at its first bend). Each piece keeps its direction: the next point moves only across the piece (a straight
+// pipe's far end gets the part across its line), or, when a bend follows, only along the next piece, which takes it up. A hose bends.
+function zoomPipeMoves(p, k, v, zero) {
+  const pts = p.points, n = pts.length, out = pts.map(() => [0, 0]), at = j => k === 'from' ? j : n - 1 - j;
+  out[at(0)] = v;
+  if (p.hose) return out;
+  const dir = (i, j) => { const x = pts[j][0] - pts[i][0], y = pts[j][1] - pts[i][1], L = Math.hypot(x, y) || 1; return [x / L, y / L]; };
+  let cur = v;
+  for (let j = 0; j < n - 1 && !zero(cur); j++) {
+    const d = dir(at(j), at(j + 1)), e = j + 2 < n ? dir(at(j + 1), at(j + 2)) : null, cross = e ? d[0] * e[1] - d[1] * e[0] : 0;
+    if (e && Math.abs(cross) > 0.01) { const bb = (d[0] * cur[1] - d[1] * cur[0]) / cross; cur = [bb * e[0], bb * e[1]]; }     // a bend next: only along the next piece
+    else { const t = cur[0] * d[0] + cur[1] * d[1]; cur = [cur[0] - t * d[0], cur[1] - t * d[1]]; }                                 // only across this piece
+    out[at(j + 1)] = cur;
+  }
+  return out;
+}
 function zoomTraceBack(start, d, endItem) {
-  const moves = new Map(), ends = new Map(), todo = [[start, d]], name = it => it?.label || it?.name || it?.id || 'an IP';
+  const moves = new Map(), ends = new Map(), todo = [[start, d, []]], name = it => it?.label || it?.name || it?.id || 'an IP';
   const zero = v => Math.abs(v[0]) < 0.5 && Math.abs(v[1]) < 0.5, same = (u, v) => zero([u[0] - v[0], u[1] - v[1]]);
   const all = allIps(wsName).map(q => ({ id: q.id, c: ipPoint(q.id, wsName) })).filter(q => q.c);
   const isCoupling = it => it.kind === 'ip' && it.fitting === 'coupling';
-  const endMove = (p, k, v) => { const e = ends.get(p) || { from: [0, 0], to: [0, 0] }; if (!zero(e[k]) && !same(e[k], v)) return false; e[k] = v; ends.set(p, e); return true; };
+  const via = path => path.length ? ` (by way of ${path.slice(-4).map(name).join(', ')})` : '';
   while (todo.length) {
-    const [it, v] = todo.shift();
+    const [it, v, path] = todo.shift();
     if (!it || zero(v)) continue;
-    if (moves.has(it)) { if (!same(moves.get(it), v)) return { fail: `two ways back to ${name(it)} would move it differently (a loop)` }; continue; }
-    if (it === endItem) return { fail: `it is joined back to ${name(it)} through its pipes, so that would have to move too` };
-    if ((it.kind === 'vessel' && !isUnit(it)) || (bundleOf(it) && !isUnit(bundleOf(it)))) return { fail: `the trace back reaches ${name(it)}, part of a vessel, which Auto configure does not move` };
-    if (it.locked || profileFrozen(it)) return { fail: `the trace back reaches ${name(it)}, which is locked` };
+    if (moves.has(it)) { if (!same(moves.get(it), v)) return { fail: `two ways back to ${name(it)} would move it differently (a loop)${via(path)}` }; continue; }
+    if (it === endItem) return { fail: path.length ? `it is joined back to ${name(it)} through its pipes, so that would have to move too${via(path)}` : `both IPs are on ${name(it)}` };
+    if ((it.kind === 'vessel' && !isUnit(it)) || (bundleOf(it) && !isUnit(bundleOf(it)))) return { fail: `the trace back reaches ${name(it)}, part of a vessel, which Auto configure does not move${via(path)}` };
+    if (it.locked || profileFrozen(it)) return { fail: `the trace back reaches ${name(it)}, which is locked${via(path)}` };
     moves.set(it, v);
     const joins = isCoupling(it) ? pipesOn(it.id, wsName).map(p => ({ p, k: p.from === it.id ? 'from' : 'to' })) : zoomParts(it).flatMap(grabJoins);
     for (const { p, k } of joins) {
-      const o = k === 'from' ? 'to' : 'from', pts = p.points || [];
-      if (ends.get(p) && same(ends.get(p)[k], v)) continue;       // the pipe the move came along
-      if (!endMove(p, k, v)) return { fail: `${name(p)} would be pulled two ways` };
-      let far = v;
-      if (p.hose) far = [0, 0];                       // a hose bends
-      else if (pts.length === 2) {                     // a straight pipe takes the part along its line
-        const ax = pts[1][0] - pts[0][0], ay = pts[1][1] - pts[0][1], L = Math.hypot(ax, ay) || 1, along = (v[0] * ax + v[1] * ay) / L;
-        far = [v[0] - along * ax / L, v[1] - along * ay / L];
-      }
-      if (zero(far)) continue;
-      if (!endMove(p, o, far)) return { fail: `${name(p)} would be pulled two ways` };
-      if (p[o]) todo.push([zoomMover(p[o]), far]);
+      const o = k === 'from' ? 'to' : 'from', n = (p.points || []).length, iK = k === 'from' ? 0 : n - 1, iO = n - 1 - iK, had = ends.get(p);
+      if (had && same(had[iK], v)) continue;       // the pipe the move came along
+      if (had) return { fail: `${name(p)} would be pulled two ways${via(path)}` };
+      if (p.locked) return { fail: `the trace back reaches ${name(p)}, which is locked${via(path)}` };
+      const pm = zoomPipeMoves(p, k, v, zero); ends.set(p, pm);
+      if (!zero(pm[iO]) && p[o]) todo.push([zoomMover(p[o]), pm[iO], [...path, it, p]]);
     }
     const mine = isCoupling(it) ? [it.id] : zoomParts(it).flatMap(grabIpIds);       // an IP sitting right on another one (a fitting on a fitting): it comes too
-    for (const id of mine) { const c = ipPoint(id, wsName); if (c) for (const q of all) if (!mine.includes(q.id) && Math.hypot(q.c[0] - c[0], q.c[1] - c[1]) <= 1) todo.push([zoomMover(q.id), v]); }
+    for (const id of mine) { const c = ipPoint(id, wsName); if (c) for (const q of all) if (!mine.includes(q.id) && Math.hypot(q.c[0] - c[0], q.c[1] - c[1]) <= 1) todo.push([zoomMover(q.id), v, [...path, it]]); }
   }
-  for (const [p, e] of ends) {                       // a straight pipe must keep a length and its direction
-    const pts = p.points; if (p.hose || pts.length !== 2) continue;
-    const a = [pts[0][0] + e.from[0], pts[0][1] + e.from[1]], b = [pts[1][0] + e.to[0], pts[1][1] + e.to[1]];
-    const ox = pts[1][0] - pts[0][0], oy = pts[1][1] - pts[0][1], nx = b[0] - a[0], ny = b[1] - a[1];
-    if (Math.hypot(nx, ny) < 8 || ox * nx + oy * ny <= 0) return { fail: `${name(p)} would get too short` };
+  for (const [p, pm] of ends) {                      // every piece of a pipe must keep a length and its direction
+    if (p.hose) continue;
+    const pts = p.points;
+    for (let i = 0; i + 1 < pts.length; i++) {
+      const ox = pts[i + 1][0] - pts[i][0], oy = pts[i + 1][1] - pts[i][1], nx = ox + pm[i + 1][0] - pm[i][0], ny = oy + pm[i + 1][1] - pm[i][1];
+      if (Math.hypot(nx, ny) < 8 || ox * nx + oy * ny <= 0) return { fail: `${name(p)} would get too short` };
+    }
   }
   return { moves, ends };
 }
@@ -5371,23 +5385,20 @@ function zoomAuto() {
   // to find which place back would work without breaking joins or adding pipe or hose or fitting. If it required that, just abandon
   // fix and say it cannot be done automatically and has to be done manually")
   const ma = zoomMover(tr.a.id), mb = zoomMover(tr.b.id);
+  if (ma && ma === mb) return toast(`🔗 ${tr.a.label} and ${tr.b.label} are both on ${ma.label || ma.name || ma.id}. Trace from an IP on one thing to an IP on another.`, true, 7000);
   const one = ma ? zoomTraceBack(ma, [b[0] - a[0], b[1] - a[1]], mb) : { fail: `${tr.a.label} can't be moved` };
   const two = one.fail && mb ? zoomTraceBack(mb, [a[0] - b[0], a[1] - b[1]], ma) : null;
   const t = one.fail ? two : one;
-  if (!t || t.fail) return toast(`🔗 This can't be done automatically without breaking a join or adding a pipe, hose or fitting (${one.fail}). Do it by hand: delete or add pipes, fittings or joins.`, true, 10000);
+  if (!t || t.fail) return toast(`🔗 This can't be done automatically without breaking a join or adding a pipe, hose or fitting (${one.fail}${two?.fail ? `; the other way round, ${two.fail}` : ''}). Do it by hand: delete or add pipes, fittings or joins.`, true, 10000);
   pushUndo(`auto configure ${tr.a.label}`);
   const ids = new Map([...t.moves].map(([it, v]) => [it.id || it.name, v]));
   for (const [it, v] of t.moves) { it.x = (it.x || 0) + v[0]; it.y = (it.y || 0) + v[1]; }
   for (const g of draft.graphics) if (g.attachTo && ids.has(g.attachTo) && !t.moves.has(g)) { const v = ids.get(g.attachTo); g.x = (g.x || 0) + v[0]; g.y = (g.y || 0) + v[1]; }      // IPs that ride on a moved fitting
-  for (const [p, e] of t.ends) {
-    const n = p.points.length;
-    if (!p.hose && n > 2) { const v = e.from[0] || e.from[1] ? e.from : e.to; p.points = p.points.map(q => [q[0] + v[0], q[1] + v[1]]); continue; }
-    p.points[0] = [p.points[0][0] + e.from[0], p.points[0][1] + e.from[1]]; p.points[n - 1] = [p.points[n - 1][0] + e.to[0], p.points[n - 1][1] + e.to[1]];
-  }
+  for (const [p, pm] of t.ends) p.points = p.points.map((q, i) => [q[0] + pm[i][0], q[1] + pm[i][1]]);
   rejoinEnds(new Set([tr.a.id, tr.b.id]));            // an open pipe end now on the other IP joins it
   renderWs();
   const n = t.moves.size - 1, [m1, m2] = t === one ? [tr.a.label, tr.b.label] : [tr.b.label, tr.a.label];
-  toast(`🔗 ${m1} moved onto ${m2} and joined it${n ? `; ${n} joined thing${n > 1 ? 's' : ''} behind it moved along and their straight pipes got longer or shorter` : ''}. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000);
+  toast(`🔗 ${m1} moved onto ${m2} and joined it${n ? `; ${n} joined thing${n > 1 ? 's' : ''} behind it moved along and their pipes got longer or shorter` : ''}. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000);
   zoomTraceEnd(); zoomDraw(true);
 }
 function zoomDraw(fresh = false) {

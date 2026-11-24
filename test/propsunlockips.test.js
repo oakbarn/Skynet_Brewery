@@ -33,8 +33,8 @@ assert.match(fn, /grabWith\.add\(it\.id \|\| it\.name\); w\.disabled = b\.disabl
 assert.match(fn, /const riders = pipe \? \[\] : lockedRiders\(it\)/, 'greyed out when a locked pipe or fitting would move with it');
 assert.match(fn, /'↔ Move with pipes'/);
 console.log('move with pipes ok');
-// 🔍 Zoom box (OakBarn Brewery, 2026-11-23, picked A: the Z key): 200 screen pixels around the mouse, 2 times bigger, look only
-assert.match(app, /const ZOOM_SRC = 200, ZOOM_X = 2;/);
+// 🔍 Zoom box (OakBarn Brewery, 2026-11-23, picked A: the Z key): 200 screen pixels around the mouse, 4 times bigger, look only
+assert.match(app, /const ZOOM_SRC = 200, ZOOM_X = 4;/);
 assert.match(app, /if \(zb\.down && !zb\.down\.isConnected\) zb\.down = under;/, 'a pipe drawn again on press still gets the drag (grab it again and again)');
 assert.match(app, /host\.attachShadow\(\{ mode: 'open' \}\)/, 'its copy of the Tab is closed off, so nothing else finds it');
 assert.match(app, /ev\.key\.toLowerCase\(\) !== 'z'\) return;\n[^\n]*closest\?\.\('input, textarea, select, \[contenteditable="true"\], dialog'\)[^\n]*\n  ev\.preventDefault\(\); zoomBox \? zoomClose\(\) : zoomOpen\(\);/, 'Z opens and closes it, never in a text box');
@@ -52,7 +52,8 @@ assert.match(app, /const one = ma \? zoomTraceBack\(ma, \[b\[0\] - a\[0\], b\[1\
 assert.match(app, /const two = one\.fail && mb \? zoomTraceBack\(mb, \[a\[0\] - b\[0\], a\[1\] - b\[1\]\], ma\) : null;/, 'then the other way round');
 assert.match(app, /can't be done automatically without breaking a join or adding a pipe, hose or fitting/, 'else it says to do it by hand');
 assert.match(app, /if \(it === endItem\) return \{ fail:/, 'never moves both ends');
-assert.match(app, /far = \[v\[0\] - along \* ax \/ L, v\[1\] - along \* ay \/ L\];/, 'a straight pipe takes the part along its line');
+assert.match(app, /function zoomPipeMoves\(p, k, v, zero\)/, 'a pipe takes the part along its line, a bent pipe takes it at its bend');
+assert.match(app, /if \(ma && ma === mb\) return toast\(/, 'two IPs on one thing: says so');
 assert.match(app, /pushUndo\(`auto configure \$\{tr\.a\.label\}`\);/, 'Put back undoes it');
 assert.match(app, /if \(zoomBox && ev\.key === 'Escape'\) \{ if \(zoomBox\.trace\) zoomTraceEnd\(\); else zoomClose\(\); return; \}/, 'Esc stops the trace first');
 console.log('zoom trace ok');
