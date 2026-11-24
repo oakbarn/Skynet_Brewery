@@ -1677,7 +1677,8 @@ K, L, M, N, O, P, Q, U, W, X, Y. **Never:** D, E, F (Chrome and Edge), F, E, V, 
 overlay), nor Alt + Tab, Space, Esc, F1 to F10, Home or the arrows (Alt + Left / Right are the browser's Back and Forward). **Shift + Alt + letter** is free on all of them except T and I
 (Chrome and Edge). **Shift + Alt + arrow** is free too (OakBarn Brewery, 2026-11-24: "Shift + Alt + arrow"), outside text boxes only. **Alt + number is never used** (OakBarn Brewery, 2026-11-24: "What about alt + Number"): Chromium and Firefox on
 Linux and the Pi switch browser tabs with Alt + 1 to 9, and on Windows Alt + number pad digits type characters (Alt + 0176 = °).
-**Shift + Alt + number** is allowed, outside text boxes only. **Ctrl + Alt + key is never used** (OakBarn Brewery, 2026-11-24: "any conflicts with CTRL + Alt + Key"): on
+**Shift + Alt + number** is allowed, outside text boxes only. **Alt + ` (the ~ key) is never used** (OakBarn Brewery, 2026-11-24: "alt + tilde"): GNOME switches
+windows with it, on a Mac Option + ` types accents, and the key is ² on a French keyboard and ^ on a German one. **Ctrl + Alt + key is never used** (OakBarn Brewery, 2026-11-24: "any conflicts with CTRL + Alt + Key"): on
 European Windows keyboards Ctrl + Alt is AltGr and types characters (€, @), Linux and the Pi keep many (terminal, lock screen,
 desktops), and on a Mac Control + Option is the VoiceOver key. The key is read by its place (`ev.code`), so a Mac's Option + letter, which types a symbol, works too. In use: Alt + P
 (Picture picker, admins). Never while typing in a box, and never a key Rule 2.32 keeps.
