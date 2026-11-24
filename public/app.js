@@ -4776,7 +4776,9 @@ function rejoinEnds(only = null, one = null, end = null) {
   let n = 0;
   for (const p of draft.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2 && (!one || g === one))) {
     for (const k of end ? [end] : ['from', 'to']) {
-      const own = p[k] && ownCoupling(p[k], p); if (!own) continue;
+      // a plain end (no coupling, Rule 5.37) is an open end too (OakBarn Brewery, 2026-11-24: "Pipe end needs the red dot, cannot join
+      // a valve to a pipe"): an IP dropped on it joins it
+      const pk = k === 'from' ? 'plainFrom' : 'plainTo', own = p[k] ? ownCoupling(p[k], p) : p[pk] ? { plain: true } : null; if (!own) continue;
       const pts = p.points, i = k === 'from' ? 0 : pts.length - 1, j = k === 'from' ? 1 : pts.length - 2, e = pts[i], other = k === 'from' ? p.to : p.from;
       const near = allIps(p.workspace).filter(q => q.id !== own.id && q.id !== other && (!only || only.has(q.id))).map(q => ({ id: q.id, c: q.c || ipPoint(q.id, p.workspace) }))
         .filter(q => q.c && Math.hypot(q.c[0] - e[0], q.c[1] - e[1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - e[0], a.c[1] - e[1]) - Math.hypot(b.c[0] - e[0], b.c[1] - e[1]));
@@ -4790,7 +4792,7 @@ function rejoinEnds(only = null, one = null, end = null) {
           if (!g || isFitting(g) || g.attachTo || g.locked || pipesOn(g.id, p.workspace).length) continue;
           g.x = (g.x || 0) + e[0] - q.c[0]; g.y = (g.y || 0) + e[1] - q.c[1];
         }
-        p[k] = q.id; draft.graphics = draft.graphics.filter(x => x !== own); n++; takePumpSpots();
+        p[k] = q.id; delete p[pk]; draft.graphics = draft.graphics.filter(x => x !== own); n++; takePumpSpots();
         joinIpType(draft, p, k);      // the end just joined takes the IP Type of the pipe end already there (Rule 5.40)
         break;
       }
@@ -4907,6 +4909,27 @@ function rejoinLetGo(it) {
     p[k] = id; draft.graphics = draft.graphics.filter(x => x !== g); n++;
   }
   return n;
+}
+// An item with no pipes on it, let go with one of its IPs within REJOIN_PX of an open pipe end (a red dot: a plain end or an open
+// end's coupling), slides the last few pixels so that IP sits right on the end; rejoinEnds then joins it (OakBarn Brewery, 2026-11-24:
+// "Pipe end needs the red dot, cannot join a valve to a pipe"; Rule 5.37). Returns true when it moved.
+function snapOpenEnd(it) {
+  if (!it || !draft || it.locked || grabJoins(it).length) return false;
+  if (it.kind && it.kind !== 'ip') return false;
+  const ids = grabIpIds(it); if (!ids.length) return false;
+  let best = null;
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace && (g.points || []).length >= 2 && !g.direct)) for (const k of ['from', 'to']) {
+    if (!(p[k] ? ownCoupling(p[k], p) : p[k === 'from' ? 'plainFrom' : 'plainTo'])) continue;
+    const e = k === 'from' ? p.points[0] : p.points[p.points.length - 1];
+    for (const x of ids) {
+      const c = ipPoint(x, it.workspace); if (!c) continue;
+      const d = Math.hypot(c[0] - e[0], c[1] - e[1]);
+      if (d <= REJOIN_PX && (!best || d < best.d)) best = { d, dx: e[0] - c[0], dy: e[1] - c[1] };
+    }
+  }
+  if (!best || best.d < 0.01) return false;
+  it.x = Math.round(((+it.x || 0) + best.dx) * 100) / 100; it.y = Math.round(((+it.y || 0) + best.dy) * 100) / 100;
+  return true;
 }
 // A Pump with no pipes on it always has free IPs (OakBarn Brewery, 2026-11-19: "A Pump with No attached Pipes always have free IPs";
 // "assign inlet outlet IPs one of the 8 each"; Rule 5.37): a new pump put where another one let go of its pipes takes them, whichever
@@ -5181,6 +5204,10 @@ function renderPipes() {
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace) && !p.plainFrom) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
       if (!ipPoint(p.to, p.workspace) && !isQdHose(p) && !p.plainTo) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
+      // a plain pipe end shows the small red IP dot (OakBarn Brewery, 2026-11-24: "Pipe end needs the red dot, cannot join a valve to a
+      // pipe"; Rule 5.20): it is open, and an IP of a valve, pump or fitting dropped on it joins it
+      // (a plain end that can be dragged gets it on its handle, below)
+      for (const [plain, i] of [[p.plainFrom && !p.from, 0], [p.plainTo && !p.to, p.points.length - 1]]) if (plain && (p.locked || !endMoves(p, i))) g.append(mk('circle', { class: 'plainDot', cx: p.points[i][0], cy: p.points[i][1], r: 5.5 }));
     }
     // the free end of a Quick Disconnect hose can be grabbed at any time (Rule 5.28): right mouse button, or a finger
     // and so can a hose end whose IP Type is Quick Disconnect, one end at a time (Rule 5.40)
@@ -5199,7 +5226,8 @@ function renderPipes() {
       // "Hose also need to be Redrawn after its IPs are unlocked", Rule 5.37)
       if (!p.locked && (p.points || []).length > 1) (p.points || []).forEach((q, i) => {
         if (!(i > 0 && i < p.points.length - 1 && p.hose) && !endMoves(p, i)) return;
-        g.append(mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }));
+        const plain = i === 0 ? p.plainFrom && !p.from : i === p.points.length - 1 && p.plainTo && !p.to;      // a plain end's handle is its red dot
+        g.append(mk('circle', { class: plain ? 'handle plainDot' : 'handle', cx: q[0], cy: q[1], r: plain ? 5.5 : 6, 'data-gid': p.id, 'data-pi': i }));
       });
     }
     const own = layers.get(p.id); if (own) own.append(g); else { const n = pipeLayer(p.id); n.append(g); mine.push(n); }      // in its own place in the Layer Order (Rule 1.29)
@@ -5903,8 +5931,9 @@ window.addEventListener('pointerup', () => {
   if (drag?.mode === 'resize' && drag.moved && isSized(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
-  if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)), took = ids.size && freeIpsTake(drag.item), n = ids.size ? rejoinLetGo(drag.item) + rejoinEnds(ids) : 0; if (n || took) renderWs(); if (took && n) toast(`🔗 ${lockName(drag.item)} joined ${n} open pipe end${n > 1 ? 's' : ''} where the last one let go. ↩ Put back (Ctrl+Z) undoes it.`); }    // its IP dropped on an open pipe end joins it (Rule 5.37)
-  if (drag?.mode === 'move' && drag.moved) {
+  let endJoined = 0;
+  if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)), took = ids.size && freeIpsTake(drag.item), snap = ids.size && !took && snapOpenEnd(drag.item), n = ids.size ? rejoinLetGo(drag.item) + rejoinEnds(ids) : 0; endJoined = n; if (n || took || snap) renderWs(); if ((took || snap) && n) toast(`🔗 ${lockName(drag.item)} joined ${n} open pipe end${n > 1 ? 's' : ''}${took ? ' where the last one let go' : ''}. ↩ Put back (Ctrl+Z) undoes it.`); }    // its IP dropped on an open pipe end (a red dot) joins it (Rule 5.37)
+  if (drag?.mode === 'move' && drag.moved && !endJoined) {
     const j = ipOnIpJoin(drag.item);      // its IP dropped right on another IP: joined IP to IP (Rule 5.26)
     if (j) { renderWs(); toast(`🔗 ${lockName(drag.item)} joined ${j} IP to IP. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000); }
     else { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26

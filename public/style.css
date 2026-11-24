@@ -337,6 +337,9 @@ div.zoomBox { pointer-events: auto; }
 #ws .gfx.ip.devip { font-size: 8px; z-index: 3; }
 #ws.editing .gfx.ip.devip { cursor: crosshair; }
 .pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
+.pipes .plainDot { fill: #e01b12; stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 0.6px #000) drop-shadow(0 0 0.6px #000); }
+.pipes circle.plainDot:not(.handle) { pointer-events: none; }
+.pipes .handle.plainDot:hover { r: 7.5; }
 /* IP widget fittings: tee, elbows, cross, manual valve */
 #ws .gfx.ip.fit { border: none; background: none; border-radius: 0; box-shadow: none; }
 #ws .gfx.ip.fit svg { width: 100%; height: 100%; overflow: visible; }

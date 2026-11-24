@@ -348,3 +348,15 @@ test('every note (not a red error) stays 3 seconds', async () => {
   assert.match(app, /const NOTE_MS = 3000;/);
   assert.match(app, /setTimeout\(\(\) => t\.className = '', bad \? ms \|\| 5000 : NOTE_MS\)/);
 });
+
+// OakBarn Brewery, 2026-11-24: "Pipe end needs the red dot, cannot join a valve to a pipe" (Rule 5.37)
+test('a plain pipe end shows the red dot, and an IP dropped near it joins it', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /class: plain \? 'handle plainDot' : 'handle'/, 'the plain end handle is a red dot');
+  assert.match(app, /own = p\[k\] \? ownCoupling\(p\[k\], p\) : p\[pk\] \? \{ plain: true \} : null;/, 'rejoinEnds takes a plain end');
+  assert.match(app, /function snapOpenEnd\(it\)/);
+  assert.match(app, /if \(drag\?\.mode === 'move' && drag\.moved && !endJoined\) \{/, 'not cut into a pipe once joined');
+  const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+  assert.match(css, /\.pipes \.plainDot \{ fill: #e01b12;/);
+});
