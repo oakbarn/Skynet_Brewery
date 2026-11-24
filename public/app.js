@@ -284,10 +284,10 @@ function savedPop(what) {
   t.replaceChildren(h('b', {}, '✔ Saved'), ...(what && what !== 'Saved' ? [h('span', {}, what)] : []));
   t.className = 'show ok'; clearTimeout(t._t); t._t = setTimeout(() => t.className = '', SAVED_MS);
 }
-// Every note (not a red error) stays 3 seconds, then goes (OakBarn Brewery, 2026-11-24: "All nanny pop-ups 3 seconds"; Rule 2.74):
-// a time asked for by the caller is used only for a red error note
-const NOTE_MS = 3000;
-function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); raiseOnTop(t); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? ms || 5000 : NOTE_MS); }
+// Every note, blue or red, stays 2 seconds, then goes (OakBarn Brewery, 2026-11-24: "All nanny pop-ups 3 seconds", then "Change Blue
+// and Red Nanny to 2 seconds"; Rule 2.74): a time asked for by the caller is not used
+const NOTE_MS = 2000;
+function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); raiseOnTop(t); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', NOTE_MS); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 // Rule 2.35 (Fritz, 2026-11-04): a phone or tablet is for running the brewery, not for editing or building. On one, an admin
 // works as an operator: the Schema, Processes (Start / Stop) and the buttons on the Tabs work; Edit layout, Properties and the

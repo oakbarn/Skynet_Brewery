@@ -343,11 +343,11 @@ test('the deleted ... Put back note goes after 3 seconds', async () => {
 });
 
 // OakBarn Brewery, 2026-11-24: "All nanny pop-ups 3 seconds" (Rule 2.74)
-test('every note (not a red error) stays 3 seconds', async () => {
+test('every note, blue or red, stays 2 seconds', async () => {
   const fs = await import('node:fs');
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
-  assert.match(app, /const NOTE_MS = 3000;/);
-  assert.match(app, /setTimeout\(\(\) => t\.className = '', bad \? ms \|\| 5000 : NOTE_MS\)/);
+  assert.match(app, /const NOTE_MS = 2000;/, 'changed from 3 to 2 seconds, red too ("Change Blue and Red Nanny to 2 seconds")');
+  assert.match(app, /setTimeout\(\(\) => t\.className = '', NOTE_MS\); \}/);
 });
 
 // OakBarn Brewery, 2026-11-24: "Pipe end needs the red dot, cannot join a valve to a pipe" (Rule 5.37)
