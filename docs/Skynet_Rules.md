@@ -2825,6 +2825,9 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   inside the box (the grab pop-up, snapping and joins work as on the Tab). **Esc** or its red **✕** (upper right) closes it, and
   so does leaving Edit layout; its text says so. *Changed (OakBarn Brewery, 2026-11-23: "Try zoom x 2"; "I cannot grab the pipe
   inside the dialog after I release it"):* 3 times ("let's try 4 x", then 2026-11-24 "Back to 3 x"; was 3, then 2, then 4); a pipe can be grabbed and moved in the box again and again.
+  *Added (OakBarn Brewery, 2026-11-24: "I want to be able to move the Inside of the scroll pattern to a different part of the whole
+  manifold so when I get near an edge with the left mouse click held, it scrolls"):* with a mouse button held within 28 pixels of
+  an edge of the box, the view moves that way (8 box pixels a frame, up to the edge of the Tab), and what is being dragged goes along.
   *Added (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
   would be red line. The a button to autoconfigure"; he picked "move the first onto the second": "has to trace back so no breaks
   in Ips"):* **only in the Zoom box**, a double-click on an IP starts a red **trace** and a click on another IP ends it (a
@@ -2872,6 +2875,9 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   pixels of an IP, that end joins it at once (only that end; the other stays as it is); anywhere else it stays open. Skynet does
   this in the Background and needs no user input. Nothing else changes: an end still joined, a 🔒 locked pipe or hose, and an end
   whose IP is 🔒 locked (No Unlock too, Rule 2.12) do not move. ↩ Put back (Ctrl+Z) undoes each drag; Save layout keeps it.
+  *Added (OakBarn Brewery, 2026-11-23: "Tried to grab this and it ask me to unlock? It is not connected"):* an end with a **red ring**
+  (on no IP, because what it was joined to is gone) is a let-go end too: it can be grabbed (no pop-up), it gets its coupling when
+  grabbed, and dropped on an IP it joins it. Fittings still win (Rule 5.20).
   **Both programs:** the BruControl Import's Build page is the Panel's Edit layout, so it works the same there.
 - **Deleting a pipe or hose takes its own IPs with it** (OakBarn Brewery, 2026-11-14: "I deleted a Pipe but the IPs where still on
   the Build"; "Check same issue for Hose"), from this pop-up or from its Properties: a coupling or IP point on one of its ends goes
@@ -7132,6 +7138,8 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 ## Change log
 
+- 2026-11-24: Rule 5.37 Zoom box note (OakBarn Brewery: "when I get near an edge with the left mouse click held, it scrolls"): a button held near an edge of the Zoom box moves the view that way; a drag goes along. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Rule 5.37 note (OakBarn Brewery, 2026-11-23: "Tried to grab this and it ask me to unlock? It is not connected"): a pipe end with a red ring (on no IP, what it was joined to is gone) can be dragged like a let-go end; grabbed, it gets its coupling, so dropped on an IP it joins. Help 153 (and French). Also ("Why do I have to close or save after unlocking. Two Clicks? Why", Rule 2.44): 🔓 Unlock its IPs / its ends and ↔ Move with pipes in Properties save and close Properties themselves, one click. BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-23: Rule 5.29 changed (OakBarn Brewery: "did away with the extentions" ... "Lets try that"): the drawn-on pipe is taken off the 13 Skynet side-view valve SVGs and the box is cropped to the valve: 150 long like the Motorized Ball Valve, 300 across (the tallest), shown 75 x 150 level / 150 x 75 upright, IPs on the valve's own ends; boxes fitted on read and in Edit layout; 3 Vessel sample and default Schema valves fitted. A pump's Hose or Pipe ends in a TC ferrule on its spot. Help 130, 131 (and French). Checked against the BruControl Import program: same pictures and same pump drawing code; nothing else changes there.
 - 2026-11-23: Rule 5.20 note added (OakBarn Brewery: "A Tee Should win"): a fitting under the pointer wins over a coupling or let-go pipe end lying on it; those are grabbed off the fitting. IP dots joined to a pipe or hose are green, open ones red (Help 13). Help 153 (and French). Checked against the BruControl Import program: its build uses the same Edit layout code, so it gets the same; nothing else changes there.
 - 2026-11-23: Rule 5.20 changed (OakBarn Brewery: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small red dots on only become large when you hiver on one"): in Edit layout a round IP marker is a small red dot that only the dot can be pointed at; hovered or selected it is the full white circle in its colored ring, with its letters and name tag. Fittings, IPs with a picture and Quick Disconnects do not change. Help 13 (and French). Checked against the BruControl Import program: its build opens the same Edit layout (same style.css), so it gets the same dots; nothing else changes there.

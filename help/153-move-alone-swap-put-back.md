@@ -28,10 +28,10 @@ Tee's IP:
 
 1. In **Edit layout**, double-click the Tee (or the hose) to open its Properties.
 2. Press **🔓 Unlock its IPs** (on the hose: **🔓 Unlock its ends**). Every pipe or hose end on it lets go at once and stays where it
-   is, as an open end.
-3. Close or Save, then drag the open end where you want it. **↩ Put back** (Ctrl+Z) joins it again.
+   is, as an open end, and Properties saves and closes by itself (one click).
+3. Drag the open end where you want it. **↩ Put back** (Ctrl+Z) joins it again.
 
-Beside it, **↔ Move with pipes** is the pop-up's other choice: press it, close or Save, then grab the item and it moves **with** its
+Beside it, **↔ Move with pipes** is the pop-up's other choice: press it (Properties saves and closes by itself), then grab the item and it moves **with** its
 pipes, without the pop-up. It is not on a Pipe or Hose, and it is grey when a 🔒 locked pipe or fitting would have to move with it.
 
 The buttons are grey when nothing is joined to it, when the item is 🔒 locked (unlock it first) or when the equipment on its Tab is
@@ -40,11 +40,16 @@ locked (lock_Equipment). Rest the mouse on it to see why.
 ## Zoom in on a join (Z)
 
 In **Edit layout**, point at the join and press **Z** (not while typing in a box). A box opens in a top corner of the Tab that
-shows the **200 pixels around the mouse, 3 times bigger** (a little less on a small screen, so it fits). It stays where it opened and keeps showing that spot.
+shows the **200 pixels around the mouse, 3 times bigger** (a little less on a small screen, so it fits). It stays where it opened.
 
 **Work right in the box:** drag a pipe end, an IP or an item in it with the right mouse button, the same as on the Tab, and it
 moves on the Tab too, 3 times finer, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
-double-click opens Properties, except on a red IP). Press **Esc** or the red **✕** in its upper right corner to close it.
+double-click opens Properties, except on a red IP).
+
+**Move around in the box:** hold the mouse button down and go near an edge of the box: the view moves that way across the
+manifold, and anything you are dragging goes along. Move away from the edge, or let go, and it stops.
+
+Press **Esc** or the red **✕** in its upper right corner to close it.
 
 **Join two IPs with a trace (only in the Zoom box):** double-click a red IP to start a red trace line, then click the IP to join it
 to. Press **🔧 Auto configure**: the first IP moves onto the second and they join, and what is joined behind it follows so no join
@@ -69,7 +74,7 @@ A pipe or hose can change after it is saved, once its ends are let go:
 
 A let-go end can be grabbed even where it sits on a pump, valve or vessel IP. On a fitting (a tee, an elbow, any fitting) the
 fitting wins: pressing on it grabs the fitting, not a coupling or let-go end lying on top of it. Grab the coupling or end off
-the fitting instead. An end that is still joined, a 🔒 locked pipe or hose,
+the fitting instead. An end with a red ring (on no IP, because what it was joined to is gone) can be grabbed and dropped on an IP too. An end that is still joined, a 🔒 locked pipe or hose,
 and an end on a 🔒 locked IP (one set to No Unlock too) do not move. **↩ Put back** (Ctrl+Z) undoes each drag, and **Save layout**
 keeps the new length or shape.
 

@@ -4834,8 +4834,12 @@ function propsUnlockIps(it, onLetGo) {
     const now = grabJoins(it); if (!now.length) return;
     pushUndo(`unlock ${who}`); unlockJoins(now); grabWith.delete(it.id || it.name); onLetGo?.(); renderWs();
     b.disabled = true; b.textContent = pipe ? '🔓 Ends let go' : '🔓 IPs let go';
-    toast(`🔓 ${who}: ${now.length} ${pipe ? 'end' : 'pipe end'}${now.length > 1 ? 's' : ''} let go. Close or Save, then grab it and move it alone. ↩ Put back (Ctrl+Z) joins ${now.length > 1 ? 'them' : 'it'} again.`, false, 7000);
+    toast(`🔓 ${who}: ${now.length} ${pipe ? 'end' : 'pipe end'}${now.length > 1 ? 's' : ''} let go. Grab it and move it alone. ↩ Put back (Ctrl+Z) joins ${now.length > 1 ? 'them' : 'it'} again.`, false, 7000);
+    propsDone();
   };
+  // one click (OakBarn Brewery, 2026-11-23: "Why do I have to close or save after unlocking. Two Clicks? Why"; Rule 2.44): the button
+  // saves and closes Properties itself, so the next thing is the grab
+  const propsDone = () => setTimeout(() => $('#dlg[open] button[value="ok"]')?.click(), 0);
   // Move it with its pipes (OakBarn Brewery, 2026-11-23: "The Unlock IPs on the dialog is good but add Move with Pipes option"): the
   // grab pop-up's other choice (Rule 5.19 as before); the next drag moves it with its pipes and does not ask. Greyed out for the same
   // reasons, and when a 🔒 locked pipe or fitting would have to move with it.
@@ -4845,7 +4849,7 @@ function propsUnlockIps(it, onLetGo) {
   if (w) w.onclick = ev => {
     ev.preventDefault(); if (w.disabled) return;
     grabWith.add(it.id || it.name); w.disabled = b.disabled = true; w.textContent = '↔ Moves with its pipes';
-    toast(`Close or Save, then grab ${who} and it moves with its pipes.`, false, 6000);
+    toast(`Grab ${who} and it moves with its pipes.`, false, 6000); propsDone();
   };
   const b0 = b.onclick; b.onclick = ev => { b0(ev); if (w && b.disabled) w.disabled = true; };
   const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b, w);
@@ -5268,6 +5272,10 @@ function zoomReal(ev) {
 function zoomPass(ev) {
   const zb = zoomBox; if (!zb) return;
   ev.stopPropagation(); if (ev.type !== 'pointermove') ev.preventDefault();
+  // the left button held near an edge of the box moves the view that way (zoomEdgeTick)
+  if (ev.type === 'pointerdown' && (ev.button === 0 || ev.button === 2)) zb.held = { clientX: ev.clientX, clientY: ev.clientY, pointerId: ev.pointerId, pointerType: ev.pointerType };
+  else if (ev.type === 'pointermove' && zb.held && !ev.fake) { Object.assign(zb.held, { clientX: ev.clientX, clientY: ev.clientY }); if (!zb.raf) zb.raf = requestAnimationFrame(zoomEdgeTick); }
+  else if (/^pointer(up|cancel)$/.test(ev.type)) zb.held = null;
   const [x, y] = zoomReal(ev);
   if (zoomTracePass(ev, x, y)) return;
   zb.host.style.pointerEvents = 'none'; const under = document.elementFromPoint(x, y) || document.body; zb.host.style.pointerEvents = '';
@@ -5423,6 +5431,26 @@ function zoomAuto() {
   toast(`🔗 ${m1} moved onto ${m2} and joined it${n ? `; ${n} joined thing${n > 1 ? 's' : ''} behind it moved along and their pipes got longer or shorter` : ''}. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000);
   zoomTraceEnd(); zoomDraw(true);
 }
+// Move around inside the zoom box (OakBarn Brewery, 2026-11-24: "I want to be able to move the Inside of the scroll pattern to a different
+// part of the whole manifold so when I get near an edge with the left mouse click held, it scrolls"; Rule 5.37): while a button
+// is held within ZOOM_EDGE pixels of an edge of the box, the view moves that way, ZOOM_PAN box pixels a frame, and what is being dragged
+// goes along with the pointer. It stops at the edge of the Tab, when the pointer leaves the edge, or when the button is let go.
+const ZOOM_EDGE = 28, ZOOM_PAN = 8;
+function zoomEdgeTick() {
+  const zb = zoomBox; if (!zb) return;
+  const e = zb.held, f = zb.frame.getBoundingClientRect(), px = e ? e.clientX - f.left : 0, py = e ? e.clientY - f.top : 0;
+  const dx = !e ? 0 : px < ZOOM_EDGE ? -1 : px > zb.size - ZOOM_EDGE ? 1 : 0, dy = !e ? 0 : py < ZOOM_EDGE ? -1 : py > zb.size - ZOOM_EDGE ? 1 : 0;
+  if (!dx && !dy) { zb.raf = 0; return; }
+  const ws = $('#ws'), z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, step = ZOOM_PAN / (ZOOM_X * z);
+  const lx = Math.min(Math.max(zb.lx + dx * step, 0), ws.offsetWidth), ly = Math.min(Math.max(zb.ly + dy * step, 0), ws.offsetHeight);
+  if (lx === zb.lx && ly === zb.ly) { zb.raf = 0; return; }
+  zb.lx = lx; zb.ly = ly;
+  // the same spot in the box now stands for another spot of the Tab: what is being dragged follows it there
+  if (zb.down) zoomPass({ type: 'pointermove', fake: true, clientX: e.clientX, clientY: e.clientY, button: -1, buttons: 1, pointerId: e.pointerId, pointerType: e.pointerType,
+    isPrimary: true, detail: 0, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false, stopPropagation() { }, preventDefault() { } });
+  zoomDraw();
+  zb.raf = requestAnimationFrame(zoomEdgeTick);
+}
 function zoomDraw(fresh = false) {
   const zb = zoomBox; if (!zb) return;
   if (!editing) return zoomClose();
@@ -5486,7 +5514,11 @@ $('#ws').addEventListener('pointerdown', ev => {
   const onFit = fittingUnder(ev);
   // a let-go end under the pointer wins over the valve, pump or vessel IP it sits on, so it can always be grabbed
   const oe = !noMove() && !onFit && openEndAt(p);
-  if (oe) { sel = { kind: 'gfx', id: oe.p.id }; drag = { mode: 'point', item: oe.p, i: oe.i }; delete oe.p.qdAuto; ev.preventDefault(); return; }
+  if (oe) {
+    const k = oe.i === 0 ? 'from' : 'to', n = oe.p.points.length;      // an end on no IP (a red ring) gets its coupling first, so it can join an IP when dropped
+    if (!isQdHose(oe.p) && !ipPoint(oe.p[k], oe.p.workspace)) { oe.p[k] = endCoupling(oe.p.points, oe.i, oe.i === 0 ? 1 : n - 2); }
+    sel = { kind: 'gfx', id: oe.p.id }; drag = { mode: 'point', item: oe.p, i: oe.i }; delete oe.p.qdAuto; ev.preventDefault(); return;
+  }
   // the coupling on a let-go pipe end is its handle too: dragging it shortens or lengthens the pipe along its line
   const cpl = ev.target.closest?.('[data-gid]'), cg = cpl && draft?.graphics.find(x => x.id === cpl.dataset.gid && x.kind === 'ip' && x.fitting === 'coupling');
   const cp = cg && draft.graphics.find(x => x.kind === 'pipe' && !x.hose && !x.locked && (x.from === cg.id || x.to === cg.id));
@@ -6058,11 +6090,14 @@ function shortenPipe(p, i, at) {
   if (c) { c.x = pts[i][0] - (c.w || 30) / 2; c.y = pts[i][1] - (c.h || 30) / 2; }
 }
 // a pipe or hose end that can be dragged in Edit layout: the pipe or hose is not 🔒 locked, and the end is let go (an open end whose
-// coupling is not 🔒 locked either, so an IP set to No Unlock stays put, Rule 2.12), or it is a Quick Disconnect hose's free end
+// coupling is not 🔒 locked either, so an IP set to No Unlock stays put, Rule 2.12), or on no IP at all (a red ring), or it is a
+// Quick Disconnect hose's free end
 function endMoves(p, i) {
   if (!p || p.locked || (p.points || []).length < 2 || (i !== 0 && i !== p.points.length - 1)) return false;
   if (isQdHose(p) && i === p.points.length - 1) return true;
-  if (!openEnd(p, i)) return false;
+  // an end on no IP at all (its red ring: what it was joined to is gone) can be grabbed too (OakBarn Brewery, 2026-11-23: "Tried to
+  // grab this and it ask me to unlock? It is not connected"; Rule 5.37)
+  if (!openEnd(p, i)) return !ipPoint(i === 0 ? p.from : p.to, p.workspace);
   return !L().graphics.find(x => x.id === (i === 0 ? p.from : p.to))?.locked;
 }
 // the fitting (a Skynet Fitting, a Build fitting, an IP fitting other than a coupling, or one of their IPs) under the pointer, or null

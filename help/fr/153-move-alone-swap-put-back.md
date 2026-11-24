@@ -28,10 +28,10 @@ quelque chose sans que vous le vouliez, par exemple un tuyau souple qui s'est ac
 
 1. En **Edit layout**, double-cliquez sur le Tee (ou sur le tuyau souple) pour ouvrir ses Properties.
 2. Appuyez sur **🔓 Unlock its IPs** (sur le tuyau souple : **🔓 Unlock its ends**). Chaque bout de tuyau dessus se détache tout de
-   suite et reste où il est, comme un bout ouvert.
-3. Fermez ou enregistrez (Close ou Save), puis traînez le bout ouvert où vous le voulez. **↩ Put back** (Ctrl+Z) le joint de nouveau.
+   suite et reste où il est, comme un bout ouvert, et les Properties s'enregistrent et se ferment toutes seules (un seul clic).
+3. Traînez le bout ouvert où vous le voulez. **↩ Put back** (Ctrl+Z) le joint de nouveau.
 
-À côté, **↔ Move with pipes** est l'autre choix de la fenêtre : appuyez dessus, fermez ou enregistrez, puis attrapez l'objet et il bouge
+À côté, **↔ Move with pipes** est l'autre choix de la fenêtre : appuyez dessus (les Properties s'enregistrent et se ferment toutes seules), puis attrapez l'objet et il bouge
 **avec** ses tuyaux, sans la fenêtre. Il n'est pas sur un Pipe ou un Hose, et il est gris quand un tuyau ou raccord 🔒 verrouillé devrait bouger avec lui.
 
 Les boutons sont gris quand rien n'y est joint, quand l'objet est 🔒 verrouillé (déverrouillez-le d'abord) ou quand l'équipement de son
@@ -40,12 +40,16 @@ Tab est verrouillé (lock_Equipment). Posez la souris dessus pour voir pourquoi.
 ## Zoomer sur un raccord (Z) {#zoom-in-on-a-join-z}
 
 En **Edit layout**, pointez le raccord et appuyez sur **Z** (pas pendant que vous tapez dans une case). Une fenêtre s'ouvre dans un
-coin du haut du Tab et montre les **200 pixels autour de la souris, 3 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte et
-montre toujours cet endroit.
+coin du haut du Tab et montre les **200 pixels autour de la souris, 3 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte.
 
 **Travaillez directement dans la fenêtre :** traînez-y un bout de tuyau, un IP ou un objet avec le bouton droit de la souris,
 comme sur le Tab, et il bouge aussi sur le Tab, 3 fois plus finement, pour poser un bout exactement sur un IP. Les clics et les
-doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge). Appuyez sur **Échap** ou sur le **✕**
+doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge).
+
+**Se déplacer dans la fenêtre :** gardez le bouton de la souris enfoncé et approchez-vous d'un bord de la fenêtre : la vue se
+déplace de ce côté sur le collecteur, et ce que vous traînez suit. Éloignez-vous du bord, ou lâchez, et elle s'arrête.
+
+Appuyez sur **Échap** ou sur le **✕**
 rouge dans son coin en haut à droite pour la fermer.
 
 **Joindre deux IP avec un tracé (seulement dans la fenêtre de zoom) :** double-cliquez sur un IP rouge pour commencer une ligne
@@ -72,7 +76,7 @@ Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregi
 
 Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Sur un raccord (un té, un coude,
 tout raccord), le raccord gagne : appuyer dessus attrape le raccord, pas un raccord d'about (coupling) ni un bout détaché posé
-par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
+par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout avec un anneau rouge (sur aucun IP, parce que ce à quoi il était joint n'existe plus) peut aussi être attrapé et posé sur un IP. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
 et un bout sur un IP 🔒 verrouillé (aussi un IP réglé sur No Unlock) ne bougent pas. **↩ Put back** (Ctrl+Z) annule chaque glissement, et **Save layout**
 garde la nouvelle longueur ou forme.
 

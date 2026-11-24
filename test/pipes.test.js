@@ -161,6 +161,10 @@ test('a let-go end of a pipe or hose can be dragged and joins an IP it is droppe
   assert.match(app, /const oe = !noMove\(\) && !onFit && openEndAt\(p\);/, 'a let-go end comes first on a press, unless a fitting is under it');
   assert.match(app, /if \(cp && !onFit && endMoves/, 'a coupling on a fitting does not take the press (Rule 5.20: a Tee should win)');
   assert.match(app, /function fittingUnder\(ev\)/);
+  assert.match(app, /if \(!openEnd\(p, i\)\) return !ipPoint\(i === 0 \? p\.from : p\.to, p\.workspace\);/, 'an end on no IP (red ring) can be grabbed');
+  assert.match(app, /oe\.p\[k\] = endCoupling\(/, '... and gets its coupling so it can join an IP when dropped');
+  assert.match(app, /const ZOOM_EDGE = 28, ZOOM_PAN = 8;/, 'the Zoom box moves its view near an edge with a button held');
+  assert.match(app, /const propsDone = \(\) => setTimeout\(\(\) => \$\('#dlg\[open\] button\[value="ok"\]'\)\?\.click\(\), 0\);/, 'Unlock in Properties saves and closes it: one click (Rule 2.44)');
   assert.match(app, /const ipJoined = id =>/, 'a joined IP dot is green, an open one red');
   assert.match((await import('node:fs')).readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /\.gfx\.ip\.joined:not\(\.fit\):not\(\.has-img\)::before \{ background: #1e9e3a; \}/);
   assert.ok(app.indexOf('const oe = !noMove() && !onFit && openEndAt(p);') < app.indexOf("const pip = ev.target.closest('.devip');"), '... before a pump or valve IP');
