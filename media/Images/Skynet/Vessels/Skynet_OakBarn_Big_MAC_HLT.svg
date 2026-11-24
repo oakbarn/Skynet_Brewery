@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 271">
+  <!-- Skynet Vessel Widget "OakBarn_Big_MAC_HLT" (OakBarn Brewery, 2026-11-24): a 50 gallon HLT 24 in wide and 25.5 in tall (10 units = 1 in). Ports (all face forward): Sight Gauge Top and Bottom (TC) on the Left, Tangential at the Left wall, TC 2 Thermowell at the Left Back, a Front Low drain and a Bottom Center drain, the Heating Element (TC 2) at the Right Back, and a Volume Sensor in a box on the Right side. No text: the Display Name shows above it. -->
+  <rect x="246" y="220" width="30" height="32" rx="4" fill="#808080" stroke="#111" stroke-width="3"/>
+  <rect x="10" y="12" width="240" height="255" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
+  <path d="M19 24 V160" stroke="#9a9a9a" stroke-width="5" stroke-linecap="round"/>
+  <rect x="2" y="3" width="256" height="11" rx="4" fill="#808080" stroke="#111" stroke-width="3"/>
+  <g stroke="#111">
+    <circle cx="49" cy="50" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="49" cy="50" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="49" cy="50" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="49" cy="184" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="49" cy="184" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="49" cy="184" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="21" cy="201" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="21" cy="201" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="21" cy="201" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="72" cy="156" r="13.2" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="72" cy="156" r="11.6" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="72" cy="156" r="10.0" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="130" cy="199" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="130" cy="199" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="130" cy="199" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="130" cy="257" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="130" cy="257" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="130" cy="257" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="187" cy="166" r="14.5" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="187" cy="166" r="12.9" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="187" cy="166" r="11.3" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="262" cy="236" r="8.5" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="262" cy="236" r="6.9" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="262" cy="236" r="5.3" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+</svg>

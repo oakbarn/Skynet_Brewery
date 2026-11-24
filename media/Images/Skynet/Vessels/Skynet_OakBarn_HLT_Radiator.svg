@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 212">
+  <!-- Skynet Vessel Widget "OakBarn_HLT_Radiator" (OakBarn Brewery, 2026-11-24): a 15 gallon HLT 15 in wide and 19.6 in tall (10 units = 1 in). Ports: a Tangential at the Left wall, the Low Outlet (TC 1.5) on the Front, the Heating Element (TC 2) at the Center Back above it, and the Thermowell (TC 1.5, the temperature probe) on the Front above the Element. No text: the Display Name shows above it. -->
+  <rect x="10" y="12" width="150" height="196" rx="6" fill="#808080" stroke="#111" stroke-width="3"/>
+  <path d="M19 24 V110" stroke="#9a9a9a" stroke-width="5" stroke-linecap="round"/>
+  <rect x="2" y="3" width="166" height="11" rx="4" fill="#808080" stroke="#111" stroke-width="3"/>
+  <g stroke="#111">
+    <circle cx="85" cy="183" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="85" cy="183" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="85" cy="183" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="85" cy="153" r="13.2" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="85" cy="153" r="11.6" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="85" cy="153" r="10.0" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="85" cy="123" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="85" cy="123" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="85" cy="123" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="21" cy="168" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="21" cy="168" r="8.3" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="21" cy="168" r="6.7" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+</svg>

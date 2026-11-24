@@ -447,8 +447,10 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 | Brew_Vessel_NPT_Temperature_Widget | Same, both NPT 1/2 FPT |
 | Brew_Vessel_TC_Temperature_Tangential_Widget | + Tangential Left 4 in (faces forward) |
 | Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget | + Heating element port Right 6 in (TC 2, a mark, no IP) |
-| OakBarn_Stout_Kettle (43 gal, 21 x 26 in with a 6 in bottom skirt, 230 x 266; Rule 19.12) | Outlet Stout Skirt Drain (Bottom Drain centered in the skirt), Thermowell Stout Center, Top Inlet Stout Right High 2 in (TC 2), Sight Gauge Top Stout Left High, Sight Gauge Bottom Stout Left Low, Tangential Stout Left Wall |
+| OakBarn_Stout_Kettle (43 gal, body 22 x 26.1 in on a 6 in bottom skirt, 240 x 337; Rule 19.12) | Outlet Stout Skirt Drain (Bottom Drain centered in the skirt), Thermowell Stout Center, Top Inlet Stout Right High 2 in (TC 2), Sight Gauge Top Stout Left High, Sight Gauge Bottom Stout Left Low, Tangential Stout Left Wall |
 | OakBarn_MLT (Mash Tun, the Stout Kettle's body; Rule 19.12) | Outlet Stout Skirt Drain, Thermowell Stout Center, Sparge Stout Right High (TC 1.5 sparge arm inlet); no Tangential, no sight gauge |
+| OakBarn_Big_MAC_HLT (HLT, electric, 50 gal, 24 x 25.5 in, 280 x 271; Rule 19.12) | Sight Gauge Top / Bottom Big MAC HLT Left High / Low, Tangential Left Wall, Thermowell Left Back (TC 2), Second Outlet Front Low, Outlet Bottom Center, Heating element Right Back (TC 2, mark), Volume Sensor Right Side (V mark, no IP) |
+| OakBarn_HLT_Radiator (HLT, electric, 15 gal, 15 x 19.6 in, 170 x 212; Rule 19.12) | Tangential Radiator Left Wall, Outlet Radiator Front Low, Heating element Radiator Center Back (TC 2, mark), Thermowell Radiator Front |
 | Brew_Vessel_Big_Mac_Widget ("the fat one", 291 x 291) | Outlet Fat CB 1 in, Thermowell Fat Center 10 in, Tangential Fat Left 4 in, Sparge Fat Left 11 in (TC 2), Element Fat Right 6 in (TC 2) |
 
 ### Other Skynet Vessel Templates

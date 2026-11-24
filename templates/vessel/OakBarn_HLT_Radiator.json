@@ -1,0 +1,39 @@
+{
+  "vesselType": "vessel",
+  "vtype": "HLT",
+  "heatKind": "electric",
+  "image": "Images/Skynet/Vessels/Skynet_OakBarn_HLT_Radiator.svg",
+  "units": "Metric",
+  "volume": 56.7812,
+  "size": [
+    170,
+    212
+  ],
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Radiator Front Low"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Radiator Left Wall"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Radiator Front"
+    },
+    "element": {
+      "installed": true,
+      "position": "Radiator Center Back",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    }
+  },
+  "notes": "The OakBarn HLT Radiator, a Skynet Vessel Widget (OakBarn Brewery, 2026-11-24): a 15 gallon HLT, 15 in wide and 19.6 in tall. A Tangential at the Left wall; the Low Outlet (TC 1.5) on the Front; the Heating Element (TC 2) at the Center Back, between the Outlet and the Temperature Probe; the Thermowell (TC 1.5, the temperature probe) on the Front above it. Its IPs are built in on the ports."
+}

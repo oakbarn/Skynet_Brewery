@@ -1,0 +1,59 @@
+{
+  "vesselType": "vessel",
+  "vtype": "HLT",
+  "heatKind": "electric",
+  "image": "Images/Skynet/Vessels/Skynet_OakBarn_Big_MAC_HLT.svg",
+  "units": "Metric",
+  "volume": 189.2706,
+  "size": [
+    280,
+    271
+  ],
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Big MAC HLT Bottom Center"
+    },
+    "outlet2": {
+      "installed": true,
+      "position": "Big MAC HLT Front Low"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Big MAC HLT Left Wall"
+    },
+    "sightTop": {
+      "installed": true,
+      "position": "Big MAC HLT Left High"
+    },
+    "sightBottom": {
+      "installed": true,
+      "position": "Big MAC HLT Left Low"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Big MAC HLT Left Back",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    },
+    "element": {
+      "installed": true,
+      "position": "Big MAC HLT Right Back",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    },
+    "volSensor": {
+      "installed": true,
+      "position": "Big MAC HLT Right Side"
+    }
+  },
+  "notes": "The OakBarn Big MAC HLT, a Skynet Vessel Widget (OakBarn Brewery, 2026-11-24): a 50 gallon HLT, 24 in wide and 25.5 in tall. A sight gauge on the Left with TC ports at its Top and Bottom; a Tangential at the Left wall; a TC 2 Thermowell (temperature probe) at the Left Back; two drains, Front Low and Bottom Center; the Heating Element (TC 2) at the Right Back; a pressure type Volume Sensor in a box on the Right side (a mark, its Volume Meter Device picked on the Tab). Its IPs are built in on the ports."
+}
