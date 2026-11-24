@@ -265,11 +265,12 @@ test('a TC Pipe Fitting is added with no Properties box, in the middle of the Zo
 });
 
 // OakBarn Brewery, 2026-11-24: "trying to get the properties up so I can delete these coupling" (Rule 5.37)
-test('a red dot can be deleted with the Delete key or its Properties, and its pipe end stays plain', async () => {
+test('a red dot can be deleted with the Delete key or its Properties, and a plain end gets no coupling', async () => {
   const fs = await import('node:fs');
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /function redDotPress\(p, i\)/);
-  assert.match(app, /if \(dotPick && sel\.id === dotPick\.pipe\) item = findItem\('gfx', dotPick\.dot\) \|\| item;/, 'Delete key: the dot, not its pipe');
+  // changed 2026-11-24 ("it is still there"): the Delete key now takes the dot's pipe too (test below)
+  assert.match(app, /if \(kind === 'gfx' && item\.kind === 'ip' && item\.fitting === 'coupling' && !item\.port && !item\.attachTo\)/, 'Delete: a red dot takes its pipe');
   assert.match(app, /again = !zoomPassing && lastDotTap/, 'two quick presses open its Properties, not in the Zoom box');
   assert.match(app, /else if \(p\[plain\]\) continue;/, 'a plain end gets no new dot');
   assert.match(app, /!ipPoint\(p\.from, p\.workspace\) && !p\.plainFrom\)/, 'and no red ring');
@@ -359,4 +360,12 @@ test('a plain pipe end shows the red dot, and an IP dropped near it joins it', a
   assert.match(app, /if \(drag\?\.mode === 'move' && drag\.moved && !endJoined\) \{/, 'not cut into a pipe once joined');
   const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
   assert.match(css, /\.pipes \.plainDot \{ fill: #e01b12;/);
+});
+
+// OakBarn Brewery, 2026-11-24: "Used Delete and the Delete key. Pop-up says deleted but it is still there" (Rule 5.37)
+test('deleting a red dot on an open pipe end deletes its pipe', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const ps = pipesOn\(item\.id, item\.workspace\); if \(ps\.length === 1\) item = ps\[0\];/);
+  assert.doesNotMatch(app, /item = findItem\('gfx', dotPick\.dot\)/, 'the Delete key no longer deletes only the dot');
 });

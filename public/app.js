@@ -5721,7 +5721,8 @@ document.addEventListener('keydown', ev => {
   if (!['Delete', 'Backspace'].includes(ev.key) || !editing || !sel || !draft || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   let kind = sel.kind, item = findItem(kind, sel.id); if (!item) return;
-  if (dotPick && sel.id === dotPick.pipe) item = findItem('gfx', dotPick.dot) || item;      // a red dot was pressed: it goes, its pipe stays
+  // a red dot pressed (an open pipe end): its pipe goes, with the dot (OakBarn Brewery, 2026-11-24: "Used Delete and the Delete key. Pop-up
+  // says deleted but it is still there": a plain end shows the same red dot, Rule 5.37, so deleting only the dot changed nothing)
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
   if (unitOf) { kind = 'gfx'; item = unitOf; }        // an IP of a Skynet Fitting or vessel: the whole fitting or vessel, as its Properties do
   ev.preventDefault(); dotPick = null;
@@ -5733,8 +5734,8 @@ document.addEventListener('keydown', ev => {
 });
 let drag = null, lastPipeTap = null, hitUnit = null;
 // 🔴 a red dot (the coupling on an open pipe end) can be opened and deleted (OakBarn Brewery, 2026-11-24: "trying to get the properties
-// up so I can delete these coupling"; Rule 5.37): a press on it still grabs the pipe end to drag it, but the Delete key then deletes the
-// dot, not the pipe, and two quick presses (outside the Zoom box, where a double-click starts a trace) open the dot's Properties
+// up so I can delete these coupling"; Rule 5.37): a press on it still grabs the pipe end to drag it, the Delete key then deletes its
+// pipe with it (2026-11-24: "it is still there"), and two quick presses (outside the Zoom box, where a double-click starts a trace) open the dot's Properties
 let dotPick = null, lastDotTap = null;
 function redDotPress(p, i) {
   const g = draft.graphics.find(x => x.id === (i === 0 ? p.from : p.to) && x.kind === 'ip' && x.fitting === 'coupling');
@@ -13077,6 +13078,10 @@ const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.s
 TYPE_TITLE[PROCESS_WIDGET_TYPE] = PROCESS_WIDGET_WORD.replace(/ Widget$/, '');      // "Process Widget Properties" (Rule 1.31)
 // 🗑 Delete an item (Properties Delete, and the Delete key in Edit layout): no "Delete this item?" box, ↩ Put back (Ctrl+Z) brings it back
 async function deleteItem(kind, item) {
+  // a red dot (the coupling on one open pipe end): its pipe goes with it, since the end would show the same red dot (Rule 5.37)
+  if (kind === 'gfx' && item.kind === 'ip' && item.fitting === 'coupling' && !item.port && !item.attachTo) {
+    const ps = pipesOn(item.id, item.workspace); if (ps.length === 1) item = ps[0];
+  }
   const type = kind === 'el' ? item.type : item.kind;
   const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
   if (host) return toast(`${item.name} is built into ${host.label || host.name} (a Skynet_Integrated_Device), so it can't be taken out of it. Delete ${host.label || host.name} to delete it too.`, true);
