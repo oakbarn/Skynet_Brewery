@@ -13239,7 +13239,19 @@ function setSound(on) {
   if (soundOn && tappedYet()) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
   updateAlarms();
 }
-$('#barSound').onclick = () => setSound(!soundOn);
+// a quick beep when the Sound icon turns sound on (OakBarn Brewery, 2026-11-24: "when you turn the sound on a quick beep"), made by the
+// browser itself (no sound file, so nothing to copyright, Rule 9.12). Only on a click that turns it on: never when turning it off, and
+// never when Turn Sound On when starting turns it on by itself. The click is the tap browsers ask for, so the beep can always play.
+let soundOnBeepAc = null;
+function soundOnBeep() {
+  try {
+    const ac = (soundOnBeepAc ??= new (window.AudioContext || window.webkitAudioContext)()), t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    if (ac.state === 'suspended') ac.resume();
+    o.frequency.value = 1000; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.13);
+  } catch { }
+}
+$('#barSound').onclick = () => { setSound(!soundOn); if (soundOn) soundOnBeep(); };
 // the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
 const firstTap = () => {
   soundTapped = true;
