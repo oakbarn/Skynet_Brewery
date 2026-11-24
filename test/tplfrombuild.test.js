@@ -15,7 +15,7 @@ assert.match(html, /<select id="tplOpen"[^>]*><option value="">📁 Templates<\/
 assert.match(app, /s\.onchange = \(\) => \{ const k = s\.value; s\.value = ''; if \(k\) openMenuTab\(k\); \}/, 'picking one opens it');
 assert.match(css, /body\.menuOverBuild #editBar \{ display: none; \}/, 'the Edit layout bar steps aside over a Template Menu tab');
 assert.match(app, /if \(!editing \|\| menuTab \|\| !\(ev\.ctrlKey/, 'Ctrl+Z does nothing over a Menu tab');
-assert.match(app, /if \(!editing \|\| menuTab \|\| ev\.ctrlKey \|\| ev\.metaKey \|\| ev\.repeat \|\| \(ev\.code !== 'KeyZ' && ev\.key\.toLowerCase\(\) !== 'z'\)\)/, 'Z does nothing over a Menu tab');
+assert.match(app, /if \(!editing \|\| menuTab \|\| ev\.ctrlKey \|\| ev\.metaKey \|\| ev\.altKey \|\| ev\.repeat \|\| ev\.key\.toLowerCase\(\) !== 'z'\)/, 'Z does nothing over a Menu tab');
 assert.match(app, /\(ev\.key === 'Insert' \|\| ev\.key\.toLowerCase\(\) === 'b'\) && !ev\.ctrlKey && !ev\.shiftKey && !ev\.altKey && !ev\.metaKey && can\('admin'\)\) \{ ev\.preventDefault\(\); tplInsert\(kind, t\); \}/, 'B or Insert on the icon');
 const ins = app.slice(app.indexOf('function tplInsert('), app.indexOf('function placeTabVessel('));
 assert.match(ins, /\{ stay: !!menuTab \}/, 'you stay on the Templates');

@@ -1670,6 +1670,16 @@ keeps its own title. Help 40.
   Each browser remembers its own (by the choice's words); a choice that is not in the list now (a page this account can't see) shows no copy.
 Then the Menu tabs and the Pages, as before. Help 33, 51, 67. Panel only: the BruControl Import's pages have no ☰ Menu.
 
+2.73 **Alt + key shortcuts work everywhere** (OakBarn Brewery, 2026-11-24: "I want things to work universal so ALT + Z and ALT + R are
+Out. and all the Firefox ones as well"). A Panel shortcut with **Alt** uses only a letter that no browser (Chrome, Edge, Firefox, Safari),
+no system (Windows, Mac, Linux, Raspberry Pi OS) and no common graphics overlay keeps for itself. **Allowed Alt + letter:** A, C, G, I, J,
+K, L, M, N, O, P, Q, U, W, X, Y. **Never:** D, E, F (Chrome and Edge), F, E, V, S, B, T, H (Firefox menus), Z (NVIDIA overlay), R (AMD
+overlay), nor Alt + Tab, Space, Esc, F1 to F10, Home or the arrows. **Shift + Alt + letter** is free on all of them except T and I
+(Chrome and Edge). **Ctrl + Alt + key is never used** (OakBarn Brewery, 2026-11-24: "any conflicts with CTRL + Alt + Key"): on
+European Windows keyboards Ctrl + Alt is AltGr and types characters (€, @), Linux and the Pi keep many (terminal, lock screen,
+desktops), and on a Mac Control + Option is the VoiceOver key. The key is read by its place (`ev.code`), so a Mac's Option + letter, which types a symbol, works too. In use: Alt + P
+(Picture picker, admins). Never while typing in a box, and never a key Rule 2.32 keeps.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2824,7 +2834,7 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and does not ask. Greyed out for the same reasons, and when a 🔒 locked pipe or fitting would have to move with it.
 - **🔍 Zoom box** (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for
   200 pixel square where Join area is zoomed inside the Dialog"; he picked A, the Z key, as Ctrl + Click already opens Properties,
-  Rule 2.9): in Edit layout, **Z** or **Alt + Z** (2026-11-24: "can alt + Z = Zoom"; by the key's place, so a Mac's Option + Z works) (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
+  Rule 2.9): in Edit layout, **Z** (not Alt + Z, Rule 2.73) (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
   screen pixels around the mouse **3 times bigger** (on a smaller Tab area the box shrinks to fit). *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
   Dialog moves now. It needs to stay fixed and move the joins together inside the Dialog"; "z does not work like the esc. Just
   change the text that you use the esc button to close and or have a close button upper right corner"):* the box **stays where it
@@ -7146,7 +7156,7 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 ## Change log
 
-- 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("can alt + Z = Zoom"): Alt + Z opens and closes the Zoom box too; the Zoom box drags and pans with the left button only. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
+- 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. The Zoom box drags and pans with the left button only (Rule 5.37). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
 - 2026-11-24: Rule 5.37 Zoom box note (OakBarn Brewery: "when I get near an edge with the left mouse click held, it scrolls"): a button held near an edge of the Zoom box moves the view that way; a drag goes along. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 note (OakBarn Brewery, 2026-11-23: "Tried to grab this and it ask me to unlock? It is not connected"): a pipe end with a red ring (on no IP, what it was joined to is gone) can be dragged like a let-go end; grabbed, it gets its coupling, so dropped on an IP it joins. Help 153 (and French). Also ("Why do I have to close or save after unlocking. Two Clicks? Why", Rule 2.44): 🔓 Unlock its IPs / its ends and ↔ Move with pipes in Properties save and close Properties themselves, one click. BruControl Import program: same Edit layout code; nothing else changes there.

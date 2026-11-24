@@ -39,7 +39,7 @@ locked (lock_Equipment). Rest the mouse on it to see why.
 
 ## Zoom in on a join (Z)
 
-In **Edit layout**, point at the join and press **Z** or **Alt + Z** (not while typing in a box). A box opens in a top corner of the Tab that
+In **Edit layout**, point at the join and press **Z** (not while typing in a box). A box opens in a top corner of the Tab that
 shows the **200 pixels around the mouse, 3 times bigger** (a little less on a small screen, so it fits). It stays where it opened.
 
 **Work right in the box:** drag a pipe end, an IP or an item in it with the left mouse button, the same as on the Tab, and it

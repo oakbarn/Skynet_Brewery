@@ -5472,8 +5472,9 @@ document.addEventListener('pointermove', ev => {
 }, true);
 document.addEventListener('keydown', ev => {
   if (zoomBox && ev.key === 'Escape') { if (zoomBox.trace) zoomTraceEnd(); else zoomClose(); return; }
-  // Z, or Alt + Z (OakBarn Brewery, 2026-11-24: "can alt + Z = Zoom"; by its key, so a Mac's Option + Z, which types Ω, works too)
-  if (!editing || menuTab || ev.ctrlKey || ev.metaKey || ev.repeat || (ev.code !== 'KeyZ' && ev.key.toLowerCase() !== 'z')) return;
+  // Z only: Alt + Z was asked for, then dropped (OakBarn Brewery, 2026-11-24: "I want things to work universal so ALT + Z and ALT + R
+  // are Out"; Alt + Z opens the NVIDIA overlay on many Windows PCs; Rule 2.73)
+  if (!editing || menuTab || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat || ev.key.toLowerCase() !== 'z') return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();
 });

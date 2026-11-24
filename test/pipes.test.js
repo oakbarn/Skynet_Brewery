@@ -188,7 +188,7 @@ test('Skynet valves have no drawn-on pipe (IPs on their own ends); pump ends are
 
 // Rule 2.9 changed (OakBarn Brewery, 2026-11-24: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold
 // can be deprecated as it too often brings up the help"; "can alt + Z = Zoom")
-test('the left button held a moment drags outside Edit layout; the right button never drags; Alt + Z opens Zoom', async () => {
+test('the left button held a moment drags outside Edit layout; the right button never drags; no Alt + Z', async () => {
   const fs = await import('node:fs');
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /const HOLD_MS = 400;/, 'one hold time');
@@ -196,6 +196,6 @@ test('the left button held a moment drags outside Edit layout; the right button 
   assert.match(app, /holdThen\(ev, \(\) => chGrab\(c, at, false\)\)/, 'a chiller moves after a left hold');
   assert.match(app, /holdThen\(ev0, \(\) => tplDragGo\(at, btn, t\)\)/, 'a Template icon drags after a left hold');
   assert.match(app, /if \(ev\.pointerType === 'mouse' && ev\.button === 2\) return;/, 'the right button does not drag in Edit layout');
-  assert.match(app, /ev\.code !== 'KeyZ'/, 'Z by its key, with or without Alt');
+  assert.match(app, /ev\.altKey \|\| ev\.repeat \|\| ev\.key\.toLowerCase\(\) !== 'z'\) return;/, 'Z only, never Alt + Z (Rule 2.73)');
   assert.doesNotMatch(app, /'Move with Held Right Click'/, 'no right-drag hint left');
 });
