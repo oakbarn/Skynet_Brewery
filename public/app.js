@@ -19624,7 +19624,7 @@ function renderTemplatesTab(kind, group) { return box => {
     const drag = kind === 'vessel' && can('admin'), cls = t.cls === 'skynet' ? 'Skynet' : 'User Bundled';
     const ins = can('admin') ? ' Click it once, then B (or Insert) puts a copy on the 🔨 Build Tab and you stay here.' : '';
     const b = h('button', { class: 'tplIcon ' + t.cls, 'data-tpl': t.name, title: (drag ? `${t.name} (${cls} Template). Double-click for its settings. Hold the left button on it a moment, then drag it off to put a copy on the 🔨 Build Tab.` : `${t.name} (${cls} Template). Double-click for its settings.`) + ins, ondblclick: open,
-      onkeydown: ev => { if (ev.key === 'Enter') open(); else if ((ev.key === 'Insert' || ev.key.toLowerCase() === 'b') && !ev.ctrlKey && !ev.shiftKey && !ev.altKey && !ev.metaKey && can('admin')) { ev.preventDefault(); tplInsert(kind, t); } } },
+      onkeydown: ev => { if (ev.key === 'Enter') open(); else if ((ev.key === 'Insert' || ev.key === 'ArrowRight' || ev.key.toLowerCase() === 'b') && !ev.ctrlKey && !ev.shiftKey && !ev.altKey && !ev.metaKey && can('admin')) { ev.preventDefault(); tplInsert(kind, t); } } },
       h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : '');
     if (drag) { b.classList.add('vesselTpl'); b.addEventListener('pointerdown', ev => tplDragStart(ev, b, t)); }
     grid.append(b);
