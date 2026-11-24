@@ -318,3 +318,10 @@ test('an IP to IP join goes when its two IPs come apart', async () => {
   assert.match(app, /function dropLooseDirect\(d\)/);
   assert.match(app, /if \(editing && draft && !drag\) dropLooseDirect\(draft\);/, 'checked each time the Tab is drawn');
 });
+
+// OakBarn Brewery, 2026-11-24: "Hit R and did not rotate but this" (Rule 2.73)
+test('an Edit layout bar list lets go of the keyboard once a row is picked', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function pickRun\(sel\) \{[\s\S]{0,500}sel\.blur\(\);\s+if \(f\) guard\(f\)\(\);/);
+});

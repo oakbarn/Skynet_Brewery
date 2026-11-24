@@ -6887,6 +6887,9 @@ function fillPick(sel, head, groups) {
 }
 function pickRun(sel) {
   const f = sel.value === '' ? null : sel._runs?.[+sel.value]; sel.value = '';
+  // the list lets go of the keyboard once a row is picked (OakBarn Brewery, 2026-11-24: "Hit R and did not rotate but this": the R
+  // went to the still-focused list, which jumped to its first row starting with R and added a RIMS), so R, H, V, Z, Delete reach the Tab
+  sel.blur();
   if (f) guard(f)();
 }
 function fillAddType() {
