@@ -71,6 +71,17 @@ Une copie de Template, d'un **Template Skynet** ou d'un **Template groupé de l'
 
 Si vous n'êtes pas encore en Edit layout, il est activé pour vous.
 
+## Ouvrir les Templates depuis le Build Tab {#open-the-templates-from-the-build-tab}
+
+Vous n'avez pas à fermer votre Build pour voir les Templates. En Edit layout, **📁 Templates** dans la barre Edit layout ouvre **Vessel Templates**, **Equipment Templates**, **Fitting Templates** ou **Build Template**, et le Build reste ouvert. Un onglet Template du Menu déjà ouvert peut aussi être cliqué.
+
+- Vous voyez ce que vous obtenez : **Add to Tab**, **Clone** ou un **glisser avec le bouton droit** met la copie sur le Build Tab, comme toujours.
+- **B** (ou **Insert**) : cliquez une fois sur l'icône d'un Template, puis appuyez sur **B** (pour Build) ou **Insert**. Une copie va sur le Build Tab et vous restez sur les Templates, pour en ajouter plusieurs.
+- Pendant qu'une page de Templates est affichée, la barre Edit layout s'efface. Cliquez sur le **🔨 Build Tab** (ou **✖ Close**) pour revenir à votre Build, tout y est comme vous l'avez laissé.
+- Les autres onglets du Menu attendent toujours que vous appuyiez sur **Save layout** ou **Exit** (Règle Skynet 2.52).
+
+(Règle Skynet 4.10)
+
 ## Finish Build
 
 Appuyez sur **✅ Finish Build ...** dans la barre Edit layout. Une fenêtre demande où ça doit aller :

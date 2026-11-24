@@ -570,6 +570,7 @@ Mode", "Hamburger Menu does not work in build mode. Get Rid in Build mode", "Ent
 Nothing works so Just take up space OR GREYED OUT", Label Attributes "DiD not change to the defaults set", its bottom buttons "Don't
 Need"). While **Edit layout** is on (Build mode):
 - the **☰ Menu** button (Menu Bar and Tabs bar) is **greyed out**; a click only says to press **Exit** or **Save layout** first.
+  The Template Menu tabs are the one exception: they open from **📁 Templates** on the Edit layout bar (Rule 4.10, 2026-11-24).
 - **dialogs have no ☰** (an exception to Rule 2.3), and a dialog shown again (the Review step's Back) never gets a second ☰.
 - while a dialog is open, the **whole Edit layout bar is greyed out** (nothing on it works until the dialog is finished or Cancelled).
 - the **Label Attributes** Dialog shows the Font, Fore Color and Back Color the Label has now (its own, the Tab Style, then Default
@@ -2036,7 +2037,7 @@ things. Added by Process Editor"). Help 71, 92.
   **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
 - **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
   All, Unlock All, Tab settings, New tab, **👻 Hidden Tab** and its **orange ?** (a pop-up with how Edit layout
-  works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Finish Build.
+  works, the hint that was on row 3), Build Tab, To Build Tab, **📁 Templates** (Rule 4.10), Processes, Preview, Finish Build.
 - **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
   still shows on row 3.
 *Replaced:* the ➕ Add box of PR #117 (2026-10-27). *Replaced (2026-11-05):* row 1 Widgets ended with **Add equipment ➕** and
@@ -2101,6 +2102,25 @@ equipment). On ☰ Menu > Vessel Templates or Equipment Templates (Admins), hold
 copy of its picture follows the mouse, and turns solid past 100 px. Let go past 100 px and a copy is made on the 🔨 Build Tab (Rule
 4.1) with its Properties open, as Add equipment does. Under 100 px nothing is made. A right-click that does not move opens its Help,
 as everywhere (Rule 2.11). Panel only.
+
+4.10 **The Templates open from the 🔨 Build Tab, and B or Insert puts a copy on it** (OakBarn Brewery, 2026-11-24: "on the build tab, I
+clicked Equipment Template and said I needed to close build First. The Move form the Equipment Template to the build worked the way I
+expected, but would like to be able to access the build template from the Build tab. Basically any of the templates able to access from
+the Build Tab"; "Easier for a User to use the Template as he sees what he is getting. Any hot keys so we can add to build tab from a
+Template while in a Template? If an item had the focus and we used Insert Key?"; "Is there a Keyboard short cut we could use just on a
+Template"):
+- **📁 Templates** on the Edit layout bar (a dropdown, Rule 2.6) opens **Vessel Templates**, **Equipment Templates**, **Fitting
+  Templates** or **Build Template** while Edit layout (Build mode) stays on and the Build stays open. A Template Menu tab already open
+  on the Tabs bar can be clicked too. Every other Menu tab still says "Save or exit Edit layout first" (Rule 2.52).
+- Their **Add to Tab**, **Clone** and **right-drag** (Rule 4.9) work as before: the copy goes on the 🔨 Build Tab (Rule 4.1).
+- **B** (for Build) or **Insert** on a Template's icon that has the focus (one click gives it the focus; Admins): a copy goes on the
+  🔨 Build Tab, the same as Add to Tab (Bundled, its name made for the Tab the Build goes to), and you stay on the Template Menu tab
+  with the same Template picked, so several can be put down one after another. Double-click and Enter still open its settings (that is
+  why double-click is not used). The keys act only on the icon, never in a text box, and not with Ctrl, Shift, Alt or Cmd. Edit layout
+  turns on when it is off. Many laptops have no Insert key, so B is the one every keyboard has.
+- While a Template Menu tab shows over the Build, the Edit layout bar steps aside, and Z (zoom) and Ctrl+Z (Put back) do nothing. A
+  click on the 🔨 Build Tab, or the Menu tab's Close, goes back to the Build, everything on it as it was.
+Help 50, 55. Panel only.
 
 ## 5. Templates and Integrated items
 

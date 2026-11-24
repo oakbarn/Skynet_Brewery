@@ -5166,6 +5166,7 @@ function setEditing(on) {
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
   document.body.classList.toggle('buildMode', on);       // ☰ Menu greyed out; the Edit layout bar greyed while a box is open (Rule 2.52)
+  markMenuOverBuild();
   $('#barEdit').classList.toggle('on', on); $('#barEdit').setAttribute('aria-pressed', String(on));
   $('#barEdit').title = on ? 'Leave Edit layout (asks to Save if something changed)' : 'Edit layout (admins): move, add and change things on the Tabs. Press again to leave it';
   const lockedEq = S.config.workspaces.find(w => w.name === wsName)?.equipLocked;
@@ -5197,7 +5198,7 @@ $('#editInfo').addEventListener('click', editInfoPopup);
 $('#undoMove').addEventListener('click', undoLast);
 // Ctrl+Z in Edit layout puts back the last move, unlock or swap (Rule 5.37); in a text box it stays the browser's own undo
 document.addEventListener('keydown', ev => {
-  if (!editing || !(ev.ctrlKey || ev.metaKey) || ev.shiftKey || ev.key.toLowerCase() !== 'z') return;
+  if (!editing || menuTab || !(ev.ctrlKey || ev.metaKey) || ev.shiftKey || ev.key.toLowerCase() !== 'z') return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   ev.preventDefault(); undoLast();
 });
@@ -5422,7 +5423,7 @@ document.addEventListener('pointermove', ev => {
 }, true);
 document.addEventListener('keydown', ev => {
   if (zoomBox && ev.key === 'Escape') { if (zoomBox.trace) zoomTraceEnd(); else zoomClose(); return; }
-  if (!editing || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat || ev.key.toLowerCase() !== 'z') return;
+  if (!editing || menuTab || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat || ev.key.toLowerCase() !== 'z') return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();
 });
@@ -13365,6 +13366,9 @@ $('#updVersion').onclick = guard(async () => {
 });
 // 📝 Processes on the Edit layout bar opens the Process editor, the same way 🔨 Build Tab opens the Build Tab
 $('#procTab').onclick = () => setView('scripts');
+// 📁 Templates on the Edit layout bar (Rule 4.10): opens a Template Menu tab without leaving Edit layout (the ☰ Menu stays greyed, Rule 2.52)
+{ const s = $('#tplOpen');
+  if (s) s.onchange = () => { const k = s.value; s.value = ''; if (k) openMenuTab(k); }; }
 // The Process editor never opens empty (OakBarn Brewery, 2026-11-21: "I opened the Process with the Button on the Work Tab Menu and
 // it is not in edit mode"): it opens the Process this browser had open last, or the first one in the list. The box says what to do
 // when there is no Process yet.
@@ -16946,9 +16950,17 @@ async function menuEditLayout() {
   setView('workspace'); setEditing(true);
 }
 const menuBack = {};      // each open Menu tab: where it was opened from (Panel Update 5 #8)
+// The Template Menu tabs open from the 🔨 Build Tab too, with Edit layout (Build mode) kept on (OakBarn Brewery, 2026-11-24: "would like
+// to be able to access the build template from the Build tab. Basically any of the templates able to access from the Build Tab";
+// Rule 4.10): Vessel Templates, Equipment Templates, Fitting Templates and Build Template. Their Add to Tab, Clone, right-drag and
+// Insert put the copy on the Build Tab as before. While one shows, the Edit layout bar steps aside; a click on the Build Tab (or the
+// Menu tab's Close) goes back to the Build, everything on it as it was. Every other Menu tab still waits for Save or Exit (Rule 2.52).
+const TPL_MENU_TABS = ['vtemplates', 'etemplates', 'ftemplates', 'buildtemplate'];
+const markMenuOverBuild = () => document.body.classList.toggle('menuOverBuild', !!(editing && menuTab));
 function openMenuTab(k) {
   if (eqv && !eqViewClose()) return;      // the Equipment Profile view closes first (it asks when its changes are not saved)
-  if (editing) return toast('Save or exit Edit layout first', true);
+  if (editing && !TPL_MENU_TABS.includes(k)) return toast('Save or exit Edit layout first', true);
+  if (editing) sel = null;                // nothing on the Build stays picked, so no key (Delete ...) acts on it from the Templates
   if (menuTab && menuTab !== k && paneDirty() && !confirm('This Menu tab has changes that are not saved. Leave them?')) return;
   if (menuTab && menuTab !== k) dropDirty(menuTab);
   if (!menuOpen.includes(k)) menuOpen.push(k);
@@ -16958,7 +16970,7 @@ function openMenuTab(k) {
   menuTab = k;
   setView('workspace');
   $('#wsScroll').classList.add('hidden'); $('#menuPane').classList.remove('hidden'); $('#view-workspace').classList.add('menuMode');
-  markOnTabs(); refit();
+  markMenuOverBuild(); markOnTabs(); refit();
   renderTabs(); renderMenu(); renderMenuPane();
 }
 function leaveMenuTab() {
@@ -16966,7 +16978,7 @@ function leaveMenuTab() {
   dropDirty(menuTab);
   menuTab = null;
   $('#menuPane').classList.add('hidden'); $('#wsScroll').classList.remove('hidden'); $('#view-workspace').classList.remove('menuMode');
-  markOnTabs(); showMenuBar(false);
+  markMenuOverBuild(); markOnTabs(); showMenuBar(false);
   renderMenu(); renderTabs(); fitZoom();
 }
 // Save, Undo and Close, all at the top (OakBarn Brewery, 2026-11-16, Rule 2.54): Save saves and stays open (✔ Saved); Undo goes
@@ -19482,7 +19494,9 @@ function renderTemplatesTab(kind, group) { return box => {
   for (const t of list) {
     const open = () => openTemplate(kind, t.name);
     const drag = kind === 'vessel' && can('admin'), cls = t.cls === 'skynet' ? 'Skynet' : 'User Bundled';
-    const b = h('button', { class: 'tplIcon ' + t.cls, title: drag ? `${t.name} (${cls} Template). Double-click for its settings. Right-drag it off to put a copy on the 🔨 Build Tab.` : `${t.name} (${cls} Template). Double-click for its settings.`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
+    const ins = can('admin') ? ' Click it once, then B (or Insert) puts a copy on the 🔨 Build Tab and you stay here.' : '';
+    const b = h('button', { class: 'tplIcon ' + t.cls, 'data-tpl': t.name, title: (drag ? `${t.name} (${cls} Template). Double-click for its settings. Right-drag it off to put a copy on the 🔨 Build Tab.` : `${t.name} (${cls} Template). Double-click for its settings.`) + ins, ondblclick: open,
+      onkeydown: ev => { if (ev.key === 'Enter') open(); else if ((ev.key === 'Insert' || ev.key.toLowerCase() === 'b') && !ev.ctrlKey && !ev.shiftKey && !ev.altKey && !ev.metaKey && can('admin')) { ev.preventDefault(); tplInsert(kind, t); } } },
       h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : '');
     if (drag) { b.classList.add('vesselTpl'); b.addEventListener('pointerdown', ev => tplDragStart(ev, b, t)); }
     grid.append(b);
@@ -19527,8 +19541,8 @@ function tplDragStart(ev, btn, t) {
 }
 // Add to Tab and Clone: the copy is made on the Build Tab (in Edit layout, Bundled). Finish Build ... then offers the Tab it is
 // going to first (Add to Tab), or As a Template under the new name (Clone).
-function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
-  if (menuTab) leaveMenuTab();
+function addTemplateToTab(kind, t, tab, name, { cloneAs, stay } = {}) {
+  if (menuTab && !stay) leaveMenuTab();
   if (!editing) setEditing(true);
   const b = toBuild(); if (!b) return;
   if (draft.workspaces.some(w => w.name === tab && !w.build)) b.from = tab;
@@ -19536,8 +19550,25 @@ function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
   const g = kind === 'vessel' ? placeTabVessel(t, b.name, name) : placeTabFitting(t, b.name, name, null);
   sel = { kind: 'gfx', id: g.id };
   renderTabs(); renderWs();
+  if (stay) return toast(`${name} is on the 🔨 Build Tab. B (or Insert) puts another one there; click the 🔨 Build Tab to go to it.`, false, 6000);
   toast(cloneAs ? `${name} is on the 🔨 Build Tab. Change it there, then press ✅ Finish Build ... > As a Template to save the new Template.`
     : `${name} is on the 🔨 Build Tab. Change it there, then press ✅ Finish Build ... > Move to Tab to put it on the ${b.from} tab.`, false, 8000);
+}
+// Insert on a Template that has the focus (OakBarn Brewery, 2026-11-24: "Any hot keys so we can add to build tab from a Template while
+// in a Template? If an item had the focus and we used Insert Key?"; Rule 4.10): a copy goes on the 🔨 Build Tab, the same as Add to Tab
+// (Bundled, its name made for the Tab it goes to), and you stay on the Template Menu tab with the focus on the same Template, so
+// several can be put down one after another. Edit layout turns on when it is off. Only on the Template icon itself, never in a box.
+function tplInsert(kind, t) {
+  const back = menuTab;
+  if (!editing) setEditing(true);          // turning Edit layout on leaves the Menu tab; it opens again below
+  if (!editing || !draft) return;
+  const full = tplOf(kind, t.name) || t;
+  const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean);
+  const from = buildWs()?.name === wsName ? buildWs().from || wsName : wsName;
+  if (back && menuTab !== back) openMenuTab(back);
+  addTemplateToTab(kind, { ...full, name: full.name, cls: full.cls }, from, bundleName(full.name, tabIdOf(from) || 'Build', taken), { stay: !!menuTab });
+  sel = null;
+  if (menuTab) { renderMenuPane(); [...document.querySelectorAll('#menuPane .tplIcon')].find(x => x.dataset.tpl === full.name)?.focus(); }
 }
 function placeTabVessel(t, tab, name) {
   const C = vClassOf(t), n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
