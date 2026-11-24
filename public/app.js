@@ -24,6 +24,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
 import { plainLetters } from './letters.js';      // ß ss, æ ae, ø o in a Name (Rule 3.4)
 import { setStopWord } from './processwidget.js';
+import { fitValveBoxes } from './valvebox.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -554,6 +555,7 @@ function runStack(stack) {
 function drawWs() {
   const w = curWs(); const ws = $('#ws');
   if (!w) return;
+  if (editing && draft) fitValveBoxes(draft);      // a Skynet side-view valve's box is as long as the valve (Rule 5.29)
   ws.querySelectorAll('.el,.gfx,.flowHot,svg.pipeL').forEach(n => { if (!n.closest('.buildMark')) n.remove(); });      // the Watermark keeps its copy (Rule 4.1)
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
   ws.style.backgroundColor = w.color || '';      // its own color: a Tab Profile's is copied into it when picked (Rule 2.62 #9)
@@ -2146,11 +2148,12 @@ function sidePt(e, side) {
 const VALVE_STD = { h: [[0, 0.5], [1, 0.5]], v: [[0.5, 0], [0.5, 1]], f: [[0.5, 0.5], [0.5, 0.5]], fe: [[0.5, 0.5], [0.5, 1]] };
 // Skynet valve pictures have no drawn-on pipe out to the box edges any more (OakBarn Brewery, 2026-11-23: "If we use the same graphic but
 // did away with the extentions" ... "Lets try that"; Rule 5.29 changed): every side-view valve is 150 long, end to end, in the middle
-// of its 300 box, so its IPs are on its own ends, a quarter in from the sides: (75, 150) and (225, 150) level, (150, 75) and (150, 225)
-// upright, the front elbow's bottom end at (150, 225). The box keeps its size so the motor or handle fits in it. A user's own valve
-// picture keeps VALVE_STD (its IPs on the box edges).
-const VALVE_SKN = { h: [[0.25, 0.5], [0.75, 0.5]], v: [[0.5, 0.25], [0.5, 0.75]], f: VALVE_STD.f, fe: [[0.5, 0.5], [0.5, 0.75]] };
-const vstd = (o, kind = o, t = VALVE_SKN) => ({ o, w: 300, h: 300, ends: t[kind] });
+// of its 300 box; the front elbow's bottom end is at (150, 225). A user's own valve picture keeps VALVE_STD in its square box.
+// Then (OakBarn Brewery, 2026-11-23: "Or you could make the height standard to the tallest needed") the box is cropped to the valve:
+// a level picture is 150 x 300 (viewBox 75 0 150 300), an upright one 300 x 150, so the IPs are back on the middle of the box ends
+// (public/valvebox.js fits the item's box to it).
+const VALVE_SKN = { h: VALVE_STD.h, v: VALVE_STD.v, f: VALVE_STD.f, fe: [[0.5, 0.5], [0.5, 0.75]] };
+const vstd = (o, kind = o, t = VALVE_SKN) => ({ o, w: o === 'h' && t === VALVE_SKN ? 150 : 300, h: o === 'v' && t === VALVE_SKN ? 150 : 300, ends: t[kind] });
 const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h'), BF_V_R: vstd('v'), BF_V_L: vstd('v'),
   BF_Front: vstd('f'), BF_Front_Elbow: vstd('f', 'fe'), BALL_Front: vstd('f'),
   // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...)

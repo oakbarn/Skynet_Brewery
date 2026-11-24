@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-valve-standard="1">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 75 300 150" data-valve-standard="1">
   <!-- Motorized TC 1.5 inch ball valve, vertical pipe, motor on the LEFT: Motorized_TC15_Ball_Valve_Vertical.svg (motor on the right)
        mirrored left to right (OakBarn Brewery, 2026-11-18: Vertical Left and Vertical Right switch the picture, Rule 18.43). -->
   <g transform="translate(300 0) scale(-1 1)">
   <!-- The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs
-       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); no pipe drawn out to the edges (Rule 5.29, 2026-11-23): its IPs are on its own ends. -->
+       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); no pipe drawn out to the edges; the box is cropped to the valve, 150 long and 300 across (Rule 5.29, 2026-11-23), so its IPs are on its own ends. -->
   <g transform="translate(125.8 72.45) scale(1.1)">
   <!-- Skynet drawing: motorised ball valve, closed, vertical pipe. Same size and pipe spot as Valve_Ball_ClosedV-1x1.png. -->
   <rect x="10" y="0" width="24" height="141" fill="#7f7f7f"/>

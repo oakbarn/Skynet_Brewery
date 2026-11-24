@@ -179,5 +179,5 @@ test('Skynet valves have no drawn-on pipe (IPs on their own ends); pump ends are
   }
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /class="pumpend"/, 'a pump Hose or Pipe ends in a ferrule');
-  assert.match(app, /const VALVE_SKN = \{ h: \[\[0\.25, 0\.5\], \[0\.75, 0\.5\]\]/, 'IPs a quarter in from the box sides');
+  assert.match(app, /const VALVE_SKN = \{ h: VALVE_STD\.h, v: VALVE_STD\.v/, 'IPs on the ends of the cropped box');
 });

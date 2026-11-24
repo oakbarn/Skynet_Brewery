@@ -6,23 +6,25 @@ in the same spots** (Skynet Rule 5.29). You can change a Ball valve for a Butter
 
 ## Where the IPs are
 
-A valve starts at **150 x 150** on a Tab (the same as a pump, so valves and pumps are to the same scale).
+A side-view valve is **75 x 150** on a Tab when level and **150 x 75** when upright: its box is only as long as the valve, and as
+high as the tallest valve needs. A front view (looking down the pipe) is **150 x 150**. Valves and pumps are to the same scale.
 
-| Orientation | In the 300 x 300 drawing | On a 150 x 150 valve |
+| Orientation | In the drawing | On the Tab |
 |----|-----|-----|
-| Horizontal | (75, 150) and (225, 150) | level with the middle, a quarter in from the left and right sides |
-| Vertical Left, Vertical Right | (150, 75) and (150, 225) | on the middle line, a quarter down from the top and up from the bottom |
+| Horizontal (150 x 300 drawing) | (0, 150) and (150, 150) | the middle of the left and right sides: the valve's ends |
+| Vertical Left, Vertical Right (300 x 150 drawing) | (150, 0) and (150, 150) | the middle of the top and bottom: the valve's ends |
 | 45 degrees | the Horizontal spots, turned 45 degrees about the middle | |
 | Front (looking down the pipe) | both at (150, 150) | the middle |
 | Front elbow | (150, 150) and (150, 225) | the middle, and a quarter up from the bottom |
 
-If you resize a valve, the spots grow or shrink with its box. Keep it square so the spots stay on the valve's ends. A valve with your own picture keeps its spots on the middle of the box sides.
+If you resize a valve, the spots grow or shrink with its box, and the box keeps its shape (its length half its height). Turned from
+level to upright, its box turns too. A valve with your own picture keeps its spots on the middle of the box sides.
 
 ## Drawn to scale
 
-Every Skynet valve drawing is at the same scale in the box, and every side view is the same length as the Motorized Ball Valve, end to
-end (half the box). Its IPs are on its own ends, a quarter in from the sides of the box; the rest of the box holds the motor or handle.
-Pipes joined to it run right up to its ends.
+Every Skynet valve drawing is at the same scale, and every side view is the same length as the Motorized Ball Valve, end to end.
+Its IPs are on its own ends; the box is as high as the tallest valve, so the motor or handle always fits. Pipes joined to it run right
+up to its ends.
 
 ## A valve with your own picture
 
