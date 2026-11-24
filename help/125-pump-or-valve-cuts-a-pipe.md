@@ -32,7 +32,7 @@ The pipe is made **shorter** and the pump or valve is joined in with **both of i
 
 Drop a pump or valve that has no pipes on it with one of its red IP dots right on a red IP dot of something else (a pump, valve,
 fitting or vessel port), as a valve sits on a pump in real life. It slides so the two dots sit on one spot and they join, IP to IP,
-with no pipe between; both dots turn green. It is not put into a pipe it lies over. ↩ Put back (Ctrl+Z) undoes it.
+with no pipe between; both dots turn green. It is not put into a pipe it lies over. ↩ Put back (Ctrl+Z) undoes it. Move either one off (or unlock or delete it) and the join goes: both dots are red again.
 
 ## When nothing is cut
 

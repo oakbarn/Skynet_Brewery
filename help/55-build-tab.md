@@ -91,7 +91,7 @@ Press **✅ Finish Build ...** on the Edit layout bar. A pop-up asks where it sh
 | **Move to Tab** | Pick the Tab (the one picked for the new item is first; otherwise the one you came from) and press **Move to Tab**. Everything on the Build Tab moves there at the size it is now. To the Tab picked for it, it keeps its spot from the Build Tab; to another Tab it goes to the middle. It glows red until clicked. Then press **Save layout**. |
 | **As a Template** | Type a **Template Name** (no spaces, unique) and press **Save as Template**. It is saved at once in **☰ Menu**, and the Build Tab closes. Use **Add to Tab** on the Template to put it on a Tab. |
 | **Throw it away** | Everything on the Build Tab is deleted (it asks first), and the Ports of its Devices are free again. |
-| **Keep building** | Back to the Build Tab, nothing changes. |
+| **Keep building** | Back to building on the Build Tab, nothing changes. If 👁 Preview was on, it is turned off so you can move and change things again. |
 
 A new Device whose name still follows the suggested name gets the **Tab ID** of the Tab it moves to at the end of its name (for example `MB_25_PWM_VlV_Fly~Sparge_SP`). A name you typed yourself is never changed.
 

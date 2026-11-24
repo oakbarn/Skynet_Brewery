@@ -310,3 +310,25 @@ test('R, Shift + R, H and V turn and flip the picked fitting', async () => {
   assert.match(app, /turnSel\(k === 'r' \? \(ev\.shiftKey \? -90 : 90\) : k\);/);
   assert.match(app, /if \(!editing \|\| previewing \|\| menuTab \|\| !sel \|\| ev\.ctrlKey \|\| ev\.metaKey \|\| ev\.altKey \|\| ev\.repeat\) return;/, 'never with Ctrl, Alt or ⌘');
 });
+
+// OakBarn Brewery, 2026-11-24: "Both should have been red"; "The Pump IPs" (Rule 5.26)
+test('an IP to IP join goes when its two IPs come apart', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function dropLooseDirect\(d\)/);
+  assert.match(app, /if \(editing && draft && !drag\) dropLooseDirect\(draft\);/, 'checked each time the Tab is drawn');
+});
+
+// OakBarn Brewery, 2026-11-24: "Hit R and did not rotate but this" (Rule 2.73)
+test('an Edit layout bar list lets go of the keyboard once a row is picked', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function pickRun\(sel\) \{[\s\S]{0,500}sel\.blur\(\);\s+if \(f\) guard\(f\)\(\);/);
+});
+
+// OakBarn Brewery, 2026-11-24: "Clicked Finish Build then Keep building ... but still in non edit mode" (Rule 4.1)
+test('Finish Build > Keep building turns Preview off', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /onclick: \(\) => \{ close\(null\); if \(previewing\) setPreview\(false\); \} \}, 'Keep building'/);
+});
