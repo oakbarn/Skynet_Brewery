@@ -39,10 +39,10 @@ Tab est verrouillé (lock_Equipment). Posez la souris dessus pour voir pourquoi.
 
 ## Zoomer sur un raccord (Z) {#zoom-in-on-a-join-z}
 
-En **Edit layout**, pointez le raccord et appuyez sur **Z** (pas pendant que vous tapez dans une case). Une fenêtre s'ouvre dans un
+En **Edit layout**, pointez le raccord et appuyez sur **Z** ou **Alt + Z** (pas pendant que vous tapez dans une case). Une fenêtre s'ouvre dans un
 coin du haut du Tab et montre les **200 pixels autour de la souris, 3 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte.
 
-**Travaillez directement dans la fenêtre :** traînez-y un bout de tuyau, un IP ou un objet avec le bouton droit de la souris,
+**Travaillez directement dans la fenêtre :** traînez-y un bout de tuyau, un IP ou un objet avec le bouton gauche de la souris,
 comme sur le Tab, et il bouge aussi sur le Tab, 3 fois plus finement, pour poser un bout exactement sur un IP. Les clics et les
 doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge).
 

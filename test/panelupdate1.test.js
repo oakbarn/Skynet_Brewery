@@ -37,8 +37,8 @@ assert.match(rules, /^18\.45 \*\*Panel Update Final 1/m);
 // a Hose Bib may be Vertical (Left / Right); its IP on any of the 8 spots since Rule 18.49
 assert.match(app, /const mvOrientOf = g => mvFront\(g\) \? 'h' : \['h', ?'v'\]\.includes\(g\.mvOrient\)/, 'a Hose Bib is not locked to Horizontal');
 assert.match(app, /const hbSpotOk = \(g, k\) =>/);
-// a left click on a QD hose end: the Move with Held Right Click pop-up (after a moment, so a double-click opens the hose instead)
-assert.match(app, /'Move with Held Right Click'/);
+// a left click on a QD hose end: the hold-then-drag pop-up (was Move with Held Right Click until 2026-11-24, Rule 2.9) (after a moment, so a double-click opens the hose instead)
+assert.match(app, /'Hold the left button a moment, then drag'/);
 assert.match(app, /qdHintWait = setTimeout\(\(\) => \{ qdHintWait = null; qdLeftHint\(at\); \}, 320\)/);
 assert.match(css, /\.qdHint \{/);
 // a double-click outside Edit layout: a hose end's ring opens the hose, an IP opens its Device or Widget

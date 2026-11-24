@@ -32,7 +32,7 @@ Le bouton Override ne la passe pas : le flexible doit être placé.
 
 ## Le déplacer à la main {#moving-it-by-hand}
 
-Quand une personne traîne le bout du flexible (bouton droit de la souris, ou un doigt, aide 127), rien n'est demandé : le bout reste là où il est lâché.
+Quand une personne traîne le bout du flexible (bouton gauche de la souris gardé un instant, ou un doigt, aide 127), rien n'est demandé : le bout reste là où il est lâché.
 Seule une ligne de Process attend **Done**.
 
 ## Texte prédictif et Check {#predictive-text-and-check}

@@ -471,8 +471,8 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
 - **A double-click outside Edit layout** is two single clicks to a browser, so its first click acts. To open a **Heating Element's**
   method Settings on a running Tab, use **Ctrl + Click** (⌘ + Click on a Mac); a plain click still acts at once (OakBarn Brewery,
   2026-11-17, Rule 6.19).
-- What stays the same: **double-click opens Properties** (Rule 2.9), the right mouse button drags in Edit layout and gives Help
-  outside it (Rule 2.11), view only accounts can't change anything, and an item's own **When tapped** setting (none, process, tab,
+- What stays the same: **double-click opens Properties** (Rule 2.9), the left mouse button drags and the right one gives Help
+  (Rules 2.9, 2.11), view only accounts can't change anything, and an item's own **When tapped** setting (none, process, tab,
   or Ask before changing) still wins, because the user chose it for that one item.
 - **Anything new** is built to this Rule: before a new Device or Widget is finished, its one click is checked against this list.
 - **BruControl Import:** checked. The Importer has no Tabs that run, so it has no clicks of its own; everything it makes is a Panel
@@ -631,8 +631,14 @@ as the pump covers of Rule 7.13 (Fritz, 2026-11-05); an item saved with pure whi
 2.8 **Properties dialogs** have Delete, Cancel and Save at both the top and the bottom. (2026-10-04,
 PR #15)
 
-2.9 **Double-click opens Properties** (hold a finger on phones). **Right mouse button drags.**
-(2026-10-21)
+2.9 **Double-click opens Properties** (hold a finger on phones). **The left mouse button drags; the right button never does.**
+(2026-10-21; changed 2026-11-24)
+*Changed 2026-11-24* (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be
+deprecated as it too often brings up the help"): the right mouse button no longer drags anywhere, in Edit layout or out of it; it only
+opens Help (Rule 2.11). Outside Edit layout, what moves by hand (a Quick Disconnect hose end, Rule 5.40; an Immersion Chiller, Rule 5.42;
+a Template icon, Rule 4.9) moves with the **left button held still a moment (400 ms), then dragged**; a quick left click keeps its normal
+action, and a press that moves before the moment is up does nothing. A finger works as before. *Replaced:* "Right mouse button drags"
+(2026-10-21).
 **Ctrl + Click** (⌘ + Click on a Mac) opens Properties too, in Edit layout (OakBarn Brewery, 2026-11-17: "Maybe the CTRL + Click is
 the way to Bring Up Properties Dialog"; "make sure that the double click for hoses still works"): double-click still opens Properties and
 still finishes drawing a hose; a Ctrl + Click while a pipe or hose is being drawn does nothing. *Fixed 2026-11-17* (OakBarn Brewery:
@@ -647,8 +653,9 @@ also bring Up the Property dialog for the Parent. Double Click on a Yellow Circl
 Part of the Properties of a Hose and Not Outside"): an IP or a hose end has no dialog of its own; its settings are in its parent's
 Properties. So a double-click on the **yellow ring of a hose end** opens that hose's Properties, and a double-click on an **IP** opens
 the Properties of the Device or Widget it belongs to (a Vessel's IP: the Vessel; a Pipe Fitting or a free IP: its own), on a running
-Tab as in Edit layout. Edit layout opens with them (admins only). A Device or a Manual Valve itself keeps its own clicks. A left click
-on the yellow ring does not move it: after a moment a small pop-up with the ⛔ says **Move with Held Right Click** (Rule 5.40).
+Tab as in Edit layout. Edit layout opens with them (admins only). A Device or a Manual Valve itself keeps its own clicks. A quick left click
+on the yellow ring does not move it: after a moment a small pop-up with the ⛔ says **Hold the left button a moment, then drag** (Rule 5.40;
+was "Move with Held Right Click" until 2026-11-24).
 *Replaced:* right-click opening Properties (PR #51) was built, then Fritz turned it down and the PR
 was closed. Do not offer it again.
 
@@ -658,7 +665,8 @@ was closed. Do not offer it again.
 empty spot, the Menu Bar). A yellow "?" sits by ☰ Menu tab headings and Properties titles, **but
 never on a Tab itself.** (2026-10-21, PR #57)
 *Exception (2026-11-05, waiting on Fritz's pick):* the free end of a Quick Disconnect hose moves outside Edit layout, and the right
-button drags it (Rule 5.28).
+button drags it (Rule 5.28). *Changed 2026-11-24 (Rule 2.9):* the right button only ever opens Help, in Edit layout too, on any item,
+locked or not; moving is the left button's (held a moment outside Edit layout).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
@@ -2098,12 +2106,12 @@ Tab's name (its Tab ID by Rule 3.2). The copy puts everything that is on the Tab
 Help 236. Rules 4.1 and 4.4 were changed for it (OakBarn Brewery, 2026-11-19, picked "Change the Rules"): the copy puts its new
 Widgets straight on the new Tab, not the 🔨 Build Tab, and makes Clones of Devices and of Widgets without ⧉ Clone Device.
 
-4.9 **Right-drag a copy off a Vessel or Equipment Template** (OakBarn Brewery, 2026-11-22, Panel Update 9 item 16: "Grab a Item from
+4.9 **Drag a copy off a Vessel or Equipment Template** (left button since 2026-11-24, Rule 2.9; was right-drag) (OakBarn Brewery, 2026-11-22, Panel Update 9 item 16: "Grab a Item from
 the Vessel or Equipment Template and drag off clone picture with Right Clicked Draw after 100 + Pixel Movement and right mouse click
 release, move to the Build tab and open Built Tab with Property Dialog open just as if it had been added with the button" Add
-equipment). On ☰ Menu > Vessel Templates or Equipment Templates (Admins), hold the right mouse button on a Template and drag: a faint
+equipment). On ☰ Menu > Vessel Templates or Equipment Templates (Admins), hold the left mouse button on a Template a moment (400 ms), then drag (the right button until 2026-11-24): a faint
 copy of its picture follows the mouse, and turns solid past 100 px. Let go past 100 px and a copy is made on the 🔨 Build Tab (Rule
-4.1) with its Properties open, as Add equipment does. Under 100 px nothing is made. A right-click that does not move opens its Help,
+4.1) with its Properties open, as Add equipment does. Under 100 px nothing is made. A right-click opens its Help,
 as everywhere (Rule 2.11). Panel only.
 
 4.10 **The Templates open from the 🔨 Build Tab, and B or Insert puts a copy on it** (OakBarn Brewery, 2026-11-24: "on the build tab, I
@@ -2495,7 +2503,7 @@ Help 127).
   on an IP) passes flow on into a hose or pipe joined to it, and sprays when nothing else is on it.
   *Replaced:* with nothing on it, it was shut, as an End Cap (2026-11-05).
 - **The Quick Disconnect hose** (**Draw QD hose**, Edit layout bar) hangs from a **pump IP**. Its **free end can be moved at any time,
-  not only in Edit layout**: with the **right mouse button** (Rule 2.9) on a computer, a **finger** on a phone or tablet (this is
+  not only in Edit layout**: with the **left mouse button held a moment, then dragged** (Rule 2.9; the right button until 2026-11-24) on a computer, a **finger** on a phone or tablet (this is
   running the brewery, so it works in run mode, Rule 2.35). Dropped on an IP or a Quick Disconnect it joins it (a Quick Disconnect wins
   over the IP under it); anywhere in the **top third of a vessel** it is the same as putting the hose in the vessel's top (the whole top
   third is one big IP); anywhere else the end is loose and no flow shows. Operators and admins can move it, the move is kept at once
@@ -2816,7 +2824,7 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and does not ask. Greyed out for the same reasons, and when a 🔒 locked pipe or fitting would have to move with it.
 - **🔍 Zoom box** (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for
   200 pixel square where Join area is zoomed inside the Dialog"; he picked A, the Z key, as Ctrl + Click already opens Properties,
-  Rule 2.9): in Edit layout, **Z** (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
+  Rule 2.9): in Edit layout, **Z** or **Alt + Z** (2026-11-24: "can alt + Z = Zoom"; by the key's place, so a Mac's Option + Z works) (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
   screen pixels around the mouse **3 times bigger** (on a smaller Tab area the box shrinks to fit). *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
   Dialog moves now. It needs to stay fixed and move the joins together inside the Dialog"; "z does not work like the esc. Just
   change the text that you use the esc button to close and or have a close button upper right corner"):* the box **stays where it
@@ -2969,11 +2977,11 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   in Build Mode"; "QD ends: Hoses only and only grab one end at a time"): a hose end whose IP Type is Quick Disconnect can be
   grabbed and moved outside Edit layout like a QD hose's free end (Rule 5.28), one end at a time; the other end stays. Pipes never
   do, whatever their IP Type.
-- **Unhooking a hose end: a warning only when liquid flows** (OakBarn Brewery, 2026-11-16: "Right Click and hold the Yellow circle is all it should take to move it.  It unhooks without comfirmation and is locked or hanging open when Right Moude buuton release"; "If there is flow a warning,  No flow, no warning"): holding the right mouse button (or a finger) on the
+- **Unhooking a hose end: a warning only when liquid flows** (OakBarn Brewery, 2026-11-16: "Right Click and hold the Yellow circle is all it should take to move it.  It unhooks without comfirmation and is locked or hanging open when Right Moude buuton release"; "If there is flow a warning,  No flow, no warning"): holding the left mouse button a moment (the right button until 2026-11-24, Rule 2.9), or a finger, on the
   yellow ring is all it takes; with no flow there is no pop-up and the end moves at once. With a pump on the hose On, or liquid
   flowing in it, a warning (frozen top, Rule 2.51) says "Turn the pump Off before you unhook it" and the end does not move. Skynet
   keeps checking (every half second) and the warning closes by itself once nothing flows; then hold the ring again. **✖ Exit**
-  closes it. It only warns: it never turns anything On or Off (Rule 2.44). Letting go of the right button never opens Help.
+  closes it. It only warns: it never turns anything On or Off (Rule 2.44). Letting go after a drag never opens Help.
   A hose end left in the air is open: what pushes into the hose (a Tap Water Valve that is On, a running pump) pours out of it, so
   the hose shows flow (and moving it warns). On a plain IP at the open end of a pipe, flow goes on into that pipe. Any open pipe or
   hose end can flow; only End Caps and closed valves stop it. Where flow pours out of an open end, a water splash is drawn (Skynet's
@@ -3031,7 +3039,7 @@ from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, ves
   A chiller a person built and moved in by hand is never taken off by a Process, and `place_Chiller` says that vessel already has one.
 - **Moving an Immersion Chiller by hand on a live Tab** (OakBarn Brewery, 2026-11-17: "Immersion Chillers on a Tab Can be Free Floating
   but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; built as a Rule 14.4 exception: "B Now"): the same as a Quick
-  Disconnect hose end (Rule 5.40). A **right-button hold** (or a finger) on the chiller picks it up, with no pop-up; while water flows
+  Disconnect hose end (Rule 5.40). A **left-button hold of a moment** (the right button until 2026-11-24, Rule 2.9), or a finger, on the chiller picks it up, with no pop-up; while water flows
   through it a warning says so and it does not move (the warning closes by itself once nothing flows). Let go over a vessel (no other
   chiller in it) and it **drops into that vessel**, in its lower middle, the same spot `place_Chiller` uses, and flashes red and yellow
   for 2 seconds; let go anywhere else and it stays there, **free floating**. Its own hoses (a bundled supply and waste hose, or Quick
@@ -7137,6 +7145,8 @@ bottom with a manual ball valve: the Valve_Only Bundled Fitting, its valve picke
 turns it on and off), so it has no Device; its Heat Source is Electric or Gas. Both programs show the same Templates.
 
 ## Change log
+
+- 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("can alt + Z = Zoom"): Alt + Z opens and closes the Zoom box too; the Zoom box drags and pans with the left button only. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
 - 2026-11-24: Rule 5.37 Zoom box note (OakBarn Brewery: "when I get near an edge with the left mouse click held, it scrolls"): a button held near an edge of the Zoom box moves the view that way; a drag goes along. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 note (OakBarn Brewery, 2026-11-23: "Tried to grab this and it ask me to unlock? It is not connected"): a pipe end with a red ring (on no IP, what it was joined to is gone) can be dragged like a let-go end; grabbed, it gets its coupling, so dropped on an IP it joins. Help 153 (and French). Also ("Why do I have to close or save after unlocking. Two Clicks? Why", Rule 2.44): 🔓 Unlock its IPs / its ends and ↔ Move with pipes in Properties save and close Properties themselves, one click. BruControl Import program: same Edit layout code; nothing else changes there.

@@ -33,9 +33,9 @@ Le titre des Properties dit **Quick Disconnect Hose**. Sa taille, sa couleur, so
 Le bout libre d'un flexible QD peut être déplacé **à tout moment**, pas seulement en Edit layout. Son bout s'affiche comme un anneau jaune en pointillés,
 toujours par-dessus tout ce qui est sur le Tab.
 
-- **Ordinateur :** gardez le **bouton droit de la souris** appuyé sur l'anneau et faites glisser (Règle 2.9 : le bouton droit fait glisser).
+- **Ordinateur :** gardez le **bouton gauche de la souris** appuyé un instant sur l'anneau (moins d'une demi-seconde), puis faites glisser. Un clic rapide ne le déplace pas. Le bouton droit ouvre seulement l'aide.
 - **Téléphone ou tablette :** gardez un **doigt** sur l'anneau et faites glisser.
-- **Clic gauche :** il ne déplace pas l'extrémité. Après un instant, une petite fenêtre avec le ⛔ rouge dit **Move with Held Right Click** (déplacer en gardant le bouton droit appuyé). Elle disparaît seule après 3 secondes, ou au clic suivant.
+- **Clic gauche :** il ne déplace pas l'extrémité. Après un instant, une petite fenêtre avec le ⛔ rouge dit **Hold the left button a moment, then drag** (tenez le bouton gauche un instant, puis glissez). Elle disparaît seule après 3 secondes, ou au clic suivant.
 - **Double-clic** sur l'anneau : les **Properties** du flexible s'ouvrent (admins seulement ; Edit layout s'ouvre avec elles). Un double-clic sur un **IP** ouvre les Properties du Device ou du Widget auquel il appartient.
 
 Tout bout de tuyau souple dont l'**IP Type** est **Quick Disconnect** bouge de la même façon (aide 24), un bout à la fois.

@@ -11,7 +11,7 @@ Right-click (on a Mac: Control + click, or a two-finger click on the trackpad):
 - **An empty spot on a tab**: opens [Tab background picture and color](26-tab-background).
 - **The Menu Bar**: the Schema list, each button (Tabs, Processes, Devices ...), the screen tabs, the ☰ Menu, and the Edit layout bar.
 
-In **Edit layout** an item that is **not** locked keeps the right mouse button for dragging it, as before. Double-click still opens **Properties**.
+The right mouse button never drags (2026-11-24): in **Edit layout** too, a right-click on any item opens its Help. Drag with the **left** button. Double-click still opens **Properties**.
 
 > Want the browser's own right-click menu (copy, inspect ...)? Hold **Shift** while you right-click.
 
