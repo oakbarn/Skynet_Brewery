@@ -40,11 +40,11 @@ Tab est verrouillé (lock_Equipment). Posez la souris dessus pour voir pourquoi.
 ## Zoomer sur un raccord (Z) {#zoom-in-on-a-join-z}
 
 En **Edit layout**, pointez le raccord et appuyez sur **Z** (pas pendant que vous tapez dans une case). Une fenêtre s'ouvre dans un
-coin du haut du Tab et montre les **200 pixels autour de la souris, 4 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte et
+coin du haut du Tab et montre les **200 pixels autour de la souris, 3 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte et
 montre toujours cet endroit.
 
 **Travaillez directement dans la fenêtre :** traînez-y un bout de tuyau, un IP ou un objet avec le bouton droit de la souris,
-comme sur le Tab, et il bouge aussi sur le Tab, 4 fois plus finement, pour poser un bout exactement sur un IP. Les clics et les
+comme sur le Tab, et il bouge aussi sur le Tab, 3 fois plus finement, pour poser un bout exactement sur un IP. Les clics et les
 doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge). Appuyez sur **Échap** ou sur le **✕**
 rouge dans son coin en haut à droite pour la fermer.
 
@@ -55,6 +55,7 @@ pour la part du déplacement le long de sa ligne, et seule la part en travers pa
 long de ses tuyaux à niveau, le tuyau qui monte à un coude se raccourcit), et ainsi de suite ; un tuyau coudé prend tout le déplacement à son coude, et un tuyau souple se plie. Si cela
 défaisait un raccord, le second IP est essayé sur le premier. Si aucun ne marche, rien ne bouge et un message dit que cela ne
 peut pas se faire automatiquement : faites-le à la main, en supprimant ou en ajoutant des tuyaux, des raccords ou des joints.
+Deux IP déjà joints par un tuyau, même très court, sont déjà joints : le débit passe par ce tuyau, donc rien ne change.
 **Cancel trace** ou **Échap** enlève le tracé, et ↩ Put back (Ctrl+Z) annule un Auto configure.
 
 ## Rendre un tuyau plus court ou plus long, et redessiner un tuyau souple {#making-a-pipe-shorter-or-longer-and-redrawing-a-hose}
@@ -90,3 +91,7 @@ s'alignent. Une vanne ou une Manual Valve sans tuyau glisse sur ses bouts ouvert
 là où ils étaient. Appuyez de nouveau pour revenir plus loin (jusqu'à 30 étapes). Posez la souris dessus pour voir ce qu'il va remettre. Il repart
 à zéro chaque fois que vous ouvrez Edit layout. Les autres changements faits dans une fenêtre Properties n'y sont pas ; **Exit** sans enregistrer annule quand même
 tout depuis le dernier Save layout.
+
+**Touche Suppr :** cliquez sur un objet en Edit layout et appuyez sur **Suppr** (Delete) ou sur **Retour arrière** (sur un Mac, la touche
+**delete**) pour le supprimer, comme Delete dans ses Properties. Ctrl+Z (Cmd+Z sur un Mac) le ramène. Elle ne fait rien pendant que vous tapez dans une case ou qu'une fenêtre est ouverte, et un objet
+verrouillé reste où il est.

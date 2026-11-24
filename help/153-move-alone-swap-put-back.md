@@ -40,10 +40,10 @@ locked (lock_Equipment). Rest the mouse on it to see why.
 ## Zoom in on a join (Z)
 
 In **Edit layout**, point at the join and press **Z** (not while typing in a box). A box opens in a top corner of the Tab that
-shows the **200 pixels around the mouse, 4 times bigger** (a little less on a small screen, so it fits). It stays where it opened and keeps showing that spot.
+shows the **200 pixels around the mouse, 3 times bigger** (a little less on a small screen, so it fits). It stays where it opened and keeps showing that spot.
 
 **Work right in the box:** drag a pipe end, an IP or an item in it with the right mouse button, the same as on the Tab, and it
-moves on the Tab too, 4 times finer, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
+moves on the Tab too, 3 times finer, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
 double-click opens Properties, except on a red IP). Press **Esc** or the red **✕** in its upper right corner to close it.
 
 **Join two IPs with a trace (only in the Zoom box):** double-click a red IP to start a red trace line, then click the IP to join it
@@ -51,7 +51,8 @@ to. Press **🔧 Auto configure**: the first IP moves onto the second and they j
 breaks. A straight pipe gets longer or shorter for the part of the move along its own line, and only the part across it is passed
 on to what is on its other end (a tee slides along its level pipes, the pipe up to an elbow gets shorter), and so on back; a pipe with a bend
 in it takes the whole move at the bend, and a hose just bends. If that would break a join, the second IP is tried onto the first instead. If neither works, nothing moves and a
-message says it can't be done automatically: do it by hand, deleting or adding pipes, fittings or joins. **Cancel trace** or
+message says it can't be done automatically: do it by hand, deleting or adding pipes, fittings or joins. Two IPs already
+joined by a pipe, even a very short one, are already joined: flow goes through that pipe, so nothing changes. **Cancel trace** or
 **Esc** takes the trace away, and ↩ Put back (Ctrl+Z) undoes an Auto configure.
 
 ## Making a pipe shorter or longer, and redrawing a hose
@@ -87,3 +88,6 @@ Rule 5.27), so two pumps of the same size line up. A valve or Manual Valve with 
 where they were. Press it again to go back further (up to 30 steps). Rest the mouse on it to see what it will put back. It starts
 fresh each time you open Edit layout. Other changes made in a Properties dialog are not in it; **Exit** without saving still undoes
 everything since the last Save layout.
+
+**Delete key:** click an item in Edit layout and press **Delete** (or **Backspace**; on a Mac, the **delete** key) to delete it, the
+same as Delete in its Properties. Ctrl+Z (Cmd+Z on a Mac) brings it back. It does nothing while you are typing in a box or a dialog is open, and a locked item stays where it is.

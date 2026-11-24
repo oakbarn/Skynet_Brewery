@@ -1488,7 +1488,9 @@ for a big delete or change. They all ask in **one shared Skynet box** (public/sk
   Patron code; Turn Approved Devices Off; Make a new recovery code; the BruControl Import; Switch / load a Schema; Simulator or Real
   boards; Move in (Brain Move); Save the config file and Put back an old one. The small "leave without saving?" questions stay as
   they are. *Not* an item on a Tab (OakBarn Brewery, 2026-11-23): its Properties Delete goes at once and ↩ Put back (Ctrl+Z)
-  brings it back (Rule 5.37).
+  brings it back (Rule 5.37). The **Delete key** (or **Backspace**, the Mac's "delete" key; 2026-11-24) does the same for the item picked in Edit layout (OakBarn Brewery, 2026-11-24: "If
+  something has the focus can we delete it with the delete key?"): never while typing in a box or with a dialog open; a locked item
+  (or equipment under lock_Equipment) stays, with one toast.
 **Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asked in this box until it
 was taken out of the Panel (2026-11-21, Rule 11.3).
 Help 28, 48, 119, 188.
@@ -2776,14 +2778,14 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
 - **🔍 Zoom box** (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for
   200 pixel square where Join area is zoomed inside the Dialog"; he picked A, the Z key, as Ctrl + Click already opens Properties,
   Rule 2.9): in Edit layout, **Z** (not in a text box or dialog) opens a box in a top corner of the Tab area that shows the 200
-  screen pixels around the mouse **4 times bigger** (on a smaller Tab area the box shrinks to fit). *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
+  screen pixels around the mouse **3 times bigger** (on a smaller Tab area the box shrinks to fit). *Changed (OakBarn Brewery, 2026-11-23: "be able to move within the dialog.
   Dialog moves now. It needs to stay fixed and move the joins together inside the Dialog"; "z does not work like the esc. Just
   change the text that you use the esc button to close and or have a close button upper right corner"):* the box **stays where it
   opened** (on the side away from the spot it shows) and keeps showing that same spot. **Work right in it:** every press, drag,
-  click and double-click in the box goes to the Tab at the same spot, 4 times finer, so a pipe end or an item is dragged onto an IP
+  click and double-click in the box goes to the Tab at the same spot, 3 times finer, so a pipe end or an item is dragged onto an IP
   inside the box (the grab pop-up, snapping and joins work as on the Tab). **Esc** or its red **✕** (upper right) closes it, and
   so does leaving Edit layout; its text says so. *Changed (OakBarn Brewery, 2026-11-23: "Try zoom x 2"; "I cannot grab the pipe
-  inside the dialog after I release it"):* 4 times ("let's try 4 x"; was 3, then 2); a pipe can be grabbed and moved in the box again and again.
+  inside the dialog after I release it"):* 3 times ("let's try 4 x", then 2026-11-24 "Back to 3 x"; was 3, then 2, then 4); a pipe can be grabbed and moved in the box again and again.
   *Added (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
   would be red line. The a button to autoconfigure"; he picked "move the first onto the second": "has to trace back so no breaks
   in Ips"):* **only in the Zoom box**, a double-click on an IP starts a red **trace** and a click on another IP ends it (a
@@ -2796,7 +2798,8 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   would break a join (it reaches the second IP, a vessel or something locked, a pipe gets too short, or two ways back disagree),
   the second IP is tried onto the first. If neither works, nothing moves and one toast says it can't be done automatically without
   breaking a join or adding a pipe, hose or fitting, so do it by hand (delete or add pipes, fittings or joins). Nothing is ever
-  added or deleted by it. **Cancel trace** or Esc takes the trace away; ↩ Put back (Ctrl+Z) undoes it. (Help 153)
+  added or deleted by it. Two IPs already joined by a pipe (a short one between them too) are left as they are, with a toast
+  that says so: every join is a pipe, and taking it away would break the join (2026-11-24). **Cancel trace** or Esc takes the trace away; ↩ Put back (Ctrl+Z) undoes it. (Help 153)
 - **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
   gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
 - **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the

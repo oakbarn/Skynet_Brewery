@@ -5205,17 +5205,17 @@ document.addEventListener('keydown', ev => {
 // 🔍 Zoom box (OakBarn Brewery, 2026-11-23: "a keyboard Short cut to have an zoomed version of the Join where the mouse is for 200 pixel
 // square where Join area is zoomed inside the Dialog"; then "be able to move within the dialog. Dialog moves now. It needs to stay
 // fixed and move the joins together inside the Dialog"; Rule 5.37): in Edit layout, Z (not in a text box) opens a box that shows the
-// 200 screen pixels around the mouse 4 times bigger. It stays where it opened, on the same spot of the Tab. Work inside it as on the
-// Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 4 times finer, so a pipe end or an item
+// 200 screen pixels around the mouse 3 times bigger. It stays where it opened, on the same spot of the Tab. Work inside it as on the
+// Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 3 times finer, so a pipe end or an item
 // can be dragged onto an IP right there. Esc or its ✕ (upper right) closes it, and so does leaving Edit layout (Z again too). The copy of the Tab is drawn in a
 // closed-off part of the page (a shadow root), so nothing else on the panel ever finds it.
-const ZOOM_SRC = 200, ZOOM_X = 4;      // OakBarn Brewery, 2026-11-23: "Try zoom x 2", then "let's try 4 x"
+const ZOOM_SRC = 200, ZOOM_X = 3;      // OakBarn Brewery, 2026-11-23: "Try zoom x 2", then "let's try 4 x", then "Back to 3 x"
 let zoomBox = null, zoomMouse = null;
 function zoomOpen() {
   const ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1;
   const [mx, my] = zoomMouse || [r.left + r.width / 2, r.top + r.height / 2];
   const host = h('div', { class: 'zoomBox' }), root = host.attachShadow({ mode: 'open' });
-  // 200 screen pixels 4 times bigger is 800 px: on a smaller Tab area the box shrinks to fit (and shows a little less around the mouse)
+  // 200 screen pixels 3 times bigger is 600 px: on a smaller Tab area the box shrinks to fit (and shows a little less around the mouse)
   const fit = ($('#wsScroll') || ws).getBoundingClientRect(), size = Math.max(200, Math.round(Math.min(ZOOM_SRC * ZOOM_X, fit.height - 60, fit.width / 2 - 24)));
   root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; cursor: crosshair; touch-action: none; }
     .zf > .zc { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
@@ -5384,6 +5384,10 @@ function zoomAuto() {
   // the first IP onto the second; when that would break a join, the second onto the first (OakBarn Brewery, 2026-11-23: "you would have
   // to find which place back would work without breaking joins or adding pipe or hose or fitting. If it required that, just abandon
   // fix and say it cannot be done automatically and has to be done manually")
+  // already joined: a pipe runs from one to the other (OakBarn Brewery, 2026-11-24: his elbow and Tap water, joined by a short pipe).
+  // Every join is a pipe, so flow already goes through it: nothing to do, and taking that pipe away would break the join.
+  const both = new Set([tr.a.id, tr.b.id]), jp = draft.graphics.find(p => p.kind === 'pipe' && p.workspace === wsName && both.has(p.from) && both.has(p.to));
+  if (jp) return toast(`🔗 ${tr.a.label} and ${tr.b.label} are already joined by ${jp.label || jp.name || 'a pipe'}, so flow already goes through. Nothing to change.`, false, 7000);
   const ma = zoomMover(tr.a.id), mb = zoomMover(tr.b.id);
   if (ma && ma === mb) return toast(`🔗 ${tr.a.label} and ${tr.b.label} are both on ${ma.label || ma.name || ma.id}. Trace from an IP on one thing to an IP on another.`, true, 7000);
   const one = ma ? zoomTraceBack(ma, [b[0] - a[0], b[1] - a[1]], mb) : { fail: `${tr.a.label} can't be moved` };
@@ -5427,6 +5431,23 @@ document.addEventListener('keydown', ev => {
   ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();
 });
 
+// 🗑 The Delete key deletes the item picked in Edit layout (OakBarn Brewery, 2026-11-24: "If something has the focus can we delete it with
+// the delete key?"; Rule 2.64): the same as Delete in its Properties, no "Delete this item?" box, ↩ Put back (Ctrl+Z) brings it back.
+// Never while typing in a box or with a dialog open; a locked item (or equipment under lock_Equipment) stays, with one toast.
+document.addEventListener('keydown', ev => {
+  // a Mac's "delete" key sends Backspace (OakBarn Brewery, 2026-11-24: "And a Mac or Linux and Pi?"), so Backspace does it too
+  if (!['Delete', 'Backspace'].includes(ev.key) || !editing || !sel || !draft || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
+  if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
+  let kind = sel.kind, item = findItem(kind, sel.id); if (!item) return;
+  const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
+  if (unitOf) { kind = 'gfx'; item = unitOf; }        // an IP of a Skynet Fitting or vessel: the whole fitting or vessel, as its Properties do
+  ev.preventDefault();
+  const bundle = isUnit(item) || isSkyV(item) ? null : bundleOf(item), who = item.label || item.name || lockName(item);
+  if (bundle) return toast(`${who} is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to delete it.`, true);
+  if (item.kind === 'vessel' && item.bundled && !isUnit(item) && !isSkyV(item)) return toast(`${who} is a bundle: open it (double-click) and use its Delete.`, true);
+  if (item.locked || profileFrozen(item)) return toast(`🔒 ${who} is locked, so the Delete key leaves it. Unlock it first, or use Delete in its Properties.`, true);
+  deleteItem(kind, item);
+});
 let drag = null, lastPipeTap = null, hitUnit = null;
 $('#ws').addEventListener('pointerdown', ev => {
   if (!editing) return;
@@ -12677,6 +12698,42 @@ function openTabProps(name) {
 const TYPE_TITLE = { hydrometer: 'Hydrometer', valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 TYPE_TITLE[PROCESS_WIDGET_TYPE] = PROCESS_WIDGET_WORD.replace(/ Widget$/, '');      // "Process Widget Properties" (Rule 1.31)
+// 🗑 Delete an item (Properties Delete, and the Delete key in Edit layout): no "Delete this item?" box, ↩ Put back (Ctrl+Z) brings it back
+async function deleteItem(kind, item) {
+  const type = kind === 'el' ? item.type : item.kind;
+  const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
+  if (host) return toast(`${item.name} is built into ${host.label || host.name} (a Skynet_Integrated_Device), so it can't be taken out of it. Delete ${host.label || host.name} to delete it too.`, true);
+  const kids = kind === 'el' ? clonesOf(item.name, draft.graphics) : [];       // a Device's clones go with it
+  // a Device with Clones (OakBarn Brewery, 2026-11-10, Rule 4.4): 1. delete it and all its Clones, or 2. / 3. a Clone the user picks
+  // becomes the Device (the Parent) where that Clone is; the other Clones stay its Clones
+  if (kids.length) {
+    const tabOf = g => draft.workspaces.find(w => w.name === g.workspace)?.label || g.workspace || 'no Tab';
+    const pick = await choose(`Delete ${item.name}? It has ${kids.length === 1 ? 'a Clone' : kids.length + ' Clones'}.`,
+      [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
+    if (pick === undefined) return;
+    if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
+  }
+  // no "Delete this item?" box (OakBarn Brewery, 2026-11-23: "getting the annoying Do you really want do delete nanny popup. Could a
+  // simple CTRL + Z restore a Delete ?"; Rules 2.64 and 5.37): it goes at once, and ↩ Put back (Ctrl+Z) brings it back
+  const delWho = item.label || item.name || lockName(item); pushUndo(`delete ${delWho}`);
+  if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else if (item.kind === 'pipe') deletePipe(item); else draft.graphics = draft.graphics.filter(g => g !== item);
+  const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
+  for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
+  draft.graphics = draft.graphics.filter(g => !kids.includes(g));
+  if (type === 'vessel') {       // its own port IPs go with it; IPs that were only dropped on it stay
+    for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === item.id)) {     // and the Tab_Fittings joined to it
+      for (const g of draft.graphics) if (g.attachTo === f.id && g.port) gone.push(g.id);
+      draft.graphics = draft.graphics.filter(g => g !== f && !(g.attachTo === f.id && g.port));
+    }
+    draft.elements = draft.elements.filter(e => e.integratedIn !== item.id);       // the Devices built into it go with it
+    for (const g of draft.graphics) if (g.attachTo === item.id && g.port) gone.push(g.id);
+    draft.graphics = draft.graphics.filter(g => !(g.attachTo === item.id && g.port));
+    for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
+  }
+  draft.graphics = draft.graphics.filter(g => !(isCap(g) && gone.includes(g.capOn)));     // an End Cap on an opening that is gone goes too
+  for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
+  sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000);
+}
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
@@ -12766,40 +12823,7 @@ async function editItem(kind, id) {
   let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? (isTapMv(item) ? 'Hose Bib Widget' : 'Manual Valve Widget') : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(kind !== 'el' && !isMv(item) && !['text', 'override', 'clone'].includes(type) ? gfxModelOf(fields, item) : fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {
-    if (r === 'delete') {
-      const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
-      if (host) return toast(`${item.name} is built into ${host.label || host.name} (a Skynet_Integrated_Device), so it can't be taken out of it. Delete ${host.label || host.name} to delete it too.`, true);
-      const kids = kind === 'el' ? clonesOf(item.name, draft.graphics) : [];       // a Device's clones go with it
-      // a Device with Clones (OakBarn Brewery, 2026-11-10, Rule 4.4): 1. delete it and all its Clones, or 2. / 3. a Clone the user picks
-      // becomes the Device (the Parent) where that Clone is; the other Clones stay its Clones
-      if (kids.length) {
-        const tabOf = g => draft.workspaces.find(w => w.name === g.workspace)?.label || g.workspace || 'no Tab';
-        const pick = await choose(`Delete ${item.name}? It has ${kids.length === 1 ? 'a Clone' : kids.length + ' Clones'}.`,
-          [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
-        if (pick === undefined) return;
-        if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
-      }
-      // no "Delete this item?" box (OakBarn Brewery, 2026-11-23: "getting the annoying Do you really want do delete nanny popup. Could a
-      // simple CTRL + Z restore a Delete ?"; Rules 2.64 and 5.37): it goes at once, and ↩ Put back (Ctrl+Z) brings it back
-      const delWho = item.label || item.name || lockName(item); pushUndo(`delete ${delWho}`);
-      if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else if (item.kind === 'pipe') deletePipe(item); else draft.graphics = draft.graphics.filter(g => g !== item);
-      const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
-      for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
-      draft.graphics = draft.graphics.filter(g => !kids.includes(g));
-      if (type === 'vessel') {       // its own port IPs go with it; IPs that were only dropped on it stay
-        for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === item.id)) {     // and the Tab_Fittings joined to it
-          for (const g of draft.graphics) if (g.attachTo === f.id && g.port) gone.push(g.id);
-          draft.graphics = draft.graphics.filter(g => g !== f && !(g.attachTo === f.id && g.port));
-        }
-        draft.elements = draft.elements.filter(e => e.integratedIn !== item.id);       // the Devices built into it go with it
-        for (const g of draft.graphics) if (g.attachTo === item.id && g.port) gone.push(g.id);
-        draft.graphics = draft.graphics.filter(g => !(g.attachTo === item.id && g.port));
-        for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
-      }
-      draft.graphics = draft.graphics.filter(g => !(isCap(g) && gone.includes(g.capOn)));     // an End Cap on an opening that is gone goes too
-      for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
-      sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000); return;
-    }
+    if (r === 'delete') return deleteItem(kind, item);
     const copy = r === 'copy'; if (copy) r = 'ok';           // COPY: save it, then make the copy
     if (r !== 'ok') {      // a new vessel closed with Cancel still gets its default ports
       if (isV && item.isNew) { delete item.isNew; vesselPopup(item, syncVesselPorts(item, null)); renderWs(); }
