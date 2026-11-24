@@ -340,3 +340,11 @@ test('the deleted ... Put back note goes after 3 seconds', async () => {
   const all = [...app.matchAll(/deleted[^\n]*Put back \(Ctrl\+Z\) brings it back\.`, false, (\d+)\)/g)].map(m => +m[1]);
   assert.ok(all.length >= 2); assert.ok(all.every(n => n === 3000), String(all));
 });
+
+// OakBarn Brewery, 2026-11-24: "All nanny pop-ups 3 seconds" (Rule 2.74)
+test('every note (not a red error) stays 3 seconds', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const NOTE_MS = 3000;/);
+  assert.match(app, /setTimeout\(\(\) => t\.className = '', bad \? ms \|\| 5000 : NOTE_MS\)/);
+});

@@ -1690,6 +1690,11 @@ desktops), and on a Mac Control + Option is the VoiceOver key. The key is read b
 are available on Skynet") (OakBarn Brewery, 2026-11-24: "make it an MD ... and available as a CSV"); a new
 shortcut is added there too.
 
+2.74 **Notes stay 3 seconds** (OakBarn Brewery, 2026-11-24: "Nanny state up too long. Needs to be quick, maybe 3 seconds and then
+gone"; "All nanny pop-ups 3 seconds"). Every short note that pops up at the bottom of the Panel ("… deleted. ↩ Put back (Ctrl+Z)
+brings it back.", "Moved to …", "Saved" …), in the Panel and the BruControl Import program, stays **3 seconds**, then goes by itself, however long its words are. Only a red error
+note keeps its own time (5 seconds unless it asks for more), since something did not work. A new note never asks for another time.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2927,7 +2932,7 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   this item?" box), up to 30 steps, back to how pipes, fittings and items were. It starts fresh each time Edit layout opens. Other
   Properties changes are not in it;
   Exit without saving still undoes everything since the last Save layout.
-  The "… deleted. ↩ Put back (Ctrl+Z) brings it back." note stays 3 seconds, then goes (2026-11-24, OakBarn Brewery: "Nanny state
+  The "… deleted. ↩ Put back (Ctrl+Z) brings it back." note stays 3 seconds, then goes (Rule 2.74; 2026-11-24, OakBarn Brewery: "Nanny state
   up too long. Needs to be quick, maybe 3 seconds and then gone").
 - **🗑 Delete Pipe / Delete Hose** (OakBarn Brewery, 2026-11-14: "Add Delete Button to Hose and Pipe Disconnect Dialog"): the
   pop-up of a pipe or hose has a red Delete button beside 🔓 Unlock its ends; ↩ Put back (Ctrl+Z) brings it back. Its top is frozen
@@ -7211,7 +7216,8 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 - 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("On a property allow individual Unlock of an IP in addition to Unlock IPs"): Properties with 2 or more joined pipe ends also have 🔓 Unlock one IP ▾ (a Pipe or Hose: Unlock one end ▾); the picked one lets go alone. The Zoom box drags and pans with the left button only, fills the work area at 2.5x, centered on the whole manifold (50 px all round) when it fits, and never opens Tab settings from inside it (Rule 5.37). Rule 4.10: → Right Arrow on a Template's icon does the same as B ("On a Template, could we make the Right Arrow the same as B"). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
-- 2026-11-24: Rule 5.37 note (OakBarn Brewery: "Nanny state up too long. Needs to be quick, maybe 3 seconds and then gone"): the "… deleted. ↩ Put back (Ctrl+Z) brings it back." note in Edit layout stays 3 seconds (was 6 or 7). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Added Rule 2.74 (OakBarn Brewery: "All nanny pop-ups 3 seconds"): every note (not a red error) at the bottom of the Panel stays 3 seconds, then goes (toast() in public/app.js, NOTE_MS); a red error note keeps its own time. BruControl Import program: its notes stay 3 seconds too (were 5).
+- 2026-11-24: Rule 5.37 note (OakBarn Brewery: "Nanny state up too long. Needs to be quick, maybe 3 seconds and then gone"): the "… deleted. ↩ Put back (Ctrl+Z) brings it back." note in Edit layout stays 3 seconds (was 6 or 7). Then Added Rule 2.74 for every note. BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 4.1 note (OakBarn Brewery: "Clicked Finish Build then Keep building as I wanted to change some stuff but still in non edit mode"): Finish Build ... > Keep building turns 👁 Preview off when it was on, so the Build Tab can be changed again. Help 55 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 2.73 note (OakBarn Brewery: "Hit R and did not rotate but this"): an Edit layout bar list (Elbows, Tees …, Add equipment ➕, Add Device ...) lets go of the keyboard once a row is picked, so a key pressed next (R, H, V, Z, Delete) goes to the Tab, not to the list (a focused list jumps to its first row starting with that letter and runs it). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.26 note (OakBarn Brewery: "Both should have been red"; "The Pump IPs"): an IP to IP join goes when its two IPs come apart (moved off, unlocked or deleted), with any open-end coupling an unlock left on it, so both IPs show open (red). Help 125 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
