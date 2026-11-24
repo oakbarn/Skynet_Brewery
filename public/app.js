@@ -5195,7 +5195,7 @@ function setEditing(on) {
   if (draft && restoreBuild()) setTimeout(buildBackNote, 300);       // an unfinished Build kept on the Brain comes back on its 🔨 Build Tab (Rule 4.1)
   if (!on) $('#buildBack')?.remove();
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
-  if (on) { mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
+  if (on) { mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); plainLonelyEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
@@ -6203,10 +6203,11 @@ function endCoupling(pts, i, j, ws = wsName) {
   const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: ws, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: String((ang + 360) % 180) };
   draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
 }
-// a pipe or hose end whose IP is gone (the elbow, tee or Device it was on was deleted) gets an open end (a coupling), as 🔓 Unlock
-// leaves it, so it shows as a red IP dot that can be joined, traced and auto configured (OakBarn Brewery, 2026-11-24: "I removed the
-// elbow so these should all be the red dot and available to connect with the trace"; "Removed the Tee"; Rule 5.37). A Quick
-// Disconnect hose's free end stays free. Returns how many ends were opened.
+// a pipe or hose end whose IP is gone (the elbow, tee or Device it was on was deleted) is left a plain end: no coupling, no red dot and
+// no red ring (OakBarn Brewery, 2026-11-24, picked "Remove automatically": "Lets try B first because I think that is what will work as
+// they are not needed with a new Join"; Rule 5.37; it was a red-dot coupling for a few hours, "I removed the elbow so these should all
+// be the red dot"). It still joins a new IP when dragged or drawn to one. A Quick Disconnect hose's free end stays free. Returns how
+// many ends were made plain.
 function openLostEnds(d) {
   let n = 0; const known = new Map();
   for (const p of d.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) for (const k of ['from', 'to']) {
@@ -6219,8 +6220,20 @@ function openLostEnds(d) {
       if (!known.has(p.workspace)) known.set(p.workspace, new Set(allIps(p.workspace).map(q => q.id)));
       if (known.get(p.workspace).has(id) || d.graphics.some(g => g.id === id)) continue;      // still there (only not drawn yet)
     }
-    const m = p.points.length;
-    p[k] = k === 'from' ? endCoupling(p.points, 0, 1, p.workspace) : endCoupling(p.points, m - 1, m - 2, p.workspace); n++;
+    delete p[k]; p[plain] = true; n++;
+  }
+  return n;
+}
+// the red dots left over from before (a coupling with one pipe end on it and nothing else, made by Skynet) go when Edit layout opens:
+// their pipe ends are plain ends (Rule 5.37). A coupling the user named or labelled, a locked one, a hose's and a Quick Disconnect stay.
+function plainLonelyEnds(d) {
+  let n = 0;
+  for (const g of d.graphics.filter(g => g.kind === 'ip' && g.fitting === 'coupling' && g.autoFit && !g.label && !g.locked && !g.attachTo)) {
+    const on = d.graphics.filter(p => p.kind === 'pipe' && (p.from === g.id || p.to === g.id));
+    if (on.length !== 1 || on[0].hose || isQdHose(on[0]) || on[0].from === on[0].to) continue;
+    if (d.graphics.some(x => x !== g && (x.capOn === g.id || x.of === g.id))) continue;
+    const p = on[0], k = p.from === g.id ? 'from' : 'to';
+    delete p[k]; p[k === 'from' ? 'plainFrom' : 'plainTo'] = true; d.graphics = d.graphics.filter(x => x !== g); n++;
   }
   return n;
 }
@@ -6248,7 +6261,6 @@ function endMoves(p, i) {
   if (isQdHose(p) && i === p.points.length - 1) return true;
   // an end on no IP at all (its red ring: what it was joined to is gone) can be grabbed too (OakBarn Brewery, 2026-11-23: "Tried to
   // grab this and it ask me to unlock? It is not connected"; Rule 5.37)
-  if (i === 0 ? p.plainFrom && !p.from : p.plainTo && !p.to) return false;      // a plain end (its red dot deleted by hand) moves with its pipe
   if (!openEnd(p, i)) return !ipPoint(i === 0 ? p.from : p.to, p.workspace);
   return !L().graphics.find(x => x.id === (i === 0 ? p.from : p.to))?.locked;
 }
@@ -6354,7 +6366,7 @@ function dropPipe(d) {
       pipe[k] = near.id; takePumpSpots(); joinIpType(draft, pipe, k);      // auto typed to the join (Rule 5.40)
       return dropPipe({ ...d, carry: d.carry.filter(q => q.g !== mine) });   // the other end may now sit on an IP too
     }
-    if (!pipe[k]) pipe[k] = endCoupling(pipe.points, i, j);
+    if (!pipe[k] && !pipe[k === 'from' ? 'plainFrom' : 'plainTo']) pipe[k] = endCoupling(pipe.points, i, j);      // a plain end stays plain (Rule 5.37)
   }
 }
 
@@ -12955,7 +12967,7 @@ async function deleteItem(kind, item) {
     if (gone.includes(g.from)) { delete g.from; if (dot && g.kind === 'pipe') g.plainFrom = true; }
     if (gone.includes(g.to)) { delete g.to; if (dot && g.kind === 'pipe') g.plainTo = true; }
   }
-  openLostEnds(draft);       // the pipe ends that were on it are open ends now: red dots that can be joined or traced (Rule 5.37)
+  openLostEnds(draft);       // the pipe ends that were on it are plain ends now: no dot, no ring (Rule 5.37)
   sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000);
 }
 async function editItem(kind, id) {

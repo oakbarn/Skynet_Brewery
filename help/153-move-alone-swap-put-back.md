@@ -82,7 +82,7 @@ A pipe or hose can change after it is saved, once its ends are let go:
 
 A let-go end can be grabbed even where it sits on a pump, valve or vessel IP. On a fitting (a tee, an elbow, any fitting) the
 fitting wins: pressing on it grabs the fitting, not a coupling or let-go end lying on top of it. Grab the coupling or end off
-the fitting instead. An end whose elbow, tee or Device was deleted becomes an open end at once: a small **red dot** like any open IP, which can be grabbed, joined or traced (🔗) in the Zoom box. To get rid of a red dot you don't want, press it and then the **Delete** key: the dot goes, its pipe stays, and that pipe end is left plain (no dot comes back). Two quick clicks on a red dot open its Properties, which have 🗑 Delete too (in the Zoom box a double-click starts a trace instead). An end that is still joined, a 🔒 locked pipe or hose,
+the fitting instead. An end whose elbow, tee or Device was deleted is left a **plain end**: no red dot and no red ring, only the small blue handle that drags it. Drag it or draw a pipe to an IP and it joins there. Red dots left over from before go when Edit layout opens. Any other red dot (the open end of a pipe you drew) can be deleted: press it and then the **Delete** key. The dot goes, its pipe stays, and that pipe end is left plain. Two quick clicks on a red dot open its Properties, which have 🗑 Delete too (in the Zoom box a double-click starts a trace instead). An end that is still joined, a 🔒 locked pipe or hose,
 and an end on a 🔒 locked IP (one set to No Unlock too) do not move. **↩ Put back** (Ctrl+Z) undoes each drag, and **Save layout**
 keeps the new length or shape.
 

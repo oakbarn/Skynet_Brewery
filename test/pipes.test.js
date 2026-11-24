@@ -219,15 +219,18 @@ test('Properties have 🔓 Unlock one IP / one end next to Unlock its IPs', asyn
   assert.match(app, /unlockJoins\(\[j\]\)/, 'only the picked one lets go');
 });
 
-// OakBarn Brewery, 2026-11-24: "I removed the elbow so these should all be the red dot and available to connect with the trace";
-// "just the red dot would match what we have rather than the red circle" (Rule 5.37)
-test('a pipe end whose IP is deleted becomes an open end shown as a red dot', async () => {
+// OakBarn Brewery, 2026-11-24: "just the red dot would match what we have rather than the red circle"; then, picked "Remove
+// automatically": "they are not needed with a new Join" (Rule 5.37): a lost end is a plain end, leftover red dots go
+test('a pipe end whose IP is deleted is left a plain end, and leftover red dots go when Edit layout opens', async () => {
   const fs = await import('node:fs');
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
   assert.match(app, /function openLostEnds\(d\)/);
   assert.match(app, /openLostEnds\(draft\);\s+\/\/ the pipe ends that were on it/, 'after a delete');
-  assert.match(app, /centerOnPipes\(draft\); openLostEnds\(draft\); \}/, 'and when Edit layout opens');
+  assert.match(app, /centerOnPipes\(draft\); openLostEnds\(draft\); plainLonelyEnds\(draft\); \}/, 'and when Edit layout opens');
+  const f = app.slice(app.indexOf('function openLostEnds(d)'), app.indexOf('function plainLonelyEnds(d)'));
+  assert.match(f, /delete p\[k\]; p\[plain\] = true;/, 'no coupling, a plain end');
+  assert.doesNotMatch(f, /endCoupling\(/);
   assert.match(css, /#ws\.editing \.gfx\.ip\.fit\.lonely::before \{[^}]*background: #e01b12/, 'a red dot');
 });
 
