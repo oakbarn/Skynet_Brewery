@@ -169,3 +169,14 @@ test('a let-go end of a pipe or hose can be dragged and joins an IP it is droppe
   assert.match(app, /endCouplingTo\(drag\.item, drag\.i\)/, 'a hose end takes its coupling with it');
   assert.match(app, /rejoinEnds\(null, drag\.item, drag\.i === 0 \? 'from' : 'to'\)/, 'dropped on an IP, only that end joins');
 });
+
+// Box-edge ends (OakBarn Brewery, 2026-11-23: "Make the connections at the edge of the box that look like the end of the valve or Pump"; Rule 5.29)
+test('valve and pump box-edge ends are TC ferrules, not plain pipe stubs', async () => {
+  const fs = await import('node:fs'), dir = new URL('../media/Images/Skynet/Valves/', import.meta.url);
+  for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.svg'))) {
+    const s = fs.readFileSync(new URL(f, dir), 'utf8');
+    if (s.includes('data-valve-standard="1"')) assert.ok(!s.includes('fill="#8a8f96"'), f + ': no plain grey stub');
+  }
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /class="pumpend"/, 'a pump Hose or Pipe ends in a ferrule');
+});

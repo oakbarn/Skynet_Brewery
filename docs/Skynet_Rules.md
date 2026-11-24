@@ -2519,6 +2519,9 @@ thread "Standardize valve size and IPs", Help 131).
   Ball and Butterfly valves, the Manual and Manual Butterfly valves, the Gas Solenoid valves and the older Motorized_TC15 ball valves,
   in every Orientation. They are all drawn **to the same scale** (Rule 5.11), and where a valve is shorter than the box its pipe is
   drawn on, straight, out to the edge of the box (as the Pump Standard lengthens port tubes, Rule 5.27).
+  *Changed (OakBarn Brewery, 2026-11-23: "Make the connections at the edge of the box that look like the end of the valve or Pump"):*
+  that drawn-on piece is the valve's own body tube, not plain pipe grey, and it ends at the box edge in a **TC ferrule** like the end
+  of the valve, where the IP is. Pumps: the Hose or Pipe from the pump to its Inlet IP and Outlet IP ends in the same ferrule (Rule 5.27).
 - **The IPs are always on the same spots:** Horizontal at the middle of the left and right sides, **(0, 150)** and **(300, 150)**;
   Vertical Left and Vertical Right at the middle of the top and bottom, **(150, 0)** and **(150, 300)**; 45 degrees on the
   Horizontal spots turned about the middle; a front view (looking down the pipe) both at the middle, **(150, 150)**; a front elbow at
@@ -7119,6 +7122,7 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 ## Change log
 
+- 2026-11-23: Rule 5.29 changed (OakBarn Brewery: "Make the connections at the edge of the box that look like the end of the valve or Pump"): the valve pictures' drawn-on ends are body tube with a TC ferrule on the box edge (13 Skynet valve SVGs); a pump's Hose or Pipe ends in the same ferrule on its spot. Help 130, 131 (and French). Checked against the BruControl Import program: same pictures and same pump drawing code; nothing else changes there.
 - 2026-11-23: Rule 5.20 note added (OakBarn Brewery: "A Tee Should win"): a fitting under the pointer wins over a coupling or let-go pipe end lying on it; those are grabbed off the fitting. IP dots joined to a pipe or hose are green, open ones red (Help 13). Help 153 (and French). Checked against the BruControl Import program: its build uses the same Edit layout code, so it gets the same; nothing else changes there.
 - 2026-11-23: Rule 5.20 changed (OakBarn Brewery: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small red dots on only become large when you hiver on one"): in Edit layout a round IP marker is a small red dot that only the dot can be pointed at; hovered or selected it is the full white circle in its colored ring, with its letters and name tag. Fittings, IPs with a picture and Quick Disconnects do not change. Help 13 (and French). Checked against the BruControl Import program: its build opens the same Edit layout (same style.css), so it gets the same dots; nothing else changes there.
 - 2026-11-22: Panel Update 9 Part 1 (OakBarn Brewery, PDF "Panel Update 9", 35 items): added Rule 7.27 (six Skynet Audio folders plus

@@ -27,7 +27,7 @@ Les tuyaux et les flexibles fixent lequel est son entrée (IN) et lequel sa sort
 
 Ce qui est dessiné entre les propres entrée et sortie de la pompe et son Inlet IP et son Outlet IP : un **Hose** (flexible) blanc, ou un **Pipe** (tuyau) inox. Il est
 dessiné par-dessus la pompe et son Cover, sous l'On overlay. Il sort tout droit de l'End Fitting, fait le tour par le bord intérieur de la case de la pompe,
-et va jusqu'à la place, et il tourne avec la pompe quand elle est montrée Left. Une pompe avec votre propre image n'a pas de Hose ni de Pipe (Skynet ne
+et va jusqu'à la place, où il finit par une virole TC comme le bout de la pompe ou d'une vanne, et il tourne avec la pompe quand elle est montrée Left. Une pompe avec votre propre image n'a pas de Hose ni de Pipe (Skynet ne
 sait pas où sont ses End Fittings), donc ses IP sont simplement sur les places.
 
 **Avec un tuyau ou un flexible joint à l'IP**, ce bout est dessiné comme le tuyau ou le flexible qui y est : même sorte, même

@@ -20,8 +20,8 @@ If you resize a valve, the spots grow or shrink with its box. Keep it square so 
 
 ## Drawn to scale
 
-Every Skynet valve drawing is at the same scale in the box. A valve that is shorter than the box has its pipe drawn on, straight, out
-to the edge of the box, where the IP is.
+Every Skynet valve drawing is at the same scale in the box. A valve that is shorter than the box has its body tube drawn on, straight, out
+to the edge of the box, ending in a TC ferrule like the end of the valve, where the IP is.
 
 ## A valve with your own picture
 

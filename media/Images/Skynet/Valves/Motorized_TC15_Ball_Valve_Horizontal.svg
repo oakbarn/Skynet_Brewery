@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-valve-standard="1">
   <!-- The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs
        are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); straight pipe runs out to the edges. -->
-  <rect x="0" y="137.5" width="74.55" height="25" fill="#8a8f96"/>
-  <rect x="225.45" y="137.5" width="74.55" height="25" fill="#8a8f96"/>
+  <!-- the box-edge end looks like the end of the valve (OakBarn Brewery, 2026-11-23: "Make the connections at the edge of the box that look like the end of the valve or Pump"; Rule 5.29): the valve body tube runs out to a TC ferrule on the box edge, where its IP is -->
+  <rect x="0" y="135.5" width="74.55" height="29" fill="#7f7f7f"/><path d="M0 140.5 H74.55" stroke="#a3a3a3" stroke-width="3"/><rect x="0.5" y="129.5" width="12" height="41" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>
+  <rect x="225.45" y="135.5" width="74.55" height="29" fill="#7f7f7f"/><path d="M225.45 140.5 H300.0" stroke="#a3a3a3" stroke-width="3"/><rect x="287.5" y="129.5" width="12" height="41" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>
   <g transform="translate(73.55 42.75) scale(1.1)">
   <!-- Skynet drawing: motorised ball valve, closed, horizontal pipe. Same size and pipe spot as Valve_Ball_ClosedH_1.png. -->
   <rect x="0" y="84" width="139" height="27" fill="#7f7f7f"/>

@@ -20,8 +20,8 @@ Si vous redimensionnez une vanne, les places grandissent ou rétrécissent avec 
 
 ## Dessinées à l'échelle {#drawn-to-scale}
 
-Chaque dessin de vanne Skynet est à la même échelle dans la case. Une vanne plus courte que la case a son tuyau prolongé, tout droit,
-jusqu'au bord de la case, là où est l'IP.
+Chaque dessin de vanne Skynet est à la même échelle dans la case. Une vanne plus courte que la case a son tube de corps prolongé, tout droit,
+jusqu'au bord de la case, où il finit par une virole TC comme le bout de la vanne, là où est l'IP.
 
 ## Une vanne avec votre propre image {#a-valve-with-your-own-picture}
 

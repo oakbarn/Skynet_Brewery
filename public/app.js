@@ -2308,7 +2308,13 @@ function pumpLinkSvg(e) {
   const into = (pts, end, spot) => { const ax = pumpEndAxis(e, end, spot); if (!ax || pts.length < 2) return pts;
     const s = pts[pts.length - 1], t = pts[pts.length - 2], m = ax === 'h' ? [t[0], s[1]] : [s[0], t[1]];
     return [...pts.slice(0, -1), m, s]; };
-  const route = (tip, dir, spot, avoid, end, i) => { const lk = looks[i]; return draw(routeD(into(pumpRoute(tip, dir, spot, avoid), end, spots[i]), lk.hose ? 18 : 0), lk); };
+  // the box-edge end of the hose or pipe is a TC ferrule, like the end of the pump or a valve (OakBarn Brewery, 2026-11-23: "Make the
+  // connections at the edge of the box that look like the end of the valve or Pump"; Rule 5.27)
+  const ferrule = pts => { const n = pts.length; if (n < 2) return ''; const [x, y] = pts[n - 1], [px, py] = pts[n - 2], h = Math.abs(x - px) >= Math.abs(y - py);
+    const sx = Math.sign(x - px) || 1, sy = Math.sign(y - py) || 1;
+    const r = h ? [x - (sx > 0 ? 12 : 0) + (sx > 0 ? -0.5 : 0.5), y - 20.5, 12, 41] : [x - 20.5, y - (sy > 0 ? 12 : 0) + (sy > 0 ? -0.5 : 0.5), 41, 12];
+    return `<rect class="pumpend" x="${+r[0].toFixed(1)}" y="${+r[1].toFixed(1)}" width="${r[2]}" height="${r[3]}" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>`; };
+  const route = (tip, dir, spot, avoid, end, i) => { const lk = looks[i], pts = into(pumpRoute(tip, dir, spot, avoid), end, spots[i]); return draw(routeD(pts, lk.hose ? 18 : 0), lk) + ferrule(pts); };
   return `<svg viewBox="0 0 300 300" width="100%" height="100%" preserveAspectRatio="none" style="overflow:visible">${route(to, [0, -1], so, si, 'out', 1)}${route(ti, [1, 0], si, so, 'in', 0)}</svg>`;
 }
 const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
