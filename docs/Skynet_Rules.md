@@ -7209,7 +7209,38 @@ import.
 bottom with a manual ball valve: the Valve_Only Bundled Fitting, its valve picked when it is on a Tab). The stove is manual (a person
 turns it on and off), so it has no Device; its Heat Source is Electric or Gas. Both programs show the same Templates.
 
+19.12 **The OakBarn Stout Kettle: a 43 gallon skirted kettle** (OakBarn Brewery, 2026-11-24: "Create a Vessel Widget Has 2" Port upper
+Right and a Bottom Drain. 43 gallons Real Dimensions are 21 x 26 with 6" bottom Skirt and drain Has a sight Gauge on left with TC
+fittings"; "With sight gauge TCs"; "Name Vessel OakBarn Stout Kettle"). A Skynet Vessel Widget, **OakBarn_Stout_Kettle** (Skynet
+picture 249), drawn from his sketch at its real size (10 units = 1 in): the body 22 in across and 26.1 in tall (OakBarn Brewery: "without
+skirt so 22 x 26 is vessel volume"; "adjust the height on the 43 gallon Brew Kettle and MLT to match 43 gallons"), on a 6 in bottom
+skirt, with a line across marking the top of the skirt. Gallons 43 (stored 162.77 L). Its IPs are built in, all facing forward: **Top Inlet** TC 2 at the upper Right
+(Stout Right High 2 in); the sight gauge's **Sight Gauge Top** and **Sight Gauge Bottom** TC ports on the Left (Stout Left High, Stout
+Left Low); a **Tangential** TC port at the Left wall (Stout Left Wall); the **Thermowell** TC 1.5 in the Center (Stout Center); the
+**Outlet** TC 1.5, the Bottom Drain centered in the skirt (Stout Skirt Drain). Its own picture box, so its port positions are named
+Stout .... **Sight Gauge Top** and **Sight Gauge Bottom** are two new vessel ports any vessel can use (Left or Right, High or Low); a
+Sight Glass fitting (Rule 5.32) or a pipe joins them.
+**OakBarn_MLT** (Skynet picture 250; OakBarn Brewery: "create Oakbarn MLT No Tangential, No 2 TCs for sight gauge and upper right
+sparge arm inlet is 1.5 TC") is a Mash Tun with the same body: no Tangential and no sight gauge; the upper Right port is a **Sparge**
+arm inlet, TC 1.5 (Stout Right High); the Thermowell and Bottom Drain are the same.
+**OakBarn_Big_MAC_HLT** (Skynet picture 251; OakBarn Brewery: "OakBarn Big MAC HLT 26 x 24 Tangential Sight Gauge Two Front Drain
+Outlets 2" TC Left Back with Temperature probe and Big Right Heating Element and Right side ... Volume Sensor"; "26 x 24 says 50
+Gallons"; "Big MAC is 50 Gal") is an electric HLT, 24 in wide and 25.5 in tall (the height 50 gallons need), 50 gallons (stored 189.27 L), drawn at its real size in its own box (positions
+named Big MAC HLT ...): **Sight Gauge Top** and **Bottom** on the Left, a **Tangential** at the Left wall, the **Thermowell** TC 2 at
+the Left Back (the temperature probe), two drains (**Second Outlet** Front Low and **Outlet** Bottom Center), the **Heating element**
+TC 2 at the Right Back, and a **Volume Sensor** (a pressure type level sensor) in a small box on the Right side. **Volume Sensor** is a
+new vessel port any vessel can use: a mark, not an IP (no flow), shown as a blue **V** like the Thermowell's T and the Element's E; its
+Volume Meter Device is picked on the Tab.
+**OakBarn_HLT_Radiator** (Skynet picture 252; OakBarn Brewery: "A small HLT 19 x 15 with Tangential and the Low Outlet front and
+Temperature Probe above (TC 1.5 as well) ON Center back 2" TC Heating Element Height between Outlet and Temp TC On Front"; "OakBarn HLT
+Radiator"; "15 gallon so maybe 1/2" or less taller") is an electric HLT, 15 in wide and 19.6 in tall (the height 15 gallons need), 15
+gallons (stored 56.78 L), in its own box (positions named Radiator ...): a **Tangential** at the Left wall, the **Outlet** TC 1.5 low
+on the Front, the **Heating element** TC 2 at the Center Back, between the Outlet and the Temperature Probe, and the **Thermowell** TC
+1.5 (the temperature probe) on the Front above it. Both programs show the same Templates and ports.
+
 ## Change log
+
+- 2026-11-24: Added Rule 19.12 (OakBarn Brewery: "Create a Vessel Widget Has 2" Port upper Right and a Bottom Drain. 43 gallons Real Dimensions are 21 x 26 with 6" bottom Skirt and drain Has a sight Gauge on left with TC fittings"; "With sight gauge TCs"; "Name Vessel OakBarn Stout Kettle"): the Skynet Vessel Widgets OakBarn_Stout_Kettle (Skynet picture 249; re-measured: "without skirt so 22 x 26 is vessel volume", a 22 x 26 in body on the 6 in skirt), OakBarn_MLT (picture 250; "create Oakbarn MLT No Tangential, No 2 TCs for sight gauge and upper right sparge arm inlet is 1.5 TC") OakBarn_Big_MAC_HLT (picture 251, 50 gal, 24 x 25.5 in) and OakBarn_HLT_Radiator (picture 252, 15 gal, 15 x 19.6 in) with their Stout ..., Big MAC HLT ... and Radiator ... port positions; heights set so each holds its gallons, and three new vessel ports, Sight Gauge Top, Sight Gauge Bottom and Volume Sensor (a V mark, not an IP). Help 50 (and French), Widget Library. Checked against both programs: the BruControl Import's Build page uses the same Vessel Templates and ports; its Vessels interview does not look for sight gauges, so nothing else changes there.
 
 - 2026-11-24: Rule 18.39 extended (OakBarn Brewery: "When Building a New schema and adding a Board, be able to skip the USB Port and allow the Build to continue and add the Board"): the Add Interface pop-up's USB Port list ends with None for now, and a blank Network address is allowed; the board is added and shows as not connected (the Brain opens nothing for it) until ⚙ Change fills it in; one warning when it is added. Help 3, 76, 188 and their French pages; the USB Port balloon and its French. Checked against both programs. (thread "Skip USB port when adding a Board")
 

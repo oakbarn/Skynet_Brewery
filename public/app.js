@@ -669,16 +669,26 @@ const EQ = {
       // '... in' positions are the ports of the Skynet Brew Vessel Widgets (Fritz, 2026-10-23): all share one picture box, and the
       // number is the port center's height above the bottom ('Fat ...' = the Brew_Vessel_Big_Mac_Widget, which has its own box)
       // 'Stove Low Drain': the 5 gallon kettles on a Manual Electric or Gas Stove (Panel Update 9 item 14, 2026-11-22)
-      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Stove Low Drain', 0.5, 0.653], ['Front Bottom Center', 0.467, 0.879], ['Center Bottom 1 in', 0.492, 0.934], ['Fat Center Bottom 1 in', 0.494, 0.946], ['VW Center Bottom', 0.5, 0.931]], { on: true }),
+      // 'Stout ...': the OakBarn_Stout_Kettle and OakBarn_MLT, 43 gallon skirted vessels (OakBarn Brewery, 2026-11-24, Rule 19.12), own box (240 x 337)
+      // 'Big MAC HLT ...': the OakBarn_Big_MAC_HLT (OakBarn Brewery, 2026-11-24, Rule 19.12), its own box (280 x 271)
+      // 'Radiator ...': the OakBarn_HLT_Radiator, a 15 gallon HLT (OakBarn Brewery, 2026-11-24, Rule 19.12), its own box (170 x 212)
+      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Stove Low Drain', 0.5, 0.653], ['Front Bottom Center', 0.467, 0.879], ['Center Bottom 1 in', 0.492, 0.934], ['Fat Center Bottom 1 in', 0.494, 0.946], ['VW Center Bottom', 0.5, 0.931], ['Stout Skirt Drain', 0.5, 0.8991], ['Big MAC HLT Bottom Center', 0.4643, 0.9483], ['Radiator Front Low', 0.5, 0.8632]], { on: true }),
       // a second drain, for example above the element so it always stays under water (Fritz's Big Fatty, 2026-10-22)
-      outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92], ['VW Right Middle', 0.923, 0.641], ['Brewzilla Pump Out', 0.045, 0.523]]),
+      outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92], ['VW Right Middle', 0.923, 0.641], ['Brewzilla Pump Out', 0.045, 0.523], ['Big MAC HLT Front Low', 0.4643, 0.7343]]),
       // the Vessel Widget's ('VW ...' positions, Skynet_Vessel_Widget.svg, 260 x 320; Fritz, 2026-11-05): a return or fill pipe in at the top
-      topInlet: pt('Top Inlet', [['VW Left High', 0.077, 0.094], ['Left High', 0, 0.15], ['Right High', 1, 0.15]]),
-      tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75], ['Left 4 in', 0.18, 0.816], ['Fat Left 4 in', 0.103, 0.851], ['VW Left Low', 0.077, 0.625]]),
-      thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7], ['Front Center', 0.452, 0.73], ['Center 5 in', 0.492, 0.777], ['Fat Center 10 in', 0.494, 0.661], ['VW Left Thermowell', 0.077, 0.844], ['VW Front', 0.5, 0.8]], { ip: false }),
-      steamSlayer: pt('Steam Slayer', [...V_HIGH, ['VW Right High', 0.923, 0.1875]]), sparge: pt('Sparge', [...V_HIGH, ['Fat Left 11 in', 0.017, 0.63], ['VW Lid Center', 0.5, 0.044]]), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH, ['VW Lid Right', 0.769, 0.044]]),
+      topInlet: pt('Top Inlet', [['VW Left High', 0.077, 0.094], ['Left High', 0, 0.15], ['Right High', 1, 0.15], ['Stout Right High 2 in', 0.8458, 0.1424]]),
+      tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75], ['Left 4 in', 0.18, 0.816], ['Fat Left 4 in', 0.103, 0.851], ['VW Left Low', 0.077, 0.625], ['Stout Left Wall', 0.0875, 0.6736], ['Big MAC HLT Left Wall', 0.075, 0.7417], ['Radiator Left Wall', 0.1235, 0.7925]]),
+      thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7], ['Front Center', 0.452, 0.73], ['Center 5 in', 0.492, 0.777], ['Fat Center 10 in', 0.494, 0.661], ['VW Left Thermowell', 0.077, 0.844], ['VW Front', 0.5, 0.8], ['Stout Center', 0.5, 0.6439], ['Big MAC HLT Left Back', 0.2571, 0.5756], ['Radiator Front', 0.5, 0.5802]], { ip: false }),
+      steamSlayer: pt('Steam Slayer', [...V_HIGH, ['VW Right High', 0.923, 0.1875]]), sparge: pt('Sparge', [...V_HIGH, ['Fat Left 11 in', 0.017, 0.63], ['VW Lid Center', 0.5, 0.044], ['Stout Right High', 0.8458, 0.1424]]), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH, ['VW Lid Right', 0.769, 0.044]]),
+      // a sight gauge's two TC ports, top and bottom (OakBarn Brewery, 2026-11-24: "With sight gauge TCs", Rule 19.12): IPs, so a
+      // Sight Glass fitting (Rule 5.32) or a pipe can join them
+      sightTop: pt('Sight Gauge Top', [['Left High', 0, 0.15], ['Right High', 1, 0.15], ['Stout Left High', 0.2542, 0.1632], ['Big MAC HLT Left High', 0.175, 0.1845]]),
+      sightBottom: pt('Sight Gauge Bottom', [['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Stout Left Low', 0.2542, 0.6231], ['Big MAC HLT Left Low', 0.175, 0.679]]),
       // where the heating element goes in (Fritz, 2026-10-22): a mark, not an IP; its Device is picked on the Tab_Vessel
-      element: pt('Heating element', [['Right Low', 1, 0.88], ['Left Low', 0, 0.88], ['Center Low', 0.5, 0.92], ['Back Low', 0.3, 0.88], ['Right Side', 0.926, 0.723], ['Right 6 in', 0.917, 0.738], ['Fat Right 6 in', 0.97, 0.788], ['VW Right Element', 0.923, 0.859]], { ip: false }),
+      element: pt('Heating element', [['Right Low', 1, 0.88], ['Left Low', 0, 0.88], ['Center Low', 0.5, 0.92], ['Back Low', 0.3, 0.88], ['Right Side', 0.926, 0.723], ['Right 6 in', 0.917, 0.738], ['Fat Right 6 in', 0.97, 0.788], ['VW Right Element', 0.923, 0.859], ['Big MAC HLT Right Back', 0.6679, 0.6125], ['Radiator Center Back', 0.5, 0.7217]], { ip: false }),
+      // a volume sensor's port (OakBarn Brewery, 2026-11-24, Rule 19.12): a pressure type level sensor in a small box on the side.
+      // A mark, not an IP (no flow); its Volume Meter Device is picked like a Probe's
+      volSensor: pt('Volume Sensor', [['Right Low', 1, 0.88], ['Left Low', 0, 0.88], ['Big MAC HLT Right Side', 0.9357, 0.8708]], { ip: false }),
     } },
   pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/Skynet/Chillers/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
@@ -1590,7 +1600,8 @@ function buildVessel(g) {
     let q = d.pos.find(q => q[0] === (isUnit(g) ? portDefPos(d) : p.position)) || [0, 0.5, 0.5];
     if (isUnit(g) || isSkyV(g)) { const [px, py] = unitPoint({ ...g, x: 0, y: 0 }, q[1], q[2]); q = [0, px / (g.w || 90), py / (g.h || 90)]; }
     const el = k === 'element';      // the heating element's spot: E, and it glows while its Device is on
-    n.append(h('div', { class: 'twell' + (el ? ' elmark' : ''), title: vPortLabel(g, k, p) + (el && g.heater ? ': ' + g.heater : !el && g.probe ? ': ' + g.probe : ''), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, el ? 'E' : 'T'));
+    const vs = k === 'volSensor';    // a Volume Sensor's spot: V (Rule 19.12)
+    n.append(h('div', { class: 'twell' + (el ? ' elmark' : vs ? ' volmark' : ''), title: vPortLabel(g, k, p) + (el && g.heater ? ': ' + g.heater : !el && !vs && g.probe ? ': ' + g.probe : ''), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, el ? 'E' : vs ? 'V' : 'T'));
   }
   if (t === 'bfit' && (g.fittings || []).some(f => METERS.includes(f.kind) && f.meter)) n.append(h('div', { class: 'fmRead', 'data-gid': g.id }, meterText(g)));
   const lbl = g.label || (g.template ? g.name : '');       // a Tab_Vessel or Tab_Fitting: empty Label = its Name
