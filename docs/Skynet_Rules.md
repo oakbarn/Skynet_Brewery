@@ -1680,7 +1680,7 @@ Linux and the Pi switch browser tabs with Alt + 1 to 9, and on Windows Alt + num
 **Shift + Alt + number** is allowed, outside text boxes only. **Alt + ` (the ~ key) is never used** (OakBarn Brewery, 2026-11-24: "alt + tilde"): GNOME switches
 windows with it, on a Mac Option + ` types accents, and the key is ² on a French keyboard and ^ on a German one. **Alt + [** (OakBarn Brewery, 2026-11-24:
 "alt + [") is allowed but read by its place (the key right of P), since it is ^ on a French and Ü on a German keyboard; Help names
-it that way. The allowed letters come first. **Ctrl + Alt + key is never used** (OakBarn Brewery, 2026-11-24: "any conflicts with CTRL + Alt + Key"): on
+it that way. **Alt + =** ("Alt + =") the same: allowed by its place (the key left of Backspace; ´ on a German keyboard). The allowed letters come first. **Ctrl + Alt + key is never used** (OakBarn Brewery, 2026-11-24: "any conflicts with CTRL + Alt + Key"): on
 European Windows keyboards Ctrl + Alt is AltGr and types characters (€, @), Linux and the Pi keep many (terminal, lock screen,
 desktops), and on a Mac Control + Option is the VoiceOver key. The key is read by its place (`ev.code`), so a Mac's Option + letter, which types a symbol, works too. In use: Alt + P
 (Picture picker, admins). Never while typing in a box, and never a key Rule 2.32 keeps.
