@@ -28,10 +28,10 @@ quelque chose sans que vous le vouliez, par exemple un tuyau souple qui s'est ac
 
 1. En **Edit layout**, double-cliquez sur le Tee (ou sur le tuyau souple) pour ouvrir ses Properties.
 2. Appuyez sur **🔓 Unlock its IPs** (sur le tuyau souple : **🔓 Unlock its ends**). Chaque bout de tuyau dessus se détache tout de
-   suite et reste où il est, comme un bout ouvert.
-3. Fermez ou enregistrez (Close ou Save), puis traînez le bout ouvert où vous le voulez. **↩ Put back** (Ctrl+Z) le joint de nouveau.
+   suite et reste où il est, comme un bout ouvert, et les Properties s'enregistrent et se ferment toutes seules (un seul clic).
+3. Traînez le bout ouvert où vous le voulez. **↩ Put back** (Ctrl+Z) le joint de nouveau.
 
-À côté, **↔ Move with pipes** est l'autre choix de la fenêtre : appuyez dessus, fermez ou enregistrez, puis attrapez l'objet et il bouge
+À côté, **↔ Move with pipes** est l'autre choix de la fenêtre : appuyez dessus (les Properties s'enregistrent et se ferment toutes seules), puis attrapez l'objet et il bouge
 **avec** ses tuyaux, sans la fenêtre. Il n'est pas sur un Pipe ou un Hose, et il est gris quand un tuyau ou raccord 🔒 verrouillé devrait bouger avec lui.
 
 Les boutons sont gris quand rien n'y est joint, quand l'objet est 🔒 verrouillé (déverrouillez-le d'abord) ou quand l'équipement de son
@@ -72,7 +72,7 @@ Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregi
 
 Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Sur un raccord (un té, un coude,
 tout raccord), le raccord gagne : appuyer dessus attrape le raccord, pas un raccord d'about (coupling) ni un bout détaché posé
-par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
+par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout avec un anneau rouge (sur aucun IP, parce que ce à quoi il était joint n'existe plus) peut aussi être attrapé et posé sur un IP. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
 et un bout sur un IP 🔒 verrouillé (aussi un IP réglé sur No Unlock) ne bougent pas. **↩ Put back** (Ctrl+Z) annule chaque glissement, et **Save layout**
 garde la nouvelle longueur ou forme.
 
