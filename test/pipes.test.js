@@ -249,3 +249,14 @@ test('Auto configure gives two open ends joined at a corner the fitting the corn
   const after = app.slice(i, i + 900);
   assert.match(after, /x\.fitting === 'coupling' && x\.autoFit\); if \(g && pipesOn\(g\.id, g\.workspace\)\.length >= 2\) autoFit\(g\);/);
 });
+
+// OakBarn Brewery, 2026-11-24: "Double click alone should add the elbow and open the Build Tab in edit mode. If I was on a Zoom Box,
+// the Elbow should be in the Zoom Box" (Rule 5.25)
+test('a TC Pipe Fitting is added with no Properties box, in the middle of the Zoom box when it is open', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  const f = app.slice(app.indexOf('function addTcFit(name)'), app.indexOf('function tcArms(u)'));
+  assert.doesNotMatch(f, /editItem\(/, 'no Properties box');
+  assert.match(f, /const zb = editing && zoomBox \? zoomBox : null;\s+if \(!zb\) toBuild\(\);/);
+  assert.match(f, /g\.x = Math\.round\(zb\.lx - g\.w \/ 2\); g\.y = Math\.round\(zb\.ly - g\.h \/ 2\);/);
+});

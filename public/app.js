@@ -6075,10 +6075,17 @@ function tcFitJoints(ws) {
 // Add Widget > TC Pipe Fittings: the fitting on the Build Tab (like every new item, Rule 4.1)
 function addTcFit(name) {
   const t = tplOf('fitting', name); if (!t) return toast(`No ${name} Template`, true);
-  toBuild();
+  // one pick adds it and stays in Edit layout, with no Properties box (OakBarn Brewery, 2026-11-24: "Double click alone should add the
+  // elbow and open the Build Tab in edit mode. If I was on a Zoom Box, the Elbow should be in the Zoom Box"): with the Zoom box open it
+  // goes in the middle of the Zoom box, on the Tab being zoomed (Rule 4.1 exception); otherwise on the 🔨 Build Tab. Double-click it for its Properties.
+  const zb = editing && zoomBox ? zoomBox : null;
+  if (!zb) toBuild();
   const g = placeTabFitting(t, wsName, tcName(t, draft.graphics), null); g.labelVisible = false;
+  if (zb) { g.x = Math.round(zb.lx - g.w / 2); g.y = Math.round(zb.ly - g.h / 2); placeUnitParts(g); }
   if (isSightGlass(g)) { g.label = sgLabel(draft.graphics); g.sgLength = SG_DEFAULT; sgFromLength(g); placeUnitParts(g); }    // Rule 5.32, Label Rule 18.15
-  sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+  sel = { kind: 'gfx', id: g.id }; renderWs();
+  if (zb) zoomDraw();
+  toast(`${g.name} added${zb ? ' in the middle of the Zoom box' : ' on the 🔨 Build Tab'}. Double-click it for its Properties.`);
 }
 // A tee or a cross dropped on a straight pipe cuts it there (Fritz, 2026-11-05: "Tried to add a Tee to a Pipe and it did not
 // divide"; Rule 5.25). Its run (two ends in line) goes along the pipe: the fitting moves across onto the pipe's line, turning if its
