@@ -92,6 +92,6 @@ là où ils étaient. Appuyez de nouveau pour revenir plus loin (jusqu'à 30 ét
 à zéro chaque fois que vous ouvrez Edit layout. Les autres changements faits dans une fenêtre Properties n'y sont pas ; **Exit** sans enregistrer annule quand même
 tout depuis le dernier Save layout.
 
-**Touche Suppr :** cliquez sur un objet en Edit layout et appuyez sur **Suppr** (Delete) pour le supprimer, comme Delete dans ses
-Properties. Ctrl+Z le ramène. Elle ne fait rien pendant que vous tapez dans une case ou qu'une fenêtre est ouverte, et un objet
+**Touche Suppr :** cliquez sur un objet en Edit layout et appuyez sur **Suppr** (Delete) ou sur **Retour arrière** (sur un Mac, la touche
+**delete**) pour le supprimer, comme Delete dans ses Properties. Ctrl+Z (Cmd+Z sur un Mac) le ramène. Elle ne fait rien pendant que vous tapez dans une case ou qu'une fenêtre est ouverte, et un objet
 verrouillé reste où il est.

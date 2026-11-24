@@ -5435,7 +5435,8 @@ document.addEventListener('keydown', ev => {
 // the delete key?"; Rule 2.64): the same as Delete in its Properties, no "Delete this item?" box, ↩ Put back (Ctrl+Z) brings it back.
 // Never while typing in a box or with a dialog open; a locked item (or equipment under lock_Equipment) stays, with one toast.
 document.addEventListener('keydown', ev => {
-  if (ev.key !== 'Delete' || !editing || !sel || !draft || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
+  // a Mac's "delete" key sends Backspace (OakBarn Brewery, 2026-11-24: "And a Mac or Linux and Pi?"), so Backspace does it too
+  if (!['Delete', 'Backspace'].includes(ev.key) || !editing || !sel || !draft || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   let kind = sel.kind, item = findItem(kind, sel.id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;

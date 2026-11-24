@@ -1488,7 +1488,7 @@ for a big delete or change. They all ask in **one shared Skynet box** (public/sk
   Patron code; Turn Approved Devices Off; Make a new recovery code; the BruControl Import; Switch / load a Schema; Simulator or Real
   boards; Move in (Brain Move); Save the config file and Put back an old one. The small "leave without saving?" questions stay as
   they are. *Not* an item on a Tab (OakBarn Brewery, 2026-11-23): its Properties Delete goes at once and ↩ Put back (Ctrl+Z)
-  brings it back (Rule 5.37). The **Delete key** does the same for the item picked in Edit layout (OakBarn Brewery, 2026-11-24: "If
+  brings it back (Rule 5.37). The **Delete key** (or **Backspace**, the Mac's "delete" key; 2026-11-24) does the same for the item picked in Edit layout (OakBarn Brewery, 2026-11-24: "If
   something has the focus can we delete it with the delete key?"): never while typing in a box or with a dialog open; a locked item
   (or equipment under lock_Equipment) stays, with one toast.
 **Both programs:** the BruControl Importer's own pages are unchanged; the panel's BruControl Import button asked in this box until it

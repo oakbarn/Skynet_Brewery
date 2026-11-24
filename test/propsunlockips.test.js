@@ -62,6 +62,6 @@ console.log('zoom trace ok');
 assert.ok(!app.includes("skyConfirm('Delete this item?'"), 'no nanny box on an item\'s Properties Delete');
 assert.match(app, /const delWho = item\.label \|\| item\.name \|\| lockName\(item\); pushUndo\(`delete \$\{delWho\}`\);/, 'Put back has it');
 assert.match(app, /if \(r === 'delete'\) return deleteItem\(kind, item\);/, 'Properties Delete and the Delete key share one delete');
-assert.match(app, /if \(ev\.key !== 'Delete' \|\| !editing \|\| !sel/, 'the Delete key, only in Edit layout with something picked');
+assert.match(app, /if \(!\['Delete', 'Backspace'\]\.includes\(ev\.key\) \|\| !editing \|\| !sel/, 'the Delete key (Backspace too, a Mac\'s delete key), only in Edit layout with something picked');
 assert.match(app, /if \(ev\.target\.closest\?\.\('input, textarea, select, \[contenteditable="true"\], dialog'\) \|\| document\.querySelector\('dialog\[open\]'\)\) return;\n  let kind = sel\.kind/, 'never while typing or with a dialog open');
 console.log('delete put back ok');
