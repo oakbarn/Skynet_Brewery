@@ -2187,6 +2187,9 @@ Rotate 90 retired 2026-10-28, thread "Lock Skynet Widget Templates and IPs")
 the Vessel kind: kettles, HLT, mash tun, fermenter) has **Flip Horizontal only**: no Flip Vertical and no Rotate (turned 180 is
 the same as upside down). An older kettle turned or upside down is set upright. Chillers, coils, the RIMS tube and fittings keep
 the full set. (thread "Limit pipes to horizontal, vertical, 45", Help 105)
+- **Keys** (2026-11-24, OakBarn Brewery: "Maybe time for a keyboard shortcut to rotate 90 degrees and flip horizontal or vertical?"):
+  with a fitting that can turn picked in Edit layout, **R** turns it a quarter turn right, **Shift + R** left, **H** flips it left to
+  right and **V** top to bottom (Rule 2.73), the same as the turn buttons; never while typing in a box or with a dialog open.
 
 5.6 **A Skynet Template's picture is fixed.** A bottom-drain copy of a kettle changes only the
 picture. (2026-10-23)
@@ -2465,6 +2468,11 @@ straight Horizontal or Vertical pipe (or added right on one):
   to choose which side its inlet is on.
 - Nothing is cut when the item is still joined to another pipe (a message says so; one dragged off its pipes lets them go first, Rule 5.19, and then cuts the pipe it is dropped on), is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
+- **IP on IP: joined with no pipe** (2026-11-24, OakBarn Brewery: "I put the Valve Red Dot on top the Pump red dot and got a message.
+  This is how real life the valves are on the Pump"): a Device or Manual Valve with no pipes on it, let go with one of its open IPs
+  within 12 px of an open IP of something else (a pump, valve, fitting or vessel port), slides so the two sit on one spot and they
+  are joined IP to IP by a pipe of no length (nothing is drawn; flow goes through it as through every join). Its other IPs that
+  then sit on an open IP join too. It is then not put into a pipe it lies over. ↩ Put back (Ctrl+Z) undoes it. (Help 125)
 
 5.27 **The Pump Standard: every pump in the same 300 x 300 box, with its 8 IPs in the same spots** (Fritz, 2026-11-05: "They could
 comply with the rule if we drew everyone in the same Ratio Box. We could make it a 300 x 300 for all Pump Drawings and by default
@@ -2564,7 +2572,12 @@ thread "Standardize valve size and IPs", Help 131).
   read and in Edit layout, a Skynet side-view valve's box is fitted about its middle (the longer side kept as the across size, the
   length half of it), so a valve turned from level to upright turns its box too (public/valvebox.js). Pipes already joined stretch
   along their line to the IPs. Front views (looking down the pipe; the front elbow's bottom end is at (150, 225)) and a user's own
-  valve picture keep a square box. Pumps (OakBarn Brewery: "Make the connections at the edge of the box that look like the end of the valve or Pump"): the
+  valve picture keep a square box. *Changed (OakBarn Brewery, 2026-11-24: "Valve box more like this", with a picture of a box just
+  round a level Motorized Ball Valve):* the box **hugs the valve**: a side-view picture is cut to the band every Skynet side-view valve
+  uses, **186 across** (4 to 190 of its 300: the Motorized Butterfly's motor on one side, the valve body on the other) and 150 long, so
+  a level valve is **75 x 93** on a Tab with its pipe (and IPs) **146 / 186 down**, and an upright one **93 x 75** with its pipe 146 / 186
+  from its motor's side. All Skynet side-view valves keep one box and IP spots, so one still replaces another in place. A box is
+  fitted keeping its pipe line where it was. A valve turned 45 degrees or mirrored keeps the 75 x 150 box (its picture is drawn whole). Pumps (OakBarn Brewery: "Make the connections at the edge of the box that look like the end of the valve or Pump"): the
   Hose or Pipe from the pump to its Inlet IP and Outlet IP ends in a **TC ferrule** on its spot (Rule 5.27).
 - **The IPs are always on the same spots:** Horizontal at the middle of the left and right sides, **(0, 150)** and **(300, 150)**;
   Vertical Left and Vertical Right at the middle of the top and bottom, **(150, 0)** and **(150, 300)**; 45 degrees on the
@@ -2878,6 +2891,15 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   to what is on its other end (fitting, valve, pump, an IP sitting right on another), and so on back; a pipe with a bend in it takes
   the whole move at its first bend (2026-11-24); two open ends (couplings) joined at a corner get the fitting the corner needs, an
   elbow (a tee, a cross ...) (2026-11-24, OakBarn Brewery: "On autoconfigure should have put in an elbow"); a hose just bends. When that
+  **A red dot can be deleted** (2026-11-24, OakBarn Brewery: "trying to get the properties up so I can delete these coupling"): press
+  it, then the Delete key (the dot goes, its pipe stays), or two quick presses outside the Zoom box for its Properties; its pipe end is
+  left plain (no dot, no red ring) and stays plain until it is joined again.
+  **Auto configure joins IP to IP** (2026-11-24, OakBarn Brewery: "why is the red dot not green on the elbow and valve?"): two IPs of
+  things (not open pipe ends) brought onto one spot are joined by a pipe of no length (Rule 5.26), so both turn green.
+  **Turn buttons in the Zoom box** (2026-11-24, OakBarn Brewery: "No way to orient"): while a fitting that can turn is picked, the
+  Zoom box's title has ⟲ 90, ⟳ 90, ⇆ Flip H and ⇅ Flip V (Rule 5.5, a quarter turn at a time), and the box shows every change at once.
+  **A deleted fitting leaves plain ends** (2026-11-24, OakBarn Brewery: "they are not needed with a new Join"): a pipe end whose
+  elbow, tee or Device is deleted gets no coupling (no red dot, no red ring); leftover red dots become plain ends when Edit layout opens.
   would break a join (it reaches the second IP, a vessel or something locked, a pipe gets too short, or two ways back disagree),
   the second IP is tried onto the first. If neither works, nothing moves and one toast says it can't be done automatically without
   breaking a join or adding a pipe, hose or fitting, so do it by hand (delete or add pipes, fittings or joins). Nothing is ever
@@ -7183,6 +7205,12 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 - 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("On a property allow individual Unlock of an IP in addition to Unlock IPs"): Properties with 2 or more joined pipe ends also have 🔓 Unlock one IP ▾ (a Pipe or Hose: Unlock one end ▾); the picked one lets go alone. The Zoom box drags and pans with the left button only, fills the work area at 2.5x, centered on the whole manifold (50 px all round) when it fits, and never opens Tab settings from inside it (Rule 5.37). Rule 4.10: → Right Arrow on a Template's icon does the same as B ("On a Template, could we make the Right Arrow the same as B"). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
+- 2026-11-24: Rule 5.5 note (OakBarn Brewery: "Maybe time for a keyboard shortcut to rotate 90 degrees and flip horizontal or vertical?"; "use your suggestions as I can change them later"): in Edit layout, with a fitting that can turn picked, R turns it a quarter turn right, Shift + R left, H flips it left to right and V top to bottom (Rule 2.73: plain letters; not in a text box or dialog). Key tables docs/Skynet_Key_Combinations.md / .csv and docs/Skynet_Keys_Available.md. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Rule 5.37 note (OakBarn Brewery: "No way to orient"): the Zoom box's title has ⟲ 90, ⟳ 90, ⇆ Flip H and ⇅ Flip V while a fitting that can turn is picked, and the box redraws at once after any change. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Rule 5.29 changed (OakBarn Brewery: "Valve box more like this"): a Skynet side-view valve's box hugs the valve, 75 x 93 level (93 x 75 upright), its picture cut to the 186-across band all side-view valves use, its IPs 146 / 186 across (near the side away from the motor); the pipe line is kept when a box is fitted; 45 degree and mirrored valves keep 75 x 150. Rule 5.37 note (OakBarn Brewery: "Autoconfigured worked but why is the red dot not green on the elbow and valve?"): Auto configure that brings two IPs of things (a fitting, valve, pump ...) onto one spot joins them IP to IP (Rule 5.26). Help 131, 153 (and French). BruControl Import program: same Edit layout code and Schema read; nothing else changes there.
+- 2026-11-24: Rule 5.26 note (OakBarn Brewery: "I put the Valve Red Dot on top the Pump red dot and got a message. This is how real life the valves are on the Pump"): an IP dropped right on another open IP (within 12 px) joins it IP to IP with a pipe of no length, instead of cutting a pipe it lies over. Help 125 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Rule 5.37 changed (OakBarn Brewery picked "Remove automatically": "Lets try B first because I think that is what will work as they are not needed with a new Join"): a pipe or hose end whose elbow, tee or Device is deleted is left a plain end (no coupling, no red dot, no red ring; its blue handle drags it, and it joins an IP it is dragged or drawn to), not a red-dot coupling as earlier the same day; red dots left over (a Skynet-made coupling with one pipe end and nothing else on it) become plain ends when Edit layout opens. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Rule 5.37 red dot note (OakBarn Brewery: "trying to get the properties up so I can delete these coupling. How did they get here?"): a press on a red dot (the coupling on an open pipe end) still grabs the end, but the Delete key then deletes the dot, not its pipe; two quick presses (outside the Zoom box) open the dot's Properties. A red dot deleted by hand leaves its pipe end plain (no dot, no red ring), and it is not put back when Edit layout opens, until the end is joined again. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.25 note (OakBarn Brewery: "Double click to add elbow saved and then no edit no elbow. Double click alone should add the elbow and open the Build Tab in edit mode. If I was on a Zoom Box, the Elbow should be in the Zoom Box"): picking a TC Pipe Fitting in Elbows, Tees … or Add Widget adds it with no Properties box and stays in Edit layout; with the Zoom box open it goes in the middle of the Zoom box on the Tab being zoomed (Rule 4.1 exception), else on the 🔨 Build Tab. Help 124 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 Auto configure note (OakBarn Brewery: "On autoconfigure should have put in an elbow"): when Auto configure joins two open ends (couplings) at a corner, the joint they share gets the fitting the corner needs (an elbow; a tee or cross where more pipes meet), shown as its TC Pipe Fittings Widget. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 Zoom box note (OakBarn Brewery: "when I get near an edge with the left mouse click held, it scrolls"): a button held near an edge of the Zoom box moves the view that way; a drag goes along. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.

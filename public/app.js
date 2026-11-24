@@ -24,7 +24,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
 import { plainLetters } from './letters.js';      // ß ss, æ ae, ø o in a Name (Rule 3.4)
 import { setStopWord } from './processwidget.js';
-import { fitValveBoxes } from './valvebox.js';
+import { fitValveBoxes, valveSide, valveCropped, VCROP, VCROP_PIPE } from './valvebox.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -492,6 +492,7 @@ function renderWs() {
   if (previewing && !(editing && curWs()?.build)) { previewing = false; if (editing) $('#editHint').textContent = curWs()?.build ? BUILD_HINT : ''; }
   document.body.classList.toggle('previewing', previewing); $('#ws').classList.toggle('preview', previewing);
   $('#previewBuild').textContent = previewing ? '✏ Back to building' : '👁 Preview';
+  if (zoomBox && !zoomBox.down) setTimeout(() => zoomDraw(true), 0);      // the Zoom box shows the change at once (a turn, a flip, a join ...)
   if (!previewing) { drawWs(); return markJobPick(); }
   editing = false;
   try { drawWs(); } finally { editing = true; }
@@ -2154,10 +2155,15 @@ const VALVE_STD = { h: [[0, 0.5], [1, 0.5]], v: [[0.5, 0], [0.5, 1]], f: [[0.5, 
 // (public/valvebox.js fits the item's box to it).
 const VALVE_SKN = { h: VALVE_STD.h, v: VALVE_STD.v, f: VALVE_STD.f, fe: [[0.5, 0.5], [0.5, 0.75]] };
 const vstd = (o, kind = o, t = VALVE_SKN) => ({ o, w: o === 'h' && t === VALVE_SKN ? 150 : 300, h: o === 'v' && t === VALVE_SKN ? 150 : 300, ends: t[kind] });
-const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h'), BF_V_R: vstd('v'), BF_V_L: vstd('v'),
+// and then cut to the valve band (OakBarn Brewery, 2026-11-24: "Valve box more like this"; public/valvebox.js): 150 x 186 level, the
+// pipe 146 / 186 down; 186 x 150 upright, the pipe that far from the motor's side. full: the whole picture, for a valve drawn turned
+// 45 degrees or mirrored (it keeps the old box).
+const vcut = (o, at) => ({ o, w: o === 'h' ? VCROP.long : VCROP.across, h: o === 'h' ? VCROP.across : VCROP.long, ends: o === 'h' ? [[0, at], [1, at]] : [[at, 0], [at, 1]], full: vstd(o) });
+const VC_H = vcut('h', VCROP_PIPE), VC_VL = vcut('v', VCROP_PIPE), VC_VR = vcut('v', 1 - VCROP_PIPE);
+const PIC_FLOW = { H: VC_H, V_R: VC_VR, V_L: VC_VL, BF_H: VC_H, BF_V_R: VC_VR, BF_V_L: VC_VL,
   BF_Front: vstd('f'), BF_Front_Elbow: vstd('f', 'fe'), BALL_Front: vstd('f'),
-  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...)
-  OLD_H: vstd('h'), OLD_V: vstd('v') };
+  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical / _Vertical_Left, once BruControl's Valve_Ball_...)
+  OLD_H: VC_H, OLD_V: VC_VR, OLD_VL: VC_VL };
 // The Pump Standard (Fritz, 2026-11-05, Rule 5.27): every Skynet pump picture is drawn in the same 300 x 300 box (shown 150 x 150)
 // with its inlet IP at (285, 150) and its outlet IP at (243, 56), so one pump can replace another in the same place and stay joined
 // to its pipes. The Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover) are all to the same scale
@@ -2425,7 +2431,7 @@ function picFlow(path) {
   if (/(?:^|\/)Pump_[A-Za-z]+_Rip_(?:Off|On)\.(?:svg|png)$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Rip };
   if (/(?:^|\/)Pump_Sump_(?:Off|On)\.svg$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Sump };
   const om = String(path || '').match(/(?:^|\/)Motorized_TC15_Ball_Valve_(Horizontal|Vertical(?:_Left)?)\.svg$/i);      // _Left: mirrored, motor left (Rule 18.43)
-  if (om) return { k: om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V'] };
+  if (om) { const k = om[1] === 'Horizontal' ? 'OLD_H' : /Left$/i.test(om[1]) ? 'OLD_VL' : 'OLD_V'; return { k, ...PIC_FLOW[k] }; }
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
   return k && PIC_FLOW[k] ? { k, ...PIC_FLOW[k] } : null;
@@ -2433,9 +2439,10 @@ function picFlow(path) {
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
-  const f = pumpSpotFlow(e, picFlow(e.imageOff || e.imageOn)) || userValveStd(e), o = userLook(e) ? userValveKind(e) : e.orientation;      // a look of a user's picture (USER_LOOK) stands as Horizontal or Vertical
+  let f = pumpSpotFlow(e, picFlow(e.imageOff || e.imageOn)) || userValveStd(e); const o = userLook(e) ? userValveKind(e) : e.orientation;      // a look of a user's picture (USER_LOOK) stands as Horizontal or Vertical
   // a valve at 45 degrees shows its picture turned about its middle (Rule 5.5), so its two IPs turn with it (Rule 5.24)
   const turn = f && f.k !== 'P' && f.o !== 'f' && e.subtype === 'valve' ? { l45: -45, r45: 45 }[o] || 0 : 0;
+  if (f?.full && !valveCropped(e)) f = { ...f, ...f.full };      // turned 45 degrees or mirrored: the whole picture, the old box
   if (!f || (!turn && f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
   if (!turn && o && f.k !== 'P' && f.o !== 'f' && (o === 'h') !== (f.o === 'h')) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
@@ -3406,6 +3413,9 @@ function fillEl(n, e0) {
   if (sv?.k === 'probe') { if (!vl._svEdit) { fitOneLine(n, vl, null); fitPvSv(vl); } }      // PV and SV each on one line inside the display
   else if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
+  // a Skynet side-view valve's picture is cut to the valve band, so its box hugs the valve (OakBarn Brewery, 2026-11-24: "Valve box more like this")
+  const vc = img && !notFound && !stretch && !turn && !flip && !look && valveCropped(e) ? valveSide(img) : null;
+  for (const c of ['h', 'vl', 'vr']) n.classList.toggle('vcrop-' + c, vc === c);
   // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
   const vf = img ? valveFit(e) : null;
   n.classList.toggle('vfit', !!vf);
@@ -4925,6 +4935,46 @@ function freeIpsTake(it) {
   }
   return true;
 }
+// 🔗 An IP dropped right on another IP joins it, IP to IP, with no pipe between (OakBarn Brewery, 2026-11-24: "I put the Valve Red Dot
+// on top the Pump red dot and got a message. This is how real life the valves are on the Pump"; Rule 5.26): when a Device or Manual
+// Valve with no pipes on it is let go with one of its open IPs within 12 px of an open IP of something else, it slides so the two sit
+// on one spot and a pipe of no length joins them (flow goes through it, as through every join; nothing is drawn). It is not then put
+// into a pipe it lies over. Returns the name of what it joined, or null.
+const IP_ON_IP_PX = 12;
+// two IPs on one spot joined by a pipe of no length (nothing is drawn; flow goes through it)
+function directJoin(a, b, ws) {
+  const c = ipPoint(b, ws) || ipPoint(a, ws); if (!c) return null;
+  const pipe = { id: newId(), kind: 'pipe', straight: true, direct: true, workspace: ws, points: [[...c], [...c]], from: a, to: b, color: '#8a8f96', size: String(defPipeIn()) };
+  giveName(pipe, draft.graphics); draft.graphics.push(pipe);
+  return pipe;
+}
+function ipOnIpJoin(it) {
+  if (!it || !draft || !editing || it.locked || grabJoins(it).length) return null;
+  if (it.kind && !isMv(it)) return null;
+  const ws = it.workspace, mine = new Set(grabIpIds(it).concat(isMv(it) ? [it.id] : []));
+  const used = id => draft.graphics.some(p => p.kind === 'pipe' && (p.from === id || p.to === id));
+  let best = null;
+  for (const a of mine) {
+    const ca = ipPoint(a, ws); if (!ca) continue;
+    for (const q of allIps(ws)) {
+      if (mine.has(q.id) || used(q.id)) continue;
+      const g = draft.graphics.find(x => x.id === q.id); if (g && g.fitting === 'coupling' && !g.port) continue;      // an open pipe end's coupling joins by rejoinEnds
+      const cb = ipPoint(q.id, ws); if (!cb) continue;
+      const d = Math.hypot(cb[0] - ca[0], cb[1] - ca[1]);
+      if (d <= IP_ON_IP_PX && (!best || d < best.d)) best = { d, a, b: q.id, label: q.label, dx: cb[0] - ca[0], dy: cb[1] - ca[1] };
+    }
+  }
+  if (!best) return null;
+  it.x = Math.round(((+it.x || 0) + best.dx) * 100) / 100; it.y = Math.round(((+it.y || 0) + best.dy) * 100) / 100;
+  const join = (a, b) => directJoin(a, b, ws);
+  join(best.a, best.b);
+  for (const a of mine) {       // its other IPs that now sit right on an open IP too
+    const ca = a !== best.a && ipPoint(a, ws); if (!ca || used(a)) continue;
+    const q = allIps(ws).find(q => !mine.has(q.id) && !used(q.id) && !(draft.graphics.find(x => x.id === q.id)?.fitting === 'coupling') && (c => c && Math.hypot(c[0] - ca[0], c[1] - ca[1]) <= 1.5)(ipPoint(q.id, ws)));
+    if (q) join(a, q.id);
+  }
+  return best.label || best.b;
+}
 // a pump or valve can swap places with another of the same kind, on any Tab
 function swapKind(it) {
   if (!it || it.locked) return null;
@@ -5100,8 +5150,8 @@ function renderPipes() {
     // no orange mismatch ring (OakBarn Brewery, 2026-11-17: "There can be no mismatch because an adapter would be used so no need for
     // Orange Ring"): the IP's Properties say which adapter is in the connection (ipAdapterNote, Rule 2.57)
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
-      if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
-      if (!ipPoint(p.to, p.workspace) && !isQdHose(p)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
+      if (!ipPoint(p.from, p.workspace) && !p.plainFrom) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
+      if (!ipPoint(p.to, p.workspace) && !isQdHose(p) && !p.plainTo) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
     }
     // the free end of a Quick Disconnect hose can be grabbed at any time (Rule 5.28): right mouse button, or a finger
     // and so can a hose end whose IP Type is Quick Disconnect, one end at a time (Rule 5.40)
@@ -5195,7 +5245,7 @@ function setEditing(on) {
   if (draft && restoreBuild()) setTimeout(buildBackNote, 300);       // an unfinished Build kept on the Brain comes back on its 🔨 Build Tab (Rule 4.1)
   if (!on) $('#buildBack')?.remove();
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
-  if (on) { mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
+  if (on) { mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); plainLonelyEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
@@ -5297,6 +5347,7 @@ function zoomOpen() {
     .zt { display: flex; flex-wrap: wrap; box-sizing: border-box; width: ${bw}px; align-items: center; gap: 4px 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
     .zt span { flex: 1; min-width: 0; overflow-wrap: anywhere; } .zt button { font: 700 14px/1 system-ui, sans-serif; color: #fafafa; background: #c0392b; border: 1px solid #000; border-radius: 4px; padding: 3px 8px; cursor: pointer; }
     .zt button:hover { background: #e74c3c; } .zt button.zAuto, .zt button.zDrop { font-size: 12px; background: #2d6cdf; } .zt button.zDrop { background: #555; }
+    .zTurn { display: inline-flex; gap: 4px; } .zTurn[hidden] { display: none; } .zt button.zT { font-size: 12px; background: #3a3f46; } .zt button.zT:hover { background: #555b63; } .zt button.zT:disabled { opacity: .4; cursor: default; }
     .zf > .ztr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
     .zw { position: relative; } .zb { position: absolute; background: rgba(255,255,255,.08); z-index: 2; } .zb[hidden] { display: none; }
     .zb.zv { right: 0; top: 0; bottom: 12px; width: 12px; } .zb.zh { left: 0; right: 12px; bottom: 0; height: 12px; }
@@ -5309,6 +5360,11 @@ function zoomOpen() {
   const auto = h('button', { type: 'button', class: 'zAuto', title: 'Move the IP the trace starts on onto the IP it ends on and join them; everything joined behind it moves along (↩ Put back undoes it)', onclick: ev => { ev.stopPropagation(); zoomAuto(); } }, '🔧 Auto configure');
   const drop = h('button', { type: 'button', class: 'zDrop', title: 'Take the red trace away', onclick: ev => { ev.stopPropagation(); zoomTraceEnd(); } }, 'Cancel trace');
   auto.hidden = drop.hidden = true; title.lastChild.before(auto, drop);
+  // ⟲ 90 ⟳ 90 Flip H Flip V in the box (OakBarn Brewery, 2026-11-24: "No way to orient"): they show while a fitting that can turn
+  // (an elbow, tee ...) is picked, and do what the turn buttons on the Edit layout bar do, a quarter turn at a time
+  const turn = h('span', { class: 'zTurn' }, ...[['⟲ 90', -90, 'Turn it a quarter turn to the left'], ['⟳ 90', 90, 'Turn it a quarter turn to the right'], ['⇆ Flip H', 'h', 'Flip it left to right'], ['⇅ Flip V', 'v', 'Flip it top to bottom']]
+    .map(([t, op, tip]) => h('button', { type: 'button', class: 'zT', 'data-op': String(op), title: tip, onclick: ev => { ev.stopPropagation(); turnSel(op); } }, t)));
+  turn.hidden = true; title.lastChild.before(turn);
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'ztr');
   // scroll bars when the zoomed Tab is bigger than the box (OakBarn Brewery, 2026-11-24: "Scroll Bars in the Zoom Box when needed"):
   // drag a bar's thumb, click its track to jump, or turn the mouse wheel over the box (Shift + wheel goes sideways)
@@ -5316,7 +5372,8 @@ function zoomOpen() {
   root.append(title, h('div', { class: 'zw' }, frame, bars.v, bars.h)); frame.append(svg);
   document.body.append(host);
   Object.assign(host.style, { left: Math.max(4, fit.left + 8) + 'px', top: Math.max(4, fit.top + 8) + 'px' });
-  zoomBox = { host, frame, bars, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits ? mf.cx : (mx - r.left) / z, ly: fits ? mf.cy : (my - r.top) / z, down: null, title, auto, drop, svg, trace: null };
+  zoomBox = { host, frame, bars, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits ? mf.cx : (mx - r.left) / z, ly: fits ? mf.cy : (my - r.top) / z, down: null, title, auto, drop, turn, svg, trace: null };
+  updTurnBar(sel && findItem(sel.kind, sel.id));
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu']) frame.addEventListener(type, zoomPass);
   for (const ax of ['h', 'v']) bars[ax].addEventListener('pointerdown', ev => zoomBarDown(ev, ax));
   frame.addEventListener('wheel', ev => {
@@ -5524,6 +5581,11 @@ function zoomAuto() {
   for (const g of draft.graphics) if (g.attachTo && ids.has(g.attachTo) && !t.moves.has(g)) { const v = ids.get(g.attachTo); g.x = (g.x || 0) + v[0]; g.y = (g.y || 0) + v[1]; }      // IPs that ride on a moved fitting
   for (const [p, pm] of t.ends) p.points = p.points.map((q, i) => [q[0] + pm[i][0], q[1] + pm[i][1]]);
   rejoinEnds(new Set([tr.a.id, tr.b.id]));            // an open pipe end now on the other IP joins it
+  // two IPs of things (a fitting, valve, pump ...) now on one spot join IP to IP (OakBarn Brewery, 2026-11-24: "Autoconfigure worked
+  // but why is the red dot not green on the elbow and valve?"; Rule 5.26): a pipe of no length, as an IP dropped on an IP gets
+  { const pa = ipPoint(tr.a.id, wsName), pb = ipPoint(tr.b.id, wsName), lone = id => { const g = draft.graphics.find(x => x.id === id); return g?.kind === 'ip' && g.fitting === 'coupling' && !g.port && pipesOn(id, wsName).length < 2; };
+    if (pa && pb && Math.hypot(pa[0] - pb[0], pa[1] - pb[1]) <= 1.5 && !lone(tr.a.id) && !lone(tr.b.id)
+      && !draft.graphics.some(p => p.kind === 'pipe' && ((p.from === tr.a.id && p.to === tr.b.id) || (p.from === tr.b.id && p.to === tr.a.id)))) directJoin(tr.a.id, tr.b.id, wsName); }
   // two open ends joined at a corner get the fitting the corner needs (OakBarn Brewery, 2026-11-24: "On autoconfigure should have put in
   // an elbow"): the joint they now share becomes an elbow (a tee, a cross ...), and renderWs turns it into its TC Pipe Fittings Widget
   for (const id of [tr.a.id, tr.b.id]) { const g = draft.graphics.find(x => x.id === id && x.kind === 'ip' && x.fitting === 'coupling' && x.autoFit); if (g && pipesOn(g.id, g.workspace).length >= 2) autoFit(g); }
@@ -5581,6 +5643,19 @@ document.addEventListener('keydown', ev => {
   ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();
 });
 
+// ⟳ R turns the picked fitting a quarter turn right, Shift + R left; H flips it left to right, V top to bottom (OakBarn Brewery,
+// 2026-11-24: "Maybe time for a keyboard shortcut to rotate 90 degrees and flip horizontal or vertical?"; "use your suggestions as I can
+// change them later"; Rule 2.73: plain letters reach the page on every system). Edit layout only, with an elbow, tee or other fitting that
+// can turn picked (the turn buttons show), never while typing in a box or with a dialog open. The same as the turn buttons (Rule 5.5).
+document.addEventListener('keydown', ev => {
+  if (!editing || previewing || menuTab || !sel || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
+  const k = ev.key.toLowerCase(); if (!['r', 'h', 'v'].includes(k)) return;
+  if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
+  if (!turnKind(findItem(sel.kind, sel.id))) return;
+  ev.preventDefault();
+  turnSel(k === 'r' ? (ev.shiftKey ? -90 : 90) : k);
+});
+
 // 🗑 The Delete key deletes the item picked in Edit layout (OakBarn Brewery, 2026-11-24: "If something has the focus can we delete it with
 // the delete key?"; Rule 2.64): the same as Delete in its Properties, no "Delete this item?" box, ↩ Put back (Ctrl+Z) brings it back.
 // Never while typing in a box or with a dialog open; a locked item (or equipment under lock_Equipment) stays, with one toast.
@@ -5589,9 +5664,10 @@ document.addEventListener('keydown', ev => {
   if (!['Delete', 'Backspace'].includes(ev.key) || !editing || !sel || !draft || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   let kind = sel.kind, item = findItem(kind, sel.id); if (!item) return;
+  if (dotPick && sel.id === dotPick.pipe) item = findItem('gfx', dotPick.dot) || item;      // a red dot was pressed: it goes, its pipe stays
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
   if (unitOf) { kind = 'gfx'; item = unitOf; }        // an IP of a Skynet Fitting or vessel: the whole fitting or vessel, as its Properties do
-  ev.preventDefault();
+  ev.preventDefault(); dotPick = null;
   const bundle = isUnit(item) || isSkyV(item) ? null : bundleOf(item), who = item.label || item.name || lockName(item);
   if (bundle) return toast(`${who} is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to delete it.`, true);
   if (item.kind === 'vessel' && item.bundled && !isUnit(item) && !isSkyV(item)) return toast(`${who} is a bundle: open it (double-click) and use its Delete.`, true);
@@ -5599,6 +5675,20 @@ document.addEventListener('keydown', ev => {
   deleteItem(kind, item);
 });
 let drag = null, lastPipeTap = null, hitUnit = null;
+// 🔴 a red dot (the coupling on an open pipe end) can be opened and deleted (OakBarn Brewery, 2026-11-24: "trying to get the properties
+// up so I can delete these coupling"; Rule 5.37): a press on it still grabs the pipe end to drag it, but the Delete key then deletes the
+// dot, not the pipe, and two quick presses (outside the Zoom box, where a double-click starts a trace) open the dot's Properties
+let dotPick = null, lastDotTap = null;
+function redDotPress(p, i) {
+  const g = draft.graphics.find(x => x.id === (i === 0 ? p.from : p.to) && x.kind === 'ip' && x.fitting === 'coupling');
+  if (!g || pipesOn(g.id, g.workspace).length >= 2) return false;
+  dotPick = { pipe: p.id, dot: g.id };
+  const now = Date.now(), again = !zoomPassing && lastDotTap && lastDotTap.id === g.id && now - lastDotTap.t < 450;
+  lastDotTap = again ? null : { id: g.id, t: now };
+  if (!again) return false;
+  drag = null; sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+  return true;
+}
 $('#ws').addEventListener('pointerdown', ev => {
   if (!editing) return;
   // the right button no longer drags in Edit layout (OakBarn Brewery, 2026-11-24: "The right Drag and Hold can be deprecated as it too
@@ -5621,6 +5711,8 @@ $('#ws').addEventListener('pointerdown', ev => {
   const onFit = fittingUnder(ev);
   // a let-go end under the pointer wins over the valve, pump or vessel IP it sits on, so it can always be grabbed
   const oe = !noMove() && !onFit && openEndAt(p);
+  dotPick = null;
+  if (oe && redDotPress(oe.p, oe.i)) { ev.preventDefault(); return; }
   if (oe) {
     const k = oe.i === 0 ? 'from' : 'to', n = oe.p.points.length;      // an end on no IP (a red ring) gets its coupling first, so it can join an IP when dropped
     if (!isQdHose(oe.p) && !ipPoint(oe.p[k], oe.p.workspace)) { oe.p[k] = endCoupling(oe.p.points, oe.i, oe.i === 0 ? 1 : n - 2); }
@@ -5630,6 +5722,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   const cpl = ev.target.closest?.('[data-gid]'), cg = cpl && draft?.graphics.find(x => x.id === cpl.dataset.gid && x.kind === 'ip' && x.fitting === 'coupling');
   const cp = cg && draft.graphics.find(x => x.kind === 'pipe' && !x.hose && !x.locked && (x.from === cg.id || x.to === cg.id));
   if (cp && !onFit && endMoves(cp, cp.from === cg.id ? 0 : cp.points.length - 1) && !noMove()) {
+    if (redDotPress(cp, cp.from === cg.id ? 0 : cp.points.length - 1)) { ev.preventDefault(); return; }
     sel = { kind: 'gfx', id: cp.id }; drag = { mode: 'point', item: cp, i: cp.from === cg.id ? 0 : cp.points.length - 1 }; ev.preventDefault(); return;
   }
   const handle = ev.target.closest('circle.handle');
@@ -5782,7 +5875,11 @@ window.addEventListener('pointerup', () => {
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
   if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)), took = ids.size && freeIpsTake(drag.item), n = ids.size ? rejoinLetGo(drag.item) + rejoinEnds(ids) : 0; if (n || took) renderWs(); if (took && n) toast(`🔗 ${lockName(drag.item)} joined ${n} open pipe end${n > 1 ? 's' : ''} where the last one let go. ↩ Put back (Ctrl+Z) undoes it.`); }    // its IP dropped on an open pipe end joins it (Rule 5.37)
-  if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
+  if (drag?.mode === 'move' && drag.moved) {
+    const j = ipOnIpJoin(drag.item);      // its IP dropped right on another IP: joined IP to IP (Rule 5.26)
+    if (j) { renderWs(); toast(`🔗 ${lockName(drag.item)} joined ${j} IP to IP. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000); }
+    else { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
+  }
   if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
   }
@@ -6185,22 +6282,37 @@ function endCoupling(pts, i, j, ws = wsName) {
   const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: ws, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: String((ang + 360) % 180) };
   draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
 }
-// a pipe or hose end whose IP is gone (the elbow, tee or Device it was on was deleted) gets an open end (a coupling), as 🔓 Unlock
-// leaves it, so it shows as a red IP dot that can be joined, traced and auto configured (OakBarn Brewery, 2026-11-24: "I removed the
-// elbow so these should all be the red dot and available to connect with the trace"; "Removed the Tee"; Rule 5.37). A Quick
-// Disconnect hose's free end stays free. Returns how many ends were opened.
+// a pipe or hose end whose IP is gone (the elbow, tee or Device it was on was deleted) is left a plain end: no coupling, no red dot and
+// no red ring (OakBarn Brewery, 2026-11-24, picked "Remove automatically": "Lets try B first because I think that is what will work as
+// they are not needed with a new Join"; Rule 5.37; it was a red-dot coupling for a few hours, "I removed the elbow so these should all
+// be the red dot"). It still joins a new IP when dragged or drawn to one. A Quick Disconnect hose's free end stays free. Returns how
+// many ends were made plain.
 function openLostEnds(d) {
   let n = 0; const known = new Map();
   for (const p of d.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) for (const k of ['from', 'to']) {
     if (isQdHose(p) && k === 'to') continue;
-    const id = p[k];
+    const id = p[k], plain = k === 'from' ? 'plainFrom' : 'plainTo';
+    if (id) delete p[plain];          // joined again: a plain end (its red dot deleted by hand) is an ordinary end again
+    else if (p[plain]) continue;      // its red dot was deleted by hand: it stays plain (Rule 5.37)
     if (id) {
       if (ipPoint(id, p.workspace)) continue;
       if (!known.has(p.workspace)) known.set(p.workspace, new Set(allIps(p.workspace).map(q => q.id)));
       if (known.get(p.workspace).has(id) || d.graphics.some(g => g.id === id)) continue;      // still there (only not drawn yet)
     }
-    const m = p.points.length;
-    p[k] = k === 'from' ? endCoupling(p.points, 0, 1, p.workspace) : endCoupling(p.points, m - 1, m - 2, p.workspace); n++;
+    delete p[k]; p[plain] = true; n++;
+  }
+  return n;
+}
+// the red dots left over from before (a coupling with one pipe end on it and nothing else, made by Skynet) go when Edit layout opens:
+// their pipe ends are plain ends (Rule 5.37). A coupling the user named or labelled, a locked one, a hose's and a Quick Disconnect stay.
+function plainLonelyEnds(d) {
+  let n = 0;
+  for (const g of d.graphics.filter(g => g.kind === 'ip' && g.fitting === 'coupling' && g.autoFit && !g.label && !g.locked && !g.attachTo)) {
+    const on = d.graphics.filter(p => p.kind === 'pipe' && (p.from === g.id || p.to === g.id));
+    if (on.length !== 1 || on[0].hose || isQdHose(on[0]) || on[0].from === on[0].to) continue;
+    if (d.graphics.some(x => x !== g && (x.capOn === g.id || x.of === g.id))) continue;
+    const p = on[0], k = p.from === g.id ? 'from' : 'to';
+    delete p[k]; p[k === 'from' ? 'plainFrom' : 'plainTo'] = true; d.graphics = d.graphics.filter(x => x !== g); n++;
   }
   return n;
 }
@@ -6333,7 +6445,7 @@ function dropPipe(d) {
       pipe[k] = near.id; takePumpSpots(); joinIpType(draft, pipe, k);      // auto typed to the join (Rule 5.40)
       return dropPipe({ ...d, carry: d.carry.filter(q => q.g !== mine) });   // the other end may now sit on an IP too
     }
-    if (!pipe[k]) pipe[k] = endCoupling(pipe.points, i, j);
+    if (!pipe[k] && !pipe[k === 'from' ? 'plainFrom' : 'plainTo']) pipe[k] = endCoupling(pipe.points, i, j);      // a plain end stays plain (Rule 5.37)
   }
 }
 
@@ -7965,6 +8077,10 @@ function updTurnBar(item) {
   for (const b of $$('#turnBar .flip')) b.disabled = k !== 'all';
   if (k === 'kettle') { $('#turnFlipH').disabled = false; for (const id of ['#turnFlipV', '#turnL45', '#turnR45']) $(id).disabled = true; }     // a kettle stays upright (Rule 5.5)
   else for (const id of ['#turnL45', '#turnR45']) $(id).disabled = false;
+  if (zoomBox?.turn) {        // the same buttons in the Zoom box, a quarter turn at a time
+    zoomBox.turn.hidden = !k;
+    for (const b of zoomBox.turn.querySelectorAll('button')) { const op = b.dataset.op; b.disabled = op === 'h' ? !['all', 'kettle'].includes(k) : op === 'v' ? k !== 'all' : k === 'kettle'; }
+  }
 }
 function turnSel(op) {
   const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
@@ -12929,8 +13045,12 @@ async function deleteItem(kind, item) {
     for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
   }
   draft.graphics = draft.graphics.filter(g => !(isCap(g) && gone.includes(g.capOn)));     // an End Cap on an opening that is gone goes too
-  for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
-  openLostEnds(draft);       // the pipe ends that were on it are open ends now: red dots that can be joined or traced (Rule 5.37)
+  const dot = type === 'ip' && item.fitting === 'coupling';      // a red dot deleted by hand: its pipe end is left plain, with no dot or ring
+  for (const g of draft.graphics) {
+    if (gone.includes(g.from)) { delete g.from; if (dot && g.kind === 'pipe') g.plainFrom = true; }
+    if (gone.includes(g.to)) { delete g.to; if (dot && g.kind === 'pipe') g.plainTo = true; }
+  }
+  openLostEnds(draft);       // the pipe ends that were on it are plain ends now: no dot, no ring (Rule 5.37)
   sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000);
 }
 async function editItem(kind, id) {

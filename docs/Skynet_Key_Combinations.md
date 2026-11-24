@@ -174,6 +174,9 @@ The same table as a spreadsheet: [Skynet_Key_Combinations.csv](Skynet_Key_Combin
 | Combination | Action on Windows | Action on Mac | Action on Linux | Action on Pi | Available on Skynet Tab | Skynet Assigned | Comments | Reason to Exclude |
 |---|---|---|---|---|---|---|---|---|
 | **Z** |  |  |  |  | In use | Zoom box on / off (Edit layout, Rule 5.37) | Not in a text box or dialog. |  |
+| **R** |  |  |  |  | In use | Turns the picked fitting a quarter turn right; **Shift + R** left (Edit layout, Rule 5.5) | Not in a text box or dialog; only with a fitting that can turn picked. |  |
+| **H** |  |  |  |  | In use | Flips the picked fitting left to right (Edit layout, Rule 5.5) | Not in a text box or dialog. |  |
+| **V** |  |  |  |  | In use | Flips the picked fitting top to bottom (Edit layout, Rule 5.5) | Not in a text box or dialog. |  |
 | **Ctrl + Z  (⌘ + Z)** |  |  |  |  | In use | Put back the last move (Edit layout); undo typing in a box |  |  |
 | **Ctrl + Y  (⌘ + Y)** |  |  |  |  | In use | Redo typing in a box (Rule 2.32) | Ctrl + Shift + Z redoes too (browser). |  |
 | **Ctrl + B  (⌘ + B)** |  |  |  |  | In use | Bold code \b ... \b in a text box (Rule 2.32) |  |  |

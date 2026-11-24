@@ -219,15 +219,18 @@ test('Properties have 🔓 Unlock one IP / one end next to Unlock its IPs', asyn
   assert.match(app, /unlockJoins\(\[j\]\)/, 'only the picked one lets go');
 });
 
-// OakBarn Brewery, 2026-11-24: "I removed the elbow so these should all be the red dot and available to connect with the trace";
-// "just the red dot would match what we have rather than the red circle" (Rule 5.37)
-test('a pipe end whose IP is deleted becomes an open end shown as a red dot', async () => {
+// OakBarn Brewery, 2026-11-24: "just the red dot would match what we have rather than the red circle"; then, picked "Remove
+// automatically": "they are not needed with a new Join" (Rule 5.37): a lost end is a plain end, leftover red dots go
+test('a pipe end whose IP is deleted is left a plain end, and leftover red dots go when Edit layout opens', async () => {
   const fs = await import('node:fs');
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
   assert.match(app, /function openLostEnds\(d\)/);
   assert.match(app, /openLostEnds\(draft\);\s+\/\/ the pipe ends that were on it/, 'after a delete');
-  assert.match(app, /centerOnPipes\(draft\); openLostEnds\(draft\); \}/, 'and when Edit layout opens');
+  assert.match(app, /centerOnPipes\(draft\); openLostEnds\(draft\); plainLonelyEnds\(draft\); \}/, 'and when Edit layout opens');
+  const f = app.slice(app.indexOf('function openLostEnds(d)'), app.indexOf('function plainLonelyEnds(d)'));
+  assert.match(f, /delete p\[k\]; p\[plain\] = true;/, 'no coupling, a plain end');
+  assert.doesNotMatch(f, /endCoupling\(/);
   assert.match(css, /#ws\.editing \.gfx\.ip\.fit\.lonely::before \{[^}]*background: #e01b12/, 'a red dot');
 });
 
@@ -246,7 +249,7 @@ test('Auto configure gives two open ends joined at a corner the fitting the corn
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   const i = app.indexOf('rejoinEnds(new Set([tr.a.id, tr.b.id]));');
   assert.ok(i > 0);
-  const after = app.slice(i, i + 900);
+  const after = app.slice(i, i + 2200);
   assert.match(after, /x\.fitting === 'coupling' && x\.autoFit\); if \(g && pipesOn\(g\.id, g\.workspace\)\.length >= 2\) autoFit\(g\);/);
 });
 
@@ -259,4 +262,51 @@ test('a TC Pipe Fitting is added with no Properties box, in the middle of the Zo
   assert.doesNotMatch(f, /editItem\(/, 'no Properties box');
   assert.match(f, /const zb = editing && zoomBox \? zoomBox : null;\s+if \(!zb\) toBuild\(\);/);
   assert.match(f, /g\.x = Math\.round\(zb\.lx - g\.w \/ 2\); g\.y = Math\.round\(zb\.ly - g\.h \/ 2\);/);
+});
+
+// OakBarn Brewery, 2026-11-24: "trying to get the properties up so I can delete these coupling" (Rule 5.37)
+test('a red dot can be deleted with the Delete key or its Properties, and its pipe end stays plain', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function redDotPress\(p, i\)/);
+  assert.match(app, /if \(dotPick && sel\.id === dotPick\.pipe\) item = findItem\('gfx', dotPick\.dot\) \|\| item;/, 'Delete key: the dot, not its pipe');
+  assert.match(app, /again = !zoomPassing && lastDotTap/, 'two quick presses open its Properties, not in the Zoom box');
+  assert.match(app, /else if \(p\[plain\]\) continue;/, 'a plain end gets no new dot');
+  assert.match(app, /!ipPoint\(p\.from, p\.workspace\) && !p\.plainFrom\)/, 'and no red ring');
+});
+
+// OakBarn Brewery, 2026-11-24: "I put the Valve Red Dot on top the Pump red dot and got a message. This is how real life the valves
+// are on the Pump" (Rule 5.26)
+test('an IP dropped right on another open IP joins it IP to IP instead of cutting a pipe', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const IP_ON_IP_PX = 12;/);
+  assert.match(app, /kind: 'pipe', straight: true, direct: true, workspace: ws, points: \[\[\.\.\.c\], \[\.\.\.c\]\]/, 'a pipe of no length');
+  assert.match(app, /const j = ipOnIpJoin\(drag\.item\);[\s\S]{0,300}else \{ const r = splitPipeFor\(drag\.item\);/, 'before cutting a pipe');
+});
+
+// OakBarn Brewery, 2026-11-24: "Autoconfigured worked but why is the red dot not green on the elbow and valve?" (Rule 5.37)
+test('Auto configure joins two IPs of things brought onto one spot IP to IP', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  const i = app.indexOf('rejoinEnds(new Set([tr.a.id, tr.b.id]));');
+  assert.match(app.slice(i, i + 1400), /directJoin\(tr\.a\.id, tr\.b\.id, wsName\)/);
+});
+
+// OakBarn Brewery, 2026-11-24: "No way to orient" (Rule 5.37)
+test('the Zoom box has quarter-turn and flip buttons for a picked fitting, and redraws at once', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /\['⟲ 90', -90, [^\]]+\], \['⟳ 90', 90,/);
+  assert.match(app, /onclick: ev => \{ ev\.stopPropagation\(\); turnSel\(op\); \}/);
+  assert.match(app, /if \(zoomBox\?\.turn\) \{/, 'shown with the Edit layout bar turn buttons');
+  assert.match(app, /if \(zoomBox && !zoomBox\.down\) setTimeout\(\(\) => zoomDraw\(true\), 0\);/, 'redrawn after a change');
+});
+
+// OakBarn Brewery, 2026-11-24: "Maybe time for a keyboard shortcut to rotate 90 degrees and flip horizontal or vertical?" (Rule 5.5)
+test('R, Shift + R, H and V turn and flip the picked fitting', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /turnSel\(k === 'r' \? \(ev\.shiftKey \? -90 : 90\) : k\);/);
+  assert.match(app, /if \(!editing \|\| previewing \|\| menuTab \|\| !sel \|\| ev\.ctrlKey \|\| ev\.metaKey \|\| ev\.altKey \|\| ev\.repeat\) return;/, 'never with Ctrl, Alt or ⌘');
 });

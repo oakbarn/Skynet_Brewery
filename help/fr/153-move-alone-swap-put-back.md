@@ -57,12 +57,12 @@ déplace de ce côté sur le collecteur, et ce que vous traînez suit. Éloignez
 est plus grand que la fenêtre, elle a des **barres de défilement** sur ses bords droit et bas : traînez-en une, ou cliquez le long
 pour y sauter. La molette de la souris défile vers le haut et le bas, et **Shift + molette** sur le côté.
 
-Appuyez sur **Échap** ou sur le **✕**
+Quand un coude, un té ou un autre raccord qui peut tourner est choisi, le titre de la fenêtre de zoom a **⟲ 90**, **⟳ 90**, **⇆ Flip H** et **⇅ Flip V** : ils le tournent ou le retournent d'un quart de tour à la fois, comme les boutons pour tourner de la barre Edit layout, et la fenêtre de zoom le montre tout de suite. Les touches le font aussi, dans la fenêtre de zoom ou non : **R** tourne le raccord choisi d'un quart de tour à droite, **Maj + R** à gauche, **H** le retourne de gauche à droite et **V** de haut en bas. Appuyez sur **Échap** ou sur le **✕**
 rouge dans son coin en haut à droite pour la fermer.
 
 **Joindre deux IP avec un tracé (seulement dans la fenêtre de zoom) :** double-cliquez sur un IP rouge pour commencer une ligne
 de tracé rouge, puis cliquez sur l'IP auquel le joindre. Appuyez sur **🔧 Auto configure** : le premier IP se pose sur le second
-et ils se joignent, et ce qui est joint derrière suit pour qu'aucun raccord ne se défasse. Deux bouts ouverts (points rouges) qui se rejoignent en angle reçoivent un coude (un té là où trois tuyaux se rejoignent, et ainsi de suite). Un tuyau droit s'allonge ou se raccourcit
+et ils se joignent, et ce qui est joint derrière suit pour qu'aucun raccord ne se défasse. Deux bouts ouverts (points rouges) qui se rejoignent en angle reçoivent un coude (un té là où trois tuyaux se rejoignent, et ainsi de suite). Deux IP de choses (un coude et une vanne, une vanne et une pompe ...) amenés au même endroit se joignent IP sur IP, sans tuyau entre eux, et deviennent verts tous les deux. Un tuyau droit s'allonge ou se raccourcit
 pour la part du déplacement le long de sa ligne, et seule la part en travers passe à ce qui est à son autre bout (un té glisse le
 long de ses tuyaux à niveau, le tuyau qui monte à un coude se raccourcit), et ainsi de suite ; un tuyau coudé prend tout le déplacement à son coude, et un tuyau souple se plie. Si cela
 défaisait un raccord, le second IP est essayé sur le premier. Si aucun ne marche, rien ne bouge et un message dit que cela ne
@@ -84,7 +84,7 @@ Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregi
 
 Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Sur un raccord (un té, un coude,
 tout raccord), le raccord gagne : appuyer dessus attrape le raccord, pas un raccord d'about (coupling) ni un bout détaché posé
-par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout dont le coude, le té ou le Device a été supprimé devient tout de suite un bout ouvert : un petit **point rouge** comme tout IP ouvert, qui peut être attrapé, joint ou tracé (🔗) dans la fenêtre Zoom. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
+par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout dont le coude, le té ou le Device a été supprimé reste un **bout simple** : pas de point rouge ni d'anneau rouge, seulement la petite poignée bleue qui le fait glisser. Faites-le glisser ou tracez un tuyau jusqu'à un IP et il s'y joint. Les points rouges restés d'avant s'en vont à l'ouverture d'Edit layout. Tout autre point rouge (le bout ouvert d'un tuyau que vous avez tracé) peut être supprimé : appuyez dessus puis sur la touche **Suppr** (Delete). Le point s'en va, son tuyau reste, et ce bout de tuyau reste simple. Deux clics rapides sur un point rouge ouvrent ses Properties, qui ont aussi 🗑 Delete (dans la fenêtre Zoom, un double-clic commence plutôt un tracé). Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
 et un bout sur un IP 🔒 verrouillé (aussi un IP réglé sur No Unlock) ne bougent pas. **↩ Put back** (Ctrl+Z) annule chaque glissement, et **Save layout**
 garde la nouvelle longueur ou forme.
 

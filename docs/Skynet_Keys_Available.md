@@ -72,7 +72,7 @@ The key shows a different sign on European keyboards, so Help names it by where 
 | **Alt + .** | the key right of , |
 | **Alt + /** | the key left of right Shift |
 
-## Already used by Skynet (20)
+## Already used by Skynet (23)
 
 | Combination | What it does |
 |---|---|
@@ -83,6 +83,9 @@ The key shows a different sign on European keyboards, so Help names it by where 
 | **Left hold (0.4 s) then drag** | Moves a QD hose end, chiller or Template icon outside Edit layout (Rule 2.9) |
 | **Double-click** | Opens Properties in Edit layout; finishes a hose |
 | **Z** | Zoom box on / off (Edit layout, Rule 5.37) |
+| **R / Shift + R** | Turns the picked fitting a quarter turn right / left (Edit layout, Rule 5.5) |
+| **H** | Flips the picked fitting left to right (Edit layout, Rule 5.5) |
+| **V** | Flips the picked fitting top to bottom (Edit layout, Rule 5.5) |
 | **Ctrl + Z  (⌘ + Z)** | Put back the last move (Edit layout); undo typing in a box |
 | **Ctrl + Y  (⌘ + Y)** | Redo typing in a box (Rule 2.32) |
 | **Ctrl + B  (⌘ + B)** | Bold code \b ... \b in a text box (Rule 2.32) |
