@@ -91,3 +91,7 @@ s'alignent. Une vanne ou une Manual Valve sans tuyau glisse sur ses bouts ouvert
 là où ils étaient. Appuyez de nouveau pour revenir plus loin (jusqu'à 30 étapes). Posez la souris dessus pour voir ce qu'il va remettre. Il repart
 à zéro chaque fois que vous ouvrez Edit layout. Les autres changements faits dans une fenêtre Properties n'y sont pas ; **Exit** sans enregistrer annule quand même
 tout depuis le dernier Save layout.
+
+**Touche Suppr :** cliquez sur un objet en Edit layout et appuyez sur **Suppr** (Delete) pour le supprimer, comme Delete dans ses
+Properties. Ctrl+Z le ramène. Elle ne fait rien pendant que vous tapez dans une case ou qu'une fenêtre est ouverte, et un objet
+verrouillé reste où il est.

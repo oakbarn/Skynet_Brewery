@@ -88,3 +88,6 @@ Rule 5.27), so two pumps of the same size line up. A valve or Manual Valve with 
 where they were. Press it again to go back further (up to 30 steps). Rest the mouse on it to see what it will put back. It starts
 fresh each time you open Edit layout. Other changes made in a Properties dialog are not in it; **Exit** without saving still undoes
 everything since the last Save layout.
+
+**Delete key:** click an item in Edit layout and press **Delete** to delete it, the same as Delete in its Properties. Ctrl+Z
+brings it back. It does nothing while you are typing in a box or a dialog is open, and a locked item stays where it is.
