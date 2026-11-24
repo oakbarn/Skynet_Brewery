@@ -106,6 +106,14 @@ Ctrl + Alt + any letter or number,"On European keyboards Ctrl + Alt is AltGr and
 Ctrl + Alt + arrows,Some PCs (Intel graphics): rotate the screen,VoiceOver: move around,Switch desktops / workspaces,Unknown,No,,,Screen rotate on Windows; desktop switch on Linux
 Ctrl + Alt + F1 to F12,None,None,Leave the desktop for a text console,Linux: leave the desktop for a text console,No,,,Linux / Pi console switch
 Ctrl + Alt + Delete,Security screen,No such key,Log out / restart (desktop dependent),Unknown,No,,,System key
+Alt + left click / drag,Chrome / Edge: Alt + click on a link downloads it; otherwise reaches the page,Option + click on a link downloads it (Safari); otherwise reaches the page,XFCE and others: moves the whole window (GNOME / KDE use the Windows key instead),"Unknown (likely moves the window, as older Pi OS did)",No,Hold Alt while dragging = place without the snap (Edit layout),"Fritz, 2026-11-24: ""Can alt + Left Mouse Click work"". The Alt no-snap drag may not reach the Panel on a Pi.",Window move on many Linux desktops and likely the Pi
+Alt + right click,Reaches the page,Reaches the page,Some desktops: resize the window or window menu,Unknown,No,,,Window keys on Linux desktops
+Shift + left click,Chrome / Edge: on a link opens a new window; otherwise reaches the page,Reaches the page,Reaches the page,Chromium: on a link opens a new window; otherwise reaches the page,Yes,,Safe on all four (not on links).,
+Ctrl + left click  (⌘ + click),On a link opens a new tab; otherwise reaches the page,⌘ + click: same. Ctrl + click is a right-click on a Mac,Same as Windows,Chromium: same as Windows,In use,Opens Properties in Edit layout (Rule 2.9),,
+Shift + right click,The browser's own menu,The browser's own menu,The browser's own menu,Chromium: the browser's own menu,In use,Browser menu instead of Help (Rule 2.11),,
+Right click,Browser menu,Browser menu (or Ctrl + click),Browser menu,Browser menu,In use,Help for what is under the mouse (Rule 2.11); never drags (Rule 2.9),,
+Left hold (0.4 s) then drag,,,,,In use,"Moves a QD hose end, chiller or Template icon outside Edit layout (Rule 2.9)",,
+Double-click,,,,,In use,Opens Properties in Edit layout; finishes a hose,,
 Z,,,,,In use,"Zoom box on / off (Edit layout, Rule 5.37)",Not in a text box or dialog.,
 Ctrl + Z  (⌘ + Z),,,,,In use,Put back the last move (Edit layout); undo typing in a box,,
 Ctrl + Y  (⌘ + Y),,,,,In use,Redo typing in a box (Rule 2.32),Ctrl + Shift + Z redoes too (browser).,

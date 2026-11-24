@@ -199,3 +199,22 @@ test('the left button held a moment drags outside Edit layout; the right button 
   assert.match(app, /ev\.altKey \|\| ev\.repeat \|\| ev\.key\.toLowerCase\(\) !== 'z'\) return;/, 'Z only, never Alt + Z (Rule 2.73)');
   assert.doesNotMatch(app, /'Move with Held Right Click'/, 'no right-drag hint left');
 });
+
+// Rule 5.37 changed (OakBarn Brewery, 2026-11-24: "the zoom box needs to be bigger ... + 50 px and fill the work area"; "inside the zoom Box,
+// Click to open Tab Properties no longer works but only in the Zoom Box")
+test('the Zoom box fills the work area with the whole manifold and never opens Tab settings', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function zoomManifold\(x, y\)/);
+  assert.match(app, /x0 = Math\.min\(\.\.\.xs\) - ZOOM_PAD/, '50 px all round');
+  assert.match(app, /else if \(!zoomPassing\) editWorkspace\(\);/, 'no Tab settings from a double-click in the box');
+  assert.match(app, /if \(kind === 'tab' && zoomPassing\) return;/, 'no Tab settings from a held press in the box');
+});
+
+// OakBarn Brewery, 2026-11-24: "On a property allow individual Unlock of an IP in addition to Unlock IPs" (Rule 5.37)
+test('Properties have 🔓 Unlock one IP / one end next to Unlock its IPs', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /'🔓 Unlock one end ▾' : '🔓 Unlock one IP ▾'/);
+  assert.match(app, /unlockJoins\(\[j\]\)/, 'only the picked one lets go');
+});

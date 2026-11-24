@@ -12,7 +12,7 @@ The same table as a spreadsheet: [Skynet_Key_Combinations.csv](Skynet_Key_Combin
 - Pi = Raspberry Pi OS with Chromium. Linux = a common desktop (GNOME, KDE) with Chrome or Firefox. Desktops differ. **Unknown** in the Pi column means it is questionable on a Pi (not checked there); the words after it say what other Linux desktops do.
 - No shortcut ever works while typing in a text box.
 
-**Short list:** Alt + A, C, G, I, J, K, L, M, N, O, P (in use), Q, U, W, X, Y. Shift + Alt + any letter except A, I, T. Shift + Alt + numbers and arrows. Never Ctrl + Alt, Alt + number, Alt + arrows, Alt + F-keys.
+**Short list:** Alt + A, C, G, I, J, K, L, M, N, O, P (in use), Q, U, W, X, Y. Shift + Alt + any letter except A, I, T. Shift + Alt + numbers and arrows. Never Ctrl + Alt, Alt + number, Alt + arrows, Alt + F-keys, Alt + mouse.
 
 ## Alt + letter
 
@@ -155,6 +155,19 @@ The same table as a spreadsheet: [Skynet_Key_Combinations.csv](Skynet_Key_Combin
 | **Ctrl + Alt + arrows** | Some PCs (Intel graphics): rotate the screen | VoiceOver: move around | Switch desktops / workspaces | Unknown | No |  |  | Screen rotate on Windows; desktop switch on Linux |
 | **Ctrl + Alt + F1 to F12** | None | None | Leave the desktop for a text console | Linux: leave the desktop for a text console | No |  |  | Linux / Pi console switch |
 | **Ctrl + Alt + Delete** | Security screen | No such key | Log out / restart (desktop dependent) | Unknown | No |  |  | System key |
+
+## Mouse
+
+| Combination | Action on Windows | Action on Mac | Action on Linux | Action on Pi | Available on Skynet Tab | Skynet Assigned | Comments | Reason to Exclude |
+|---|---|---|---|---|---|---|---|---|
+| **Alt + left click / drag** | Chrome / Edge: Alt + click on a link downloads it; otherwise reaches the page | Option + click on a link downloads it (Safari); otherwise reaches the page | XFCE and others: moves the whole window (GNOME / KDE use the Windows key instead) | Unknown (likely moves the window, as older Pi OS did) | No | Hold Alt while dragging = place without the snap (Edit layout) | Fritz, 2026-11-24: "Can alt + Left Mouse Click work". The Alt no-snap drag may not reach the Panel on a Pi. | Window move on many Linux desktops and likely the Pi |
+| **Alt + right click** | Reaches the page | Reaches the page | Some desktops: resize the window or window menu | Unknown | No |  |  | Window keys on Linux desktops |
+| **Shift + left click** | Chrome / Edge: on a link opens a new window; otherwise reaches the page | Reaches the page | Reaches the page | Chromium: on a link opens a new window; otherwise reaches the page | Yes |  | Safe on all four (not on links). |  |
+| **Ctrl + left click  (⌘ + click)** | On a link opens a new tab; otherwise reaches the page | ⌘ + click: same. Ctrl + click is a right-click on a Mac | Same as Windows | Chromium: same as Windows | In use | Opens Properties in Edit layout (Rule 2.9) |  |  |
+| **Shift + right click** | The browser's own menu | The browser's own menu | The browser's own menu | Chromium: the browser's own menu | In use | Browser menu instead of Help (Rule 2.11) |  |  |
+| **Right click** | Browser menu | Browser menu (or Ctrl + click) | Browser menu | Browser menu | In use | Help for what is under the mouse (Rule 2.11); never drags (Rule 2.9) |  |  |
+| **Left hold (0.4 s) then drag** |  |  |  |  | In use | Moves a QD hose end, chiller or Template icon outside Edit layout (Rule 2.9) |  |  |
+| **Double-click** |  |  |  |  | In use | Opens Properties in Edit layout; finishes a hose |  |  |
 
 ## Other keys Skynet already uses
 

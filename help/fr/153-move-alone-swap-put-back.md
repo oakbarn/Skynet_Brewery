@@ -34,16 +34,22 @@ quelque chose sans que vous le vouliez, par exemple un tuyau souple qui s'est ac
 À côté, **↔ Move with pipes** est l'autre choix de la fenêtre : appuyez dessus (les Properties s'enregistrent et se ferment toutes seules), puis attrapez l'objet et il bouge
 **avec** ses tuyaux, sans la fenêtre. Il n'est pas sur un Pipe ou un Hose, et il est gris quand un tuyau ou raccord 🔒 verrouillé devrait bouger avec lui.
 
+**🔓 Unlock one IP ▾** (sur un Pipe ou un Hose : **🔓 Unlock one end ▾**) est là quand 2 bouts de tuyau ou plus y sont joints.
+Choisissez un IP dans la liste et seul ce bout de tuyau se détache ; les autres restent joints. Les Properties s'enregistrent et se
+ferment toutes seules, et **↩ Put back** (Ctrl+Z) le rejoint.
+
 Les boutons sont gris quand rien n'y est joint, quand l'objet est 🔒 verrouillé (déverrouillez-le d'abord) ou quand l'équipement de son
 Tab est verrouillé (lock_Equipment). Posez la souris dessus pour voir pourquoi.
 
 ## Zoomer sur un raccord (Z) {#zoom-in-on-a-join-z}
 
-En **Edit layout**, pointez le raccord et appuyez sur **Z** (pas pendant que vous tapez dans une case). Une fenêtre s'ouvre dans un
-coin du haut du Tab et montre les **200 pixels autour de la souris, 3 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte.
+En **Edit layout**, pointez un tuyau ou un raccord et appuyez sur **Z** (pas pendant que vous tapez dans une case). Une fenêtre
+s'ouvre sur toute la zone de travail. Elle montre ce que vous avez pointé **2,5 fois plus grand**. Quand tout le collecteur pointé (les tuyaux, raccords, vannes et
+pompes qui y sont joints, avec 50 pixels tout autour) tient à 2,5x, la fenêtre est centrée dessus ; sinon, sur la souris. Elle reste où elle s'est ouverte. Un clic ou un double-clic
+sur un endroit vide de la fenêtre n'ouvre jamais les Tab settings.
 
 **Travaillez directement dans la fenêtre :** traînez-y un bout de tuyau, un IP ou un objet avec le bouton gauche de la souris,
-comme sur le Tab, et il bouge aussi sur le Tab, 3 fois plus finement, pour poser un bout exactement sur un IP. Les clics et les
+comme sur le Tab, et il bouge aussi sur le Tab, plus finement, pour poser un bout exactement sur un IP. Les clics et les
 doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge).
 
 **Se déplacer dans la fenêtre :** gardez le bouton de la souris enfoncé et approchez-vous d'un bord de la fenêtre : la vue se

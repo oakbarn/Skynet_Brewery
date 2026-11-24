@@ -34,16 +34,22 @@ Tee's IP:
 Beside it, **↔ Move with pipes** is the pop-up's other choice: press it (Properties saves and closes by itself), then grab the item and it moves **with** its
 pipes, without the pop-up. It is not on a Pipe or Hose, and it is grey when a 🔒 locked pipe or fitting would have to move with it.
 
+**🔓 Unlock one IP ▾** (on a Pipe or Hose: **🔓 Unlock one end ▾**) is there when 2 or more pipe ends are joined to it. Pick one IP
+in the list and only that pipe end lets go; the others stay joined. Properties saves and closes by itself, and **↩ Put back**
+(Ctrl+Z) joins it again.
+
 The buttons are grey when nothing is joined to it, when the item is 🔒 locked (unlock it first) or when the equipment on its Tab is
 locked (lock_Equipment). Rest the mouse on it to see why.
 
 ## Zoom in on a join (Z)
 
-In **Edit layout**, point at the join and press **Z** (not while typing in a box). A box opens in a top corner of the Tab that
-shows the **200 pixels around the mouse, 3 times bigger** (a little less on a small screen, so it fits). It stays where it opened.
+In **Edit layout**, point at a pipe or fitting and press **Z** (not while typing in a box). A box opens over the whole work area.
+It shows what you pointed at **2.5 times bigger**. When the whole manifold you pointed at (the pipes, fittings, valves and pumps
+joined to it, with 50 pixels all round) fits at 2.5x, the box is centered on it; when it doesn't, on the mouse.
+It stays where it opened. A click or double-click on an empty spot in the box never opens Tab settings.
 
 **Work right in the box:** drag a pipe end, an IP or an item in it with the left mouse button, the same as on the Tab, and it
-moves on the Tab too, 3 times finer, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
+moves on the Tab too, more finely, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
 double-click opens Properties, except on a red IP).
 
 **Move around in the box:** hold the mouse button down and go near an edge of the box: the view moves that way across the

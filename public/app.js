@@ -4851,8 +4851,23 @@ function propsUnlockIps(it, onLetGo) {
     grabWith.add(it.id || it.name); w.disabled = b.disabled = true; w.textContent = '↔ Moves with its pipes';
     toast(`Grab ${who} and it moves with its pipes.`, false, 6000); propsDone();
   };
-  const b0 = b.onclick; b.onclick = ev => { b0(ev); if (w && b.disabled) w.disabled = true; };
-  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b, w);
+  // 🔓 Unlock one IP (OakBarn Brewery, 2026-11-24: "On a property allow individual Unlock of an IP in addition to Unlock IPs"): a
+  // dropdown of each joined IP (a pipe or hose: each joined end); the one picked lets go alone, the same way, at once. Only with 2 or more.
+  const ipName = new Map(allIps(it.workspace || wsName).map(q => [q.id, String(q.label || q.id).replace(who + ' ', '')])), pname = p => p.label || p.name || (p.hose ? 'hose' : 'pipe');
+  const one = n < 2 ? null : h('select', { class: 'propsUnlockIps propsUnlockOne tipLbl', disabled: !!why || null,
+    'data-help': 'Let go of just one: pick it and only its pipe end lets go where it is (an open end); the others stay joined. ↩ Put back (Ctrl+Z) joins it again (Rule 5.37).' + (why ? `\n\nNot now: ${why}` : '') },
+    h('option', { value: '' }, pipe ? '🔓 Unlock one end ▾' : '🔓 Unlock one IP ▾'),
+    ...joins.map((j, i) => h('option', { value: String(i) }, pipe ? `${j.k === 'from' ? 'Start' : 'End'}: ${ipName.get(j.p[j.k]) || j.p[j.k]}` : `${ipName.get(j.p[j.k]) || j.p[j.k]} (${pname(j.p)})`)));
+  if (one) one.onchange = () => {
+    const j = joins[+one.value]; if (one.value === '' || !j || one.disabled) return;
+    const label = one.selectedOptions[0].textContent;
+    pushUndo(`unlock ${label}`); unlockJoins([j]); grabWith.delete(it.id || it.name); onLetGo?.(); renderWs();
+    one.disabled = b.disabled = true; if (w) w.disabled = true;
+    toast(`🔓 ${who}: ${label} let go. The other ${n - 1 > 1 ? n - 1 + ' stay' : 'one stays'} joined. ↩ Put back (Ctrl+Z) joins it again.`, false, 7000);
+    propsDone();
+  };
+  const b0 = b.onclick; b.onclick = ev => { b0(ev); if (b.disabled) { if (w) w.disabled = true; if (one) one.disabled = true; } };
+  const t = h('span', { class: 'ttlExtra', 'data-for': '_unlockIps' }, b, one, w);
   setTimeout(() => setTimeout(() => { const ttl = $('#dlgTitle'); for (const o of ttl.querySelectorAll('.ttlExtra[data-for="_unlockIps"]')) o.remove(); ttl.append(t); }, 0), 0);      // after the lock, Visible and Hidden Locked
 }
 // an item dropped where something let go of its pipes: each open end whose IP was within REJOIN_PX of the same end of this item
@@ -5231,21 +5246,59 @@ document.addEventListener('keydown', ev => {
 // Tab: every press, drag, click and double-click in it is passed to the Tab at the same spot, 3 times finer, so a pipe end or an item
 // can be dragged onto an IP right there. Esc or its ✕ (upper right) closes it, and so does leaving Edit layout (Z again too). The copy of the Tab is drawn in a
 // closed-off part of the page (a shadow root), so nothing else on the panel ever finds it.
-const ZOOM_SRC = 200, ZOOM_X = 3;      // OakBarn Brewery, 2026-11-23: "Try zoom x 2", then "let's try 4 x", then "Back to 3 x"
+const ZOOM_X = 2.5, ZOOM_PAD = 50;      // OakBarn Brewery, 2026-11-23: "Try zoom x 2", then "let's try 4 x", then "Back to 3 x"; 2026-11-24: "Can you also do zoom at 2.5"
+// the manifold at a Tab spot: the pipe (or IP, or fitting) there and everything joined to it by pipes, through fittings, valves and pumps
+// (not through a vessel, which only adds its IP); its box with ZOOM_PAD Tab pixels all round, or null when there is none
+function zoomManifold(x, y) {
+  if (!draft) return null;
+  const pipes = draft.graphics.filter(p => p.kind === 'pipe' && p.workspace === wsName && (p.points || []).length);
+  const seg = (p, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = dx * dx + dy * dy, t = l ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l)) : 0; return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy); };
+  const near = 24 / Z(), todo = [], seen = new Set(), got = new Set(), pts = [];
+  const hit = pipes.find(p => p.points.some((q, i) => i && seg([x, y], p.points[i - 1], q) <= near));
+  if (hit) todo.push(hit.from, hit.to);
+  else {
+    const ip = allIps(wsName).map(q => ({ id: q.id, c: ipPoint(q.id, wsName) })).filter(q => q.c && Math.hypot(q.c[0] - x, q.c[1] - y) <= near).sort((a, b) => Math.hypot(a.c[0] - x, a.c[1] - y) - Math.hypot(b.c[0] - x, b.c[1] - y))[0];
+    if (!ip) return null;
+    todo.push(ip.id);
+  }
+  const ownerOf = new Map();
+  while (todo.length) {
+    const id = todo.pop(); if (!id || seen.has(id)) continue; seen.add(id);
+    const c = ipPoint(id, wsName); if (c) pts.push(c);
+    for (const p of pipes) if ((p.from === id || p.to === id) && !got.has(p)) { got.add(p); pts.push(...p.points); todo.push(p.from === id ? p.to : p.from); }
+    let m = ownerOf.get(id); if (m === undefined) { try { m = zoomMover(id); } catch { m = null; } ownerOf.set(id, m); }
+    if (!m || m.kind === 'ip' || hasTop(m)) continue;       // a loose IP or coupling, or a vessel: go no further
+    for (const o of grabIpIds(m)) if (!seen.has(o)) todo.push(o);
+    if ([m.x, m.y, m.w, m.h].every(Number.isFinite)) pts.push([m.x, m.y], [m.x + m.w, m.y + m.h]);
+  }
+  if (!pts.length) return null;
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs) - ZOOM_PAD, x1 = Math.max(...xs) + ZOOM_PAD, y0 = Math.min(...ys) - ZOOM_PAD, y1 = Math.max(...ys) + ZOOM_PAD;
+  return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, w: x1 - x0, h: y1 - y0 };
+}
 let zoomBox = null, zoomMouse = null;
+// true while the box passes a press or click on to the Tab: an empty spot then never opens Tab Properties (OakBarn Brewery,
+// 2026-11-24: "inside the zoom Box, Click to open Tab Properties no longer works but only in the Zoom Box")
+let zoomPassing = false;
 function zoomOpen() {
   const ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1;
   const [mx, my] = zoomMouse || [r.left + r.width / 2, r.top + r.height / 2];
   const host = h('div', { class: 'zoomBox' }), root = host.attachShadow({ mode: 'open' });
-  // 200 screen pixels 3 times bigger is 600 px: on a smaller Tab area the box shrinks to fit (and shows a little less around the mouse)
-  const fit = ($('#wsScroll') || ws).getBoundingClientRect(), size = Math.max(200, Math.round(Math.min(ZOOM_SRC * ZOOM_X, fit.height - 60, fit.width / 2 - 24)));
-  root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; background: #111; cursor: crosshair; touch-action: none; }
+  // the box fills the work area (OakBarn Brewery, 2026-11-24: "the zoom box needs to be bigger. Could be any manifold part. Top, bottom,
+  // right and left + 50 px and fill the work area"): it shows the manifold under the mouse (the pipes, fittings, valves and pumps
+  // joined to it, with 50 Tab pixels all round) 2.5 times bigger, centered on it when it all fits, else on the mouse
+  const fit = ($('#wsScroll') || ws).getBoundingClientRect(), bw = Math.max(240, Math.round(fit.width - 20)), bh = Math.max(200, Math.round(fit.height - 46));
+  const mf = zoomManifold((mx - r.left) / z, (my - r.top) / z);
+  // always 2.5 times bigger ("Can you also do zoom at 2.5"): centered on the whole manifold when it fits at 2.5x, else on the mouse
+  const k = ZOOM_X, fits = mf && mf.w * z * k <= bw && mf.h * z * k <= bh;
+  const kTxt = (Math.round(k * 10) / 10) + 'x';
+  root.append(h('link', { rel: 'stylesheet', href: 'style.css' }), h('style', {}, `:host { all: initial; } .zf { position: relative; width: ${bw}px; height: ${bh}px; overflow: hidden; background: #111; cursor: crosshair; touch-action: none; }
     .zf > .zc { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
-    .zt { display: flex; flex-wrap: wrap; box-sizing: border-box; width: ${size}px; align-items: center; gap: 4px 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
+    .zt { display: flex; flex-wrap: wrap; box-sizing: border-box; width: ${bw}px; align-items: center; gap: 4px 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
     .zt span { flex: 1; min-width: 0; overflow-wrap: anywhere; } .zt button { font: 700 14px/1 system-ui, sans-serif; color: #fafafa; background: #c0392b; border: 1px solid #000; border-radius: 4px; padding: 3px 8px; cursor: pointer; }
     .zt button:hover { background: #e74c3c; } .zt button.zAuto, .zt button.zDrop { font-size: 12px; background: #2d6cdf; } .zt button.zDrop { background: #555; }
     .zf > .ztr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }`));
-  const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, h('span', {}, `🔍 Zoom ${ZOOM_X}x: work right in here (drag, join, double-click). Esc or ✕ closes it.`),
+  const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, h('span', {}, `🔍 Zoom ${kTxt}: work right in here (drag, join, double-click). Esc or ✕ closes it.`),
     h('button', { type: 'button', title: 'Close the zoom box (Esc)', onclick: ev => { ev.stopPropagation(); zoomClose(); } }, '✕'));      // OakBarn Brewery, 2026-11-23: "have a close button upper right corner"
   // 🔗 Trace (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
   // would be red line. The a button to autoconfigure"): the red line and its two buttons, shown only while there is a trace
@@ -5255,18 +5308,16 @@ function zoomOpen() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'ztr');
   root.append(title, frame); frame.append(svg);
   document.body.append(host);
-  // it stays on the side of the Tab area away from the spot it shows
-  const area = ($('#wsScroll') || ws).getBoundingClientRect(), w = size + 4, left = mx > area.left + area.width / 2 ? area.left + 8 : area.right - w - 8;
-  Object.assign(host.style, { left: Math.max(4, left) + 'px', top: Math.max(4, area.top + 8) + 'px' });
-  zoomBox = { host, frame, copy: null, t: 0, size, lx: (mx - r.left) / z, ly: (my - r.top) / z, down: null, title, auto, drop, svg, trace: null };
+  Object.assign(host.style, { left: Math.max(4, fit.left + 8) + 'px', top: Math.max(4, fit.top + 8) + 'px' });
+  zoomBox = { host, frame, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits ? mf.cx : (mx - r.left) / z, ly: fits ? mf.cy : (my - r.top) / z, down: null, title, auto, drop, svg, trace: null };
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu']) frame.addEventListener(type, zoomPass);
   zoomDraw(true);
 }
 function zoomClose() { zoomBox?.host.remove(); zoomBox = null; }
 // the spot on the screen of the Tab that a point in the box stands for
 function zoomReal(ev) {
-  const zb = zoomBox, ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1, f = zb.frame.getBoundingClientRect(), k = ZOOM_X;
-  return [r.left + (zb.lx + (ev.clientX - f.left - zb.size / 2) / (k * z)) * z, r.top + (zb.ly + (ev.clientY - f.top - zb.size / 2) / (k * z)) * z];
+  const zb = zoomBox, ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1, f = zb.frame.getBoundingClientRect(), k = zb.k;
+  return [r.left + (zb.lx + (ev.clientX - f.left - zb.w / 2) / (k * z)) * z, r.top + (zb.ly + (ev.clientY - f.top - zb.h / 2) / (k * z)) * z];
 }
 // pass a press, drag, click or double-click in the box on to the Tab, as if it was made there
 function zoomPass(ev) {
@@ -5287,7 +5338,8 @@ function zoomPass(ev) {
   const to = zb.down && /^pointer(move|up|cancel)$/.test(ev.type) ? zb.down : under;
   const o = { bubbles: true, cancelable: true, composed: true, view: window, clientX: x, clientY: y, screenX: x, screenY: y, button: ev.button, buttons: ev.buttons,
     detail: ev.detail, ctrlKey: ev.ctrlKey, shiftKey: ev.shiftKey, altKey: ev.altKey, metaKey: ev.metaKey };
-  to.dispatchEvent(ev.type.startsWith('pointer') ? new PointerEvent(ev.type, { ...o, pointerId: ev.pointerId, pointerType: ev.pointerType, isPrimary: ev.isPrimary, width: 1, height: 1 }) : new MouseEvent(ev.type, o));
+  zoomPassing = true;
+  try { to.dispatchEvent(ev.type.startsWith('pointer') ? new PointerEvent(ev.type, { ...o, pointerId: ev.pointerId, pointerType: ev.pointerType, isPrimary: ev.isPrimary, width: 1, height: 1 }) : new MouseEvent(ev.type, o)); } finally { zoomPassing = false; }
   // the Tab's own press takes the pointer (setPointerCapture); the box takes it back after, so the drag goes on coming through it
   if (ev.type === 'pointerdown') try { zb.frame.setPointerCapture(ev.pointerId); } catch { }
   if (/^pointer(up|cancel)$/.test(ev.type)) { zb.down = null; setTimeout(() => zoomDraw(true), 0); }
@@ -5322,12 +5374,12 @@ function zoomTraceShow() {
   const zb = zoomBox; if (!zb) return;
   const tr = zb.trace, span = zb.title.firstChild;
   zb.svg.replaceChildren(); zb.auto.hidden = !tr?.b; zb.drop.hidden = !tr;
-  span.textContent = !tr ? `🔍 Zoom ${ZOOM_X}x: work right in here (drag, join, double-click). Esc or ✕ closes it.`
+  span.textContent = !tr ? `🔍 Zoom ${zb.kTxt}: work right in here (drag, join, double-click). Esc or ✕ closes it.`
     : !tr.b ? `🔗 Trace from ${tr.a.label}: click the IP to join it to. Esc stops the trace.`
       : `🔗 ${tr.a.label} → ${tr.b.label}`;
   if (!tr) return;
-  const ws = $('#ws'), r = ws.getBoundingClientRect(), z = Z(), f = zb.frame.getBoundingClientRect(), k = ZOOM_X;
-  const box = c => [zb.size / 2 + (c[0] - zb.lx) * k * z, zb.size / 2 + (c[1] - zb.ly) * k * z];
+  const ws = $('#ws'), r = ws.getBoundingClientRect(), z = Z(), f = zb.frame.getBoundingClientRect(), k = zb.k;
+  const box = c => [zb.w / 2 + (c[0] - zb.lx) * k * z, zb.h / 2 + (c[1] - zb.ly) * k * z];
   const scr = ([sx, sy]) => box([(sx - r.left) / z, (sy - r.top) / z]);
   const a = ipPoint(tr.a.id, wsName), b = tr.b ? ipPoint(tr.b.id, wsName) : null;
   if (!a) return zoomTraceEnd();
@@ -5439,9 +5491,9 @@ const ZOOM_EDGE = 28, ZOOM_PAN = 8;
 function zoomEdgeTick() {
   const zb = zoomBox; if (!zb) return;
   const e = zb.held, f = zb.frame.getBoundingClientRect(), px = e ? e.clientX - f.left : 0, py = e ? e.clientY - f.top : 0;
-  const dx = !e ? 0 : px < ZOOM_EDGE ? -1 : px > zb.size - ZOOM_EDGE ? 1 : 0, dy = !e ? 0 : py < ZOOM_EDGE ? -1 : py > zb.size - ZOOM_EDGE ? 1 : 0;
+  const dx = !e ? 0 : px < ZOOM_EDGE ? -1 : px > zb.w - ZOOM_EDGE ? 1 : 0, dy = !e ? 0 : py < ZOOM_EDGE ? -1 : py > zb.h - ZOOM_EDGE ? 1 : 0;
   if (!dx && !dy) { zb.raf = 0; return; }
-  const ws = $('#ws'), z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, step = ZOOM_PAN / (ZOOM_X * z);
+  const ws = $('#ws'), z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, step = ZOOM_PAN / (zb.k * z);
   const lx = Math.min(Math.max(zb.lx + dx * step, 0), ws.offsetWidth), ly = Math.min(Math.max(zb.ly + dy * step, 0), ws.offsetHeight);
   if (lx === zb.lx && ly === zb.ly) { zb.raf = 0; return; }
   zb.lx = lx; zb.ly = ly;
@@ -5460,8 +5512,8 @@ function zoomDraw(fresh = false) {
     c.style.width = ws.offsetWidth + 'px'; c.style.height = ws.offsetHeight + 'px';
     zb.copy?.remove(); zb.frame.prepend(c); zb.copy = c; zb.t = now;
   }
-  const z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, k = ZOOM_X * z;
-  zb.copy.style.transform = `translate(${zb.size / 2 - zb.lx * k}px, ${zb.size / 2 - zb.ly * k}px) scale(${k})`;
+  const z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, k = zb.k * z;
+  zb.copy.style.transform = `translate(${zb.w / 2 - zb.lx * k}px, ${zb.h / 2 - zb.ly * k}px) scale(${k})`;
   if (zb.trace) zoomTraceShow();
 }
 let zoomRaf = 0;
@@ -5714,7 +5766,7 @@ $('#ws').addEventListener('dblclick', ev => {
   else if (node && unit && [unit.id, bundleOf(unit)?.id].includes(node.dataset.gid)) editItem('gfx', unit.id);   // the pointer was caught by its vessel
   else if (node) editItem(...refOf(node));
   else if (pipe) editItem('gfx', pipe.dataset.gid);
-  else editWorkspace();      // an empty spot on the tab: Tab settings (name, background color and picture, size)
+  else if (!zoomPassing) editWorkspace();      // an empty spot on the tab: Tab settings (not from inside the Zoom box) (name, background color and picture, size)
 });
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
@@ -5725,6 +5777,7 @@ document.addEventListener('keydown', ev => {
 let lp = null;
 function startLongPress(ev, kind, id) {
   cancelLongPress();
+  if (kind === 'tab' && zoomPassing) return;      // not from inside the Zoom box
   const vp = vpOf(ev.target?.closest?.('.vpPart[data-dev], .vpPart[data-vbg]'));      // a built in part: its own Properties
   lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } vp ? vpPartOpen(vp)() : kind === 'tab' ? editWorkspace() : editItem(kind, id); }, 600) };
 }
