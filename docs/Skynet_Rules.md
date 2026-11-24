@@ -6536,6 +6536,12 @@ finished"). Both programs (the BruControl Import's Build page uses the same pop-
 - **USB Port**: plain words in its Hover Help ("a number between 1 and 256, used to connect the Arduino to the Brain"), with a link to
   the technical side (Help 76). Skynet suggests the first USB port it finds that no other Interface uses. On Windows the number alone
   is typed (7 = COM7).
+- **The USB Port may be skipped** (OakBarn Brewery, 2026-11-24: "When Building a New schema and adding a Board, be able to skip the
+  USB Port and allow the Build to continue and add the Board"): the USB Port list ends with **None for now** (just before 🔄 Look
+  again), and a blank Network address is allowed too. The board is added anyway, so the build goes on and Devices can be put on it.
+  Until it has a USB Port or Network address the Brain opens nothing for it and the Devices page shows it **not connected** ("No USB
+  Port yet: ⚙ Change on the Devices page to pick it"). One warning only, the note when it is added; no pop-up. ⚙ Change fills it in
+  later. Skynet still suggests a free port when it finds one. Both programs (the BruControl Import's Build page uses the same pop-up).
 - **The focus**: the Name and the USB Port (or Network address) are **All** (Enter, Tab key, mouse); the Interface ID, Board,
   Connection and Board settings are Tab key or mouse only. Enter goes from the Name to the USB Port; Enter on a filled-in USB Port
   with a Name adds (or saves) it. The Tab key cycles through the boxes only, last back to first; the ? Help, ✖ Cancel and Add are for
@@ -7204,6 +7210,8 @@ bottom with a manual ball valve: the Valve_Only Bundled Fitting, its valve picke
 turns it on and off), so it has no Device; its Heat Source is Electric or Gas. Both programs show the same Templates.
 
 ## Change log
+
+- 2026-11-24: Rule 18.39 extended (OakBarn Brewery: "When Building a New schema and adding a Board, be able to skip the USB Port and allow the Build to continue and add the Board"): the Add Interface pop-up's USB Port list ends with None for now, and a blank Network address is allowed; the board is added and shows as not connected (the Brain opens nothing for it) until ⚙ Change fills it in; one warning when it is added. Help 3, 76, 188 and their French pages; the USB Port balloon and its French. Checked against both programs. (thread "Skip USB port when adding a Board")
 
 - 2026-11-24: Rule 5.37 notes (OakBarn Brewery: "I removed the elbow so these should all be the red dot and available to connect with the trace"; "Removed the Tee"; "just the red dot would match what we have rather than the red circle"): a pipe or hose end whose IP is deleted (an elbow, tee or Device) gets an open end (a coupling) at once, and older such ends get one when Edit layout opens; an open end shows in Edit layout as the small red IP dot (was a coupling ring, or a red circle when on no IP) and can be joined, traced and auto configured in the Zoom box. ("Scroll Bars in the Zoom Box when needed"): the Zoom box has scroll bars on its right and bottom edges when the zoomed Tab is bigger than it; the mouse wheel scrolls (Shift + wheel sideways). Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 
