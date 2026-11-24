@@ -292,3 +292,21 @@ test('Auto configure joins two IPs of things brought onto one spot IP to IP', as
   const i = app.indexOf('rejoinEnds(new Set([tr.a.id, tr.b.id]));');
   assert.match(app.slice(i, i + 1400), /directJoin\(tr\.a\.id, tr\.b\.id, wsName\)/);
 });
+
+// OakBarn Brewery, 2026-11-24: "No way to orient" (Rule 5.37)
+test('the Zoom box has quarter-turn and flip buttons for a picked fitting, and redraws at once', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /\['⟲ 90', -90, [^\]]+\], \['⟳ 90', 90,/);
+  assert.match(app, /onclick: ev => \{ ev\.stopPropagation\(\); turnSel\(op\); \}/);
+  assert.match(app, /if \(zoomBox\?\.turn\) \{/, 'shown with the Edit layout bar turn buttons');
+  assert.match(app, /if \(zoomBox && !zoomBox\.down\) setTimeout\(\(\) => zoomDraw\(true\), 0\);/, 'redrawn after a change');
+});
+
+// OakBarn Brewery, 2026-11-24: "Maybe time for a keyboard shortcut to rotate 90 degrees and flip horizontal or vertical?" (Rule 5.5)
+test('R, Shift + R, H and V turn and flip the picked fitting', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /turnSel\(k === 'r' \? \(ev\.shiftKey \? -90 : 90\) : k\);/);
+  assert.match(app, /if \(!editing \|\| previewing \|\| menuTab \|\| !sel \|\| ev\.ctrlKey \|\| ev\.metaKey \|\| ev\.altKey \|\| ev\.repeat\) return;/, 'never with Ctrl, Alt or ⌘');
+});

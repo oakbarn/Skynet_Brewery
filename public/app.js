@@ -492,6 +492,7 @@ function renderWs() {
   if (previewing && !(editing && curWs()?.build)) { previewing = false; if (editing) $('#editHint').textContent = curWs()?.build ? BUILD_HINT : ''; }
   document.body.classList.toggle('previewing', previewing); $('#ws').classList.toggle('preview', previewing);
   $('#previewBuild').textContent = previewing ? '✏ Back to building' : '👁 Preview';
+  if (zoomBox && !zoomBox.down) setTimeout(() => zoomDraw(true), 0);      // the Zoom box shows the change at once (a turn, a flip, a join ...)
   if (!previewing) { drawWs(); return markJobPick(); }
   editing = false;
   try { drawWs(); } finally { editing = true; }
@@ -5346,6 +5347,7 @@ function zoomOpen() {
     .zt { display: flex; flex-wrap: wrap; box-sizing: border-box; width: ${bw}px; align-items: center; gap: 4px 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
     .zt span { flex: 1; min-width: 0; overflow-wrap: anywhere; } .zt button { font: 700 14px/1 system-ui, sans-serif; color: #fafafa; background: #c0392b; border: 1px solid #000; border-radius: 4px; padding: 3px 8px; cursor: pointer; }
     .zt button:hover { background: #e74c3c; } .zt button.zAuto, .zt button.zDrop { font-size: 12px; background: #2d6cdf; } .zt button.zDrop { background: #555; }
+    .zTurn { display: inline-flex; gap: 4px; } .zTurn[hidden] { display: none; } .zt button.zT { font-size: 12px; background: #3a3f46; } .zt button.zT:hover { background: #555b63; } .zt button.zT:disabled { opacity: .4; cursor: default; }
     .zf > .ztr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
     .zw { position: relative; } .zb { position: absolute; background: rgba(255,255,255,.08); z-index: 2; } .zb[hidden] { display: none; }
     .zb.zv { right: 0; top: 0; bottom: 12px; width: 12px; } .zb.zh { left: 0; right: 12px; bottom: 0; height: 12px; }
@@ -5358,6 +5360,11 @@ function zoomOpen() {
   const auto = h('button', { type: 'button', class: 'zAuto', title: 'Move the IP the trace starts on onto the IP it ends on and join them; everything joined behind it moves along (↩ Put back undoes it)', onclick: ev => { ev.stopPropagation(); zoomAuto(); } }, '🔧 Auto configure');
   const drop = h('button', { type: 'button', class: 'zDrop', title: 'Take the red trace away', onclick: ev => { ev.stopPropagation(); zoomTraceEnd(); } }, 'Cancel trace');
   auto.hidden = drop.hidden = true; title.lastChild.before(auto, drop);
+  // ⟲ 90 ⟳ 90 Flip H Flip V in the box (OakBarn Brewery, 2026-11-24: "No way to orient"): they show while a fitting that can turn
+  // (an elbow, tee ...) is picked, and do what the turn buttons on the Edit layout bar do, a quarter turn at a time
+  const turn = h('span', { class: 'zTurn' }, ...[['⟲ 90', -90, 'Turn it a quarter turn to the left'], ['⟳ 90', 90, 'Turn it a quarter turn to the right'], ['⇆ Flip H', 'h', 'Flip it left to right'], ['⇅ Flip V', 'v', 'Flip it top to bottom']]
+    .map(([t, op, tip]) => h('button', { type: 'button', class: 'zT', 'data-op': String(op), title: tip, onclick: ev => { ev.stopPropagation(); turnSel(op); } }, t)));
+  turn.hidden = true; title.lastChild.before(turn);
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'ztr');
   // scroll bars when the zoomed Tab is bigger than the box (OakBarn Brewery, 2026-11-24: "Scroll Bars in the Zoom Box when needed"):
   // drag a bar's thumb, click its track to jump, or turn the mouse wheel over the box (Shift + wheel goes sideways)
@@ -5365,7 +5372,8 @@ function zoomOpen() {
   root.append(title, h('div', { class: 'zw' }, frame, bars.v, bars.h)); frame.append(svg);
   document.body.append(host);
   Object.assign(host.style, { left: Math.max(4, fit.left + 8) + 'px', top: Math.max(4, fit.top + 8) + 'px' });
-  zoomBox = { host, frame, bars, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits ? mf.cx : (mx - r.left) / z, ly: fits ? mf.cy : (my - r.top) / z, down: null, title, auto, drop, svg, trace: null };
+  zoomBox = { host, frame, bars, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits ? mf.cx : (mx - r.left) / z, ly: fits ? mf.cy : (my - r.top) / z, down: null, title, auto, drop, turn, svg, trace: null };
+  updTurnBar(sel && findItem(sel.kind, sel.id));
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu']) frame.addEventListener(type, zoomPass);
   for (const ax of ['h', 'v']) bars[ax].addEventListener('pointerdown', ev => zoomBarDown(ev, ax));
   frame.addEventListener('wheel', ev => {
@@ -5633,6 +5641,19 @@ document.addEventListener('keydown', ev => {
   if (!editing || menuTab || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat || ev.key.toLowerCase() !== 'z') return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   ev.preventDefault(); zoomBox ? zoomClose() : zoomOpen();
+});
+
+// ⟳ R turns the picked fitting a quarter turn right, Shift + R left; H flips it left to right, V top to bottom (OakBarn Brewery,
+// 2026-11-24: "Maybe time for a keyboard shortcut to rotate 90 degrees and flip horizontal or vertical?"; "use your suggestions as I can
+// change them later"; Rule 2.73: plain letters reach the page on every system). Edit layout only, with an elbow, tee or other fitting that
+// can turn picked (the turn buttons show), never while typing in a box or with a dialog open. The same as the turn buttons (Rule 5.5).
+document.addEventListener('keydown', ev => {
+  if (!editing || previewing || menuTab || !sel || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
+  const k = ev.key.toLowerCase(); if (!['r', 'h', 'v'].includes(k)) return;
+  if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
+  if (!turnKind(findItem(sel.kind, sel.id))) return;
+  ev.preventDefault();
+  turnSel(k === 'r' ? (ev.shiftKey ? -90 : 90) : k);
 });
 
 // 🗑 The Delete key deletes the item picked in Edit layout (OakBarn Brewery, 2026-11-24: "If something has the focus can we delete it with
@@ -8056,6 +8077,10 @@ function updTurnBar(item) {
   for (const b of $$('#turnBar .flip')) b.disabled = k !== 'all';
   if (k === 'kettle') { $('#turnFlipH').disabled = false; for (const id of ['#turnFlipV', '#turnL45', '#turnR45']) $(id).disabled = true; }     // a kettle stays upright (Rule 5.5)
   else for (const id of ['#turnL45', '#turnR45']) $(id).disabled = false;
+  if (zoomBox?.turn) {        // the same buttons in the Zoom box, a quarter turn at a time
+    zoomBox.turn.hidden = !k;
+    for (const b of zoomBox.turn.querySelectorAll('button')) { const op = b.dataset.op; b.disabled = op === 'h' ? !['all', 'kettle'].includes(k) : op === 'v' ? k !== 'all' : k === 'kettle'; }
+  }
 }
 function turnSel(op) {
   const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
