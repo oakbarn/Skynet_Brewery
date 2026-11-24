@@ -1,8 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-valve-standard="1">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 75 300 150" data-valve-standard="1">
   <!-- The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs
-       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); straight pipe runs out to the edges. -->
-  <rect x="137.5" y="0" width="25" height="74" fill="#8a8f96"/>
-  <rect x="137.5" y="226" width="25" height="74" fill="#8a8f96"/>
+       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); no pipe drawn out to the edges; the box is cropped to the valve, 150 long and 300 across (Rule 5.29, 2026-11-23), so its IPs are on its own ends. -->
   <g transform="translate(119.2 73) scale(1.1)">
   <!-- Skynet solenoid gas valve, closed (ring; brass body, black coil with a flame), vertical: pipe ends at the middle of the Top and Bottom edges, coil on the right -->
   <g transform="translate(120 0) rotate(90)">

@@ -27,7 +27,7 @@ The pipes and hoses set which one is its Inlet (IN) and which its Outlet (OUT), 
 
 What is drawn from the pump's own inlet and outlet to its Inlet IP and Outlet IP: a white **Hose**, or a stainless **Pipe**. It is
 drawn over the pump and its Cover, under the On overlay. It runs straight out of the End Fitting, round the inside edge of the pump's box,
-and out to the spot, and it turns with the pump when it is shown Left. A pump with your own picture has no Hose or Pipe (Skynet does
+and out to the spot, where it ends in a TC ferrule like the end of the pump or a valve, and it turns with the pump when it is shown Left. A pump with your own picture has no Hose or Pipe (Skynet does
 not know where its End Fittings are), so its IPs are simply on the spots.
 
 **With a pipe or hose joined to the IP**, that end is drawn like the pipe or hose on it: the same kind, color and thickness, so the

@@ -24,6 +24,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
 import { plainLetters } from './letters.js';      // ß ss, æ ae, ø o in a Name (Rule 3.4)
 import { setStopWord } from './processwidget.js';
+import { fitValveBoxes } from './valvebox.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -554,6 +555,7 @@ function runStack(stack) {
 function drawWs() {
   const w = curWs(); const ws = $('#ws');
   if (!w) return;
+  if (editing && draft) fitValveBoxes(draft);      // a Skynet side-view valve's box is as long as the valve (Rule 5.29)
   ws.querySelectorAll('.el,.gfx,.flowHot,svg.pipeL').forEach(n => { if (!n.closest('.buildMark')) n.remove(); });      // the Watermark keeps its copy (Rule 4.1)
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
   ws.style.backgroundColor = w.color || '';      // its own color: a Tab Profile's is copied into it when picked (Rule 2.62 #9)
@@ -1510,7 +1512,7 @@ function eqPorts(g) {
   return [];
 }
 function buildEqIp(g, q) {
-  const n = h('div', { class: 'gfx ip devip eqip', 'data-ipid': q.id, 'data-eq': g.id, title: q.label }, h('span', {}, q.text.replace('WORT ', 'W').replace('WATER ', 'C')));
+  const n = h('div', { class: 'gfx ip devip eqip' + (ipJoined(q.id) ? ' joined' : ''), 'data-ipid': q.id, 'data-eq': g.id, title: q.label }, h('span', {}, q.text.replace('WORT ', 'W').replace('WATER ', 'C')));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
   n.style.setProperty('--ipc', q.mv ? '#4fb3ff' : q.circuit === 'water' ? '#4fb3ff' : '#e8a33a');
   return n;
@@ -2010,6 +2012,8 @@ const defaultWidth = (wsn, o) => pipeSize(wsn) * defPipeOf(o) / 0.5;
 // 1920 x 1080 Windows screen), so a new Tab fills the screen at Zoom Fit screen. 1920 x 1040 if the screen size cannot be read.
 const screenTab = () => { const w = Math.round(+window.screen?.availWidth || 0), h = Math.round(+window.screen?.availHeight || 0); return w >= 200 && h >= 200 ? { w: Math.min(w, 20000), h: Math.min(h, 20000) } : { w: 1920, h: 1040 }; };
 const newTabSize = (tp = S.config.brewDefaults?.tabProfile) => { const d = tabProfileOf({ tabProfile: tp }) || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}), hoseSize: +d.newTabHose > 0 ? +d.newTabHose : HOSE_PX }; };
+// is a pipe or hose joined to this IP? (Edit layout: its dot is green, an open one red; Rule 5.20)
+const ipJoined = id => L().graphics.some(p => p.kind === 'pipe' && (p.from === id || p.to === id));
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
 // The pipe thickness a fitting takes (Fritz, 2026-11-07: "should size to the majority of the pipes or hoses", Rule 5.36): the size
 // most of the pipes and hoses joined to it have. On a tie (one 1" and one 1/2", as on a Reducer) it takes the bigger. 0 = none joined.
@@ -2064,7 +2068,7 @@ function buildIp(g) {
   // a coupling on just one pipe end is an open end: it shows in Edit layout only; joining two pipes it shows as a collar
   const lonely = fit === 'coupling' && pipesOn(g.id, g.workspace).length < 2;
   const open = isMv(g) && mvOpen(g), plain = isIpFit(g);
-  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : '') + (isMv(g) && mvAsked(g) ? ' mvAsk' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? (plain ? g.name : ipName(g)) : g.label || FITTINGS[fit] || 'IP') + (isMv(g) ? (open ? ' (open: click to close it)' : ' (closed: click to open it)') : '') });
+  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (!fit && ipJoined(g.id) ? ' joined' : '') + (g.hideRun ? ' hide-run' : '') + (isMv(g) && mvAsked(g) ? ' mvAsk' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? (plain ? g.name : ipName(g)) : g.label || FITTINGS[fit] || 'IP') + (isMv(g) ? (open ? ' (open: click to close it)' : ' (closed: click to open it)') : '') });
   if (isQd(g)) { n.classList.add('has-img', 'qd'); n.style.backgroundImage = `url("${media(g.image || QD_PIC)}")`; }      // Fritz's red star (Rule 5.28)
   else if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(isMv(g) ? mvPic(g) : g.image)}")`; const tf = isMv(g) ? mvTransform(g) : +g.rotate ? `rotate(${+g.rotate}deg)` : ''; if (tf) n.style.transform = tf; }
   else if (fit) {
@@ -2142,7 +2146,14 @@ function sidePt(e, side) {
 // the middle of its top and bottom (150, 0) and (150, 300), a front view (looking down the pipe) both at the middle (150, 150), and a
 // front elbow at the middle and the middle of its bottom (150, 300). A 45 degree valve turns the level spots about the middle.
 const VALVE_STD = { h: [[0, 0.5], [1, 0.5]], v: [[0.5, 0], [0.5, 1]], f: [[0.5, 0.5], [0.5, 0.5]], fe: [[0.5, 0.5], [0.5, 1]] };
-const vstd = (o, kind = o) => ({ o, w: 300, h: 300, ends: VALVE_STD[kind] });
+// Skynet valve pictures have no drawn-on pipe out to the box edges any more (OakBarn Brewery, 2026-11-23: "If we use the same graphic but
+// did away with the extentions" ... "Lets try that"; Rule 5.29 changed): every side-view valve is 150 long, end to end, in the middle
+// of its 300 box; the front elbow's bottom end is at (150, 225). A user's own valve picture keeps VALVE_STD in its square box.
+// Then (OakBarn Brewery, 2026-11-23: "Or you could make the height standard to the tallest needed") the box is cropped to the valve:
+// a level picture is 150 x 300 (viewBox 75 0 150 300), an upright one 300 x 150, so the IPs are back on the middle of the box ends
+// (public/valvebox.js fits the item's box to it).
+const VALVE_SKN = { h: VALVE_STD.h, v: VALVE_STD.v, f: VALVE_STD.f, fe: [[0.5, 0.5], [0.5, 0.75]] };
+const vstd = (o, kind = o, t = VALVE_SKN) => ({ o, w: o === 'h' && t === VALVE_SKN ? 150 : 300, h: o === 'v' && t === VALVE_SKN ? 150 : 300, ends: t[kind] });
 const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h'), BF_V_R: vstd('v'), BF_V_L: vstd('v'),
   BF_Front: vstd('f'), BF_Front_Elbow: vstd('f', 'fe'), BALL_Front: vstd('f'),
   // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...)
@@ -2306,7 +2317,13 @@ function pumpLinkSvg(e) {
   const into = (pts, end, spot) => { const ax = pumpEndAxis(e, end, spot); if (!ax || pts.length < 2) return pts;
     const s = pts[pts.length - 1], t = pts[pts.length - 2], m = ax === 'h' ? [t[0], s[1]] : [s[0], t[1]];
     return [...pts.slice(0, -1), m, s]; };
-  const route = (tip, dir, spot, avoid, end, i) => { const lk = looks[i]; return draw(routeD(into(pumpRoute(tip, dir, spot, avoid), end, spots[i]), lk.hose ? 18 : 0), lk); };
+  // the box-edge end of the hose or pipe is a TC ferrule, like the end of the pump or a valve (OakBarn Brewery, 2026-11-23: "Make the
+  // connections at the edge of the box that look like the end of the valve or Pump"; Rule 5.27)
+  const ferrule = pts => { const n = pts.length; if (n < 2) return ''; const [x, y] = pts[n - 1], [px, py] = pts[n - 2], h = Math.abs(x - px) >= Math.abs(y - py);
+    const sx = Math.sign(x - px) || 1, sy = Math.sign(y - py) || 1;
+    const r = h ? [x - (sx > 0 ? 12 : 0) + (sx > 0 ? -0.5 : 0.5), y - 20.5, 12, 41] : [x - 20.5, y - (sy > 0 ? 12 : 0) + (sy > 0 ? -0.5 : 0.5), 41, 12];
+    return `<rect class="pumpend" x="${+r[0].toFixed(1)}" y="${+r[1].toFixed(1)}" width="${r[2]}" height="${r[3]}" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>`; };
+  const route = (tip, dir, spot, avoid, end, i) => { const lk = looks[i], pts = into(pumpRoute(tip, dir, spot, avoid), end, spots[i]); return draw(routeD(pts, lk.hose ? 18 : 0), lk) + ferrule(pts); };
   return `<svg viewBox="0 0 300 300" width="100%" height="100%" preserveAspectRatio="none" style="overflow:visible">${route(to, [0, -1], so, si, 'out', 1)}${route(ti, [1, 0], si, so, 'in', 0)}</svg>`;
 }
 const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
@@ -2444,7 +2461,7 @@ const USER_LOOK = { hd: { turn: 0, sx: 1, sy: -1 }, vl: { turn: -90, sx: 1, sy: 
 const userLook = e => e && e.subtype === 'valve' && isUserValvePic(e) ? USER_LOOK[e.orientation] || null : null;
 const USER_LOOK_ENDS = { h: VALVE_STD.h, v: [[0.5, 1], [0.5, 0]] };
 const userValveKind = e => e.orientation === 'v' || e.orientation === 'vl' || e.orientation === 'vr' ? 'v' : e.orientation === 'h' || e.orientation === 'hd' || e.orientation === 'l45' || e.orientation === 'r45' ? 'h' : (e.w || 120) >= (e.h || 60) ? 'h' : 'v';
-const userValveStd = e => isUserValvePic(e) ? (userLook(e) ? { k: 'U', o: userValveKind(e), w: 300, h: 300, ends: USER_LOOK_ENDS[userValveKind(e)] } : { k: 'U', ...vstd(userValveKind(e)) }) : null;
+const userValveStd = e => isUserValvePic(e) ? (userLook(e) ? { k: 'U', o: userValveKind(e), w: 300, h: 300, ends: USER_LOOK_ENDS[userValveKind(e)] } : { k: 'U', ...vstd(userValveKind(e), userValveKind(e), VALVE_STD) }) : null;
 // the picture's size and place in its box (in % of the box) so the user's In and Out spots land on the standard IP spots, or null
 function valveFit(e) {
   if (!isUserValvePic(e) || !pctOk(e.ipInX) || !pctOk(e.ipInY) || !pctOk(e.ipOutX) || !pctOk(e.ipOutY)) return null;
@@ -2700,7 +2717,7 @@ function mvJoinEnds(lay, ws) {
   return n;
 }
 function buildDevIp(e, q) {
-  const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
+  const n = h('div', { class: 'gfx ip devip' + (ipJoined(q.id) ? ' joined' : ''), 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
   n.style.setProperty('--ipc', isInline(e) || isThermowell(e) ? '#a87ee8' : e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
   return n;
@@ -5464,20 +5481,23 @@ $('#ws').addEventListener('pointerdown', ev => {
     }
     drawPts.push(c); renderPipes(); return;
   }
-  // a let-go end under the pointer wins over the valve, pump, vessel or fitting IP it sits on, so it can always be grabbed
-  const oe = !noMove() && openEndAt(p);
+  // a fitting under the pointer wins over a coupling or let-go pipe end lying on it (OakBarn Brewery, 2026-11-23: "A Tee Should win ...
+  // I am not sure we should even be able to grab a coupling unless you are back off a Fitting"; Rule 5.20): the end is grabbed off the fitting
+  const onFit = fittingUnder(ev);
+  // a let-go end under the pointer wins over the valve, pump or vessel IP it sits on, so it can always be grabbed
+  const oe = !noMove() && !onFit && openEndAt(p);
   if (oe) { sel = { kind: 'gfx', id: oe.p.id }; drag = { mode: 'point', item: oe.p, i: oe.i }; delete oe.p.qdAuto; ev.preventDefault(); return; }
   // the coupling on a let-go pipe end is its handle too: dragging it shortens or lengthens the pipe along its line
   const cpl = ev.target.closest?.('[data-gid]'), cg = cpl && draft?.graphics.find(x => x.id === cpl.dataset.gid && x.kind === 'ip' && x.fitting === 'coupling');
   const cp = cg && draft.graphics.find(x => x.kind === 'pipe' && !x.hose && !x.locked && (x.from === cg.id || x.to === cg.id));
-  if (cp && endMoves(cp, cp.from === cg.id ? 0 : cp.points.length - 1) && !noMove()) {
+  if (cp && !onFit && endMoves(cp, cp.from === cg.id ? 0 : cp.points.length - 1) && !noMove()) {
     sel = { kind: 'gfx', id: cp.id }; drag = { mode: 'point', item: cp, i: cp.from === cg.id ? 0 : cp.points.length - 1 }; ev.preventDefault(); return;
   }
   const handle = ev.target.closest('circle.handle');
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = noMove() ? null : { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; if (drag?.item) delete drag.item.qdAuto; ev.preventDefault(); return; }
   const hit = ev.target.closest('.pipes g');
   const pip = ev.target.closest('.devip');
-  let node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
+  let node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : onFit && ev.target.closest('.gfx.ip.fit[data-fit="coupling"]') ? onFit : ev.target.closest('.el,.gfx');
   if (hit && !node) {
     // the pipe is redrawn on press, so the browser never sends a double-click for it: count two quick presses instead
     const now = Date.now(), again = lastPipeTap && lastPipeTap.id === hit.dataset.gid && now - lastPipeTap.t < 450;
@@ -6044,6 +6064,17 @@ function endMoves(p, i) {
   if (isQdHose(p) && i === p.points.length - 1) return true;
   if (!openEnd(p, i)) return false;
   return !L().graphics.find(x => x.id === (i === 0 ? p.from : p.to))?.locked;
+}
+// the fitting (a Skynet Fitting, a Build fitting, an IP fitting other than a coupling, or one of their IPs) under the pointer, or null
+function fittingUnder(ev) {
+  if (!draft || !Number.isFinite(ev.clientX)) return false;
+  for (const e of document.elementsFromPoint(ev.clientX, ev.clientY)) {
+    const n = e.closest?.('#ws .gfx[data-gid]'); if (!n) continue;
+    const g = draft.graphics.find(x => x.id === n.dataset.gid); if (!g || g.kind === 'pipe') continue;
+    if (g.kind === 'ip' && g.fitting === 'coupling') continue;
+    if (isBfit(g) || (g.kind === 'ip' && g.fitting) || isUnit(bundleOf(g))) return n;
+  }
+  return null;
 }
 // the let-go end nearest the pointer (within END_GRAB_PX), on this Tab: { p, i }
 const END_GRAB_PX = 12;

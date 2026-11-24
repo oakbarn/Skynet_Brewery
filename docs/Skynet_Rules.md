@@ -2302,6 +2302,12 @@ edge), and only the dot can be pointed at, so IPs close together no longer cover
 white circle in its colored ring with its letters, and its Edit layout name tag shows. A Label set to Show stays as it is. Fittings,
 IPs with a picture and Quick Disconnects are drawings, not markers, and do not change. Pipes still snap to an IP by distance, so
 drawing to a dot works as before. (Help 13)
+*Fittings win (OakBarn Brewery, 2026-11-23: "A Tee Should win ... I am not sure we should even be able to grab a coupling
+unless you are back off a Fitting"):* in Edit layout, pressing on a fitting (a Skynet Fitting, a Build fitting, an IP fitting other
+than a coupling, or one of their IPs) grabs the fitting, even where a coupling or a let-go pipe end lies on top of it. A coupling or
+let-go end is grabbed only off a fitting; on a pump, valve or vessel IP it still wins (Rule 5.37). Also in the Zoom box. (Help 153)
+*Dot colors (OakBarn Brewery, 2026-11-23: "Change the color of Connected ips to green and unconnected to red"):* an IP dot joined
+to a pipe or hose is **green**; an open one (nothing joined) stays **red**. Device, valve and Widget IPs alike. (Help 13)
 
 5.21 **Pipe and Hose Widgets and Flow Colors** (Fritz, 2026-11-03, thread "Add flow colors to pipe and hose Widgets", Help 116):
 - A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose** on the
@@ -2513,6 +2519,19 @@ thread "Standardize valve size and IPs", Help 131).
   Ball and Butterfly valves, the Manual and Manual Butterfly valves, the Gas Solenoid valves and the older Motorized_TC15 ball valves,
   in every Orientation. They are all drawn **to the same scale** (Rule 5.11), and where a valve is shorter than the box its pipe is
   drawn on, straight, out to the edge of the box (as the Pump Standard lengthens port tubes, Rule 5.27).
+  *Changed (OakBarn Brewery, 2026-11-23: "Maybe we need to make the box smaller so the valves look correct ... If we use the same
+  graphic but did away with the extentions" ... "Lets try that"; "make the Motorized ball valve the standard and resize all others to
+  fit so their connection IPs were exactly where a Motorized ball valve's were"; "we do not care if the Box is square for Valve ...
+  could be taller on the top to accommodate Manual handles"; "Or you could make the height standard to the tallest needed"):* the
+  drawn-on pipe is gone and the **box is cropped to the valve**. Every Skynet side-view valve is **150 long, end to end** (the Motorized
+  Ball Valve's length; all the others already match it) and **300 across** (the tallest, the Motorized Butterfly, needs nearly all
+  of it), pipe through the middle: a level picture is **150 x 300** (shown **75 x 150**), an upright one **300 x 150** (shown
+  **150 x 75**). Its IPs are back on the **middle of the box's short sides**, which are the valve's own ends. Each time a Schema is
+  read and in Edit layout, a Skynet side-view valve's box is fitted about its middle (the longer side kept as the across size, the
+  length half of it), so a valve turned from level to upright turns its box too (public/valvebox.js). Pipes already joined stretch
+  along their line to the IPs. Front views (looking down the pipe; the front elbow's bottom end is at (150, 225)) and a user's own
+  valve picture keep a square box. Pumps (OakBarn Brewery: "Make the connections at the edge of the box that look like the end of the valve or Pump"): the
+  Hose or Pipe from the pump to its Inlet IP and Outlet IP ends in a **TC ferrule** on its spot (Rule 5.27).
 - **The IPs are always on the same spots:** Horizontal at the middle of the left and right sides, **(0, 150)** and **(300, 150)**;
   Vertical Left and Vertical Right at the middle of the top and bottom, **(150, 0)** and **(150, 300)**; 45 degrees on the
   Horizontal spots turned about the middle; a front view (looking down the pipe) both at the middle, **(150, 150)**; a front elbow at
@@ -7113,6 +7132,8 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 ## Change log
 
+- 2026-11-23: Rule 5.29 changed (OakBarn Brewery: "did away with the extentions" ... "Lets try that"): the drawn-on pipe is taken off the 13 Skynet side-view valve SVGs and the box is cropped to the valve: 150 long like the Motorized Ball Valve, 300 across (the tallest), shown 75 x 150 level / 150 x 75 upright, IPs on the valve's own ends; boxes fitted on read and in Edit layout; 3 Vessel sample and default Schema valves fitted. A pump's Hose or Pipe ends in a TC ferrule on its spot. Help 130, 131 (and French). Checked against the BruControl Import program: same pictures and same pump drawing code; nothing else changes there.
+- 2026-11-23: Rule 5.20 note added (OakBarn Brewery: "A Tee Should win"): a fitting under the pointer wins over a coupling or let-go pipe end lying on it; those are grabbed off the fitting. IP dots joined to a pipe or hose are green, open ones red (Help 13). Help 153 (and French). Checked against the BruControl Import program: its build uses the same Edit layout code, so it gets the same; nothing else changes there.
 - 2026-11-23: Rule 5.20 changed (OakBarn Brewery: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small red dots on only become large when you hiver on one"): in Edit layout a round IP marker is a small red dot that only the dot can be pointed at; hovered or selected it is the full white circle in its colored ring, with its letters and name tag. Fittings, IPs with a picture and Quick Disconnects do not change. Help 13 (and French). Checked against the BruControl Import program: its build opens the same Edit layout (same style.css), so it gets the same dots; nothing else changes there.
 - 2026-11-22: Panel Update 9 Part 1 (OakBarn Brewery, PDF "Panel Update 9", 35 items): added Rule 7.27 (six Skynet Audio folders plus
   Patron, their drawings, pictures 239 to 244, the Audio Widget shows only while it plays, no `.visible` for it); Rule 9.26 the Windows

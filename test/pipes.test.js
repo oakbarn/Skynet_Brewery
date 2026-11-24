@@ -158,10 +158,26 @@ test('a let-go end of a pipe or hose can be dragged and joins an IP it is droppe
   assert.equal(inLine([1208, 680], [1388, 680], [1385, 690]), null, 'off to the side: no join');
   assert.equal(inLine([1208, 680], [1388, 680], [1100, 680]), null, 'behind the other end: no join');
   const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
-  assert.match(app, /const oe = !noMove\(\) && openEndAt\(p\);/, 'a let-go end comes first on a press');
-  assert.ok(app.indexOf('const oe = !noMove() && openEndAt(p);') < app.indexOf("const pip = ev.target.closest('.devip');"), '... before a pump or valve IP');
+  assert.match(app, /const oe = !noMove\(\) && !onFit && openEndAt\(p\);/, 'a let-go end comes first on a press, unless a fitting is under it');
+  assert.match(app, /if \(cp && !onFit && endMoves/, 'a coupling on a fitting does not take the press (Rule 5.20: a Tee should win)');
+  assert.match(app, /function fittingUnder\(ev\)/);
+  assert.match(app, /const ipJoined = id =>/, 'a joined IP dot is green, an open one red');
+  assert.match((await import('node:fs')).readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /\.gfx\.ip\.joined:not\(\.fit\):not\(\.has-img\)::before \{ background: #1e9e3a; \}/);
+  assert.ok(app.indexOf('const oe = !noMove() && !onFit && openEndAt(p);') < app.indexOf("const pip = ev.target.closest('.devip');"), '... before a pump or valve IP');
   assert.match(app, /return !L\(\)\.graphics\.find\(x => x\.id === \(i === 0 \? p\.from : p\.to\)\)\?\.locked;/, 'an end on a locked IP (No Unlock too) stays put');
   assert.match(app, /if \(!p \|\| p\.locked/, 'a locked pipe or hose stays put');
   assert.match(app, /endCouplingTo\(drag\.item, drag\.i\)/, 'a hose end takes its coupling with it');
   assert.match(app, /rejoinEnds\(null, drag\.item, drag\.i === 0 \? 'from' : 'to'\)/, 'dropped on an IP, only that end joins');
+});
+
+// Box-edge ends (OakBarn Brewery, 2026-11-23: "Make the connections at the edge of the box that look like the end of the valve or Pump"; Rule 5.29)
+test('Skynet valves have no drawn-on pipe (IPs on their own ends); pump ends are TC ferrules', async () => {
+  const fs = await import('node:fs'), dir = new URL('../media/Images/Skynet/Valves/', import.meta.url);
+  for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.svg'))) {
+    const s = fs.readFileSync(new URL(f, dir), 'utf8');
+    if (s.includes('data-valve-standard="1"')) assert.ok(!s.includes('fill="#8a8f96"'), f + ': no plain grey stub');
+  }
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /class="pumpend"/, 'a pump Hose or Pipe ends in a ferrule');
+  assert.match(app, /const VALVE_SKN = \{ h: VALVE_STD\.h, v: VALVE_STD\.v/, 'IPs on the ends of the cropped box');
 });

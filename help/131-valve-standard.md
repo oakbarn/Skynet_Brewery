@@ -6,22 +6,25 @@ in the same spots** (Skynet Rule 5.29). You can change a Ball valve for a Butter
 
 ## Where the IPs are
 
-A valve starts at **150 x 150** on a Tab (the same as a pump, so valves and pumps are to the same scale).
+A side-view valve is **75 x 150** on a Tab when level and **150 x 75** when upright: its box is only as long as the valve, and as
+high as the tallest valve needs. A front view (looking down the pipe) is **150 x 150**. Valves and pumps are to the same scale.
 
-| Orientation | In the 300 x 300 drawing | On a 150 x 150 valve |
+| Orientation | In the drawing | On the Tab |
 |----|-----|-----|
-| Horizontal | (0, 150) and (300, 150) | the middle of the left and right sides |
-| Vertical Left, Vertical Right | (150, 0) and (150, 300) | the middle of the top and bottom |
+| Horizontal (150 x 300 drawing) | (0, 150) and (150, 150) | the middle of the left and right sides: the valve's ends |
+| Vertical Left, Vertical Right (300 x 150 drawing) | (150, 0) and (150, 150) | the middle of the top and bottom: the valve's ends |
 | 45 degrees | the Horizontal spots, turned 45 degrees about the middle | |
 | Front (looking down the pipe) | both at (150, 150) | the middle |
-| Front elbow | (150, 150) and (150, 300) | the middle, and the middle of the bottom |
+| Front elbow | (150, 150) and (150, 225) | the middle, and a quarter up from the bottom |
 
-If you resize a valve, the spots grow or shrink with its box. Keep it square so the spots stay on its sides.
+If you resize a valve, the spots grow or shrink with its box, and the box keeps its shape (its length half its height). Turned from
+level to upright, its box turns too. A valve with your own picture keeps its spots on the middle of the box sides.
 
 ## Drawn to scale
 
-Every Skynet valve drawing is at the same scale in the box. A valve that is shorter than the box has its pipe drawn on, straight, out
-to the edge of the box, where the IP is.
+Every Skynet valve drawing is at the same scale, and every side view is the same length as the Motorized Ball Valve, end to end.
+Its IPs are on its own ends; the box is as high as the tallest valve, so the motor or handle always fits. Pipes joined to it run right
+up to its ends.
 
 ## A valve with your own picture
 

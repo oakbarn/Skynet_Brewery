@@ -8,7 +8,9 @@ const valves = fs.readdirSync(dir).filter(f => /^(Valve_(Motor_Ball|Manual|Manua
 assert.ok(valves.length >= 15, 'found the valve pictures');      // 6 unused ones retired to Delete/ (2026-11-18, Rule 18.43)
 for (const f of valves) {
   const root = fs.readFileSync(path.join(dir, f), 'utf8').match(/<svg[^>]*>/)[0];
-  assert.ok(root.includes('viewBox="0 0 300 300"') && root.includes('data-valve-standard="1"'), `${f} is in the 300 x 300 Valve Standard box`);
+  // a side view is cropped to the valve, 150 long and 300 across (OakBarn Brewery, 2026-11-23, Rule 5.29); a front view stays 300 x 300
+  const vb = /_(Horizontal|ClosedHC?\.svg$)/.test(f) || /ClosedH\.svg$/.test(f) ? '75 0 150 300' : /_Vertical|ClosedV_[LR]C?\.svg$/.test(f) ? '0 75 300 150' : '0 0 300 300';
+  assert.ok(root.includes(`viewBox="${vb}"`) && root.includes('data-valve-standard="1"'), `${f} is in its Valve Standard box (${vb})`);
   assert.ok(!/\swidth=|\sheight=|preserveAspectRatio/.test(root), `${f} has no fixed size`);
 }
 for (const f of ['Valve_Check.svg', 'Quick_Disconnect.svg']) assert.ok(!fs.readFileSync(path.join(dir, f), 'utf8').includes('data-valve-standard'), `${f} is a fitting, not a valve`);
@@ -31,12 +33,17 @@ console.log('valve standard ok');
   const sv = smp.elements.filter(e => e.subtype === 'valve');
   assert.ok(sv.length >= 6, 'the sample has its valves');
   for (const e of sv) {
-    assert.ok(e.w === 150 && e.h === 150, `${e.name} is 150 x 150`);
-    const cx = e.x + 75, cy = e.y + 75;
+    assert.ok(Math.max(e.w, e.h) === 150 && [75, 150].includes(Math.min(e.w, e.h)), `${e.name} is 150 across (75 long for a side view)`);
+    const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
     for (const p of smp.graphics.filter(g => g.kind === 'pipe' && [`dev:${e.name}:in`, `dev:${e.name}:out`].some(k => k === g.from || k === g.to))) {
       const far = [`dev:${e.name}:in`, `dev:${e.name}:out`].includes(p.from) ? p.points.at(-1) : p.points[0];
       assert.ok(Math.hypot(far[0] - cx, far[1] - cy) >= 81, `${p.id} is long enough for ${e.name} at full size`);
     }
   }
 }
+const { fitValveBox, valveSide } = await import('../public/valvebox.js');
+assert.equal(valveSide('Images/Skynet/Valves/Valve_Manual_ClosedH.svg'), 'h'); assert.equal(valveSide('Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg'), 'v');
+assert.equal(valveSide('Images/Skynet/Valves/Valve_Motor_Butterfly_ClosedFront.svg'), null, 'a front view keeps its square box');
+{ const e = { imageOff: 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', x: 100, y: 100, w: 150, h: 150 }; assert.ok(fitValveBox(e)); assert.deepEqual([e.x, e.y, e.w, e.h], [138, 100, 75, 150], 'level: 75 long about its middle');
+  e.imageOff = 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg'; fitValveBox(e); assert.deepEqual([e.w, e.h], [150, 75], 'turned upright: the box turns too'); assert.ok(!fitValveBox(e), 'once fitted it stays'); }
 console.log('valve standard sample ok');

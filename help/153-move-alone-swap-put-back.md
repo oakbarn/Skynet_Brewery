@@ -67,7 +67,9 @@ A pipe or hose can change after it is saved, once its ends are let go:
    - a **hose** end goes **anywhere**, and the hose bends to follow. The round handles in the middle of a hose change its bends.
 3. Drop the end on an IP (within 14 pixels) and it joins that IP. Dropped anywhere else, it stays an open end.
 
-A let-go end can be grabbed even where it sits on a pump, valve or vessel IP. An end that is still joined, a 🔒 locked pipe or hose,
+A let-go end can be grabbed even where it sits on a pump, valve or vessel IP. On a fitting (a tee, an elbow, any fitting) the
+fitting wins: pressing on it grabs the fitting, not a coupling or let-go end lying on top of it. Grab the coupling or end off
+the fitting instead. An end that is still joined, a 🔒 locked pipe or hose,
 and an end on a 🔒 locked IP (one set to No Unlock too) do not move. **↩ Put back** (Ctrl+Z) undoes each drag, and **Save layout**
 keeps the new length or shape.
 
