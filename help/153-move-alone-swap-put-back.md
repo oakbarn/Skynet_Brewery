@@ -40,11 +40,16 @@ locked (lock_Equipment). Rest the mouse on it to see why.
 ## Zoom in on a join (Z)
 
 In **Edit layout**, point at the join and press **Z** (not while typing in a box). A box opens in a top corner of the Tab that
-shows the **200 pixels around the mouse, 3 times bigger** (a little less on a small screen, so it fits). It stays where it opened and keeps showing that spot.
+shows the **200 pixels around the mouse, 3 times bigger** (a little less on a small screen, so it fits). It stays where it opened.
 
 **Work right in the box:** drag a pipe end, an IP or an item in it with the right mouse button, the same as on the Tab, and it
 moves on the Tab too, 3 times finer, so you can put an end exactly on an IP. Clicks and double-clicks in it work too (a
-double-click opens Properties, except on a red IP). Press **Esc** or the red **✕** in its upper right corner to close it.
+double-click opens Properties, except on a red IP).
+
+**Move around in the box:** hold the mouse button down and go near an edge of the box: the view moves that way across the
+manifold, and anything you are dragging goes along. Move away from the edge, or let go, and it stops.
+
+Press **Esc** or the red **✕** in its upper right corner to close it.
 
 **Join two IPs with a trace (only in the Zoom box):** double-click a red IP to start a red trace line, then click the IP to join it
 to. Press **🔧 Auto configure**: the first IP moves onto the second and they join, and what is joined behind it follows so no join

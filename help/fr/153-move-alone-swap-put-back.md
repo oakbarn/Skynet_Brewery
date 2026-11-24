@@ -40,12 +40,16 @@ Tab est verrouillé (lock_Equipment). Posez la souris dessus pour voir pourquoi.
 ## Zoomer sur un raccord (Z) {#zoom-in-on-a-join-z}
 
 En **Edit layout**, pointez le raccord et appuyez sur **Z** (pas pendant que vous tapez dans une case). Une fenêtre s'ouvre dans un
-coin du haut du Tab et montre les **200 pixels autour de la souris, 3 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte et
-montre toujours cet endroit.
+coin du haut du Tab et montre les **200 pixels autour de la souris, 3 fois plus grands** (un peu moins sur un petit écran, pour qu'elle tienne). Elle reste où elle s'est ouverte.
 
 **Travaillez directement dans la fenêtre :** traînez-y un bout de tuyau, un IP ou un objet avec le bouton droit de la souris,
 comme sur le Tab, et il bouge aussi sur le Tab, 3 fois plus finement, pour poser un bout exactement sur un IP. Les clics et les
-doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge). Appuyez sur **Échap** ou sur le **✕**
+doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge).
+
+**Se déplacer dans la fenêtre :** gardez le bouton de la souris enfoncé et approchez-vous d'un bord de la fenêtre : la vue se
+déplace de ce côté sur le collecteur, et ce que vous traînez suit. Éloignez-vous du bord, ou lâchez, et elle s'arrête.
+
+Appuyez sur **Échap** ou sur le **✕**
 rouge dans son coin en haut à droite pour la fermer.
 
 **Joindre deux IP avec un tracé (seulement dans la fenêtre de zoom) :** double-cliquez sur un IP rouge pour commencer une ligne

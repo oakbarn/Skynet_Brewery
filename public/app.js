@@ -5272,6 +5272,10 @@ function zoomReal(ev) {
 function zoomPass(ev) {
   const zb = zoomBox; if (!zb) return;
   ev.stopPropagation(); if (ev.type !== 'pointermove') ev.preventDefault();
+  // the left button held near an edge of the box moves the view that way (zoomEdgeTick)
+  if (ev.type === 'pointerdown' && (ev.button === 0 || ev.button === 2)) zb.held = { clientX: ev.clientX, clientY: ev.clientY, pointerId: ev.pointerId, pointerType: ev.pointerType };
+  else if (ev.type === 'pointermove' && zb.held && !ev.fake) { Object.assign(zb.held, { clientX: ev.clientX, clientY: ev.clientY }); if (!zb.raf) zb.raf = requestAnimationFrame(zoomEdgeTick); }
+  else if (/^pointer(up|cancel)$/.test(ev.type)) zb.held = null;
   const [x, y] = zoomReal(ev);
   if (zoomTracePass(ev, x, y)) return;
   zb.host.style.pointerEvents = 'none'; const under = document.elementFromPoint(x, y) || document.body; zb.host.style.pointerEvents = '';
@@ -5426,6 +5430,26 @@ function zoomAuto() {
   const n = t.moves.size - 1, [m1, m2] = t === one ? [tr.a.label, tr.b.label] : [tr.b.label, tr.a.label];
   toast(`🔗 ${m1} moved onto ${m2} and joined it${n ? `; ${n} joined thing${n > 1 ? 's' : ''} behind it moved along and their pipes got longer or shorter` : ''}. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000);
   zoomTraceEnd(); zoomDraw(true);
+}
+// Move around inside the zoom box (OakBarn Brewery, 2026-11-24: "I want to be able to move the Inside of the scroll pattern to a different
+// part of the whole manifold so when I get near an edge with the left mouse click held, it scrolls"; Rule 5.37): while a button
+// is held within ZOOM_EDGE pixels of an edge of the box, the view moves that way, ZOOM_PAN box pixels a frame, and what is being dragged
+// goes along with the pointer. It stops at the edge of the Tab, when the pointer leaves the edge, or when the button is let go.
+const ZOOM_EDGE = 28, ZOOM_PAN = 8;
+function zoomEdgeTick() {
+  const zb = zoomBox; if (!zb) return;
+  const e = zb.held, f = zb.frame.getBoundingClientRect(), px = e ? e.clientX - f.left : 0, py = e ? e.clientY - f.top : 0;
+  const dx = !e ? 0 : px < ZOOM_EDGE ? -1 : px > zb.size - ZOOM_EDGE ? 1 : 0, dy = !e ? 0 : py < ZOOM_EDGE ? -1 : py > zb.size - ZOOM_EDGE ? 1 : 0;
+  if (!dx && !dy) { zb.raf = 0; return; }
+  const ws = $('#ws'), z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, step = ZOOM_PAN / (ZOOM_X * z);
+  const lx = Math.min(Math.max(zb.lx + dx * step, 0), ws.offsetWidth), ly = Math.min(Math.max(zb.ly + dy * step, 0), ws.offsetHeight);
+  if (lx === zb.lx && ly === zb.ly) { zb.raf = 0; return; }
+  zb.lx = lx; zb.ly = ly;
+  // the same spot in the box now stands for another spot of the Tab: what is being dragged follows it there
+  if (zb.down) zoomPass({ type: 'pointermove', fake: true, clientX: e.clientX, clientY: e.clientY, button: -1, buttons: 1, pointerId: e.pointerId, pointerType: e.pointerType,
+    isPrimary: true, detail: 0, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false, stopPropagation() { }, preventDefault() { } });
+  zoomDraw();
+  zb.raf = requestAnimationFrame(zoomEdgeTick);
 }
 function zoomDraw(fresh = false) {
   const zb = zoomBox; if (!zb) return;
