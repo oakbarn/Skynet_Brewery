@@ -5100,8 +5100,8 @@ function renderPipes() {
     // no orange mismatch ring (OakBarn Brewery, 2026-11-17: "There can be no mismatch because an adapter would be used so no need for
     // Orange Ring"): the IP's Properties say which adapter is in the connection (ipAdapterNote, Rule 2.57)
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
-      if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
-      if (!ipPoint(p.to, p.workspace) && !isQdHose(p)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
+      if (!ipPoint(p.from, p.workspace) && !p.plainFrom) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
+      if (!ipPoint(p.to, p.workspace) && !isQdHose(p) && !p.plainTo) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
     }
     // the free end of a Quick Disconnect hose can be grabbed at any time (Rule 5.28): right mouse button, or a finger
     // and so can a hose end whose IP Type is Quick Disconnect, one end at a time (Rule 5.40)
@@ -5589,9 +5589,10 @@ document.addEventListener('keydown', ev => {
   if (!['Delete', 'Backspace'].includes(ev.key) || !editing || !sel || !draft || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
   let kind = sel.kind, item = findItem(kind, sel.id); if (!item) return;
+  if (dotPick && sel.id === dotPick.pipe) item = findItem('gfx', dotPick.dot) || item;      // a red dot was pressed: it goes, its pipe stays
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
   if (unitOf) { kind = 'gfx'; item = unitOf; }        // an IP of a Skynet Fitting or vessel: the whole fitting or vessel, as its Properties do
-  ev.preventDefault();
+  ev.preventDefault(); dotPick = null;
   const bundle = isUnit(item) || isSkyV(item) ? null : bundleOf(item), who = item.label || item.name || lockName(item);
   if (bundle) return toast(`${who} is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to delete it.`, true);
   if (item.kind === 'vessel' && item.bundled && !isUnit(item) && !isSkyV(item)) return toast(`${who} is a bundle: open it (double-click) and use its Delete.`, true);
@@ -5599,6 +5600,20 @@ document.addEventListener('keydown', ev => {
   deleteItem(kind, item);
 });
 let drag = null, lastPipeTap = null, hitUnit = null;
+// 🔴 a red dot (the coupling on an open pipe end) can be opened and deleted (OakBarn Brewery, 2026-11-24: "trying to get the properties
+// up so I can delete these coupling"; Rule 5.37): a press on it still grabs the pipe end to drag it, but the Delete key then deletes the
+// dot, not the pipe, and two quick presses (outside the Zoom box, where a double-click starts a trace) open the dot's Properties
+let dotPick = null, lastDotTap = null;
+function redDotPress(p, i) {
+  const g = draft.graphics.find(x => x.id === (i === 0 ? p.from : p.to) && x.kind === 'ip' && x.fitting === 'coupling');
+  if (!g || pipesOn(g.id, g.workspace).length >= 2) return false;
+  dotPick = { pipe: p.id, dot: g.id };
+  const now = Date.now(), again = !zoomPassing && lastDotTap && lastDotTap.id === g.id && now - lastDotTap.t < 450;
+  lastDotTap = again ? null : { id: g.id, t: now };
+  if (!again) return false;
+  drag = null; sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+  return true;
+}
 $('#ws').addEventListener('pointerdown', ev => {
   if (!editing) return;
   // the right button no longer drags in Edit layout (OakBarn Brewery, 2026-11-24: "The right Drag and Hold can be deprecated as it too
@@ -5621,6 +5636,8 @@ $('#ws').addEventListener('pointerdown', ev => {
   const onFit = fittingUnder(ev);
   // a let-go end under the pointer wins over the valve, pump or vessel IP it sits on, so it can always be grabbed
   const oe = !noMove() && !onFit && openEndAt(p);
+  dotPick = null;
+  if (oe && redDotPress(oe.p, oe.i)) { ev.preventDefault(); return; }
   if (oe) {
     const k = oe.i === 0 ? 'from' : 'to', n = oe.p.points.length;      // an end on no IP (a red ring) gets its coupling first, so it can join an IP when dropped
     if (!isQdHose(oe.p) && !ipPoint(oe.p[k], oe.p.workspace)) { oe.p[k] = endCoupling(oe.p.points, oe.i, oe.i === 0 ? 1 : n - 2); }
@@ -5630,6 +5647,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   const cpl = ev.target.closest?.('[data-gid]'), cg = cpl && draft?.graphics.find(x => x.id === cpl.dataset.gid && x.kind === 'ip' && x.fitting === 'coupling');
   const cp = cg && draft.graphics.find(x => x.kind === 'pipe' && !x.hose && !x.locked && (x.from === cg.id || x.to === cg.id));
   if (cp && !onFit && endMoves(cp, cp.from === cg.id ? 0 : cp.points.length - 1) && !noMove()) {
+    if (redDotPress(cp, cp.from === cg.id ? 0 : cp.points.length - 1)) { ev.preventDefault(); return; }
     sel = { kind: 'gfx', id: cp.id }; drag = { mode: 'point', item: cp, i: cp.from === cg.id ? 0 : cp.points.length - 1 }; ev.preventDefault(); return;
   }
   const handle = ev.target.closest('circle.handle');
@@ -6193,7 +6211,9 @@ function openLostEnds(d) {
   let n = 0; const known = new Map();
   for (const p of d.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) for (const k of ['from', 'to']) {
     if (isQdHose(p) && k === 'to') continue;
-    const id = p[k];
+    const id = p[k], plain = k === 'from' ? 'plainFrom' : 'plainTo';
+    if (id) delete p[plain];          // joined again: a plain end (its red dot deleted by hand) is an ordinary end again
+    else if (p[plain]) continue;      // its red dot was deleted by hand: it stays plain (Rule 5.37)
     if (id) {
       if (ipPoint(id, p.workspace)) continue;
       if (!known.has(p.workspace)) known.set(p.workspace, new Set(allIps(p.workspace).map(q => q.id)));
@@ -6228,6 +6248,7 @@ function endMoves(p, i) {
   if (isQdHose(p) && i === p.points.length - 1) return true;
   // an end on no IP at all (its red ring: what it was joined to is gone) can be grabbed too (OakBarn Brewery, 2026-11-23: "Tried to
   // grab this and it ask me to unlock? It is not connected"; Rule 5.37)
+  if (i === 0 ? p.plainFrom && !p.from : p.plainTo && !p.to) return false;      // a plain end (its red dot deleted by hand) moves with its pipe
   if (!openEnd(p, i)) return !ipPoint(i === 0 ? p.from : p.to, p.workspace);
   return !L().graphics.find(x => x.id === (i === 0 ? p.from : p.to))?.locked;
 }
@@ -12929,7 +12950,11 @@ async function deleteItem(kind, item) {
     for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
   }
   draft.graphics = draft.graphics.filter(g => !(isCap(g) && gone.includes(g.capOn)));     // an End Cap on an opening that is gone goes too
-  for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
+  const dot = type === 'ip' && item.fitting === 'coupling';      // a red dot deleted by hand: its pipe end is left plain, with no dot or ring
+  for (const g of draft.graphics) {
+    if (gone.includes(g.from)) { delete g.from; if (dot && g.kind === 'pipe') g.plainFrom = true; }
+    if (gone.includes(g.to)) { delete g.to; if (dot && g.kind === 'pipe') g.plainTo = true; }
+  }
   openLostEnds(draft);       // the pipe ends that were on it are open ends now: red dots that can be joined or traced (Rule 5.37)
   sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000);
 }

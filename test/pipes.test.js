@@ -260,3 +260,14 @@ test('a TC Pipe Fitting is added with no Properties box, in the middle of the Zo
   assert.match(f, /const zb = editing && zoomBox \? zoomBox : null;\s+if \(!zb\) toBuild\(\);/);
   assert.match(f, /g\.x = Math\.round\(zb\.lx - g\.w \/ 2\); g\.y = Math\.round\(zb\.ly - g\.h \/ 2\);/);
 });
+
+// OakBarn Brewery, 2026-11-24: "trying to get the properties up so I can delete these coupling" (Rule 5.37)
+test('a red dot can be deleted with the Delete key or its Properties, and its pipe end stays plain', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /function redDotPress\(p, i\)/);
+  assert.match(app, /if \(dotPick && sel\.id === dotPick\.pipe\) item = findItem\('gfx', dotPick\.dot\) \|\| item;/, 'Delete key: the dot, not its pipe');
+  assert.match(app, /again = !zoomPassing && lastDotTap/, 'two quick presses open its Properties, not in the Zoom box');
+  assert.match(app, /else if \(p\[plain\]\) continue;/, 'a plain end gets no new dot');
+  assert.match(app, /!ipPoint\(p\.from, p\.workspace\) && !p\.plainFrom\)/, 'and no red ring');
+});

@@ -84,7 +84,7 @@ Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregi
 
 Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Sur un raccord (un té, un coude,
 tout raccord), le raccord gagne : appuyer dessus attrape le raccord, pas un raccord d'about (coupling) ni un bout détaché posé
-par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout dont le coude, le té ou le Device a été supprimé devient tout de suite un bout ouvert : un petit **point rouge** comme tout IP ouvert, qui peut être attrapé, joint ou tracé (🔗) dans la fenêtre Zoom. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
+par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout dont le coude, le té ou le Device a été supprimé devient tout de suite un bout ouvert : un petit **point rouge** comme tout IP ouvert, qui peut être attrapé, joint ou tracé (🔗) dans la fenêtre Zoom. Pour enlever un point rouge dont vous ne voulez pas, appuyez dessus puis sur la touche **Suppr** (Delete) : le point s'en va, son tuyau reste, et ce bout de tuyau reste simple (aucun point ne revient). Deux clics rapides sur un point rouge ouvrent ses Properties, qui ont aussi 🗑 Delete (dans la fenêtre Zoom, un double-clic commence plutôt un tracé). Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
 et un bout sur un IP 🔒 verrouillé (aussi un IP réglé sur No Unlock) ne bougent pas. **↩ Put back** (Ctrl+Z) annule chaque glissement, et **Save layout**
 garde la nouvelle longueur ou forme.
 
