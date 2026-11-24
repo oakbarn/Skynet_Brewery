@@ -274,3 +274,13 @@ test('a red dot can be deleted with the Delete key or its Properties, and its pi
   assert.match(app, /else if \(p\[plain\]\) continue;/, 'a plain end gets no new dot');
   assert.match(app, /!ipPoint\(p\.from, p\.workspace\) && !p\.plainFrom\)/, 'and no red ring');
 });
+
+// OakBarn Brewery, 2026-11-24: "I put the Valve Red Dot on top the Pump red dot and got a message. This is how real life the valves
+// are on the Pump" (Rule 5.26)
+test('an IP dropped right on another open IP joins it IP to IP instead of cutting a pipe', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const IP_ON_IP_PX = 12;/);
+  assert.match(app, /kind: 'pipe', straight: true, direct: true, workspace: ws, points: \[\[\.\.\.c\], \[\.\.\.c\]\]/, 'a pipe of no length');
+  assert.match(app, /const j = ipOnIpJoin\(drag\.item\);[\s\S]{0,300}else \{ const r = splitPipeFor\(drag\.item\);/, 'before cutting a pipe');
+});

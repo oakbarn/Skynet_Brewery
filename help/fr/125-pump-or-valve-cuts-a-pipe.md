@@ -28,6 +28,14 @@ Le tuyau est **raccourci** et la pompe ou la vanne y est jointe par **ses deux I
   du tuyau pour s'en dégager ; un IP se joint au tuyau raccourci et l'autre est joint par un court nouveau tuyau au té (ou à
   ce sur quoi était le bout).
 
+
+## IP sur IP : une vanne directement sur une pompe {#ip-on-ip-a-valve-right-on-a-pump}
+
+Lâchez une pompe ou une vanne qui n'a pas de tuyau avec un de ses points IP rouges juste sur un point IP rouge d'autre chose (une
+pompe, une vanne, un raccord ou un port de cuve), comme une vanne posée sur une pompe dans la vraie vie. Elle glisse pour que les
+deux points soient au même endroit et ils se joignent, IP sur IP, sans tuyau entre eux ; les deux points deviennent verts. Elle
+n'est pas mise dans un tuyau qu'elle recouvre. ↩ Put back (Ctrl+Z) l'annule.
+
 ## Quand rien n'est coupé {#when-nothing-is-cut}
 
 - La pompe ou la vanne est encore jointe à un autre tuyau, ou elle est verrouillée. Une pompe ou une vanne que vous **faites glisser hors** de ses tuyaux les lâche

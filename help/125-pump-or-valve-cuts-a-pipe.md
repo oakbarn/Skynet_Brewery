@@ -28,6 +28,12 @@ The pipe is made **shorter** and the pump or valve is joined in with **both of i
   the pipe so it is clear of it; one IP joins the shortened pipe and the other is joined by a short new pipe to the tee (or
   whatever the end was on).
 
+## IP on IP: a valve right on a pump
+
+Drop a pump or valve that has no pipes on it with one of its red IP dots right on a red IP dot of something else (a pump, valve,
+fitting or vessel port), as a valve sits on a pump in real life. It slides so the two dots sit on one spot and they join, IP to IP,
+with no pipe between; both dots turn green. It is not put into a pipe it lies over. ↩ Put back (Ctrl+Z) undoes it.
+
 ## When nothing is cut
 
 - The pump or valve is still joined to another pipe, or it is Locked. A pump or valve you **drag off** its pipes lets them go
