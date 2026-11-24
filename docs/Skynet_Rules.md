@@ -1686,7 +1686,8 @@ dragging (place without the snap, Edit layout) still works on Windows and Mac; o
 European Windows keyboards Ctrl + Alt is AltGr and types characters (€, @), Linux and the Pi keep many (terminal, lock screen,
 desktops), and on a Mac Control + Option is the VoiceOver key. The key is read by its place (`ev.code`), so a Mac's Option + letter, which types a symbol, works too. In use: Alt + P
 (Picture picker, admins). Never while typing in a box, and never a key Rule 2.32 keeps. The full table, with what each combination does on Windows, Mac, Linux and the Pi, is
-`docs/Skynet_Key_Combinations.md` (and `.csv`) (OakBarn Brewery, 2026-11-24: "make it an MD ... and available as a CSV"); a new
+`docs/Skynet_Key_Combinations.md` (and `.csv`), and just the ones still free in `docs/Skynet_Keys_Available.md` ("Give me a second MD of list the keys that
+are available on Skynet") (OakBarn Brewery, 2026-11-24: "make it an MD ... and available as a CSV"); a new
 shortcut is added there too.
 
 ## 3. Names and file names
