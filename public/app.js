@@ -5054,7 +5054,7 @@ function grabPopup(it, locked = []) {
   const what = it.hose ? 'Hose' : 'Pipe';
   const delBtn = it.kind !== 'pipe' ? null : btn(`🗑 Delete ${what}`, `Delete ${who} and its own IPs (a coupling or IP on its end with nothing else on it). ↩ Put back (Ctrl+Z) brings it back.`, () => {
     pushUndo(`delete ${who}`); const n = deletePipe(it); sel = null; renderWs();
-    toast(`🗑 ${who} deleted${n ? ` with ${n === 1 ? 'its IP' : 'its ' + n + ' IPs'}` : ''}. ↩ Put back (Ctrl+Z) brings it back.`, false, 7000);
+    toast(`🗑 ${who} deleted${n ? ` with ${n === 1 ? 'its IP' : 'its ' + n + ' IPs'}` : ''}. ↩ Put back (Ctrl+Z) brings it back.`, false, 3000);    // 3 seconds, then gone (OakBarn Brewery, 2026-11-24: "up too long")
   }, 'big danger');
   const withBtn = locked.length || it.kind === 'pipe' ? null : btn('Move it with its pipes', 'As before (Rule 5.19): a pipe with an open end moves along, a pipe end slides along its own line, and a pipe moved off to the side lets go. Then grab it again.', () => {
     grabWith.add(it.id || it.name); toast(`Grab ${who} again and move it with its pipes.`);
@@ -13071,7 +13071,7 @@ async function deleteItem(kind, item) {
     if (gone.includes(g.to)) { delete g.to; if (dot && g.kind === 'pipe') g.plainTo = true; }
   }
   openLostEnds(draft);       // the pipe ends that were on it are plain ends now: no dot, no ring (Rule 5.37)
-  sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000);
+  sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 3000);    // 3 seconds, then gone (OakBarn Brewery, 2026-11-24: "Nanny state up too long. Needs to be quick, maybe 3 seconds and then gone")
 }
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
