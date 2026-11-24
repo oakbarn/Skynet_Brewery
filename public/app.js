@@ -5524,6 +5524,9 @@ function zoomAuto() {
   for (const g of draft.graphics) if (g.attachTo && ids.has(g.attachTo) && !t.moves.has(g)) { const v = ids.get(g.attachTo); g.x = (g.x || 0) + v[0]; g.y = (g.y || 0) + v[1]; }      // IPs that ride on a moved fitting
   for (const [p, pm] of t.ends) p.points = p.points.map((q, i) => [q[0] + pm[i][0], q[1] + pm[i][1]]);
   rejoinEnds(new Set([tr.a.id, tr.b.id]));            // an open pipe end now on the other IP joins it
+  // two open ends joined at a corner get the fitting the corner needs (OakBarn Brewery, 2026-11-24: "On autoconfigure should have put in
+  // an elbow"): the joint they now share becomes an elbow (a tee, a cross ...), and renderWs turns it into its TC Pipe Fittings Widget
+  for (const id of [tr.a.id, tr.b.id]) { const g = draft.graphics.find(x => x.id === id && x.kind === 'ip' && x.fitting === 'coupling' && x.autoFit); if (g && pipesOn(g.id, g.workspace).length >= 2) autoFit(g); }
   renderWs();
   const n = t.moves.size - 1, [m1, m2] = t === one ? [tr.a.label, tr.b.label] : [tr.b.label, tr.a.label];
   toast(`🔗 ${m1} moved onto ${m2} and joined it${n ? `; ${n} joined thing${n > 1 ? 's' : ''} behind it moved along and their pipes got longer or shorter` : ''}. ↩ Put back (Ctrl+Z) undoes it.`, false, 6000);
