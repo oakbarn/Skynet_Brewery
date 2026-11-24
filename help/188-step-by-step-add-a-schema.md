@@ -70,7 +70,7 @@ More about every question: [New Schema from a Skynet Template](157-schema-templa
 
 ## Step 5. An empty Schema
 
-**5a. Your board.** A new empty Schema has no board (Interface) yet. On the **Devices** page press **Add Interface**. Give it a **Name** that means something to you (**✏ Change name**), for example **Hot_Side**, and an **Interface ID** (Skynet suggests one, for example **HS**; Interface IDs follow Rule 3.2). The Interface ID starts the name of every Device on that board. Pick the **Board** you have and its **Connection**. Plug the board in and fill in its **USB Port** number (Skynet suggests a free one it found), keep **Lost Comm (s)** at 10, and press **Add**. To try things before a board is plugged in, use the Simulator ([The Simulator bar](85-simulator-bar)).
+**5a. Your board.** A new empty Schema has no board (Interface) yet. On the **Devices** page press **Add Interface**. Give it a **Name** that means something to you (**✏ Change name**), for example **Hot_Side**, and an **Interface ID** (Skynet suggests one, for example **HS**; Interface IDs follow Rule 3.2). The Interface ID starts the name of every Device on that board. Pick the **Board** you have and its **Connection**. Plug the board in and fill in its **USB Port** number (Skynet suggests a free one it found), keep **Lost Comm (s)** at 10, and press **Add**. No board plugged in yet? Pick **None for now** as the USB Port and press **Add**: the board is added, shows as not connected, and you pick its USB Port later with **⚙ Change**. To try things before a board is plugged in, use the Simulator ([The Simulator bar](85-simulator-bar)).
 
 ![Your new Interface](help_pictures/Step_Add_Schema_10_Interface.png)
 
