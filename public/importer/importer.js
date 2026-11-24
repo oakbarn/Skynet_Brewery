@@ -36,7 +36,7 @@ setInterval(() => { fetch('/api/ping', { headers: { 'X-Skynet-Importer': '1' } }
 // a message next to the folder buttons (the toast at the bottom is easy to miss)
 function folderMsg(msg) { const n = $('#folderNote'); n.textContent = msg; n.classList.toggle('note', !!msg); }
 let toastTimer;
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('hidden'), 5000); }
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('hidden'), 3000); }    // 3 seconds, then gone (Rule 2.74)
 
 const state = { start: null, folder: '', files: [], sel: '' };
 

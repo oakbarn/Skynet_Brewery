@@ -284,7 +284,10 @@ function savedPop(what) {
   t.replaceChildren(h('b', {}, '✔ Saved'), ...(what && what !== 'Saved' ? [h('span', {}, what)] : []));
   t.className = 'show ok'; clearTimeout(t._t); t._t = setTimeout(() => t.className = '', SAVED_MS);
 }
-function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); raiseOnTop(t); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', ms || (bad ? 5000 : 2200)); }
+// Every note (not a red error) stays 3 seconds, then goes (OakBarn Brewery, 2026-11-24: "All nanny pop-ups 3 seconds"; Rule 2.74):
+// a time asked for by the caller is used only for a red error note
+const NOTE_MS = 3000;
+function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); raiseOnTop(t); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? ms || 5000 : NOTE_MS); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 // Rule 2.35 (Fritz, 2026-11-04): a phone or tablet is for running the brewery, not for editing or building. On one, an admin
 // works as an operator: the Schema, Processes (Start / Stop) and the buttons on the Tabs work; Edit layout, Properties and the
@@ -5065,7 +5068,7 @@ function grabPopup(it, locked = []) {
   const what = it.hose ? 'Hose' : 'Pipe';
   const delBtn = it.kind !== 'pipe' ? null : btn(`🗑 Delete ${what}`, `Delete ${who} and its own IPs (a coupling or IP on its end with nothing else on it). ↩ Put back (Ctrl+Z) brings it back.`, () => {
     pushUndo(`delete ${who}`); const n = deletePipe(it); sel = null; renderWs();
-    toast(`🗑 ${who} deleted${n ? ` with ${n === 1 ? 'its IP' : 'its ' + n + ' IPs'}` : ''}. ↩ Put back (Ctrl+Z) brings it back.`, false, 7000);
+    toast(`🗑 ${who} deleted${n ? ` with ${n === 1 ? 'its IP' : 'its ' + n + ' IPs'}` : ''}. ↩ Put back (Ctrl+Z) brings it back.`, false, 3000);
   }, 'big danger');
   const withBtn = locked.length || it.kind === 'pipe' ? null : btn('Move it with its pipes', 'As before (Rule 5.19): a pipe with an open end moves along, a pipe end slides along its own line, and a pipe moved off to the side lets go. Then grab it again.', () => {
     grabWith.add(it.id || it.name); toast(`Grab ${who} again and move it with its pipes.`);
@@ -13082,7 +13085,7 @@ async function deleteItem(kind, item) {
     if (gone.includes(g.to)) { delete g.to; if (dot && g.kind === 'pipe') g.plainTo = true; }
   }
   openLostEnds(draft);       // the pipe ends that were on it are plain ends now: no dot, no ring (Rule 5.37)
-  sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000);
+  sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 3000);
 }
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
