@@ -1674,7 +1674,7 @@ Then the Menu tabs and the Pages, as before. Help 33, 51, 67. Panel only: the Br
 Out. and all the Firefox ones as well"). A Panel shortcut with **Alt** uses only a letter that no browser (Chrome, Edge, Firefox, Safari),
 no system (Windows, Mac, Linux, Raspberry Pi OS) and no common graphics overlay keeps for itself. **Allowed Alt + letter:** A, C, G, I, J,
 K, L, M, N, O, P, Q, U, W, X, Y. **Never:** D, E, F (Chrome and Edge), F, E, V, S, B, T, H (Firefox menus), Z (NVIDIA overlay), R (AMD
-overlay), nor Alt + Tab, Space, Esc, F1 to F10, Home or the arrows (Alt + Left / Right are the browser's Back and Forward). **Shift + Alt + letter** is free on all of them except T and I
+overlay), nor Alt + Tab, Space, Esc, F1 to F10, Home or the arrows (Alt + Left / Right are the browser's Back and Forward). **Shift + Alt + letter** is free on all of them except T, I and A
 (Chrome and Edge). **Shift + Alt + arrow** is free too (OakBarn Brewery, 2026-11-24: "Shift + Alt + arrow"), outside text boxes only. **Alt + number is never used** (OakBarn Brewery, 2026-11-24: "What about alt + Number"): Chromium and Firefox on
 Linux and the Pi switch browser tabs with Alt + 1 to 9, and on Windows Alt + number pad digits type characters (Alt + 0176 = °).
 **Shift + Alt + number** is allowed, outside text boxes only. **Alt + ` (the ~ key) is never used** (OakBarn Brewery, 2026-11-24: "alt + tilde"): GNOME switches
@@ -1683,7 +1683,9 @@ windows with it, on a Mac Option + ` types accents, and the key is ² on a Frenc
 it that way. **Alt + =** ("Alt + =") the same: allowed by its place (the key left of Backspace; ´ on a German keyboard). The allowed letters come first. **Ctrl + Alt + key is never used** (OakBarn Brewery, 2026-11-24: "any conflicts with CTRL + Alt + Key"): on
 European Windows keyboards Ctrl + Alt is AltGr and types characters (€, @), Linux and the Pi keep many (terminal, lock screen,
 desktops), and on a Mac Control + Option is the VoiceOver key. The key is read by its place (`ev.code`), so a Mac's Option + letter, which types a symbol, works too. In use: Alt + P
-(Picture picker, admins). Never while typing in a box, and never a key Rule 2.32 keeps.
+(Picture picker, admins). Never while typing in a box, and never a key Rule 2.32 keeps. The full table, with what each combination does on Windows, Mac, Linux and the Pi, is
+`docs/Skynet_Key_Combinations.md` (and `.csv`) (OakBarn Brewery, 2026-11-24: "make it an MD ... and available as a CSV"); a new
+shortcut is added there too.
 
 ## 3. Names and file names
 
