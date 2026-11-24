@@ -34,7 +34,7 @@ Le tuyau est **raccourci** et la pompe ou la vanne y est jointe par **ses deux I
 Lâchez une pompe ou une vanne qui n'a pas de tuyau avec un de ses points IP rouges juste sur un point IP rouge d'autre chose (une
 pompe, une vanne, un raccord ou un port de cuve), comme une vanne posée sur une pompe dans la vraie vie. Elle glisse pour que les
 deux points soient au même endroit et ils se joignent, IP sur IP, sans tuyau entre eux ; les deux points deviennent verts. Elle
-n'est pas mise dans un tuyau qu'elle recouvre. ↩ Put back (Ctrl+Z) l'annule.
+n'est pas mise dans un tuyau qu'elle recouvre. ↩ Put back (Ctrl+Z) l'annule. Déplacez l'une ou l'autre (ou déverrouillez-la ou supprimez-la) et le joint s'en va : les deux points redeviennent rouges.
 
 ## Quand rien n'est coupé {#when-nothing-is-cut}
 

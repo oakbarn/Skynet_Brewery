@@ -492,6 +492,7 @@ function renderWs() {
   if (previewing && !(editing && curWs()?.build)) { previewing = false; if (editing) $('#editHint').textContent = curWs()?.build ? BUILD_HINT : ''; }
   document.body.classList.toggle('previewing', previewing); $('#ws').classList.toggle('preview', previewing);
   $('#previewBuild').textContent = previewing ? '✏ Back to building' : '👁 Preview';
+  if (editing && draft && !drag) dropLooseDirect(draft);      // an IP to IP join whose IPs came apart goes (Rule 5.26)
   if (zoomBox && !zoomBox.down) setTimeout(() => zoomDraw(true), 0);      // the Zoom box shows the change at once (a turn, a flip, a join ...)
   if (!previewing) { drawWs(); return markJobPick(); }
   editing = false;
@@ -4941,6 +4942,20 @@ function freeIpsTake(it) {
 // on one spot and a pipe of no length joins them (flow goes through it, as through every join; nothing is drawn). It is not then put
 // into a pipe it lies over. Returns the name of what it joined, or null.
 const IP_ON_IP_PX = 12;
+// An IP to IP join goes as soon as its two IPs are no longer on one spot (OakBarn Brewery, 2026-11-24: "Both should have been red";
+// "The Pump IPs"; Rule 5.26): when either thing is moved off, unlocked or deleted, the pipe of no length goes, with any open-end
+// coupling an unlock left on it, so both IPs are open (red) again. Returns how many went.
+function dropLooseDirect(d) {
+  let n = 0;
+  for (const p of d.graphics.filter(g => g.kind === 'pipe' && g.direct)) {
+    const a = p.from && ipPoint(p.from, p.workspace), b = p.to && ipPoint(p.to, p.workspace);
+    const cpl = id => { const g = d.graphics.find(x => x.id === id); return g?.kind === 'ip' && g.fitting === 'coupling' && !g.port ? g : null; };
+    if (a && b && Math.hypot(a[0] - b[0], a[1] - b[1]) <= 1.5 && !cpl(p.from) && !cpl(p.to)) continue;
+    const own = [cpl(p.from), cpl(p.to)].filter(g => g && d.graphics.filter(x => x.kind === 'pipe' && (x.from === g.id || x.to === g.id)).length === 1);
+    d.graphics = d.graphics.filter(g => g !== p && !own.includes(g)); n++;
+  }
+  return n;
+}
 // two IPs on one spot joined by a pipe of no length (nothing is drawn; flow goes through it)
 function directJoin(a, b, ws) {
   const c = ipPoint(b, ws) || ipPoint(a, ws); if (!c) return null;
