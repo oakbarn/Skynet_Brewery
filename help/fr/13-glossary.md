@@ -110,7 +110,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Interface** : une carte (automate, PLC) à laquelle les Devices sont câblés. Son **Interface ID** (comme `MB_`, Rule 3.2) commence le nom de ses Devices. Voir [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).
 
-**IP (Initial Point)** (point de départ) : un petit repère rond là où un écoulement commence ou finit (une sortie de pompe, un port de cuve, une vidange). Les tuyaux commencent et finissent sur des IP. Les IP ne s'affichent que dans Edit layout, sous forme de **petit point rouge**, pour que des IP proches ne se cachent jamais les unes les autres. Posez la souris sur un point (ou sélectionnez-le) et il grandit en cercle blanc dans un anneau de couleur, avec ses lettres et son nom.
+**IP (Initial Point)** (point de départ) : un petit repère rond là où un écoulement commence ou finit (une sortie de pompe, un port de cuve, une vidange). Les tuyaux commencent et finissent sur des IP. Les IP ne s'affichent que dans Edit layout, sous forme de **petit point**, pour que des IP proches ne se cachent jamais les unes les autres. Un point **vert** est joint à un tuyau ou un tuyau souple ; un point **rouge** est libre (rien de joint encore). Posez la souris sur un point (ou sélectionnez-le) et il grandit en cercle blanc dans un anneau de couleur, avec ses lettres et son nom.
 
 ## L {#l}
 

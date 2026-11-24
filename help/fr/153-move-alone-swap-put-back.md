@@ -70,7 +70,9 @@ Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregi
    - un bout de **tuyau souple** va **n'importe où**, et le tuyau souple se courbe pour suivre. Les poignées rondes au milieu d'un tuyau souple changent ses courbes.
 3. Lâchez le bout sur un IP (à moins de 14 pixels) et il se joint à cet IP. Lâché ailleurs, il reste un bout ouvert.
 
-Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
+Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Sur un raccord (un té, un coude,
+tout raccord), le raccord gagne : appuyer dessus attrape le raccord, pas un raccord d'about (coupling) ni un bout détaché posé
+par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
 et un bout sur un IP 🔒 verrouillé (aussi un IP réglé sur No Unlock) ne bougent pas. **↩ Put back** (Ctrl+Z) annule chaque glissement, et **Save layout**
 garde la nouvelle longueur ou forme.
 

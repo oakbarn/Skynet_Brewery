@@ -2302,6 +2302,12 @@ edge), and only the dot can be pointed at, so IPs close together no longer cover
 white circle in its colored ring with its letters, and its Edit layout name tag shows. A Label set to Show stays as it is. Fittings,
 IPs with a picture and Quick Disconnects are drawings, not markers, and do not change. Pipes still snap to an IP by distance, so
 drawing to a dot works as before. (Help 13)
+*Fittings win (OakBarn Brewery, 2026-11-23: "A Tee Should win ... I am not sure we should even be able to grab a coupling
+unless you are back off a Fitting"):* in Edit layout, pressing on a fitting (a Skynet Fitting, a Build fitting, an IP fitting other
+than a coupling, or one of their IPs) grabs the fitting, even where a coupling or a let-go pipe end lies on top of it. A coupling or
+let-go end is grabbed only off a fitting; on a pump, valve or vessel IP it still wins (Rule 5.37). Also in the Zoom box. (Help 153)
+*Dot colors (OakBarn Brewery, 2026-11-23: "Change the color of Connected ips to green and unconnected to red"):* an IP dot joined
+to a pipe or hose is **green**; an open one (nothing joined) stays **red**. Device, valve and Widget IPs alike. (Help 13)
 
 5.21 **Pipe and Hose Widgets and Flow Colors** (Fritz, 2026-11-03, thread "Add flow colors to pipe and hose Widgets", Help 116):
 - A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose** on the
@@ -7113,6 +7119,7 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 ## Change log
 
+- 2026-11-23: Rule 5.20 note added (OakBarn Brewery: "A Tee Should win"): a fitting under the pointer wins over a coupling or let-go pipe end lying on it; those are grabbed off the fitting. IP dots joined to a pipe or hose are green, open ones red (Help 13). Help 153 (and French). Checked against the BruControl Import program: its build uses the same Edit layout code, so it gets the same; nothing else changes there.
 - 2026-11-23: Rule 5.20 changed (OakBarn Brewery: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small red dots on only become large when you hiver on one"): in Edit layout a round IP marker is a small red dot that only the dot can be pointed at; hovered or selected it is the full white circle in its colored ring, with its letters and name tag. Fittings, IPs with a picture and Quick Disconnects do not change. Help 13 (and French). Checked against the BruControl Import program: its build opens the same Edit layout (same style.css), so it gets the same dots; nothing else changes there.
 - 2026-11-22: Panel Update 9 Part 1 (OakBarn Brewery, PDF "Panel Update 9", 35 items): added Rule 7.27 (six Skynet Audio folders plus
   Patron, their drawings, pictures 239 to 244, the Audio Widget shows only while it plays, no `.visible` for it); Rule 9.26 the Windows
