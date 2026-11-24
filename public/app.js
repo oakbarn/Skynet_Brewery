@@ -5195,7 +5195,7 @@ function setEditing(on) {
   if (draft && restoreBuild()) setTimeout(buildBackNote, 300);       // an unfinished Build kept on the Brain comes back on its 🔨 Build Tab (Rule 4.1)
   if (!on) $('#buildBack')?.remove();
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
-  if (on) { mvJoinEnds(draft); centerOnPipes(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
+  if (on) { mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
@@ -5297,7 +5297,11 @@ function zoomOpen() {
     .zt { display: flex; flex-wrap: wrap; box-sizing: border-box; width: ${bw}px; align-items: center; gap: 4px 8px; font: 600 12px/1.6 system-ui, sans-serif; color: #fafafa; background: #001f5b; padding: 2px 4px 2px 8px; }
     .zt span { flex: 1; min-width: 0; overflow-wrap: anywhere; } .zt button { font: 700 14px/1 system-ui, sans-serif; color: #fafafa; background: #c0392b; border: 1px solid #000; border-radius: 4px; padding: 3px 8px; cursor: pointer; }
     .zt button:hover { background: #e74c3c; } .zt button.zAuto, .zt button.zDrop { font-size: 12px; background: #2d6cdf; } .zt button.zDrop { background: #555; }
-    .zf > .ztr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }`));
+    .zf > .ztr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+    .zw { position: relative; } .zb { position: absolute; background: rgba(255,255,255,.08); z-index: 2; } .zb[hidden] { display: none; }
+    .zb.zv { right: 0; top: 0; bottom: 12px; width: 12px; } .zb.zh { left: 0; right: 12px; bottom: 0; height: 12px; }
+    .zb > i { position: absolute; background: #8a8f96; border-radius: 6px; border: 1px solid #000; box-sizing: border-box; cursor: grab; }
+    .zb > i:hover, .zb > i.on { background: #c9ccd1; } .zb.zv > i { left: 1px; right: 1px; } .zb.zh > i { top: 1px; bottom: 1px; }`));
   const frame = h('div', { class: 'zf' }), title = h('div', { class: 'zt' }, h('span', {}, `🔍 Zoom ${kTxt}: work right in here (drag, join, double-click). Esc or ✕ closes it.`),
     h('button', { type: 'button', title: 'Close the zoom box (Esc)', onclick: ev => { ev.stopPropagation(); zoomClose(); } }, '✕'));      // OakBarn Brewery, 2026-11-23: "have a close button upper right corner"
   // 🔗 Trace (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
@@ -5306,14 +5310,56 @@ function zoomOpen() {
   const drop = h('button', { type: 'button', class: 'zDrop', title: 'Take the red trace away', onclick: ev => { ev.stopPropagation(); zoomTraceEnd(); } }, 'Cancel trace');
   auto.hidden = drop.hidden = true; title.lastChild.before(auto, drop);
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'ztr');
-  root.append(title, frame); frame.append(svg);
+  // scroll bars when the zoomed Tab is bigger than the box (OakBarn Brewery, 2026-11-24: "Scroll Bars in the Zoom Box when needed"):
+  // drag a bar's thumb, click its track to jump, or turn the mouse wheel over the box (Shift + wheel goes sideways)
+  const bars = { v: h('div', { class: 'zb zv' }, h('i')), h: h('div', { class: 'zb zh' }, h('i')) };
+  root.append(title, h('div', { class: 'zw' }, frame, bars.v, bars.h)); frame.append(svg);
   document.body.append(host);
   Object.assign(host.style, { left: Math.max(4, fit.left + 8) + 'px', top: Math.max(4, fit.top + 8) + 'px' });
-  zoomBox = { host, frame, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits ? mf.cx : (mx - r.left) / z, ly: fits ? mf.cy : (my - r.top) / z, down: null, title, auto, drop, svg, trace: null };
+  zoomBox = { host, frame, bars, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits ? mf.cx : (mx - r.left) / z, ly: fits ? mf.cy : (my - r.top) / z, down: null, title, auto, drop, svg, trace: null };
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu']) frame.addEventListener(type, zoomPass);
+  for (const ax of ['h', 'v']) bars[ax].addEventListener('pointerdown', ev => zoomBarDown(ev, ax));
+  frame.addEventListener('wheel', ev => {
+    ev.preventDefault(); const zb = zoomBox; if (!zb) return;
+    const kz = zb.k * zoomZ(), dx = ev.shiftKey && !ev.deltaX ? ev.deltaY : ev.deltaX, dy = ev.shiftKey && !ev.deltaX ? 0 : ev.deltaY;
+    zoomScrollTo(zb.lx + dx / kz, zb.ly + dy / kz);
+  }, { passive: false });
   zoomDraw(true);
 }
 function zoomClose() { zoomBox?.host.remove(); zoomBox = null; }
+const zoomZ = () => { const ws = $('#ws'); return ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1; };
+// the view's centre may go from half a box from the Tab's left (top) edge to half a box from its right (bottom) edge
+function zoomScrollTo(lx, ly) {
+  const zb = zoomBox; if (!zb) return;
+  const ws = $('#ws'), kz = zb.k * zoomZ(), hw = zb.w / 2 / kz, hh = zb.h / 2 / kz, W = ws.offsetWidth, H = ws.offsetHeight;
+  zb.lx = W > 2 * hw ? Math.min(Math.max(lx, hw), W - hw) : W / 2; zb.ly = H > 2 * hh ? Math.min(Math.max(ly, hh), H - hh) : H / 2;
+  zoomDraw();
+}
+// the scroll bars: shown only when the zoomed Tab is wider (taller) than the box; the thumb is the part of the Tab in view
+function zoomBars() {
+  const zb = zoomBox; if (!zb?.bars) return;
+  const ws = $('#ws'), kz = zb.k * zoomZ();
+  for (const [ax, len, all, c] of [['h', zb.w - 12, ws.offsetWidth * kz, zb.lx * kz], ['v', zb.h - 12, ws.offsetHeight * kz, zb.ly * kz]]) {
+    const bar = zb.bars[ax], view = ax === 'h' ? zb.w : zb.h; bar.hidden = all <= view + 1; if (bar.hidden) continue;
+    const size = Math.max(24, len * view / all), pos = Math.min(Math.max((c - view / 2) / all * len, 0), len - size), t = bar.firstChild;
+    if (ax === 'h') Object.assign(t.style, { left: pos + 'px', width: size + 'px' }); else Object.assign(t.style, { top: pos + 'px', height: size + 'px' });
+  }
+}
+function zoomBarDown(ev, ax) {
+  const zb = zoomBox; if (!zb || ev.button !== 0) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const bar = zb.bars[ax], t = bar.firstChild, r = bar.getBoundingClientRect(), ws = $('#ws'), kz = zb.k * zoomZ();
+  const len = (ax === 'h' ? r.width : r.height), all = (ax === 'h' ? ws.offsetWidth : ws.offsetHeight) * kz, view = ax === 'h' ? zb.w : zb.h;
+  const at = e => (ax === 'h' ? e.clientX - r.left : e.clientY - r.top);
+  const tr = t.getBoundingClientRect(), tpos = ax === 'h' ? tr.left - r.left : tr.top - r.top, tsize = ax === 'h' ? tr.width : tr.height;
+  // on the thumb: it follows the mouse; on the track: the thumb jumps there first
+  let grab = ev.target === t ? at(ev) - tpos : tsize / 2;
+  const go = e => { const p = at(e) - grab, c = (p / len) * all + view / 2; ax === 'h' ? zoomScrollTo(c / kz, zb.ly) : zoomScrollTo(zb.lx, c / kz); };
+  if (ev.target !== t) go(ev);
+  t.classList.add('on'); bar.setPointerCapture(ev.pointerId);
+  const mv = e => go(e), up = () => { t.classList.remove('on'); bar.removeEventListener('pointermove', mv); bar.removeEventListener('pointerup', up); bar.removeEventListener('pointercancel', up); };
+  bar.addEventListener('pointermove', mv); bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+}
 // the spot on the screen of the Tab that a point in the box stands for
 function zoomReal(ev) {
   const zb = zoomBox, ws = $('#ws'), r = ws.getBoundingClientRect(), z = r.width / (ws.offsetWidth || 1) || 1, f = zb.frame.getBoundingClientRect(), k = zb.k;
@@ -5515,6 +5561,7 @@ function zoomDraw(fresh = false) {
   const z = ws.getBoundingClientRect().width / (ws.offsetWidth || 1) || 1, k = zb.k * z;
   zb.copy.style.transform = `translate(${zb.w / 2 - zb.lx * k}px, ${zb.h / 2 - zb.ly * k}px) scale(${k})`;
   if (zb.trace) zoomTraceShow();
+  zoomBars();
 }
 let zoomRaf = 0;
 document.addEventListener('pointermove', ev => {
@@ -6123,10 +6170,29 @@ function stopDrawing() {
   $('#ws').classList.remove('drawing'); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); renderPipes();
 }
 // a loose pipe or hose end gets a coupling, so every pipe has an IP at both ends; another pipe can join it there later
-function endCoupling(pts, i, j) {
+function endCoupling(pts, i, j, ws = wsName) {
   const c = pts[i], n = pts[j], ang = Math.round(Math.atan2(n[1] - c[1], n[0] - c[0]) * 180 / Math.PI / 45) * 45;
-  const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: wsName, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: String((ang + 360) % 180) };
+  const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: ws, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: String((ang + 360) % 180) };
   draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
+}
+// a pipe or hose end whose IP is gone (the elbow, tee or Device it was on was deleted) gets an open end (a coupling), as 🔓 Unlock
+// leaves it, so it shows as a red IP dot that can be joined, traced and auto configured (OakBarn Brewery, 2026-11-24: "I removed the
+// elbow so these should all be the red dot and available to connect with the trace"; "Removed the Tee"; Rule 5.37). A Quick
+// Disconnect hose's free end stays free. Returns how many ends were opened.
+function openLostEnds(d) {
+  let n = 0; const known = new Map();
+  for (const p of d.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) for (const k of ['from', 'to']) {
+    if (isQdHose(p) && k === 'to') continue;
+    const id = p[k];
+    if (id) {
+      if (ipPoint(id, p.workspace)) continue;
+      if (!known.has(p.workspace)) known.set(p.workspace, new Set(allIps(p.workspace).map(q => q.id)));
+      if (known.get(p.workspace).has(id) || d.graphics.some(g => g.id === id)) continue;      // still there (only not drawn yet)
+    }
+    const m = p.points.length;
+    p[k] = k === 'from' ? endCoupling(p.points, 0, 1, p.workspace) : endCoupling(p.points, m - 1, m - 2, p.workspace); n++;
+  }
+  return n;
 }
 // Deleting a pipe or hose takes its own IPs with it (OakBarn Brewery, 2026-11-14: "I deleted a Pipe but the IPs where still on the
 // Build"; "Check same issue for Hose"): a coupling or plain IP point on one of its ends goes too when nothing else is on it (no other
@@ -12854,6 +12920,7 @@ async function deleteItem(kind, item) {
   }
   draft.graphics = draft.graphics.filter(g => !(isCap(g) && gone.includes(g.capOn)));     // an End Cap on an opening that is gone goes too
   for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
+  openLostEnds(draft);       // the pipe ends that were on it are open ends now: red dots that can be joined or traced (Rule 5.37)
   sel = null; renderWs(); toast(`🗑 ${delWho} deleted. ↩ Put back (Ctrl+Z) brings it back.`, false, 6000);
 }
 async function editItem(kind, id) {

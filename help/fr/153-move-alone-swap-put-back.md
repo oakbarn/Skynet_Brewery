@@ -53,7 +53,9 @@ comme sur le Tab, et il bouge aussi sur le Tab, plus finement, pour poser un bou
 doubles-clics y marchent aussi (un double-clic ouvre les Properties, sauf sur un IP rouge).
 
 **Se déplacer dans la fenêtre :** gardez le bouton de la souris enfoncé et approchez-vous d'un bord de la fenêtre : la vue se
-déplace de ce côté sur le collecteur, et ce que vous traînez suit. Éloignez-vous du bord, ou lâchez, et elle s'arrête.
+déplace de ce côté sur le collecteur, et ce que vous traînez suit. Éloignez-vous du bord, ou lâchez, et elle s'arrête. Quand le Tab
+est plus grand que la fenêtre, elle a des **barres de défilement** sur ses bords droit et bas : traînez-en une, ou cliquez le long
+pour y sauter. La molette de la souris défile vers le haut et le bas, et **Shift + molette** sur le côté.
 
 Appuyez sur **Échap** ou sur le **✕**
 rouge dans son coin en haut à droite pour la fermer.
@@ -82,7 +84,7 @@ Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregi
 
 Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Sur un raccord (un té, un coude,
 tout raccord), le raccord gagne : appuyer dessus attrape le raccord, pas un raccord d'about (coupling) ni un bout détaché posé
-par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout avec un anneau rouge (sur aucun IP, parce que ce à quoi il était joint n'existe plus) peut aussi être attrapé et posé sur un IP. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
+par-dessus. Attrapez le coupling ou le bout à côté du raccord. Un bout dont le coude, le té ou le Device a été supprimé devient tout de suite un bout ouvert : un petit **point rouge** comme tout IP ouvert, qui peut être attrapé, joint ou tracé (🔗) dans la fenêtre Zoom. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
 et un bout sur un IP 🔒 verrouillé (aussi un IP réglé sur No Unlock) ne bougent pas. **↩ Put back** (Ctrl+Z) annule chaque glissement, et **Save layout**
 garde la nouvelle longueur ou forme.
 

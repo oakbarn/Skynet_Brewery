@@ -42,7 +42,7 @@ assert.match(app, /ev\.key\.toLowerCase\(\) !== 'z'\) return;\n[^\n]*closest\?\.
 // together inside the Dialog"; "have a close button upper right corner")
 assert.match(app, /for \(const type of \['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'click', 'dblclick', 'contextmenu'\]\) frame\.addEventListener\(type, zoomPass\);/, 'presses, drags and clicks pass to the Tab');
 assert.match(app, /if \(ev\.type === 'pointerdown'\) try \{ zb\.frame\.setPointerCapture\(ev\.pointerId\); \} catch \{ \}/, 'the box takes the pointer back after the Tab\'s own press');
-assert.match(app, /zoomBox = \{ host, frame, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits \? mf\.cx : \(mx - r\.left\) \/ z, ly: fits \? mf\.cy : \(my - r\.top\) \/ z/, 'it keeps showing the spot it opened on');
+assert.match(app, /zoomBox = \{ host, frame, bars, copy: null, t: 0, w: bw, h: bh, k, kTxt, lx: fits \? mf\.cx : \(mx - r\.left\) \/ z, ly: fits \? mf\.cy : \(my - r\.top\) \/ z/, 'it keeps showing the spot it opened on');
 assert.match(app, /Esc or ✕ closes it\.`\),\n    h\('button', \{ type: 'button', title: 'Close the zoom box \(Esc\)'/, 'a ✕ in its upper right corner');
 console.log('zoom box ok');
 // 🔗 Trace + 🔧 Auto configure, only in the Zoom box (OakBarn Brewery, 2026-11-23, picked A, "has to trace back so no breaks in Ips")
