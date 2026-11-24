@@ -33,7 +33,9 @@ chaque tuyau finit sur un de ses IP.
 - **Barre Edit layout > Elbows, Tees …**, sous **TC Pipe Fittings**, ou
 - **Add Widget > TC Pipe Fittings**.
 
-Le nouveau raccord va sur le Build Tab comme chaque nouvel élément (Règle 4.1). Tournez-le et retournez-le avec les boutons pour tourner de la barre Edit layout
+Un seul choix l'ajoute tout de suite, sans boîte de Properties, et vous restez dans Edit layout. Le nouveau raccord va sur le
+Build Tab comme chaque nouvel élément (Règle 4.1), sauf quand la fenêtre de zoom est ouverte : il va alors au milieu de la fenêtre
+de zoom, sur le Tab que vous zoomez. Double-cliquez dessus pour ses Properties. Tournez-le et retournez-le avec les boutons pour tourner de la barre Edit layout
 (Règle 5.5), puis joignez des tuyaux à ses IP.
 
 ## Lâcher un té ou une croix sur un tuyau {#dropping-a-tee-or-a-cross-on-a-pipe}

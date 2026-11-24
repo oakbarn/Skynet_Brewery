@@ -61,7 +61,7 @@ Press **Esc** or the red **✕** in its upper right corner to close it.
 
 **Join two IPs with a trace (only in the Zoom box):** double-click a red IP to start a red trace line, then click the IP to join it
 to. Press **🔧 Auto configure**: the first IP moves onto the second and they join, and what is joined behind it follows so no join
-breaks. A straight pipe gets longer or shorter for the part of the move along its own line, and only the part across it is passed
+breaks. Two open ends (red dots) that meet at a corner get an elbow there (a tee where three pipes meet, and so on). A straight pipe gets longer or shorter for the part of the move along its own line, and only the part across it is passed
 on to what is on its other end (a tee slides along its level pipes, the pipe up to an elbow gets shorter), and so on back; a pipe with a bend
 in it takes the whole move at the bend, and a hose just bends. If that would break a join, the second IP is tried onto the first instead. If neither works, nothing moves and a
 message says it can't be done automatically: do it by hand, deleting or adding pipes, fittings or joins. Two IPs already

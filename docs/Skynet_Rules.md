@@ -1980,6 +1980,9 @@ on the Build Tab first (OakBarn Brewery, 2026-11-19, picked "Change the Rules").
 *Exception (Fritz, 2026-11-03):* a **Pipe or Hose** is drawn right on its Tab with Draw pipe or Draw hose; it is never made on the Build
 Tab first (Rule 5.21).
 
+- **Exception (2026-11-24, Rule 5.25):** a TC Pipe Fitting picked while the Zoom box is open goes in the middle of the Zoom box, on
+  the Tab being zoomed (OakBarn Brewery: "If I was on a Zoom Box, the Elbow should be in the Zoom Box").
+
 4.2 **New Device order** (the **Add Device** box, Fritz 2026-11-04, "to build a name that follows my naming conventions"):
 **1 Label** (typed, or filled in as Type_n where Rule 18.15 says; Fritz 2026-11-04/05), **2 Interface**, **3 Port** (Available Ports/Pins: only free ones that fit), **4 Tab**,
 **5 Name** (the Suggested Name, made from them; it shows once 1-4 are done, and the user may type their own). Then Width and
@@ -2434,6 +2437,9 @@ all have IPs and they become Skynet Widgets"; thread "Make Fritz's elbow and tee
   into two pipes, one on each end of its run; the branch stays open. Over an open end the pipe is made shorter and joins it.
   The first piece keeps the pipe's Name, Label and Flow Color, as in Rule 5.26.
 - **They are also added by hand:** Edit layout bar > Elbows, Tees … and Add Widget > TC Pipe Fittings (on the Build Tab, Rule 4.1).
+  One pick adds it, with no Properties box, and Edit layout stays on; with the Zoom box open it goes in the middle of the Zoom box,
+  on the Tab being zoomed (an exception to Rule 4.1) (OakBarn Brewery, 2026-11-24: "Double click alone should add the elbow and open
+  the Build Tab in edit mode. If I was on a Zoom Box, the Elbow should be in the Zoom Box").
   The older equipment pipe fittings (Pipe tee, Pipe 90° and 45° elbow, Pipe cross) are no longer in the Add lists; ones already on
   a Tab still draw.
 - **A fitting with a Temperature Probe is a Device**, a Temperature Device subtype (Probe Tee), not a TC Pipe Fitting (Rule 5.20).
@@ -2870,7 +2876,8 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   move right shortening the right pipe and lengthen the left pipe on the tee. The pipe to the elbow would have to shorten"): a
   straight pipe takes the part of the move along its own line by getting longer or shorter and passes on only the part across it
   to what is on its other end (fitting, valve, pump, an IP sitting right on another), and so on back; a pipe with a bend in it takes
-  the whole move at its first bend (2026-11-24); a hose just bends. When that
+  the whole move at its first bend (2026-11-24); two open ends (couplings) joined at a corner get the fitting the corner needs, an
+  elbow (a tee, a cross ...) (2026-11-24, OakBarn Brewery: "On autoconfigure should have put in an elbow"); a hose just bends. When that
   would break a join (it reaches the second IP, a vessel or something locked, a pipe gets too short, or two ways back disagree),
   the second IP is tried onto the first. If neither works, nothing moves and one toast says it can't be done automatically without
   breaking a join or adding a pipe, hose or fitting, so do it by hand (delete or add pipes, fittings or joins). Nothing is ever
@@ -7176,6 +7183,8 @@ turns it on and off), so it has no Device; its Heat Source is Electric or Gas. B
 
 - 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("On a property allow individual Unlock of an IP in addition to Unlock IPs"): Properties with 2 or more joined pipe ends also have 🔓 Unlock one IP ▾ (a Pipe or Hose: Unlock one end ▾); the picked one lets go alone. The Zoom box drags and pans with the left button only, fills the work area at 2.5x, centered on the whole manifold (50 px all round) when it fits, and never opens Tab settings from inside it (Rule 5.37). Rule 4.10: → Right Arrow on a Template's icon does the same as B ("On a Template, could we make the Right Arrow the same as B"). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
+- 2026-11-24: Rule 5.25 note (OakBarn Brewery: "Double click to add elbow saved and then no edit no elbow. Double click alone should add the elbow and open the Build Tab in edit mode. If I was on a Zoom Box, the Elbow should be in the Zoom Box"): picking a TC Pipe Fitting in Elbows, Tees … or Add Widget adds it with no Properties box and stays in Edit layout; with the Zoom box open it goes in the middle of the Zoom box on the Tab being zoomed (Rule 4.1 exception), else on the 🔨 Build Tab. Help 124 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Rule 5.37 Auto configure note (OakBarn Brewery: "On autoconfigure should have put in an elbow"): when Auto configure joins two open ends (couplings) at a corner, the joint they share gets the fitting the corner needs (an elbow; a tee or cross where more pipes meet), shown as its TC Pipe Fittings Widget. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 Zoom box note (OakBarn Brewery: "when I get near an edge with the left mouse click held, it scrolls"): a button held near an edge of the Zoom box moves the view that way; a drag goes along. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 note (OakBarn Brewery, 2026-11-23: "Tried to grab this and it ask me to unlock? It is not connected"): a pipe end with a red ring (on no IP, what it was joined to is gone) can be dragged like a let-go end; grabbed, it gets its coupling, so dropped on an IP it joins. Help 153 (and French). Also ("Why do I have to close or save after unlocking. Two Clicks? Why", Rule 2.44): 🔓 Unlock its IPs / its ends and ↔ Move with pipes in Properties save and close Properties themselves, one click. BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-23: Rule 5.29 changed (OakBarn Brewery: "did away with the extentions" ... "Lets try that"): the drawn-on pipe is taken off the 13 Skynet side-view valve SVGs and the box is cropped to the valve: 150 long like the Motorized Ball Valve, 300 across (the tallest), shown 75 x 150 level / 150 x 75 upright, IPs on the valve's own ends; boxes fitted on read and in Edit layout; 3 Vessel sample and default Schema valves fitted. A pump's Hose or Pipe ends in a TC ferrule on its spot. Help 130, 131 (and French). Checked against the BruControl Import program: same pictures and same pump drawing code; nothing else changes there.

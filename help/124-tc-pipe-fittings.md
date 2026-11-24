@@ -33,7 +33,9 @@ each pipe ends on one of its IPs.
 - **Edit layout bar > Elbows, Tees …**, under **TC Pipe Fittings**, or
 - **Add Widget > TC Pipe Fittings**.
 
-The new fitting goes on the Build Tab like every new item (Rule 4.1). Turn and flip it with the turn buttons on the Edit layout
+One pick adds it at once, with no Properties box, and you stay in Edit layout. The new fitting goes on the Build Tab like every
+new item (Rule 4.1), except when the Zoom box is open: then it goes in the middle of the Zoom box, on the Tab you are zooming.
+Double-click it for its Properties. Turn and flip it with the turn buttons on the Edit layout
 bar (Rule 5.5), then join pipes to its IPs.
 
 ## Dropping a tee or a cross on a pipe
