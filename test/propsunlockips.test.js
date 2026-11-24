@@ -33,8 +33,9 @@ assert.match(fn, /grabWith\.add\(it\.id \|\| it\.name\); w\.disabled = b\.disabl
 assert.match(fn, /const riders = pipe \? \[\] : lockedRiders\(it\)/, 'greyed out when a locked pipe or fitting would move with it');
 assert.match(fn, /'↔ Move with pipes'/);
 console.log('move with pipes ok');
-// 🔍 Zoom box (OakBarn Brewery, 2026-11-23, picked A: the Z key): 200 screen pixels around the mouse, 3 times bigger, look only
-assert.match(app, /const ZOOM_SRC = 200, ZOOM_X = 3;/);
+// 🔍 Zoom box (OakBarn Brewery, 2026-11-23, picked A: the Z key): 200 screen pixels around the mouse, 2 times bigger, look only
+assert.match(app, /const ZOOM_SRC = 200, ZOOM_X = 2;/);
+assert.match(app, /if \(zb\.down && !zb\.down\.isConnected\) zb\.down = under;/, 'a pipe drawn again on press still gets the drag (grab it again and again)');
 assert.match(app, /host\.attachShadow\(\{ mode: 'open' \}\)/, 'its copy of the Tab is closed off, so nothing else finds it');
 assert.match(app, /ev\.key\.toLowerCase\(\) !== 'z'\) return;\n[^\n]*closest\?\.\('input, textarea, select, \[contenteditable="true"\], dialog'\)[^\n]*\n  ev\.preventDefault\(\); zoomBox \? zoomClose\(\) : zoomOpen\(\);/, 'Z opens and closes it, never in a text box');
 // it stays put and what is done in it goes to the Tab (OakBarn Brewery, 2026-11-23: "It needs to stay fixed and move the joins
@@ -44,6 +45,17 @@ assert.match(app, /if \(ev\.type === 'pointerdown'\) try \{ zb\.frame\.setPointe
 assert.match(app, /zoomBox = \{ host, frame, copy: null, t: 0, size, lx: \(mx - r\.left\) \/ z, ly: \(my - r\.top\) \/ z/, 'it keeps showing the spot it opened on');
 assert.match(app, /Esc or ✕ closes it\.`\),\n    h\('button', \{ type: 'button', title: 'Close the zoom box \(Esc\)'/, 'a ✕ in its upper right corner');
 console.log('zoom box ok');
+// 🔗 Trace + 🔧 Auto configure, only in the Zoom box (OakBarn Brewery, 2026-11-23, picked A, "has to trace back so no breaks in Ips")
+assert.match(app, /if \(zoomTracePass\(ev, x, y\)\) return;/, 'the box looks at the trace first');
+assert.match(app, /if \(ev\.type === 'dblclick' && \(!tr \|\| tr\.b\)\) \{\n    const ip = zoomIpAt\(x, y\); if \(!ip\) return false;/, 'a double-click on an IP starts it; anywhere else it is a double-click as before');
+assert.match(app, /const one = ma \? zoomTraceBack\(ma, \[b\[0\] - a\[0\], b\[1\] - a\[1\]\], mb\)/, 'what is joined behind is traced back');
+assert.match(app, /const two = one\.fail && mb \? zoomTraceBack\(mb, \[a\[0\] - b\[0\], a\[1\] - b\[1\]\], ma\) : null;/, 'then the other way round');
+assert.match(app, /can't be done automatically without breaking a join or adding a pipe, hose or fitting/, 'else it says to do it by hand');
+assert.match(app, /if \(it === endItem\) return \{ fail:/, 'never moves both ends');
+assert.match(app, /far = \[v\[0\] - along \* ax \/ L, v\[1\] - along \* ay \/ L\];/, 'a straight pipe takes the part along its line');
+assert.match(app, /pushUndo\(`auto configure \$\{tr\.a\.label\}`\);/, 'Put back undoes it');
+assert.match(app, /if \(zoomBox && ev\.key === 'Escape'\) \{ if \(zoomBox\.trace\) zoomTraceEnd\(\); else zoomClose\(\); return; \}/, 'Esc stops the trace first');
+console.log('zoom trace ok');
 // Delete with no "Delete this item?" box; ↩ Put back (Ctrl+Z) brings it back (OakBarn Brewery, 2026-11-23)
 assert.ok(!app.includes("skyConfirm('Delete this item?'"), 'no nanny box on an item\'s Properties Delete');
 assert.match(app, /const delWho = item\.label \|\| item\.name \|\| lockName\(item\); pushUndo\(`delete \$\{delWho\}`\);/, 'Put back has it');
