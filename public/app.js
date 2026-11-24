@@ -15286,7 +15286,7 @@ const IFACE_TIP = {
   // board instead"; "you could have a mixed system of 3.3 and 5v" (Rule 6.35)
   board: 'The kind of board this Interface is. Skynet sets the rest from the board: its Connection choices, how fast it talks over USB, and its Ports (IO Pins).\n\nSkynet is planned and wired for the Arduino Mega 2560 (a 5 V board). Every other board in the list can be used too.\n\n⟪b:3.3 V boards⟫Due, GIGA, Nano ESP32, Grand Central, Feather M0, ESP32, ESP8266 and Raspberry Pi are 3.3 V boards. When you put an input, a 0-5 V sensor or a relay on one, Skynet shows one warning. You can mix 5 V and 3.3 V boards: each board is its own Interface.\nMore: Skynet Boards.',
   connection: 'How the board is connected to the Brain. The choices are the ones this board can use. USB is the safest; Ethernet and WiFi depend on your network.',
-  usb: 'The USB Port the board is plugged into on the Brain. Pick it from the list: Skynet shows the ports it finds on this Brain right now. On Windows it is a number (COM3 shows as 3). On a Raspberry Pi or Linux it is a name like /dev/ttyACM0. Not sure which one is the board? Unplug it and press 🔄 Look again: the one that is gone is the board. A port shown in red was saved before but is not on this Brain now.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
+  usb: 'The USB Port the board is plugged into on the Brain. Pick it from the list: Skynet shows the ports it finds on this Brain right now. On Windows it is a number (COM3 shows as 3). On a Raspberry Pi or Linux it is a name like /dev/ttyACM0. Not sure which one is the board? Unplug it and press 🔄 Look again: the one that is gone is the board. A port shown in red was saved before but is not on this Brain now.\n\n⟪b:No board yet⟫Pick None for now: the board is added anyway and shows as not connected. Pick its USB Port later with ⚙ Change on the Devices page.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
   // Network Address (OakBarn Brewery, 2026-11-16, Add Interface markup: "This is always a big stumbling Block for many users who know
   // nothing about TCIP and IP Address or how to figure out which one to use. Help here can be expansive but start with If you do not
   // understand Networks and protocalls, call a friend to help. Do we need the SSID and Password to connect? And is this a Software and
@@ -15341,11 +15341,15 @@ const comPath = (v, win) => { const t = String(v ?? '').trim(); return win && /^
 // ports found on this Brain now (on Windows the number alone, COM3 is 3; on a Pi /dev/ttyACM0), with what is plugged in when the port
 // says so; a saved port that is not on this Brain is kept and shown as not found (Design Rule #1); 🔄 Look again reads them again
 const USB_LOOK = '\0lookAgain';
-function usbPortChoices(ports, cur, win) {
+// none: the Add Interface pop-up's "None for now" (OakBarn Brewery, 2026-11-24: "be able to skip the USB Port and allow the Build to
+// continue and add the Board"): the board is added with no USB Port and shows as not connected until one is picked (⚙ Change)
+const USB_NONE = 'None for now (pick it later with ⚙ Change)';
+function usbPortChoices(ports, cur, win, { none = false } = {}) {
   const list = (ports || []).map(p => { const v = comNum(p.path, win); return [v, `${win && v !== p.path ? `${v}  (${p.path})` : v}${p.manufacturer ? `  ${p.manufacturer}` : ''}`]; });
   const c = String(cur ?? '').trim();
   if (c && !list.some(([v]) => v.toUpperCase() === c.toUpperCase())) list.unshift([c, `⚠ ${c} (not found on this Brain)`]);
-  if (!list.length) list.push(['', '(no board found: plug it in, then 🔄 Look again)']);
+  if (!list.length) list.push(['', none ? `(no board found) ${USB_NONE}` : '(no board found: plug it in, then 🔄 Look again)']);
+  else if (none) list.push(['', USB_NONE]);
   return [...list, [USB_LOOK, '🔄 Look again']];
 }
 const markPortList = sel => { for (const x of sel.options) x.classList.toggle('portGone', /not found on this Brain/.test(x.textContent)); sel.classList.toggle('portGone', !!sel.selectedOptions[0]?.classList.contains('portGone')); };
@@ -15374,7 +15378,7 @@ const TEST_CHECKS = {
     'The Network port is the one in the program on the board (Skynet\'s own programs use 4100).',
     'The board has the Skynet program on it.'],
 };
-const TEST_STATUS = { connected: 'Talking: the Brain and the board are in communication.', 'no answer': 'Connected, but the board says nothing (no answer).', disabled: 'Off: turn the board On (its On switch) and Save.' };
+const TEST_STATUS = { connected: 'Talking: the Brain and the board are in communication.', 'no answer': 'Connected, but the board says nothing (no answer).', disabled: 'Off: turn the board On (its On switch) and Save.', 'not connected': 'Not connected: it has no USB Port or Network address yet. Pick it in this pop-up, Save, then test.' };
 async function testComm(name) {
   if (!name) { toast('Add the Interface first (➕ Add). Then ⚙ Change it on the Devices page to test it.', true); return; }
   const cfg = S.config.devices.find(d => d.name === name), net = ['ethernet', 'esp32'].includes(linkOf(cfg));
@@ -15509,7 +15513,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
       ['connection', 'Connection', 'sel', conns, true, false, { tip: IFACE_TIP.connection + (rt.text ? '\nThis connection: ' + rt.text : '') }],
       // while the Simulator runs nothing goes to the board: the real USB Port (or address) is kept for Real boards and may be changed (entry 29 Part 2)
       ...(S.sim?.on && (o.connection === 'serial' ? o.port : o.host) ? [['_simPort', `🧪 Simulator: nothing goes to this board now. Real ${o.connection === 'serial' ? 'USB Port' : 'Network address'}: ${o.connection === 'serial' ? comPath(o.port, win) : o.host}, used when you switch back to Real boards.`, 'note']] : []),
-      ...(o.connection === 'serial' ? [['port', 'USB Port', portList ? 'sel' : 'text', portList ? usbPortChoices(ports, o.port, win) : null, false, false, { tip: IFACE_TIP.usb }]]
+      ...(o.connection === 'serial' ? [['port', 'USB Port', portList ? 'sel' : 'text', portList ? usbPortChoices(ports, o.port, win, { none: true }) : null, false, false, { tip: IFACE_TIP.usb }]]
         : [['host', 'Network address', 'text', null, false, false, { tip: o.connection === 'esp32' ? IFACE_TIP.hostWifi : IFACE_TIP.hostEth }]]),
       ...boardFields(o),      // Board settings (Rule 6.27)
     ];
@@ -15540,7 +15544,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
     const keep = [...sel.options].find(x => x.dataset.prev)?.value ?? '';
     await readPorts();
     const now = keep || comNum(freeUsbPort(ports, S.config.devices, old?.name), win);
-    sel.replaceChildren(...usbPortChoices(ports, now, win).map(([v, t]) => h('option', { value: v, ...(v === now ? { selected: true } : {}) }, t)));
+    sel.replaceChildren(...usbPortChoices(ports, now, win, { none: true }).map(([v, t]) => h('option', { value: v, ...(v === now ? { selected: true } : {}) }, t)));
     markPortList(sel);
     toast(ports.length ? `Found ${ports.length} USB Port${ports.length === 1 ? '' : 's'} on this Brain` : 'No USB Port found on this Brain: plug the board in, then 🔄 Look again', !ports.length);
   };
@@ -15580,8 +15584,9 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         if (w.connection === 'serial') d.port = comPath(w.port, win);
         if (['esp32', 'ethernet'].includes(w.connection)) d.host = String(w.host ?? '').trim();
         if (pretend && !d.port && !d.host) { d.realConnection = d.connection; d.connection = 'simulator'; }      // still pretend: no board yet
-        else if (w.connection === 'serial' && !d.port) throw new Error('Type the USB Port number (the board must be plugged in)');
-        else if (['esp32', 'ethernet'].includes(w.connection) && !d.host) throw new Error('Type the Network address');
+        // no USB Port (or Network address) yet is fine: the board is added and shows as not connected until it is filled in
+        // (OakBarn Brewery, 2026-11-24: "be able to skip the USB Port and allow the Build to continue and add the Board"); one warning
+        const later = d.connection !== 'simulator' && (w.connection === 'serial' ? !d.port : !d.host);
         boardSave(d, w);
         if (d.connection === 'simulator') delete d.port;
         const devices = old ? S.config.devices.map(x => x === old ? d : x) : [...S.config.devices, d];
@@ -15592,7 +15597,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
         }
         if (draft) draft.devices = clone(devices);
         await load();
-        toast(old ? `Interface ${name} saved, ID ${id}_` : `Interface ${name} added, ID ${id}_`);
+        toast((old ? `Interface ${name} saved, ID ${id}_` : `Interface ${name} added, ID ${id}_`) + (later ? `. ⚠ Not connected: no ${w.connection === 'serial' ? 'USB Port' : 'Network address'} yet. Pick it later with ⚙ Change on the Devices page.` : ''), later, later ? 9000 : 0);
         return name;
       } catch (err) { toast(err.message, true); }
     }

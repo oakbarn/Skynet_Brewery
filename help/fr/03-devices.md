@@ -15,7 +15,7 @@ Une carte s'appelle une **Interface**. Sur l'écran **Devices**, sous **Add Inte
 
 1. Donnez-lui un **Name**, par exemple `Main Brewery Mega USB`. Son **Interface ID** (`MB`) est proposé à partir du nom ; voir [Interfaces](76-interfaces).
 2. Choisissez la **Board** (l'Arduino Mega, une autre carte Arduino, un ESP32 ou un Raspberry Pi ; voir [Cartes Skynet](206-skynet-boards)) et sa **Connection** : les choix suivent la Board (USB, Ethernet ou WiFi). Le Hover Help de la Connection donne la **note de connexion** (connection rating), à quel point ce lien est sûr ; voir [Notes de connexion](69-connection-ratings).
-3. Pour l'USB, le numéro du **USB Port** : Skynet en propose un libre qu'il a trouvé (Windows : `7` est COM7 ; Pi : `/dev/ttyACM0`). Pour l'Ethernet ou le WiFi, tapez son adresse réseau.
+3. Pour l'USB, le numéro du **USB Port** : Skynet en propose un libre qu'il a trouvé (Windows : `7` est COM7 ; Pi : `/dev/ttyACM0`). Pour l'Ethernet ou le WiFi, tapez son adresse réseau. Pas encore de carte ? Choisissez **None for now** (ou laissez l'adresse vide) : la carte est ajoutée et s'affiche non connectée jusqu'à ce que vous la choisissiez avec ⚙ Change.
 4. Appuyez sur **Add**. Ensuite **⚙ Change** et **🔌 Test Communication** vérifient que le Brain et la carte se parlent.
 
 Le tableau du haut montre chaque carte, sa note de connexion et si elle est connectée.
