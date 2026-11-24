@@ -279,6 +279,10 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el.k-pushbutton { touch-action: none; }
 /* BruControl-style elements */
 .el.stretch { background-size: 100% 100%; }
+/* a Skynet side-view valve picture cut to the valve band, 4 to 190 of its 300 across (public/valvebox.js, Rule 5.29): 4 / 114 and 110 / 114 */
+.el.vcrop-h { background-size: 100% auto; background-position: 50% 3.509%; }
+.el.vcrop-vl { background-size: auto 100%; background-position: 3.509% 50%; }
+.el.vcrop-vr { background-size: auto 100%; background-position: 96.491% 50%; }
 .el.stretch.turned::before { background-size: 100% 100%; }
 /* a user's own valve picture moved and sized so its In and Out spots sit on the Valve Standard IPs (Rule 5.29) */
 .el.vfit { background-size: var(--vfs) !important; background-position: var(--vfp) !important; }

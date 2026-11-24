@@ -42,8 +42,13 @@ console.log('valve standard ok');
   }
 }
 const { fitValveBox, valveSide } = await import('../public/valvebox.js');
-assert.equal(valveSide('Images/Skynet/Valves/Valve_Manual_ClosedH.svg'), 'h'); assert.equal(valveSide('Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg'), 'v');
+assert.equal(valveSide('Images/Skynet/Valves/Valve_Manual_ClosedH.svg'), 'h'); assert.equal(valveSide('Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg'), 'vl');
+assert.equal(valveSide('Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg'), 'vr'); assert.equal(valveSide('Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_R.svg'), 'vr');
 assert.equal(valveSide('Images/Skynet/Valves/Valve_Motor_Butterfly_ClosedFront.svg'), null, 'a front view keeps its square box');
-{ const e = { imageOff: 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', x: 100, y: 100, w: 150, h: 150 }; assert.ok(fitValveBox(e)); assert.deepEqual([e.x, e.y, e.w, e.h], [138, 100, 75, 150], 'level: 75 long about its middle');
-  e.imageOff = 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg'; fitValveBox(e); assert.deepEqual([e.w, e.h], [150, 75], 'turned upright: the box turns too'); assert.ok(!fitValveBox(e), 'once fitted it stays'); }
+// the box hugs the valve (OakBarn Brewery, 2026-11-24: "Valve box more like this"): 75 long, 93 across, its pipe line kept where it was
+{ const e = { imageOff: 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', x: 100, y: 100, w: 150, h: 150 }; assert.ok(fitValveBox(e)); assert.deepEqual([e.x, e.y, e.w, e.h], [138, 102, 75, 93], 'level: 75 long about its middle, the pipe line still at 175');
+  e.imageOff = 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg'; fitValveBox(e); assert.deepEqual([e.w, e.h], [93, 75], 'turned upright: the box turns too'); assert.ok(!fitValveBox(e), 'once fitted it stays'); }
+{ const e = { imageOff: 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg', x: 0, y: 0, w: 64, h: 32 }; assert.ok(fitValveBox(e)); assert.deepEqual([e.x, e.y, e.w, e.h], [23, 0, 40, 32], 'motor right: the pipe line stays at 32');
+  const t = { imageOff: 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg', orientation: 'l45', x: 0, y: 0, w: 64, h: 32 }; assert.ok(!fitValveBox(t), 'turned 45 degrees: the old box'); }
+assert.ok(fs.readFileSync(path.join(ROOT, 'public', 'style.css'), 'utf8').includes('.el.vcrop-h { background-size: 100% auto; background-position: 50% 3.509%; }'), 'the picture is cut to the valve band');
 console.log('valve standard sample ok');

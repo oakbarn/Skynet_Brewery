@@ -24,7 +24,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
 import { plainLetters } from './letters.js';      // ß ss, æ ae, ø o in a Name (Rule 3.4)
 import { setStopWord } from './processwidget.js';
-import { fitValveBoxes } from './valvebox.js';
+import { fitValveBoxes, valveSide, valveCropped, VCROP, VCROP_PIPE } from './valvebox.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -2154,10 +2154,15 @@ const VALVE_STD = { h: [[0, 0.5], [1, 0.5]], v: [[0.5, 0], [0.5, 1]], f: [[0.5, 
 // (public/valvebox.js fits the item's box to it).
 const VALVE_SKN = { h: VALVE_STD.h, v: VALVE_STD.v, f: VALVE_STD.f, fe: [[0.5, 0.5], [0.5, 0.75]] };
 const vstd = (o, kind = o, t = VALVE_SKN) => ({ o, w: o === 'h' && t === VALVE_SKN ? 150 : 300, h: o === 'v' && t === VALVE_SKN ? 150 : 300, ends: t[kind] });
-const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h'), BF_V_R: vstd('v'), BF_V_L: vstd('v'),
+// and then cut to the valve band (OakBarn Brewery, 2026-11-24: "Valve box more like this"; public/valvebox.js): 150 x 186 level, the
+// pipe 146 / 186 down; 186 x 150 upright, the pipe that far from the motor's side. full: the whole picture, for a valve drawn turned
+// 45 degrees or mirrored (it keeps the old box).
+const vcut = (o, at) => ({ o, w: o === 'h' ? VCROP.long : VCROP.across, h: o === 'h' ? VCROP.across : VCROP.long, ends: o === 'h' ? [[0, at], [1, at]] : [[at, 0], [at, 1]], full: vstd(o) });
+const VC_H = vcut('h', VCROP_PIPE), VC_VL = vcut('v', VCROP_PIPE), VC_VR = vcut('v', 1 - VCROP_PIPE);
+const PIC_FLOW = { H: VC_H, V_R: VC_VR, V_L: VC_VL, BF_H: VC_H, BF_V_R: VC_VR, BF_V_L: VC_VL,
   BF_Front: vstd('f'), BF_Front_Elbow: vstd('f', 'fe'), BALL_Front: vstd('f'),
-  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...)
-  OLD_H: vstd('h'), OLD_V: vstd('v') };
+  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical / _Vertical_Left, once BruControl's Valve_Ball_...)
+  OLD_H: VC_H, OLD_V: VC_VR, OLD_VL: VC_VL };
 // The Pump Standard (Fritz, 2026-11-05, Rule 5.27): every Skynet pump picture is drawn in the same 300 x 300 box (shown 150 x 150)
 // with its inlet IP at (285, 150) and its outlet IP at (243, 56), so one pump can replace another in the same place and stay joined
 // to its pipes. The Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover) are all to the same scale
@@ -2425,7 +2430,7 @@ function picFlow(path) {
   if (/(?:^|\/)Pump_[A-Za-z]+_Rip_(?:Off|On)\.(?:svg|png)$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Rip };
   if (/(?:^|\/)Pump_Sump_(?:Off|On)\.svg$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Sump };
   const om = String(path || '').match(/(?:^|\/)Motorized_TC15_Ball_Valve_(Horizontal|Vertical(?:_Left)?)\.svg$/i);      // _Left: mirrored, motor left (Rule 18.43)
-  if (om) return { k: om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V'] };
+  if (om) { const k = om[1] === 'Horizontal' ? 'OLD_H' : /Left$/i.test(om[1]) ? 'OLD_VL' : 'OLD_V'; return { k, ...PIC_FLOW[k] }; }
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
   return k && PIC_FLOW[k] ? { k, ...PIC_FLOW[k] } : null;
@@ -2433,9 +2438,10 @@ function picFlow(path) {
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
-  const f = pumpSpotFlow(e, picFlow(e.imageOff || e.imageOn)) || userValveStd(e), o = userLook(e) ? userValveKind(e) : e.orientation;      // a look of a user's picture (USER_LOOK) stands as Horizontal or Vertical
+  let f = pumpSpotFlow(e, picFlow(e.imageOff || e.imageOn)) || userValveStd(e); const o = userLook(e) ? userValveKind(e) : e.orientation;      // a look of a user's picture (USER_LOOK) stands as Horizontal or Vertical
   // a valve at 45 degrees shows its picture turned about its middle (Rule 5.5), so its two IPs turn with it (Rule 5.24)
   const turn = f && f.k !== 'P' && f.o !== 'f' && e.subtype === 'valve' ? { l45: -45, r45: 45 }[o] || 0 : 0;
+  if (f?.full && !valveCropped(e)) f = { ...f, ...f.full };      // turned 45 degrees or mirrored: the whole picture, the old box
   if (!f || (!turn && f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
   if (!turn && o && f.k !== 'P' && f.o !== 'f' && (o === 'h') !== (f.o === 'h')) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
@@ -3406,6 +3412,9 @@ function fillEl(n, e0) {
   if (sv?.k === 'probe') { if (!vl._svEdit) { fitOneLine(n, vl, null); fitPvSv(vl); } }      // PV and SV each on one line inside the display
   else if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
+  // a Skynet side-view valve's picture is cut to the valve band, so its box hugs the valve (OakBarn Brewery, 2026-11-24: "Valve box more like this")
+  const vc = img && !notFound && !stretch && !turn && !flip && !look && valveCropped(e) ? valveSide(img) : null;
+  for (const c of ['h', 'vl', 'vr']) n.classList.toggle('vcrop-' + c, vc === c);
   // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
   const vf = img ? valveFit(e) : null;
   n.classList.toggle('vfit', !!vf);
@@ -4931,6 +4940,13 @@ function freeIpsTake(it) {
 // on one spot and a pipe of no length joins them (flow goes through it, as through every join; nothing is drawn). It is not then put
 // into a pipe it lies over. Returns the name of what it joined, or null.
 const IP_ON_IP_PX = 12;
+// two IPs on one spot joined by a pipe of no length (nothing is drawn; flow goes through it)
+function directJoin(a, b, ws) {
+  const c = ipPoint(b, ws) || ipPoint(a, ws); if (!c) return null;
+  const pipe = { id: newId(), kind: 'pipe', straight: true, direct: true, workspace: ws, points: [[...c], [...c]], from: a, to: b, color: '#8a8f96', size: String(defPipeIn()) };
+  giveName(pipe, draft.graphics); draft.graphics.push(pipe);
+  return pipe;
+}
 function ipOnIpJoin(it) {
   if (!it || !draft || !editing || it.locked || grabJoins(it).length) return null;
   if (it.kind && !isMv(it)) return null;
@@ -4949,11 +4965,7 @@ function ipOnIpJoin(it) {
   }
   if (!best) return null;
   it.x = Math.round(((+it.x || 0) + best.dx) * 100) / 100; it.y = Math.round(((+it.y || 0) + best.dy) * 100) / 100;
-  const join = (a, b) => {
-    const c = ipPoint(b, ws) || ipPoint(a, ws);
-    const pipe = { id: newId(), kind: 'pipe', straight: true, direct: true, workspace: ws, points: [[...c], [...c]], from: a, to: b, color: '#8a8f96', size: String(defPipeIn()) };
-    giveName(pipe, draft.graphics); draft.graphics.push(pipe);
-  };
+  const join = (a, b) => directJoin(a, b, ws);
   join(best.a, best.b);
   for (const a of mine) {       // its other IPs that now sit right on an open IP too
     const ca = a !== best.a && ipPoint(a, ws); if (!ca || used(a)) continue;
@@ -5561,6 +5573,11 @@ function zoomAuto() {
   for (const g of draft.graphics) if (g.attachTo && ids.has(g.attachTo) && !t.moves.has(g)) { const v = ids.get(g.attachTo); g.x = (g.x || 0) + v[0]; g.y = (g.y || 0) + v[1]; }      // IPs that ride on a moved fitting
   for (const [p, pm] of t.ends) p.points = p.points.map((q, i) => [q[0] + pm[i][0], q[1] + pm[i][1]]);
   rejoinEnds(new Set([tr.a.id, tr.b.id]));            // an open pipe end now on the other IP joins it
+  // two IPs of things (a fitting, valve, pump ...) now on one spot join IP to IP (OakBarn Brewery, 2026-11-24: "Autoconfigure worked
+  // but why is the red dot not green on the elbow and valve?"; Rule 5.26): a pipe of no length, as an IP dropped on an IP gets
+  { const pa = ipPoint(tr.a.id, wsName), pb = ipPoint(tr.b.id, wsName), lone = id => { const g = draft.graphics.find(x => x.id === id); return g?.kind === 'ip' && g.fitting === 'coupling' && !g.port && pipesOn(id, wsName).length < 2; };
+    if (pa && pb && Math.hypot(pa[0] - pb[0], pa[1] - pb[1]) <= 1.5 && !lone(tr.a.id) && !lone(tr.b.id)
+      && !draft.graphics.some(p => p.kind === 'pipe' && ((p.from === tr.a.id && p.to === tr.b.id) || (p.from === tr.b.id && p.to === tr.a.id)))) directJoin(tr.a.id, tr.b.id, wsName); }
   // two open ends joined at a corner get the fitting the corner needs (OakBarn Brewery, 2026-11-24: "On autoconfigure should have put in
   // an elbow"): the joint they now share becomes an elbow (a tee, a cross ...), and renderWs turns it into its TC Pipe Fittings Widget
   for (const id of [tr.a.id, tr.b.id]) { const g = draft.graphics.find(x => x.id === id && x.kind === 'ip' && x.fitting === 'coupling' && x.autoFit); if (g && pipesOn(g.id, g.workspace).length >= 2) autoFit(g); }

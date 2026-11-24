@@ -6,18 +6,19 @@ aux mêmes places** (Règle Skynet 5.29). Vous pouvez changer une vanne à bille
 
 ## Où sont les IP {#where-the-ips-are}
 
-Une vanne vue de côté fait **75 x 150** sur un Tab quand elle est à plat et **150 x 75** quand elle est debout : sa case n'est pas plus
-longue que la vanne, et aussi haute que la vanne la plus haute. Une vue de face (en regardant dans le tuyau) fait **150 x 150**. Les vannes et les pompes sont à la même échelle.
+Une vanne vue de côté fait **75 x 93** sur un Tab quand elle est à plat et **93 x 75** quand elle est debout : sa case serre la vanne,
+pas plus longue que la vanne et pas plus haute que le moteur et le corps de la vanne la plus haute, donc le tuyau passe près du bas de
+la case d'une vanne à plat (sous son moteur). Une vanne tournée de 45 degrés garde l'ancienne case de 75 x 150. Une vue de face (en regardant dans le tuyau) fait **150 x 150**. Les vannes et les pompes sont à la même échelle.
 
 | Orientation | Dans le dessin | Sur le Tab |
 |----|-----|-----|
-| Horizontal (dessin de 150 x 300) | (0, 150) et (150, 150) | le milieu des côtés gauche et droit : les bouts de la vanne |
-| Vertical Left, Vertical Right (dessin de 300 x 150) | (150, 0) et (150, 150) | le milieu du haut et du bas : les bouts de la vanne |
+| Horizontal (dessin de 150 x 186) | (0, 146) et (150, 146) | bas sur les côtés gauche et droit (à 146 / 186 du haut) : les bouts de la vanne |
+| Vertical Left, Vertical Right (dessin de 186 x 150) | (146, 0) et (146, 150) depuis le côté du moteur | en haut et en bas, près du côté opposé au moteur : les bouts de la vanne |
 | 45 degrees | les places Horizontal, tournées de 45 degrés autour du milieu | |
 | Front (en regardant dans le tuyau) | les deux à (150, 150) | le milieu |
 | Front elbow | (150, 150) et (150, 225) | le milieu, et à un quart du bas |
 
-Si vous redimensionnez une vanne, les places grandissent ou rétrécissent avec sa case. La case garde sa forme (sa longueur est la moitié de sa hauteur). Tournée de à plat à debout, sa case tourne aussi. Une vanne avec votre propre image garde ses places au milieu des côtés de la case.
+Si vous redimensionnez une vanne, les places grandissent ou rétrécissent avec sa case. La case garde sa forme (sa longueur fait 150 / 186 de sa hauteur). Tournée de à plat à debout, sa case tourne aussi. Une vanne avec votre propre image garde ses places au milieu des côtés de la case.
 
 ## Dessinées à l'échelle {#drawn-to-scale}
 

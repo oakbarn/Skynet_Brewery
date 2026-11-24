@@ -6,18 +6,19 @@ in the same spots** (Skynet Rule 5.29). You can change a Ball valve for a Butter
 
 ## Where the IPs are
 
-A side-view valve is **75 x 150** on a Tab when level and **150 x 75** when upright: its box is only as long as the valve, and as
-high as the tallest valve needs. A front view (looking down the pipe) is **150 x 150**. Valves and pumps are to the same scale.
+A side-view valve is **75 x 93** on a Tab when level and **93 x 75** when upright: its box hugs the valve, only as long as the valve
+and only as high as the tallest valve's motor and body need, so the pipe runs near the bottom of a level valve's box (below its motor).
+A valve turned 45 degrees keeps the older 75 x 150 box. A front view (looking down the pipe) is **150 x 150**. Valves and pumps are to the same scale.
 
 | Orientation | In the drawing | On the Tab |
 |----|-----|-----|
-| Horizontal (150 x 300 drawing) | (0, 150) and (150, 150) | the middle of the left and right sides: the valve's ends |
-| Vertical Left, Vertical Right (300 x 150 drawing) | (150, 0) and (150, 150) | the middle of the top and bottom: the valve's ends |
+| Horizontal (150 x 186 drawing) | (0, 146) and (150, 146) | low on the left and right sides (146 / 186 down): the valve's ends |
+| Vertical Left, Vertical Right (186 x 150 drawing) | (146, 0) and (146, 150) from the motor's side | on the top and bottom, near the side away from the motor: the valve's ends |
 | 45 degrees | the Horizontal spots, turned 45 degrees about the middle | |
 | Front (looking down the pipe) | both at (150, 150) | the middle |
 | Front elbow | (150, 150) and (150, 225) | the middle, and a quarter up from the bottom |
 
-If you resize a valve, the spots grow or shrink with its box, and the box keeps its shape (its length half its height). Turned from
+If you resize a valve, the spots grow or shrink with its box, and the box keeps its shape (its length 150 / 186 of its height). Turned from
 level to upright, its box turns too. A valve with your own picture keeps its spots on the middle of the box sides.
 
 ## Drawn to scale

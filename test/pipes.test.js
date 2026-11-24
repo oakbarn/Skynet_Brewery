@@ -249,7 +249,7 @@ test('Auto configure gives two open ends joined at a corner the fitting the corn
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   const i = app.indexOf('rejoinEnds(new Set([tr.a.id, tr.b.id]));');
   assert.ok(i > 0);
-  const after = app.slice(i, i + 900);
+  const after = app.slice(i, i + 2200);
   assert.match(after, /x\.fitting === 'coupling' && x\.autoFit\); if \(g && pipesOn\(g\.id, g\.workspace\)\.length >= 2\) autoFit\(g\);/);
 });
 
@@ -283,4 +283,12 @@ test('an IP dropped right on another open IP joins it IP to IP instead of cuttin
   assert.match(app, /const IP_ON_IP_PX = 12;/);
   assert.match(app, /kind: 'pipe', straight: true, direct: true, workspace: ws, points: \[\[\.\.\.c\], \[\.\.\.c\]\]/, 'a pipe of no length');
   assert.match(app, /const j = ipOnIpJoin\(drag\.item\);[\s\S]{0,300}else \{ const r = splitPipeFor\(drag\.item\);/, 'before cutting a pipe');
+});
+
+// OakBarn Brewery, 2026-11-24: "Autoconfigured worked but why is the red dot not green on the elbow and valve?" (Rule 5.37)
+test('Auto configure joins two IPs of things brought onto one spot IP to IP', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  const i = app.indexOf('rejoinEnds(new Set([tr.a.id, tr.b.id]));');
+  assert.match(app.slice(i, i + 1400), /directJoin\(tr\.a\.id, tr\.b\.id, wsName\)/);
 });
