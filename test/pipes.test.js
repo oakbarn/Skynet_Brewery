@@ -440,3 +440,11 @@ test('unlocking leaves plain open ends, no couplings, and they still rejoin', as
   assert.match(app, /const letGoEnds = ws =>/);
   assert.match(app, /for \(const e of letGoEnds\(it\.workspace\)\) \{/, 'rejoinLetGo reads plain ends too');
 });
+
+// OakBarn Brewery, 2026-11-24: "As I passed over the pipe it created a Tee" (Rule 5.25)
+test('a dragged pipe end does not join pipes it passes over, only where it is let go', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /if \(editing && draft && !drawPts && !\(drag\?\.moved && !drag\.done\)\) joinLooseEnds\(w\.name\);/);
+  assert.match(app, /if \(drag\) drag\.done = true;/);
+});

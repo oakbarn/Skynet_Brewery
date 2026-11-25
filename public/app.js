@@ -573,7 +573,9 @@ function drawWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
-  if (editing && draft && !drawPts) joinLooseEnds(w.name);     // a loose pipe end on another pipe joins it (a tee or an elbow)
+  // a loose pipe end on another pipe joins it (a tee or an elbow); not while an end is still being dragged over pipes, only where it is
+  // let go (OakBarn Brewery, 2026-11-24: "As I passed over the pipe it created a Tee")
+  if (editing && draft && !drawPts && !(drag?.moved && !drag.done)) joinLooseEnds(w.name);
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) sizeToPipes(w.name);       // every pipe fitting takes the size of its pipe (Rule 5.36)
   if (!editing) { fitValveBoxes(L()); mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
@@ -5989,6 +5991,7 @@ function showGeo(ev, it) {
 }
 window.addEventListener('pointerup', () => {
   cancelLongPress(); geoTip.classList.add('hidden');
+  if (drag) drag.done = true;       // let go: a loose end where it is dropped may now join a pipe (joinLooseEnds)
   if (drag?.mode === 'move' && drag.item.kind === 'ip' && !isFitting(drag.item)) attachIp(drag.item);
   if (drag?.mode === 'move' && drag.moved) {      // a free Tab_Fitting (or its Start IP) dropped on a vessel port joins it
     const f = isBfit(drag.item) ? drag.item : drag.item.kind === 'ip' && drag.item.port === 'start' ? draft.graphics.find(x => x.id === drag.item.attachTo && isBfit(x)) : null;
