@@ -30,7 +30,8 @@
   {
    "name": "Reporting",
    "width": 1920,
-   "height": 1040
+   "height": 1040,
+   "id": "RE"
   },
   {
    "name": "Water",
@@ -56,7 +57,8 @@
    "kind": "string",
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 87
+   "layer": 91,
+   "dataType": "string"
   },
   {
    "workspace": "Brew House",
@@ -74,7 +76,8 @@
    "kind": "string",
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 86
+   "layer": 90,
+   "dataType": "string"
   },
   {
    "workspace": "Brew House",
@@ -90,7 +93,7 @@
    "look": "button",
    "background": "2",
    "visibility": "hidden",
-   "layer": 85
+   "layer": 89
   },
   {
    "workspace": "Brew House",
@@ -106,7 +109,8 @@
    "kind": "value",
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 84
+   "layer": 88,
+   "dataType": "value"
   },
   {
    "workspace": "Brew House",
@@ -119,7 +123,7 @@
    "label": "Step timer",
    "timerType": "countdown",
    "look": "led",
-   "layer": 83
+   "layer": 87
   },
   {
    "workspace": "Brew House",
@@ -132,7 +136,7 @@
    "label": "Brew day",
    "timerType": "countup",
    "look": "led",
-   "layer": 82
+   "layer": 86
   },
   {
    "workspace": "Brew House",
@@ -148,7 +152,7 @@
    "activeText": "TAP",
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 79
+   "layer": 85
   },
   {
    "workspace": "Brew House",
@@ -164,7 +168,7 @@
    "activeText": "BEEP",
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 78
+   "layer": 84
   },
   {
    "workspace": "Brew House",
@@ -181,7 +185,7 @@
    "background": "6",
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 77,
+   "layer": 83,
    "sliderLayer": true
   },
   {
@@ -197,7 +201,7 @@
    "hideRunning": true,
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 76
+   "layer": 82
   },
   {
    "workspace": "Brew House",
@@ -211,7 +215,7 @@
    "process": "BrewDay_Stop",
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "layer": 75
+   "layer": 81
   },
   {
    "workspace": "Reporting",
@@ -233,7 +237,9 @@
    "nameAlign": "TopCenter",
    "database": {
     "frequency": "clicked"
-   }
+   },
+   "dataType": "value",
+   "layer": 8
   },
   {
    "workspace": "Reporting",
@@ -255,7 +261,9 @@
    "nameAlign": "TopCenter",
    "database": {
     "frequency": "clicked"
-   }
+   },
+   "dataType": "value",
+   "layer": 7
   },
   {
    "workspace": "Reporting",
@@ -277,7 +285,9 @@
    "nameAlign": "TopCenter",
    "database": {
     "frequency": "clicked"
-   }
+   },
+   "dataType": "value",
+   "layer": 6
   },
   {
    "workspace": "Reporting",
@@ -299,7 +309,9 @@
    "nameAlign": "TopCenter",
    "database": {
     "frequency": "clicked"
-   }
+   },
+   "dataType": "value",
+   "layer": 5
   },
   {
    "workspace": "Reporting",
@@ -321,7 +333,9 @@
    "nameAlign": "TopCenter",
    "database": {
     "frequency": "clicked"
-   }
+   },
+   "dataType": "value",
+   "layer": 4
   },
   {
    "workspace": "Reporting",
@@ -343,7 +357,9 @@
    "nameAlign": "TopCenter",
    "database": {
     "frequency": "clicked"
-   }
+   },
+   "dataType": "value",
+   "layer": 3
   },
   {
    "workspace": "Reporting",
@@ -365,7 +381,9 @@
    "nameAlign": "TopCenter",
    "database": {
     "frequency": "clicked"
-   }
+   },
+   "dataType": "value",
+   "layer": 2
   },
   {
    "workspace": "Reporting",
@@ -382,7 +400,9 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "dataType": "string",
+   "layer": 1
   },
   {
    "name": "BM1w1_1_HLT_BH",
@@ -410,7 +430,8 @@
    },
    "integratedIn": "v_HLT",
    "integratedAs": "ip:lElement",
-   "vpKind": "thermowell"
+   "vpKind": "thermowell",
+   "layer": 2
   },
   {
    "name": "BM1w1_2_Mash_BH",
@@ -443,7 +464,8 @@
    },
    "integratedIn": "v_MLT",
    "integratedAs": "ip:lElement",
-   "vpKind": "thermowell"
+   "vpKind": "thermowell",
+   "layer": 1
   },
   {
    "name": "BM1w1_3_Kettle_BH",
@@ -482,7 +504,8 @@
    },
    "integratedIn": "v_BK",
    "integratedAs": "ip:lElement",
-   "vpKind": "thermowell"
+   "vpKind": "thermowell",
+   "layer": 2
   },
   {
    "name": "BM_8_DO@H_Element_HLT~element_BH",
@@ -508,7 +531,8 @@
    "look": "dark",
    "integratedIn": "v_HLT",
    "integratedAs": "ip:rElement",
-   "vpKind": "element"
+   "vpKind": "element",
+   "layer": 1
   },
   {
    "name": "BM_9_DO@H_Element_Kettle~element_BH",
@@ -533,7 +557,8 @@
    "look": "dark",
    "integratedIn": "v_BK",
    "integratedAs": "ip:rElement",
-   "vpKind": "element"
+   "vpKind": "element",
+   "layer": 1
   },
   {
    "name": "BM_22_DO@Pump_Pump_BH",
@@ -543,21 +568,24 @@
    "device": "Brewery Mega",
    "channel": 22,
    "label": "Pump",
-   "x": 1181,
-   "y": 728,
+   "x": 1176,
+   "y": 838,
    "w": 150,
    "h": 150,
    "imageOff": "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg",
-   "cover": "Red",
+   "cover": "None",
    "hideValue": true,
    "tap": "toggle",
    "onText": "ON",
    "offText": "OFF",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "flipH": true,
-   "layer": 74,
+   "layer": 80,
    "ipTypeIn": "TC1.5",
-   "ipTypeOut": "TC1.5"
+   "ipTypeOut": "TC1.5",
+   "flipV": false,
+   "speed": 100,
+   "hidden": false
   },
   {
    "name": "BM_24_DO@Valve_E_HLT~out_BH",
@@ -567,9 +595,9 @@
    "device": "Brewery Mega",
    "channel": 24,
    "label": "HLT out",
-   "x": 635,
+   "x": 690,
    "y": 401,
-   "w": 150,
+   "w": 93,
    "h": 75,
    "ipIn": "top",
    "ipOut": "bottom",
@@ -580,7 +608,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "layer": 73
+   "layer": 79
   },
   {
    "name": "BM_25_DO@Valve_E_Mash~tun~out_BH",
@@ -590,9 +618,9 @@
    "device": "Brewery Mega",
    "channel": 25,
    "label": "Mash tun out",
-   "x": 995,
+   "x": 1050,
    "y": 401,
-   "w": 150,
+   "w": 93,
    "h": 75,
    "ipIn": "top",
    "ipOut": "bottom",
@@ -603,7 +631,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "layer": 72
+   "layer": 78
   },
   {
    "name": "BM_26_DO@Valve_E_Kettle~out_BH",
@@ -613,9 +641,9 @@
    "device": "Brewery Mega",
    "channel": 26,
    "label": "Kettle out",
-   "x": 1355,
+   "x": 1410,
    "y": 401,
-   "w": 150,
+   "w": 93,
    "h": 75,
    "ipIn": "top",
    "ipOut": "bottom",
@@ -626,7 +654,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "layer": 71
+   "layer": 77
   },
   {
    "name": "BM_27_DO@Valve_E_To~mash~tun_BH",
@@ -636,9 +664,9 @@
    "device": "Brewery Mega",
    "channel": 27,
    "label": "To mash tun",
-   "x": 815,
+   "x": 870,
    "y": 401,
-   "w": 150,
+   "w": 93,
    "h": 75,
    "ipIn": "top",
    "ipOut": "bottom",
@@ -649,7 +677,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "layer": 70
+   "layer": 76
   },
   {
    "name": "BM_28_DO@Valve_E_To~kettle_BH",
@@ -659,9 +687,9 @@
    "device": "Brewery Mega",
    "channel": 28,
    "label": "To kettle",
-   "x": 1185,
+   "x": 1240,
    "y": 401,
-   "w": 150,
+   "w": 93,
    "h": 75,
    "ipIn": "top",
    "ipOut": "bottom",
@@ -672,7 +700,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "layer": 69
+   "layer": 75
   },
   {
    "name": "BM_29_DO@Valve_E_To~fermenter_BH",
@@ -682,10 +710,10 @@
    "device": "Brewery Mega",
    "channel": 29,
    "label": "To fermenter",
-   "x": 1423,
-   "y": 606,
+   "x": 1418,
+   "y": 718,
    "w": 75,
-   "h": 150,
+   "h": 93,
    "ipIn": "left",
    "ipOut": "right",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
@@ -695,20 +723,20 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "layer": 68
+   "layer": 74
   },
   {
-   "name": "BM_30_DO@Valve_E_Tap~water_BH",
+   "name": "BM_30_DO@Valve_E_Manifold~Supply_BH",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Brew House",
    "device": "Brewery Mega",
    "channel": 30,
-   "label": "Tap water",
-   "x": 1055,
-   "y": 616,
+   "label": "Manifold Supply",
+   "x": 765,
+   "y": 750,
    "w": 75,
-   "h": 150,
+   "h": 93,
    "ipIn": "left",
    "ipOut": "right",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
@@ -720,7 +748,8 @@
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "tapwater": true,
    "tapwaterOut": "in",
-   "layer": 67
+   "layer": 73,
+   "hidden": false
   },
   {
    "workspace": "Water",
@@ -737,7 +766,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
    "nameColor": "#ffff00",
-   "group": "Water"
+   "group": "Water",
+   "layer": 32
   },
   {
    "workspace": "Water",
@@ -754,7 +784,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
    "nameColor": "#ffff00",
-   "group": "Water"
+   "group": "Water",
+   "layer": 31
   },
   {
    "workspace": "Water",
@@ -771,7 +802,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
    "nameColor": "#ffff00",
-   "group": "Water"
+   "group": "Water",
+   "layer": 30
   },
   {
    "workspace": "Water",
@@ -788,7 +820,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#ff0000",
    "nameColor": "#ffff00",
-   "group": "Water"
+   "group": "Water",
+   "layer": 29
   },
   {
    "workspace": "Water",
@@ -808,7 +841,8 @@
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
    "follow": "BM_32_DI@Float_Water~float_WA",
-   "group": "Water"
+   "group": "Water",
+   "layer": 28
   },
   {
    "workspace": "Water",
@@ -824,7 +858,8 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#000000",
-   "nameColor": "#ffffff"
+   "nameColor": "#ffffff",
+   "layer": 27
   },
   {
    "workspace": "Water",
@@ -841,7 +876,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
    "nameColor": "#000000",
-   "group": "Water"
+   "group": "Water",
+   "layer": 26
   },
   {
    "workspace": "Water",
@@ -858,7 +894,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
    "nameColor": "#000000",
-   "group": "Water"
+   "group": "Water",
+   "layer": 25
   },
   {
    "workspace": "Water",
@@ -875,7 +912,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
    "nameColor": "#000000",
-   "group": "Water"
+   "group": "Water",
+   "layer": 24
   },
   {
    "workspace": "Water",
@@ -892,7 +930,8 @@
    "nameAlign": "TopCenter",
    "nameBg": "#e6b9b8",
    "nameColor": "#000000",
-   "group": "Water"
+   "group": "Water",
+   "layer": 23
   },
   {
    "workspace": "Water",
@@ -912,7 +951,8 @@
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
    "follow": "BM_32_DI@Float_Water~float_WA",
-   "group": "Water"
+   "group": "Water",
+   "layer": 22
   },
   {
    "name": "BM_33_DO@Valve_E_Manifold~Supply_WA",
@@ -923,9 +963,9 @@
    "channel": 33,
    "label": "Manifold Valve",
    "x": 1288,
-   "y": 331,
+   "y": 327,
    "w": 75,
-   "h": 150,
+   "h": 93,
    "ipIn": "right",
    "ipOut": "left",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
@@ -935,7 +975,8 @@
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "tapwater": true,
-   "tapwaterOut": "in"
+   "tapwaterOut": "in",
+   "layer": 21
   },
   {
    "name": "BM_31_DO@Valve_E_Fire~Hose_WA",
@@ -945,9 +986,9 @@
    "device": "Brewery Mega",
    "channel": 31,
    "label": "Firehose Valve",
-   "x": 1433,
+   "x": 1488,
    "y": 241,
-   "w": 150,
+   "w": 93,
    "h": 75,
    "ipIn": "bottom",
    "ipOut": "top",
@@ -958,7 +999,8 @@
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "tapwater": true,
-   "tapwaterOut": "out"
+   "tapwaterOut": "out",
+   "layer": 20
   },
   {
    "name": "BM_32_DI@Float_Water~float_WA",
@@ -977,7 +1019,8 @@
    "offText": "open",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
-   "forceSecs": 2
+   "forceSecs": 2,
+   "layer": 19
   },
   {
    "workspace": "Water",
@@ -993,7 +1036,9 @@
    "fontSize": 20,
    "readOnly": true,
    "backColor": "#000000",
-   "foreColor": "#fafafa"
+   "foreColor": "#fafafa",
+   "dataType": "string",
+   "layer": 18
   },
   {
    "workspace": "Water",
@@ -1006,7 +1051,9 @@
    "w": 170,
    "h": 62,
    "initial": "00:00:00",
-   "visibility": "hidden"
+   "visibility": "hidden",
+   "dataType": "time",
+   "layer": 17
   },
   {
    "workspace": "Water",
@@ -1019,7 +1066,9 @@
    "w": 170,
    "h": 62,
    "initial": "00:00:00",
-   "visibility": "hidden"
+   "visibility": "hidden",
+   "dataType": "time",
+   "layer": 16
   },
   {
    "workspace": "Water",
@@ -1036,7 +1085,9 @@
    "readOnly": true,
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "visibility": "hidden"
+   "visibility": "hidden",
+   "dataType": "value",
+   "layer": 15
   },
   {
    "workspace": "Water",
@@ -1053,7 +1104,9 @@
    "readOnly": true,
    "backColor": "#000000",
    "foreColor": "#fafafa",
-   "visibility": "hidden"
+   "visibility": "hidden",
+   "dataType": "value",
+   "layer": 14
   },
   {
    "workspace": "Water",
@@ -1067,7 +1120,8 @@
    "timerType": "countdown",
    "look": "led",
    "visibility": "hidden",
-   "hideButtons": true
+   "hideButtons": true,
+   "layer": 13
   },
   {
    "workspace": "Water",
@@ -1080,7 +1134,8 @@
    "h": 90,
    "timerType": "countup",
    "look": "led",
-   "visibility": "hidden"
+   "visibility": "hidden",
+   "layer": 12
   },
   {
    "workspace": "Water",
@@ -1093,7 +1148,8 @@
    "h": 104,
    "timerType": "countdown",
    "look": "led",
-   "hideButtons": true
+   "hideButtons": true,
+   "layer": 11
   },
   {
    "workspace": "Water",
@@ -1108,7 +1164,8 @@
    "loop": true,
    "activeText": "ON",
    "backColor": "#000000",
-   "foreColor": "#fafafa"
+   "foreColor": "#fafafa",
+   "layer": 10
   },
   {
    "workspace": "Water",
@@ -1123,7 +1180,8 @@
    "loop": true,
    "activeText": "ON",
    "backColor": "#000000",
-   "foreColor": "#fafafa"
+   "foreColor": "#fafafa",
+   "layer": 9
   }
  ],
  "graphics": [
@@ -1138,7 +1196,8 @@
    "text": "Readings (tap to enter; they go to the database)",
    "fontSize": 15,
    "bold": true,
-   "name": "wgt_TXT_Readings_RP"
+   "name": "wgt_TXT_Readings_RP",
+   "layer": 9
   },
   {
    "id": "v_HLT",
@@ -1277,7 +1336,7 @@
    "vdevice": true,
    "units": "Metric",
    "volume": 37.85,
-   "layer": 93
+   "layer": 97
   },
   {
    "id": "ip_hlt_lElement",
@@ -1294,7 +1353,7 @@
    "x": 585,
    "y": 236,
    "label": "Left Element",
-   "layer": 50
+   "layer": 62
   },
   {
    "id": "ip_hlt_rElement",
@@ -1311,7 +1370,7 @@
    "x": 805,
    "y": 236,
    "label": "Right Element",
-   "layer": 49
+   "layer": 61
   },
   {
    "id": "ip_h_out",
@@ -1328,7 +1387,7 @@
    "x": 695,
    "y": 328,
    "label": "Center Bottom Outlet",
-   "layer": 48
+   "layer": 60
   },
   {
    "id": "v_MLT",
@@ -1467,7 +1526,7 @@
    "vdevice": true,
    "units": "Metric",
    "volume": 37.85,
-   "layer": 92
+   "layer": 96
   },
   {
    "id": "ip_mlt_lElement",
@@ -1484,7 +1543,7 @@
    "x": 945,
    "y": 236,
    "label": "Left Element",
-   "layer": 47
+   "layer": 59
   },
   {
    "id": "ip_m_out",
@@ -1501,7 +1560,7 @@
    "x": 1055,
    "y": 328,
    "label": "Center Bottom Outlet",
-   "layer": 46
+   "layer": 58
   },
   {
    "id": "ip_m_in",
@@ -1518,7 +1577,7 @@
    "x": 945,
    "y": 91,
    "label": "Left Sparge",
-   "layer": 45
+   "layer": 57
   },
   {
    "id": "v_BK",
@@ -1657,7 +1716,7 @@
    "vdevice": true,
    "units": "Metric",
    "volume": 37.85,
-   "layer": 91
+   "layer": 95
   },
   {
    "id": "ip_bk_lElement",
@@ -1674,7 +1733,7 @@
    "x": 1305,
    "y": 236,
    "label": "Left Element",
-   "layer": 44
+   "layer": 56
   },
   {
    "id": "ip_bk_rElement",
@@ -1691,7 +1750,7 @@
    "x": 1525,
    "y": 236,
    "label": "Right Element",
-   "layer": 43
+   "layer": 55
   },
   {
    "id": "ip_b_out",
@@ -1708,7 +1767,7 @@
    "x": 1415,
    "y": 328,
    "label": "Center Bottom Outlet",
-   "layer": 42
+   "layer": 54
   },
   {
    "id": "ip_b_in",
@@ -1725,61 +1784,65 @@
    "x": 1305,
    "y": 91,
    "label": "Left Sparge",
-   "layer": 41
+   "layer": 53
   },
   {
    "id": "t_hlt",
    "kind": "text",
    "workspace": "Brew House",
    "text": "Hot liquor tank",
-   "x": 620,
+   "x": 610,
    "y": 10,
    "w": 220,
    "h": 32,
    "fontSize": 18,
    "bold": true,
    "name": "wgt_TXT_Hot~liquor~tank_BH",
-   "layer": 90
+   "layer": 94,
+   "labelVisible": false,
+   "visible": true,
+   "hidden": false
   },
   {
    "id": "t_mlt",
    "kind": "text",
    "workspace": "Brew House",
    "text": "Mash tun",
-   "x": 1010,
+   "x": 985,
    "y": 10,
    "w": 200,
    "h": 32,
    "fontSize": 18,
    "bold": true,
    "name": "wgt_TXT_Mash~tun_BH",
-   "layer": 89
+   "layer": 93
   },
   {
    "id": "t_bk",
    "kind": "text",
    "workspace": "Brew House",
    "text": "Boil kettle",
-   "x": 1360,
+   "x": 1340,
    "y": 10,
    "w": 200,
    "h": 32,
    "fontSize": 18,
    "bold": true,
    "name": "wgt_TXT_Boil~kettle_BH",
-   "layer": 88
+   "layer": 92
   },
   {
    "id": "ip_ferm",
    "kind": "ip",
    "workspace": "Brew House",
    "label": "To fermenter (through the chiller)",
-   "x": 1647,
-   "y": 712,
+   "x": 1642,
+   "y": 822,
    "w": 26,
    "h": 26,
    "color": "#3fbf6a",
-   "layer": 40
+   "layer": 52,
+   "name": "IP_1"
   },
   {
    "id": "p_Brewhouse_1",
@@ -1794,13 +1857,13 @@
     ],
     [
      710,
-     363
+     401
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 122,
+   "layer": 123,
    "name": "Pipe_14",
    "label": "pipe_14",
    "ipTypeFrom": "TC1.5",
@@ -1819,13 +1882,13 @@
     ],
     [
      1070,
-     363
+     401
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 121,
+   "layer": 122,
    "name": "Pipe_15",
    "label": "pipe_15",
    "ipTypeFrom": "TC1.5",
@@ -1844,13 +1907,13 @@
     ],
     [
      1430,
-     363
+     401
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 120,
+   "layer": 121,
    "name": "Pipe_16",
    "label": "pipe_16",
    "ipTypeFrom": "TC1.5",
@@ -1865,7 +1928,7 @@
    "points": [
     [
      710,
-     513
+     476
     ],
     [
      710,
@@ -1875,7 +1938,7 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 119,
+   "layer": 120,
    "name": "Pipe_17",
    "label": "pipe_17",
    "ipTypeFrom": "TC1.5",
@@ -1886,7 +1949,6 @@
    "kind": "pipe",
    "workspace": "Brew House",
    "from": "gmw2lvfnrit5",
-   "to": "gmw2lvfnp4zl",
    "points": [
     [
      728,
@@ -1902,9 +1964,16 @@
    "straight": true,
    "label": "pipe_1",
    "name": "Pipe_1",
-   "layer": 118,
+   "layer": 119,
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "wasTo": {
+    "wasAt": [
+     833,
+     590
+    ]
+   },
+   "to": "gmw2lvfnp4zl"
   },
   {
    "id": "p_Brewhouse_5",
@@ -1915,7 +1984,7 @@
    "points": [
     [
      1070,
-     513
+     476
     ],
     [
      1070,
@@ -1925,7 +1994,7 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 117,
+   "layer": 118,
    "name": "Pipe_18",
    "label": "pipe_18",
    "ipTypeFrom": "TC1.5",
@@ -1936,85 +2005,34 @@
    "kind": "pipe",
    "workspace": "Brew House",
    "from": "dev:BM_26_DO@Valve_E_Kettle~out_BH:out",
-   "to": "gmw2lvfnsw9p",
    "points": [
     [
      1430,
-     513
+     476
     ],
     [
      1430,
-     522
+     572
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 116,
+   "layer": 117,
    "name": "Pipe_19",
    "label": "pipe_19",
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
-  },
-  {
-   "id": "p_Brewhouse_6_2",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "gmw2lvfnsdm0",
-   "to": "gmw2lvfnsqzj",
-   "points": [
-    [
-     1448,
-     540
-    ],
-    [
-     1502,
-     540
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "label": "pipe_2",
-   "name": "Pipe_2",
-   "layer": 115,
-   "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
-  },
-  {
-   "id": "p_Brewhouse_6_3",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "gmw2lvfns93m",
-   "to": "bh_mf_tee_b",
-   "points": [
-    [
-     1520,
-     558
-    ],
-    [
-     1520,
-     563
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "label": "pipe_3",
-   "name": "Pipe_3",
-   "layer": 114,
-   "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "to": "gmwwd5069kr3"
   },
   {
    "id": "p_Brewhouse_6_4",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "bh_mf_tee_e",
    "to": "gmw2lvfnq0ye",
    "points": [
     [
-     1492,
+     1412,
      590
     ],
     [
@@ -2027,16 +2045,16 @@
    "straight": true,
    "label": "pipe_4",
    "name": "Pipe_4",
-   "layer": 113,
+   "layer": 116,
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "from": "gmwwd5069x4f"
   },
   {
    "id": "p_Brewhouse_7",
    "kind": "pipe",
    "workspace": "Brew House",
    "from": "gmw2lvfnq5b2",
-   "to": "gmw2lvfnpgqs",
    "points": [
     [
      1042,
@@ -2050,18 +2068,23 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 112,
+   "layer": 115,
    "name": "Pipe_20",
    "label": "pipe_20",
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "wasTo": {
+    "wasAt": [
+     888,
+     590
+    ]
+   },
+   "to": "gmw2lvfnpgqs"
   },
   {
    "id": "p_Brewhouse_8",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "gmw2lvfnpoxk",
-   "to": "gmw2lvfntv1j",
    "points": [
     [
      861,
@@ -2069,32 +2092,45 @@
     ],
     [
      861,
-     785
+     895
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 111,
+   "layer": 114,
    "name": "Pipe_21",
    "label": "pipe_21",
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "wasFrom": {
+    "wasAt": [
+     861,
+     617
+    ]
+   },
+   "from": "gmw2lvfnpoxk",
+   "wasTo": {
+    "wasAt": [
+     856,
+     895
+    ]
+   },
+   "to": "gmwwdna6d6tn"
   },
   {
    "id": "p_Brewhouse_8_2",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "gmw2lvfns1n4",
    "to": "g_tap_tee_end",
    "points": [
     [
      879,
-     803
+     913
     ],
     [
-     960,
-     803
+     955,
+     913
     ]
    ],
    "width": 10,
@@ -2102,9 +2138,11 @@
    "straight": true,
    "label": "pipe_5",
    "name": "Pipe_5",
-   "layer": 110,
+   "layer": 113,
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "plainFrom": true,
+   "from": "gmwwdna6diq4"
   },
   {
    "id": "p_Brewhouse_9",
@@ -2114,18 +2152,18 @@
    "to": "gmw2lvfnqrtx",
    "points": [
     [
-     1181,
-     728
+     1176,
+     838
     ],
     [
-     1181,
-     707
+     1176,
+     817
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 109,
+   "layer": 112,
    "name": "Pipe_22",
    "label": "pipe_22",
    "ipTypeFrom": "TC1.5",
@@ -2139,18 +2177,18 @@
    "to": "dev:BM_29_DO@Valve_E_To~fermenter_BH:in",
    "points": [
     [
-     1208,
-     680
+     1203,
+     790
     ],
     [
-     1428,
-     680
+     1418,
+     790
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 108,
+   "layer": 111,
    "name": "Pipe_23",
    "label": "pipe_23",
    "ipTypeFrom": "TC1.5",
@@ -2164,18 +2202,18 @@
    "to": "gmw2lvfntr04",
    "points": [
     [
-     1492,
-     680
+     1493,
+     790
     ],
     [
-     1642,
-     680
+     1637,
+     790
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 107,
+   "layer": 110,
    "name": "Pipe_24",
    "label": "pipe_24",
    "ipTypeFrom": "TC1.5",
@@ -2189,12 +2227,12 @@
    "to": "ip_ferm",
    "points": [
     [
-     1660,
-     698
+     1655,
+     808
     ],
     [
-     1660,
-     725
+     1655,
+     835
     ]
    ],
    "width": 10,
@@ -2202,7 +2240,7 @@
    "straight": true,
    "label": "pipe_6",
    "name": "Pipe_6",
-   "layer": 106,
+   "layer": 109,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
   },
@@ -2211,35 +2249,40 @@
    "kind": "pipe",
    "workspace": "Brew House",
    "from": "gmw2lvfnqhbw",
-   "to": "gmw2lvfnrq1r",
    "points": [
     [
-     1181,
-     652
+     1176,
+     762
     ],
     [
-     1181,
+     1176,
      567
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 105,
+   "layer": 108,
    "name": "Pipe_25",
    "label": "pipe_25",
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "wasTo": {
+    "wasAt": [
+     1181,
+     567
+    ]
+   },
+   "to": "gmww6pxf7lzc"
   },
   {
    "id": "p_Brewhouse_13",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "gmw2lvfnricm",
    "to": "gmw2lvfnuf49",
    "points": [
     [
-     1153,
+     1149,
      540
     ],
     [
@@ -2250,11 +2293,12 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 104,
+   "layer": 107,
    "name": "Pipe_26",
    "label": "pipe_26",
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "from": "gmww6pxf7701"
   },
   {
    "id": "p_Brewhouse_13_2",
@@ -2269,7 +2313,7 @@
     ],
     [
      890,
-     513
+     476
     ]
    ],
    "width": 10,
@@ -2277,7 +2321,7 @@
    "straight": true,
    "label": "pipe_7",
    "name": "Pipe_7",
-   "layer": 103,
+   "layer": 106,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
   },
@@ -2290,7 +2334,7 @@
    "points": [
     [
      890,
-     363
+     401
     ],
     [
      890,
@@ -2300,7 +2344,7 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 102,
+   "layer": 105,
    "name": "Pipe_27",
    "label": "pipe_27",
    "ipTypeFrom": "TC1.5",
@@ -2327,7 +2371,7 @@
    "straight": true,
    "label": "pipe_8",
    "name": "Pipe_8",
-   "layer": 101,
+   "layer": 104,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
   },
@@ -2335,11 +2379,10 @@
    "id": "p_Brewhouse_15",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "gmw2lvfnrbg9",
    "to": "gmw2lvfnuo3e",
    "points": [
     [
-     1208,
+     1204,
      540
     ],
     [
@@ -2350,11 +2393,12 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 100,
+   "layer": 103,
    "name": "Pipe_28",
    "label": "pipe_28",
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "from": "gmww6pxf7408"
   },
   {
    "id": "p_Brewhouse_15_2",
@@ -2369,7 +2413,7 @@
     ],
     [
      1260,
-     513
+     476
     ]
    ],
    "width": 10,
@@ -2377,7 +2421,7 @@
    "straight": true,
    "label": "pipe_9",
    "name": "Pipe_9",
-   "layer": 99,
+   "layer": 102,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
   },
@@ -2390,7 +2434,7 @@
    "points": [
     [
      1260,
-     363
+     401
     ],
     [
      1260,
@@ -2400,7 +2444,7 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true,
-   "layer": 98,
+   "layer": 101,
    "name": "Pipe_29",
    "label": "pipe_29",
    "ipTypeFrom": "TC1.5",
@@ -2427,7 +2471,7 @@
    "straight": true,
    "label": "pipe_10",
    "name": "Pipe_10",
-   "layer": 97,
+   "layer": 100,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
   },
@@ -2489,7 +2533,20 @@
    "y": 582,
    "bundled": true,
    "label": "Suction tee 1",
-   "layer": 66
+   "layer": 72,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
+    }
+   }
   },
   {
    "id": "gmw2lvfnp4zl",
@@ -2506,7 +2563,7 @@
    "x": 818,
    "y": 575,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 39
+   "layer": 51
   },
   {
    "id": "gmw2lvfnpgqs",
@@ -2523,7 +2580,7 @@
    "x": 873,
    "y": 575,
    "label": "End (TC 1.5)",
-   "layer": 38
+   "layer": 50
   },
   {
    "id": "gmw2lvfnpoxk",
@@ -2540,7 +2597,7 @@
    "x": 846,
    "y": 602,
    "label": "Tee 1 branch (TC 1.5)",
-   "layer": 37
+   "layer": 49
   },
   {
    "id": "gmw2lvfnqsfo",
@@ -2601,7 +2658,20 @@
    "bundled": true,
    "label": "Suction tee 2",
    "rot": 180,
-   "layer": 65
+   "layer": 71,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
+    }
+   }
   },
   {
    "id": "gmw2lvfnq0ye",
@@ -2618,7 +2688,7 @@
    "x": 1082,
    "y": 575,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 36
+   "layer": 48
   },
   {
    "id": "gmw2lvfnq5b2",
@@ -2635,7 +2705,7 @@
    "x": 1027,
    "y": 575,
    "label": "End (TC 1.5)",
-   "layer": 35
+   "layer": 47
   },
   {
    "id": "gmw2lvfnqu29",
@@ -2652,7 +2722,7 @@
    "x": 1055,
    "y": 548,
    "label": "Tee 1 branch (TC 1.5)",
-   "layer": 34
+   "layer": 46
   },
   {
    "id": "gmw2lvfnqzan",
@@ -2708,12 +2778,25 @@
     "end": "1,0.216",
     "branch1": "0.5,1"
    },
-   "x": 1163,
-   "y": 662,
+   "x": 1158,
+   "y": 772,
    "bundled": true,
    "label": "Pump out tee",
    "rot": 270,
-   "layer": 64
+   "layer": 70,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
+    }
+   }
   },
   {
    "id": "gmw2lvfnqrtx",
@@ -2727,10 +2810,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 1166,
-   "y": 692,
+   "x": 1161,
+   "y": 802,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 33
+   "layer": 45
   },
   {
    "id": "gmw2lvfnqhbw",
@@ -2744,10 +2827,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 1166,
-   "y": 637,
+   "x": 1161,
+   "y": 747,
    "label": "End (TC 1.5)",
-   "layer": 32
+   "layer": 44
   },
   {
    "id": "gmw2lvfnqzjc",
@@ -2761,121 +2844,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 1193,
-   "y": 665,
+   "x": 1188,
+   "y": 775,
    "label": "Tee 1 branch (TC 1.5)",
-   "layer": 31
-  },
-  {
-   "id": "gmw2lvfnrvr0",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 55,
-   "h": 35,
-   "name": "Tee_4",
-   "template": "Tee",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "tee"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0,0.216",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.216",
-     "standard": "TC 1.5"
-    },
-    "branch1": {
-     "installed": true,
-     "position": "0.5,1",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0,0.216",
-    "end": "1,0.216",
-    "branch1": "0.5,1"
-   },
-   "x": 1153,
-   "y": 532,
-   "bundled": true,
-   "label": "Top tee",
-   "layer": 63
-  },
-  {
-   "id": "gmw2lvfnricm",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnrvr0",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1138,
-   "y": 525,
-   "label": "Start (vessel side) (TC 1.5)",
-   "layer": 30
-  },
-  {
-   "id": "gmw2lvfnrbg9",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnrvr0",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1193,
-   "y": 525,
-   "label": "End (TC 1.5)",
-   "layer": 29
-  },
-  {
-   "id": "gmw2lvfnrq1r",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnrvr0",
-   "port": "branch1",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1166,
-   "y": 552,
-   "label": "Tee 1 branch (TC 1.5)",
-   "layer": 28
+   "layer": 43
   },
   {
    "id": "gmw2lvfnrl7u",
@@ -2929,8 +2901,20 @@
    "y": 572,
    "bundled": true,
    "rot": 270,
-   "layer": 62,
-   "label": "elbow_1"
+   "layer": 69,
+   "label": "elbow_1",
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   }
   },
   {
    "id": "gmw2lvfnrit5",
@@ -2947,7 +2931,7 @@
    "x": 713,
    "y": 575,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 27
+   "layer": 42
   },
   {
    "id": "gmw2lvfnr451",
@@ -2964,274 +2948,7 @@
    "x": 695,
    "y": 557,
    "label": "End (TC 1.5)",
-   "layer": 26
-  },
-  {
-   "id": "gmw2lvfns0ju",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 26,
-   "h": 26,
-   "name": "Elbow_2",
-   "template": "Elbow_90",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "elbow90"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0.29,1",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.29",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0.29,1",
-    "end": "1,0.29"
-   },
-   "x": 1422,
-   "y": 522,
-   "bundled": true,
-   "rot": 270,
-   "layer": 61,
-   "label": "elbow_2"
-  },
-  {
-   "id": "gmw2lvfnsdm0",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfns0ju",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1433,
-   "y": 525,
-   "label": "Start (vessel side) (TC 1.5)",
-   "layer": 25
-  },
-  {
-   "id": "gmw2lvfnsw9p",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfns0ju",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1415,
-   "y": 507,
-   "label": "End (TC 1.5)",
-   "layer": 24
-  },
-  {
-   "id": "gmw2lvfnsw6s",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 26,
-   "h": 26,
-   "name": "Elbow_3",
-   "template": "Elbow_90",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "elbow90"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0.29,1",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.29",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0.29,1",
-    "end": "1,0.29"
-   },
-   "x": 1502,
-   "y": 532,
-   "bundled": true,
-   "rot": 90,
-   "layer": 60,
-   "label": "elbow_3"
-  },
-  {
-   "id": "gmw2lvfnsqzj",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnsw6s",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1487,
-   "y": 525,
-   "label": "Start (vessel side) (TC 1.5)",
-   "layer": 23
-  },
-  {
-   "id": "gmw2lvfns93m",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnsw6s",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1505,
-   "y": 543,
-   "label": "End (TC 1.5)",
-   "layer": 22
-  },
-  {
-   "id": "gmw2lvfnsyu0",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 26,
-   "h": 26,
-   "name": "Elbow_5",
-   "template": "Elbow_90",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "elbow90"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0.29,1",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.29",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0.29,1",
-    "end": "1,0.29"
-   },
-   "x": 853,
-   "y": 785,
-   "bundled": true,
-   "rot": 270,
-   "layer": 58,
-   "label": "elbow_5"
-  },
-  {
-   "id": "gmw2lvfns1n4",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnsyu0",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 864,
-   "y": 788,
-   "label": "Start (vessel side) (TC 1.5)",
-   "layer": 19
-  },
-  {
-   "id": "gmw2lvfntv1j",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnsyu0",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 846,
-   "y": 770,
-   "label": "End (TC 1.5)",
-   "layer": 18
+   "layer": 41
   },
   {
    "id": "gmw2lvfnt7at",
@@ -3281,12 +2998,24 @@
     "start": "0.29,1",
     "end": "1,0.29"
    },
-   "x": 1642,
-   "y": 672,
+   "x": 1637,
+   "y": 782,
    "bundled": true,
    "rot": 90,
-   "layer": 57,
-   "label": "elbow_6"
+   "layer": 68,
+   "label": "elbow_6",
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   }
   },
   {
    "id": "gmw2lvfntr04",
@@ -3300,10 +3029,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 1627,
-   "y": 665,
+   "x": 1622,
+   "y": 775,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 17
+   "layer": 40
   },
   {
    "id": "gmw2lvfntnf3",
@@ -3317,10 +3046,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 1645,
-   "y": 683,
+   "x": 1640,
+   "y": 793,
    "label": "End (TC 1.5)",
-   "layer": 16
+   "layer": 39
   },
   {
    "id": "gmw2lvfnu4f1",
@@ -3374,8 +3103,20 @@
    "y": 522,
    "bundled": true,
    "rot": 270,
-   "layer": 56,
-   "label": "elbow_7"
+   "layer": 67,
+   "label": "elbow_7",
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   }
   },
   {
    "id": "gmw2lvfnuf49",
@@ -3392,7 +3133,7 @@
    "x": 893,
    "y": 525,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 15
+   "layer": 38
   },
   {
    "id": "gmw2lvfnu209",
@@ -3409,7 +3150,7 @@
    "x": 875,
    "y": 507,
    "label": "End (TC 1.5)",
-   "layer": 14
+   "layer": 37
   },
   {
    "id": "gmw2lvfnu2t5",
@@ -3462,8 +3203,20 @@
    "x": 882,
    "y": 98,
    "bundled": true,
-   "layer": 55,
-   "label": "elbow_8"
+   "layer": 66,
+   "label": "elbow_8",
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   }
   },
   {
    "id": "gmw2lvfnu3rj",
@@ -3480,7 +3233,7 @@
    "x": 875,
    "y": 109,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 13
+   "layer": 36
   },
   {
    "id": "gmw2lvfnuhux",
@@ -3497,7 +3250,7 @@
    "x": 893,
    "y": 91,
    "label": "End (TC 1.5)",
-   "layer": 12
+   "layer": 35
   },
   {
    "id": "gmw2lvfnu1r5",
@@ -3551,8 +3304,20 @@
    "y": 522,
    "bundled": true,
    "rot": 180,
-   "layer": 54,
-   "label": "elbow_9"
+   "layer": 65,
+   "label": "elbow_9",
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   }
   },
   {
    "id": "gmw2lvfnu1oy",
@@ -3569,7 +3334,7 @@
    "x": 1245,
    "y": 507,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 11
+   "layer": 34
   },
   {
    "id": "gmw2lvfnuo3e",
@@ -3586,7 +3351,7 @@
    "x": 1227,
    "y": 525,
    "label": "End (TC 1.5)",
-   "layer": 10
+   "layer": 33
   },
   {
    "id": "gmw2lvfnv1os",
@@ -3639,8 +3404,20 @@
    "x": 1252,
    "y": 98,
    "bundled": true,
-   "layer": 53,
-   "label": "elbow_10"
+   "layer": 64,
+   "label": "elbow_10",
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   }
   },
   {
    "id": "gmw2lvfnvgm9",
@@ -3657,7 +3434,7 @@
    "x": 1245,
    "y": 109,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 9
+   "layer": 32
   },
   {
    "id": "gmw2lvfnvybd",
@@ -3674,7 +3451,7 @@
    "x": 1263,
    "y": 91,
    "label": "End (TC 1.5)",
-   "layer": 8
+   "layer": 31
   },
   {
    "id": "g_tap_tee",
@@ -3730,66 +3507,25 @@
     "end": "1,0.216",
     "branch1": "0.5,1"
    },
-   "x": 960,
-   "y": 776,
+   "x": 955,
+   "y": 886,
    "bundled": true,
    "label": "Suction tee 2",
    "rot": 180,
-   "layer": 52
-  },
-  {
-   "id": "g_tap_elbow",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 26,
-   "h": 26,
-   "name": "Elbow_11",
-   "template": "Elbow_90",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "elbow90"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
+   "layer": 63,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
     }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0.29,1",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.29",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0.29,1",
-    "end": "1,0.29"
-   },
-   "x": 980,
-   "y": 682,
-   "bundled": true,
-   "layer": 51,
-   "label": "elbow_11"
+   }
   },
   {
    "id": "g_chill_tap",
@@ -3797,15 +3533,23 @@
    "fitting": "manualValve",
    "image": "Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg",
    "workspace": "Brew House",
-   "x": 1850,
-   "y": 460,
+   "x": 610,
+   "y": 560,
    "w": 50,
    "h": 50,
    "label": "Tap water",
    "name": "wgt_TWV_Tap~water_BH",
    "color": "#8a8f96",
    "confirmation": true,
-   "layer": 7
+   "layer": 30,
+   "mvOrient": "h",
+   "mvSide": "l",
+   "mvInlet": "b",
+   "ipTypeOut": "MGH3/4",
+   "ipTypeIn": "MPT1/2",
+   "tapSpot": "BM",
+   "tapLink": "hose",
+   "labelVisible": false
   },
   {
    "id": "ip_chill_drain",
@@ -3817,7 +3561,8 @@
    "w": 26,
    "h": 26,
    "color": "#4a90d9",
-   "layer": 6
+   "layer": 29,
+   "name": "IP_2"
   },
   {
    "id": "g_tap_tee_start",
@@ -3831,10 +3576,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 1000,
-   "y": 788,
+   "x": 995,
+   "y": 898,
    "label": "Start (vessel side) (TC 1.5)",
-   "layer": 5
+   "layer": 28
   },
   {
    "id": "g_tap_tee_end",
@@ -3848,10 +3593,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 945,
-   "y": 788,
+   "x": 940,
+   "y": 898,
    "label": "End (TC 1.5)",
-   "layer": 4
+   "layer": 27
   },
   {
    "id": "g_tap_tee_branch1",
@@ -3865,44 +3610,10 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 973,
-   "y": 761,
+   "x": 968,
+   "y": 871,
    "label": "Tee 1 branch (TC 1.5)",
-   "layer": 3
-  },
-  {
-   "id": "g_tap_elbow_start",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "g_tap_elbow",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 973,
-   "y": 693,
-   "label": "Start (vessel side) (TC 1.5)",
-   "layer": 2
-  },
-  {
-   "id": "g_tap_elbow_end",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "g_tap_elbow",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 991,
-   "y": 675,
-   "label": "End (TC 1.5)",
-   "layer": 1
+   "layer": 26
   },
   {
    "id": "p_tap_1",
@@ -3912,12 +3623,12 @@
    "to": "dev:BM_22_DO@Pump_Pump_BH:in",
    "points": [
     [
-     1015,
-     803
+     1010,
+     913
     ],
     [
-     1181,
-     803
+     1176,
+     913
     ]
    ],
    "width": 10,
@@ -3925,7 +3636,7 @@
    "straight": true,
    "label": "pipe_11",
    "name": "Pipe_11",
-   "layer": 96,
+   "layer": 99,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
   },
@@ -3933,16 +3644,15 @@
    "id": "p_tap_2",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "g_tap_elbow_start",
    "to": "g_tap_tee_branch1",
    "points": [
     [
-     988,
-     708
+     983,
+     841
     ],
     [
-     988,
-     776
+     983,
+     886
     ]
    ],
    "width": 10,
@@ -3950,34 +3660,10 @@
    "straight": true,
    "label": "pipe_12",
    "name": "Pipe_12",
-   "layer": 95,
+   "layer": 98,
    "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
-  },
-  {
-   "id": "p_tap_3",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "dev:BM_30_DO@Valve_E_Tap~water_BH:in",
-   "to": "g_tap_elbow_end",
-   "points": [
-    [
-     1060,
-     690
-    ],
-    [
-     1006,
-     690
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "label": "pipe_13",
-   "name": "Pipe_13",
-   "layer": 94,
-   "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
+   "ipTypeTo": "TC1.5",
+   "from": "gmwwcyo2jsoh"
   },
   {
    "id": "t_water",
@@ -3990,7 +3676,8 @@
    "fontSize": 22,
    "bold": true,
    "text": "Fire Hose and Manifold Supply Valve: tap water on the fly",
-   "name": "wgt_TXT_Water_WA"
+   "name": "wgt_TXT_Water_WA",
+   "layer": 34
   },
   {
    "id": "wa_override",
@@ -4008,7 +3695,8 @@
    "align": "Center",
    "process": "utility_FireHose_Manifold_Supply_Water",
    "showWhen": "water",
-   "name": "wgt_OVR_Water~Override_WA"
+   "name": "wgt_OVR_Water~Override_WA",
+   "layer": 33
   },
   {
    "id": "ip_tap_supply",
@@ -4022,7 +3710,9 @@
    "label": "Tap Water Supply",
    "labelVisible": true,
    "labelAlign": "above",
-   "labelSize": 14
+   "labelSize": 14,
+   "name": "IP_3",
+   "layer": 7
   },
   {
    "id": "fw_tee",
@@ -4082,7 +3772,21 @@
    "y": 373,
    "bundled": true,
    "label": "tee_1",
-   "rot": 180
+   "rot": 180,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
+    }
+   },
+   "layer": 8
   },
   {
    "id": "fw_tee_s",
@@ -4098,7 +3802,8 @@
    "labelSize": 12,
    "x": 1520,
    "y": 385,
-   "label": "Start (TC 1.5)"
+   "label": "Start (TC 1.5)",
+   "layer": 6
   },
   {
    "id": "fw_tee_e",
@@ -4114,7 +3819,8 @@
    "labelSize": 12,
    "x": 1465,
    "y": 385,
-   "label": "End (TC 1.5)"
+   "label": "End (TC 1.5)",
+   "layer": 5
   },
   {
    "id": "fw_tee_b",
@@ -4130,7 +3836,8 @@
    "labelSize": 12,
    "x": 1493,
    "y": 358,
-   "label": "Tee 1 branch (TC 1.5)"
+   "label": "Tee 1 branch (TC 1.5)",
+   "layer": 4
   },
   {
    "id": "p_fw_1",
@@ -4152,7 +3859,8 @@
    "color": "#8a8f96",
    "straight": true,
    "name": "Pipe_W1",
-   "label": "Tap water"
+   "label": "Tap water",
+   "layer": 40
   },
   {
    "id": "p_fw_2",
@@ -4174,7 +3882,8 @@
    "color": "#8a8f96",
    "straight": true,
    "name": "Pipe_W2",
-   "label": "To Manifold Valve"
+   "label": "To Manifold Valve",
+   "layer": 39
   },
   {
    "id": "p_fw_3",
@@ -4196,7 +3905,8 @@
    "color": "#8a8f96",
    "straight": true,
    "name": "Pipe_W3",
-   "label": "To Firehose Valve"
+   "label": "To Firehose Valve",
+   "layer": 38
   },
   {
    "id": "ip_brew_manifold",
@@ -4210,7 +3920,9 @@
    "label": "Brewery manifold",
    "labelVisible": true,
    "labelAlign": "above",
-   "labelSize": 14
+   "labelSize": 14,
+   "name": "IP_4",
+   "layer": 3
   },
   {
    "id": "p_fw_4",
@@ -4232,7 +3944,8 @@
    "color": "#8a8f96",
    "straight": true,
    "name": "Pipe_W4",
-   "label": "To the Brewery manifold"
+   "label": "To the Brewery manifold",
+   "layer": 37
   },
   {
    "id": "ip_fh_qd",
@@ -4247,7 +3960,9 @@
    "label": "QD SS Male",
    "labelVisible": true,
    "labelAlign": "right",
-   "labelSize": 14
+   "labelSize": 14,
+   "name": "QD_1",
+   "layer": 2
   },
   {
    "id": "p_fw_5",
@@ -4269,7 +3984,8 @@
    "color": "#8a8f96",
    "straight": true,
    "name": "Pipe_W5",
-   "label": "To the QD"
+   "label": "To the QD",
+   "layer": 36
   },
   {
    "id": "ip_fh_end",
@@ -4282,7 +3998,9 @@
    "h": 30,
    "color": "#e8a33a",
    "label": "Fire Hose end",
-   "labelVisible": false
+   "labelVisible": false,
+   "name": "Coupling_1",
+   "layer": 1
   },
   {
    "id": "p_fh_hose",
@@ -4313,372 +4031,755 @@
    "width": 10,
    "color": "#e6e6e6",
    "name": "Hose_1",
-   "label": "Fire Hose"
-  },
-  {
-   "id": "bh_mf_tee",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 55,
-   "h": 35,
-   "name": "Tee_6",
-   "template": "Tee",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "tee"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0,0.216",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.216",
-     "standard": "TC 1.5"
-    },
-    "branch1": {
-     "installed": true,
-     "position": "0.5,1",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0,0.216",
-    "end": "1,0.216",
-    "branch1": "0.5,1"
-   },
-   "x": 1492,
-   "y": 563,
-   "bundled": true,
-   "label": "manifold tee",
-   "rot": 180
-  },
-  {
-   "id": "bh_mf_tee_s",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "bh_mf_tee",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1532,
-   "y": 575,
-   "label": "Start (TC 1.5)"
-  },
-  {
-   "id": "bh_mf_tee_e",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "bh_mf_tee",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1477,
-   "y": 575,
-   "label": "End (TC 1.5)"
-  },
-  {
-   "id": "bh_mf_tee_b",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "bh_mf_tee",
-   "port": "branch1",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1505,
-   "y": 548,
-   "label": "Tee 1 branch (TC 1.5)"
-  },
-  {
-   "id": "bh_tap_tee",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 55,
-   "h": 35,
-   "name": "Tee_7",
-   "template": "Tee",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "tee"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0,0.216",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.216",
-     "standard": "TC 1.5"
-    },
-    "branch1": {
-     "installed": true,
-     "position": "0.5,1",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0,0.216",
-    "end": "1,0.216",
-    "branch1": "0.5,1"
-   },
-   "x": 1760,
-   "y": 563,
-   "bundled": true,
-   "label": "fire hose tee",
-   "rot": 180
-  },
-  {
-   "id": "bh_tap_tee_s",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "bh_tap_tee",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1800,
-   "y": 575,
-   "label": "Start (TC 1.5)"
-  },
-  {
-   "id": "bh_tap_tee_e",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "bh_tap_tee",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1745,
-   "y": 575,
-   "label": "End (TC 1.5)"
-  },
-  {
-   "id": "bh_tap_tee_b",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "bh_tap_tee",
-   "port": "branch1",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1773,
-   "y": 548,
-   "label": "Tee 1 branch (TC 1.5)"
-  },
-  {
-   "id": "bh_mv_clone",
-   "kind": "clone",
-   "of": "BM_33_DO@Valve_E_Manifold~Supply_WA",
-   "workspace": "Brew House",
-   "x": 1560,
-   "y": 521,
-   "name": "BM_33_DO@Valve_E_Manifold~Supply_WA_Clone_1"
+   "label": "Fire Hose",
+   "layer": 35
   },
   {
    "id": "bh_fh_clone",
    "kind": "clone",
    "of": "BM_31_DO@Valve_E_Fire~Hose_WA",
    "workspace": "Brew House",
-   "x": 1713,
-   "y": 393,
-   "name": "BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1"
-  },
-  {
-   "id": "p_bh_mv_1",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "bh_mf_tee_s",
-   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA_Clone_1:in",
-   "points": [
-    [
-     1547,
-     590
-    ],
-    [
-     1560,
-     590
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "name": "Pipe_25",
-   "label": "Manifold Valve to the manifold"
-  },
-  {
-   "id": "p_bh_mv_2",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA_Clone_1:out",
-   "to": "bh_tap_tee_e",
-   "points": [
-    [
-     1710,
-     590
-    ],
-    [
-     1760,
-     590
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "name": "Pipe_26",
-   "label": "Tap water to the Manifold Valve"
-  },
-  {
-   "id": "p_bh_fh_1",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "bh_tap_tee_b",
-   "to": "dev:BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1:in",
-   "points": [
-    [
-     1788,
-     563
-    ],
-    [
-     1788,
-     543
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "name": "Pipe_27",
-   "label": "To the Firehose Valve"
+   "x": 685,
+   "y": 895,
+   "name": "BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1",
+   "layer": 25
   },
   {
    "id": "bh_fh_qd",
    "kind": "ip",
    "fitting": "qd",
    "workspace": "Brew House",
-   "x": 1771,
-   "y": 345,
-   "w": 34,
-   "h": 34,
+   "x": 680,
+   "y": 945,
+   "w": 50,
+   "h": 50,
    "color": "#e8a33a",
    "label": "Firehose with QD",
    "labelVisible": true,
    "labelAlign": "above",
-   "labelSize": 14
+   "labelSize": 14,
+   "name": "QD_2",
+   "layer": 23,
+   "qdOn": "dev:BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1:out"
   },
   {
-   "id": "p_bh_fh_2",
+   "id": "gmww6pxf7qc3",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brew House",
+   "name": "Tee_4",
+   "template": "Tee",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "tee"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0,0.216",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.216",
+     "standard": "TC 1.5"
+    },
+    "branch1": {
+     "installed": true,
+     "position": "0.5,1",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1148.5,
+   "y": 532.44,
+   "label": "coupling_3",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0,0.216",
+    "end": "1,0.216",
+    "branch1": "0.5,1"
+   },
+   "w": 55,
+   "h": 35,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
+    }
+   },
+   "layer": 24
+  },
+  {
+   "id": "gmww6pxf7701",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmww6pxf7qc3",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1134,
+   "y": 525,
+   "label": "Start (vessel side) (TC 1.5)",
+   "layer": 22
+  },
+  {
+   "id": "gmww6pxf7408",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmww6pxf7qc3",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1189,
+   "y": 525,
+   "label": "End (TC 1.5)",
+   "layer": 21
+  },
+  {
+   "id": "gmww6pxf7lzc",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmww6pxf7qc3",
+   "port": "branch1",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1161,
+   "y": 552,
+   "label": "Tee 1 branch (TC 1.5)",
+   "layer": 20
+  },
+  {
+   "id": "gmwwcyo2gtv5",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "dev:BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1:out",
-   "to": "bh_fh_qd",
    "points": [
     [
-     1788,
-     393
+     840,
+     823
     ],
     [
-     1788,
-     379
+     965,
+     823
     ]
    ],
-   "width": 10,
    "color": "#8a8f96",
+   "size": "0.5",
    "straight": true,
-   "name": "Pipe_28",
-   "label": "To the QD"
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5",
+   "from": "dev:BM_30_DO@Valve_E_Manifold~Supply_BH:out",
+   "to": "gmwwcyo2js30",
+   "name": "Pipe_13",
+   "label": "pipe_13",
+   "labelVisible": false,
+   "sizeUnits": "in",
+   "layer": 19
   },
   {
-   "id": "p_bh_tap_hose",
-   "kind": "pipe",
-   "hose": true,
+   "id": "gmwwcyo2irng",
+   "kind": "vessel",
+   "vesselType": "bfit",
    "workspace": "Brew House",
-   "from": "eq:g_chill_tap:out",
-   "to": "bh_tap_tee_s",
+   "name": "Elbow_4",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 964.54,
+   "y": 815.46,
+   "label": "coupling_3",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 90,
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   },
+   "layer": 14
+  },
+  {
+   "id": "gmwwcyo2js30",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwcyo2irng",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 950,
+   "y": 808,
+   "label": "Start (vessel side) (TC 1.5)",
+   "layer": 11
+  },
+  {
+   "id": "gmwwcyo2jsoh",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwcyo2irng",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 968,
+   "y": 826,
+   "label": "End (TC 1.5)",
+   "layer": 10
+  },
+  {
+   "id": "gmwwcyx86u4g",
+   "kind": "ip",
+   "fitting": "coupling",
+   "autoFit": true,
+   "workspace": "Brew House",
+   "x": 617,
+   "y": 798,
+   "w": 50,
+   "h": 50,
+   "label": "coupling_2",
+   "color": "#9aa0a6",
+   "rotate": "0",
+   "name": "Coupling_2",
+   "layer": 9
+  },
+  {
+   "id": "gmwwcyx86isx",
+   "kind": "pipe",
+   "workspace": "Brew House",
    "points": [
     [
-     1867,
-     509
+     765,
+     823
     ],
     [
-     1867,
-     590
-    ],
-    [
-     1830,
-     590
+     733,
+     823
     ]
    ],
-   "width": 10,
-   "color": "#e6e6e6",
-   "name": "Hose_2",
-   "label": "Tap water hose"
+   "color": "#8a8f96",
+   "size": "0.5",
+   "straight": true,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5",
+   "to": "gmwwd3jisbgr",
+   "name": "Pipe_30",
+   "label": "pipe_30",
+   "labelVisible": false,
+   "sizeUnits": "in",
+   "wasFrom": {
+    "wasAt": [
+     765,
+     828
+    ],
+    "wasEnd": "in"
+   },
+   "from": "dev:BM_30_DO@Valve_E_Manifold~Supply_BH:in",
+   "layer": 18
+  },
+  {
+   "id": "gmwwd2ighzyx",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "points": [
+    [
+     635,
+     610
+    ],
+    [
+     642,
+     823
+    ]
+   ],
+   "color": "#c9ced3",
+   "size": "0.5",
+   "hose": true,
+   "ipTypeFrom": "FGH3/4",
+   "ipTypeTo": "FMSSQD1/2",
+   "from": "eq:g_chill_tap:out",
+   "to": "gmwwcyx86u4g",
+   "name": "Hose_3",
+   "label": "hose_3",
+   "labelVisible": false,
+   "sizeUnits": "in",
+   "layer": 17
+  },
+  {
+   "id": "gmwwd3jipupv",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "points": [
+    [
+     705,
+     895
+    ],
+    [
+     705,
+     850
+    ]
+   ],
+   "color": "#8a8f96",
+   "size": "0.5",
+   "straight": true,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5",
+   "from": "dev:BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1:in",
+   "to": "gmwwd3jisbwl",
+   "name": "Pipe_31",
+   "label": "pipe_31",
+   "labelVisible": false,
+   "sizeUnits": "in",
+   "layer": 16
+  },
+  {
+   "id": "gmwwd3jirazd",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "points": [
+    [
+     678,
+     823
+    ],
+    [
+     642,
+     823
+    ]
+   ],
+   "color": "#8a8f96",
+   "size": "0.5",
+   "straight": true,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5",
+   "to": "gmwwcyx86u4g",
+   "label": "pipe_30",
+   "labelVisible": false,
+   "sizeUnits": "in",
+   "wasFrom": {
+    "wasAt": [
+     765,
+     828
+    ],
+    "wasEnd": "in"
+   },
+   "from": "gmwwd3jis6px",
+   "name": "Pipe_32",
+   "layer": 15
+  },
+  {
+   "id": "gmwwd3jis6ax",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brew House",
+   "name": "Tee_8",
+   "template": "Tee",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "tee"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0,0.216",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.216",
+     "standard": "TC 1.5"
+    },
+    "branch1": {
+     "installed": true,
+     "position": "0.5,1",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 677.5,
+   "y": 815.44,
+   "label": "coupling_4",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0,0.216",
+    "end": "1,0.216",
+    "branch1": "0.5,1"
+   },
+   "w": 55,
+   "h": 35,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
+    }
+   },
+   "layer": 13
+  },
+  {
+   "id": "gmwwd3jis6px",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwd3jis6ax",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 663,
+   "y": 808,
+   "label": "Start (vessel side) (TC 1.5)",
+   "layer": 8
+  },
+  {
+   "id": "gmwwd3jisbgr",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwd3jis6ax",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 718,
+   "y": 808,
+   "label": "End (TC 1.5)",
+   "layer": 7
+  },
+  {
+   "id": "gmwwd3jisbwl",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwd3jis6ax",
+   "port": "branch1",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 690,
+   "y": 835,
+   "label": "Tee 1 branch (TC 1.5)",
+   "layer": 6
+  },
+  {
+   "id": "gmwwd5069vwy",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brew House",
+   "name": "Elbow_2",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1411.54,
+   "y": 571.54,
+   "label": "coupling_3",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 180,
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   },
+   "layer": 12
+  },
+  {
+   "id": "gmwwd5069kr3",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwd5069vwy",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1415,
+   "y": 557,
+   "label": "Start (vessel side) (TC 1.5)",
+   "layer": 5
+  },
+  {
+   "id": "gmwwd5069x4f",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwd5069vwy",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1397,
+   "y": 575,
+   "label": "End (TC 1.5)",
+   "layer": 4
+  },
+  {
+   "id": "gmwwdna6den4",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brew House",
+   "name": "Elbow_3",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 853.46,
+   "y": 894.54,
+   "label": "coupling_4",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 270,
+   "fit": {
+    "bend": "0.29,0.29",
+    "body": 0.384,
+    "size": [
+     90,
+     90
+    ],
+    "ipPos": {
+     "start": "0.29,1",
+     "end": "1,0.29"
+    }
+   },
+   "layer": 3
+  },
+  {
+   "id": "gmwwdna6diq4",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwdna6den4",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 864,
+   "y": 898,
+   "label": "Start (vessel side) (TC 1.5)",
+   "layer": 2
+  },
+  {
+   "id": "gmwwdna6d6tn",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmwwdna6den4",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 846,
+   "y": 880,
+   "label": "End (TC 1.5)",
+   "layer": 1
   }
  ],
+ "probes": [],
  "autostart": [],
  "ipAllow": [
   "TC1.5",

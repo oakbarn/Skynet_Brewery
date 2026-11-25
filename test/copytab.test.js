@@ -18,7 +18,7 @@ assert.equal(cl.length, p.devices.length + p.widgets.length + p.clones.length, '
 for (const g of cl) { assert.ok(g.name.startsWith(g.of + '_Clone_'), g.name); assert.equal(g.workspace, 'Brew House 2'); }
 const pump = cl.find(g => g.of === 'BM_22_DO@Pump_Pump_BH');
 assert.equal(pump.name, 'BM_22_DO@Pump_Pump_BH_Clone_1');
-assert.deepEqual([pump.x, pump.y], [1181, 728], 'in the same place');
+assert.deepEqual([pump.x, pump.y], [1176, 838], 'in the same place');
 // pipes, IPs and vessels: new ids, pipe ends on the copies, Device ends on the Clones
 const drawn = a.graphics.filter(g => g.kind !== 'clone');
 assert.equal(drawn.length, p.graphics.length);
