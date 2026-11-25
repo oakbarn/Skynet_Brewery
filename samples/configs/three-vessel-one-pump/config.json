@@ -746,7 +746,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "tapwater": true,
+   "tapwater": false,
    "tapwaterOut": "in",
    "layer": 73,
    "hidden": false
@@ -974,7 +974,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "tapwater": true,
+   "tapwater": false,
    "tapwaterOut": "in",
    "layer": 21
   },
@@ -998,7 +998,7 @@
    "onText": "OPEN",
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "tapwater": true,
+   "tapwater": false,
    "tapwaterOut": "out",
    "layer": 20
   },
