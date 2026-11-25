@@ -57,3 +57,14 @@ assert.ok(app.includes("flipFrom(work); if (work.flipH) g.flipH = true; if (work
 assert.ok(app.includes("flipFrom(work); if (!MF_ROTS.includes(+work.rot || 0)) work.rot = '0';"), 'the Properties keep the Flip');
 assert.ok(!app.includes('has no Flip: it turns Horizontal'), 'the Flip buttons on the Edit layout bar work');
 console.log('manifold flip ok');
+
+// It breaks apart once placed (OakBarn Brewery, 2026-11-25: "Any thing like the three valve supply tees needs to be individual Devices
+// and widgets after placed because they need to be manipulated individually"; Rule 5.35)
+assert.ok(app.includes('function breakMf(g) {'), 'breakMf breaks a Valve Tee or Supply Manifold apart');
+assert.ok(app.includes("const parts = breakMf(g) || [];") && app.includes('for (const x of parts) keepOnBuild(x);'), 'the Add box puts the parts on the Build Tab');
+assert.ok(app.includes("const mfParts = mfG ? breakMf(mfG) || [] : [];") && app.includes('if (mfG) breakMf(mfG);'), 'both Setup interviews break their manifold apart');
+assert.ok(app.includes('if (isMf(g) && breakMf(g)) sel = null;'), 'a Template put on the Build Tab breaks apart');
+assert.ok(app.includes("const n = draft.graphics.filter(isMf).filter(g => breakMf(g)).length;"), 'an older one breaks apart when Edit layout opens');
+assert.ok(app.includes("skyDevPreset(across ? 'Skynet_Motorized_Ball_Valve_H' : 'Skynet_Motorized_Ball_Valve_VR')"), 'a Motorized valve becomes a Skynet Motorized Ball Valve Device');
+assert.ok(app.includes("fitting: 'manualValve'") && app.includes("const MF_MANUAL_PIC = 'Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg';"), 'a Manual valve becomes a Manual Valve Widget');
+assert.ok(app.includes("...(adding ? [] : [['name', '5. Name', 'text'"), 'no Name in the Add box');

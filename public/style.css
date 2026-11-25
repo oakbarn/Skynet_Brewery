@@ -213,6 +213,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 /* a kept Build came back (Rule 4.1): one click to Discard it, then ↩ Undo for a few seconds */
 #buildBack, #undoNote { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--accent, var(--line)); border-radius: 8px; padding: 8px 12px; max-width: 92vw; flex-wrap: wrap; }
 #buildBack .bbX, #undoNote .bbX { padding: 2px 8px; }
+#undoNote.blue { background: #1f4e9c; color: #fafafa; border: 2px solid #fff; font-weight: bold; box-shadow: 0 6px 28px rgba(0,0,0,.55); }      /* a blue pop-up with a button, e.g. ✏ Change Name after a Label change (Rule 18.45 #2) */
 /* Sound is off (OakBarn Brewery, 2026-11-13): a reminder on the Tab until sound is turned on */
 #toast.bad { background: #b3261e; color: #fafafa; }
 #wsSizer { position: relative; margin: 0 auto; }
@@ -338,6 +339,11 @@ div.zoomBox { pointer-events: auto; }
 #ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fafafa; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
 #ws .gfx.ip.devip { font-size: 8px; z-index: 3; }
 #ws.editing .gfx.ip.devip { cursor: crosshair; }
+/* a tap water valve's TAP side: its TAP mark always shows, not a small dot, and it is not clicked on (OakBarn Brewery, 2026-11-25: "Tap when
+   Tap water is always the Tap ICON and no user Click on the screen"; Rule 6.15) */
+#ws.editing .gfx.ip.devip.tapIp { border-color: var(--ipc) !important; background: #FAFAFA !important; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000 !important; pointer-events: none !important; cursor: default; }
+#ws.editing .gfx.ip.devip.tapIp > span { visibility: visible !important; }
+#ws.editing .gfx.ip.devip.tapIp::before { display: none !important; }
 .pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
 .pipes .plainDot { fill: #e01b12; stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 0.6px #000) drop-shadow(0 0 0.6px #000); }
 .pipes circle.plainDot:not(.handle) { pointer-events: none; }
@@ -563,6 +569,12 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .sw input:checked + .swk { background: #3fbf6a; }
 .sw input:checked + .swk::after { transform: translateX(20px); }
 .sw input:focus-visible + .swk { outline: 2px solid #4fb3ff; outline-offset: 2px; }
+/* a Tap Water valve's On Close List and On Open List can't be changed: their knobs show the Do Not Enter sign (OakBarn Brewery,
+   2026-11-25: "Add Do Not Enter ICON as depicted when the Tap Water is True"; Rules 6.15, 18.45) */
+.sw input:is([data-k="_tapClose"], [data-k="_tapOpen"]):disabled + .swk { cursor: default; }
+.sw input:is([data-k="_tapClose"], [data-k="_tapOpen"]):disabled + .swk::after {
+  background: #FAFAFA url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9.2' fill='%23d62828' stroke='%23fff' stroke-width='1.2'/%3E%3Crect x='4' y='8.2' width='12' height='3.6' rx='.6' fill='%23fff'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
 /* a plain checkbox drawn as a small switch: every on / off choice is a switch or a toggle icon, never a list box (Fritz, 2026-10-23) */
 input[type=checkbox].swc { appearance: none; -webkit-appearance: none; position: relative; display: inline-block; width: 36px; height: 20px; flex: none; margin: 0; padding: 0; border: none; border-radius: 10px; background: #9aa2aa; cursor: pointer; vertical-align: middle; transition: background .15s; }
 input[type=checkbox].swc::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
@@ -1566,7 +1578,6 @@ dialog .fldPair .pairLbl:hover + :is(input, select, textarea):disabled { --dne: 
    box, and a Manual Valve's Graphic */
 .stateBox, .swWithBtn { display: flex; align-items: center; gap: 10px; }
 .stateBox .stateWord { font-weight: 600; }
-.swWithBtn .sugNameBtn.hidden { display: none; }
 .nameRow .chgName { flex: 1; min-width: 0; }
 .mvPreview { width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; }
 .mvPreview .mvPv { position: relative; width: 116px; height: 116px; background: center / 100% 100% no-repeat; }

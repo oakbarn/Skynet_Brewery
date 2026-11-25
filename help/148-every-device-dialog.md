@@ -47,8 +47,8 @@ Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide 
 - **State, Name and Change Name** (Skynet Rule 18.45): **State** (on every On / Off Device, and a Manual Valve) is a slider that turns the
   item On or Off (a valve: Open or Closed) at once, the same as a click on it on its Tab; it is not a setting, so Save and Close
   do not change it. The **Name** is greyed out; the **Change Name** box below it starts with the Name now, and **✏ Change Name**
-  puts what is typed there in the Name (kept with 💾 Save; every Process follows it). Once the Label is changed, **🏷 Update to
-  Suggested Name** pops up beside Label Visible and fills the Change Name box. The State slider, the Change Name box and its two
+  puts what is typed there in the Name (kept with 💾 Save; every Process follows it). Once the Label is changed, the Change Name
+  box takes the new Suggested Name and a blue pop-up offers **✏ Change Name** with it. The State slider, the Change Name box and its two
   buttons are for the mouse only: the Tab key and Enter pass them by. The Change Name box shows on every Device and Widget once it
   is saved; while you build a new one its Name simply follows the Suggested Name until you add it.
 - **Alarm Widgets** (Skynet Rule 18.50, the "Recheck dialogs" pass): the Basic Skynet Alarm, the User Alarm and the Pre-Hop Alarm

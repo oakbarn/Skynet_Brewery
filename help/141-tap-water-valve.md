@@ -58,8 +58,8 @@ or smaller, the inside Hose or Pipe is drawn again to reach the IP.
 ## Its own dialog
 
 Its Properties are the **Hose Bib Widget** dialog, in the same look and order as the Pump's: the lock and **No Unlock** in the
-title line, **State** (a slider, Open or Closed now), **1. Label** and **Label Visible** (🏷 Update to Suggested Name pops up once
-the Label is changed), **2. Tab** with **Layer Order** under it, **3. Name** with the **Change Name** box and **✏ Change Name**, the
+title line, **State** (a slider, Open or Closed now), **1. Label** and **Label Visible** (once the Label is changed,
+a blue pop-up offers ✏ Change Name with the new Suggested Name), **2. Tab** with **Layer Order** under it, **3. Name** with the **Change Name** box and **✏ Change Name**, the
 Suggested Name, the **Graphic** (its one Skynet picture with its inside Hose or Pipe, kept up to date), **Orientation** with **Left /
 Right** and **Inlet**, **Hose or Pipe**, **Cover** with **Toggle**, **Overlay** with **Database and .API ⬢**, **Inlet IP
 Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** and **Height** on one line, and the Widget Type (Skynet Rule

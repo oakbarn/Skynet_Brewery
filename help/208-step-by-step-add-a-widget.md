@@ -34,7 +34,7 @@ Type the **Label**: what you call it, in plain words, for example **Garden hose*
 
 ## Step 5. 3. Name
 
-The **Suggested Name** under the Name follows the Label. To use it, press **🏷 Update to Suggested Name**: it goes in the **Change Name** box. Then press **✏ Change Name**. Or type a name of your own in **Change Name** and press **✏ Change Name**. See [Interface, Tab and Device names](46-interface-tab-device-names).
+The **Suggested Name** under the Name follows the Label. When you change the Label, it goes in the **Change Name** box and a blue pop-up asks to change the Name to it: press **✏ Change Name** on the pop-up. Or type a name of your own in **Change Name** and press **✏ Change Name**. See [Interface, Tab and Device names](46-interface-tab-device-names).
 
 ![Change Name](help_pictures/Step_Add_Widget_05_Name.png)
 

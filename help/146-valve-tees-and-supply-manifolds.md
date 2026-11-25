@@ -11,6 +11,19 @@ end, the way many home brewers build a manifold to send liquid from one source t
 
 ![Double Supply Manifold](Images/Skynet/Other_Equipment/Skynet_TC15_Supply_Manifold_2.svg)
 
+## It breaks apart once placed
+
+Once it is placed, it is **no longer one fitting**: each part becomes its own Device or Widget so it can be moved, turned, deleted or
+changed by itself (Skynet Rule 5.35):
+
+- each tee becomes a **Long Tee** (TC Pipe Fittings), joined to the next one end to end;
+- each **Motorized** valve becomes a **Skynet Motorized Ball Valve** Device, with the same Name, Label, Interface and Port;
+- each **Manual** valve becomes a **Manual Valve Widget** (Manual Ball Valve, side view).
+
+Each valve is joined IP to IP on its tee's branch, on the same spot as before. A fitting placed before this breaks apart the next time
+Edit layout opens; **Save layout** keeps it. The parts below about the fitting's IPs, Properties and Flip are how it is set up in the
+Add box, before it breaks apart.
+
 ## Its IPs
 
 There are IPs **only** on the **two open ends of the joined tees** (left and right) and on the **far end of each valve** (the bottom).
@@ -30,8 +43,9 @@ The **Add box** works like a Pump's (Skynet Rule 18.29). Hover the name of any f
    same line. Two valves can't share a Port.
 4. **Tab**: the Tab it goes on.
 
-Then the **Name** (ValveTee_1, Manifold2_1 or Manifold3_1 to start), the **Graphic**, its **Path**, the **Orientation** and **Flip**, X, Y, Width,
-Height and the **Device Type**. Press **➕ Add Device**: it goes on that Tab and its Properties open. Enter goes from field to field
+Then the **Graphic**, its **Path**, the **Orientation** and **Flip**, X, Y, Width, Height and the **Device Type** (there is no Name: each
+part gets its own). Press **➕ Add Device**: it goes on the 🔨 Build Tab as its Long Tees and valves, and **Finish Build ...** moves them
+to that Tab. Double-click any part for its Properties. Enter goes from field to field
 and last to ➕ Add Device.
 
 ## Which valve is which
