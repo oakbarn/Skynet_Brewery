@@ -34,6 +34,8 @@ BM_33_DO@Valve_E_Manifold~Valve_WA = false
 [SectionBrew100]
 step 1.00001 "SectionBrew100"
 gblV_Brew_Status = 100
+// A Brew Day always has a Recipe (Rule 16.14): with none loaded, the No Recipe Found pop-up leads the way to one
+ask_recipe
 vSMsg = "Brewing " + skn_rcp_Name + ". Check the Recipe on ☰ Menu > Recipe (Import a BeerSmith .bsmx or BeerXML file there). Strike " + skn_rcp_Strike_Temp + " " + skn_rcp_Temp_Units + ", mash " + skn_rcp_Mash_Step_1_Temp + " " + skn_rcp_Temp_Units + "."
 if skn_rcp_Loaded == false
 	vSMsg = "No Recipe is loaded: import one on ☰ Menu > Recipe, or the Default tab's values are used and there are no hop alerts. Strike " + skn_rcp_Strike_Temp + " " + skn_rcp_Temp_Units + ", mash " + skn_rcp_Mash_Step_1_Temp + " " + skn_rcp_Temp_Units + "."

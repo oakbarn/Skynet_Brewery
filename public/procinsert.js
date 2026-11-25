@@ -12,7 +12,7 @@ import { G_DECLARE } from './gkinds.js';
 export const CONDITIONALS = ['if', 'elseif', 'else', 'endif', 'wait', 'goto', 'goLine', 'step'];
 // Skynet Special: the commands only Skynet has (Rules 6.15, 16.11, 16.12, 5.42 ...)
 export const SKYNET_SPECIAL = ['ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'all_heaters_off', 'wait_boil', 'take_reading',
-  'import_recipe', 'start_hop_alerts', 'stop_hop_alerts', 'hop_alert', 'place_Chiller', 'remove_Chiller', 'lock_Equipment', 'unlock_Equipment'];
+  'ask_recipe', 'import_recipe', 'start_hop_alerts', 'stop_hop_alerts', 'hop_alert', 'place_Chiller', 'remove_Chiller', 'lock_Equipment', 'unlock_Equipment'];
 // Common: every other normal command, worked out from the Process commands, so a command added later lands here by itself.
 // "else if" is the same as elseif (Conditionals), so it is left out.
 const SAME_AS = new Set(['else if']);
@@ -21,7 +21,7 @@ export const COMMON = COMMANDS.map(c => c[0]).filter(c => !CONDITIONALS.includes
 export const SKN_NAMES = [...SKN_GLOBALS.map(([n, what]) => [n, what]), ...BREW_TIMERS.map(([n, , what]) => [n, 'a Brew Timer: ' + what])];
 
 // commands that are a whole line by themselves (nothing typed after them)
-const BARE = new Set(['else', 'endif', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'all_heaters_off', 'wait_boil', 'stop_hop_alerts',
+const BARE = new Set(['else', 'endif', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'all_heaters_off', 'wait_boil', 'stop_hop_alerts', 'ask_recipe',
   'lock_Equipment', 'unlock_Equipment']);
 const NEW_G = Object.fromEntries(Object.values(G_DECLARE).map(d => [`new ${d.long}`, `new ${d.long} ${d.prefix}`]));
 // the text a command puts in: the word, then a space when something is typed after it (a gGlobal also gets the start of its name)

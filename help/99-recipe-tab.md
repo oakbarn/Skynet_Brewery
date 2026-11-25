@@ -6,7 +6,7 @@ Along the top:
 
 - **IMPORT** brings in a recipe file (below).
 - **NEW** clears the Recipe and starts one from the Defaults (☰ Menu > Default).
-- **Library ...** opens a saved Recipe, saves this one (💾), or deletes a saved one. Saved Recipes are on the Brain in `config/recipes`.
+- **Library ...** opens a saved Recipe, saves this one (💾 **Save this Recipe to the library**), or deletes a saved one (🗑). Saved Recipes are on the Brain in `config/recipes`. **Save this Recipe** saves it as it has been fixed, with the date at the end of its name (`Pale Ale 2026:11:25`; saved again on the same date: `Pale Ale 2026:11:25 (2)`). The Actual AAU of every hop is saved as 0, because it needs to be zero if used again. The Recipe you have open keeps its name and its Actual AAUs.
 - **Cancel** and **Save**.
 
 ## Brew on: the Tab for the Brew

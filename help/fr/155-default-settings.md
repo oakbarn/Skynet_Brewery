@@ -81,6 +81,10 @@ avant. Un raccord posé sur une ouverture de cuve sans tuyau garde sa taille. Vo
 Ce sont les deux mêmes listes déroulantes que sur la barre Edit layout du 🔨 Build Tab. Elles sont gardées par l'ID d'Interface et l'ID de Tab, donc un Schema
 sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6)
 
+## Brewer Type {#brewer-type}
+
+Ce que cette brasserie brasse d'habitude : **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** (au départ) ou **All Grain (own Grain Mill)**. Quand un jour de brassage ne trouve aucune recette, la fenêtre **No Recipe Found** commence sur ce choix, et vous pouvez en choisir un autre. Voir [Aucune recette trouvée](100-brew-process#no-recipe-found).
+
 ## New User Recipes {#new-user-recipes}
 
 Ce avec quoi commence une nouvelle Recette quand vous appuyez sur **NEW** sur le Tab Recipe. Vous pouvez changer chaque chose dans la Recette. **Units** (US ou Métrique) est en haut de ce Tab (voir **Unités et votre brasserie**).

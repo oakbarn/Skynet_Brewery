@@ -52,7 +52,7 @@ import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_
 import { ON_PRESS, ON_PRESS_TIPS, pressProcessOf, pressNeedsProcess } from './onpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopGroupOf, HOP_GROUPS, minutesHms, pullDate, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, HOP_MEASURES, hopUnitOf, YEAST_UNITS, yeastUnitOf, YEAST_FORMS, YEAST_TYPES, YEAST_FLOCS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, recipeTotals, COMMON_ADJUNCTS, OTHER_ADJUNCT, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopGroupOf, HOP_GROUPS, minutesHms, pullDate, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, HOP_MEASURES, hopUnitOf, YEAST_UNITS, yeastUnitOf, YEAST_FORMS, YEAST_TYPES, YEAST_FLOCS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, recipeTotals, COMMON_ADJUNCTS, OTHER_ADJUNCT, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, BREWER_TYPES, BREWER_TYPE_DEFAULT, brewerTypeOf, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
@@ -166,7 +166,8 @@ const mvAsked = g => (S?.valves || []).some(a => a.widget && a.name === g.name);
 function renderValves(all = []) {
   renderMvAsks(all.filter(a => a.widget));
   renderReadings(all.filter(a => a.reading));
-  const list = all.filter(a => !a.widget && !a.reading);
+  renderRecipeAsks(all.filter(a => a.recipe));
+  const list = all.filter(a => !a.widget && !a.reading && !a.recipe);
   for (const n of $$('#ws .gfx.ip[data-fit="manualValve"]')) { const g = L().graphics.find(x => x.id === n.dataset.gid); n.classList.toggle('mvAsk', !!g && mvAsked(g)); }
   let d = $('#valveDlg');
   if (!list.length) { if (d?.open) d.close(); return; }
@@ -260,6 +261,53 @@ function drawReadings() {
       h('div', { class: 'muted' }, `The Process ${a.process} goes on once it is saved.`),
       h('div', { class: 'bar' }, who ? h('button', { onclick: () => send(a, { action: 'back' }) }, '◀ Back') : '', pause, h('span', { class: 'spacer' }), who ? save : noOne));
   }));
+  if (!d.open) d.showModal();
+}
+// ask_recipe in a Process (OakBarn Brewery, 2026-11-25, "No Recipe Found", Rule 16.14: "On a Brew Day, there is ALWAYS a Recipe"):
+// one dropdown, his list word for word: Saved Recipe, Extract Can Kit, Extract Partial Grain and Hops, All Grain, All Grain (own Grain
+// Mill). It starts on the Brewer Type of ☰ Menu > Default settings ("Choice default is set by brewer Type from Skynet Settings").
+// Open: a Saved Recipe is opened from the library (the Process goes on at once); any other is a NEW Recipe at its Level, and the
+// Recipe tab opens ("Opens the Recipe Tab"). Then a bar at the top says the Process waits until the Recipe is saved (or IMPORTed there).
+let recipeAsked = new Set();      // the asks this screen already opened the Recipe tab for: they show as the bar, not the pop-up
+const NO_RECIPE_SAVED = '__saved__';
+function renderRecipeAsks(list) {
+  recipeAsked = new Set([...recipeAsked].filter(n => list.some(a => a.name === n)));
+  let d = $('#recipeAskDlg'), bar = $('#recipeAskBar');
+  const pop = list.filter(a => !recipeAsked.has(a.name)), wait = list.filter(a => recipeAsked.has(a.name));
+  if (!wait.length) bar?.remove();
+  else {
+    if (!bar) { bar = h('div', { id: 'recipeAskBar', class: 'mvAskBar', role: 'status' }); document.body.append(bar); }
+    bar.replaceChildren(...wait.map(a => h('div', { class: 'mvAskRow' },
+      h('span', { class: 'valveDo' }, '📋 Recipe: '), h('span', {}, `fill it in and press Save on ☰ Menu > Recipe (or IMPORT one there). The Process ${a.process} goes on once it is saved.`),
+      h('button', { onclick: () => openMenuTab('recipe') }, 'Recipe tab'),
+      h('button', { title: 'Show the No Recipe Found choices again', onclick: () => { recipeAsked.delete(a.name); renderRecipeAsks(list); } }, 'Choices'))));
+  }
+  if (!pop.length) { if (d?.open) d.close(); return; }
+  if (d?.open && d.dataset.key === pop.map(a => a.name).join('|')) return;      // already showing: a choice being made stays as it is
+  if (!d) { d = h('dialog', { id: 'recipeAskDlg', class: 'valveDlg', 'data-nomenu': true }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
+  d.dataset.key = pop.map(a => a.name).join('|');
+  const a = pop[0], who = can('operator'), def = brewerTypeOf(S.config.brewDefaults);
+  const pick = h('select', { class: 'askInput', title: 'Saved Recipe: one from the Recipe library. The others start a NEW Recipe at their Level.' },
+    h('option', { value: NO_RECIPE_SAVED }, 'Saved Recipe'), ...BREWER_TYPES.map(t => h('option', { value: t.key, ...(t.key === def.key ? { selected: true } : {}) }, t.name)));
+  const saved = h('select', { class: 'askInput', title: 'The saved Recipes in the Recipe library' }, h('option', { value: '' }, 'Loading ...'));
+  const savedRow = h('div', { class: 'hidden' }, 'Recipe ', saved);
+  const show = () => savedRow.classList.toggle('hidden', pick.value !== NO_RECIPE_SAVED);
+  pick.onchange = show; show();
+  api('GET', '/ui/recipe').then(v => saved.replaceChildren(...(v.saved?.length ? v.saved.map(x => h('option', { value: x.id }, x.name)) : [h('option', { value: '' }, '(no saved Recipes yet)')]))).catch(() => { });
+  const open = guard(async () => {
+    if (pick.value === NO_RECIPE_SAVED) {
+      if (!saved.value) return toast('No saved Recipe yet: pick one of the other choices to make one', true);
+      await api('POST', `/ui/recipes/${saved.value}/open`); d.close(); rcView = null; openMenuTab('recipe'); return toast('Recipe opened');
+    }
+    const t = BREWER_TYPES.find(x => x.key === pick.value) || def;
+    await api('POST', '/ui/recipe/new', { level: t.level }); recipeAsked.add(a.name); d.close(); rcView = null; rcSub = 'recipe'; openMenuTab('recipe'); renderRecipeAsks(list);
+    toast(`New Recipe, ${t.name}`);
+  });
+  d.replaceChildren(h('h3', {}, '📋 No Recipe Found'),
+    h('div', { class: 'valveAsk' }, h('div', { class: 'valveDo' }, 'A Brew Day always has a Recipe. Pick one to start:'),
+      h('div', {}, pick), savedRow,
+      h('div', { class: 'muted' }, `The Process ${a.process} waits until a Recipe is opened, IMPORTed or saved.`),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), who ? h('button', { class: 'primary', onclick: open }, 'Open ▶') : h('span', { class: 'muted' }, 'An operator or admin must pick one.'))));
   if (!d.open) d.showModal();
 }
 function renderMvAsks(list) {
@@ -17956,7 +18004,7 @@ function btSend(now, set, was, metric) {
 }
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
-    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
+    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, brewerType: BREWER_TYPE_DEFAULT, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
   const shownMetric = d.units === 'Metric', shownUnits = d.units;      // what the boxes show now; Units changed here applies after Save
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
@@ -17987,6 +18035,9 @@ function renderDefaultTab(box) {
     ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).' }],
     // New User Recipes (Default Tab 3, 2026-11-16): Units is a Skynet Panel Setting (☰ Menu > Default settings); Equipment Profile,
     // Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are not Recipe defaults
+    // Brewer Type (OakBarn Brewery, 2026-11-25, "No Recipe Found": "Choice default is set by brewer Type from Skynet Settings")
+    ['_bwt', 'Brewer Type', 'head'],
+    ['brewerType', 'Brewer Type', 'sel', BREWER_TYPES.map(t => [t.key, t.name]), true, false, { tip: 'What this brewery usually brews. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14), and you can pick another there.' }],
     ['_r', 'New User Recipes', 'head'],
     ['_rn', 'A new Recipe starts with these, and you can change each one in the Recipe.', 'note'],
     ['_batch', `Batch Size (${w.units === 'Metric' ? 'Liters' : 'Gallons'})`, 'num', null, false, false, { tip: DEF_TIPS.batch }],
@@ -20868,9 +20919,8 @@ function renderRecipeTab(box) {
     if (await dialog('NEW Recipe', [['_n', 'Clear the Recipe and start a NEW one? It starts with the Defaults (☰ Menu > Default). Save it to the Recipe library first if you want to keep it.', 'note'],
       ['level', 'Level', 'sel', RECIPE_LEVELS.map(x => [String(x.level), x.name])]], w) !== 'ok') return;
     readFields(w);
-    await api('POST', '/ui/recipe/new'); await rcLoad();
     const L = RECIPE_LEVELS.find(x => x.level === +w.level) || RECIPE_LEVELS[3];
-    if (L.level !== recipeLevel(rcWork)) { rcWork.level = L.level; rcWork.type = L.type; await api('PUT', '/ui/recipe', rcWork); await rcLoad(); }
+    await api('POST', '/ui/recipe/new', { level: L.level }); await rcLoad();      // the Level goes with it, so a NEW Recipe is not yet "saved" (Rule 16.14)
     rcSub = 'recipe'; renderMenuPane(); toast(`New Recipe, ${L.title}`);
   });
   // IMPORT: a .bsmx or .xml file from this computer or phone. A file with many recipes asks which one.
@@ -20895,7 +20945,9 @@ function renderRecipeTab(box) {
     ...rcView.saved.map(x => h('option', { value: x.id }, x.name)), ...(op ? [h('option', { value: '__save__' }, '💾 Save this Recipe to the library'), ...(rcView.saved.length ? [h('option', { value: '__del__' }, '🗑 Delete a saved Recipe ...')] : [])] : []));
   lib.onchange = guard(async () => {
     const v = lib.value; lib.value = '';
-    if (v === '__save__') { if (profDirty.recipe) await api('PUT', '/ui/recipe', rcWork); const same = rcView.saved.find(x => x.name === rcWork.name); await api('POST', '/ui/recipe/save', { id: same?.id }); await rcLoad(); renderMenuPane(); return toast(`"${rcWork.name}" saved to the library`); }
+    // Save this Recipe (OakBarn Brewery, 2026-11-25): a new library copy named "Name yyyy:mm:dd" ("(2)" on a second save that day), its
+    // Actual AAUs at 0 so it is ready to brew again
+    if (v === '__save__') { if (profDirty.recipe) await api('PUT', '/ui/recipe', rcWork); const r = await api('POST', '/ui/recipe/save', { mode: 'dated' }); await rcLoad(); renderMenuPane(); return toast(`"${r.name}" saved to the library`); }
     if (v === '__del__') {
       const w = { id: rcView.saved[0].id };
       if (await dialog('Delete a saved Recipe', [['id', 'Recipe', 'sel', rcView.saved.map(x => [x.id, x.name])]], w) !== 'ok') return;

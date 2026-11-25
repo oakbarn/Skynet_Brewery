@@ -30,6 +30,7 @@ alm_Hops = true                sound an alarm
 wait BK_Temp <= 154            wait for a temperature (in your Units)
 sleep 1000                     wait 1 second (1000 ms)
 delay 7                        wait 7 seconds (the same as sleep 7000)
+ask_recipe                     no Recipe loaded: the No Recipe Found pop-up, wait for one
 my_Widget.visible = false      hide something on the screen
 if vVCount > 2 && Pump_Red == true
 elseif ...

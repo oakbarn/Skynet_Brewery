@@ -13,6 +13,7 @@ Built from the Process reader and runner (lib/engine.js), 2026-11-21. Upper and 
 |---|---|---|---|
 | `all_heaters_off` | `all_heaters_off` | Turns every heater off: every Heating Element (any method), every older Duty Cycle / Hysteresis / PID / Deadband, and every gas burner (gas valve closed, igniter off). Nothing turns back on by itself. Same list as Emergency Off step 1. | 6.15, Help 100 |
 | `all_pumps_off` | `all_pumps_off` | Turns every pump off. | 6.15, Help 100 |
+| `ask_recipe` | `ask_recipe` | A Brew Day always has a Recipe. With one loaded it goes straight on; with none, the **No Recipe Found** pop-up (Saved Recipe, Extract Can Kit, Extract Partial Grain and Hops, All Grain, All Grain (own Grain Mill); starts on the Default settings Brewer Type) and the Process waits until a Recipe is opened, IMPORTed or saved. | 16.14 |
 | `ask` | `ask "Add the grain, then press Done"` | A pop-up on every screen with ✔ Done. Waits until an Operator or Admin presses it. | 16.5 |
 | `ask` (with a box) | `ask "Fire Hose minutes?" gT_Hose_Time` | The same pop-up with a box for the answer, filled with what the gGlobal or Value Widget holds now. Done puts the answer in it. Waits. | 16.5 |
 | `close_all_valves` | `close_all_valves` | Closes every valve On Close List (tap water valves always). Then, only if the Schema has a Manual valve, one pop-up "Have you closed all Manual Valves?" and waits. | 6.15 |

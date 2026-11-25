@@ -6,7 +6,7 @@ En haut :
 
 - **IMPORT** fait venir un fichier de recette (plus bas).
 - **NEW** vide la recette et en commence une à partir des valeurs par défaut (☰ Menu > Default).
-- **Library ...** ouvre une recette enregistrée, enregistre celle-ci (💾), ou supprime une recette enregistrée. Les recettes enregistrées sont sur le Brain dans `config/recipes`.
+- **Library ...** ouvre une recette enregistrée, enregistre celle-ci (💾 **Save this Recipe to the library**), ou supprime une recette enregistrée (🗑). Les recettes enregistrées sont sur le Brain dans `config/recipes`. **Save this Recipe** l'enregistre telle qu'elle a été corrigée, avec la date à la fin de son nom (`Pale Ale 2026:11:25` ; enregistrée de nouveau à la même date : `Pale Ale 2026:11:25 (2)`). L'Actual AAU de chaque houblon est enregistré à 0, car il doit être à zéro si la recette sert de nouveau. La recette ouverte garde son nom et ses Actual AAU.
 - **Cancel** et **Save**.
 
 ## Brew on : le Tab du brassin {#brew-on-the-tab-for-the-brew}

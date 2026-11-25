@@ -185,6 +185,18 @@ export const RECIPE_LEVELS = [
   { level: 4, name: '4 All Grain', title: 'Level 4: All Grain', type: 'All Grain', about: 'All the sugar comes from mashed grain, then the sparge, the boil and your own hops.',
     tabs: ['hops', 'posthops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
 ];
+// Brewer Type (OakBarn Brewery, 2026-11-25, "No Recipe Found": "Choice default is set by brewer Type from Skynet Settings"): what this
+// brewery usually brews, on ☰ Menu > Default settings (Rule 2.42). It picks the first choice of the No Recipe Found pop-up (Rule 16.14),
+// whose choices are his list, word for word: a Saved Recipe, then the four kinds of brewer, each a NEW Recipe at its Level (Rule 17.11).
+// All Grain (own Grain Mill) is a Level 4 Recipe too; the mill is the brewery's (the "Is the grain milled?" question waits for PreBrew).
+export const BREWER_TYPES = [
+  { key: 'cankit', name: 'Extract Can Kit', level: 1 },
+  { key: 'partial', name: 'Extract Partial Grain and Hops', level: 3 },
+  { key: 'allgrain', name: 'All Grain', level: 4 },
+  { key: 'allgrainmill', name: 'All Grain (own Grain Mill)', level: 4 },
+];
+export const BREWER_TYPE_DEFAULT = 'allgrain';
+export const brewerTypeOf = d => BREWER_TYPES.find(x => x.key === d?.brewerType) ?? BREWER_TYPES.find(x => x.key === BREWER_TYPE_DEFAULT);
 // a Recipe's Level: the one picked, else from its BeerXML type (an imported file), else 4 All Grain
 export function recipeLevel(r) {
   const l = +r?.level; if (RECIPE_LEVELS.some(x => x.level === l)) return l;

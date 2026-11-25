@@ -47,8 +47,8 @@ import { importFolder, listSchemaFiles, readSchemaFile } from './lib/importer.js
 import { THEME_KEYS, forceLookOnTabs, restoreTabs } from './public/themes.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS, DEFAULT_PUMP_OVERLAY, DEFAULT_VALVE_OVERLAY, NEW_TAB_KEYS } from './lib/profiles.js';
-import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView, brewOnTab, defaultBrewOn, brewOnEfficiency, recipeForBrowser, brewOnFromBrowser } from './lib/recipe.js';
-import { newUserRecipe, expectedGravity, measuredEfficiency, averageEfficiency } from './public/recipecalc.js';
+import { readRecipeFile, cleanRecipe, RecipeStore, datedCopy, HopAlerts, recipeView, brewOnTab, defaultBrewOn, brewOnEfficiency, recipeForBrowser, brewOnFromBrowser } from './lib/recipe.js';
+import { newUserRecipe, expectedGravity, measuredEfficiency, averageEfficiency, RECIPE_LEVELS } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
 import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { applyKeptSettings } from './lib/freshstart.js';
@@ -266,7 +266,10 @@ const boilProfileOf = rc => brewProfiles.boil.list().find(x => x.id === (rc?.boi
 const hopAlerts = new HopAlerts({ store, timers: engine.brewTimers, clock: () => clock.now(), send: a => broadcast('hopAlert', a), defaults: () => store.config.brewDefaults ?? {}, recipe: currentRecipe, boilProfile: boilProfileOf });
 // a Recipe always has its Brew on Tab when this Schema has a Tab with an Equipment Profile (Rule 17.13); its Expected Gravity uses
 // that Tab's profile's Efficiency and nothing else
-function useRecipe(rc) {
+// A Recipe that comes in (imported, opened from the library or saved on the Recipe tab) lets a Process waiting in ask_recipe go on
+// (Rule 16.14). A NEW Recipe does not: it is still to be filled in and saved.
+function useRecipe(rc, fresh = false) {
+  if (!fresh) engine.recipeIn();
   const r = cleanRecipe(rc);
   if (!brewOnTab(store.config, r)) r.brewOn = defaultBrewOn(store.config, profiles);
   r.expectedSG = expectedGravity(r, brewOnEfficiency(store.config, profiles, r));
@@ -1149,7 +1152,12 @@ async function route(req, res) {
     b.brewOn = 'brewOnRef' in b ? brewOnFromBrowser(b.brewOnRef, store.config) : was?.brewOn ?? null;
     useRecipe(b); return ok(res, recipeOut(recipeView(currentRecipe(), store.config.brewDefaults ?? {}, boilProfileOf(currentRecipe()))));
   }
-  if (p === '/ui/recipe/new' && m === 'POST') { useRecipe(newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list())); return ok(res); }
+  // NEW (Rule 17.11): the Level picked comes with it (the NEW box or the No Recipe Found pop-up, Rule 16.14)
+  if (p === '/ui/recipe/new' && m === 'POST') {
+    const b = await jsonBody(req).catch(() => ({})), r = newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list()), L = RECIPE_LEVELS.find(x => x.level === +b?.level);
+    if (L) { r.level = L.level; r.type = L.type; }
+    useRecipe(r, true); return ok(res);
+  }
   if (p === '/ui/recipe/import' && m === 'POST') {
     const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
     useRecipe(got.recipe); return ok(res, { names: got.names, name: got.recipe.name, fileEfficiency: got.recipe.fileEfficiency ?? null });
@@ -1160,6 +1168,11 @@ async function route(req, res) {
     const b = await jsonBody(req), rc = currentRecipe() ?? {};
     if (b.mode === 'new') { const nm = recipes.freeName(rc.name); useRecipe({ ...rc, name: nm }); const s = recipes.save(currentRecipe()); return ok(res, { id: s.id, name: nm, saved: recipes.list() }); }
     if (b.mode === 'overwrite') { const same = recipes.byName(rc.name); if (same) recipes.backup(same.id); const s = recipes.save(rc, same?.id); return ok(res, { id: s.id, name: s.name, saved: recipes.list() }); }
+    // mode dated (OakBarn Brewery, 2026-11-25, "No Recipe Found": "Save this recipe which saves the recipe as it has been fixed but the AAU
+    // Actual are not sent because they need to be zero if used again. Save can include an Automatic date State in format yyyy:mm:dd;
+    // if saved again on same date (n); Put at end of name"): a new saved Recipe "Name 2026:11:25", "Name 2026:11:25 (2)" ... with every
+    // hop's Actual AAU at 0. The open Recipe keeps its name and its Actual AAUs.
+    if (b.mode === 'dated') { if (!String(rc.name ?? '').trim()) return fail(res, 400, 'Give the Recipe a name first'); const s = recipes.save(datedCopy(rc, recipes, new Date())); return ok(res, { id: s.id, name: s.name, saved: recipes.list() }); }
     const s = recipes.save(rc, b.id || undefined); return ok(res, { id: s.id, saved: recipes.list() });
   }
   // Track the real Efficiency of each brew, by Schema (Rule 17.13; OakBarn Brewery, 2026-11-17: "Average over 10 brews with same schema";
