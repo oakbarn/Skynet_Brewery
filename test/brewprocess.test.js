@@ -140,6 +140,15 @@ const hv = recipeValues({ recipe: { name: 'H', boilTime: 60, ingredients: { hops
 assert.equal(recipeValue(hv, 'skn_rcp_Hop_1_Name'), 'Magnum'); assert.equal(recipeValue(hv, 'skn_rcp_Hop_Count'), 1);
 assert.equal(recipeValue(hv, 'skn_rcp_Hop_5_Name'), ''); assert.ok(isKnownRecipeName('skn_rcp_Grain_2_SRM') && isKnownRecipeName('skn_rcp_Fermentable_Count'));
 assert.equal(recipeValue(hv, 'skn_rcp_Grain_3_Name'), ''); assert.equal(recipeValue(hv, 'skn_rcp_Fermentable_1_After_Boil'), false); assert.equal(recipeValue(hv, 'skn_rcp_Grain_Count'), 0); assert.equal(recipeValue(hv, 'skn_rcp_Adjunct_2_Name'), ''); assert.ok(isKnownRecipeName('skn_rcp_Adjunct_1_Time_Unit')); assert.equal(recipeValue(hv, 'skn_rcp_Hop_5_Amount'), 0);
+// no Recipe loaded (Brew Day, 2026-11-25): every Recipe tab name reads as 0 or empty, never an error that stops the Process
+{
+  const { RECIPE_FIELDS: TAB } = await import('../public/recipecalc.js');
+  const none = recipeValues({ brewDefaults: {} }, {});
+  for (const [k] of TAB) assert.doesNotThrow(() => recipeValue(none, k), `${k} reads with no Recipe`);
+  assert.equal(recipeValue(none, 'skn_rcp_Whirlpool_Minutes'), 0);
+  assert.equal(recipeValue(none, 'skn_rcp_Style'), '');
+}
 console.log('brew process tests passed');
 // Recipe values metric in a Process (Rule 2.59, 2026-11-20): run from here, so the npm test list is unchanged (no conflict with open PRs)
+await import('./errorresume.test.js');      // Resume after an error (Rule 10.14), run from here so the npm test list is unchanged
 await import('./rcpmetric.test.js');

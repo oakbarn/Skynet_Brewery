@@ -26,4 +26,9 @@ tm_Mash.label = "Mash rest"
 
 `label` is the only word for it in a Process.
 
+A Label a Process sets shows on every screen while the panel runs. The Schema keeps the Label from the Properties, and
+`tm_Mash.label = ""` puts that one back. The 3 Vessel sample's Brew Day uses it on its Step timer: the timer says what the brew is
+doing, such as **Transferring 1st Run**. A timed step (mash, boil, whirlpool) counts down; every other step counts up, so you can see
+how long each transfer, heat and chill takes.
+
 See also [Text boxes](49-text-boxes) and [Interface, Tab and Device names](46-interface-tab-device-names).

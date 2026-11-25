@@ -111,10 +111,11 @@ async function brewDay(id, tweak) {
   // the Three Vessel sample has the Skynet names (Rule 3.14, Fritz 2026-11-08: "bring anything on 3 Vessel up to latest standard")
   const n = NAMES[id] ?? OLD_NAMES;
   store.setProp(n.testing, 'state', true);
-  const seen = [];
+  const seen = [], labels = [];
   const brewer = setInterval(() => {                       // clicks whatever the panel asks for
     const st = store.getProp('gblV_Brew_Status', 'value');
     if (!seen.includes(st)) seen.push(st);
+    const lb = store.getProp('wgt_TMR_Step~timer_BH', 'label'); if (!labels.includes(lb)) labels.push(lb);
     if (store.getProp(n.advance, 'visibility') === 'visible' && !store.getProp(n.advance, 'state')) store.setProp(n.advance, 'state', true, 'ui');
     for (const a of n.alarms) if (store.getProp(a, 'active')) store.setProp(a, 'active', false, 'ui');
   }, 120);
@@ -130,7 +131,7 @@ async function brewDay(id, tweak) {
   hops.stop();
   seen.push(999);
   control.stop(); engine.stopAll(); hw.stop(); clearTimeout(store._persistTimer);
-  return { seen, alerts, secs: (Date.now() - t0) / 1000 };
+  return { seen, labels, alerts, secs: (Date.now() - t0) / 1000 };
 }
 const hop = (name, use, time, extra = {}) => ({ name, kg: 0.028, alpha: 8, use, time, ...extra });
 const fast = store => {   // short recipe (the Skynet Recipe, read as skn_rcp_ values); heaters very quick
@@ -143,6 +144,9 @@ const fast = store => {   // short recipe (the Skynet Recipe, read as skn_rcp_ v
 for (const id of ['three-vessel-one-pump']) {
   const r = await brewDay(id, fast);
   for (const st of [100, 150, 400, 500, 600, 700, 999]) assert.ok(r.seen.includes(st), `${id}: never reached step ${st} (${r.seen})`);
+  // the Step timer says what the brew is doing (OakBarn Brewery, 2026-11-25: "Change the label of the Step time to say what it is doing
+  // i.e. Transferring 1st Run"); the Schema keeps its own Label
+  for (const l of ['Transferring Strike Water', 'Mashing Step 1', 'Transferring 1st Run', 'Transferring 2nd Run', 'Boiling', 'Transferring to the Fermenter']) assert.ok(r.labels.includes(l), `${id}: Step timer never said "${l}" (${r.labels})`);
   // Skynet's hop alerts followed the sped-up boil timer: a drop for each boil hop and the Whirlpool, in order
   const drops = r.alerts.filter(a => a.kind === 'drop').map(a => a.text).join(' | ');
   for (const h of ['Centennial', 'Citra', 'Mosaic', 'Amarillo']) assert.match(drops, new RegExp(h), `${id}: no drop alert for ${h} (${drops})`);
