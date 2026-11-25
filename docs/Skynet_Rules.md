@@ -2884,7 +2884,10 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   a move if it did not just go down"): Shift held as the left button is pressed on an item, then a drag, moves it **and everything
   joined to it through its pipes** (fittings, valves, pumps and the pipes between them) together, with no pop-up. A pipe that runs to
   a vessel (or to something locked) keeps its end on the vessel and gets longer or shorter; moved across its line, a straight one gets
-  a jog in its middle (two bends), so it still runs level and upright and stays joined. ↩ Put back (Ctrl+Z) undoes the move. Shift +
+  a jog in its middle (two bends), so it still runs level and upright and stays joined; a note then names those pipes, warns that more
+  pipes or fittings (elbows) may be needed there, and its **⟲ Revert** button puts the move back (the same as ↩ Put back; OakBarn
+  Brewery: "the clean up would have to Warn that additional pipes or fittings may be needed ... something like Revert rather than
+  Undo, but same as Undo"). ↩ Put back (Ctrl+Z) undoes the move. Shift +
   left click is free on Windows, Mac, Linux and the Pi (Rule 2.73).
 - **🔓 Unlock its IPs in Properties** (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
   "The hose got connected to a Tee IP and I could not unlock"): an IP has no dialog of its own (Rule 2.9), so the title line of the

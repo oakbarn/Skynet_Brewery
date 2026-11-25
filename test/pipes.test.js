@@ -425,6 +425,7 @@ test('Shift + drag moves an item with its pipes, no grab pop-up', async () => {
   assert.match(app, /if \(drag\.mode === 'move' && grabAsks\(item\) && !ev\.shiftKey\) drag\.ask = true;/);
   assert.match(app, /if \(drag\.mode === 'move' && ev\.shiftKey && grabJoins\(item\)\.length\) \{ const g = joinedGroup\(item\);/, 'the whole joined group');
   assert.match(app, /function moveGroup\(d, mx, my\)/);
+  assert.match(app, /More pipes or fittings \(elbows\) may be needed there\.`, \(\) => undoLast\(\), 8000, '⟲ Revert'\);/, 'the clean up warns, with Revert');
   assert.match(app, /q\.p\.points = i === 0 \? \[b0, \.\.\.mid\.reverse\(\), a0\] : \[a0, \.\.\.mid, b0\];/, 'a jog with two bends');
   assert.match(app, /\['move', 'resize', 'pipe', 'group'\]\.includes\(drag\.mode\)\) letGoBentEnds/);
 });

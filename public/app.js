@@ -5918,6 +5918,7 @@ function joinedGroup(start) {
 // move it by [mx, my]: the things and the pipes between them whole; a pipe to a vessel moves only its own end (and keeps its first
 // piece level or upright by moving the next point with it), so it gets longer or shorter
 function moveGroup(d, mx, my) {
+  d.jogged = [];
   for (const q of d.things) { q.o.x = q.x + mx; q.o.y = q.y + my; }
   for (const q of d.pipes) {
     const pts = q.pts.map(c => [...c]);
@@ -5933,7 +5934,7 @@ function moveGroup(d, mx, my) {
       const m = up ? Math.round((a0[1] + b0[1]) / 2) : Math.round((a0[0] + b0[0]) / 2);
       const mid = up ? [[a0[0], m], [b0[0], m]] : [[m, a0[1]], [m, b0[1]]];
       q.p.points = i === 0 ? [b0, ...mid.reverse(), a0] : [a0, ...mid, b0];
-      q.p.straight = false; continue;
+      q.p.straight = false; d.jogged.push(q.p); continue;
     }
     q.p.points = pts;
   }
@@ -5992,7 +5993,13 @@ window.addEventListener('pointerup', () => {
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'resize' && drag.moved && isSized(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
-  if (drag?.moved && ['move', 'resize', 'pipe', 'group'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
+  if (drag?.moved && ['move', 'resize', 'pipe', 'group'].includes(drag.mode)) letGoBentEnds(drag.offBefore);
+  // the clean up says so, and ⟲ Revert puts the move back, as ↩ Put back (Ctrl+Z) does (OakBarn Brewery, 2026-11-24: "the clean up
+  // would have to Warn that additional pipes or fittings may be needed. and a way to Undo, but something like Revert rather than Undo")
+  if (drag?.mode === 'group' && drag.moved && drag.jogged?.length) {
+    const names = drag.jogged.map(p => p.label || p.name).slice(0, 4).join(', ') + (drag.jogged.length > 4 ? ` and ${drag.jogged.length - 4} more` : '');
+    undoNote(`⚠ ${names} got a jog with two bends to stay joined. More pipes or fittings (elbows) may be needed there.`, () => undoLast(), 8000, '⟲ Revert');
+  }     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
   let endJoined = 0;
   if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)), took = ids.size && freeIpsTake(drag.item), snap = ids.size && !took && snapOpenEnd(drag.item), n = ids.size ? rejoinLetGo(drag.item) + rejoinEnds(ids) : 0; endJoined = n; if (n || took || snap) renderWs(); if ((took || snap) && n) toast(`🔗 ${lockName(drag.item)} joined ${n} open pipe end${n > 1 ? 's' : ''}${took ? ' where the last one let go' : ''}. ↩ Put back (Ctrl+Z) undoes it.`); }    // its IP dropped on an open pipe end (a red dot) joins it (Rule 5.37)
@@ -20523,10 +20530,10 @@ const rcEff = rc => { const v = +rcBrewTab(rc)?.equip?.brewhouseEfficiency; retu
 const rcStrikeOff = rc => { const e = rcBrewTab(rc)?.equip; return e ? deltaC(e.strikeOffset, e.units) : 0; };
 const tabTitle = w => w.id ? `${w.id}: ${w.name}` : w.name;
 // a short note with ↩ Undo for a few seconds (Rule 2.53)
-function undoNote(text, onUndo, ms = 8000) {
+function undoNote(text, onUndo, ms = 8000, label = '↩ Undo') {
   $('#undoNote')?.remove();
   const bar = h('div', { id: 'undoNote', role: 'status' }), close = () => { clearTimeout(bar._t); bar.remove(); };
-  bar.append(h('span', {}, text), h('button', { type: 'button', onclick: guard(async () => { close(); await onUndo(); }) }, '↩ Undo'),
+  bar.append(h('span', {}, text), h('button', { type: 'button', onclick: guard(async () => { close(); await onUndo(); }) }, label),
     h('button', { type: 'button', class: 'bbX', title: 'Close this note', onclick: close }, '✕'));
   bar._t = setTimeout(close, ms); document.body.append(bar);
 }
