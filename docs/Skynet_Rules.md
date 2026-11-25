@@ -6192,6 +6192,7 @@ Valve drill-down dialog", Help 128):
    Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
    valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap Water flows instead, Rule 6.15).
+   A tap water valve also has **Water Supply** (None / Pipe / Hose): a picture-only house water line on its TAP end, always flowing blue; it is not a normal Pipe (Rule 6.15 note, 2026-11-25).
 5. Its Type ID is **Valve_E** (OakBarn Brewery, 2026-11-11: "Change ON Off Motorized Valves to DO@Valve_E"; was eVlv, before that E_L_Vlv; the Device Type reads **DO@Valve_E**). Older valves are
    upgraded on load, the stored Type ID and the name (Rule 15.2). The other electric valves follow (OakBarn Brewery, 2026-11-11:
    "Valve_E_H and Valve_Sgas"): a High Temperature Electric Valve is **Valve_E_H** (**DO@Valve_E_H**, was E_H_Vlv) and a Solenoid Gas
@@ -7302,6 +7303,8 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 1.5 (the temperature probe) on the Front above it. Both programs show the same Templates and ports.
 
 ## Change log
+
+- 2026-11-25: Rule 6.15 note (OakBarn Brewery: "Tap when Tap water is always the Tap icon and no user click on the screen"; "Get rid of the Out icon and leave as red or green dot only"; "choice of flow direction change with the valve Horizontal or Vertical"): on a tap water valve the TAP end always shows TAP and can't be clicked or joined; the Out end is a plain red or green IP dot; Tap Water flows offers Left to Right / Right to Left or Top to Bottom / Bottom to Top to fit the Orientation, and changing the Orientation keeps the way the water goes. New Water Supply (None / Pipe / Hose) on a tap water valve (OakBarn Brewery: "A Tap side will have a special Pipe or hose that can connect to it. Only one end of the special Pipe or Hose has an IP that can attach to a Tap side of a Tap Valve. Simply the water supply but just for visual. The Pipe will always have blue flow in it that is always ON"; "And it is not a normal pipe and only a selection for a Tap Water Valve and only on the Tap side"): Skynet draws it 90 px straight out from the TAP end (pipe.supplyOf), always blue flow, no handles, can't be moved or joined, goes when the valve or the choice goes. Help 31 and 128 (and French).
 
 - 2026-11-25: Rule 5.35 changed (OakBarn Brewery: "And once this template is placed on a Tab, it becomes 3 devices and 3 widgets"; "Any thing like the three valve supply tees needs to be individual Devices and widgets after placed because they need to be manipulated individually"): a Valve Tee or Supply Manifold breaks apart as soon as it is placed (Add box, Setup interviews, Template on the 🔨 Build Tab) into Long Tees joined end to end and one valve per tee joined IP to IP on its branch: Motorized = Skynet Motorized Ball Valve Device (same Name, Label, Interface, Port), Manual = Manual Valve Widget (Manual Ball Valve, side view). Its pipes go on the part on the same spot. Older ones break apart when Edit layout opens. The Add box has no Name. Help 146 (and French). BruControl Import program: it never brings in a Valve Tee or Supply Manifold; nothing changes there.
 

@@ -338,6 +338,11 @@ div.zoomBox { pointer-events: auto; }
 #ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fafafa; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
 #ws .gfx.ip.devip { font-size: 8px; z-index: 3; }
 #ws.editing .gfx.ip.devip { cursor: crosshair; }
+/* a tap water valve's TAP side: its TAP mark always shows, not a small dot, and it is not clicked on (OakBarn Brewery, 2026-11-25: "Tap when
+   Tap water is always the Tap ICON and no user Click on the screen"; Rule 6.15) */
+#ws.editing .gfx.ip.devip.tapIp { border-color: var(--ipc) !important; background: #FAFAFA !important; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000 !important; pointer-events: none !important; cursor: default; }
+#ws.editing .gfx.ip.devip.tapIp > span { visibility: visible !important; }
+#ws.editing .gfx.ip.devip.tapIp::before { display: none !important; }
 .pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
 .pipes .plainDot { fill: #e01b12; stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 0.6px #000) drop-shadow(0 0 0.6px #000); }
 .pipes circle.plainDot:not(.handle) { pointer-events: none; }

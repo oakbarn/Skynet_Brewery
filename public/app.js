@@ -578,6 +578,7 @@ function drawWs() {
   if (editing && draft && !drawPts && !(drag?.moved && !drag.done)) joinLooseEnds(w.name);
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) sizeToPipes(w.name);       // every pipe fitting takes the size of its pipe (Rule 5.36)
+  if (editing && draft) syncSupplies(draft, w.name);      // a tap water valve's Water Supply on its TAP side (Rule 6.15)
   if (!editing) { fitValveBoxes(L()); mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
   // Layer Order (Rule 1.29): drawn from the bottom of the list up, so Layer Order 1 is on top
   // Every item, pipes and IP-kind items too, goes on the Tab in that order (no z-index, so each item's own markers stay as they were)
@@ -2592,7 +2593,8 @@ const devIps = e => {
       { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: pp ? pf(pp[1]) : us ? us[1] : sidePt(e, e.ipOut || 'right') }]; }
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
   const tap = e.subtype === 'valve' && e.tapwater && tapOut(e) !== 'none' ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
-  const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
+  // the Tap side shows TAP; the Out end is a plain red or green dot (OakBarn Brewery, 2026-11-25: "Get Rid Of the Out Icon and leave as red or green dot Only")
+  const t = end => !tap ? '' : end === tap ? '' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
   const pe = picEnds(e), fl = flipPt(e);
   // the Valve Standard (Rule 5.29) puts them on the same spots for every valve picture, a user's own too; a valve with no picture
   // keeps them on the middle of its sides
@@ -2807,7 +2809,9 @@ function mvJoinEnds(lay, ws) {
   return n;
 }
 function buildDevIp(e, q) {
-  const n = h('div', { class: 'gfx ip devip' + (ipJoined(q.id) ? ' joined' : ''), 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
+  // a tap water valve's TAP side always shows its TAP mark, and is not clicked on (OakBarn Brewery, 2026-11-25: "Tap when Tap water is
+  // always the Tap ICON and no user Click on the screen"; Rule 6.15)
+  const n = h('div', { class: 'gfx ip devip' + (ipJoined(q.id) ? ' joined' : '') + (q.text === 'TAP' ? ' tapIp' : ''), 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
   n.style.setProperty('--ipc', isInline(e) || isThermowell(e) ? '#a87ee8' : e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
   return n;
@@ -4462,9 +4466,16 @@ const tapWater = e => !!(editing ? e.tapwater : S.values[e.cloneOf || e.name]?.t
 const TAP_OUT = ['out', 'in'];      // the saved keys; tapOutChoices shows them as directions
 // "Tap Water flows" picks a direction, and only the two that fit the way the valve sits (OakBarn Brewery, 2026-11-15): Left to Right /
 // Right to Left when its ends are side by side, Top to Bottom / Bottom to Top when one is above the other. The saved key stays out / in.
+// the valve as it will sit: a box still the old shape while its Orientation is changed in its Properties (the box turns on Save) is
+// turned here first, so its ends are found where they will be
+function tapShape(e) {
+  const c = { ...e, tapwater: false }, w = +c.w || 120, hh = +c.h || 60, k = ['h', 'hd', 'l45', 'r45'].includes(c.orientation) ? 'h' : ['v', 'vl', 'vr'].includes(c.orientation) ? 'v' : '';
+  if ((k === 'h' && hh > w) || (k === 'v' && w > hh)) Object.assign(c, { w: hh, h: w });
+  return c;
+}
 function tapOutChoices(e) {
   if (e?.tapwater && !TAP_OUT.includes(e.tapwaterOut)) e.tapwaterOut = 'out';     // an old 'both' (or none): one way now
-  const [a, b] = (e ? devIps({ ...e, tapwater: false }) : []).map(q => q.c);
+  const [a, b] = (e ? devIps(tapShape(e)) : []).map(q => q.c);
   const flat = a && b ? Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) : (e?.w || 120) >= (e?.h || 60);
   const fwd = a && b ? (flat ? b[0] >= a[0] : b[1] >= a[1]) : true;       // the 'out' end is right of (or below) the 'in' end
   const [p, q] = flat ? ['Left to Right', 'Right to Left'] : ['Top to Bottom', 'Bottom to Top'];
@@ -5251,14 +5262,14 @@ function renderPipes() {
   const drawn = new Map();       // each pipe's drawing, for the crossings (Rule 5.44)
   layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
-    const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, standing = !flowing && still.has(p.id), backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
+    const sup = isSupply(p), byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav || sup, standing = !flowing && still.has(p.id), backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
     // a pipe or hose always shows (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot disappear in the real world")
     for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color }));
     g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
-    g.append(line(p, { class: 'flow' + (flowing ? '' : standing ? ' still' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...(srcs.get(p.id) || still.get(p.id)), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : standing ? ' still' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor(sup ? { tap: true } : { ...(srcs.get(p.id) || still.get(p.id)), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));      // a Water Supply: always blue (Rule 6.15)
     for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     // water spurting out of an open end that flow pours out of (OakBarn Brewery, 2026-11-16: "if a pipe or hose is open, maybe a
     // graphic of water spurting out the end")
@@ -5276,7 +5287,7 @@ function renderPipes() {
     // no orange mismatch ring (OakBarn Brewery, 2026-11-17: "There can be no mismatch because an adapter would be used so no need for
     // Orange Ring"): the IP's Properties say which adapter is in the connection (ipAdapterNote, Rule 2.57)
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
-      if (!ipPoint(p.from, p.workspace) && !p.plainFrom) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
+      if (!isSupply(p) && !ipPoint(p.from, p.workspace) && !p.plainFrom) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
       if (!ipPoint(p.to, p.workspace) && !isQdHose(p) && !p.plainTo) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
       // a plain pipe end shows the small red IP dot (OakBarn Brewery, 2026-11-24: "Pipe end needs the red dot, cannot join a valve to a
       // pipe"; Rule 5.20): it is open, and an IP of a valve, pump or fitting dropped on it joins it
@@ -5298,7 +5309,7 @@ function renderPipes() {
       // drag it to change the length of a pipe (along its line) or to redraw where a hose goes (OakBarn Brewery, 2026-11-14: "After a
       // Pipe is disconnected to Move, able to Shorten"; 2026-11-15: "Ability to change the Length of a Pipe once it has been saved";
       // "Hose also need to be Redrawn after its IPs are unlocked", Rule 5.37)
-      if (!p.locked && (p.points || []).length > 1) (p.points || []).forEach((q, i) => {
+      if (!p.locked && !isSupply(p) && (p.points || []).length > 1) (p.points || []).forEach((q, i) => {      // a Water Supply has no handles: Skynet draws it (Rule 6.15)
         if (!(i > 0 && i < p.points.length - 1 && p.hose) && !endMoves(p, i)) return;
         const plain = i === 0 ? p.plainFrom && !p.from : i === p.points.length - 1 && p.plainTo && !p.to;      // a plain end's handle is its red dot
         g.append(mk('circle', { class: plain ? 'handle plainDot' : 'handle', cx: q[0], cy: q[1], r: plain ? 5.5 : 6, 'data-gid': p.id, 'data-pi': i }));
@@ -5588,7 +5599,8 @@ function zoomIpAt(x, y, openOnly = false) {
   const r = $('#ws').getBoundingClientRect(), p = [(x - r.left) / Z(), (y - r.top) / Z()], lim = 10 / Z();
   const open = id => { const n = pipesOn(id, wsName).length, g = draft?.graphics.find(x => x.id === id && x.kind === 'ip'); return g?.fitting === 'coupling' ? n < 2 : !n; };
   let best = null;
-  for (const q of allIps(wsName)) { if (openOnly && !open(q.id)) continue; const c = ipPoint(q.id, wsName); if (!c) continue; const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= lim && (!best || d < best.d)) best = { d, id: q.id, label: q.label || q.id }; }
+  for (const q of allIps(wsName)) { if (q.text === 'TAP' || (openOnly && !open(q.id))) continue;      // a tap water valve's TAP side is not clicked on (Rule 6.15)
+    const c = ipPoint(q.id, wsName); if (!c) continue; const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= lim && (!best || d < best.d)) best = { d, id: q.id, label: q.label || q.id }; }
   // an open pipe end with no coupling (its red dot, Rule 5.37) is an IP for the trace too (OakBarn Brewery, 2026-11-24: "going from
   // Valve Red IP to Pump Red IP would not lock trace"): it gets its coupling when the trace takes it (zoomTakeEnd)
   for (const pp of (draft?.graphics || []).filter(g => g.kind === 'pipe' && g.workspace === wsName && (g.points || []).length >= 2)) for (const k of ['from', 'to']) {
@@ -6635,6 +6647,7 @@ function finishPipe(to) {
 // a shared IP (a fitting, pump, valve or vessel port) lets go. Dropped with an end on another IP, it joins that IP.
 const ownCoupling = (id, pipe) => { const g = draft.graphics.find(x => x.id === id && x.fitting === 'coupling'); return g && pipesOn(id, pipe.workspace).every(p => p === pipe) ? g : null; };
 function startPipeMove(pipe, p) {
+  if (isSupply(pipe)) return null;        // a Water Supply moves only with its valve (Rule 6.15)
   const riders = lockedRiders(pipe); if (riders.length) return lockedDrag(pipe, p, riders);
   const d = { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points), carry: [] };
   if (!pipe.straight) return d;
@@ -6656,7 +6669,7 @@ function dropPipe(d) {
   const pts = pipe.points, ends = [['from', 0, 1], ['to', pts.length - 1, pts.length - 2]];
   for (const [k, i, j] of ends) {
     const mine = pipe[k] && ownCoupling(pipe[k], pipe);
-    if (pipe[k] && !mine) continue;
+    if ((pipe[k] && !mine) || isSupply(pipe)) continue;      // a Water Supply's house end joins nothing (Rule 6.15)
     const near = allIps(pipe.workspace).filter(q => q.id !== pipe.from && q.id !== pipe.to).map(q => ({ id: q.id, c: ipPoint(q.id, pipe.workspace) }))
       .filter(q => q.c && Math.hypot(q.c[0] - pts[i][0], q.c[1] - pts[i][1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - pts[i][0], a.c[1] - pts[i][1]) - Math.hypot(b.c[0] - pts[i][0], b.c[1] - pts[i][1]))[0]
       || pumpSpotHit(pipe.workspace, pts[i], REJOIN_PX);       // near a pump: the nearest of its 8 IPs (Rule 5.27)
@@ -6963,6 +6976,61 @@ function tapChoices(e) {
   const [lo, hi] = first ? ['in', 'out'] : ['out', 'in'];       // the tap end: the top (or left) one, or the bottom (or right) one
   return [['', 'Needs setting'], [lo, v ? 'Top to Bottom' : 'Left to Right'], [hi, v ? 'Bottom to Top' : 'Right to Left']];
 }
+// The Water Supply (OakBarn Brewery, 2026-11-25: "A Tap side will have a special Pipe or hose that can connect to it. Only one end of the
+// Special Pipe or Hose has a IP that can attach to a Tap side of a Tap Valve. Simply the water supply but just for visual. The Pipe will
+// always have blue flow in it that is always ON"; "it is not a Normal pipe and only a selection for a Tap Water Valve and only on the Tap
+// side"; Rule 6.15): picked in the tap water valve's Properties (Water Supply: None, Pipe or Hose). Skynet draws it on the valve's TAP
+// side, going straight out from the valve; its one IP is on the TAP side, its other end has none (the house water: no dot, never joins
+// anything). It always shows blue flowing toward the valve, open or closed, and moves with the valve. It is only a picture: the flow of
+// the brewery does not use it. It goes when Water Supply is None or the valve is no longer a tap water valve.
+const SUPPLY_SEL = [['', 'None'], ['pipe', 'Pipe'], ['hose', 'Hose']];
+const SUPPLY_LEN = 90;
+const isSupply = p => p?.kind === 'pipe' && !!p.supplyOf;
+function syncSupplies(lay, ws) {
+  if (!lay) return 0;
+  let n = 0;
+  const els = lay.elements.filter(e => e.workspace === ws && e.subtype === 'valve' && hasIps(e));
+  for (const p of lay.graphics.filter(g => isSupply(g) && g.workspace === ws)) {      // its valve gone, no longer tap water, or set to None
+    const e = els.find(x => x.name === p.supplyOf);
+    if (!e || !e.tapwater || !e.supply || tapOut(e) === 'none') { lay.graphics = lay.graphics.filter(g => g !== p); n++; }
+  }
+  for (const e of els.filter(e => e.tapwater && e.supply && tapOut(e) !== 'none')) {
+    const ips = devIps({ ...e, tapwater: false }), tapQ = ips.find(q => !q.id.endsWith(':' + tapOut(e))), outQ = ips.find(q => q !== tapQ);
+    if (!tapQ || !outQ) continue;
+    let p = lay.graphics.find(g => isSupply(g) && g.supplyOf === e.name);
+    const hose = e.supply === 'hose';
+    if (p && p.to === tapQ.id && !!p.hose === hose) continue;
+    const dx = tapQ.c[0] - outQ.c[0], dy = tapQ.c[1] - outQ.c[1], d = Math.hypot(dx, dy) || 1, far = [Math.round(tapQ.c[0] + dx / d * SUPPLY_LEN), Math.round(tapQ.c[1] + dy / d * SUPPLY_LEN)];
+    if (!p) { p = { id: newId(), kind: 'pipe', workspace: ws, supplyOf: e.name, color: '#8a8f96', size: String(defPipeIn()) }; lay.graphics.push(p); giveName(p, lay.graphics); p.label = `${e.label || e.name} water supply`; }
+    Object.assign(p, { to: tapQ.id, straight: !hose, points: [far, [...tapQ.c]] });
+    if (hose) p.hose = true; else delete p.hose;
+    delete p.from; n++;
+  }
+  return n;
+}
+// Turning or flipping a tap water valve keeps the way its water flows (OakBarn Brewery, 2026-11-25: "H works but also Changes the Flow
+// Left to Right and Right to Left"; "choice of flow direction change with the valve Horizontal or Vertical"): Left to Right stays Left to
+// Right (and becomes Top to Bottom when it is stood up), so its Tap and Out ends swap when needed. Only Tap Water flows changes it.
+// fwd: the water goes Left to Right or Top to Bottom
+function tapFwd(e, outKey) {
+  const ips = devIps(tapShape(e)); if (ips.length < 2) return true;
+  const [a, b] = ips, o = outKey === 'in' ? a : b, i = outKey === 'in' ? b : a, flat = Math.abs(b.c[0] - a.c[0]) >= Math.abs(b.c[1] - a.c[1]);
+  return flat ? o.c[0] >= i.c[0] : o.c[1] >= i.c[1];
+}
+const tapOutFor = (e, fwd) => tapFwd(e, 'out') === fwd ? 'out' : 'in';
+// called each time its Properties are drawn and when they are saved: what the valve flowed before it was turned stays
+const TAP_GEO = ['orientation', 'flipH', 'flipV', 'w', 'h', 'template', 'imageOff', 'imageOn', 'rot'];
+function keepTapWay(it) {
+  if (!it?.tapwater) return;
+  const key = tapKey(it), outOf = x => x.template ? (x.tapSource === 'out' ? 'in' : 'out') : x.tapwaterOut;
+  const set = it.template ? !!it.tapSource : TAP_OUT.includes(it.tapwaterOut);
+  if (it._tapFor !== undefined && it._tapFor !== key && it._tapGeo && set) {
+    const fwd = tapFwd({ ...it, ...it._tapGeo }, outOf(it)), out = tapOutFor(it, fwd);      // the way it flowed as it sat before
+    if (it.template) it.tapSource = out === 'out' ? 'in' : 'out'; else it.tapwaterOut = out;
+  }
+  it._tapFor = key;
+  it._tapGeo = Object.fromEntries(TAP_GEO.map(k => [k, it[k]]));
+}
 // Orientation (Fritz, 2026-11-03): one pick for how the valve stands. Each choice is one Template of the set, so the picture and
 // its IPs follow; the main Template also turns 45 degrees (Rule 5.5).
 const orientPick = it => it.template + (it.orientation === 'r45' ? '|r45' : '');
@@ -6999,7 +7067,7 @@ function skyDevFields(it, f) {
   it._orient = orientPick(it);
   const t = devTemplate(it), ok = new Set(skyRows(it)), choices = skyOrientChoices(it);
   if (it._tapFor === undefined) it._tapFor = tapKey(it);
-  else if (it.tapwater && it._tapFor !== tapKey(it)) { it.tapSource = ''; it._tapFor = tapKey(it); }    // turned or flipped: the tap end Needs setting again
+  keepTapWay(it);    // turned or flipped: the water keeps flowing the same way
   const own = {
     orientation: [['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
     tapwater: [['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true],
@@ -10514,7 +10582,7 @@ const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
       // OakBarn Brewery, 2026-11-18 ("There are only valves, not opened and closed the overlay for on is enough", Rule 18.43): one
       // picture; the On Overlay shows it open. Path (open) shows only on a valve that already has an open picture (Never Take Away).
       : [['imageOff', 'Path', 'gpick', null, false, false, { tip: T.vPath, attr: MBV_IP_POP, ...x }], ...(it.imageOn ? [['imageOn', 'Path (open)', 'gpick', null, false, false, { tip: T.vPathOpen, ...x }]] : []),
-        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), false, false, { tip: T.vOrientUser, with: MBV_TOGGLE(it), ...x }]])];
+        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), true, false, { tip: T.vOrientUser, with: MBV_TOGGLE(it), ...x }]])];
 };
 // Toggle (what a tap does) and the Overlay with Database and .API ⬢ on its line (Fritz's screen 7); no Cover on a valve
 // Fritz, 2026-11-05 ("Toggles and Overlays should work normally"): the Skynet valve's too (its Template lists them as user settable)
@@ -10529,14 +10597,14 @@ const MBV_OWN = (it, x = {}) => [it.tapwater ? ((it._tapClose = true), (it._tapO
       with: [['_tapClose', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }], ['_tapOpen', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }]], ...x }])
     : ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, with: [['closeAll', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]], ...x }],
   ...(it.tapwater ? [it.template ? ['tapSource', 'Tap Water flows', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap Water flows', 'sel', tapOutChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
+    ['supply', 'Water Supply', 'sel', SUPPLY_SEL, false, false, { tip: DEVICE_TIPS.vSupply, ...x }],
     ['_vl', 'A tap water valve is always on the Close List and never on the Open List (Rule 6.15).', 'note', null, false, false, x]] : [])];
 function mbvDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   if (it.template) {        // the Orientation picks the Template of its set (Rule 5.17), as in skyDevFields
     skyOrientSwitch(it); it._orient = orientPick(it);
-    if (it._tapFor === undefined) it._tapFor = tapKey(it);
-    else if (it.tapwater && it._tapFor !== tapKey(it)) { it.tapSource = ''; it._tapFor = tapKey(it); }    // turned: the tap end Needs setting again
   }
+  keepTapWay(it);    // turned or flipped: the water keeps flowing the same way (its choices follow Horizontal or Vertical)
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.vLabelVisible }],
     // the ⬢ Pin attributes; the balloons adapted from the Pump's (Rule 18.42) (Invert, One-shot, Dual Throw: OakBarn Brewery, 2026-11-09, Rule 6.22: a valve with an Open and a Close wire)
@@ -11615,6 +11683,7 @@ const DEVICE_TIPS = {
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
   vTapLists: 'A tap water valve is always on the Close List and never on the Open List, so open_all_valves (the last step of Clean) never lets tap water run (Rule 6.15). These can\'t be changed.',
   vTapEnd: 'Which way the tap water flows through it: always one way, from the tap side to the Out side. Lying flat: Left to Right or Right to Left. Standing up: Top to Bottom or Bottom to Top.',
+  vSupply: 'The house water line drawn on its TAP side: a Pipe or a Hose, or None. Only a picture: it always shows blue water flowing to the valve, and moves with it. Its other end is the wall: it joins nothing.',
   // the Temperature Probe (Fritz, 2026-11-05, Rule 18.26)
   pNum: '1-Wire Index: which 1-Wire circuit this DS18B20 is on and its number there. BM1w1_2 = Interface BM, 1-Wire circuit 1, probe 2. Pick ➕ Create an Index for a new 1-Wire circuit for a new circuit (its pin, how it is powered, its resolution), or a circuit you already have to add another probe to it. Its probe (ROM id) is picked on Devices > 🌡 OneWire Probes.',
   tpGraphic: 'The picture of this probe as it will show on the Tab, turned to its Orientation. A Thermowell snaps onto an IP; on a front facing IP it shows from the front. A probe tee cuts a pipe as a tee does (Rule 5.30).',
@@ -13536,9 +13605,9 @@ async function editItem(kind, id) {
         for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
         turnElBox(work, item);
       }
+      if (!skyDev(work) && work.subtype === 'valve') { keepTapWay(work); delete work._tapFor; delete work._tapGeo; }      // a User valve turned: its water keeps its way
       if (skyDev(work)) {        // a User version of a Skynet Template: its fixed attributes stay the Template's (the Brain checks it too)
-        if (work.tapwater && work._tapFor !== tapKey(work)) work.tapSource = '';
-        delete work._tapFor;
+        keepTapWay(work); delete work._tapFor; delete work._tapGeo;
         skyOrientSwitch(work); delete work._orient;
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
         keepDeviceFixed(work, item, devTemplate(work));      // its own copy; the Template only when the Orientation picks another (Rule 2.62)
