@@ -6750,7 +6750,10 @@ BruControl Import's Build page shares the Panel's dialogs).
    5.15). It is not a setting: 💾 Save and ✖ Cancel do not change it. Only the mouse reaches it. Greyed out until the item is saved.
 2. **🏷 Update to Suggested Name** ("If Label is Changed Pop Up Button with Update Suggested Name and populates Change Name Field"):
    once the Label is changed, the button pops up on the Label Visible line; it puts the Suggested Name of the new Label in the Change
-   Name box.
+   Name box. CHANGED 2026-11-25 (OakBarn Brewery: "When this pops up after an edit of the label, update the suggested Name and get rid
+   of the button. Blue pop-up that you can change the Name of the Device to the new Suggested Name"): no button. When the Label is
+   changed (left), the Change Name box takes the new Suggested Name and a blue pop-up (8 s, ✕ closes it) asks "Change the Name to …?"
+   with **✏ Change Name**, which does the same as the ✏ Change Name button (kept with 💾 Save).
 3. **Change Name** ("Change Name Field that a User can Edit. Fill with Current name on Open Add change name Button"): the **Name** is
    greyed out (⛔); below it the **Change Name** box starts with the Name now and can be typed in; **✏ Change Name** checks it (Rules
    3.3, 3.4) and puts it in the Name, kept with 💾 Save, and every Process follows (Rule 3.11). Once built, a Manual Valve's Name is
@@ -7303,6 +7306,8 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 1.5 (the temperature probe) on the Front above it. Both programs show the same Templates and ports.
 
 ## Change log
+
+- 2026-11-25: Rule 18.45 #2 changed (OakBarn Brewery: "When this pops up after an edit of the label, update the suggested Name and get rid of the button. Blue pop-up that you can change the Name of the Device to the new Suggested Name"): 🏷 Update to Suggested Name is gone; a Label change fills the Change Name box with the new Suggested Name and a blue pop-up offers ✏ Change Name. Help 87, 141, 148, 208 (and French).
 
 - 2026-11-25: Manual Ball Valve side view picture (Manual_Ball_Valve_Side_Closed.svg) gets a blue handle (OakBarn Brewery: "Manual Valve side view needs to show handle in blue. Create an SVG based on the one now, just add the blue handle as depicted"). Same file name, so every placed Manual Valve Widget with it shows the handle.
 

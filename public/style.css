@@ -213,6 +213,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 /* a kept Build came back (Rule 4.1): one click to Discard it, then ↩ Undo for a few seconds */
 #buildBack, #undoNote { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--accent, var(--line)); border-radius: 8px; padding: 8px 12px; max-width: 92vw; flex-wrap: wrap; }
 #buildBack .bbX, #undoNote .bbX { padding: 2px 8px; }
+#undoNote.blue { background: #1f4e9c; color: #fafafa; border: 2px solid #fff; font-weight: bold; box-shadow: 0 6px 28px rgba(0,0,0,.55); }      /* a blue pop-up with a button, e.g. ✏ Change Name after a Label change (Rule 18.45 #2) */
 /* Sound is off (OakBarn Brewery, 2026-11-13): a reminder on the Tab until sound is turned on */
 #toast.bad { background: #b3261e; color: #fafafa; }
 #wsSizer { position: relative; margin: 0 auto; }
@@ -1577,7 +1578,6 @@ dialog .fldPair .pairLbl:hover + :is(input, select, textarea):disabled { --dne: 
    box, and a Manual Valve's Graphic */
 .stateBox, .swWithBtn { display: flex; align-items: center; gap: 10px; }
 .stateBox .stateWord { font-weight: 600; }
-.swWithBtn .sugNameBtn.hidden { display: none; }
 .nameRow .chgName { flex: 1; min-width: 0; }
 .mvPreview { width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; }
 .mvPreview .mvPv { position: relative; width: 116px; height: 116px; background: center / 100% 100% no-repeat; }

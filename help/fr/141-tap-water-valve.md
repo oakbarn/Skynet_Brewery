@@ -58,8 +58,8 @@ bord de la boîte. Agrandi ou réduit, le Hose ou Pipe intérieur est redessiné
 ## Sa propre fenêtre {#its-own-dialog}
 
 Ses Properties sont la fenêtre **Hose Bib Widget**, avec le même aspect et le même ordre que celle de la Pump : le cadenas et
-**No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (🏷 Update
-to Suggested Name apparaît dès que le Label change), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
+**No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (dès que le Label
+change, une fenêtre bleue propose ✏ Change Name avec le nouveau Suggested Name), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
 Name** et **✏ Change Name**, le Suggested Name, le **Graphic** (sa seule image Skynet avec son Hose ou Pipe intérieur, tenue à jour),
 **Orientation** avec **Left / Right** et **Inlet**, **Hose or Pipe**, **Cover** avec **Toggle**, **Overlay** avec **Database and .API ⬢**,
 **Inlet IP Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne, et
