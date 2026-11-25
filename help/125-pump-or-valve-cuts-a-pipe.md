@@ -34,10 +34,14 @@ Drop a pump or valve that has no pipes on it with one of its red IP dots right o
 fitting or vessel port), as a valve sits on a pump in real life. It slides so the two dots sit on one spot and they join, IP to IP,
 with no pipe between; both dots turn green. It is not put into a pipe it lies over. ↩ Put back (Ctrl+Z) undoes it. Move either one off (or unlock or delete it) and the join goes: both dots are red again.
 
+## A pump or valve still on its pipes
+
+Drop a pump or valve that is still joined to its pipes on another pipe: it lets go of its old pipes, and their ends stay where
+they were as open ends, each with a red dot. Then it cuts the pipe you dropped it on. ↩ Put back (Ctrl+Z) undoes it.
+
 ## When nothing is cut
 
-- The pump or valve is still joined to another pipe, or it is Locked. A pump or valve you **drag off** its pipes lets them go
-  (Rule 5.19), so dropped on another pipe it cuts that one. One still joined says so in a message.
+- The pump or valve is Locked.
 - The pipe is a hose, or runs at 45 degrees; the valve is turned 45 degrees or is a front view.
 - There is not enough pipe left to go round the pump or to put it in. Move it further along the pipe, or draw a longer pipe.
 

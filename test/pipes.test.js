@@ -388,3 +388,20 @@ test('Tab Settings: Color first when the Name is locked; Skynet backgrounds only
   assert.match(app, /const TAB_BG_GROUP = 'Tab_Background';/);
   assert.match(app, /if \(list === 'backgrounds'\) os = os\.filter\(p => !isSkynetPic\(p\) \|\| groupOf\(p\)\.toLowerCase\(\) === TAB_BG_GROUP\.toLowerCase\(\)\);/);
 });
+
+// OakBarn Brewery, 2026-11-25: "Still cannot join a Pump to a pipe"; "A, the way it was before with just red IPs" (Rule 5.26)
+test('a pump or valve still joined to its pipes lets them go and cuts the pipe it is dropped on', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(app, /is still joined to other pipes\. Take those pipes off it first \(Rule 5\.26\)/, 'no longer refused');
+  assert.match(app, /!p\.locked && !own\.includes\(p\)\)\) \{/, 'its own pipes are never the one cut');
+  assert.match(app, /if \(own\.length\) \{ const j = grabJoins\(it\); unlockJoins\(j\); letGo = j\.length; \}/, 'lets go only once a pipe will be cut');
+});
+
+// OakBarn Brewery, 2026-11-24: "It may be they are joined to the Valves, but the IPs are not aligned" (Rule 5.23)
+test('valve boxes are fitted before valves are lined up on their pipes', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /if \(on\) \{ fitValveBoxes\(draft\); mvJoinEnds\(draft\); centerOnPipes\(draft\);/);
+  assert.match(app, /if \(!editing\) \{ fitValveBoxes\(L\(\)\); mvJoinEnds\(L\(\), w\.name\); centerOnPipes\(L\(\), w\.name\); \}/);
+});

@@ -576,7 +576,7 @@ function drawWs() {
   if (editing && draft && !drawPts) joinLooseEnds(w.name);     // a loose pipe end on another pipe joins it (a tee or an elbow)
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) sizeToPipes(w.name);       // every pipe fitting takes the size of its pipe (Rule 5.36)
-  if (!editing) { mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
+  if (!editing) { fitValveBoxes(L()); mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
   // Layer Order (Rule 1.29): drawn from the bottom of the list up, so Layer Order 1 is on top
   // Every item, pipes and IP-kind items too, goes on the Tab in that order (no z-index, so each item's own markers stay as they were)
   const gfxs = new Set(L().graphics), clones = [];
@@ -2610,13 +2610,11 @@ function splitPipeFor(it) {
   if (ports.length !== 2) return null;
   const gm = mv ? it : elGeom(it), box = { x: gm.x || 0, y: gm.y || 0, w: gm.w || (mv ? 30 : 120), h: gm.h || (mv ? 30 : 60) };
   const mid = [box.x + box.w / 2, box.y + box.h / 2];
+  // still joined to its own pipes and dropped on another pipe: it lets go of them (their ends stay, red), then cuts the pipe it is on
+  // (OakBarn Brewery, 2026-11-24: "Still cannot join a Pump to a pipe"; Rule 5.26); ↩ Put back (Ctrl+Z) undoes the move
   const own = [...ports.map(q => q.id), ...(mv ? [it.id] : [])].flatMap(id => pipesOn(id, ws));
-  if (own.length) {           // already on its pipes: nothing is cut, but say so when it was dropped on another pipe
-    const p = draft.graphics.find(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !own.includes(p) && splitAt(p.points[0], p.points[1], box, ports));
-    return p ? { ok: false, text: `${p.name || 'The pipe'} was not cut: ${mv ? (it.name || 'the Manual Valve') : it.name} is still joined to other pipes. Take those pipes off it first (Rule 5.26).` } : null;
-  }
   let best = null, why = null;
-  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked)) {
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked && !own.includes(p))) {
     const gap = Math.max(45, Math.ceil(9 * pipeWidth(p) / 5) * 5);      // room for a TC elbow (Rule 5.25) between the turns
     const plan = splitAt(p.points[0], p.points[1], box, ports, { gap, aOpen: !!ownCoupling(p.from, p), bOpen: !!ownCoupling(p.to, p) });
     if (!plan) continue;
@@ -2625,7 +2623,10 @@ function splitPipeFor(it) {
     if (!best || d < best.d) best = { p, plan, d };
   }
   if (!best) return why;
-  return applySplit(it, best.p, best.plan, mv ? (it.name || 'the Manual Valve') : it.name, '5.26');
+  let letGo = 0; if (own.length) { const j = grabJoins(it); unlockJoins(j); letGo = j.length; }
+  const r = applySplit(it, best.p, best.plan, mv ? (it.name || 'the Manual Valve') : it.name, '5.26');
+  if (r.ok && letGo) r.text += ` Its old pipe end${letGo > 1 ? 's' : ''} let go (red). ↩ Put back (Ctrl+Z) undoes it.`;
+  return r;
 }
 // put the item into the pipe as splitAt planned: move it onto the pipe's line, put in the joints (they become elbows) and the pieces
 function applySplit(it, p, plan, who, rule) {
@@ -5303,7 +5304,9 @@ function setEditing(on) {
   if (draft && restoreBuild()) setTimeout(buildBackNote, 300);       // an unfinished Build kept on the Brain comes back on its 🔨 Build Tab (Rule 4.1)
   if (!on) $('#buildBack')?.remove();
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
-  if (on) { mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); plainLonelyEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
+  // the valve boxes are fitted first (Rule 5.29), so each valve is lined up on its pipes with its IPs where they will be drawn
+  // (OakBarn Brewery, 2026-11-24: "It may be they are joined to the Valves, but the IPs are not aligned")
+  if (on) { fitValveBoxes(draft); mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); plainLonelyEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
