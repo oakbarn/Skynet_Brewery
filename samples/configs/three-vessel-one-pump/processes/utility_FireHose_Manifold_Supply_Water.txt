@@ -34,12 +34,12 @@ endif
 if vVSwitchNumber == 999
 	goto "End_FMS_Water"
 endif
-BM_33_DO@Valve_E_Manifold~Supply_WA = false
-BM_31_DO@Valve_E_Fire~Hose_WA = false
+BM_33_DO@Valve_E_Manifold~Valve_WA = false
+BM_31_DO@Valve_E_Firehose~Valve_WA = false
 wgt_TMR_Water~delay_WA.visible = false
 // the Water timer shows 00:00:00 from the press until the water flows (Panel Update 9, item 12d)
-stop "wgt_TMR_Water_WA"
-wgt_TMR_Water_WA = 00:00:00
+stop "wgt_TMR_Water~timer_WA"
+wgt_TMR_Water~timer_WA = 00:00:00
 gblS_Water_Text_1_Water = "Wait! Will Auto Advance"
 //...........................................
 //Set Water Valve Status
@@ -130,7 +130,7 @@ wgt_TMR_Water~delay_WA = 00:00:20
 wgt_TMR_Water~delay_WA.countdown = true
 wgt_TMR_Water~delay_WA.visible = true
 start "wgt_TMR_Water~delay_WA"
-wgt_ALM_Fire~Hose_WA = true
+wgt_ALM_Fire~Hose~warning_WA = true
 wait wgt_TMR_Water~delay_WA <= 00:00:10
 gblS_Water_Text_1_Water = "FireHose ON in 10 Seconds!"
 wait wgt_TMR_Water~delay_WA <= 00:00:05
@@ -138,7 +138,7 @@ gblS_Water_Text_1_Water = "FireHose ALMOST On!"
 wait wgt_TMR_Water~delay_WA <= 00:00:00
 stop "wgt_TMR_Water~delay_WA"
 wgt_TMR_Water~delay_WA.visible = false
-wgt_ALM_Fire~Hose_WA = false
+wgt_ALM_Fire~Hose~warning_WA = false
 gblS_Water_Text_1_Water = vSMsg
 if vVSwitchNumber == 1005
 	goto "Start_Timer_Floats"
@@ -205,7 +205,7 @@ wgt_TMR_Water~delay_WA = 00:00:20
 wgt_TMR_Water~delay_WA.countdown = true
 wgt_TMR_Water~delay_WA.visible = true
 start "wgt_TMR_Water~delay_WA"
-wgt_ALM_Water~flow_WA = true
+wgt_ALM_Manifold~warning_WA = true
 wait wgt_TMR_Water~delay_WA <= 00:00:10
 gblS_Water_Text_1_Water = "Manifold Supply Valve ON in 10 Seconds!"
 wait wgt_TMR_Water~delay_WA <= 00:00:05
@@ -213,7 +213,7 @@ gblS_Water_Text_1_Water = "Manifold Supply Valve ALMOST On!"
 wait wgt_TMR_Water~delay_WA <= 00:00:00
 stop "wgt_TMR_Water~delay_WA"
 wgt_TMR_Water~delay_WA.visible = false
-wgt_ALM_Water~flow_WA = false
+wgt_ALM_Manifold~warning_WA = false
 gblS_Water_Text_1_Water = vSMsg
 if vVSwitchNumber == 2005
 	goto "Start_Timer_Floats"
@@ -222,10 +222,10 @@ goto "Start_Timers"
 //................................................................
 [Start_Timers]
 print "@ 395 Start Timers"
-stop "wgt_TMR_Water_WA"
-wgt_TMR_Water_WA = vT_Set
-wgt_TMR_Water_WA.countdown = true
-start "wgt_TMR_Water_WA"
+stop "wgt_TMR_Water~timer_WA"
+wgt_TMR_Water~timer_WA = vT_Set
+wgt_TMR_Water~timer_WA.countdown = true
+start "wgt_TMR_Water~timer_WA"
 // a hidden count-up timer measures the true run time, from the valve opening to the wait being met or Override (for seconds per gallon)
 stop "wgt_TMR_Water~elapsed_WA"
 wgt_TMR_Water~elapsed_WA = 00:00:00
@@ -233,64 +233,64 @@ wgt_TMR_Water~elapsed_WA.countdown = false
 start "wgt_TMR_Water~elapsed_WA"
 if vVPump == 200
 	// FireHose
-	BM_31_DO@Valve_E_Fire~Hose_WA = true
+	BM_31_DO@Valve_E_Firehose~Valve_WA = true
 endif
 if vVPump == 100
 	// Manifold Supply Valve
-	BM_33_DO@Valve_E_Manifold~Supply_WA = true
+	BM_33_DO@Valve_E_Manifold~Valve_WA = true
 endif
 // the water flows: the button pressed shows Running, the other Water buttons stay greyed out (Panel Update 9, item 12a)
 wgt_PSW_FireHose~1~Minute_WA.phase = "running"
 // One wait: the timer reaching 00:00:00 ends it, or the Water Override button (Rule 16.11) shuts it off early
-wait wgt_TMR_Water_WA <= 00:00:00
+wait wgt_TMR_Water~timer_WA <= 00:00:00
 goto "Exit_Timer_End"
 //................................................................
 [Start_Timer_Floats]
 print "@ 458 Start Timers for floats"
-stop "wgt_TMR_Water_WA"
-wgt_TMR_Water_WA = 00:00:00
-wgt_TMR_Water_WA.countdown = false
-start "wgt_TMR_Water_WA"
+stop "wgt_TMR_Water~timer_WA"
+wgt_TMR_Water~timer_WA = 00:00:00
+wgt_TMR_Water~timer_WA.countdown = false
+start "wgt_TMR_Water~timer_WA"
 // a hidden count-up timer measures the true run time, from the valve opening to the wait being met or Override (for seconds per gallon)
 stop "wgt_TMR_Water~elapsed_WA"
 wgt_TMR_Water~elapsed_WA = 00:00:00
 wgt_TMR_Water~elapsed_WA.countdown = false
 start "wgt_TMR_Water~elapsed_WA"
 if vVSwitchNumber == 1005
-	BM_31_DO@Valve_E_Fire~Hose_WA = true
+	BM_31_DO@Valve_E_Firehose~Valve_WA = true
 endif
 if vVSwitchNumber == 2005
-	BM_33_DO@Valve_E_Manifold~Supply_WA = true
+	BM_33_DO@Valve_E_Manifold~Valve_WA = true
 endif
 // the water flows: the button pressed shows Running, the other Water buttons stay greyed out (Panel Update 9, item 12a)
 wgt_PSW_FireHose~1~Minute_WA.phase = "running"
 // The float being made ends it, or Override shuts it off (his OverRide? here never worked: the quote in
 // if "sw_Advance_Endless state" == true was in the wrong place)
-wait BM_32_DI@Float_Water~float_WA == true
+wait BM_32_DI@Float_Force~floats_WA == true
 goto "Exit_Timer_End"
 //....................................
 [Exit_Timer_End]
 print "@ 454 Exit_Timer_End"
-stop "wgt_TMR_Water_WA"
+stop "wgt_TMR_Water~timer_WA"
 // the true run time, whether the wait was met or Override ended it, is kept in gblT_Elapsed_Water
 stop "wgt_TMR_Water~elapsed_WA"
 gblT_Elapsed_Water = wgt_TMR_Water~elapsed_WA
 if vVPump == 100
-	BM_33_DO@Valve_E_Manifold~Supply_WA = false
+	BM_33_DO@Valve_E_Manifold~Valve_WA = false
 endif
 if vVPump == 200
-	BM_31_DO@Valve_E_Fire~Hose_WA = false
+	BM_31_DO@Valve_E_Firehose~Valve_WA = false
 endif
 [End_FMS_Water]
 print "@465 END"
-wgt_ALM_Fire~Hose_WA = false
-wgt_ALM_Water~flow_WA = false
+wgt_ALM_Fire~Hose~warning_WA = false
+wgt_ALM_Manifold~warning_WA = false
 wgt_TMR_Water~delay_WA.visible = false
 gblS_Water_Text_1_Water = "Wait.  Will Auto Advance"
 gblV_Brew_Status = vV_GBrew_Status
 gblV_Water_Switch_Status_Water = -9999
-BM_33_DO@Valve_E_Manifold~Supply_WA = false
-BM_31_DO@Valve_E_Fire~Hose_WA = false
+BM_33_DO@Valve_E_Manifold~Valve_WA = false
+BM_31_DO@Valve_E_Firehose~Valve_WA = false
 gblS_Water_Text_1_Water = "Ready. Pick a Fire Hose or Manifold button."
 // every Water button shows Stopped and its Start works again (Panel Update 9, item 12a)
 wgt_PSW_FireHose~1~Minute_WA.phase = "stopped"

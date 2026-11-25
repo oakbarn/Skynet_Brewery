@@ -219,7 +219,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "wgt_VAL_Strike~volume_RP",
+   "name": "wgt_VAL_Strike~volume_RE",
    "type": "valueWidget",
    "x": 0,
    "y": 30,
@@ -243,7 +243,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "wgt_VAL_Mash~pH_RP",
+   "name": "wgt_VAL_Mash~pH_RE",
    "type": "valueWidget",
    "x": 175,
    "y": 30,
@@ -267,7 +267,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "wgt_VAL_Pre~boil~volume_RP",
+   "name": "wgt_VAL_Pre~boil~volume_RE",
    "type": "valueWidget",
    "x": 350,
    "y": 30,
@@ -291,7 +291,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "wgt_VAL_Pre~boil~gravity_RP",
+   "name": "wgt_VAL_Pre~boil~gravity_RE",
    "type": "valueWidget",
    "x": 0,
    "y": 88,
@@ -315,7 +315,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "wgt_VAL_Post~boil~volume_RP",
+   "name": "wgt_VAL_Post~boil~volume_RE",
    "type": "valueWidget",
    "x": 175,
    "y": 88,
@@ -339,7 +339,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "wgt_VAL_Original~gravity_RP",
+   "name": "wgt_VAL_Original~gravity_RE",
    "type": "valueWidget",
    "x": 350,
    "y": 88,
@@ -363,7 +363,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "wgt_VAL_Into~fermenter_RP",
+   "name": "wgt_VAL_Into~fermenter_RE",
    "type": "valueWidget",
    "x": 0,
    "y": 146,
@@ -726,32 +726,6 @@
    "layer": 74
   },
   {
-   "name": "BM_30_DO@Valve_E_Manifold~Supply_BH",
-   "type": "digitalOut",
-   "subtype": "valve",
-   "workspace": "Brew House",
-   "device": "Brewery Mega",
-   "channel": 30,
-   "label": "Manifold Supply",
-   "x": 765,
-   "y": 750,
-   "w": 75,
-   "h": 93,
-   "ipIn": "left",
-   "ipOut": "right",
-   "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
-   "hideName": true,
-   "hideValue": true,
-   "tap": "toggle",
-   "onText": "OPEN",
-   "offText": "CLOSED",
-   "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "tapwater": false,
-   "tapwaterOut": "in",
-   "layer": 73,
-   "hidden": false
-  },
-  {
    "workspace": "Water",
    "name": "wgt_PSW_FireHose~1~Minute_WA",
    "type": "processWidget",
@@ -840,7 +814,7 @@
    "nameColor": "#ffff00",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
-   "follow": "BM_32_DI@Float_Water~float_WA",
+   "follow": "BM_32_DI@Float_Force~floats_WA",
    "group": "Water",
    "layer": 28
   },
@@ -950,12 +924,12 @@
    "nameColor": "#000000",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
-   "follow": "BM_32_DI@Float_Water~float_WA",
+   "follow": "BM_32_DI@Float_Force~floats_WA",
    "group": "Water",
    "layer": 22
   },
   {
-   "name": "BM_33_DO@Valve_E_Manifold~Supply_WA",
+   "name": "BM_33_DO@Valve_E_Manifold~Valve_WA",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Water",
@@ -979,7 +953,7 @@
    "layer": 21
   },
   {
-   "name": "BM_31_DO@Valve_E_Fire~Hose_WA",
+   "name": "BM_31_DO@Valve_E_Firehose~Valve_WA",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Water",
@@ -1003,7 +977,7 @@
    "layer": 20
   },
   {
-   "name": "BM_32_DI@Float_Water~float_WA",
+   "name": "BM_32_DI@Float_Force~floats_WA",
    "typeCode": "Float",
    "type": "digitalIn",
    "mode": "switch",
@@ -1139,7 +1113,7 @@
   },
   {
    "workspace": "Water",
-   "name": "wgt_TMR_Water_WA",
+   "name": "wgt_TMR_Water~timer_WA",
    "type": "timer",
    "label": "Water timer",
    "x": 760,
@@ -1153,7 +1127,7 @@
   },
   {
    "workspace": "Water",
-   "name": "wgt_ALM_Fire~Hose_WA",
+   "name": "wgt_ALM_Fire~Hose~warning_WA",
    "type": "alarm",
    "label": "Fire Hose warning",
    "x": 760,
@@ -1169,7 +1143,7 @@
   },
   {
    "workspace": "Water",
-   "name": "wgt_ALM_Water~flow_WA",
+   "name": "wgt_ALM_Manifold~warning_WA",
    "type": "alarm",
    "label": "Manifold warning",
    "x": 890,
@@ -3867,7 +3841,7 @@
    "kind": "pipe",
    "workspace": "Water",
    "from": "fw_tee_e",
-   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:out",
+   "to": "dev:BM_33_DO@Valve_E_Manifold~Valve_WA:out",
    "points": [
     [
      1480,
@@ -3890,7 +3864,7 @@
    "kind": "pipe",
    "workspace": "Water",
    "from": "fw_tee_b",
-   "to": "dev:BM_31_DO@Valve_E_Fire~Hose_WA:in",
+   "to": "dev:BM_31_DO@Valve_E_Firehose~Valve_WA:in",
    "points": [
     [
      1508,
@@ -3928,7 +3902,7 @@
    "id": "p_fw_4",
    "kind": "pipe",
    "workspace": "Water",
-   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:in",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Valve_WA:in",
    "to": "ip_brew_manifold",
    "points": [
     [
@@ -3968,7 +3942,7 @@
    "id": "p_fw_5",
    "kind": "pipe",
    "workspace": "Water",
-   "from": "dev:BM_31_DO@Valve_E_Fire~Hose_WA:out",
+   "from": "dev:BM_31_DO@Valve_E_Firehose~Valve_WA:out",
    "to": "ip_fh_qd",
    "points": [
     [
@@ -4035,13 +4009,23 @@
    "layer": 35
   },
   {
+   "id": "bh_mv_clone",
+   "kind": "clone",
+   "of": "BM_33_DO@Valve_E_Manifold~Valve_WA",
+   "workspace": "Brew House",
+   "x": 765,
+   "y": 750,
+   "name": "BM_33_DO@Valve_E_Manifold~Valve_WA_Clone_1",
+   "layer": 73
+  },
+  {
    "id": "bh_fh_clone",
    "kind": "clone",
-   "of": "BM_31_DO@Valve_E_Fire~Hose_WA",
+   "of": "BM_31_DO@Valve_E_Firehose~Valve_WA",
    "workspace": "Brew House",
    "x": 685,
    "y": 895,
-   "name": "BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1",
+   "name": "BM_31_DO@Valve_E_Firehose~Valve_WA_Clone_1",
    "layer": 25
   },
   {
@@ -4060,7 +4044,7 @@
    "labelSize": 14,
    "name": "QD_2",
    "layer": 23,
-   "qdOn": "dev:BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1:out"
+   "qdOn": "dev:BM_31_DO@Valve_E_Firehose~Valve_WA_Clone_1:out"
   },
   {
    "id": "gmww6pxf7qc3",
@@ -4205,7 +4189,7 @@
    "straight": true,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5",
-   "from": "dev:BM_30_DO@Valve_E_Manifold~Supply_BH:out",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Valve_WA_Clone_1:in",
    "to": "gmwwcyo2js30",
    "name": "Pipe_13",
    "label": "pipe_13",
@@ -4361,7 +4345,7 @@
     ],
     "wasEnd": "in"
    },
-   "from": "dev:BM_30_DO@Valve_E_Manifold~Supply_BH:in",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Valve_WA_Clone_1:out",
    "layer": 18
   },
   {
@@ -4410,7 +4394,7 @@
    "straight": true,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5",
-   "from": "dev:BM_31_DO@Valve_E_Fire~Hose_WA_Clone_1:in",
+   "from": "dev:BM_31_DO@Valve_E_Firehose~Valve_WA_Clone_1:in",
    "to": "gmwwd3jisbwl",
    "name": "Pipe_31",
    "label": "pipe_31",
