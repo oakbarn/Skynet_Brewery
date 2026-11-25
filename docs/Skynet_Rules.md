@@ -5755,8 +5755,9 @@ Recipe library on ☰ Menu > Recipe **well before** a Brew Day, and saved to the
 in 620"): the Process command **`ask_recipe`** goes straight on when a Recipe is loaded; with none, the **No Recipe Found** pop-up shows on
 every screen with one dropdown, his list word for word: **Saved Recipe, Extract Can Kit, Extract Partial Grain and Hops, All Grain, All
 Grain (own Grain Mill)** (5 choices: a dropdown "if desired", Rule 2.6, as he drew it). **Extract Can Kit** (OakBarn Brewery, 2026-11-25: "Extract Kits mean that it is a Malt Extract Kit. The Malt Extract can be liquid or
-Dry in the kit. I just order a Kit but you also need to buy a KG of Dextrose (Corn Sugar)"): a Malt Extract Kit, its extract liquid or dry,
-often with added sugar such as 1 kg of Dextrose (corn sugar); there is no separate plain Extract choice. It starts on the **Brewer Type** ("Choice default
+Dry in the kit. I just order a Kit but you also need to buy a KG of Dextrose (Corn Sugar)"): a Malt Extract Kit, its extract liquid or dry;
+it MAY need added sugar such as 1 kg of Dextrose (corn sugar), and sometimes everything is in the can ("May require it.  Sometime it is just in the can"),
+so added sugar is optional; there is no separate plain Extract choice. It starts on the **Brewer Type** ("Choice default
 is set by brewer Type from Skynet Settings"), a new ☰ Menu > Default settings dropdown of the four kinds of brewer (All Grain unless
 changed, Rule 2.42). **Open ▶** ("Opens the Recipe Tab"): a Saved Recipe is opened from the library and the Process goes on; any other
 choice makes a NEW Recipe at its Level (Can Kit 1, Partial Grain and Hops 3, All Grain 4, All Grain own Grain Mill 4; Rule 17.11) and
