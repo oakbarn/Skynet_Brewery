@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { isBlank, isCancelButton, isDeleteButton, guardingField, allowedWhileBlank, LABEL_WARN, LABEL_WARN_MS } from '../public/labelguard.js';
 
 assert.equal(LABEL_WARN, 'The Label cannot be blank.');
-assert.equal(LABEL_WARN_MS, 5000, 'the pop-up goes away by itself after 5 seconds');
+assert.equal(LABEL_WARN_MS, 2000, 'the pop-up goes away by itself after 2 seconds (Rule 2.74; was 5)');
 for (const v of ['', '   ', null, undefined, '\t']) assert.ok(isBlank(v), `"${v}" is blank`);
 for (const v of ['mBV_1', ' a ', '0']) assert.ok(!isBlank(v), `"${v}" is not blank`);
 assert.ok(isCancelButton({ dataset: { close: 'cancel' }, textContent: 'Cancel' }), 'Properties Cancel');

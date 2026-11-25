@@ -11,7 +11,7 @@ pop-up:
 
 > ⚠ The Label cannot be blank.
 
-The cursor goes back to the Label so you can type one. The pop-up goes away by itself after **5 seconds** (or tap it). Pressing
+The cursor goes back to the Label so you can type one. The pop-up goes away by itself after **2 seconds** (or tap it). Pressing
 **Enter** in an empty Label keeps you on it, and clicking an empty spot of the dialog puts the cursor back in the Label.
 
 ## What always works

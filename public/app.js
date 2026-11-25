@@ -13494,13 +13494,13 @@ const TAB_TIPS = {
   hoseSize: 'How thick a 1/2" hose is drawn on this Tab, in pixels. Hoses are usually drawn thinner than pipes. A new Tab starts at 6 (☰ Menu > Default settings). Every other hose size is drawn to scale from it. Empty = the Pipe Size, as on Tabs made before there was a Hose Size.',
   flowColor: 'The color of the flow in every pipe and hose on this Tab. None = each pipe keeps its own Flow Color. Mash, Boil, Whirlpool and Ferment: a pipe with a Flow Color of its own keeps it. Tap, Strike and the plain colors: every pipe takes it. Flow from a Tap Water Valve is always Blue, and flow that starts at a Vessel with an Out Flow Color takes that color.\n\nThe technical side: a Process sets it with tab.flow_Color = Mash, on the Tab the screen shows.',
 };
-// the small ⚠ box of Rule 18.28 (public/labelguard.js), for a box of this dialog that Save waits for; it goes away after 5 seconds
+// the small ⚠ box of Rule 18.28 (public/labelguard.js), for a box of this dialog that Save waits for; it goes away after 2 seconds (Rule 2.74)
 function dlgWarn(field, say, then) {
   const d = field.closest('dialog'); if (!d) return;
   let w = d.querySelector(':scope > .labelWarn');
   if (!w) { w = h('div', { class: 'labelWarn', role: 'alert' }); w.onclick = () => w.remove(); d.append(w); }
   w.replaceChildren(h('b', {}, '⚠ ' + say), h('span', {}, then));
-  clearTimeout(w._t); w._t = setTimeout(() => w.remove(), 5000);
+  clearTimeout(w._t); w._t = setTimeout(() => w.remove(), NOTE_MS);      // 2 seconds, like every note (Rule 2.74)
   field.classList.add('labelBlank'); field.focus();
 }
 async function editWorkspace() {
@@ -19285,7 +19285,7 @@ const hoseLead = pts => pts?.length > 1 ? [pts[1][0] - pts[0][0], pts[1][1] - pt
 const qdWhere = (id, ws) => { const vt = vtopOf(id); if (vt !== null) { const v = L().graphics.find(x => x.id === vt); return `in the top of ${v?.name || v?.label || 'the vessel'}`; }
   const g = L().graphics.find(x => x.id === id); if (g) return `on ${g.name || g.label || 'the IP'}`; return `on ${allIps(ws).find(q => q.id === id)?.label || 'the IP'}`; };
 // the pop-up a left-button press on a QD hose end shows: the red Do Not Enter sign and how to move it. It sits by the mouse and goes by
-// itself after 3 seconds, or at the next click.
+// itself after 2 seconds (Rule 2.74), or at the next click.
 function qdLeftHint(ev) {
   $('#qdHint')?.remove();
   const box = h('div', { id: 'qdHint', class: 'qdHint', role: 'alert' }, h('span', { class: 'qdHintSign', 'aria-hidden': 'true' }), 'Hold the left button a moment, then drag');
@@ -19293,7 +19293,7 @@ function qdLeftHint(ev) {
   document.body.append(box);
   const gone = () => { box.remove(); document.removeEventListener('pointerdown', gone, true); };
   setTimeout(() => document.addEventListener('pointerdown', gone, true), 0);
-  setTimeout(gone, 3000);
+  setTimeout(gone, NOTE_MS);
 }
 $('#ws').addEventListener('dragstart', ev => { if (ev.target.closest?.('div.qdEnd')) ev.preventDefault(); });      // no browser drag (its own ⛔) on a hose end
 let qdHintWait = null;

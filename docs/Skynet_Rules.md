@@ -654,7 +654,7 @@ Part of the Properties of a Hose and Not Outside"): an IP or a hose end has no d
 Properties. So a double-click on the **yellow ring of a hose end** opens that hose's Properties, and a double-click on an **IP** opens
 the Properties of the Device or Widget it belongs to (a Vessel's IP: the Vessel; a Pipe Fitting or a free IP: its own), on a running
 Tab as in Edit layout. Edit layout opens with them (admins only). A Device or a Manual Valve itself keeps its own clicks. A quick left click
-on the yellow ring does not move it: after a moment a small pop-up with the ⛔ says **Hold the left button a moment, then drag** (Rule 5.40;
+on the yellow ring does not move it: after a moment a small pop-up with the ⛔ says **Hold the left button a moment, then drag** for 2 seconds (Rule 2.74; Rule 5.40;
 was "Move with Held Right Click" until 2026-11-24).
 *Replaced:* right-click opening Properties (PR #51) was built, then Fritz turned it down and the PR
 was closed. Do not offer it again.
@@ -1694,7 +1694,10 @@ shortcut is added there too.
 gone"; "All nanny pop-ups 3 seconds"; then "Change Blue and Red Nanny to 2 seconds"). Every short note that pops up at the bottom of
 the Panel ("… deleted. ↩ Put back (Ctrl+Z) brings it back.", "Moved to …", "Saved" …), blue or red (an error), in the Panel and the
 BruControl Import program, stays **2 seconds**, then goes by itself, however long its words are. A new note never asks for another
-time. *Was (earlier the same day):* blue notes 3 seconds, red notes 5.
+time. The same for the small red **⚠** box in a dialog (Rule 18.28, was 5 seconds) and the **Hold the left button a moment, then
+drag** hint on a Quick Disconnect hose end (was 3) (OakBarn Brewery, 2026-11-25: "Blue and Red notes need to be 2 seconds. Even 3
+is too long"). A note with a button on it (**↩ Undo**) keeps its own time, so there is time to press it. *Was (2026-11-24):* blue
+notes 3 seconds, red notes 5.
 
 ## 3. Names and file names
 
@@ -6254,7 +6257,7 @@ States the Label Cannot be Blank. Dialog self distructs after 5 seconds"; OakBar
   two-line box, the ⬢, Label Visible, the Interface, the Port, the Tab, the ? Help ...).
 - Only **Save / ➕ Add Device / ➕ Add Widget** and a box that gets no focus (greyed out or read only, like Device Type) wait for the
   Label: a click on them does nothing, a small pop-up says **"⚠ The Label cannot be blank."** and the focus goes back to the Label.
-  The pop-up **goes away by itself after 5 seconds** (or when tapped).
+  The pop-up **goes away by itself after 2 seconds** (or when tapped; Rule 2.74, was 5 seconds).
 - A field's **name** (its Hover Help) may be clicked or double-clicked too: a double-click on the Tab's name opens its Tab settings
   (OakBarn Brewery, 2026-11-15: a double-click on the Tab with a blank Label after Confirm gave the warning: fixed).
 - **Enter** on a blank Label stays on it. A blank Label left for nothing (a click on empty space, a title, a greyed out box) gets
@@ -7263,6 +7266,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 - 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("On a property allow individual Unlock of an IP in addition to Unlock IPs"): Properties with 2 or more joined pipe ends also have 🔓 Unlock one IP ▾ (a Pipe or Hose: Unlock one end ▾); the picked one lets go alone. The Zoom box drags and pans with the left button only, fills the work area at 2.5x, centered on the whole manifold (50 px all round) when it fits, and never opens Tab settings from inside it (Rule 5.37). Rule 4.10: → Right Arrow on a Template's icon does the same as B ("On a Template, could we make the Right Arrow the same as B"). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
+- 2026-11-25: Rule 2.74 changed (OakBarn Brewery: "Blue and Red notes need to be 2 seconds. Even 3 is too long"): the small red ⚠ box in a dialog (Rule 18.28) goes after 2 seconds (was 5), and the QD hose end hint after 2 (was 3); a note with ↩ Undo keeps its time. Help 140 (and French). BruControl Import program: its notes were already 2 seconds; nothing else changes there.
 - 2026-11-24: Rule 2.74 changed (OakBarn Brewery: "Change Blue and Red Nanny to 2 seconds"): every note, blue or red, in the Panel and the BruControl Import program stays 2 seconds (blue was 3, red 5).
 - 2026-11-24: Rule 5.37 changed (OakBarn Brewery: "Used Delete and the Delete key. Pop-up says deleted but it is still there"): deleting a red dot on an open pipe end (Delete key or its Properties' Delete) deletes the pipe or hose with that end, not only the dot, since a plain end now shows the same red dot. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 note (OakBarn Brewery: "Pipe end needs the red dot, cannot join a valve to a pipe"): a plain pipe end (left by a deleted fitting) shows the small red IP dot in Edit layout, and an item with no pipes on it dropped with an IP within 14 px of a red dot (plain end or open-end coupling) slides onto it and joins it (it was refused when the IP was a few pixels off the pipe's line). Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.

@@ -12,7 +12,7 @@ l'un d'eux avec le Label vide et une petite fenêtre s'affiche :
 > ⚠ The Label cannot be blank.
 
 (Le Label ne peut pas être vide.) Le curseur revient sur le Label pour que vous en tapiez un. La fenêtre disparaît d'elle-même après
-**5 secondes** (ou appuyez dessus). Appuyer sur **Entrée** dans un Label vide vous y garde, et cliquer sur un endroit vide de la
+**2 secondes** (ou appuyez dessus). Appuyer sur **Entrée** dans un Label vide vous y garde, et cliquer sur un endroit vide de la
 fenêtre remet le curseur dans le Label.
 
 ## Ce qui marche toujours {#what-always-works}
