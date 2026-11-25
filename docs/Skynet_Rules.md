@@ -5874,7 +5874,9 @@ Changing the Level only hides or shows; nothing is deleted, and a hidden box kee
 Calculate does not check its Actual AAU. The Level is saved with the Recipe as `level`, and the Recipe's BeerXML type says the same
 thing (Levels 1 and 2 Extract, 3 Partial Mash, 4 All Grain); an imported BeerSmith or BeerXML file comes in at Level 2, 3 or 4 from its
 type, and the user can change it. Skynet_Field `skn_rcp_Level` (1 to 4) lets a Process do the steps for its Level. A NEW Recipe starts at
-the Level picked. (Help 99)
+the Level picked. **A Level 1 Can Kit starts with No Boil** (OakBarn Brewery, 2026-11-25: "The Boil time can be different for
+each kit and I did not even realize the one I got was a No Boil one"): a NEW Can Kit Recipe has Boil Minutes 0 (0 = No Boil) and no
+Boil Profile; the brewer types the kit's own boil time. (Help 99)
 
 17.12 **Tap Water** (OakBarn Brewery, 2026-11-11: "Waters should be on each level defaulted to Tap Water. And maybe a Page in the
 Defaults for the common Water things important for brewing available from the Water Supplier or a Test Kit"; "Also in help: Suggestion
@@ -7358,6 +7360,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-25: Rule 17.11 note (OakBarn Brewery: "The Boil time can be different for each kit and I did not even realize the one I got was a No Boil one"): a NEW Level 1 Can Kit Recipe starts with Boil Minutes 0 (No Boil) and no Boil Profile; Boil Minutes tip. Help 99.
 - 2026-11-25: Rule 16.14 built (OakBarn Brewery, PDF "No Recipe Found", "Put in 620"): `ask_recipe` and the No Recipe Found pop-up, Brewer Type on Default settings; Rule 17.21 new: Save this Recipe dated yyyy:mm:dd (n), Actual AAU 0.
 - 2026-11-25: Rule 16.14 new and Rule 16.1 changed (OakBarn Brewery: "On a Brew Day, there is ALWAYS a Recipe ..."; "General Rule"): a Brew Day always has a Recipe; skipping steps never skips it. Leading the brewer to make one when none is loaded is not built yet (Process Sandbox entry 14).
 - 2026-11-25: Rules 18.43, 18.52, 5.10 and 5.5 changed (OakBarn Brewery, PDF "Panel Update 14"; picked "Change the Rules" and "flows and Flips stay linked"; "And have V and H and Shift + H work on devices in the Build Tab in Edit mode inside the Zoom Box"): every valve's Orientation is Horizontal or Vertical with Flip Horizontal and Flip Vertical beside it (Motorized Skynet and User Defined, Manual Valve, Hose Bib); pictures start Left to Right (Horizontal) and Bottom to Top (Vertical); Tap Water Flows (Right to Left, Left to Right / Bottom to Top, Top to Bottom) is tied to the Flips, the last one changed wins (replaces the 2026-11-25 "changing the Orientation keeps the way the water goes"); Vertical Right, Horizontal Flipped, Left / Right and Inlet saved before show as the matching Flips with the same look; a flipped Skynet side-view valve keeps its hugging box; in the Zoom box H, V and Shift + H work on a picked valve. Help 31, 87, 128, 141, 153 (and French). BruControl Import program: its Build page shares these dialogs and keys; its import makes no Orientation or Flips, so nothing else changes there. Checked on the 3 Vessel 1 Pump sample: its valves have no Orientation and no Left / Right saved, so they look the same.

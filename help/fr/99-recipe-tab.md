@@ -42,6 +42,7 @@ Chaque case a un haut coloré qui dit de quelle sorte elle est :
 
 - **Noir** : les noms (Beer Name, Style, Brew Length).
 - **Gris** : les temps et les choix (Sparge Type, Sparge Minutes, Boil Minutes, Whirlpool Minutes, Grain Ratio).
+  **Boil Minutes** 0 veut dire pas d'ébullition (No Boil). Chaque kit a son propre temps d'ébullition (certains sont No Boil), alors lisez le kit ; une nouvelle Recipe Can Kit commence à 0.
 - **Bleu** : les volumes (Strike Volume, Sparge Volume, PreBoil Volume).
 - **Rouge** : les températures (Strike, Grain et Sparge Temperature, Pitch At).
 - **Gris clair** : calculé par Skynet, pas tapé : **Grain Wt.**, **1st Mash** et **IBU** viennent des onglets Grain, MASH et HOPs.

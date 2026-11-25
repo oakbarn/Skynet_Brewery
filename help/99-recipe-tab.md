@@ -42,6 +42,7 @@ Each box has a colored top that says what kind it is:
 
 - **Black**: names (Beer Name, Style, Brew Length).
 - **Grey**: times and choices (Sparge Type, Sparge Minutes, Boil Minutes, Whirlpool Minutes, Grain Ratio).
+  **Boil Minutes** 0 means No Boil. Each kit has its own boil time (some are No Boil), so read the kit; a NEW Can Kit Recipe starts at 0.
 - **Blue**: volumes (Strike Volume, Sparge Volume, PreBoil Volume).
 - **Red**: temperatures (Strike, Grain and Sparge Temperature, Pitch At).
 - **Light grey**: worked out by Skynet, not typed: **Grain Wt.**, **1st Mash** and **IBU** come from the Grain, MASH and HOPs tabs.

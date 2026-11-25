@@ -1156,6 +1156,9 @@ async function route(req, res) {
   if (p === '/ui/recipe/new' && m === 'POST') {
     const b = await jsonBody(req).catch(() => ({})), r = newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list()), L = RECIPE_LEVELS.find(x => x.level === +b?.level);
     if (L) { r.level = L.level; r.type = L.type; }
+    // A Can Kit starts with No Boil (OakBarn Brewery, 2026-11-25: "The Boil time can be different for each kit and I did not even realize
+    // the one I got was a No Boil one"): Boil Minutes 0, no Boil Profile; the brewer types the kit's own boil time (Rule 17.11).
+    if (r.level === 1) { r.boilTime = 0; r.boilProfile = ''; }
     useRecipe(r, true); return ok(res);
   }
   if (p === '/ui/recipe/import' && m === 'POST') {

@@ -1801,5 +1801,6 @@
  "Show the No Recipe Found choices again": "Afficher de nouveau les choix de No Recipe Found",
  "Saved Recipe: one from the Recipe library. The others start a NEW Recipe at their Level.": "Saved Recipe : une recette de la bibliothèque de recettes. Les autres commencent une NOUVELLE recette à leur niveau.",
  "The saved Recipes in the Recipe library": "Les recettes enregistrées dans la bibliothèque de recettes",
- "What this brewery usually brews. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14), and you can pick another there.": "Ce que cette brasserie brasse d'habitude. La fenêtre No Recipe Found d'un jour de brassage commence sur ce choix (Rule 16.14), et vous pouvez en choisir un autre."
+ "What this brewery usually brews. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14), and you can pick another there.": "Ce que cette brasserie brasse d'habitude. La fenêtre No Recipe Found d'un jour de brassage commence sur ce choix (Rule 16.14), et vous pouvez en choisir un autre.",
+ "0 = No Boil. Each kit has its own boil time (some are No Boil): read the kit. A Can Kit starts at 0": "0 = pas d'ébullition (No Boil). Chaque kit a son propre temps d'ébullition (certains sont No Boil) : lisez le kit. Un Can Kit commence à 0"
 }

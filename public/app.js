@@ -21069,7 +21069,7 @@ function rcMain(pane, rc, u, changed) {
       rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { ...T, field: 'skn_rcp_Sparge_Temp' }),
       rcBox('b', 'PreBoil Volume', rcInput(rc.volumes, 'boilLiters', vol), { ...V, field: 'skn_rcp_Boil_Volume' }),
       rcBox('g', 'Boil Profile', rcBoilPick(rc, changed), { wide: true, field: 'skn_rcp_Boil_Profile', tip: 'A Skynet Boil Profile, one of your own (☰ Menu > Boil Profile), or none. Picking one fills in the Boil Minutes and its Hop Stands.' }),
-      rcBox('g', 'Boil Minutes', rcInput(rc, 'boilTime', { d: 0, ...c }), { unit: 'min', field: 'skn_rcp_Boil_Minutes' }),
+      rcBox('g', 'Boil Minutes', rcInput(rc, 'boilTime', { d: 0, ...c }), { unit: 'min', field: 'skn_rcp_Boil_Minutes', tip: '0 = No Boil. Each kit has its own boil time (some are No Boil): read the kit. A Can Kit starts at 0' }),
       rcBox('g', 'Whirlpool Minutes', rcInput(rc, 'whirlpoolMinutes', { d: 0, ...c }), { unit: 'min', field: 'skn_rcp_Whirlpool_Minutes' }),
       rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'skn_rcp_Pitch_Temp' }),
       rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'skn_rcp_Grain_Ratio' }),
