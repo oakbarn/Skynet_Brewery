@@ -70,13 +70,12 @@ export function elementNameError(name, what = 'Device or Widget') {
   return '';
 }
 
-// A name typed by hand (OakBarn Brewery, 2026-11-11: @ and ~ are "reserved for Suggested Name Use Only"): the same rules, and @ or ~ only
-// when the name is the program's Suggested Name (suggestion), or is the item's name already (was)
+// A name typed by hand: the same rules as every name. @ and ~ are allowed in it too (OakBarn Brewery, 2026-11-24: "And @ and ~ can be
+// part of a name because Skynet adds them all the time"; before, 2026-11-11, they were "reserved for Suggested Name Use Only").
+// suggestion and was are kept for the callers; they no longer change the answer.
 export function typedNameError(name, { suggestion = '', was = '', what = 'Device or Widget' } = {}) {
-  const n = String(name ?? ''), bad = elementNameError(n, what); if (bad) return bad;
-  if (/[@~]/.test(n) && n !== suggestion && n !== was && !SHOWN_NAMES.includes(what))
-    return `The ${what} name "${n}" can't have @ or ~ in it: they are kept for the Suggested Name${suggestion ? ` (${suggestion})` : ''}. Use _ instead, or pick the Suggested Name.`;
-  return '';
+  void suggestion; void was;
+  return elementNameError(String(name ?? ''), what);
 }
 
 // File and folder names. ext: true = a file ending is needed (pic.png), false = no period at all (a folder, a Process name)

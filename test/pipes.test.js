@@ -429,3 +429,31 @@ test('Shift + drag moves an item with its pipes, no grab pop-up', async () => {
   assert.match(app, /q\.p\.points = i === 0 \? \[b0, \.\.\.mid\.reverse\(\), a0\] : \[a0, \.\.\.mid, b0\];/, 'a jog with two bends');
   assert.match(app, /\['move', 'resize', 'pipe', 'group'\]\.includes\(drag\.mode\)\) letGoBentEnds/);
 });
+
+// OakBarn Brewery, 2026-11-24: "Unlock an end or Unlock IPs get rid of couplings" (Rule 5.37)
+test('unlocking leaves plain open ends, no couplings, and they still rejoin', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  const fn = app.slice(app.indexOf('function unlockJoins('), app.indexOf('// 🔓 Unlock its IPs in Properties'));
+  assert.doesNotMatch(fn, /endCoupling\(/, 'no coupling is made');
+  assert.match(fn, /delete p\[k\]; p\[k === 'from' \? 'plainFrom' : 'plainTo'\] = true;/);
+  assert.match(app, /const letGoEnds = ws =>/);
+  assert.match(app, /for \(const e of letGoEnds\(it\.workspace\)\) \{/, 'rejoinLetGo reads plain ends too');
+});
+
+// OakBarn Brewery, 2026-11-24: "As I passed over the pipe it created a Tee" (Rule 5.25)
+test('a dragged pipe end does not join pipes it passes over, only where it is let go', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /if \(editing && draft && !drawPts && !\(drag\?\.moved && !drag\.done\)\) joinLooseEnds\(w\.name\);/);
+  assert.match(app, /if \(drag\) drag\.done = true;/);
+});
+
+// OakBarn Brewery, 2026-11-24: "issue adding a Pump I did not suggest the name, Skynet did" (Rule 3.1)
+test('a name Skynet filled in is never taken for one the user typed', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const autoNames = new Set\(\);/);
+  assert.match(app, /name = noSpaces\(!work\.name \|\| autoNames\.has\(work\.name\) \? sug : work\.name\);/);
+  assert.match(app, /last = deviceSuggestion\(x\); autoNames\.add\(last\); if \(!touched && nameBox\) nameBox\.value = last;/, 'the name box follows the Confirm');
+});

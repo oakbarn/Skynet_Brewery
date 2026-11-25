@@ -8,7 +8,7 @@ Seul un **nouveau** nom, ou un nom que vous **changez**, est vérifié. La seule
 
 Un nom de Device, Widget, gGlobal, Text, tuyau, cuve ou autre élément n'a que des **lettres, des chiffres, `_`, `~`, `@` et `°`**, et commence par une lettre ou `_`. Un tel nom marche dans un Process sans guillemets, et ne pose pas de problème sous Windows, Mac, Linux et MQTT. Toute autre marque (une espace, `-` `+` `=` `!` `#` `'` `$` `%` `^` `&` `(` `)` `[` `]` `{` `}` `;` `,` `.` et l'accent grave seul, une lettre accentuée, `©` `®` `™`) est refusée, avec un message qui dit laquelle.
 
-- `@` et `~` sont gardés pour le **Suggested Name**. Le programme les y met (`BM_15_DO@Pump_Red~Pump_BH`) ; un nom que vous tapez vous-même ne peut pas en avoir, utilisez donc `_`.
+- `@` et `~` sont permis dans un nom. Le programme les met dans le Suggested Name (`BM_15_DO@Pump_Red~Pump_BH`), et un nom que vous tapez vous-même peut en avoir aussi.
 - `°` est permis : `Temp_°F`.
 - Un mot du langage des Processes (`NULL`, `true`, `if`, `wait` ...) ne peut pas être un nom. Voir [Le langage des Processes et les étapes](22-process-language), Reserved words (mots réservés).
 - Aucun nom ni **Label** ne peut commencer ou finir par une espace. Un Label est raccourci dès que vous quittez sa case.

@@ -573,7 +573,9 @@ function drawWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
-  if (editing && draft && !drawPts) joinLooseEnds(w.name);     // a loose pipe end on another pipe joins it (a tee or an elbow)
+  // a loose pipe end on another pipe joins it (a tee or an elbow); not while an end is still being dragged over pipes, only where it is
+  // let go (OakBarn Brewery, 2026-11-24: "As I passed over the pipe it created a Tee")
+  if (editing && draft && !drawPts && !(drag?.moved && !drag.done)) joinLooseEnds(w.name);
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) sizeToPipes(w.name);       // every pipe fitting takes the size of its pipe (Rule 5.36)
   if (!editing) { fitValveBoxes(L()); mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
@@ -4818,16 +4820,17 @@ function grabJoins(it) {
     for (const k of ['from', 'to']) if (ids.has(p[k])) out.push({ p, k });
   return out;
 }
-// let go of those pipe ends where they are: each gets an open end (a coupling); a Quick Disconnect hose's free end just lets go.
-// The open end remembers where the IP was and which end it was (in, out ...), so a pump or valve put in that place joins it again.
+// let go of those pipe ends where they are: each is left a plain open end, its red dot, with no coupling (OakBarn Brewery, 2026-11-24:
+// "Unlock an end or Unlock IPs get rid of couplings"; Rule 5.37); a Quick Disconnect hose's free end just lets go. The pipe remembers
+// where the IP was and which end it was (in, out ...: wasFrom / wasTo), so a pump or valve put in that place joins it again.
 const ipEnd = id => typeof id === 'string' && id.includes(':') ? id.slice(id.lastIndexOf(':') + 1) : null;
 function unlockJoins(joins) {
   for (const { p, k } of joins) {
     const n = p.points.length, was = p[k], at = ipPoint(was, p.workspace);
     if (isQdHose(p) && k === 'to') { p.to = null; delete p.qdAuto; continue; }
-    p[k] = k === 'from' ? endCoupling(p.points, 0, 1) : endCoupling(p.points, n - 1, n - 2);
-    const g = draft.graphics.find(x => x.id === p[k]);
-    if (g && at) { g.wasAt = at.map(Math.round); if (ipEnd(was)) g.wasEnd = ipEnd(was); }
+    void n; delete p[k]; p[k === 'from' ? 'plainFrom' : 'plainTo'] = true;
+    const wk = k === 'from' ? 'wasFrom' : 'wasTo'; delete p[wk];
+    if (at) { p[wk] = { wasAt: at.map(Math.round) }; if (ipEnd(was)) p[wk].wasEnd = ipEnd(was); }
   }
 }
 // 🔓 Unlock its IPs in Properties (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
@@ -4893,11 +4896,12 @@ function propsUnlockIps(it, onLetGo) {
 function rejoinLetGo(it) {
   const ids = grabIpIds(it); if (!ids.length) return 0;
   let n = 0;
-  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace)) for (const k of ['from', 'to']) {
-    const g = p[k] && ownCoupling(p[k], p); if (!g?.wasAt) continue;
-    const id = ids.find(x => (!g.wasEnd || ipEnd(x) === g.wasEnd) && (c => c && Math.hypot(c[0] - g.wasAt[0], c[1] - g.wasAt[1]) <= REJOIN_PX)(ipPoint(x, it.workspace)));
+  for (const e of letGoEnds(it.workspace)) {
+    const { p, k, g } = e;
+    const id = ids.find(x => (!e.wasEnd || ipEnd(x) === e.wasEnd) && (c => c && Math.hypot(c[0] - e.wasAt[0], c[1] - e.wasAt[1]) <= REJOIN_PX)(ipPoint(x, it.workspace)));
     if (!id) continue;
-    p[k] = id; draft.graphics = draft.graphics.filter(x => x !== g); n++;
+    p[k] = id; n++;
+    if (g) draft.graphics = draft.graphics.filter(x => x !== g); else { delete p[k === 'from' ? 'plainFrom' : 'plainTo']; delete p[k === 'from' ? 'wasFrom' : 'wasTo']; }
   }
   return n;
 }
@@ -4929,12 +4933,16 @@ function snapOpenEnd(it) {
 // (a Hose Bib's one IP the same way, Rule 18.48). Anything else with IPs and no pipes slides the same few pixels onto them. Then
 // rejoinLetGo joins them. Returns true when it moved or changed anything.
 const SNAP_PX = 30;
+// the open ends that remember where they let go: a plain end (wasFrom / wasTo on its pipe) or an older open end's coupling (wasAt)
+const letGoEnds = ws => draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === ws).flatMap(p => ['from', 'to'].map(k => {
+  const g = p[k] ? ownCoupling(p[k], p) : null, w = g?.wasAt ? g : !p[k] && p[k === 'from' ? 'plainFrom' : 'plainTo'] ? p[k === 'from' ? 'wasFrom' : 'wasTo'] : null;
+  return w?.wasAt ? { p, k, g: g?.wasAt ? g : null, wasAt: w.wasAt, wasEnd: w.wasEnd } : null;
+})).filter(Boolean);
 function freeIpsTake(it) {
   if (!it || !draft || grabJoins(it).length) return false;           // only with no pipes on it at all
   const el = !it.kind, pump = el && spotPump(it), hb = !el && isTapMv(it);
   if (!el && !isMv(it)) return false;                                  // Devices and Manual Valve Widgets (a vessel or fitting is not moved here)
-  const ends = draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace).flatMap(p => ['from', 'to'].map(k => p[k] && ownCoupling(p[k], p)))
-    .filter(g => g?.wasAt && g.wasEnd);
+  const ends = letGoEnds(it.workspace).filter(g => g.wasEnd);
   if (!ends.length) return false;
   const id = end => el ? `dev:${it.name}:${end}` : `eq:${it.id}:${end}`;
   // every place each end of it could be: a pump's end on any of its 8 spots, a Hose Bib's IP on any of its spots, else where it is
@@ -5983,6 +5991,7 @@ function showGeo(ev, it) {
 }
 window.addEventListener('pointerup', () => {
   cancelLongPress(); geoTip.classList.add('hidden');
+  if (drag) drag.done = true;       // let go: a loose end where it is dropped may now join a pipe (joinLooseEnds)
   if (drag?.mode === 'move' && drag.item.kind === 'ip' && !isFitting(drag.item)) attachIp(drag.item);
   if (drag?.mode === 'move' && drag.moved) {      // a free Tab_Fitting (or its Start IP) dropped on a vessel port joins it
     const f = isBfit(drag.item) ? drag.item : drag.item.kind === 'ip' && drag.item.port === 'start' ? draft.graphics.find(x => x.id === drag.item.attachTo && isBfit(x)) : null;
@@ -7580,8 +7589,9 @@ async function newDeviceDialog(e, hint, what) {
   };
   if (pumpFocus) dlgEl.addEventListener('keydown', pumpTabKey, true);
   try {
+    const autoNames = new Set();      // every Suggested Name this box has filled in: a name still one of them was not typed (OakBarn Brewery, 2026-11-24: "I did not suggest the name, Skynet did")
     for (;;) {
-      let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
+      let last = deviceSuggestion(work); autoNames.add(last); let touched = !!work.name && work.name !== last && !autoNames.has(work.name);
       dlgDetour = true;          // a double-click on a Tab (or other) choice opens its Properties and comes back here (Rule 4.7)
       const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : elem ? e._title || elemTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/^➕ New /, '').replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, isPumpDev(e) ? fields : deviceModel(e, e, fields), work, false, ['edit-layout-bar', 'add-device']);      // the Add box in the Blichmann's layout too (2026-11-19)
       gate();
@@ -7621,6 +7631,8 @@ async function newDeviceDialog(e, hint, what) {
         reviewing = false;
         if (!yes) { setTimeout(() => ps?.focus(), 0); return; }
         confirmed = k; gate();
+        // the Suggested Name now has the Interface ID and Port in it (OakBarn Brewery, 2026-11-24: "I did not suggest the name, Skynet did")
+        { const x = { ...work }; try { readFields(x, body); } catch { } last = deviceSuggestion(x); autoNames.add(last); if (!touched && nameBox) nameBox.value = last; }
         const tab = body.querySelector('[data-k="workspace"]');
         if (!pumpFocus && tab && !tab.value && tab.offsetParent !== null) setTimeout(() => tab.focus(), 0);      // the Pump: never jumped to (Rule 18.38)
       };
@@ -7660,7 +7672,7 @@ async function newDeviceDialog(e, hint, what) {
         gate();
         if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)
           && (!pumpFocus || confirmed || ev.target.dataset?.k === 'device')) { const t = ev.target; setTimeout(() => seqNext(t), 0); }      // the Pump: only a new Interface goes on to its Port (Rule 18.38)
-        if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
+        if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last && !autoNames.has(nameBox.value); return; }
         if (ev.type === 'change' && ev.target.dataset?.k === '_orient') {      // a Skynet valve turned: its Template's size (Rule 5.17)
           const sp = skyOrientPic(ev.target.value);
           for (const k of ['w', 'h']) { const b = body.querySelector(`[data-k="${k}"]`); if (b && sp?.[k]) b.value = sp[k]; }
@@ -7670,7 +7682,7 @@ async function newDeviceDialog(e, hint, what) {
         if (ev.type === 'change' && ev.target.dataset?.k === 'useProfile' && profKind === 'pump') return $('#dlg').close('reprofile');      // its boxes take the Pump Profile picked
         const w = { ...work }; try { readFields(w, body); } catch { }
         fillFree(w); noPwm(w);
-        last = deviceSuggestion(w); if (!touched) nameBox.value = last;
+        last = deviceSuggestion(w); autoNames.add(last); if (!touched) nameBox.value = last;
         if (ev.type === 'change' && !dlgArrowKey && [port[0], 'device'].includes(ev.target.dataset?.k)) askReview(w);
       };
       const r = await shown;
@@ -7717,7 +7729,8 @@ async function newDeviceDialog(e, hint, what) {
         const missing = gate();
         readFields(work, body);
         if (missing) throw new Error(missing);
-        const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
+        // a name Skynet filled in earlier (before the Interface and Port were Confirmed, say) is not the user's own: it takes the Suggested Name now
+        const sug = deviceSuggestion(work), name = noSpaces(!work.name || autoNames.has(work.name) ? sug : work.name);
         if (!name) throw new Error('Type a Label (or a Name)');
         const bad = typedNameError(name, { suggestion: sug, was: e.name, what: 'Device' }); if (bad) throw new Error(bad);     // @ ~ only in the Suggested Name
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
