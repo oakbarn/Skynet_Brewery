@@ -496,7 +496,7 @@ function setBuildDraft(v) {
   store.writeConfig();
 }
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/emergencyoff' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart|resume)$/.test(p) || p === '/ui/errorstop/close' || p.startsWith('/ui/errorlog')) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/emergencyoff' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart|resume)$/.test(p) || p === '/ui/errorstop/close' || p === '/ui/errorstop/hold' || p.startsWith('/ui/errorlog')) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -786,9 +786,10 @@ async function route(req, res) {
   { const mm = p.match(/^\/ui\/scripts\/([^/]+)\/resume$/);
     if (mm && m === 'POST') {
       const b = await jsonBody(req);
-      try { const r = engine.resumeAfterError(decodeURIComponent(mm[1]), { skip: b.skip === true, by: me?.name || 'user' }); return r.ok ? ok(res, r) : fail(res, 400, r.msg || 'Not resumed'); } catch (e) { return fail(res, 400, e.message); }
+      try { const r = engine.resumeAfterError(decodeURIComponent(mm[1]), { skip: b.skip === true, auto: b.auto === 'quiet' ? 'quiet' : b.auto === true || b.auto === 'popup', by: me?.name || 'user' }); return r.ok ? ok(res, r) : fail(res, 400, r.msg || 'Not resumed'); } catch (e) { return fail(res, 400, e.message); }
     } }
   if (p === '/ui/errorstop/close' && m === 'POST') { engine.closeErrorStop(String((await jsonBody(req)).process ?? '')); return ok(res); }
+  if (p === '/ui/errorstop/hold' && m === 'POST') { engine.holdErrorStop(String((await jsonBody(req)).process ?? '')); return ok(res); }
   if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
   // the Resume button on that notice (Rule 6.31): turns back On what was On and starts each Process again at its step
   if (p === '/ui/brain/resume' && m === 'POST') {

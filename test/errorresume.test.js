@@ -35,5 +35,31 @@ engine.resumeAfterError('Brew'); await run();
 assert.deepEqual(engine.errorStopList().map(e => e.line), [4], 'variables come back as they were, so Y is still empty');
 engine.start('Brew', 'user'); await run();
 assert.equal(store.getProp('gV_Done', 'value'), 3); assert.deepEqual(engine.errorStopList(), []);
+// Auto next time (OakBarn Brewery, 2026-11-25: "it is not the First Fail, but subsequent failures"; "They have to set to auto resume as
+// an Option. User Choice"): the first stop waits; picked with Skip, the same line failing again goes on by itself after 5 seconds
+engine.write('Loop', ['// Loop', 'new value N = 0', 'new value Y = NULL', 'new value X = 0', '[Top]', 'N = N + 1', 'X = Y + 1', 'gV_Done = N', 'if N < 3', '\tgoto "Top"', 'endif'].join('\n'));
+const runL = async (ms = 20) => { await engine.running.get('Loop')?.done; await new Promise(r => setTimeout(r, ms)); };
+engine.start('Loop', 'user'); await runL();
+assert.equal(engine.errorStopList()[0].auto, undefined, 'the first stop always waits for a brewer');
+engine.resumeAfterError('Loop', { skip: true, auto: true }); await runL();
+const st = engine.errorStopList()[0];
+assert.equal(st.line, 7); assert.equal(st.auto.skip, true, 'the same line again: Auto Skip counting down');
+assert.ok(st.auto.at - Date.now() > 4000 && st.auto.at - Date.now() <= 5000);
+// ⏸ Hold: it waits again, and the Auto pick for that line is let go
+assert.equal(engine.holdErrorStop('Loop'), true); assert.equal(engine.errorStopList()[0].auto, undefined);
+engine.resumeAfterError('Loop', { skip: true, auto: true }); await runL();
+await new Promise(r => setTimeout(r, 5300)); await runL();      // it went on by itself
+assert.equal(store.getProp('gV_Done', 'value'), 3, 'Auto Skip carried it to the end');
+assert.deepEqual(engine.errorStopList(), []);
+engine.start('Loop', 'user'); await runL();
+assert.equal(engine.errorStopList()[0].auto, undefined, 'starting over lets the Auto pick go');
+engine.closeErrorStop('Loop');
+engine.start('Loop', 'user'); await runL();
+// Auto, no pop-up ("Auto Resume with no Popup for something like the Hop Name error, but again, the User selects the fix"): the same line
+// again goes on after a second with nothing on the screens (still printed and on the Error Log)
+engine.resumeAfterError('Loop', { skip: true, auto: 'quiet' }); await runL();
+assert.deepEqual(engine.errorStopList(), [], 'no pop-up');
+await new Promise(r => setTimeout(r, 2600)); await runL();      // fails at N = 2 and N = 3, a second each
+assert.equal(store.getProp('gV_Done', 'value'), 3, 'Auto Skip, no pop-up, carried it to the end');
 engine.stopAll(); clearTimeout(store._persistTimer);
 console.log('error resume tests passed');

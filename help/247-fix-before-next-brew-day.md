@@ -51,6 +51,18 @@ screen with the Process, the line, the line itself and the error. You decide wha
   re-routed through the RIMS), or when the line itself is wrong.
 - **✕** leaves the Process stopped and closes the pop-up on every screen.
 
+**Next time line N fails** is a dropdown on the pop-up. The first time a line fails, Skynet always waits for you. Before you pick
+Resume or Skip, choose what happens if that same line fails again:
+
+- **Stop and wait for me** (it starts on this): the pop-up again.
+- **Auto: pop-up for 5 s, then go on**: the pop-up shows a 5 second countdown, then does the same thing again (Resume or Skip) by
+  itself. **⏸ Hold** stops the countdown, and it waits for you again.
+- **Auto: no pop-up, go on**: no pop-up at all; after a second it does the same thing again. Good for a small error such as a hop
+  name. It is still written in the Console and on this list.
+
+An Auto choice gives you one warning: you are responsible, so stay with the brew and watch it. Starting the Process over turns Auto
+off again.
+
 The pop-up stays until someone picks. Starting the Process over lets the Resume go. The error is still written on this list, so you
 can fix the Process before the next Brew Day.
 

@@ -738,6 +738,10 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
 .brainNotice span { flex: 1; }
 .brainNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
 .brainNotice button.resumeBtn { background: #fff; color: #b3261e; font-weight: 700; }
+/* Resume after an error (Rule 10.14): Auto next time and its one warning */
+.brainNotice .errAuto { font-weight: 600; }
+.brainNotice .errAuto select { font: inherit; font-weight: 400; margin-top: 4px; }
+.brainNotice .errAutoWarn { margin-top: 6px; padding: 6px 8px; background: #fff3cd; color: #1a1a1a; border-radius: 6px; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
 #dlgBody label.greyed, #dlgBody label.greyed + * { opacity: 0.45; }
 #dlgBody label.greyed + .fldIcons { opacity: 1; } #dlgBody label.greyed + .fldIcons > :first-child { opacity: 0.45; }      /* a greyed out field whose ⬢ still opens (the Probe type, Rule 18.26) */

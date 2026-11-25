@@ -58,6 +58,19 @@ rouge s'affiche sur tous les écrans avec le Process, la ligne, la ligne elle-m�
   exemple en passant par le RIMS), ou quand la ligne elle-même est fausse.
 - **✕** laisse le Process arrêté et ferme la fenêtre sur tous les écrans.
 
+**Next time line N fails** (la prochaine fois que la ligne N échoue) est une liste déroulante sur la fenêtre. La première fois
+qu'une ligne échoue, Skynet vous attend toujours. Avant de choisir Resume ou Skip, choisissez ce qui se passe si cette même ligne
+échoue à nouveau :
+
+- **Stop and wait for me** (au départ) : la fenêtre de nouveau.
+- **Auto: pop-up for 5 s, then go on** : la fenêtre montre un compte à rebours de 5 secondes, puis refait la même chose (Resume ou
+  Skip) toute seule. **⏸ Hold** arrête le compte à rebours, et Skynet vous attend de nouveau.
+- **Auto: no pop-up, go on** : pas de fenêtre du tout ; après une seconde, il refait la même chose. Pratique pour une petite erreur
+  comme un nom de houblon. C'est quand même noté dans la Console et dans cette liste.
+
+Un choix Auto vous donne un seul avertissement : vous êtes responsable, restez donc avec le brassage et surveillez-le. Redémarrer le
+Process depuis le début éteint Auto.
+
 La fenêtre reste jusqu'à ce que quelqu'un choisisse. Redémarrer le Process depuis le début abandonne le Resume. L'erreur est quand
 même notée dans cette liste, pour que vous puissiez réparer le Process avant le prochain brassage.
 
