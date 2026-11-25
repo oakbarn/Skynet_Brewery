@@ -4818,16 +4818,17 @@ function grabJoins(it) {
     for (const k of ['from', 'to']) if (ids.has(p[k])) out.push({ p, k });
   return out;
 }
-// let go of those pipe ends where they are: each gets an open end (a coupling); a Quick Disconnect hose's free end just lets go.
-// The open end remembers where the IP was and which end it was (in, out ...), so a pump or valve put in that place joins it again.
+// let go of those pipe ends where they are: each is left a plain open end, its red dot, with no coupling (OakBarn Brewery, 2026-11-24:
+// "Unlock an end or Unlock IPs get rid of couplings"; Rule 5.37); a Quick Disconnect hose's free end just lets go. The pipe remembers
+// where the IP was and which end it was (in, out ...: wasFrom / wasTo), so a pump or valve put in that place joins it again.
 const ipEnd = id => typeof id === 'string' && id.includes(':') ? id.slice(id.lastIndexOf(':') + 1) : null;
 function unlockJoins(joins) {
   for (const { p, k } of joins) {
     const n = p.points.length, was = p[k], at = ipPoint(was, p.workspace);
     if (isQdHose(p) && k === 'to') { p.to = null; delete p.qdAuto; continue; }
-    p[k] = k === 'from' ? endCoupling(p.points, 0, 1) : endCoupling(p.points, n - 1, n - 2);
-    const g = draft.graphics.find(x => x.id === p[k]);
-    if (g && at) { g.wasAt = at.map(Math.round); if (ipEnd(was)) g.wasEnd = ipEnd(was); }
+    void n; delete p[k]; p[k === 'from' ? 'plainFrom' : 'plainTo'] = true;
+    const wk = k === 'from' ? 'wasFrom' : 'wasTo'; delete p[wk];
+    if (at) { p[wk] = { wasAt: at.map(Math.round) }; if (ipEnd(was)) p[wk].wasEnd = ipEnd(was); }
   }
 }
 // 🔓 Unlock its IPs in Properties (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
@@ -4893,11 +4894,12 @@ function propsUnlockIps(it, onLetGo) {
 function rejoinLetGo(it) {
   const ids = grabIpIds(it); if (!ids.length) return 0;
   let n = 0;
-  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace)) for (const k of ['from', 'to']) {
-    const g = p[k] && ownCoupling(p[k], p); if (!g?.wasAt) continue;
-    const id = ids.find(x => (!g.wasEnd || ipEnd(x) === g.wasEnd) && (c => c && Math.hypot(c[0] - g.wasAt[0], c[1] - g.wasAt[1]) <= REJOIN_PX)(ipPoint(x, it.workspace)));
+  for (const e of letGoEnds(it.workspace)) {
+    const { p, k, g } = e;
+    const id = ids.find(x => (!e.wasEnd || ipEnd(x) === e.wasEnd) && (c => c && Math.hypot(c[0] - e.wasAt[0], c[1] - e.wasAt[1]) <= REJOIN_PX)(ipPoint(x, it.workspace)));
     if (!id) continue;
-    p[k] = id; draft.graphics = draft.graphics.filter(x => x !== g); n++;
+    p[k] = id; n++;
+    if (g) draft.graphics = draft.graphics.filter(x => x !== g); else { delete p[k === 'from' ? 'plainFrom' : 'plainTo']; delete p[k === 'from' ? 'wasFrom' : 'wasTo']; }
   }
   return n;
 }
@@ -4929,12 +4931,16 @@ function snapOpenEnd(it) {
 // (a Hose Bib's one IP the same way, Rule 18.48). Anything else with IPs and no pipes slides the same few pixels onto them. Then
 // rejoinLetGo joins them. Returns true when it moved or changed anything.
 const SNAP_PX = 30;
+// the open ends that remember where they let go: a plain end (wasFrom / wasTo on its pipe) or an older open end's coupling (wasAt)
+const letGoEnds = ws => draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === ws).flatMap(p => ['from', 'to'].map(k => {
+  const g = p[k] ? ownCoupling(p[k], p) : null, w = g?.wasAt ? g : !p[k] && p[k === 'from' ? 'plainFrom' : 'plainTo'] ? p[k === 'from' ? 'wasFrom' : 'wasTo'] : null;
+  return w?.wasAt ? { p, k, g: g?.wasAt ? g : null, wasAt: w.wasAt, wasEnd: w.wasEnd } : null;
+})).filter(Boolean);
 function freeIpsTake(it) {
   if (!it || !draft || grabJoins(it).length) return false;           // only with no pipes on it at all
   const el = !it.kind, pump = el && spotPump(it), hb = !el && isTapMv(it);
   if (!el && !isMv(it)) return false;                                  // Devices and Manual Valve Widgets (a vessel or fitting is not moved here)
-  const ends = draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace).flatMap(p => ['from', 'to'].map(k => p[k] && ownCoupling(p[k], p)))
-    .filter(g => g?.wasAt && g.wasEnd);
+  const ends = letGoEnds(it.workspace).filter(g => g.wasEnd);
   if (!ends.length) return false;
   const id = end => el ? `dev:${it.name}:${end}` : `eq:${it.id}:${end}`;
   // every place each end of it could be: a pump's end on any of its 8 spots, a Hose Bib's IP on any of its spots, else where it is

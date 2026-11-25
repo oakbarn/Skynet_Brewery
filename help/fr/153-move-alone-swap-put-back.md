@@ -7,7 +7,7 @@
 En **Edit layout**, la première fois que vous traînez un Device, un Widget, un Fitting ou un Pipe auquel des tuyaux sont joints, il reste où il est et
 une petite fenêtre demande ce que vous voulez :
 
-- **🔓 Unlock its IPs** (les points de connexion) : chaque bout de tuyau dessus se détache et reste où il est, avec un bout ouvert. Attrapez-le de nouveau
+- **🔓 Unlock its IPs** (les points de connexion) : chaque bout de tuyau dessus se détache et reste où il est, un bout simple ouvert avec son point rouge (aucun coupling n'est ajouté). Attrapez-le de nouveau
   et il bouge **seul** ; les tuyaux et raccords ne bougent pas. Cela marche aussi quand un tuyau ou raccord **verrouillé** y est joint (avant,
   il ne pouvait pas bouger du tout).
 - **Move it with its pipes** : comme avant (Règle 5.19). Un tuyau avec un bout ouvert suit, un bout de tuyau glisse le long de sa propre ligne, et un

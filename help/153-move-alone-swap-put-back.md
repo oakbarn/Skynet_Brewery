@@ -7,7 +7,7 @@
 In **Edit layout**, the first time you drag a Device, Widget, Fitting or Pipe that has pipes joined to it, it stays where it is and
 a small pop-up asks what you want:
 
-- **🔓 Unlock its IPs** (connection points): every pipe end on it lets go and stays where it is, with an open end. Grab it again
+- **🔓 Unlock its IPs** (connection points): every pipe end on it lets go and stays where it is, a plain open end with its red dot (no coupling is added). Grab it again
   and it moves **alone**; the pipes and fittings stay put. This also works when a **locked** pipe or fitting is joined to it (before,
   it could not move at all).
 - **Move it with its pipes**: as before (Rule 5.19). A pipe with an open end moves along, a pipe end slides along its own line, and a
