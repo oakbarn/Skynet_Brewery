@@ -7580,8 +7580,9 @@ async function newDeviceDialog(e, hint, what) {
   };
   if (pumpFocus) dlgEl.addEventListener('keydown', pumpTabKey, true);
   try {
+    const autoNames = new Set();      // every Suggested Name this box has filled in: a name still one of them was not typed (OakBarn Brewery, 2026-11-24: "I did not suggest the name, Skynet did")
     for (;;) {
-      let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
+      let last = deviceSuggestion(work); autoNames.add(last); let touched = !!work.name && work.name !== last && !autoNames.has(work.name);
       dlgDetour = true;          // a double-click on a Tab (or other) choice opens its Properties and comes back here (Rule 4.7)
       const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : elem ? e._title || elemTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/^➕ New /, '').replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, isPumpDev(e) ? fields : deviceModel(e, e, fields), work, false, ['edit-layout-bar', 'add-device']);      // the Add box in the Blichmann's layout too (2026-11-19)
       gate();
@@ -7621,6 +7622,8 @@ async function newDeviceDialog(e, hint, what) {
         reviewing = false;
         if (!yes) { setTimeout(() => ps?.focus(), 0); return; }
         confirmed = k; gate();
+        // the Suggested Name now has the Interface ID and Port in it (OakBarn Brewery, 2026-11-24: "I did not suggest the name, Skynet did")
+        { const x = { ...work }; try { readFields(x, body); } catch { } last = deviceSuggestion(x); autoNames.add(last); if (!touched && nameBox) nameBox.value = last; }
         const tab = body.querySelector('[data-k="workspace"]');
         if (!pumpFocus && tab && !tab.value && tab.offsetParent !== null) setTimeout(() => tab.focus(), 0);      // the Pump: never jumped to (Rule 18.38)
       };
@@ -7660,7 +7663,7 @@ async function newDeviceDialog(e, hint, what) {
         gate();
         if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)
           && (!pumpFocus || confirmed || ev.target.dataset?.k === 'device')) { const t = ev.target; setTimeout(() => seqNext(t), 0); }      // the Pump: only a new Interface goes on to its Port (Rule 18.38)
-        if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
+        if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last && !autoNames.has(nameBox.value); return; }
         if (ev.type === 'change' && ev.target.dataset?.k === '_orient') {      // a Skynet valve turned: its Template's size (Rule 5.17)
           const sp = skyOrientPic(ev.target.value);
           for (const k of ['w', 'h']) { const b = body.querySelector(`[data-k="${k}"]`); if (b && sp?.[k]) b.value = sp[k]; }
@@ -7670,7 +7673,7 @@ async function newDeviceDialog(e, hint, what) {
         if (ev.type === 'change' && ev.target.dataset?.k === 'useProfile' && profKind === 'pump') return $('#dlg').close('reprofile');      // its boxes take the Pump Profile picked
         const w = { ...work }; try { readFields(w, body); } catch { }
         fillFree(w); noPwm(w);
-        last = deviceSuggestion(w); if (!touched) nameBox.value = last;
+        last = deviceSuggestion(w); autoNames.add(last); if (!touched) nameBox.value = last;
         if (ev.type === 'change' && !dlgArrowKey && [port[0], 'device'].includes(ev.target.dataset?.k)) askReview(w);
       };
       const r = await shown;
@@ -7717,7 +7720,8 @@ async function newDeviceDialog(e, hint, what) {
         const missing = gate();
         readFields(work, body);
         if (missing) throw new Error(missing);
-        const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
+        // a name Skynet filled in earlier (before the Interface and Port were Confirmed, say) is not the user's own: it takes the Suggested Name now
+        const sug = deviceSuggestion(work), name = noSpaces(!work.name || autoNames.has(work.name) ? sug : work.name);
         if (!name) throw new Error('Type a Label (or a Name)');
         const bad = typedNameError(name, { suggestion: sug, was: e.name, what: 'Device' }); if (bad) throw new Error(bad);     // @ ~ only in the Suggested Name
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);

@@ -448,3 +448,12 @@ test('a dragged pipe end does not join pipes it passes over, only where it is le
   assert.match(app, /if \(editing && draft && !drawPts && !\(drag\?\.moved && !drag\.done\)\) joinLooseEnds\(w\.name\);/);
   assert.match(app, /if \(drag\) drag\.done = true;/);
 });
+
+// OakBarn Brewery, 2026-11-24: "issue adding a Pump I did not suggest the name, Skynet did" (Rule 3.1)
+test('a name Skynet filled in is never taken for one the user typed', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const autoNames = new Set\(\);/);
+  assert.match(app, /name = noSpaces\(!work\.name \|\| autoNames\.has\(work\.name\) \? sug : work\.name\);/);
+  assert.match(app, /last = deviceSuggestion\(x\); autoNames\.add\(last\); if \(!touched && nameBox\) nameBox\.value = last;/, 'the name box follows the Confirm');
+});
