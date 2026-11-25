@@ -5514,7 +5514,21 @@ function zoomIpAt(x, y) {
   const r = $('#ws').getBoundingClientRect(), p = [(x - r.left) / Z(), (y - r.top) / Z()], lim = 10 / Z();
   let best = null;
   for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (!c) continue; const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= lim && (!best || d < best.d)) best = { d, id: q.id, label: q.label || q.id }; }
+  // an open pipe end with no coupling (its red dot, Rule 5.37) is an IP for the trace too (OakBarn Brewery, 2026-11-24: "going from
+  // Valve Red IP to Pump Red IP would not lock trace"): it gets its coupling when the trace takes it (zoomTakeEnd)
+  for (const pp of (draft?.graphics || []).filter(g => g.kind === 'pipe' && g.workspace === wsName && (g.points || []).length >= 2)) for (const k of ['from', 'to']) {
+    if (pp[k] || !pp[k === 'from' ? 'plainFrom' : 'plainTo']) continue;
+    const c = k === 'from' ? pp.points[0] : pp.points[pp.points.length - 1], d = Math.hypot(c[0] - p[0], c[1] - p[1]);
+    if (d <= lim && (!best || d < best.d)) best = { d, id: null, plain: { p: pp, k }, label: `the open end of ${pp.label || pp.name || 'a pipe'}` };
+  }
   return best;
+}
+// the trace took an open pipe end with no coupling: it gets one now, so it joins as every open end does
+function zoomTakeEnd(ip) {
+  if (!ip?.plain) return ip;
+  const { p, k } = ip.plain, n = p.points.length, [i, j] = k === 'from' ? [0, 1] : [n - 1, n - 2];
+  p[k] = endCoupling(p.points, i, j, p.workspace); delete p[k === 'from' ? 'plainFrom' : 'plainTo'];
+  return { d: ip.d, id: p[k], label: ip.label };
 }
 // 🔗 the trace in the box (Rule 5.37): a double-click on an IP starts it, a click on another IP ends it. While it is being drawn
 // nothing in the box goes to the Tab. Returns true when the event was the trace's.
@@ -5522,13 +5536,13 @@ function zoomTracePass(ev, x, y) {
   const zb = zoomBox, tr = zb.trace;
   if (ev.type === 'dblclick' && (!tr || tr.b)) {
     const ip = zoomIpAt(x, y); if (!ip) return false;
-    zb.trace = { a: ip, b: null, m: [x, y] }; zoomTraceShow(); return true;
+    zb.trace = { a: zoomTakeEnd(ip), b: null, m: [x, y] }; if (ip.plain) renderWs(); else zoomTraceShow(); return true;
   }
   if (!tr || tr.b) return false;
   if (ev.type === 'pointermove') { tr.m = [x, y]; zoomTraceShow(); return true; }
   if (ev.type === 'pointerdown') {
     const ip = zoomIpAt(x, y);
-    if (ip && ip.id !== tr.a.id) { tr.b = ip; zoomTraceShow(); }
+    if (ip && ip.id !== tr.a.id) { tr.b = zoomTakeEnd(ip); if (ip.plain) renderWs(); else zoomTraceShow(); }
   }
   return true;
 }

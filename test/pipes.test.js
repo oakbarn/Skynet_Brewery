@@ -405,3 +405,13 @@ test('valve boxes are fitted before valves are lined up on their pipes', async (
   assert.match(app, /if \(on\) \{ fitValveBoxes\(draft\); mvJoinEnds\(draft\); centerOnPipes\(draft\);/);
   assert.match(app, /if \(!editing\) \{ fitValveBoxes\(L\(\)\); mvJoinEnds\(L\(\), w\.name\); centerOnPipes\(L\(\), w\.name\); \}/);
 });
+
+// OakBarn Brewery, 2026-11-24: "going from Valve Red IP to Pump Red IP would not lock trace" (Rule 5.37)
+test('the Zoom box trace takes the red dot of an open pipe end', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /best = \{ d, id: null, plain: \{ p: pp, k \}, label: `the open end of /);
+  assert.match(app, /p\[k\] = endCoupling\(p\.points, i, j, p\.workspace\); delete p\[k === 'from' \? 'plainFrom' : 'plainTo'\];/);
+  assert.match(app, /zb\.trace = \{ a: zoomTakeEnd\(ip\), b: null/);
+  assert.match(app, /tr\.b = zoomTakeEnd\(ip\);/);
+});
