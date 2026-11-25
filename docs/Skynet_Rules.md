@@ -2329,7 +2329,7 @@ a pipe with its own open end moves along as one piece; a pipe moves its end only
 side lets go of the pipe (the end gets an open-end coupling). Older pipes with bends are cut at each bend into straight pipes
 joined by elbows when a Schema loads (Rule 15.2); the samples and the default Schema are changed (Rule 15.3). Hoses still bend.
 (thread "Limit pipes to horizontal, vertical, 45", Help 105)
-- **Joined again on Save layout** (Fritz, 2026-11-05: "maybe a resnap to IPs on Save Layout"). A pipe's open end within 14 px of an
+- **Joined again on Save layout** (Fritz, 2026-11-05: "maybe a resnap to IPs on Save Layout"). A pipe's open end within 25 px of an
   IP joins it again when the layout is saved. A straight pipe stays Horizontal, Vertical or 45: if joining would bend it, a free IP
   point with no other pipe on it moves back onto the pipe end instead. A click or double-click that wobbles under 4 pixels is not a
   drag, and only the pipe ends a drag pulls off let go (an end already off its IP stays joined, so moving one thing never cuts a pipe
@@ -2497,7 +2497,7 @@ straight Horizontal or Vertical pipe (or added right on one):
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
 - **IP on IP: joined with no pipe** (2026-11-24, OakBarn Brewery: "I put the Valve Red Dot on top the Pump red dot and got a message.
   This is how real life the valves are on the Pump"): a Device or Manual Valve with no pipes on it, let go with one of its open IPs
-  within 12 px of an open IP of something else (a pump, valve, fitting or vessel port), slides so the two sit on one spot and they
+  within 25 px of an open IP of something else (a pump, valve, fitting or vessel port), slides so the two sit on one spot and they
   are joined IP to IP by a pipe of no length (nothing is drawn; flow goes through it as through every join). Its other IPs that
   then sit on an open IP join too. It is then not put into a pipe it lies over. ↩ Put back (Ctrl+Z) undoes it. (Help 125)
   The join goes as soon as the two IPs are no longer on one spot (one is moved off, unlocked or deleted), so both are open (red) again
@@ -2950,7 +2950,7 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   elbow, tee or Device is deleted gets no coupling (no red ring); leftover red dots become plain ends when Edit layout opens.
   **A plain end shows the small red IP dot and joins** (2026-11-24, OakBarn Brewery: "Pipe end needs the red dot, cannot join a valve to
   a pipe"): in Edit layout a plain end has the same small red dot as an open IP (Rule 5.20; it is the end's drag handle). A valve, pump,
-  fitting or other item with no pipes on it, let go with one of its IPs within 14 px of a red dot (a plain end or an open end's coupling),
+  fitting or other item with no pipes on it, let go with one of its IPs within 25 px of a red dot (a plain end or an open end's coupling),
   slides the last few pixels so that IP sits on the end, and the end joins it (the dot turns green); it is then not put into a pipe it
   lies over. ↩ Put back (Ctrl+Z) undoes it.
   would break a join (it reaches the second IP, a vessel or something locked, a pipe gets too short, or two ways back disagree),
@@ -3191,7 +3191,7 @@ connected to a Pipe. This is a Bug."; "Flow past a Closed Valve = bug"):
   can reach that has no flow (it ends at a closed valve or an End Cap; a Quick Disconnect with nothing on it is open and sprays, Rule 5.28) is full but not moving.
   It shows the flow dashes in the flow color, standing still; moving flow still moves. Still water goes through open valves,
   fittings and pumps that are off, as flow does, and stops at a closed valve.
-- **A water splash only on a truly open end** (Rule 5.40): a loose pipe or hose end within 14 px of an IP (as Save layout rejoins,
+- **A water splash only on a truly open end** (Rule 5.40): a loose pipe or hose end within 25 px of an IP (as Save layout rejoins,
   Rule 5.19), or anywhere inside a Tee, Elbow or other Tab_Fitting, is in that IP: flow goes on through it as if joined, and no
   splash is drawn. A loose end lying on another pipe or hose, or on a widget, gets no splash either. Only an end out in the air
   gets one. The saved drawing is not changed.
@@ -7293,6 +7293,8 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 1.5 (the temperature probe) on the Front above it. Both programs show the same Templates and ports.
 
 ## Change log
+
+- 2026-11-25: Rules 5.19, 5.26, 5.37 and 5.45 (OakBarn Brewery: "Bigger Auto join area"; "lets try 25"): every auto join distance in Edit layout is now 25 px (was 12 px for IP to IP and 14 px for the rest): an IP dropped on an open IP, a pipe end or item IP dropped near a red dot or IP, Save layout rejoining open ends, and a loose end counted as joined for the flow drawing. A Skynet TC fitting (elbow, tee) with no pipes on it now also slides onto a red dot. Help 105 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 
 - 2026-11-25: Vessel list wording (OakBarn Brewery: "Vessel Widget should be titled Skynet Vessel Templates (build on them)"): the Edit layout bar's Vessel list row "Vessel Widget (you add everything to it) ..." is now **Skynet Vessel Templates (build on them) ...**, and so are the Add a Vessel choice and the heading over the Skynet Vessel Widgets in its picker (title: Add a Vessel: pick a Skynet Vessel Template to build on). The Vessel Widget class heading (Place sliders) is not changed. Help 66 and 82 (and French). BruControl Import program: its Build page shares the same Vessel list; nothing else changes there.
 

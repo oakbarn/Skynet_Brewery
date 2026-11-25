@@ -23,7 +23,7 @@ assert.ok(app.includes("isStdPump(e) ? [flipSpot('RM', e.flipH, e.flipV), flipSp
 // the user places it"): no Inlet IP / Outlet IP boxes anywhere; an end put on or near a pump joins its nearest spot
 assert.ok(!app.includes("'Inlet IP', 'sel'") && !app.includes("'Outlet IP', 'sel'") && app.includes("['pumpLink', 'Hose or Pipe', 'sel'"), 'no Inlet IP / Outlet IP boxes; Hose or Pipe stays');
 assert.ok(app.includes('function pumpSpotHit(ws, p, r, inside = false)') && app.includes('function takePumpSpots(lay = draft)'), 'a pipe or hose end sets the spot');
-assert.ok(app.includes('if (!best) best = pumpSpotHit(wsName, p, r, true);') && app.includes('|| pumpSpotHit(pipe.workspace, pts[i], 14);') && app.includes('if (!best) best = pumpSpotHit(ws, c, r, true);'), 'drawing, dropping a pipe and a Quick Disconnect hose all find the nearest spot');
+assert.ok(app.includes('if (!best) best = pumpSpotHit(wsName, p, r, true);') && app.includes('|| pumpSpotHit(pipe.workspace, pts[i], REJOIN_PX);') && app.includes('if (!best) best = pumpSpotHit(ws, c, r, true);'), 'drawing, dropping a pipe and a Quick Disconnect hose all find the nearest spot');
 assert.ok(app.includes("const free = ['in', 'out'].filter(end => !pipesOn(`dev:${e.name}:${end}`, ws).length); if (!free.length) continue;") && app.includes('.filter(c => !cur.includes(c))'), 'only a free end moves, never onto the other end');
 assert.ok(/pump: \{ type: 'digitalOut', subtype: 'pump',[^}]*w: 150, h: 150/.test(app), 'a new Pump starts 150 x 150');
 console.log('pump standard ok');

@@ -17,7 +17,7 @@ assert.match(app, /stubs\.push\(\{ key: \(a\.closed \? b : a\)\.key, p \}\)/, 'a
 assert.match(app, /'flow' \+ \(flowing \? '' : standing \? ' still' : ' off'\)/, 'a pipe with still water draws its dashes');
 assert.match(css, /\.pipes \.flow\.still \{ animation: none; \}/, 'still dashes do not move');
 // a loose end on something is not an open end
-assert.match(app, /const LOOSE_JOIN = 14;/, 'a loose end within 14 px of an IP is in that IP (as Save layout, Rule 5.19)');
+assert.match(app, /const LOOSE_JOIN = 25;/, 'a loose end within 25 px of an IP is in that IP (as Save layout, Rule 5.19)');
 assert.match(app, /if \(n\?\.air\) return !n\.touch;/, 'no water splash on a loose end that touches a pipe or a widget');
 assert.match(app, /on = looseEndIp\(pt, ws, p\[fixed\]\)/, 'a loose end in a Tab_Fitting or on an IP flows on as if joined');
 
