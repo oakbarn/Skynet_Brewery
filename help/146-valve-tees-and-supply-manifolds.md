@@ -34,11 +34,10 @@ Then the **Name** (ValveTee_1, Manifold2_1 or Manifold3_1 to start), the **Graph
 Height and the **Device Type**. Press **➕ Add Device**: it goes on that Tab and its Properties open. Enter goes from field to field
 and last to ➕ Add Device.
 
-## The valve numbers
+## Which valve is which
 
-In Edit layout, and on the Graphic in the Add box and the Properties, each valve shows a yellow number, **1**, **2**, **3**. It is the
-same valve as **Valve 1**, **Valve 2**, **Valve 3** in the dialog, and as **V1**, **V2**, **V3** in its Label. The numbers are not
-shown when Edit layout is off.
+**Valve 1**, **Valve 2** and **Valve 3** in the dialog count from the left, as the fitting is drawn level (Horizontal), and are
+**V1**, **V2**, **V3** in their Labels. No number is drawn on the valves.
 
 ## Manual or Motorized, one valve at a time
 
@@ -71,7 +70,7 @@ Its **Orientation** has three choices: **Horizontal** (the valves hang down), **
 - **Flip both**: both of these.
 
 On the Edit layout bar the turn buttons step through the three turns, and **Flip H** and **Flip V** flip it the way it looks on the
-Tab. The valves, their numbers and the IPs follow.
+Tab. The valves and the IPs follow.
 
 Each valve is drawn with the same TC 1.5 ferrules as the tees: the top one is clamped to the tee's branch, and the bottom one is the
 valve's IP. Dropped on a straight pipe in Edit layout, its run goes along the pipe and the pipe is cut in two, one piece on each open

@@ -1040,16 +1040,7 @@ function mfValves(g) {
   });
   return wrap;
 }
-// Fritz, 2026-11-06: "When Building or editing a Manifold Supply the Valves need to be number corresponding to the Valve 1 in the
-// dialog": in Edit layout (and on the Graphic in its dialogs) each valve shows its number, 1, 2, 3, left of its body, upright
-// whichever way the fitting is turned or flipped
-const mfNumAt = (g, i) => { const N = mfKeys(g).length || 1; return [(i + 40 / 210) / N, MF_TEE_H + 105 / 210 * (1 - MF_TEE_H)]; };
-function mfNums(g) {
-  return mfKeys(g).map((k, i) => {
-    const [x, y] = unitPoint(g, ...mfNumAt(g, i));
-    return h('div', { class: 'mfNum', title: `Valve ${mfNum(k)} (the same number as in its Properties)`, style: `left:${x - (g.x || 0)}px;top:${y - (g.y || 0)}px` }, String(mfNum(k)));
-  });
-}
+// The valve numbers (Fritz, 2026-11-06, Rule 5.35) were taken away (OakBarn Brewery, 2026-11-24: "And get rid of the yellow circle numbers")
 // a valve opened or closed (here, by a Process or on another screen): its picture follows
 function updateMfs(ch) {
   const names = new Set(Object.keys(ch || {}));
@@ -1148,7 +1139,6 @@ async function addMf(tname, kind) {
       try {
         const missing = gate();
         readFields(work, body);
-        if (missing === CONFIRM_WHY) { await askReview(work); continue; }      // ➕ Add Device before the Review: the Review now
         if (missing) throw new Error(missing);
         const name = noSpaces(work.name || last);
         const bad = typedNameError(name, { suggestion: last, what: 'Device' }); if (bad) throw new Error(bad);
@@ -1251,9 +1241,8 @@ function mfPreview(obj) {
     const pic = h('div', { style: `position:absolute;left:${ox}px;top:${oy}px;width:${W}px;height:${H}px;transform:${unitTransform(g)}` },
       h('div', { style: `position:absolute;inset:0;background:url("${media(obj.image)}") 0 0/100% 100% no-repeat` }),
       ...keys.map((k, i) => h('div', { style: `position:absolute;left:${i / N * 100}%;width:${100 / N}%;top:${MF_TEE_H * 100}%;height:${(1 - MF_TEE_H) * 100}%;background:url("${mfPicUrl((q(k + '_mfk')?.value) || obj[k + '_mfk'])}") 0 0/100% 100% no-repeat` })));
-    const nums = keys.map((k, i) => { const [x, y] = unitPoint(g, ...mfNumAt(g, i)); return h('div', { class: 'mfNum', style: `left:${x + ox}px;top:${y + oy}px` }, String(mfNum(k))); });
     box.style.width = BW + 'px'; box.style.height = BH + 'px';
-    box.replaceChildren(pic, ...nums);
+    box.replaceChildren(pic);      // no valve numbers (OakBarn Brewery, 2026-11-24: "get rid of the yellow circle numbers")
   };
   whileShown(box, () => setTimeout(draw, 0));
   setTimeout(draw, 0);
@@ -1589,7 +1578,7 @@ function buildVessel(g) {
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : '') + (g.visibility === 'hidden' || g.hidden === true ? ' vhidden' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
   if (g.image && isUnit({ ...g, loose: false })) n.append(h('div', { class: 'bfImg', style: `background-image:url("${isSightGlass({ ...g, loose: false }) ? sgPic(g) : media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated (a Sight Glass drawn for its Length, Rule 5.32)
-  if (isMf(g)) n.append(mfValves(g), ...(editing ? mfNums(g) : []));         // a Valve Tee or Supply Manifold: its valves, Manual or Motorized, open or closed (Rule 5.35)
+  if (isMf(g)) n.append(mfValves(g));         // a Valve Tee or Supply Manifold: its valves, Manual or Motorized, open or closed (Rule 5.35)
   else if (g.image && isSkyV({ ...g, loose: false }) && (g.flipH || g.flipV || unitRot(g))) {     // a Skynet vessel flipped or rotated
     const [pw, ph] = picWH(g);
     n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));

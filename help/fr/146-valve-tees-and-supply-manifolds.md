@@ -34,11 +34,10 @@ Puis le **Name** (ValveTee_1, Manifold2_1 ou Manifold3_1 au départ), le **Graph
 Height et le **Device Type**. Appuyez sur **➕ Add Device** : il va sur ce Tab et ses Properties s'ouvrent. Entrée passe de champ en champ
 et en dernier à ➕ Add Device.
 
-## Les numéros des vannes {#the-valve-numbers}
+## Quelle vanne est laquelle {#which-valve-is-which}
 
-En Edit layout, et sur le Graphic dans la case d'ajout et les Properties, chaque vanne montre un numéro jaune, **1**, **2**, **3**. C'est la
-même vanne que **Valve 1**, **Valve 2**, **Valve 3** dans la fenêtre, et que **V1**, **V2**, **V3** dans son Label. Les numéros ne sont pas
-affichés quand Edit layout est désactivé.
+**Valve 1**, **Valve 2** et **Valve 3** dans la fenêtre se comptent depuis la gauche, le raccord dessiné à plat (Horizontal), et sont
+**V1**, **V2**, **V3** dans leurs Labels. Aucun numéro n'est dessiné sur les vannes.
 
 ## Manuelle ou motorisée, une vanne à la fois {#manual-or-motorized-one-valve-at-a-time}
 
@@ -71,7 +70,7 @@ Son **Orientation** a trois choix : **Horizontal** (les vannes pendent vers le b
 - **Flip both** : les deux à la fois.
 
 Sur la barre Edit layout, les boutons de rotation passent par les trois positions, et **Flip H** et **Flip V** le retournent tel qu'il apparaît sur le
-Tab. Les vannes, leurs numéros et les IP suivent.
+Tab. Les vannes et les IP suivent.
 
 Chaque vanne est dessinée avec les mêmes férules TC 1.5 que les tés : celle du haut est serrée sur la branche du té, et celle du bas est l'
 IP de la vanne. Posé sur un tuyau droit en Edit layout, son corps suit le tuyau et le tuyau est coupé en deux, un morceau sur chaque bout
