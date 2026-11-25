@@ -39,12 +39,12 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
   - **State** : Open ou Closed maintenant, avec un curseur. Faites-le glisser pour ouvrir ou fermer la vanne tout de suite, comme
     un clic sur elle dans son Tab (avec .confirmation, elle vous demande de le faire à la main et d'appuyer sur Done d'abord). Ce
     n'est pas un réglage : 💾 Save et Close ne le changent pas. Seule la souris l'atteint, pas la touche Tab ni Entrée.
-  - **1. Label** (utilisé dans le message « à la main ») et **Label Visible**. Dès que le Label change, **🏷 Update to Suggested
-    Name** apparaît à côté de Label Visible : il met le Suggested Name fait avec le nouveau Label dans la case Change Name.
+  - **1. Label** (utilisé dans le message « à la main ») et **Label Visible**. Dès que le Label change, la case Change Name
+    prend le Suggested Name fait avec le nouveau Label, et une fenêtre bleue propose **✏ Change Name** avec lui.
   - **2. Tab** : le Tab où elle se trouve. Choisissez un autre Tab pour l'y déplacer (les tuyaux qui y sont joints restent sur
     l'ancien Tab). **Layer Order** est dessous, comme sur la Pump (Skynet Rule 18.48).
-  - **3. Name**, grisé, et dessous la case **Change Name**, qui commence avec le Name actuel. Tapez un nouveau Name (ou utilisez
-    🏷 Update to Suggested Name) et appuyez sur **✏ Change Name** : le nouveau Name va dans le Name et est gardé quand vous appuyez
+  - **3. Name**, grisé, et dessous la case **Change Name**, qui commence avec le Name actuel. Tapez un nouveau Name (ou changez
+    le Label pour avoir le Suggested Name) et appuyez sur **✏ Change Name** : le nouveau Name va dans le Name et est gardé quand vous appuyez
     sur 💾 Save, et chaque Process qui utilise l'ancien Name le suit. La case Change Name et ses boutons sont pour la souris seulement.
   - **.confirmation**.
   - **Graphic** : la vanne telle qu'elle sera dans le Tab, tenue à jour pendant que vous choisissez.

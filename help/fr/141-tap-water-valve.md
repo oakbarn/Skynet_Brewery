@@ -31,7 +31,7 @@ Bib ou près de lui, et son IP va au plus proche des 8 endroits du bord de sa bo
 ## Son IP Inlet : le tuyau d'eau de la maison {#its-inlet-ip-the-house-water-pipe}
 
 Comme une Motorized Valve, il a aussi un **IP Inlet** sur la face extérieure du filetage du côté du mur (Règle Skynet 18.52). Il tourne
-avec l'image, donc en Vertical il est en haut ou en bas (la case **Inlet**). Joignez-y un tuyau pour dessiner le tuyau d'eau de la maison.
+avec l'image, donc en Vertical il est en haut ou en bas (Flip Vertical). Joignez-y un tuyau pour dessiner le tuyau d'eau de la maison.
 
 - **Rien sur l'Inlet** : la plomberie de la maison n'est pas dessinée, et le Hose Bib a toujours de l'eau (comme avant).
 - **Un tuyau sur l'Inlet, Hose Bib ouvert** : l'eau entre le long de ce tuyau, vers le Hose Bib, en bleu eau du réseau.
@@ -58,8 +58,8 @@ bord de la boîte. Agrandi ou réduit, le Hose ou Pipe intérieur est redessiné
 ## Sa propre fenêtre {#its-own-dialog}
 
 Ses Properties sont la fenêtre **Hose Bib Widget**, avec le même aspect et le même ordre que celle de la Pump : le cadenas et
-**No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (🏷 Update
-to Suggested Name apparaît dès que le Label change), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
+**No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (dès que le Label
+change, une fenêtre bleue propose ✏ Change Name avec le nouveau Suggested Name), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
 Name** et **✏ Change Name**, le Suggested Name, le **Graphic** (sa seule image Skynet avec son Hose ou Pipe intérieur, tenue à jour),
 **Orientation** avec **Flip Horizontal** et **Flip Vertical**, **Hose or Pipe**, **Cover** avec **Toggle**, **Overlay** avec **Database and .API ⬢**,
 **Inlet IP Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne, et

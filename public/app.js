@@ -7408,7 +7408,7 @@ function portForName(e) {
 const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), type: e.type, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e)));
 // the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
 // and Finish Build ... > Move to Tab adds it, as for a Device
-// the Type comes from widgetTypeId with the Tap Water Valve test, the same as graphicWidgetName and 🏷 Update to Suggested Name, so a Hose Bib
+// the Type comes from widgetTypeId with the Tap Water Valve test, the same as graphicWidgetName and the Suggested Name a Label change offers, so a Hose Bib
 // is wgt_TWV_ on every line of its box, never wgt_MV_ on one and wgt_TWV_ on another (OakBarn Brewery, 2026-11-19: "The suggested Skynet
 // Type needs to be consistent and repeatable in every case")
 const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e, isTapMv(e)); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
@@ -11854,7 +11854,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (kind === 'state') return stateRow(label, obj);                   // State: a slider that works the item now (Rule 18.45)
   if (kind === 'mvpic') return mvGraphic(label, obj);                  // a Manual Valve's Graphic (Rule 18.45)
   if (kind === 'semipic') return semiGraphic(label, obj);              // a Boolean Widget's Graphic (Rule 18.50 #3)
-  // every Device and Widget gets the Change Name box, ✏ Change Name and 🏷 Update to Suggested Name (OakBarn Brewery, 2026-11-18: "Double
+  // every Device and Widget gets the Change Name box and ✏ Change Name, and a Label change offers the Suggested Name (OakBarn Brewery, 2026-11-18: "Double
   // Click on existing has the name change but not the Update if Label Changed and Change Name Field", a Pump made from a Skynet Template);
   // a Tab and the rest keep the ✏ Change name pop-up
   if (key === 'name' && kind === 'text' && obj._ref && obj.type && (S.types || []).includes(obj.type) && hasSuggestion(obj) && String(obj.name ?? '').trim()) return nameChangeRows(key, label.replace(/\s*\(.*\)$/, ''), obj);
@@ -12663,14 +12663,13 @@ function bindForm(body, fields, obj, onChange) {
 // Rule 18.45). #2: "If Label is Changed Pop Up Button with Update Suggested Name and populates Change Name Field". #3: "Change Name Field
 // that a User can Edit. Fill with Current name on Open Add change name Button". The Name stays greyed out (⛔); the Change Name box below
 // it starts with the Name now and can be typed in; ✏ Change Name checks it and puts it in the Name, kept when the Properties are saved,
-// and every Process that uses the old name follows it (Rule 3.11). Once the Label is changed, 🏷 Update to Suggested Name pops up on the
-// Label Visible line and fills the Change Name box with the Suggested Name. OakBarn Brewery, 2026-11-18: "New buttons associated with Name
+// and every Process that uses the old name follows it (Rule 3.11). Once the Label is changed, the Change Name box takes the Suggested Name
+// and a blue pop-up offers ✏ Change Name with it. OakBarn Brewery, 2026-11-18: "New buttons associated with Name
 // Change and the Name Change Field only get focus with Mouse, No Tab or Enter."
 const NAMECHG_TIPS = {
   name: 'The Name now. It is how Skynet and every Process refer to this item, and it is unique. It is changed only with the Change Name box below it and ✏ Change Name.',
   box: 'Type the new Name here. It starts with the Name now. Press ✏ Change Name to use it: it goes into the Name above and is kept when you press 💾 Save. Every Process that uses the old Name is changed to the new one.\n\nOnly the mouse reaches this box: the Tab key and the Enter key pass it by.',
   btn: 'Checks the Name typed in the Change Name box and puts it in the Name. It is kept when you press 💾 Save, and every Process that uses the old Name follows it.',
-  sug: 'The Label was changed. Click to put the Suggested Name made from the new Label in the Change Name box. Then press ✏ Change Name to use it.',
 };
 // the original item a Properties box works on (its copy's own name doesn't count as taken)
 const origOf = obj => { const L0 = draft || S.config; return isMv(obj) ? L0.graphics.find(g => g.id === obj.id) || obj : sugSelf(obj); };
@@ -12703,20 +12702,21 @@ function nameChangeRows(key, label, obj) {
     toast(`The Name will be ${n} when you press 💾 Save`);
   } }, '✏ Change Name');
   box.addEventListener('keydown', ev => { if (ev.key === 'Enter') ev.preventDefault(); });
-  // 🏷 Update to Suggested Name pops up once the Label is changed (on the Label Visible line)
+  // Once the Label is changed, the Change Name box takes the new Suggested Name and a blue pop-up offers ✏ Change Name with it (OakBarn
+  // Brewery, 2026-11-25: "When this pops up after an edit of the label, update the suggested Name and get rid of the button. Blue pop-up
+  // that you can change the Name of the Device to the new Suggested Name"; Rule 18.45 #2). Asked when the Label is left (change), not
+  // on every key; a Label put back as it was, or a Suggested Name that is the Name now, asks nothing.
   const label0 = String(obj.label ?? '');
-  const sug = h('button', { type: 'button', class: 'nameBtn sugNameBtn hidden', tabindex: '-1', 'data-help': NAMECHG_TIPS.sug, onclick: () => {
-    const body = sug.closest('#dlgBody, .dlgBody, form');
-    const n = changeNameSuggestion(obj, body); if (!n) return toast('Type a Label first', true);
-    box.value = n; box.focus();
-  } }, '🏷 Update to Suggested Name');
+  let asked = '';
   setTimeout(() => {
     const body = cur.closest('#dlgBody, .dlgBody, form'); if (!body) return;
-    const sw = body.querySelector('[data-k="hideName"], [data-k="labelVisible"]')?.closest('label.sw');
-    if (sw) { const wrap = h('div', { class: 'swWithBtn' }); sw.replaceWith(wrap); wrap.append(sw, sug); } else box.parentNode?.append(sug);
-    const lab = body.querySelector('[data-k="label"]');
-    const show = () => sug.classList.toggle('hidden', !lab || String(lab.value ?? '') === label0);
-    lab?.addEventListener('input', show); lab?.addEventListener('change', show); show();
+    const lab = body.querySelector('[data-k="label"]'); if (!lab) return;
+    lab.addEventListener('change', () => {
+      if (!cur.isConnected || String(lab.value ?? '') === label0) return;
+      const n = changeNameSuggestion(obj, body); if (!n || n === cur.value || n === asked) return;
+      asked = n; box.value = n;
+      undoNote(`The Label was changed. Change the Name to ${n}?`, () => { if (cur.isConnected) { box.value = n; btn.click(); } }, 8000, '✏ Change Name', 'blue');
+    });
   }, 0);
   return [h('label', { class: 'greyed tipLbl', 'data-help': NAMECHG_TIPS.name }, label), cur,
     tipLbl('Change Name', NAMECHG_TIPS.box), h('span', { class: 'nameRow' }, box, btn)];
@@ -20806,9 +20806,9 @@ const rcEff = rc => { const v = +rcBrewTab(rc)?.equip?.brewhouseEfficiency; retu
 const rcStrikeOff = rc => { const e = rcBrewTab(rc)?.equip; return e ? deltaC(e.strikeOffset, e.units) : 0; };
 const tabTitle = w => w.id ? `${w.id}: ${w.name}` : w.name;
 // a short note with ↩ Undo for a few seconds (Rule 2.53)
-function undoNote(text, onUndo, ms = 8000, label = '↩ Undo') {
+function undoNote(text, onUndo, ms = 8000, label = '↩ Undo', cls = '') {
   $('#undoNote')?.remove();
-  const bar = h('div', { id: 'undoNote', role: 'status' }), close = () => { clearTimeout(bar._t); bar.remove(); };
+  const bar = h('div', { id: 'undoNote', role: 'status', class: cls }), close = () => { clearTimeout(bar._t); bar.remove(); };
   bar.append(h('span', {}, text), h('button', { type: 'button', onclick: guard(async () => { close(); await onUndo(); }) }, label),
     h('button', { type: 'button', class: 'bbX', title: 'Close this note', onclick: close }, '✕'));
   bar._t = setTimeout(close, ms); document.body.append(bar);

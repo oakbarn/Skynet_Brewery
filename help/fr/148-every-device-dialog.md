@@ -48,8 +48,8 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
 - **State, Name et Change Name** (Skynet Rule 18.45) : **State** (sur chaque Device On / Off, et une Manual Valve) est un curseur qui met
   l'élément On ou Off (une vanne : Open ou Closed) tout de suite, comme un clic sur lui dans son Tab ; ce n'est pas un réglage, donc
   Save et Close ne le changent pas. Le **Name** est grisé ; la case **Change Name** dessous commence avec le Name actuel, et **✏
-  Change Name** met ce qui y est tapé dans le Name (gardé avec 💾 Save ; chaque Process le suit). Dès que le Label change, **🏷
-  Update to Suggested Name** apparaît à côté de Label Visible et remplit la case Change Name. Le curseur State, la case Change Name
+  Change Name** met ce qui y est tapé dans le Name (gardé avec 💾 Save ; chaque Process le suit). Dès que le Label change, la case
+  Change Name prend le nouveau Suggested Name et une fenêtre bleue propose **✏ Change Name** avec lui. Le curseur State, la case Change Name
   et ses deux boutons sont pour la souris seulement : la touche Tab et Entrée les passent.
   La case Change Name s'affiche sur chaque Device et Widget une fois enregistré ; pendant que vous en construisez un nouveau, son Name
   suit simplement le Suggested Name jusqu'à ce que vous l'ajoutiez.
