@@ -21,10 +21,16 @@ export function valveSide(path) {
   const m = s.match(/(?:^|\/)Valve_(?:Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R)C?\.svg$/);
   return m ? { H: 'h', V_L: 'vl', V_R: 'vr' }[m[1]] : null;
 }
-// the item's picture is cut to the valve band (not turned 45 degrees, not mirrored)
-export const valveCropped = e => !!e && !['l45', 'r45'].includes(e.orientation) && !e.flipH && !e.flipV && !!valveSide(e.imageOff || e.imageOn || e.image);
-// how far across the box the pipe runs (from the top for a level valve, from the left for an upright one)
-const pipeAt = (side, crop) => !crop ? 0.5 : side === 'vr' ? 1 - VCROP_PIPE : VCROP_PIPE;
+// the item's picture is cut to the valve band (not turned 45 degrees). A mirrored one is cut too (Panel Update 14, OakBarn Brewery,
+// 2026-11-25: "Add the two Flip Boxes"): the cut picture is mirrored, so its box still hugs the valve
+export const valveCropped = e => !!e && !['l45', 'r45'].includes(e.orientation) && !!valveSide(e.imageOff || e.imageOn || e.image);
+// how far across the box the pipe runs (from the top for a level valve, from the left for an upright one); a Flip across the pipe
+// (Flip Vertical on a level valve, Flip Horizontal on an upright one) puts the motor on the other side, so the pipe too
+const pipeAt = (side, crop, e = {}) => {
+  if (!crop) return 0.5;
+  const other = (side === 'vr') !== !!(side === 'h' ? e.flipV : e.flipH);
+  return other ? 1 - VCROP_PIPE : VCROP_PIPE;
+};
 // fit one item's box to its valve picture, keeping its pipe line where it was. true = changed
 export function fitValveBox(e) {
   const side = e && valveSide(e.imageOff || e.imageOn || e.image); if (!side) return false;
@@ -34,7 +40,7 @@ export function fitValveBox(e) {
   const across = crop ? Math.round(along * VCROP.across / VCROP.long) : Math.round(along * 2), [nw, nh] = lvl ? [along, across] : [across, along];
   if (nw === w && nh === h) return false;
   const turned = r >= 1.12 && lvl !== (h > w), curCrop = !turned && r >= 1.12 && r < 1.6;
-  const curAt = turned || !curCrop ? 0.5 : pipeAt(side, true), newAt = pipeAt(side, crop);
+  const curAt = turned || !curCrop ? 0.5 : pipeAt(side, true, e), newAt = pipeAt(side, crop, e);
   if (turned) { e.x = Math.round((+e.x || 0) + (w - nw) / 2); e.y = Math.round((+e.y || 0) + (h - nh) / 2); }
   else if (lvl) { const py = (+e.y || 0) + curAt * h; e.x = Math.round((+e.x || 0) + (w - nw) / 2); e.y = Math.round(py - newAt * nh); }
   else { const px = (+e.x || 0) + curAt * w; e.y = Math.round((+e.y || 0) + (h - nh) / 2); e.x = Math.round(px - newAt * nw); }

@@ -21,8 +21,9 @@ scrolls, there is no row of buttons at the bottom, and every ⬢ or ⬆ pop-up h
      is picked; there is always one Default Valve Profile (☰ Menu > Valve Profile).
    - **Graphic**: the valve as it will show on the Tab, closed, turned to its Orientation.
    - **Path**: the picture file.
-   - **Orientation** and, on the same line, **Toggle**: how the valve stands (the Graphic and its IPs turn with it), and what
-     a tap does (On/Off opens or closes it with one click).
+   - **Orientation** (Horizontal or Vertical) and, on the same line, **Flip Horizontal** and **Flip Vertical**: how the valve
+     stands (the Graphic and its IPs turn with it).
+   - **Toggle**: what a tap does (On/Off opens or closes it with one click).
    - **Overlay**: drawn on top while the valve is open (the steady red and yellow lightning bolt). On the same line,
      **Database and .API ⬢** opens its settings (Help 98).
    - **Tap water valve**, **On Close List** and **On Open List** on one line (both lists on to start).
@@ -75,8 +76,8 @@ Name **BM_15_DO@Valve_E_Mash~Valve_BH**. (Skynet Rule 18.42)
 2. **1. Label ⬆ ⬢** and **Label Visible**. A Label is never blank: leave it empty and it becomes the Name.
 3. **2. Interface** and **Available Ports**, greyed out (the board and pin it is wired to).
 4. **3. Tab**, **Layer Order** and **4. Name** (the Suggested Name; you may type your own).
-5. **Graphic** and **Path**, then **Orientation** and **Toggle** on one line (as on the Pump).
-6. **Overlay** with **Database and .API ⬢**.
+5. **Graphic** and **Path**, then **Orientation** with **Flip Horizontal** and **Flip Vertical** on one line (see [Orientation and Flips](#orientation-and-flips) below).
+6. **Toggle**, then **Overlay** with **Database and .API ⬢**.
 7. The valve's own settings: **Tap water valve**, **On Close List** and **On Open List**, all three on one line (see [Tap water valves](31-tap-water-valves)).
    On Close List: `close_all_valves` in a Process closes it. On Open List: `open_all_valves` opens it. A tap water valve shows its
    **Tap Water flows** instead, and is always on the Close List and never on the Open List; the knobs of those two switches then show the Do Not Enter sign ⛔ (they can't be changed). A tap water valve also has **Water Supply** (None, Pipe or Hose): the house water line drawn on its TAP side, always flowing blue (see [Tap water valves](31-tap-water-valves)).
@@ -90,23 +91,49 @@ The Suggested Name follows the naming format (Rule 3.1): Interface ID, Port, `Va
 | | Skynet Motorized Ball Valve | User Defined Motorized Ball Valve |
 |---|---|---|
 | Path | greyed out: set by its Skynet Template, follows the Orientation | **Path**: your picture, one picture drawn Horizontal (the Overlay shows it open). Skynet turns and mirrors it for the other Orientations. The ⬢ beside Path sets where the In and Out IPs are. **Path (open)** shows only on a valve that already has an open picture |
-| Orientation | Horizontal, Vertical Left, Vertical Right (Front and 45 degrees show only on a valve that already sits that way) | Horizontal, Horizontal Flipped, Vertical Left, Vertical Right, all made from your one picture (plain Vertical and the 45s show only on a valve that already sits that way) |
+| Orientation | Horizontal or Vertical, with Flip Horizontal and Flip Vertical (Front and 45 degrees show only on a valve that already sits that way) | Horizontal or Vertical, with Flip Horizontal and Flip Vertical, all made from your one picture (plain Vertical and the 45s show only on a valve that already sits that way) |
 | Toggle and Overlay | yours to pick (they start as On/Off and the steady bolt) | yours to pick |
 | Width and Height | its Template's size for each Orientation | 150 x 150 to start |
 
 Settings these dialogs no longer show (Invert, One-shot, Text when on / off, Flip, Service) are kept if a valve already had them.
+
+## Orientation and Flips
+
+OakBarn Brewery, Panel Update 14 (Skynet Rules 18.43 and 6.15):
+
+1. Orientation only two Choices: **Horizontal** and **Vertical**.
+2. Add the two Flip Boxes: **Flip Horizontal** and **Flip Vertical**.
+3. All Pictures Horizontal Start as Left to Right Flow. Normal Motorized Valve Picture Flips Horizontal. Flow direction is always bi-direction.
+4. Other Valves Follow this pattern.
+5. All Pictures Vertical Start as Bottom to Top Flow and act like above.
+6. Tap Valves get an additional DDLB, **Tap Water Flows**: Horizontal Orientation: Right to Left, Left to Right. Vertical Orientation: Bottom to Top, Top to Bottom.
+7. Tap Water Flow is affected by Flips but the last one wins and changes this.
+
+What that means on the dialog and on the Tab:
+
+- **Horizontal** is the valve with its motor on top; **Vertical** is it turned 90 degrees with its motor on the left.
+- **Flip Horizontal** mirrors it left to right and **Flip Vertical** mirrors it top to bottom, as it looks on the Tab. Its IPs go with it. On
+  Vertical, Flip Horizontal puts the motor on the right (what Vertical Right was).
+- A valve saved as Vertical Right (or, User Defined, Horizontal Flipped) shows as Vertical with Flip Horizontal on (Horizontal with Flip
+  Vertical on) when its Properties open. It looks the same and its IPs stay where they are.
+- A **tap water valve** starts **Left to Right** (Horizontal: the TAP end on the left) or **Bottom to Top** (Vertical: the TAP end at the
+  bottom). The TAP end goes with the picture: Flip Horizontal on a Horizontal valve, or Flip Vertical on a Vertical one, takes it to the
+  other side, and **Tap Water Flows** changes with it. Picking the other way in **Tap Water Flows** flips the picture the same way. The
+  last one you change wins.
+- In Edit layout's **Zoom box**, with the valve picked: **H** flips it left to right, **V** top to bottom (see
+  [Move Alone, Swap and Put Back](153-move-alone-swap-put-back)).
 
 ## One picture, four looks (User Defined)
 
 Give the User Defined Motorized Ball Valve **one picture**, drawn **Horizontal**: the pipe running left to right and the motor on
 top. Skynet makes the other looks from it, so you never need a second picture. (Skynet Rule 18.43)
 
-| Orientation | What Skynet does with your picture |
+| Orientation and Flips | What Skynet does with your picture |
 |---|---|
 | **Horizontal** | shows it as you drew it |
-| **Horizontal Flipped** | mirrors it top to bottom (motor below the pipe) |
-| **Vertical Left** | turns it 90 degrees (motor on the left) |
-| **Vertical Right** | turns it 90 degrees and mirrors it left to right (motor on the right) |
+| **Horizontal** + **Flip Vertical** | mirrors it top to bottom (motor below the pipe) |
+| **Vertical** | turns it 90 degrees (motor on the left) |
+| **Vertical** + **Flip Horizontal** | turns it 90 degrees and mirrors it left to right (motor on the right) |
 
 Your picture file is never changed; it is only drawn turned or mirrored. The In and Out IPs follow the look.
 

@@ -2209,6 +2209,10 @@ the full set. (thread "Limit pipes to horizontal, vertical, 45", Help 105)
 - **Keys** (2026-11-24, OakBarn Brewery: "Maybe time for a keyboard shortcut to rotate 90 degrees and flip horizontal or vertical?"):
   with a fitting that can turn picked in Edit layout, **R** turns it a quarter turn right, **Shift + R** left, **H** flips it left to
   right and **V** top to bottom (Rule 2.73), the same as the turn buttons; never while typing in a box or with a dialog open.
+- **Valves in the Zoom box** (2026-11-25, OakBarn Brewery: "And have V and H and Shift + H work on devices in the Build Tab in Edit mode
+  inside the Zoom Box"; Panel Update 14): with a Motorized valve Device, a Manual Valve or a Hose Bib picked in the Zoom box, **H** and
+  **V** do what its Flip Horizontal and Flip Vertical boxes do (a tap water valve's Tap Water Flows follows, Rule 5.10), and **Shift + H**
+  switches its Orientation between Horizontal and Vertical, its Flips kept. Not on a locked valve.
 
 5.6 **A Skynet Template's picture is fixed.** A bottom-drain copy of a kettle changes only the
 picture. (2026-10-23)
@@ -2231,7 +2235,7 @@ add to. (2026-10-04, PR #14)
 
 5.10 **Flow rules:** flow only runs on pipes joined IP to IP, traced from running pumps. An OFF pump
 lets flow pass either way. Valves must be open. Dead ends show nothing. A check valve passes one way
-only. Fitting bundles flow both ways. Tap water valves push flow on their own. **A tap water valve is always one way**: from its tap side to its Out side, never back and never both ways. This holds for the Skynet Template tap water valves and every valve made from them too. Its **Tap Water flows** box picks Left to Right / Right to Left when it lies flat or Top to Bottom / Bottom to Top when it stands up (OakBarn Brewery, 2026-11-15: "flow is always from tap source to Out on a Valve"). **Every other Widget or Device with IPs passes flow both ways, except a check valve.** (2026-10-04, PR #3;
+only. Fitting bundles flow both ways. Tap water valves push flow on their own. **A tap water valve is always one way**: from its tap side to its Out side, never back and never both ways. This holds for the Skynet Template tap water valves and every valve made from them too. Its **Tap Water flows** box picks Left to Right / Right to Left when it lies flat or Top to Bottom / Bottom to Top when it stands up (OakBarn Brewery, 2026-11-15: "flow is always from tap source to Out on a Valve"). *Changed 2026-11-25 (Panel Update 14, Rule 18.43):* **Tap Water Flows** lists Right to Left, Left to Right (Horizontal) or Bottom to Top, Top to Bottom (Vertical); a new tap water valve starts Left to Right or Bottom to Top (the TAP end on the picture's left or bottom end); the TAP end goes with the picture, so Flip Horizontal (Horizontal) or Flip Vertical (Vertical) changes the flow, and picking the other flow flips the picture; the last one changed wins (OakBarn Brewery: "Tap Water Flow is affected by Flips but the last one wins and changes this"; picked "flows and Flips stay linked"). **Every other Widget or Device with IPs passes flow both ways, except a check valve.** (2026-10-04, PR #3;
 PR #47; PR #91)
 
 5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
@@ -6695,6 +6699,14 @@ of the Motorized Ball Valve Pictures for the one used on the 3 vessel."). Both p
   offered on a new valve or profile. A valve or profile that already has an open picture keeps it and still shows the box (Never Take Away).
 - **Orientation**: Horizontal, Vertical Left or Vertical Right (a User Defined valve: Horizontal or Vertical). Front, Front Elbow and
   45 degrees are not offered to a new valve; a valve already set that way keeps it and still shows that choice (Never Take Away).
+  *Changed 2026-11-25 (OakBarn Brewery, PDF "Panel Update 14", picked "Change the Rules"):* "Orientation only two Choices":
+  **Horizontal** and **Vertical** (motor left), and "Add the two Flip Boxes": **Flip Horizontal** and **Flip Vertical** on the
+  Orientation's line, on the Skynet and User Defined Motorized valves (the Toggle moves to its own line). "All Pictures Horizontal Start as
+  Left to Right Flow"; "All Pictures Vertical Start as Bottom to Top Flow"; "Other Valves Follow this pattern" (Manual Valves and Hose
+  Bibs, Rule 18.52). Vertical Right is Vertical with Flip Horizontal; a User Defined Horizontal Flipped is Horizontal with Flip Vertical: a
+  valve saved that way is shown so when its Properties open, with the same look and IPs (its Template becomes the set's Vertical one). A
+  flipped Skynet side-view valve keeps its box hugging the valve (Rule 5.29). A valve that is not made from a Template but has a Skynet
+  side-view picture takes the Skynet Vertical picture on Vertical (before, Vertical did not turn it). Tap Water Flows: Rule 5.10.
 - **Vertical Left and Vertical Right switch the picture** (OakBarn Brewery, 2026-11-18: "That is the way the picture should be switched so it
   is needed"; "Add it"): Vertical Left shows Motorized_TC15_Ball_Valve_Vertical_Left.svg (the 3 Vessel valve mirrored, motor left),
   Vertical Right shows it flipped (motor right), the same on the Skynet Motorized Ball Valve and the KLD20T.
@@ -6966,6 +6978,13 @@ can (and will be placed like that, Manual Ball Valves do not need left right as 
 different left right, I would need to see if it makes a difference. Vertical Left Right does matter because the handle "motor" can be
 Left or Right.. and besides a Hose bib, a Butterfly valve could have a Different inlet Outlet Top Bottom. Again for a Butterfly valve
 I would Have to see it."). Both programs (the BruControl Import's Build page shares the dialogs).
+*Changed 2026-11-25 (Panel Update 14, Rule 18.43):* Left / Right and Inlet are replaced by **Flip Horizontal** and **Flip Vertical**
+beside the Orientation. A Manual Valve or Hose Bib unflipped stands as drawn (Horizontal) or turned a quarter left with the handle to the
+left (Vertical); a Hose Bib unflipped has its Inlet (TAP) on the left (Horizontal, Left to Right) or at the bottom with the handle to the
+left (Vertical, Bottom to Top). The Flips mirror it as it looks on the Tab. A Manual Ball or Butterfly Valve's Flip Horizontal is not greyed
+("Manual Valve Picture Flips Horizontal ... the graphic would show the handle in the opposite direction"). A front view has no Orientation
+and no Flips. Saved as mvFlipH / mvFlipV; a valve saved with Left / Right and Inlet keeps the same look (the Flips are worked out from
+them). Items 1 to 4 below are the old way, kept for the record.
 1. **Hose Bib**: Orientation, Left / Right and a new **Inlet** box on one line. Horizontal: Left / Right puts the Inlet (the wall
    side) on the Right (as drawn) or the Left (mirrored); Inlet is greyed out (⛔ on hover, Rule 18.46). Vertical: **Inlet** is **Top**
    or **Bottom** and **Left / Right** is the side the handle (the "motor") points to, so it has all 4 Vertical looks. A Hose Bib saved
@@ -7304,6 +7323,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-25: Rules 18.43, 18.52, 5.10 and 5.5 changed (OakBarn Brewery, PDF "Panel Update 14"; picked "Change the Rules" and "flows and Flips stay linked"; "And have V and H and Shift + H work on devices in the Build Tab in Edit mode inside the Zoom Box"): every valve's Orientation is Horizontal or Vertical with Flip Horizontal and Flip Vertical beside it (Motorized Skynet and User Defined, Manual Valve, Hose Bib); pictures start Left to Right (Horizontal) and Bottom to Top (Vertical); Tap Water Flows (Right to Left, Left to Right / Bottom to Top, Top to Bottom) is tied to the Flips, the last one changed wins (replaces the 2026-11-25 "changing the Orientation keeps the way the water goes"); Vertical Right, Horizontal Flipped, Left / Right and Inlet saved before show as the matching Flips with the same look; a flipped Skynet side-view valve keeps its hugging box; in the Zoom box H, V and Shift + H work on a picked valve. Help 31, 87, 128, 141, 153 (and French). BruControl Import program: its Build page shares these dialogs and keys; its import makes no Orientation or Flips, so nothing else changes there. Checked on the 3 Vessel 1 Pump sample: its valves have no Orientation and no Left / Right saved, so they look the same.
 - 2026-11-25: Manual Ball Valve side view picture (Manual_Ball_Valve_Side_Closed.svg) gets a blue handle (OakBarn Brewery: "Manual Valve side view needs to show handle in blue. Create an SVG based on the one now, just add the blue handle as depicted"). Same file name, so every placed Manual Valve Widget with it shows the handle.
 
 - 2026-11-25: Rule 6.15 note (OakBarn Brewery: "Tap when Tap water is always the Tap icon and no user click on the screen"; "Get rid of the Out icon and leave as red or green dot only"; "choice of flow direction change with the valve Horizontal or Vertical"): on a tap water valve the TAP end always shows TAP and can't be clicked or joined; the Out end is a plain red or green IP dot; Tap Water flows offers Left to Right / Right to Left or Top to Bottom / Bottom to Top to fit the Orientation, and changing the Orientation keeps the way the water goes. New Water Supply (None / Pipe / Hose) on a tap water valve (OakBarn Brewery: "A Tap side will have a special Pipe or hose that can connect to it. Only one end of the special Pipe or Hose has an IP that can attach to a Tap side of a Tap Valve. Simply the water supply but just for visual. The Pipe will always have blue flow in it that is always ON"; "And it is not a normal pipe and only a selection for a Tap Water Valve and only on the Tap side"): Skynet draws it 90 px straight out from the TAP end (pipe.supplyOf), always blue flow, no handles, can't be moved or joined, goes when the valve or the choice goes. Help 31 and 128 (and French).

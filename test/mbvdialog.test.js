@@ -24,7 +24,7 @@ const own = app.slice(app.indexOf('const MBV_GRAPHIC_FIELDS'), app.indexOf("// a
 assert.ok(!/cover/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover on a valve (code, not comments)');
 assert.match(own, /\['_orient', 'Orientation', 'vorient', skyOrientChoices\(it\), true/, 'a Skynet valve: Orientation picks its Template (Rule 5.17)');
 assert.match(own, /\['tap', 'Toggle', 'sel', ONE_CLICK_TAP\(it\.tap\)/, 'Toggle works normally, Skynet valve too (Fritz, 2026-11-05); Toggle or Push Button, no None (Rule 2.46)');
-assert.match(own, /'vorient', skyOrientChoices\(it\), true, false, \{ tip: T\.vOrient, with: MBV_TOGGLE\(it\)/, 'Orientation and Toggle on one line, as the Pump\'s Cover and Toggle');
+assert.match(own, /'vorient', skyOrientChoices\(it\), true, false, \{ tip: T\.vOrient, with: MBV_FLIPS\(it\)/, 'Orientation with Flip Horizontal and Flip Vertical on one line (Panel Update 14)');
 assert.match(own, /with: \[\['closeAll', 'On Close List', 'bool', true[^\]]*\], \['openAll', 'On Open List', 'bool', true/, 'Tap water, On Close List and On Open List on one line');
 assert.match(own, /\['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES\(it\.imageOverlay, it\), false, false, \{ tip: DEVICE_TIPS\.vOverlay, dbPop: true/, 'Overlay works normally, Database and .API on its line');
 assert.ok(!/'ro'/.test(own.slice(own.indexOf('MBV_TOGGLE_OVERLAY'))) , 'nothing greyed out in Toggle / Overlay');
@@ -32,8 +32,9 @@ assert.match(own, /\['imageOff', 'Path', 'gpick', null, false, false, \{ tip: T\
 // Rule 18.43 (OakBarn Brewery, 2026-11-18): the 3 Vessel valve pictures first; one picture (the On Overlay shows open); Horizontal,
 // Vertical Left or Right. An old valve keeps its open picture, Front or 45 degrees (Never Take Away).
 assert.match(own, /\.\.\.\(it\.imageOn \? \[\['imageOn', 'Path \(open\)'/, 'Path (open) only on a valve that already has an open picture');
-assert.match(app, /const MBV_ORIENT = v => \[[^\n]*\['h', 'Horizontal'\], \['hd', 'Horizontal Flipped'\], \['vl', 'Vertical Left'\], \['vr', 'Vertical Right'\],\n  \.\.\.\(v === 'v' \? \[\['v', 'Vertical \(as drawn\)'\]\] : \[\]\),\n  \.\.\.\(v === 'l45'/, 'User Defined (Panel Updates 6): four looks from one picture; plain Vertical and the 45s only when already set');
-assert.match(app, /const ORIENT_MAIN = \['H', 'VL', 'VR'\];/, 'Skynet valve: Horizontal, Vertical Left, Vertical Right');
+assert.match(app, /const MBV_ORIENT = v => \[[^\n]*\['h', 'Horizontal'\], \['vl', 'Vertical'\],\n  \.\.\.\(v === 'v' \? \[\['v', 'Vertical \(as drawn\)'\]\] : \[\]\),\n  \.\.\.\(v === 'l45'/, 'User Defined: Horizontal or Vertical with the Flips (Panel Update 14); plain Vertical and the 45s only when already set');
+assert.match(app, /const ORIENT_MAIN = \['H', 'VL'\];/, 'Skynet valve: Horizontal and Vertical, the Flips do the rest (Panel Update 14)');
+assert.ok(app.includes("function skyVrToV(it)"), 'a valve saved as Vertical Right shows as Vertical with Flip Horizontal');
 assert.match(app, /filter\(x => ORIENT_MAIN\.includes\(end\(x\)\) \|\| now\.has\(x\.name\)\)/, 'Front and Front Elbow only when the valve already sits that way');
 assert.match(app, /const MBV_MODELS = \[\['Skynet Motorized Ball Valve', 'sky', 'Images\/Skynet\/Valves\/Motorized_TC15_Ball_Valve_Horizontal\.svg'\]/, 'the 3 Vessel picture in the Add list');
 assert.match(app, /'➕ New User Defined Motorized Ball Valve[^']*', 'user', 'Images\/Skynet\/Valves\/Motorized_TC15_Ball_Valve_Vertical\.svg'\]/);

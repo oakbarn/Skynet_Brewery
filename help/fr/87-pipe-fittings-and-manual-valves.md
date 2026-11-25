@@ -48,11 +48,13 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
     sur 💾 Save, et chaque Process qui utilise l'ancien Name le suit. La case Change Name et ses boutons sont pour la souris seulement.
   - **.confirmation**.
   - **Graphic** : la vanne telle qu'elle sera dans le Tab, tenue à jour pendant que vous choisissez.
-  - **Picture**, puis **Orientation** (Horizontal ou Vertical) et **Left / Right** sur sa ligne : Horizontal Right est l'image telle
-    qu'elle est dessinée, Horizontal Left est son miroir ; Vertical Left et Vertical Right tournent la poignée vers la gauche ou la
-    droite. Une Manual Ball Valve ou Butterfly Valve de Skynet est pareille en miroir, donc sur Horizontal sa case Left / Right est
-    grisée (Règle Skynet 18.52). Une vue de face (dans l'axe du tuyau) n'a pas d'Orientation. Ses bouts (IP) tournent avec elle, donc joignez les tuyaux
-    après avoir choisi.
+  - **Picture**, puis **Orientation** (Horizontal ou Vertical) avec **Flip Horizontal** et **Flip Vertical** sur sa ligne (OakBarn
+    Brewery, Panel Update 14 : « L'image de la Manual Valve se retourne de gauche à droite. Le sens d'écoulement est toujours dans les
+    deux sens, mais l'image montre la poignée dans l'autre sens à cause du retournement » ; Règle Skynet 18.52). Horizontal est l'image
+    telle qu'elle est dessinée (poignée en haut) ; Vertical la tourne d'un quart de tour, la poignée à gauche. Flip Horizontal la
+    retourne de gauche à droite (la poignée pointe de l'autre côté), Flip Vertical de haut en bas (la poignée sous le tuyau). Une vue de
+    face (dans l'axe du tuyau) n'a ni Orientation ni Flips. Ses bouts (IP) tournent avec elle, donc joignez les tuyaux après avoir
+    choisi. Dans la fenêtre de zoom, **H** et **V** retournent aussi la vanne choisie.
     ![Manual Valve Orientation](help_pictures/Manual_Valve_Orientation.png)
   - **X**, **Y**, **Width**, **Height** (réglés par ses tuyaux, ⛔), 🔒 Lock et No Unlock, et le **Widget Type**.
 

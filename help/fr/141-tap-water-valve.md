@@ -61,22 +61,24 @@ Ses Properties sont la fenêtre **Hose Bib Widget**, avec le même aspect et le 
 **No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (🏷 Update
 to Suggested Name apparaît dès que le Label change), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
 Name** et **✏ Change Name**, le Suggested Name, le **Graphic** (sa seule image Skynet avec son Hose ou Pipe intérieur, tenue à jour),
-**Orientation** avec **Left / Right** et **Inlet**, **Hose or Pipe**, **Cover** avec **Toggle**, **Overlay** avec **Database and .API ⬢**,
+**Orientation** avec **Flip Horizontal** et **Flip Vertical**, **Hose or Pipe**, **Cover** avec **Toggle**, **Overlay** avec **Database and .API ⬢**,
 **Inlet IP Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne, et
 le Widget Type (Règle Skynet 18.48). Il n'y a pas de case Picture (un Hose Bib a une seule image Skynet) ni de case IP (le flexible
 ou le tuyau que vous joignez la fixe, voir plus haut).
 
-**Orientation**, **Left / Right** et **Inlet** : un Hose Bib se place comme une Motorized Valve, sa poignée faisant office de
-« moteur » (Règle Skynet 18.52). Horizontal Right est l'image telle qu'elle est dessinée (l'Inlet, le côté du mur, à droite),
-Horizontal Left est son miroir (l'Inlet à gauche) ; la case Inlet est grisée sur Horizontal. Vertical est pour un robinet sur un
-tuyau qui monte et descend : **Inlet** met le côté du mur en haut (**Top**, un tuyau qui vient d'en haut) ou en bas (**Bottom**, un
-tuyau qui vient d'en bas), et **Left / Right** est le côté vers lequel pointe la poignée. Cela donne 4 vues verticales : Inlet Top
-avec la poignée à gauche ou à droite, et Inlet Bottom avec la poignée à gauche ou à droite. Un Hose Bib fait avant la case Inlet
-garde son allure (Vertical Left : Inlet Top ; Vertical Right : Inlet Bottom).
+**Orientation**, **Flip Horizontal** et **Flip Vertical** (OakBarn Brewery, Panel Update 14 : « Le Hose Bib se retourne de gauche à
+droite » ; « Toutes les images Horizontal commencent avec l'écoulement de gauche à droite » ; « Toutes les images Vertical commencent
+avec l'écoulement de bas en haut » ; Règle Skynet 18.52) : un Hose Bib se place comme une Motorized Valve, sa poignée faisant office de
+« moteur ». **Horizontal** a l'Inlet (le côté du mur, le TAP) à gauche, donc l'eau va de gauche à droite. **Vertical** est pour un
+robinet sur un tuyau qui monte et descend : l'Inlet en bas (de bas en haut) et la poignée à gauche. **Flip Horizontal** le retourne de
+gauche à droite et **Flip Vertical** de haut en bas, tel qu'on le voit sur le Tab, ce qui donne les 4 vues dans chaque Orientation (en
+Vertical : Flip Vertical met l'Inlet en haut, Flip Horizontal la poignée à droite). Un Hose Bib enregistré avec Left / Right et Inlet
+garde la même allure avec les Flips quand ses Properties s'ouvrent ; rien ne bouge sur le Tab. Dans la fenêtre de zoom, **H** et **V**
+retournent aussi le Hose Bib choisi.
 
 Son seul IP est sur un des 8 endroits du bord de sa boîte (Bottom Middle, Bottom Left, Bottom Right, Left Middle, Right Middle,
 Top Left, Top Middle, Top Right), le côté du mur aussi (Règle Skynet 18.49), comme une Pump. Le flexible ou le tuyau joint choisit
-l'endroit. Un endroit reste où vous le voyez quand vous changez l'Orientation ou Left / Right, donc le flexible ou le tuyau ne bouge
+l'endroit. Un endroit reste où vous le voyez quand vous changez l'Orientation ou un Flip, donc le flexible ou le tuyau ne bouge
 pas.
 
 ![Hose Bib 8 IPs](help_pictures/Hose_Bib_8_IPs.png)
