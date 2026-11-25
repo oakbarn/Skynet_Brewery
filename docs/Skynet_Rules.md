@@ -1690,10 +1690,11 @@ desktops), and on a Mac Control + Option is the VoiceOver key. The key is read b
 are available on Skynet") (OakBarn Brewery, 2026-11-24: "make it an MD ... and available as a CSV"); a new
 shortcut is added there too.
 
-2.74 **Notes stay 3 seconds** (OakBarn Brewery, 2026-11-24: "Nanny state up too long. Needs to be quick, maybe 3 seconds and then
-gone"; "All nanny pop-ups 3 seconds"). Every short note that pops up at the bottom of the Panel ("… deleted. ↩ Put back (Ctrl+Z)
-brings it back.", "Moved to …", "Saved" …), in the Panel and the BruControl Import program, stays **3 seconds**, then goes by itself, however long its words are. Only a red error
-note keeps its own time (5 seconds unless it asks for more), since something did not work. A new note never asks for another time.
+2.74 **Notes stay 2 seconds** (OakBarn Brewery, 2026-11-24: "Nanny state up too long. Needs to be quick, maybe 3 seconds and then
+gone"; "All nanny pop-ups 3 seconds"; then "Change Blue and Red Nanny to 2 seconds"). Every short note that pops up at the bottom of
+the Panel ("… deleted. ↩ Put back (Ctrl+Z) brings it back.", "Moved to …", "Saved" …), blue or red (an error), in the Panel and the
+BruControl Import program, stays **2 seconds**, then goes by itself, however long its words are. A new note never asks for another
+time. *Was (earlier the same day):* blue notes 3 seconds, red notes 5.
 
 ## 3. Names and file names
 
@@ -2901,14 +2902,21 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   the whole move at its first bend (2026-11-24); two open ends (couplings) joined at a corner get the fitting the corner needs, an
   elbow (a tee, a cross ...) (2026-11-24, OakBarn Brewery: "On autoconfigure should have put in an elbow"); a hose just bends. When that
   **A red dot can be deleted** (2026-11-24, OakBarn Brewery: "trying to get the properties up so I can delete these coupling"): press
-  it, then the Delete key (the dot goes, its pipe stays), or two quick presses outside the Zoom box for its Properties; its pipe end is
-  left plain (no dot, no red ring) and stays plain until it is joined again.
+  it, then the Delete key, or two quick presses outside the Zoom box for its Properties and 🗑 Delete. *Changed (2026-11-24, OakBarn
+  Brewery: "Used Delete and the Delete key. Pop-up says deleted but it is still there"):* the pipe (or hose) with that open end goes with
+  the dot, since a plain end shows the same red dot; ↩ Put back (Ctrl+Z) brings it back. *Was:* the dot goes, its pipe stays, the end
+  left plain.
   **Auto configure joins IP to IP** (2026-11-24, OakBarn Brewery: "why is the red dot not green on the elbow and valve?"): two IPs of
   things (not open pipe ends) brought onto one spot are joined by a pipe of no length (Rule 5.26), so both turn green.
   **Turn buttons in the Zoom box** (2026-11-24, OakBarn Brewery: "No way to orient"): while a fitting that can turn is picked, the
   Zoom box's title has ⟲ 90, ⟳ 90, ⇆ Flip H and ⇅ Flip V (Rule 5.5, a quarter turn at a time), and the box shows every change at once.
   **A deleted fitting leaves plain ends** (2026-11-24, OakBarn Brewery: "they are not needed with a new Join"): a pipe end whose
-  elbow, tee or Device is deleted gets no coupling (no red dot, no red ring); leftover red dots become plain ends when Edit layout opens.
+  elbow, tee or Device is deleted gets no coupling (no red ring); leftover red dots become plain ends when Edit layout opens.
+  **A plain end shows the small red IP dot and joins** (2026-11-24, OakBarn Brewery: "Pipe end needs the red dot, cannot join a valve to
+  a pipe"): in Edit layout a plain end has the same small red dot as an open IP (Rule 5.20; it is the end's drag handle). A valve, pump,
+  fitting or other item with no pipes on it, let go with one of its IPs within 14 px of a red dot (a plain end or an open end's coupling),
+  slides the last few pixels so that IP sits on the end, and the end joins it (the dot turns green); it is then not put into a pipe it
+  lies over. ↩ Put back (Ctrl+Z) undoes it.
   would break a join (it reaches the second IP, a vessel or something locked, a pipe gets too short, or two ways back disagree),
   the second IP is tried onto the first. If neither works, nothing moves and one toast says it can't be done automatically without
   breaking a join or adding a pipe, hose or fitting, so do it by hand (delete or add pipes, fittings or joins). Nothing is ever
@@ -2932,7 +2940,7 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   this item?" box), up to 30 steps, back to how pipes, fittings and items were. It starts fresh each time Edit layout opens. Other
   Properties changes are not in it;
   Exit without saving still undoes everything since the last Save layout.
-  The "… deleted. ↩ Put back (Ctrl+Z) brings it back." note stays 3 seconds, then goes (Rule 2.74; 2026-11-24, OakBarn Brewery: "Nanny state
+  The "… deleted. ↩ Put back (Ctrl+Z) brings it back." note stays 2 seconds, then goes (Rule 2.74; 2026-11-24, OakBarn Brewery: "Nanny state
   up too long. Needs to be quick, maybe 3 seconds and then gone").
 - **🗑 Delete Pipe / Delete Hose** (OakBarn Brewery, 2026-11-14: "Add Delete Button to Hose and Pipe Disconnect Dialog"): the
   pop-up of a pipe or hose has a red Delete button beside 🔓 Unlock its ends; ↩ Put back (Ctrl+Z) brings it back. Its top is frozen
@@ -7255,6 +7263,9 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 - 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("On a property allow individual Unlock of an IP in addition to Unlock IPs"): Properties with 2 or more joined pipe ends also have 🔓 Unlock one IP ▾ (a Pipe or Hose: Unlock one end ▾); the picked one lets go alone. The Zoom box drags and pans with the left button only, fills the work area at 2.5x, centered on the whole manifold (50 px all round) when it fits, and never opens Tab settings from inside it (Rule 5.37). Rule 4.10: → Right Arrow on a Template's icon does the same as B ("On a Template, could we make the Right Arrow the same as B"). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
+- 2026-11-24: Rule 2.74 changed (OakBarn Brewery: "Change Blue and Red Nanny to 2 seconds"): every note, blue or red, in the Panel and the BruControl Import program stays 2 seconds (blue was 3, red 5).
+- 2026-11-24: Rule 5.37 changed (OakBarn Brewery: "Used Delete and the Delete key. Pop-up says deleted but it is still there"): deleting a red dot on an open pipe end (Delete key or its Properties' Delete) deletes the pipe or hose with that end, not only the dot, since a plain end now shows the same red dot. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-24: Rule 5.37 note (OakBarn Brewery: "Pipe end needs the red dot, cannot join a valve to a pipe"): a plain pipe end (left by a deleted fitting) shows the small red IP dot in Edit layout, and an item with no pipes on it dropped with an IP within 14 px of a red dot (plain end or open-end coupling) slides onto it and joins it (it was refused when the IP was a few pixels off the pipe's line). Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Added Rule 2.74 (OakBarn Brewery: "All nanny pop-ups 3 seconds"): every note (not a red error) at the bottom of the Panel stays 3 seconds, then goes (toast() in public/app.js, NOTE_MS); a red error note keeps its own time. BruControl Import program: its notes stay 3 seconds too (were 5).
 - 2026-11-24: Rule 5.37 note (OakBarn Brewery: "Nanny state up too long. Needs to be quick, maybe 3 seconds and then gone"): the "… deleted. ↩ Put back (Ctrl+Z) brings it back." note in Edit layout stays 3 seconds (was 6 or 7). Then Added Rule 2.74 for every note. BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 4.1 note (OakBarn Brewery: "Clicked Finish Build then Keep building as I wanted to change some stuff but still in non edit mode"): Finish Build ... > Keep building turns 👁 Preview off when it was on, so the Build Tab can be changed again. Help 55 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
