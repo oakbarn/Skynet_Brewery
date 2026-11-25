@@ -36,10 +36,15 @@ pompe, une vanne, un raccord ou un port de cuve), comme une vanne posée sur une
 deux points soient au même endroit et ils se joignent, IP sur IP, sans tuyau entre eux ; les deux points deviennent verts. Elle
 n'est pas mise dans un tuyau qu'elle recouvre. ↩ Put back (Ctrl+Z) l'annule. Déplacez l'une ou l'autre (ou déverrouillez-la ou supprimez-la) et le joint s'en va : les deux points redeviennent rouges.
 
+## Une pompe ou une vanne encore sur ses tuyaux {#a-pump-or-valve-still-on-its-pipes}
+
+Lâchez sur un autre tuyau une pompe ou une vanne encore jointe à ses tuyaux : elle lâche ses anciens tuyaux, et leurs bouts restent
+où ils étaient comme bouts ouverts, chacun avec un point rouge. Puis elle coupe le tuyau sur lequel vous l'avez lâchée.
+↩ Put back (Ctrl+Z) l'annule.
+
 ## Quand rien n'est coupé {#when-nothing-is-cut}
 
-- La pompe ou la vanne est encore jointe à un autre tuyau, ou elle est verrouillée. Une pompe ou une vanne que vous **faites glisser hors** de ses tuyaux les lâche
-  (Règle 5.19), donc lâchée sur un autre tuyau, elle coupe celui-là. Une qui est encore jointe le dit dans un message.
+- La pompe ou la vanne est verrouillée.
 - Le tuyau est un flexible, ou va à 45 degrés ; la vanne est tournée de 45 degrés ou est une vue de face.
 - Il ne reste pas assez de tuyau pour contourner la pompe ou pour la mettre. Déplacez-la plus loin le long du tuyau, ou tracez un tuyau plus long.
 
