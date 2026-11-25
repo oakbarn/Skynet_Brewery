@@ -15,7 +15,9 @@ assert.deepStrictEqual(move(look.vr, [0, -1]), [1, 0], 'Vertical Right: motor ri
 for (const k of ['vl', 'vr']) assert.deepStrictEqual(move(look[k], [-1, 0]), [0, 1], `${k}: the In end is at the bottom`);
 assert.ok(app.includes("const USER_LOOK_ENDS = { h: VALVE_STD.h, v: [[0.5, 1], [0.5, 0]] };"), 'its IPs follow: In at the bottom when upright');
 assert.ok(/VALVE_STD\[userLook\(e\) \? 'h' : userValveKind\(e\)\]/.test(app), 'its In and Out spots fit the picture as drawn, then it is turned');
-assert.ok(/\['hd', 'Horizontal Flipped'\], \['vl', 'Vertical Left'\], \['vr', 'Vertical Right'\]/.test(app), 'the Orientation offers the four looks');
+// Panel Update 14 (Rule 18.43): the Orientation is Horizontal or Vertical, and Flip Horizontal / Flip Vertical give the other looks;
+// a valve saved as Horizontal Flipped or Vertical Right becomes Horizontal + Flip Vertical or Vertical + Flip Horizontal (same look)
+assert.ok(/\['h', 'Horizontal'\], \['vl', 'Vertical'\]/.test(app) && app.includes('function userOrientToFlips('), 'the Orientation offers Horizontal and Vertical, the Flips the rest');
 assert.ok(/\['h', 'hd', 'vl', 'vr'\]\.includes\(k\)/.test(app), 'the Valve Profile offers them too');
 const help = fs.readFileSync(path.join(ROOT, 'help', '128-motorized-ball-valve-device-properties.md'), 'utf8');
 assert.ok(help.includes('## One picture, four looks (User Defined)') && help.includes('What picture works best'), 'Help 128 has the guide');

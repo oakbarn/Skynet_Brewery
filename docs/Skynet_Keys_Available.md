@@ -84,8 +84,9 @@ The key shows a different sign on European keyboards, so Help names it by where 
 | **Double-click** | Opens Properties in Edit layout; finishes a hose |
 | **Z** | Zoom box on / off (Edit layout, Rule 5.37) |
 | **R / Shift + R** | Turns the picked fitting a quarter turn right / left (Edit layout, Rule 5.5) |
-| **H** | Flips the picked fitting left to right (Edit layout, Rule 5.5) |
-| **V** | Flips the picked fitting top to bottom (Edit layout, Rule 5.5) |
+| **H** | Flips the picked fitting left to right (Edit layout, Rule 5.5); in the Zoom box also a picked valve |
+| **Shift + H** | Switches a picked valve's Orientation Horizontal / Vertical (Edit layout, Zoom box, Rule 5.5) |
+| **V** | Flips the picked fitting top to bottom (Edit layout, Rule 5.5); in the Zoom box also a picked valve |
 | **Ctrl + Z  (⌘ + Z)** | Put back the last move (Edit layout); undo typing in a box |
 | **Ctrl + Y  (⌘ + Y)** | Redo typing in a box (Rule 2.32) |
 | **Ctrl + B  (⌘ + B)** | Bold code \b ... \b in a text box (Rule 2.32) |

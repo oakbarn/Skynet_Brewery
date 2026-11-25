@@ -286,6 +286,10 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el.vcrop-h { background-size: 100% auto; background-position: 50% 3.509%; }
 .el.vcrop-vl { background-size: auto 100%; background-position: 3.509% 50%; }
 .el.vcrop-vr { background-size: auto 100%; background-position: 96.491% 50%; }
+/* a mirrored Skynet side-view valve (Flip Horizontal / Vertical, Panel Update 14): its cut picture is drawn mirrored */
+.el.turned.vcrop-h::before { background-size: 100% auto; background-position: 50% 3.509%; }
+.el.turned.vcrop-vl::before { background-size: auto 100%; background-position: 3.509% 50%; }
+.el.turned.vcrop-vr::before { background-size: auto 100%; background-position: 96.491% 50%; }
 .el.stretch.turned::before { background-size: 100% 100%; }
 /* a user's own valve picture moved and sized so its In and Out spots sit on the Valve Standard IPs (Rule 5.29) */
 .el.vfit { background-size: var(--vfs) !important; background-position: var(--vfp) !important; }

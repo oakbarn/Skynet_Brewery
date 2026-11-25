@@ -31,7 +31,7 @@ is joined, the IP stays put, and the Graphic in its dialog shows it there.
 ## Its Inlet IP: the house water pipe
 
 Like a Motorized Valve, it also has an **Inlet IP** on the outer face of the wall side's pipe thread (Skynet Rule 18.52). It turns
-with the picture, so on Vertical it is at the Top or the Bottom (the **Inlet** box). Join a pipe to it to draw the house water pipe.
+with the picture, so on Vertical it is at the Top or the Bottom (Flip Vertical). Join a pipe to it to draw the house water pipe.
 
 - **Nothing on the Inlet**: the house plumbing is not drawn, and the Hose Bib always has water (as before).
 - **A pipe on the Inlet, Hose Bib open**: water flows in along that pipe, toward the Hose Bib, in tap water Blue.
@@ -60,21 +60,23 @@ or smaller, the inside Hose or Pipe is drawn again to reach the IP.
 Its Properties are the **Hose Bib Widget** dialog, in the same look and order as the Pump's: the lock and **No Unlock** in the
 title line, **State** (a slider, Open or Closed now), **1. Label** and **Label Visible** (once the Label is changed,
 a blue pop-up offers ✏ Change Name with the new Suggested Name), **2. Tab** with **Layer Order** under it, **3. Name** with the **Change Name** box and **✏ Change Name**, the
-Suggested Name, the **Graphic** (its one Skynet picture with its inside Hose or Pipe, kept up to date), **Orientation** with **Left /
-Right** and **Inlet**, **Hose or Pipe**, **Cover** with **Toggle**, **Overlay** with **Database and .API ⬢**, **Inlet IP
+Suggested Name, the **Graphic** (its one Skynet picture with its inside Hose or Pipe, kept up to date), **Orientation** with **Flip
+Horizontal** and **Flip Vertical**, **Hose or Pipe**, **Cover** with **Toggle**, **Overlay** with **Database and .API ⬢**, **Inlet IP
 Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** and **Height** on one line, and the Widget Type (Skynet Rule
 18.48). There is no Picture box (a Hose Bib has one Skynet picture) and no IP box (the hose or pipe you join sets it, see above).
 
-**Orientation**, **Left / Right** and **Inlet**: a Hose Bib is laid out like a Motorized Valve, with its handle as the "motor"
-(Skynet Rule 18.52). Horizontal Right is the picture as drawn (the Inlet, the wall side, on the right), Horizontal Left is it
-mirrored (the Inlet on the left); the Inlet box is greyed out on Horizontal. Vertical is for a hose bib on an up and down pipe:
-**Inlet** puts the wall side at the **Top** (a pipe from above) or the **Bottom** (a pipe from below), and **Left / Right** is the
-side the handle points to. That gives 4 Vertical looks: Inlet Top with the handle Left or Right, and Inlet Bottom with the handle
-Left or Right. A Hose Bib made before the Inlet box keeps its look (Vertical Left: Inlet Top; Vertical Right: Inlet Bottom).
+**Orientation**, **Flip Horizontal** and **Flip Vertical** (OakBarn Brewery, Panel Update 14: "Hose Bib Flips Horizontal"; "All
+Pictures Horizontal Start as Left to Right Flow"; "All Pictures Vertical Start as Bottom to Top Flow"; Skynet Rule 18.52): a Hose Bib is
+laid out like a Motorized Valve, with its handle as the "motor". **Horizontal** has the Inlet (the wall side, the TAP) on the left, so the
+water goes Left to Right. **Vertical** is for a hose bib on an up and down pipe: the Inlet at the bottom (Bottom to Top) and the handle to
+the left. **Flip Horizontal** mirrors it left to right and **Flip Vertical** top to bottom, as it looks on the Tab, so it has all 4 looks
+each way (on Vertical: Flip Vertical puts the Inlet at the top, Flip Horizontal the handle to the right). A Hose Bib saved with Left /
+Right and Inlet shows the same look with the Flips when its Properties open; nothing on the Tab moves. In the Zoom box, **H** and **V**
+flip the picked Hose Bib too.
 
 Its one IP is on one of the 8 spots on the edge of its box (Bottom Middle, Bottom Left, Bottom Right, Left Middle, Right Middle,
 Top Left, Top Middle, Top Right), the wall side too (Skynet Rule 18.49), as a Pump has. The joined hose or pipe picks the spot. A
-spot stays where you see it when you change the Orientation or Left / Right, so the hose or pipe stays put.
+spot stays where you see it when you change the Orientation or a Flip, so the hose or pipe stays put.
 
 ![Hose Bib 8 IPs](help_pictures/Hose_Bib_8_IPs.png)
 

@@ -19,7 +19,7 @@ assert.match(nc, /String\(lab\.value \?\? ''\) === label0/, 'pops up once the La
 assert.ok(app.includes("['name', '4. Name', 'namechg'"), 'the Pump (the Blichmann Model)');
 assert.ok(app.includes("if (t.dataset.mouseOnly) return;") && app.includes('x.tabIndex >= 0);'), 'Enter never goes to a mouse-only box');
 // #4 #5 the Graphic, Orientation and Left / Right
-assert.match(app, /\['mvOrient', 'Orientation', 'sel'/); assert.match(app, /with: \['mvSide', 'Left \/ Right', 'sel'/);
+assert.match(app, /\['mvOrient', 'Orientation', 'sel'/); assert.match(app, /with: MV_FLIPS\(it, MV_TIPS\)/);      // Left / Right became the Flips (Panel Update 14)
 assert.match(app, /const mvTransform = /);
 assert.match(app, /if \(L\.flip\) ends = ends\.map\(\(\[fx, fy\]\) => \[1 - fx, fy\]\)/, 'its ends go with the mirror');
 // #6 Straight and Hose Bib

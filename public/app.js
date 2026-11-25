@@ -1339,7 +1339,8 @@ function breakMf(g) {
     const e = mfEl(g, k, draft.elements), [vx, vy] = unitPoint(g, (i + 0.5) / N, (1 + MF_TEE_H) / 2);
     if (e && mfKind(e) === 'motorized') {
       const keep = Object.fromEntries(['name', 'label', 'device', 'channel', 'valveType', 'typeCode', 'activeLow', 'oneShot', 'oneShotDirection', 'locked', 'buildTo'].filter(x => e[x] !== undefined).map(x => [x, e[x]]));
-      const p = skyDevPreset(across ? 'Skynet_Motorized_Ball_Valve_H' : 'Skynet_Motorized_Ball_Valve_VR') || {};
+      const p = skyDevPreset(across ? 'Skynet_Motorized_Ball_Valve_H' : 'Skynet_Motorized_Ball_Valve_VL') || {};
+      if (!across) p.flipH = true;      // Vertical with Flip Horizontal: the motor on the right (Panel Update 14, was Vertical Right)
       delete e.integratedIn; delete e.integratedAs;
       Object.assign(e, p, keep, { workspace: ws });
       e.x = Math.round(vx - (e.w || 150) / 2); e.y = Math.round(vy - (e.h || 150) / 2);
@@ -1951,14 +1952,33 @@ const mvSideOf = g => mvFront(g) ? 'r' : ['l', 'r'].includes(g.mvSide) ? g.mvSid
 // looks. A Hose Bib saved before has no Inlet: Vertical Left was the wall on top and Vertical Right the wall below, and it keeps that look.
 const MV_INLETS = [['t', 'Top'], ['b', 'Bottom']];
 const mvInletOf = g => ['t', 'b'].includes(g?.mvInlet) ? g.mvInlet : mvSideOf(g) === 'l' ? 't' : 'b';
-function mvLook(g) {
+// Panel Update 14 (OakBarn Brewery, 2026-11-25: "Orientation only two Choices: Horizontal, Vertical"; "Add the two Flip Boxes: Flip
+// Horizontal, Flip Vertical"; "All Pictures Horizontal Start as Left to Right Flow"; "All Picture Vertical Start as Bottom to Top Flow";
+// "Other Valves Follow this pattern"; Rules 18.43 and 18.52): a Manual Valve and a Hose Bib have Orientation (Horizontal or Vertical) and
+// two Flips. Unflipped, a Manual Valve stands as drawn (Horizontal) or turned a quarter left, its handle to the left and its drawn left end
+// at the bottom (Vertical). A Hose Bib unflipped has its Inlet (the wall side, the TAP) on the left (Horizontal) or at the bottom with the
+// handle to the left (Vertical). Flip Horizontal then mirrors it left to right and Flip Vertical top to bottom, as it looks on the Tab.
+// A front view has no Orientation and no Flips. mvFlipH / mvFlipV are saved; a valve saved before them has Left / Right (and a Hose Bib its
+// Inlet) and gets the same look from them (mvOldFlips), so nothing on a Tab moves.
+const MV_I = [1, 0, 0, 1], mvS = (x, y) => [x, 0, 0, y], mvR = d => d === 90 ? [0, -1, 1, 0] : d === -90 ? [0, 1, -1, 0] : d === 180 ? [-1, 0, 0, -1] : MV_I;
+function mvOldFlips(g) {
   const o = mvOrientOf(g), s = mvSideOf(g);
-  if (isBfly(g.image)) return { src: o === 'h' ? MV_BFLY.h : s === 'l' ? MV_BFLY.vl : MV_BFLY.vr, rot: 0, flip: o === 'h' && s === 'l', flipY: false, vert: o === 'v' };
-  if (isTapMv(g) && o === 'v') { const top = mvInletOf(g) === 't'; return { src: g.image || '', rot: top ? -90 : 90, flip: false, flipY: top !== (s === 'l'), vert: false }; }
-  return { src: g.image || '', rot: o === 'v' ? (s === 'l' ? -90 : 90) : 0, flip: o === 'h' && s === 'l', flipY: false, vert: false };
+  if (isTapMv(g)) { if (o === 'h') return [s === 'r', false]; const top = mvInletOf(g) === 't'; return [s === 'r', top]; }
+  if (o === 'h') return [s === 'l', false];
+  if (isBfly(g.image)) return [s === 'r', false];      // its Vertical Right drawing is its Vertical Left one mirrored
+  return s === 'r' ? [true, true] : [false, false];      // turned a quarter right = a quarter left, then both Flips
 }
-// the turn and mirror of a Manual Valve on its Tab and on its dialog's Graphic (its own Rotate 45 turns too, Rule 5.5). flipY: a Vertical
-// Hose Bib's picture is turned upside down before it is turned, so its handle points the other way with the Inlet in the same place.
+const mvNewFlips = g => g?.mvFlipH !== undefined || g?.mvFlipV !== undefined;
+const mvFlips = g => mvFront(g) ? [false, false] : mvNewFlips(g) ? [!!g.mvFlipH, !!g.mvFlipV] : mvOldFlips(g);
+// m: the picture as it is drawn on the Tab (about its middle, y down); rot and flip: the same as a turn after a mirror left to right
+function mvLook(g) {
+  const o = mvOrientOf(g), [fh, fv] = mvFlips(g), bf = isBfly(g.image), hb = isTapMv(g), front = mvFront(g);
+  const src = bf ? (o === 'h' ? MV_BFLY.h : MV_BFLY.vl) : g.image || '';
+  const base = front || bf ? MV_I : hb ? (o === 'h' ? mvS(-1, 1) : mMul(mvS(-1, 1), mvR(90))) : o === 'h' ? MV_I : mvR(-90);
+  const m = mMul(mvS(fh ? -1 : 1, fv ? -1 : 1), base), flip = m[0] * m[3] - m[1] * m[2] < 0, r = flip ? [-m[0], m[1], -m[2], m[3]] : m;
+  return { src, rot: Math.round(Math.atan2(r[2], r[0]) * 180 / Math.PI), flip, flipY: false, vert: bf && o === 'v', m };
+}
+// the turn and mirror of a Manual Valve on its Tab and on its dialog's Graphic (its own Rotate 45 turns too, Rule 5.5)
 const mvTransform = (g, L = mvLook(g)) => { const r = L.rot + (+g.rotate || 0); return `${r ? `rotate(${r}deg) ` : ''}${L.flip ? 'scaleX(-1)' : ''}${L.flipY ? 'scaleY(-1)' : ''}`.trim(); };
 const mvPic = g => mvLook(g).src;     // open shows the open overlay on the same picture (Fritz, 2026-11-05: no Open pictures)
 // The Hose Bib (Tap Water Valve) is laid out like a Pump (OakBarn Brewery, 2026-11-18: "treat sizing of a hose bib type valve like a Pump
@@ -1975,9 +1995,8 @@ const HB_SPOT_WORDS = [['BM', 'Bottom Middle'], ['BL', 'Bottom Left'], ['BR', 'B
 // a spot as seen on the Tab -> the same spot in the picture's own box (before it is mirrored or turned, mvLook): the spot is named as it is
 // seen, so Bottom Left is on the bottom left whatever the Orientation and Left / Right
 function hbToPic(g, [X, Y]) {
-  const L = mvLook(g);
-  const [px, py] = L.flip ? [1 - X, Y] : L.rot === 90 ? [Y, 1 - X] : L.rot === -90 ? [1 - Y, X] : [X, Y];
-  return L.flipY ? [px, 1 - py] : [px, py];      // upside down (a Vertical Hose Bib's handle on the other side, Rule 18.52)
+  const m = mvLook(g).m, x = X - 0.5, y = Y - 0.5;      // its look undone (a turn or a mirror is undone by its transpose)
+  return [0.5 + m[0] * x + m[2] * y, 0.5 + m[1] * x + m[3] * y];
 }
 // all 8 spots, the wall side too (OakBarn Brewery, 2026-11-18, Panel Update Final 3 #4: "Change Rule for a Tap Water can have the 8 IPs";
 // Rule 18.49): before, the wall side (the picture's right edge above the bottom) had none
@@ -2163,7 +2182,7 @@ function buildIp(g) {
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
   if (g.labelVisible && g.label && !plain) n.append(mvLabelUpright(g, widgetLabel(g, 'below')));       // a pipe fitting has no label
-  if (editing) { if (g.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); } else if (!fit || !autoSized(g)) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible && !plain) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  if (editing) { if (g.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); } else if (!fit || !autoSized(g)) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible && !plain) n.append(mvLabelUpright(g, h('div', { class: 'iplbl' }, g.label))); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
 
@@ -2549,6 +2568,25 @@ const isUserValvePic = e => !!e && (e.subtype === 'valve' || e.subtype === 'prop
 // turn: degrees (CSS, clockwise is +); sx, sy: the mirror after the turn. The In end (left on the picture) ends at the bottom when upright.
 const USER_LOOK = { hd: { turn: 0, sx: 1, sy: -1 }, vl: { turn: -90, sx: 1, sy: 1 }, vr: { turn: -90, sx: -1, sy: 1 } };
 const userLook = e => e && e.subtype === 'valve' && isUserValvePic(e) ? USER_LOOK[e.orientation] || null : null;
+// Horizontal Flipped = Horizontal with Flip Vertical; Vertical Right = Vertical with Flip Horizontal (Panel Update 14): the same look and IPs
+function userOrientToFlips(it) {
+  if (!it || it.template || it.subtype !== 'valve') return;
+  const k = { hd: ['h', 'flipV'], vr: ['vl', 'flipH'] }[it.orientation];
+  if (k) { it.orientation = k[0]; if (it[k[1]]) delete it[k[1]]; else it[k[1]] = true; }
+  skyPicForOrient(it);
+}
+// A valve with a Skynet side-view picture that is not made from a Template (the 3 Vessel sample's valves) stands Vertical with the
+// Skynet Vertical picture (motor left), as a Skynet Template valve does, and Horizontal with the Horizontal one (Panel Update 14: before,
+// its Orientation Vertical did not turn the picture)
+const SKY_PIC_PAIRS = [['Motorized_TC15_Ball_Valve_Horizontal.svg', 'Motorized_TC15_Ball_Valve_Vertical_Left.svg'],
+  ...['Gas_Solenoid', 'Manual_Butterfly', 'Motor_Butterfly'].map(n => [`Valve_${n}_ClosedH.svg`, `Valve_${n}_ClosedV_L.svg`])];
+function skyPicForOrient(it) {
+  const v = it.orientation === 'vl' ? 1 : it.orientation === 'h' ? 0 : -1; if (v < 0) return;
+  for (const k of ['imageOff', 'imageOn']) {
+    const m = String(it[k] || '').match(/^(.*\/)([^/]+)$/), pr = m && SKY_PIC_PAIRS.find(x => x.includes(m[2]));
+    if (pr && /Images\/Skynet\/Valves\/$/.test(m[1])) it[k] = m[1] + pr[v];
+  }
+}
 const USER_LOOK_ENDS = { h: VALVE_STD.h, v: [[0.5, 1], [0.5, 0]] };
 const userValveKind = e => e.orientation === 'v' || e.orientation === 'vl' || e.orientation === 'vr' ? 'v' : e.orientation === 'h' || e.orientation === 'hd' || e.orientation === 'l45' || e.orientation === 'r45' ? 'h' : (e.w || 120) >= (e.h || 60) ? 'h' : 'v';
 const userValveStd = e => isUserValvePic(e) ? (userLook(e) ? { k: 'U', o: userValveKind(e), w: 300, h: 300, ends: USER_LOOK_ENDS[userValveKind(e)] } : { k: 'U', ...vstd(userValveKind(e), userValveKind(e), VALVE_STD) }) : null;
@@ -3501,7 +3539,7 @@ function fillEl(n, e0) {
   else if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   // a Skynet side-view valve's picture is cut to the valve band, so its box hugs the valve (OakBarn Brewery, 2026-11-24: "Valve box more like this")
-  const vc = img && !notFound && !stretch && !turn && !flip && !look && valveCropped(e) ? valveSide(img) : null;
+  const vc = img && !notFound && !stretch && !turn && !look && valveCropped(e) ? valveSide(img) : null;      // mirrored too: the cut picture is mirrored (Panel Update 14)
   for (const c of ['h', 'vl', 'vr']) n.classList.toggle('vcrop-' + c, vc === c);
   // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
   const vf = img ? valveFit(e) : null;
@@ -5815,7 +5853,9 @@ document.addEventListener('keydown', ev => {
   if (!editing || previewing || menuTab || !sel || ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
   const k = ev.key.toLowerCase(); if (!['r', 'h', 'v'].includes(k)) return;
   if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
-  if (!turnKind(findItem(sel.kind, sel.id))) return;
+  const it = findItem(sel.kind, sel.id);
+  if (zoomBox && (k === 'h' || k === 'v') && keyFlipsValve(it)) { ev.preventDefault(); return flipValveKey(it, k === 'h' && ev.shiftKey ? 'o' : k); }
+  if (!turnKind(it)) return;
   ev.preventDefault();
   turnSel(k === 'r' ? (ev.shiftKey ? -90 : 90) : k);
 });
@@ -6949,8 +6989,8 @@ const SKY_DEV_ROWS = type => (TPL?.device || []).filter(t => t.cls === 'skynet' 
   .sort((a, c) => (a.type === 'analogOut') - (c.type === 'analogOut'))
   .map(t => [skyFamily(t), 'skyDevice', t.type === 'analogOut' ? 'PropValve' : 'Valve', { template: t.name }]);
 const skyFamily = t => String(t.title || t.name).split(':')[0].trim();
-const ORIENT_WORDS = { H: 'Horizontal', VL: 'Vertical Left', VR: 'Vertical Right', Front: 'Front', Front_Elbow: 'Front Elbow' };
-const skyOrientLabel = t => String(t.title || '').includes(':') ? t.title.split(':').slice(1).join(':').trim() : ORIENT_WORDS[t.name.split('_Valve_')[1]] || t.name;
+const ORIENT_WORDS = { H: 'Horizontal', VL: 'Vertical', VR: 'Vertical Right', Front: 'Front', Front_Elbow: 'Front Elbow' };      // Vertical Left is just Vertical (Panel Update 14)
+const skyOrientLabel = t => /_VL$/.test(t.name) ? 'Vertical' : String(t.title || '').includes(':') ? t.title.split(':').slice(1).join(':').trim() : ORIENT_WORDS[t.name.split('_Valve_')[1]] || t.name;
 // a Template's whole set: its main Template first, then the others in the order they ship
 function skySet(t) {
   const main = t.master || t.name, all = TPL?.device || [];
@@ -6968,14 +7008,6 @@ const VALVE_LIST_FIELDS = it => it.valveType === 'manual' ? [['_vl', 'A Manual v
   : it.tapwater ? [['_tapClose', 'On the Close all valves list (always, for a tap water valve)', 'bool', true, false, false, { disabled: true }], ['_tapOpen', 'On the Open all valves list (never, for a tap water valve)', 'bool', true, false, false, { disabled: true }],
     ['_vl', 'A tap water valve is always on the Close all valves list and never on the Open all valves list (Rule 6.15): these can\'t be changed.', 'note']]
     : [['closeAll', 'On the Close all valves list (close_all_valves in a Process, PreBrew house cleaning)', 'bool', true], ['openAll', 'On the Open all valves list (open_all_valves, e.g. after cleaning)', 'bool', true]];
-// Tap Water flows on a Skynet valve: Top to Bottom / Bottom to Top on a vertical valve, Left to Right / Right to Left on a horizontal or
-// 45 degree one (the saved key is still the tap end)
-const tapKey = e => `${e.orientation}|${!!e.flipH}|${!!e.flipV}`;
-function tapChoices(e) {
-  const [a, b] = devIps({ ...e, tapwater: false }), v = e.orientation === 'v', first = v ? a.c[1] <= b.c[1] : a.c[0] <= b.c[0];
-  const [lo, hi] = first ? ['in', 'out'] : ['out', 'in'];       // the tap end: the top (or left) one, or the bottom (or right) one
-  return [['', 'Needs setting'], [lo, v ? 'Top to Bottom' : 'Left to Right'], [hi, v ? 'Bottom to Top' : 'Right to Left']];
-}
 // The Water Supply (OakBarn Brewery, 2026-11-25: "A Tap side will have a special Pipe or hose that can connect to it. Only one end of the
 // Special Pipe or Hose has a IP that can attach to a Tap side of a Tap Valve. Simply the water supply but just for visual. The Pipe will
 // always have blue flow in it that is always ON"; "it is not a Normal pipe and only a selection for a Tap Water Valve and only on the Tap
@@ -7008,29 +7040,52 @@ function syncSupplies(lay, ws) {
   }
   return n;
 }
-// Turning or flipping a tap water valve keeps the way its water flows (OakBarn Brewery, 2026-11-25: "H works but also Changes the Flow
-// Left to Right and Right to Left"; "choice of flow direction change with the valve Horizontal or Vertical"): Left to Right stays Left to
-// Right (and becomes Top to Bottom when it is stood up), so its Tap and Out ends swap when needed. Only Tap Water flows changes it.
-// fwd: the water goes Left to Right or Top to Bottom
-function tapFwd(e, outKey) {
-  const ips = devIps(tapShape(e)); if (ips.length < 2) return true;
-  const [a, b] = ips, o = outKey === 'in' ? a : b, i = outKey === 'in' ? b : a, flat = Math.abs(b.c[0] - a.c[0]) >= Math.abs(b.c[1] - a.c[1]);
-  return flat ? o.c[0] >= i.c[0] : o.c[1] >= i.c[1];
+// Tap Water flows (OakBarn Brewery, 2026-11-25, Panel Update 14 #3, #5 to #7: "All Pictures Horizontal Start as Left to Right Flow";
+// "All Picture Vertical Start as Bottom to Top Flow"; "Tap Valves get an addition DDLB: Tap Water Flows, Horizontal Orientation: Right to
+// Left, Left to Right; Vertical Orientation: Bottom to Top, Top To Bottom"; "Tap Water Flow is affected by Flips but the last one wins and
+// changes this"; Rule 6.15). The TAP end belongs to the picture: a new tap water valve has it on the picture's start end, the left
+// (Horizontal) or the bottom (Vertical) as drawn before any Flip. Flip Horizontal or Flip Vertical takes it to the other side, so Tap
+// Water flows follows; picking the other Tap Water flows flips the picture (Flip Horizontal when its ends are side by side, Flip Vertical
+// when one is above the other), so the Flips follow. Whichever was changed last wins. Changing the Orientation keeps it on the start end
+// (Left to Right becomes Bottom to Top) or off it. The saved key is still the tap end (tapSource on a Skynet valve, tapwaterOut the other).
+const tapEnds = e => { const ips = devIps(tapShape(e)); return ips.length < 2 ? null : ips; };
+const tapFlat = ([a, b]) => Math.abs(b.c[0] - a.c[0]) >= Math.abs(b.c[1] - a.c[1]);
+const endKey = q => q.id.split(':').pop();
+const otherEnd = k => k === 'in' ? 'out' : 'in';
+// the picture's start end ('in' or 'out'): the left one (or the bottom one) before any Flip
+function tapStartKey(e) {
+  const ips = tapEnds({ ...e, flipH: false, flipV: false }); if (!ips) return 'in';
+  const [a, b] = ips;
+  return endKey(tapFlat(ips) ? (a.c[0] <= b.c[0] ? a : b) : (a.c[1] >= b.c[1] ? a : b));
 }
-const tapOutFor = (e, fwd) => tapFwd(e, 'out') === fwd ? 'out' : 'in';
-// called each time its Properties are drawn and when they are saved: what the valve flowed before it was turned stays
-const TAP_GEO = ['orientation', 'flipH', 'flipV', 'w', 'h', 'template', 'imageOff', 'imageOn', 'rot'];
-function keepTapWay(it) {
-  if (!it?.tapwater) return;
-  const key = tapKey(it), outOf = x => x.template ? (x.tapSource === 'out' ? 'in' : 'out') : x.tapwaterOut;
-  const set = it.template ? !!it.tapSource : TAP_OUT.includes(it.tapwaterOut);
-  if (it._tapFor !== undefined && it._tapFor !== key && it._tapGeo && set) {
-    const fwd = tapFwd({ ...it, ...it._tapGeo }, outOf(it)), out = tapOutFor(it, fwd);      // the way it flowed as it sat before
-    if (it.template) it.tapSource = out === 'out' ? 'in' : 'out'; else it.tapwaterOut = out;
+// the TAP end now, or null when not set (a Skynet valve's "Needs setting")
+const tapSideKey = e => e.template ? (TAP_OUT.includes(e.tapSource) ? e.tapSource : null) : TAP_OUT.includes(e.tapwaterOut) ? otherEnd(e.tapwaterOut) : null;
+function setTapSide(e, k) { if (e.template) e.tapSource = k; e.tapwaterOut = otherEnd(k); }
+// Tap Water flows as the valve sits now: lr, rl (its ends side by side) or bt, tb (one above the other)
+function tapFlowOf(e) {
+  const ips = tapEnds(e), k = tapSideKey(e); if (!ips || !k) return '';
+  const t = ips.find(q => endKey(q) === k) || ips[0], o = ips.find(q => q !== t);
+  return tapFlat(ips) ? (t.c[0] <= o.c[0] ? 'lr' : 'rl') : (t.c[1] >= o.c[1] ? 'bt' : 'tb');
+}
+const TAP_FLOWS = { h: [['rl', 'Right to Left'], ['lr', 'Left to Right']], v: [['bt', 'Bottom to Top'], ['tb', 'Top to Bottom']] };
+const tapFlowChoices = e => { const ips = tapEnds(e); return TAP_FLOWS[!ips || tapFlat(ips) ? 'h' : 'v']; };
+const tapGeoKey = e => `${e.template || ''}|${e.orientation || ''}`;
+// called each time its Properties are drawn and when they are saved: _tapFlow is the Tap Water flows box, _tapFlowWas what it showed
+function syncTapFlow(it) {
+  if (!it || it.subtype !== 'valve') return;
+  if (!it.tapwater) { for (const k of ['_tapFlow', '_tapFlowWas', '_tapGeo', '_tapAtStart']) delete it[k]; return; }
+  const start = tapStartKey(it), geo = tapGeoKey(it);
+  if (!tapSideKey(it)) setTapSide(it, start);      // a new tap water valve: the TAP on the picture's start end (Left to Right, Bottom to Top)
+  else if (it._tapGeo !== undefined && it._tapGeo !== geo && it._tapAtStart !== undefined) setTapSide(it, it._tapAtStart ? start : otherEnd(start));      // turned: kept on (or off) the start end
+  const now = tapFlowOf(it);
+  if (it._tapFlowWas !== undefined && it._tapFlow && it._tapFlow !== it._tapFlowWas && it._tapFlow !== now) {      // the Tap Water flows box was changed last: the picture flips
+    const k = ['lr', 'rl'].includes(it._tapFlow) ? 'flipH' : 'flipV';
+    if (it[k]) delete it[k]; else it[k] = true;
   }
-  it._tapFor = key;
-  it._tapGeo = Object.fromEntries(TAP_GEO.map(k => [k, it[k]]));
+  it._tapFlow = it._tapFlowWas = tapFlowOf(it);
+  it._tapGeo = geo; it._tapAtStart = tapSideKey(it) === start;
 }
+const dropTapTemp = w => { for (const k of ['_tapFlow', '_tapFlowWas', '_tapGeo', '_tapAtStart', '_tapFor']) delete w[k]; };
 // Orientation (Fritz, 2026-11-03): one pick for how the valve stands. Each choice is one Template of the set, so the picture and
 // its IPs follow; the main Template also turns 45 degrees (Rule 5.5).
 const orientPick = it => it.template + (it.orientation === 'r45' ? '|r45' : '');
@@ -7040,14 +7095,22 @@ function skyOrientSwitch(it) {
   if (!to) return;
   it.template = name;
   const p = to.props || {};
-  for (const k of ['orientation', 'flipH', 'flipV', 'w', 'h']) { if (p[k] !== undefined) it[k] = p[k]; else if (k === 'flipH' || k === 'flipV') delete it[k]; }
+  for (const k of ['orientation', 'w', 'h']) if (p[k] !== undefined) it[k] = p[k];      // its Flips stay its own (Panel Update 14)
   if (r45) it.orientation = 'r45';
+}
+// Panel Update 14 (OakBarn Brewery, 2026-11-25: "Orientation only two Choices: Horizontal, Vertical"; "Add the two Flip Boxes"; Rule
+// 18.43): Vertical Right is Vertical with Flip Horizontal on. A valve made from a Vertical Right Template is put on its Vertical one when its
+// Properties open; its own Flip Horizontal (on, from that Template) is kept, so its look and its IPs do not change.
+function skyVrToV(it) {
+  const t = devTemplate(it); if (!t || !/_VR$/.test(it.template || '')) return;
+  const vl = skySet(t).find(x => /_VL$/.test(x.name)); if (!vl) return;
+  it.template = vl.name; delete it._orient;
 }
 // the Orientation choices of a Skynet valve: one per Template of its set (Horizontal, Vertical Left ...), then 45 degrees
 // OakBarn Brewery, 2026-11-18 ("Horizonital or Vetical, Left or Right. for all Valves", Rule 18.43): a valve offers only Horizontal,
 // Vertical Left and Vertical Right. Front, Front Elbow and 45 degrees still show on a valve that already sits that way (Never Take
 // Away), so it keeps working and can be turned back, but a new valve is never offered them.
-const ORIENT_MAIN = ['H', 'VL', 'VR'];
+const ORIENT_MAIN = ['H', 'VL'];      // Panel Update 14: Horizontal and Vertical; the Flips do the rest
 function skyOrientChoices(it) {
   const t = devTemplate(it); if (!t) return [];
   const set = skySet(t), main = set[0], now = new Set([orientPick(it), it._orient].filter(Boolean));
@@ -7063,15 +7126,15 @@ function skyOrientPic(choice) {
   return t ? { imageOff: pics?.[1], imageOn: pics?.[0], flipH: !!p.flipH, flipV: !!p.flipV, rot: r45 ? 45 : 0, w: p.w, h: p.h } : null;
 }
 function skyDevFields(it, f) {
+  skyVrToV(it);
   skyOrientSwitch(it);
   it._orient = orientPick(it);
   const t = devTemplate(it), ok = new Set(skyRows(it)), choices = skyOrientChoices(it);
-  if (it._tapFor === undefined) it._tapFor = tapKey(it);
-  keepTapWay(it);    // turned or flipped: the water keeps flowing the same way
+  syncTapFlow(it);    // flipped: Tap Water flows follows; Tap Water flows picked: the picture flips (Panel Update 14)
   const own = {
     orientation: [['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
     tapwater: [['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true],
-      ...(it.tapwater ? [['tapSource', 'Tap Water flows (a tap water valve only; the choices follow the way it sits)', 'sel', tapChoices(it)]] : [])],
+      ...(it.tapwater ? [['_tapFlow', 'Tap Water flows (a tap water valve only; picking the other way flips the picture)', 'sel', tapFlowChoices(it), true]] : [])],
     onText: [['showOnOffText', 'Text On/Off (on = the On or Off text shows on the Tab)', 'bool', undefined, true],
       ...(it.showOnOffText ? [['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']] : [])],
   };
@@ -7893,7 +7956,8 @@ async function newDeviceDialog(e, hint, what) {
           if (work.offset !== undefined && work.offset !== '') e.offset = +work.offset;
           if (hasProbePic(e)) { const b = { ...e, w: +work.w || e.w, h: +work.h || e.h, x: Number.isFinite(+work.x) ? +work.x : e.x, y: Number.isFinite(+work.y) ? +work.y : e.y }; turnElBox(b, before); work.w = b.w; work.h = b.h; work.x = b.x; work.y = b.y; }
         }
-        if (mbv && e.template) { const was = clone(e); e._orient = work._orient; skyOrientSwitch(e); delete e._orient; keepDeviceFixed(e, was, devTemplate(e)); }     // the Orientation picks its Template and its picture is copied then; otherwise the valve keeps its own (Rules 5.16 and 2.62)
+        if (mbv && e.template) { const was = clone(e); e._orient = work._orient; skyOrientSwitch(e); delete e._orient; keepDeviceFixed(e, was, devTemplate(e)); }
+        if (mbv) { if (!e.template) userOrientToFlips(e); syncTapFlow(e); dropTapTemp(e); }      // a tap water valve starts Left to Right or Bottom to Top (Panel Update 14)     // the Orientation picks its Template and its picture is copied then; otherwise the valve keeps its own (Rules 5.16 and 2.62)
         if (dd) { const d = { ...work }; dbFromWork(d, e); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; if (d.apiName) e.apiName = d.apiName; else delete e.apiName; }
         if (+work.w > 0) e.w = +work.w;
         if (+work.h > 0) e.h = +work.h;
@@ -8379,6 +8443,31 @@ function updTurnBar(item) {
     zoomBox.turn.hidden = !k;
     for (const b of zoomBox.turn.querySelectorAll('button')) { const op = b.dataset.op; b.disabled = op === 'h' ? !['all', 'kettle'].includes(k) : op === 'v' ? k !== 'all' : k === 'kettle'; }
   }
+}
+// H, V and Shift + H on a valve in the Zoom box (OakBarn Brewery, 2026-11-25: "And have V and H and Shift + H work on devices in the Build
+// Tab in Edit mode inside the Zoom Box"; Panel Update 14; Rules 2.73 and 5.5): H flips the picked valve left to right and V top to bottom,
+// the same as its Flip Horizontal and Flip Vertical boxes (a tap water valve's Tap Water flows follows, Rule 6.15); Shift + H switches its
+// Orientation between Horizontal and Vertical, its Flips kept. A Motorized valve Device or a Manual Valve or Hose Bib; not a locked one.
+const keyFlipsValve = it => !!it && !it.locked && (isMv(it) ? !mvFront(it) : (it.subtype === 'valve' || it.subtype === 'propValve') && !isInline(it) && hasIps(it));
+function flipValveKey(it, op) {
+  pushUndo(`${op === 'o' ? 'turn' : 'flip'} ${lockName(it)}`);
+  if (isMv(it)) {
+    [it.mvFlipH, it.mvFlipV] = mvFlips(it);
+    if (op === 'o') it.mvOrient = mvOrientOf(it) === 'h' ? 'v' : 'h';
+    else { const k = op === 'h' ? 'mvFlipH' : 'mvFlipV'; it[k] = !it[k]; }
+  } else if (op !== 'o') { const k = op === 'h' ? 'flipH' : 'flipV'; if (it[k]) delete it[k]; else it[k] = true; }
+  else {
+    const was = clone(it), atStart = it.tapwater && tapSideKey(it) ? tapSideKey(it) === tapStartKey(it) : null;
+    if (it.template) {
+      skyVrToV(it);
+      const set = skySet(devTemplate(it) || {}), to = set.find(x => it.orientation === 'h' ? /_VL$/.test(x.name) : /_H$/.test(x.name));
+      if (!to) return toast(`${lockName(it)} has no other Orientation.`, true);
+      it._orient = to.name; skyOrientSwitch(it); delete it._orient; keepDeviceFixed(it, was, devTemplate(it));
+    } else { userOrientToFlips(it); it.orientation = it.orientation === 'vl' || it.orientation === 'v' ? 'h' : 'vl'; skyPicForOrient(it); }
+    if (atStart !== null) setTapSide(it, atStart ? tapStartKey(it) : otherEnd(tapStartKey(it)));      // Left to Right <-> Bottom to Top
+  }
+  if (!isMv(it)) fitValveBoxes({ elements: [it] });
+  renderWs(); letGoBentEnds();
 }
 function turnSel(op) {
   const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
@@ -8995,7 +9084,7 @@ function addIpFit(fit, kind) {
   const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
   if (isIpFit(g)) delete g.label;          // a pipe fitting's Label starts as its Skynet name in small letters (tee_1, Rule 3.14): giveName below
-  if (kind === 'tap') { g.image = TAP_PIC; g.label = tapLabel(draft.graphics); }       // the Tap Water Valve (Rule 5.33)
+  if (kind === 'tap') { g.image = TAP_PIC; g.label = tapLabel(draft.graphics); g.mvFlipH = g.mvFlipV = false; }       // the Tap Water Valve (Rule 5.33); its Inlet (TAP) starts on the left, Left to Right (Panel Update 14)
   if (fit === 'manualValve') g.confirmation = true;       // a Confirmation Widget to start (Rule 1.28)
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
@@ -10569,42 +10658,48 @@ const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties
 // OakBarn Brewery, 2026-11-18 (Rule 18.43): Horizontal or Vertical; the 45s show only on a valve that already sits that way (Never Take Away)
 // OakBarn Brewery, 2026-11-19 (Panel Updates 6): four looks from one picture (USER_LOOK). Plain Vertical (the picture as drawn, upright)
 // shows only on a valve that already has it (Never Take Away).
-const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['hd', 'Horizontal Flipped'], ['vl', 'Vertical Left'], ['vr', 'Vertical Right'],
+// Panel Update 14 (OakBarn Brewery, 2026-11-25: "Orientation only two Choices"): Horizontal and Vertical (turned 90 degrees, motor left);
+// Flip Horizontal and Flip Vertical make the others (Horizontal Flipped is Horizontal with Flip Vertical, Vertical Right is Vertical with
+// Flip Horizontal: userOrientToFlips moves a valve saved that way onto them when its Properties open, with the same look).
+const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['vl', 'Vertical'],
   ...(v === 'v' ? [['v', 'Vertical (as drawn)']] : []),
   ...(v === 'l45' ? [['l45', '45 degrees Left']] : []), ...(v === 'r45' ? [['r45', '45 degrees Right']] : [])];
 const MBV_IP_POP = { title: 'In and Out IP spots', fields: IP_AT_FIELDS };
 // the Graphic, its Path (set on a Skynet valve, Rule 5.6; a User Defined valve's closed and open pictures) and Orientation
+// Flip Horizontal and Flip Vertical beside the Orientation (Panel Update 14 #2: "Add the two Flip Boxes"); a flip turns Tap Water flows too
+const MBV_FLIPS = it => [['flipH', 'Flip Horizontal', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vFlipH }], ['flipV', 'Flip Vertical', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vFlipV }]];
 const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
   const T = DEVICE_TIPS;
   return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.vGraphic, cls: 'mbvModel', ...x }],      // mbvModel: the Blichmann Model look (Rule 18.41)
     ...(it.template ? [['_path', 'Path', 'ro', String(skyOrientPic(it._orient ?? orientPick(it))?.imageOff || it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: T.vPathSet, cls: 'mbvPath', ...x }],
-      ['_orient', 'Orientation', 'vorient', skyOrientChoices(it), true, false, { tip: T.vOrient, with: MBV_TOGGLE(it), ...x }]]
+      ['_orient', 'Orientation', 'vorient', skyOrientChoices(it), true, false, { tip: T.vOrient, with: MBV_FLIPS(it), ...x }]]
       // OakBarn Brewery, 2026-11-18 ("There are only valves, not opened and closed the overlay for on is enough", Rule 18.43): one
       // picture; the On Overlay shows it open. Path (open) shows only on a valve that already has an open picture (Never Take Away).
       : [['imageOff', 'Path', 'gpick', null, false, false, { tip: T.vPath, attr: MBV_IP_POP, ...x }], ...(it.imageOn ? [['imageOn', 'Path (open)', 'gpick', null, false, false, { tip: T.vPathOpen, ...x }]] : []),
-        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), true, false, { tip: T.vOrientUser, with: MBV_TOGGLE(it), ...x }]])];
+        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), true, false, { tip: T.vOrientUser, with: MBV_FLIPS(it), ...x }]])];
 };
 // Toggle (what a tap does) and the Overlay with Database and .API ⬢ on its line (Fritz's screen 7); no Cover on a valve
 // Fritz, 2026-11-05 ("Toggles and Overlays should work normally"): the Skynet valve's too (its Template lists them as user settable)
 // Fritz, 2026-11-05 ("It should look and feel almost a copy of the Pump dialogs"): two dropdowns on one line as the Pump's Cover and
 // Toggle are, so the Toggle sits beside the Orientation (a valve has no Cover)
 const MBV_TOGGLE = it => ['tap', 'Toggle', 'sel', ONE_CLICK_TAP(it.tap), false, false, { tip: DEVICE_TIPS.vToggle }];
-const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, ...x }]];
+// Panel Update 14: the Flips took the Toggle's place beside the Orientation, so the Toggle is on the Overlay's line
+const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, with: MBV_TOGGLE(it), ...x }]];
 // a valve's own (Rule 18.22): Tap water (Rule 6.15) and the Close all / Open all valves lists
 // Fritz, 2026-11-05: short names (On Close List, On Open List) and the three switches on one line, in the Add box too
 // Fritz, 2026-11-07: a Tap water valve shows On Close List on and On Open List off, both greyed out (Rule 6.15)
 const MBV_OWN = (it, x = {}) => [it.tapwater ? ((it._tapClose = true), (it._tapOpen = false), ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap,
       with: [['_tapClose', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }], ['_tapOpen', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }]], ...x }])
     : ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, with: [['closeAll', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]], ...x }],
-  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap Water flows', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap Water flows', 'sel', tapOutChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
+  ...(it.tapwater ? [['_tapFlow', 'Tap Water Flows', 'sel', tapFlowChoices(it), true, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],      // Panel Update 14 #6 and #7
     ['supply', 'Water Supply', 'sel', SUPPLY_SEL, false, false, { tip: DEVICE_TIPS.vSupply, ...x }],
     ['_vl', 'A tap water valve is always on the Close List and never on the Open List (Rule 6.15).', 'note', null, false, false, x]] : [])];
 function mbvDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   if (it.template) {        // the Orientation picks the Template of its set (Rule 5.17), as in skyDevFields
-    skyOrientSwitch(it); it._orient = orientPick(it);
-  }
-  keepTapWay(it);    // turned or flipped: the water keeps flowing the same way (its choices follow Horizontal or Vertical)
+    skyVrToV(it); skyOrientSwitch(it); it._orient = orientPick(it);
+  } else userOrientToFlips(it);
+  syncTapFlow(it);    // flipped: Tap Water flows follows; Tap Water flows picked: the picture flips (Panel Update 14)
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.vLabelVisible }],
     // the ⬢ Pin attributes; the balloons adapted from the Pump's (Rule 18.42) (Invert, One-shot, Dual Throw: OakBarn Brewery, 2026-11-09, Rule 6.22: a valve with an Open and a Close wire)
@@ -10973,7 +11068,13 @@ const MV_TIPS = {
   graphic: 'The Manual Valve as it will be on the Tab, with its Picture, Orientation and Left / Right. While it is open it shows the open overlay.',
   orient: '⟪img:help_pictures/Manual_Valve_Orientation.png⟫Horizontal: for a level pipe. Vertical: for an up and down pipe.\n\nA front view (looking down the pipe) has no Orientation. A Hose Bib may be Horizontal or Vertical.',
   side: 'Horizontal: Right is the picture as drawn, Left is it mirrored. A Skynet Manual Ball or Butterfly Valve looks the same both ways, so on Horizontal this box is greyed out. Vertical: the handle points to the Left or to the Right.\n\nIts ends (IPs) go with the picture, so join the pipes after you pick it.',
+  flipH: 'Off: the valve as drawn (Horizontal), or with its handle to the Left (Vertical). On: mirrored left to right, so the handle points the other way. The valve works both ways, so only the picture changes. Its ends (IPs) go with the picture.',
+  flipV: 'Off: the handle on top (Horizontal). On: mirrored top to bottom, so the handle is below the pipe (Horizontal) or the valve is upside down (Vertical). Its ends (IPs) go with the picture.',
+  front: 'A front view (looking down the pipe) has no Orientation and no Flips.',
 };
+// Orientation with Flip Horizontal and Flip Vertical on its line (Panel Update 14, Rules 18.43 and 18.52); greyed on a front view
+const MV_FLIPS = (it, T) => { const off = mvFront(it) ? { disabled: true, tip: MV_TIPS.front } : {};
+  return [['mvFlipH', 'Flip Horizontal', 'bool', undefined, false, false, { tip: T.flipH, ...off }], ['mvFlipV', 'Flip Vertical', 'bool', undefined, false, false, { tip: T.flipV, ...off }]]; };
 const HOSE_BIB_IN = 'MPT1/2';      // the house pipe end a hose bib screws onto: 1/2" male pipe thread to start (Rule 18.49)
 const HB_OVERLAYS = v => [['', 'Manual Valve open (green ring and tick)'], ...OVERLAY_GRAPHICS.filter(([, p]) => !p.startsWith('tint:')).map(([t, p]) => [p, t]),
   ...(v && !v.startsWith('tint:') && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
@@ -10982,6 +11083,8 @@ const HB_TIPS = {
   graphic: '⟪img:help_pictures/Hose_Bib_8_IPs.png⟫The Skynet picture of the Hose Bib as it will be on the Tab, with its Orientation, Left / Right, Overlay and its own short Hose or Pipe from the hose thread to its one IP. The Skynet Picture is set by Skynet and cannot be changed.\n\nIts IP can be on any of the 8 spots on the edge of its box, like a Pump. You do not pick the spot: put a pipe or hose end on or near the Hose Bib and its IP moves to the nearest spot, and the Graphic shows it there. Once a pipe or hose is joined, the IP stays put.',
   side: 'Horizontal: the Inlet (the wall side, where the house water comes in) is on the Right or on the Left. Vertical: the handle points to the Left or to the Right, like the motor of a Vertical Motorized Valve.\n\nIts IP goes with the picture, so join the pipe or hose after you pick it.',
   inletSide: 'Vertical only: the Inlet (the wall side, where the house water pipe comes in) is at the Top (a pipe from above) or at the Bottom (a pipe from below). With Left / Right that gives all 4 Vertical looks. Greyed out on Horizontal, where Left / Right sets the Inlet side.',
+  flipH: 'Off: the Inlet (the wall side, TAP, where the house water comes in) on the Left, so the water goes Left to Right (Horizontal), or the handle to the Left (Vertical). On: mirrored left to right. Its IPs go with the picture.',
+  flipV: 'Off: the handle on top (Horizontal), or the Inlet (TAP) at the Bottom, so the water goes Bottom to Top (Vertical). On: mirrored top to bottom. Its IPs go with the picture.',
   link: 'Draws its inside piece from the hose thread to the IP as a Hose or as a Pipe.',
   overlay: 'What is drawn on top of the Hose Bib while it is open. Empty: the Manual Valve open sign (a green ring and a tick). The others are the Pump\'s Overlays.',
   cover: 'A colored cover over the Hose Bib, as a Pump\'s Cover: for example a foam faucet cover that keeps it from freezing, or a color that tells hose bibs apart. None: the plain brass hose bib.',
@@ -11015,8 +11118,7 @@ const MV_KINDS_TIP = 'A Manual Valve comes in two kinds: Straight (in a pipe lin
 // or hose joined to it, the same as a Pump's (hbSpotHit, takePumpSpots). The spot it is on rides along hidden, so a save keeps it.
 const hbWidgetFields = it => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
   ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: HB_TIPS.graphic }],
-  ['mvOrient', 'Orientation', 'sel', MV_ORIENTS, true, false, { tip: MV_TIPS.orient, pairCls: 'orientPair', with: [['mvSide', 'Left / Right', 'sel', MV_SIDES, true, false, { tip: HB_TIPS.side }],
-    ['mvInlet', 'Inlet', 'sel', MV_INLETS, true, false, { tip: HB_TIPS.inletSide, ...(mvOrientOf(it) === 'h' ? { disabled: true } : {}) }]] }],      // Rule 18.52
+  ['mvOrient', 'Orientation', 'sel', MV_ORIENTS, true, false, { tip: MV_TIPS.orient, pairCls: 'orientPair', with: MV_FLIPS(it, HB_TIPS) }],      // Panel Update 14 (Rules 18.43, 18.52)
   ['tapLink', 'Hose or Pipe', 'sel', [['hose', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: HB_TIPS.link }],
   // Panel Update Final 3 #4 (OakBarn Brewery, 2026-11-18: "Missing so add all those Fields to the Hose Bib"; "the Type of End. Add FGH
   // and MGH"; Rule 18.49): the Overlay and the End Fitting of its one IP, in the Pump's order
@@ -11027,16 +11129,16 @@ const hbWidgetFields = it => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
   ['ipTypeOut', 'Outlet IP Fitting', 'sel', ipChoices(it.ipTypeOut, HOSE_BIB_END, 'FGH3/4'), false, false, { tip: HB_TIPS.fitting }],
   MV_CONFIRM, ...MV_XYWH(it, HB_TIPS.size), wgtType('Hose Bib (Tap Water Valve)', MV_KINDS_TIP)];
 const mvWidgetFields = it => {
-  it.mvOrient = mvOrientOf(it); it.mvSide = mvSideOf(it);
-  if (isTapMv(it)) { it.mvInlet = mvInletOf(it); it.ipTypeOut ||= HOSE_BIB_END; it.ipTypeIn ||= HOSE_BIB_IN; it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
+  it.mvOrient = mvOrientOf(it);
+  if (!mvFront(it)) [it.mvFlipH, it.mvFlipV] = mvFlips(it);      // Panel Update 14: a valve saved with Left / Right shows the same look as Flips
+  if (isTapMv(it)) { it.ipTypeOut ||= HOSE_BIB_END; it.ipTypeIn ||= HOSE_BIB_IN; it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
   const front = mvFront(it);
   // the up and down Butterfly picture is the Butterfly with Vertical now: it stays in the list only for a valve that already has it (Never Take Away)
   const pics = MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr);
   return [...MV_TOP(it, 'wgt_MV_Valve_BH'),
     ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: MV_TIPS.graphic }],
     ['image', 'Picture', 'sel', pics, true, false, { tip: "The Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
-    ['mvOrient', 'Orientation', 'sel', front ? [['h', 'Front']] : MV_ORIENTS, false, false, { tip: MV_TIPS.orient, ...(front ? { disabled: true } : {}),
-      with: ['mvSide', 'Left / Right', 'sel', front ? [['r', 'None']] : MV_SIDES, false, false, { tip: MV_TIPS.side, ...(front || mvSameBothWays(it) ? { disabled: true } : {}) }] }],
+    ['mvOrient', 'Orientation', 'sel', front ? [['h', 'Front']] : MV_ORIENTS, false, false, { tip: MV_TIPS.orient, ...(front ? { disabled: true } : {}), pairCls: 'orientPair', with: MV_FLIPS(it, MV_TIPS) }],
     MV_CONFIRM, ...MV_XYWH(it, 'Its size on the Tab in pixels. A Straight Manual Valve sizes itself to its pipes, so Width and Height are greyed out.'),
     wgtType('Straight Manual Valve', MV_KINDS_TIP)];
 };
@@ -11674,15 +11776,17 @@ const DEVICE_TIPS = {
   vPathSet: 'The picture of the Skynet Motorized Ball Valve. It is set by its Skynet Template and follows the Orientation (a User Defined valve has its own paths).',
   vPath: 'The picture of your valve, drawn Horizontal (pipe left to right, motor on top). One picture is enough: Skynet turns and mirrors it for the other Orientations, and the Overlay shows it is open. Works best: a plain or see-through background, the valve seen straight on from the side, no writing on it. The ⬢ beside it sets where its In and Out IPs are on the picture.',
   vPathOpen: 'The picture of your valve when it is open (it may be the same picture: the Overlay shows it is open).',
-  vOrient: 'How the valve stands: Horizontal, Vertical Left or Vertical Right. The Graphic here and the valve on the Tab follow, and its IPs too.',
-  vOrientUser: 'How the valve stands, made from your one picture: Horizontal (as drawn), Horizontal Flipped (mirrored up and down, motor below), Vertical Left (turned 90 degrees, motor left) or Vertical Right (motor right). Its IPs follow.',
+  vOrient: 'How the valve stands: Horizontal (motor on top) or Vertical (motor on the left). Flip Horizontal and Flip Vertical beside it mirror it. The Graphic here and the valve on the Tab follow, and its IPs too.',
+  vOrientUser: 'How the valve stands, made from your one picture: Horizontal (as drawn) or Vertical (turned 90 degrees, motor left). Flip Horizontal and Flip Vertical beside it mirror it. Its IPs follow.',
+  vFlipH: 'On: the valve is mirrored left to right, as it looks on the Tab. Its IPs go with it. On a tap water valve the TAP end goes to the other side, so Tap Water flows changes too (Horizontal: Right to Left and Left to Right).',
+  vFlipV: 'On: the valve is mirrored top to bottom, as it looks on the Tab (Horizontal: the motor below the pipe). Its IPs go with it. On a Vertical tap water valve the TAP end goes to the other end, so Tap Water flows changes too (Bottom to Top and Top to Bottom).',
   vToggle: 'What a click on the valve does. Toggle (the start): one click opens or closes it. Push Button: you can hold and the Valve is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A valve always has one of the two (no None). A Process ignores this choice.',
   vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.16); the flashing bolt and others are choices, None for no overlay.',
   vTap: 'On: this valve lets tap water in when it is open, no pump needed (Rule 6.15). It is always on the Close all valves list.',
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
   vTapLists: 'A tap water valve is always on the Close List and never on the Open List, so open_all_valves (the last step of Clean) never lets tap water run (Rule 6.15). These can\'t be changed.',
-  vTapEnd: 'Which way the tap water flows through it: always one way, from the tap side to the Out side. Lying flat: Left to Right or Right to Left. Standing up: Top to Bottom or Bottom to Top.',
+  vTapEnd: 'Which way the tap water flows through it: always one way, from the TAP side to the Out side. Horizontal: Right to Left or Left to Right. Vertical: Bottom to Top or Top to Bottom. A new tap water valve starts Left to Right (Bottom to Top on Vertical). The TAP end goes with the picture: Flip Horizontal (Flip Vertical on Vertical) changes this, and picking the other way here flips the picture. The last one you change wins.',
   vSupply: 'The house water line drawn on its TAP side: a Pipe or a Hose, or None. Only a picture: it always shows blue water flowing to the valve, and moves with it. Its other end is the wall: it joins nothing.',
   // the Temperature Probe (Fritz, 2026-11-05, Rule 18.26)
   pNum: '1-Wire Index: which 1-Wire circuit this DS18B20 is on and its number there. BM1w1_2 = Interface BM, 1-Wire circuit 1, probe 2. Pick ➕ Create an Index for a new 1-Wire circuit for a new circuit (its pin, how it is powered, its resolution), or a circuit you already have to add another probe to it. Its probe (ROM id) is picked on Devices > 🌡 OneWire Probes.',
@@ -12130,6 +12234,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       if (obj.subtype === 'valve') {    // a Motorized Ball Valve (Rule 18.23): no Cover; its Orientation picks the picture, flips and turn
         const o = q('_orient'), sp = o ? skyOrientPic(o.value) : null, w = { imageOff: obj.imageOff, flipH: !!obj.flipH, flipV: !!obj.flipV, rot: 0 };
         if (sp) Object.assign(w, sp);
+        if (q('flipH')) { w.flipH = q('flipH').checked; w.flipV = !!q('flipV')?.checked; }      // its own Flips (Panel Update 14)
         else { if (q('imageOff')) w.imageOff = q('imageOff').value; const or = q('orientation')?.value ?? obj.orientation; w.rot = or === 'l45' ? -45 : or === 'r45' ? 45 : 0; w.look = USER_LOOK[or]; }
         pic.src = w.imageOff ? media(w.imageOff) : ''; pic.classList.toggle('hidden', !w.imageOff); cov.classList.add('hidden');
         const lk = w.look, lt = lk ? `scale(${lk.sx}, ${lk.sy})${lk.turn ? ` rotate(${lk.turn}deg)` : ''} ` : '';      // a look made from the one picture (USER_LOOK)
@@ -12684,8 +12789,7 @@ function mvLabelUpright(g, lb) {
 // (OakBarn Brewery, 2026-11-19: "Manual Ball Valves do not need left right as they are the same"; Rule 18.52). The value stays as it was.
 function mvGreyLive(q, w) {
   const grey = (k, on) => { const i = q(k); if (!i || i.disabled === on) return; i.disabled = on; i.closest('.fldPair')?.querySelector(`[data-k="${k}"]`)?.previousElementSibling?.classList.toggle('greyed', on); };
-  if (isTapMv(w)) grey('mvInlet', mvOrientOf(w) === 'h');
-  else if (!mvFront(w)) grey('mvSide', mvOrientOf(w) === 'h' && mvSameBothWays(w));
+  for (const k of ['mvFlipH', 'mvFlipV']) grey(k, mvFront(w));      // a front view has no Flips (Panel Update 14)
 }
 function mvGraphic(label, obj) {
   const box = h('div', { class: 'devPreview mvPreview' }), pic = h('div', { class: 'mvPv' }), ovl = h('div', { class: 'mvPvOver' });
@@ -12694,6 +12798,7 @@ function mvGraphic(label, obj) {
     const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
     const w = { ...obj };
     for (const k of ['image', 'mvOrient', 'mvSide', 'mvInlet', 'tapSpot', 'tapLink', 'mvOverlay', 'mvCover']) if (q(k)) w[k] = q(k).value;
+    for (const k of ['mvFlipH', 'mvFlipV']) if (q(k)) w[k] = q(k).checked;      // the Flips (Panel Update 14)
     mvGreyLive(q, w);      // Inlet only on a Vertical Hose Bib; Left / Right greyed where both look the same (Rule 18.52)
     const src = mvPic(w), hb = isTapMv(w);
     pic.style.backgroundImage = src ? `url("${media(src)}")` : '';
@@ -13605,10 +13710,10 @@ async function editItem(kind, id) {
         for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
         turnElBox(work, item);
       }
-      if (!skyDev(work) && work.subtype === 'valve') { keepTapWay(work); delete work._tapFor; delete work._tapGeo; }      // a User valve turned: its water keeps its way
+      if (!skyDev(work) && work.subtype === 'valve') { userOrientToFlips(work); syncTapFlow(work); dropTapTemp(work); }      // a User valve: Tap Water flows and the Flips (Panel Update 14)
       if (skyDev(work)) {        // a User version of a Skynet Template: its fixed attributes stay the Template's (the Brain checks it too)
-        keepTapWay(work); delete work._tapFor; delete work._tapGeo;
         skyOrientSwitch(work); delete work._orient;
+        syncTapFlow(work); dropTapTemp(work);      // Tap Water flows and the Flips, the last one changed wins (Panel Update 14)
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
         keepDeviceFixed(work, item, devTemplate(work));      // its own copy; the Template only when the Orientation picks another (Rule 2.62)
       }

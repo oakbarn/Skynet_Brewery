@@ -21,8 +21,9 @@ défile, il n'y a pas de rangée de boutons en bas, et chaque fenêtre ⬢ ou �
      Default est choisi ; il y a toujours un Default Valve Profile (☰ Menu > Valve Profile).
    - **Graphic** : la vanne telle qu'elle s'affichera sur le Tab, fermée, tournée selon son Orientation.
    - **Path** : le fichier de l'image.
-   - **Orientation** et, sur la même ligne, **Toggle** : comment la vanne se tient (le Graphic et ses IP tournent avec elle), et ce que
-     fait un appui (On/Off l'ouvre ou la ferme d'un clic).
+   - **Orientation** (Horizontal ou Vertical) et, sur la même ligne, **Flip Horizontal** et **Flip Vertical** : comment la vanne
+     se tient (le Graphic et ses IP tournent avec elle).
+   - **Toggle** : ce que fait un appui (On/Off l'ouvre ou la ferme d'un clic).
    - **Overlay** : dessiné par-dessus tant que la vanne est ouverte (l'éclair fixe rouge et jaune). Sur la même ligne,
      **Database and .API ⬢** ouvre ses réglages (aide 98).
    - **Tap water valve**, **On Close List** et **On Open List** sur une ligne (les deux listes activées au départ).
@@ -75,8 +76,8 @@ Name **BM_15_DO@Valve_E_Mash~Valve_BH**. (Règle Skynet 18.42)
 2. **1. Label ⬆ ⬢** et **Label Visible**. Un Label n'est jamais vide : laissez-le vide et il devient le Name.
 3. **2. Interface** et **Available Ports**, grisés (la carte et la broche auxquelles elle est câblée).
 4. **3. Tab**, **Layer Order** et **4. Name** (le Suggested Name ; vous pouvez taper le vôtre).
-5. **Graphic** et **Path**, puis **Orientation** et **Toggle** sur une ligne (comme sur la pompe).
-6. **Overlay** avec **Database and .API ⬢**.
+5. **Graphic** et **Path**, puis **Orientation** avec **Flip Horizontal** et **Flip Vertical** sur une ligne (voir [Orientation et Flips](#orientation-and-flips) plus bas).
+6. **Toggle**, puis **Overlay** avec **Database and .API ⬢**.
 7. Les réglages propres à la vanne : **Tap water valve**, **On Close List** et **On Open List**, tous les trois sur une ligne (voir [Vannes d'eau du robinet](31-tap-water-valves)).
    On Close List : `close_all_valves` dans un Process la ferme. On Open List : `open_all_valves` l'ouvre. Une vanne d'eau du robinet montre son
    **Tap Water flows** (sens de l'eau du robinet) à la place, et est toujours sur la Close List et jamais sur l'Open List ; les boutons de ces deux interrupteurs montrent alors le signe Sens interdit ⛔ (ils ne peuvent pas être changés). Une vanne d'eau du robinet a aussi **Water Supply** (arrivée d'eau : None, Pipe ou Hose) : la conduite d'eau de la maison dessinée de son côté TAP, toujours avec l'eau bleue qui coule (voir [Tap water valves](31-tap-water-valves)).
@@ -90,23 +91,49 @@ Le Suggested Name suit le format de nommage (Règle 3.1) : Interface ID, Port, `
 | | Skynet Motorized Ball Valve | User Defined Motorized Ball Valve |
 |---|---|---|
 | Path | grisé : fixé par son Template Skynet, suit l'Orientation | **Path** : votre image, une seule image dessinée Horizontal (l'Overlay la montre ouverte). Skynet la tourne et la retourne pour les autres Orientations. Le ⬢ à côté de Path règle où sont les IP In et Out. **Path (open)** ne s'affiche que sur une vanne qui a déjà une image ouverte |
-| Orientation | Horizontal, Vertical Left, Vertical Right (Front et 45 degrees ne s'affichent que sur une vanne déjà posée ainsi) | Horizontal, Horizontal Flipped, Vertical Left, Vertical Right, toutes faites à partir de votre seule image (Vertical simple et les 45 ne s'affichent que sur une vanne déjà posée ainsi) |
+| Orientation | Horizontal ou Vertical, avec Flip Horizontal et Flip Vertical (Front et 45 degrees ne s'affichent que sur une vanne déjà posée ainsi) | Horizontal ou Vertical, avec Flip Horizontal et Flip Vertical, toutes faites à partir de votre seule image (Vertical simple et les 45 ne s'affichent que sur une vanne déjà posée ainsi) |
 | Toggle et Overlay | à vous de choisir (ils commencent à On/Off et à l'éclair fixe) | à vous de choisir |
 | Width et Height | la taille de son Template pour chaque Orientation | 150 x 150 au départ |
 
 Les réglages que ces fenêtres ne montrent plus (Invert, One-shot, Text when on / off, Flip, Service) sont gardés si une vanne les avait déjà.
+
+## Orientation et Flips {#orientation-and-flips}
+
+OakBarn Brewery, Panel Update 14 (Règles Skynet 18.43 et 6.15) :
+
+1. Orientation, deux choix seulement : **Horizontal** et **Vertical**.
+2. Ajouter les deux cases Flip : **Flip Horizontal** et **Flip Vertical**.
+3. Toutes les images Horizontal commencent avec l'écoulement de gauche à droite. L'image normale de la Motorized Valve se retourne de gauche à droite. Le sens d'écoulement est toujours dans les deux sens.
+4. Les autres vannes suivent ce modèle.
+5. Toutes les images Vertical commencent avec l'écoulement de bas en haut et se comportent comme ci-dessus.
+6. Les vannes d'eau du robinet ont une DDLB de plus, **Tap Water Flows** : Orientation Horizontal : Right to Left, Left to Right. Orientation Vertical : Bottom to Top, Top to Bottom.
+7. Tap Water Flow change avec les Flips, mais le dernier changé gagne et change cela.
+
+Ce que cela veut dire dans la fenêtre et sur le Tab :
+
+- **Horizontal** est la vanne avec son moteur en haut ; **Vertical** est la vanne tournée de 90 degrés, son moteur à gauche.
+- **Flip Horizontal** la retourne de gauche à droite et **Flip Vertical** de haut en bas, telle qu'on la voit sur le Tab. Ses IP
+  suivent. En Vertical, Flip Horizontal met le moteur à droite (ce qu'était Vertical Right).
+- Une vanne enregistrée en Vertical Right (ou, User Defined, en Horizontal Flipped) s'affiche en Vertical avec Flip Horizontal
+  activé (en Horizontal avec Flip Vertical activé) quand ses Properties s'ouvrent. Elle a la même allure et ses IP ne bougent pas.
+- Une **vanne d'eau du robinet** commence **Left to Right** (Horizontal : le bout TAP à gauche) ou **Bottom to Top** (Vertical : le
+  bout TAP en bas). Le bout TAP suit l'image : Flip Horizontal sur une vanne Horizontal, ou Flip Vertical sur une vanne Vertical, le
+  passe de l'autre côté, et **Tap Water Flows** change avec lui. Choisir l'autre sens dans **Tap Water Flows** retourne l'image de la
+  même façon. Le dernier que vous changez gagne.
+- Dans la **fenêtre de zoom** d'Edit layout, la vanne choisie : **H** la retourne de gauche à droite, **V** de haut en bas (voir
+  [Move Alone, Swap and Put Back](153-move-alone-swap-put-back)).
 
 ## Une image, quatre vues (User Defined) {#one-picture-four-looks-user-defined}
 
 Donnez à la User Defined Motorized Ball Valve **une seule image**, dessinée **Horizontal** : le tuyau de gauche à droite et le
 moteur en haut. Skynet en fait les autres vues, vous n'avez donc jamais besoin d'une deuxième image. (Règle Skynet 18.43)
 
-| Orientation | Ce que Skynet fait de votre image |
+| Orientation et Flips | Ce que Skynet fait de votre image |
 |---|---|
 | **Horizontal** | la montre comme vous l'avez dessinée |
-| **Horizontal Flipped** | la retourne de haut en bas (moteur sous le tuyau) |
-| **Vertical Left** | la tourne de 90 degrés (moteur à gauche) |
-| **Vertical Right** | la tourne de 90 degrés et la retourne de gauche à droite (moteur à droite) |
+| **Horizontal** + **Flip Vertical** | la retourne de haut en bas (moteur sous le tuyau) |
+| **Vertical** | la tourne de 90 degrés (moteur à gauche) |
+| **Vertical** + **Flip Horizontal** | la tourne de 90 degrés et la retourne de gauche à droite (moteur à droite) |
 
 Le fichier de votre image n'est jamais changé ; il est seulement dessiné tourné ou retourné. Les IP In et Out suivent la vue.
 
