@@ -7,7 +7,7 @@
 // One shared helper for every Device and Widget dialog: it watches the whole page, so a dialog needs no code of its own for the
 // Label. A Port is marked by its dialog with data-guard="Port" and data-guard-allow="label device" (the fields it may go back to).
 export const LABEL_WARN = 'The Label cannot be blank.';
-export const LABEL_WARN_MS = 5000;
+export const LABEL_WARN_MS = 2000;      // 2 seconds, like every note (Rule 2.74; was 5)
 export const blankWarn = what => `The ${what} cannot be blank.`;
 
 export const isBlank = v => !String(v ?? '').trim();
@@ -78,7 +78,7 @@ function showWarn(field, msg) {
   // a field may say it in its own words (data-guard-msg: a Tilt's Color, OakBarn Brewery 2026-11-09)
   w.replaceChildren(Object.assign(document.createElement('b'), { textContent: '⚠ ' + (msg || field.dataset?.guardMsg || blankWarn(what)) }),
     Object.assign(document.createElement('span'), { textContent: msg ? (/@/.test(msg) ? 'It was taken out (@ and ~ become a space).' : 'It was taken out.') : what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : field.dataset?.guardNow ? 'Type it in, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
-  clearTimeout(w._t); w._t = setTimeout(() => w.remove(), LABEL_WARN_MS);      // it goes away by itself after 5 seconds
+  clearTimeout(w._t); w._t = setTimeout(() => w.remove(), LABEL_WARN_MS);      // it goes away by itself after 2 seconds
   if (msg) return;
   field.classList.add('labelBlank');
   field.focus();

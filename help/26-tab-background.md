@@ -22,10 +22,10 @@ When you are done, press **💾 Save** at the top of the box, then **Save layout
 ## The buttons and the keys
 
 - **🗑 Delete**, **✖ Cancel** and **💾 Save** stay at the top while the rest of the box scrolls; there is no second row at the bottom. Delete takes the Tab and everything on it away (it asks first; it is not there when this is the only Tab). Cancel asks first when something was changed.
-- The **Name** has the focus when the box opens.
+- The **Name** has the focus when the box opens on a new Tab. A saved Tab's Name is locked (⛔ Name 🔒), so the **Color** has the focus instead.
 - The **Enter** key goes only between the **Name** and the **Tab ID** (a new Tab). Enter on a blank Name stays on it. From any other box, Enter goes back to the Name.
 - The **Tab** key goes through every box, the last one back to the first. The ? Help, Delete, Cancel and Save are for the mouse.
-- A blank Name, or a Tab ID that can't be used, only stops **Save**: a small ⚠ box says why, the box gets the focus, and the ⚠ box goes away by itself after 5 seconds. Everything else can still be reached.
+- A blank Name, or a Tab ID that can't be used, only stops **Save**: a small ⚠ box says why, the box gets the focus, and the ⚠ box goes away by itself after 2 seconds. Everything else can still be reached.
 
 ## Name and Tab ID
 
@@ -40,7 +40,7 @@ When you are done, press **💾 Save** at the top of the box, then **Save layout
 |---|---|
 | **Copy Profile** | Pick a Tab Profile to copy onto this Tab when you Save: its background color goes into Color, and its look (colors and value style) becomes the look a new Device or Widget on this Tab starts with. None = copy nothing. Profiles are made on ☰ Menu > Tab Profile ([Tab, Valve and Pump Profiles](36-tab-and-valve-profiles)). It is a copy, not a link (Skynet Rule 2.62): changing or deleting the Profile later never changes this Tab. |
 | **Color** | The color behind everything on this Tab. It shows wherever the Picture does not cover. Default = the panel's normal color. None = no color. Custom opens the Color Picker for a color of your own, and its **Color (RGB)** box shows below it. A Tab Profile picked in Copy Profile copies its color in here when you Save. |
-| **Picture** | A picture behind everything on this Tab. Pick Skynet pictures or your own, a group, then the picture. None = no picture. Add new ... takes the name of another picture in media/Images; the [File Move](32-file-move) page copies a picture from your computer there. The Color shows wherever the picture does not cover. |
+| **Picture** | A picture behind everything on this Tab. Pick Skynet pictures or your own, a group, then the picture. Only Skynet pictures from the Tab Background folder are listed here (there are none yet, so the list starts on Both and shows your own). None = no picture. Add new ... takes the name of another picture in media/Images; the [File Move](32-file-move) page copies a picture from your computer there. The Color shows wherever the picture does not cover. |
 | **Picture Left** / **Picture Top** | Where the left edge and the top edge of the Picture go, in pixels from the left and the top of the Tab. |
 | **Picture Width** / **Picture Height** | How wide and how tall the Picture is drawn, in pixels. |
 

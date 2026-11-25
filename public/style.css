@@ -728,6 +728,10 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
 .nameRow input { flex: 1; min-width: 0; }
 .nameRow .nameBtn { flex: none; white-space: nowrap; }
 input.lockedName { opacity: 0.75; cursor: default; }
+/* a locked Name box (Rule 18.45, OakBarn Brewery, 2026-11-24: "The inner blue focus ring should be red"): it can not be typed in, so
+   its focus ring is red and its name starts with the ⛔; a click asks to open ✏ Change name */
+input.lockedName[readonly] { cursor: pointer; }
+input.lockedName[readonly]:focus, input.lockedName[readonly]:focus-visible { outline: 2px solid #d62828; outline-offset: 0; border-color: #d62828; box-shadow: none; }
 dialog.nameDlg { width: min(420px, 94vw); }
 dialog.nameDlg label { display: block; margin: 10px 0 4px; color: var(--muted); }
 dialog.nameDlg input { width: 100%; box-sizing: border-box; }

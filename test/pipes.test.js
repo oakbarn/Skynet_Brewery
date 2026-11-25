@@ -369,3 +369,22 @@ test('deleting a red dot on an open pipe end deletes its pipe', async () => {
   assert.match(app, /const ps = pipesOn\(item\.id, item\.workspace\); if \(ps\.length === 1\) item = ps\[0\];/);
   assert.doesNotMatch(app, /item = findItem\('gfx', dotPick\.dot\)/, 'the Delete key no longer deletes only the dot');
 });
+
+// OakBarn Brewery, 2026-11-24: "the Name has the focus but cannot be edited here ... focus ring should be red" (Rule 3.11)
+test('a locked Name box shows the Do Not Enter sign, a red focus ring, and asks before Change name', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /skyConfirm\(`Do you want to change the Name of the \$\{what\}\?`, \{ ok: '✏ Yes, change it', danger: false \}\)\) btn\.click\(\);/);
+  assert.match(app, /h\('label', \{\}, '⛔ ' \+ label\.replace/);
+  const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+  assert.match(css, /input\.lockedName\[readonly\]:focus, input\.lockedName\[readonly\]:focus-visible \{ outline: 2px solid #d62828;/);
+});
+
+// OakBarn Brewery, 2026-11-24: "Color should be the first focus"; "... be in a Tab Background folder" (Rule 7.23)
+test('Tab Settings: Color first when the Name is locked; Skynet backgrounds only from Tab_Background', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /nameBox\?\.readOnly \? body\.querySelector\('input\[data-k="color"\]'\)/);
+  assert.match(app, /const TAB_BG_GROUP = 'Tab_Background';/);
+  assert.match(app, /if \(list === 'backgrounds'\) os = os\.filter\(p => !isSkynetPic\(p\) \|\| groupOf\(p\)\.toLowerCase\(\) === TAB_BG_GROUP\.toLowerCase\(\)\);/);
+});
