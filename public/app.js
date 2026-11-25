@@ -6918,7 +6918,7 @@ const WGT_TYPES = () => [
   ['fittings', 'IPs, couplings and caps', FIT_ROWS()],
   ['gGlobal', 'gGlobal variables', amGroup('gGlobal').map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
 ];
-const VESSEL_ROWS = [['🔨 Build a Vessel Device (step by step) ...', () => vesselBuilder()], ['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
+const VESSEL_ROWS = [['🔨 Build a Vessel Device (step by step) ...', () => vesselBuilder()], ['Skynet Vessel Templates (build on them) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
 // pipe fittings are TC Pipe Fittings now (Rule 5.25). Each row shows its plain name (it showed the hidden key, and did nothing, before)
 const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel' && !['eqTee', 'eqElbow90', 'eqElbow45', 'eqCross'].includes(k)).map(([k, t]) => [t, () => addEquipment(k)]);
@@ -8325,14 +8325,14 @@ function addEquipment(t) {
 async function addVessel(how) {      // how: 'widget' or 'integrated' (the Vessel list on the Edit layout bar); asked when not given
   if (!TPL) await loadTemplates();
   how ||= await choose('Add a Vessel (Kettle, HLT, MLT ...): a Widget, or Integrated?',
-    [['Widget (you add everything to it)', 'widget'], ['Integrated (ready-made)', 'integrated']]);
+    [['Skynet Vessel Templates (build on them)', 'widget'], ['Integrated (ready-made)', 'integrated']]);
   if (!how) return;
   const icon = (t, note) => ({ key: t.name, label: t.name, img: tplIcon('vessel', t), title: note || t.notes || t.name });
   if (how === 'widget') {
-    const k = await pickVessel('Add a Vessel: pick its Widget', [
+    const k = await pickVessel('Add a Vessel: pick a Skynet Vessel Template to build on', [
       { head: 'Vessel Widget', note: 'One Skynet Template with every IP, a Temperature Probe (Front or Thermowell) and an Element Port, each with a Place slider. Slide off what your vessel does not have.',
         items: TPL.vessel.filter(t => isVesselWidget(t) && t.vwidget).map(t => icon(t)), empty: 'No Vessel Widget Template yet.' },
-      { head: 'Skynet Vessel Widgets', note: 'A picture with its IPs built in and nothing else. Add the Devices it needs on the 🔨 Build Tab and Bundle them with it.',
+      { head: 'Skynet Vessel Templates (build on them)', note: 'A picture with its IPs built in and nothing else. Add the Devices it needs on the 🔨 Build Tab and Bundle them with it.',
         items: TPL.vessel.filter(t => isVesselWidget(t) && !t.vwidget).map(t => icon(t)), empty: 'No Skynet Vessel Widgets yet.' },
       { head: 'Blank', note: 'A plain vessel: pick its picture and set every port yourself.', items: [{ key: '\0blank', label: 'Blank_Vessel', img: EQ.vessel.image, title: 'A plain vessel widget' }] }]);
     if (k === undefined) return;
