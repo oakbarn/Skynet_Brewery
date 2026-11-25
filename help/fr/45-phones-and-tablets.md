@@ -11,6 +11,10 @@ Quand un Admin se connecte sur un téléphone ou une tablette, le panel marche c
 - **Les boutons des Tabs** : les pompes, vannes, interrupteurs, boutons Override, minuteries et le reste marchent d'un toucher.
 - Surveiller les Tabs, les alarmes, le Log et la barre du simulateur.
 
+**Garder le doigt** sur un élément ouvre son Help, sauf sur une vanne ou un bouton que l'on tient exprès : un élément **Push Button** ou **Dual Action**, ou un Hose Bib réglé sur Push Button. Garder le doigt dessus le garde allumé (On), et le Help reste fermé.
+
+**Les champs de texte et les listes déroulantes** ont un texte un peu plus grand sur un téléphone ou une tablette, pour que l'iPhone ne zoome pas la page quand vous en touchez un.
+
 ## Ce qui n'est pas sur un téléphone ou une tablette {#what-is-not-on-a-phone-or-tablet}
 
 - Le bouton **Edit layout** (et les écrans ☰ Menu > Build).

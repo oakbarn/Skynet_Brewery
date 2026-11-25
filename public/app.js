@@ -6130,8 +6130,17 @@ document.addEventListener('contextmenu', ev => {
   if (topic) { ev.preventDefault(); openHelp(topic); }
 });
 let helpPress = null, helpShownAt = 0;
+// What a finger holds down on purpose (Fritz, 2026-11-25: "Yes if possible we want to be touch screen friendly"): a Push Button or
+// Dual Action Device or Widget (a valve of a Valve Tee or Supply Manifold, a Heating Element built into a Vessel included) and a
+// Manual Valve or Hose Bib set to Push Button. Holding a finger on one keeps it On; the Help long press must not open over it.
+function fingerHeld(target) {
+  const mv = target.closest?.('.gfx.ip[data-fit="manualValve"]'); if (mv && mvHoldGfx(mv.dataset.gid)) return true;
+  const n = target.closest?.('.el, .vpPart[data-dev], .mfValve[data-dev]'); const e = n && elByName(n.dataset.name || n.dataset.dev);
+  return !!e && ['hold', 'dual'].includes(tapAction(e));
+}
 $('#ws').addEventListener('pointerdown', ev => {
   if (editing || ev.pointerType === 'mouse' || ev.target.closest('.btns, select, button, input, div.qdEnd')) return;
+  if (fingerHeld(ev.target)) return;      // a valve or button held open on purpose (Push Button, Dual Action, a Push Button Hose Bib) never opens Help (Rule 2.35)
   const hit = tabItemAt(ev.target);
   if (!hit || (hit.kind === 'el' && tapAction(hit.item) === 'hold')) return;     // a push button is held on purpose
   clearTimeout(helpPress?.t);

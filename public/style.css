@@ -240,6 +240,8 @@ button.big.cur { outline: 3px solid var(--accent); }
 .tmBox .vdInput { width: 3.4em; }
 textarea.vdInput { font-size: 18px; text-align: left; }
 @media (pointer: coarse) { button { min-height: 40px; } nav#views button { padding: 8px 12px; } }
+/* iPhone / iPad Safari zooms the whole page in when a box with text under 16 px is tapped (Rule 2.35): boxes and dropdowns get 16 px on a touch screen */
+@media (pointer: coarse) { input, select, textarea { font-size: 16px; } }
 
 /* ===== looks ===== */
 .el.look-led { background: var(--gFace, #111) !important; border-color: #333; }
