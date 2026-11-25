@@ -13,7 +13,7 @@ assert.doesNotMatch(app, /if \(e\.workspace && e\.workspace !== wsName\) \{ wsNa
 const add = app.slice(app.indexOf('async function addThing('), app.indexOf('function elemVesselBuild('));
 assert.match(add, /useTabProfile\(e\);[^\n]*\n\s*keepOnBuild\(e\);/, 'addThing keeps it on the Build Tab, after taking its Tab\'s look');
 assert.equal((app.match(/useTabProfile\(e\); keepOnBuild\(e\);/g) || []).length, 2, 'Thermowell and Probe Tee too');
-assert.match(app, /draft\.graphics\.filter\(q => q\.attachTo === g\.id\)\]\) keepOnBuild\(x\);/, 'a Valve Tee with its valves and IPs too');
+assert.match(app, /const parts = breakMf\(g\) \|\| \[\];\n\s*for \(const x of parts\) keepOnBuild\(x\);/, 'a Valve Tee: its Long Tees, valves and IPs too (Rule 5.35)');
 const keep = app.slice(app.indexOf('function keepOnBuild('), app.indexOf('function keepOnBuild(') + 700);
 assert.match(keep, /x\.buildTo = to\.name/, 'the picked Tab is remembered');
 assert.match(keep, /b\.width = Math\.max/, 'the Build Tab is at least as big as that Tab');

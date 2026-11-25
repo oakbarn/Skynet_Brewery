@@ -1156,14 +1156,15 @@ async function addMf(tname, kind) {
         } catch (err) { draft.graphics = draft.graphics.filter(x => x !== g && x.attachTo !== g.id); throw err; }
         placeUnitParts(g);
         try { if (work.mfIface) localStorage.setItem(LAST_IFACE_KEY, work.mfIface); } catch { }
-        // on the 🔨 Build Tab first, with its valves and IPs (Rule 4.1); Finish Build ... moves it to the Tab picked in the Add box
-        for (const x of [g, ...draft.elements.filter(e => e.integratedIn === g.id), ...draft.graphics.filter(q => q.attachTo === g.id)]) keepOnBuild(x);
-        sel = { kind: 'gfx', id: g.id }; renderWs();
-        made = g; break;
+        // it breaks apart into its Long Tees and valves (Rule 5.35); on the 🔨 Build Tab first (Rule 4.1); Finish Build ... moves them to the Tab picked in the Add box
+        const parts = breakMf(g) || [];
+        for (const x of parts) keepOnBuild(x);
+        sel = null; renderWs();
+        made = parts; break;
       } catch (err) { toast(err.message, true); }
     }
   } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
-  if (made) await editItem('gfx', made.id);       // its Properties next, as a new Pump's (Rule 18.13)
+  if (made) toast(`${I.what} placed on the 🔨 Build Tab as ${keys.length} Long Tee${keys.length > 1 ? 's' : ''} and ${keys.length} valve${keys.length > 1 ? 's' : ''}, each its own Device or Widget (Rule 5.35). Double-click any one for its Properties.`, false, 8000);
 }
 // the valve settings of the dialog's work: each valve's kind and Port, and the Interface
 const mfOf = w => Object.fromEntries(Object.keys(w).filter(k => /_(mfk|mfpin)$/.test(k) || k === 'mfIface').map(k => [k, w[k]]));
@@ -1222,7 +1223,7 @@ function mfDrillFields(it, item, adding) {
       return [k + '_mfk', `${i ? '' : '3. '}Valve ${mfNum(k)}`, 'sel', MF_KIND_SEL, true, false, { tip: T.valve, ...(port ? { with: port } : {}) }];
     }),
     ['workspace', '4. Tab', 'ws', adding ? 'addnewid' : null, false, false, { tip: T.tab }],
-    ['name', '5. Name', 'text', null, false, false, { tip: T.name, ...after }],
+    ...(adding ? [] : [['name', '5. Name', 'text', null, false, false, { tip: T.name, ...after }]]),
     ['_pv', 'Graphic', 'mfpic', null, false, false, { tip: T.graphic, ...after }],
     ['_mpath', 'Path', 'ro', String(it.image || '').replace(/^Images\//, ''), false, false, { tip: T.path, ...after }],
     ['rot', 'Orientation', 'vorient', MF_ORIENT, false, false, { tip: T.orient, with: ['_flip', 'Flip', 'sel', PROBE_FLIP], ...after }],
@@ -1305,6 +1306,80 @@ function applyMf(g, w, tab, label, loose = false) {
   }
 }
 
+// A Valve Tee or Supply Manifold breaks apart once it is placed (OakBarn Brewery, 2026-11-25: "Any thing like the three valve supply
+// tees needs to be individual Devices and widgets after placed because they need to be manipulated individually"; Rule 5.35): each tee
+// becomes a TC Pipe Fittings Long Tee and each valve its own valve, a Motorized one a Skynet Motorized Ball Valve Device (same Name, Label,
+// Interface and Port), a Manual one a Manual Valve Widget (Manual Ball Valve, side view). The tees are joined end to end IP to IP, each
+// valve IP to IP on its tee's branch (Rule 5.26), on the same spots as before; a pipe that was on the fitting goes on the piece now there.
+// The fitting itself goes. Returns the new pieces (with their IPs and joins), or null when it is not one.
+const MF_MANUAL_PIC = 'Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg';
+function breakMf(g) {
+  const teeT = tplOf('fitting', 'Tee');
+  if (!draft || !isMf(g) || !teeT) return null;
+  const ws = g.workspace, keys = mfKeys(g), N = keys.length, [W, H] = picWH(g), rot = unitRot(g), across = rot % 180 === 90;
+  const ipOf = (x, k) => draft.graphics.find(q => q.kind === 'ip' && q.attachTo === x.id && q.port === k);
+  const old = Object.fromEntries(['start', 'end', ...keys].map(k => [k, ipOf(g, k)?.id]));
+  const anchor = old.start && ipPoint(old.start, ws);
+  // the pipes on it: the joins between the pieces take their size (most of them), else the Default pipe size
+  const sizes = Object.values(old).filter(Boolean).flatMap(id => pipesOn(id, ws)).map(p => String(p.size || '')).filter(Boolean);
+  const size = sizes.sort((a, b) => sizes.filter(x => x === b).length - sizes.filter(x => x === a).length)[0];
+  const out = [], tees = [], valves = [], joins = [];
+  const near = (ips, c) => [...ips].sort((a, b) => Math.hypot(a.c[0] - c[0], a.c[1] - c[1]) - Math.hypot(b.c[0] - c[0], b.c[1] - c[1]));
+  keys.forEach((k, i) => {
+    const t = placeTabFitting(teeT, ws, tcName(teeT, draft.graphics), null), w = Math.round(W / N), hh = Math.round(H * MF_TEE_H);
+    const [cx, cy] = unitPoint(g, (i + 0.5) / N, MF_TEE_H / 2);
+    Object.assign(t, { w, h: hh, x: Math.round(cx - w / 2), y: Math.round(cy - hh / 2), labelVisible: false });
+    if (rot) t.rot = rot; else delete t.rot;
+    for (const f of ['flipH', 'flipV']) if (g[f]) t[f] = true; else delete t[f];
+    if (!g.bundled) delete t.bundled;
+    placeUnitParts(t); tees.push(t);
+  });
+  keys.forEach((k, i) => {
+    const e = mfEl(g, k, draft.elements), [vx, vy] = unitPoint(g, (i + 0.5) / N, (1 + MF_TEE_H) / 2);
+    if (e && mfKind(e) === 'motorized') {
+      const keep = Object.fromEntries(['name', 'label', 'device', 'channel', 'valveType', 'typeCode', 'activeLow', 'oneShot', 'oneShotDirection', 'locked', 'buildTo'].filter(x => e[x] !== undefined).map(x => [x, e[x]]));
+      const p = skyDevPreset(across ? 'Skynet_Motorized_Ball_Valve_H' : 'Skynet_Motorized_Ball_Valve_VR') || {};
+      delete e.integratedIn; delete e.integratedAs;
+      Object.assign(e, p, keep, { workspace: ws });
+      e.x = Math.round(vx - (e.w || 150) / 2); e.y = Math.round(vy - (e.h || 150) / 2);
+      fitValveBoxes({ elements: [e] });
+      valves.push({ k, it: e, ips: () => devIps(e), move: (dx, dy) => { e.x = Math.round((e.x || 0) + dx); e.y = Math.round((e.y || 0) + dy); } });
+    } else {
+      if (e) draft.elements = draft.elements.filter(x => x !== e);
+      const m = { id: newId(), kind: 'ip', fitting: 'manualValve', workspace: ws, w: 75, h: 75, x: Math.round(vx - 37.5), y: Math.round(vy - 37.5), color: '#8a8f96', confirmation: true,
+        image: MF_MANUAL_PIC, mvOrient: across ? 'h' : 'v', label: e?.label || `${g.label || g.name} V${mfNum(k)}`, labelVisible: false };
+      draft.graphics.push(m); giveName(m, draft.graphics);
+      valves.push({ k, it: m, ips: () => eqPorts(m), move: (dx, dy) => { m.x = +((m.x || 0) + dx).toFixed(2); m.y = +((m.y || 0) + dy).toFixed(2); } });
+    }
+  });
+  // joined IP to IP (Rule 5.26): tee to tee end to end, each valve on its tee's branch; the valve's other end is where the branch IP was
+  const join = (a, b) => { const p = directJoin(a, b, ws); if (p && size) p.size = size; if (p) joins.push(p); };
+  for (let i = 0; i + 1 < N; i++) join(ipOf(tees[i], 'end').id, ipOf(tees[i + 1], 'start').id);
+  const far = {};
+  valves.forEach((v, i) => { const bc = ipPoint(ipOf(tees[i], 'branch1').id, ws), [mine, other] = near(v.ips(), bc); v.mine = mine.id; far[v.k] = other.id; join(ipOf(tees[i], 'branch1').id, mine.id); });
+  // the pipes that were on it go on the piece now on that spot
+  const to = { [old.start]: ipOf(tees[0], 'start').id, [old.end]: ipOf(tees[N - 1], 'end').id, ...Object.fromEntries(keys.map(k => [old[k], far[k]])) };
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.workspace === ws)) for (const end of ['from', 'to']) if (p[end] && to[p[end]]) p[end] = to[p[end]];
+  const gone = new Set([g.id, ...draft.graphics.filter(q => q.attachTo === g.id).map(q => q.id)]);
+  draft.graphics = draft.graphics.filter(q => !gone.has(q.id) && !gone.has(q.capOn));
+  draft.elements = draft.elements.filter(x => x.integratedIn !== g.id);
+  // each piece takes its size now (Rule 5.36), as it would when drawn, then they are put back end to end: the first tee's open end where
+  // the fitting's was, each next tee on the one before, each valve on its tee's branch
+  for (const t of tees) autoSizeUnit(t);
+  for (const v of valves) if (isMv(v.it)) sizeFitting(v.it);
+  const shift = (t, to, from) => { const a = ipPoint(ipOf(t, from).id, ws); t.x = +((t.x || 0) + to[0] - a[0]).toFixed(2); t.y = +((t.y || 0) + to[1] - a[1]).toFixed(2); placeUnitParts(t); };
+  tees.forEach((t, i) => shift(t, i ? ipPoint(ipOf(tees[i - 1], 'end').id, ws) : anchor || ipPoint(ipOf(t, 'start').id, ws), 'start'));
+  valves.forEach((v, i) => { const bc = ipPoint(ipOf(tees[i], 'branch1').id, ws), c = v.ips().find(q => q.id === v.mine).c; v.move(bc[0] - c[0], bc[1] - c[1]); });
+  const ids = new Set([...tees.flatMap(t => draft.graphics.filter(q => q.attachTo === t.id).map(q => q.id)), ...valves.flatMap(v => v.ips().map(q => q.id))]);
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.workspace === ws)) for (const end of ['from', 'to']) {
+    if (!ids.has(p[end])) continue;
+    const c = ipPoint(p[end], ws), pts = p.points || []; if (c && pts.length) pts[end === 'from' ? 0 : pts.length - 1] = [...c];
+  }
+  if (sel?.id === g.id) sel = null;
+  for (const t of tees) out.push(t, ...draft.graphics.filter(q => q.attachTo === t.id));
+  out.push(...valves.map(v => v.it), ...joins);
+  return out;
+}
 // ---- Hand-set appliances (Fritz, 2026-11-07, Rule 5.39, Help 158, public/appliance.js): the DigiBoil and the 65 L Brewzilla heat
 // (and the Brewzilla pumps) by themselves; Skynet does not switch any of it. Each one comes with its parts built in
 // (integratedIn = the vessel, never un-bundled): its Controls, a Manual vessel Widget with its switches, its set point and its screen
@@ -5303,6 +5378,8 @@ function setEditing(on) {
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
   // the valve boxes are fitted first (Rule 5.29), so each valve is lined up on its pipes with its IPs where they will be drawn
   // (OakBarn Brewery, 2026-11-24: "It may be they are joined to the Valves, but the IPs are not aligned")
+  // a Valve Tee or Supply Manifold placed before it broke apart breaks apart now (Rule 5.35), kept with the next Save layout
+  if (on && TPL) { const n = draft.graphics.filter(isMf).filter(g => breakMf(g)).length; if (n) toast(`${n} Valve Tee or Supply Manifold${n > 1 ? 's' : ''} broke apart into Long Tees and valves, each its own Device or Widget (Rule 5.35). Save layout keeps it.`, false, 8000); }
   if (on) { fitValveBoxes(draft); mvJoinEnds(draft); centerOnPipes(draft); openLostEnds(draft); plainLonelyEnds(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
@@ -16468,6 +16545,7 @@ async function newSchemaFromTemplate(name) {
     }
   }
   layoutSchema(plan, placed, mfG);
+  if (mfG) breakMf(mfG);       // the manifold breaks apart into its Long Tees and valves (Rule 5.35)
   renderTabs(); renderWs();
   await saveLayout({ leave: true });
   // the Brew Process: every job picked, Whirlpool and Chill or Chill, then Build the Brew Day
@@ -18751,11 +18829,12 @@ async function ivBuild(a) {
     }
   }
   layoutSchema(plan, placed, mfG);
+  const mfParts = mfG ? breakMf(mfG) || [] : [];       // the manifold breaks apart into its Long Tees and valves (Rule 5.35)
   // all of it to the 🔨 Build Tab (Rule 4.1): each piece with everything on it, so Finish Build ... puts it back in the same spot on its Tab
   const onTab = [...draft.elements.filter(e => e.workspace === tab && (devs.includes(e) || placed.v.some(g => e.integratedIn === g.id) || (mfG && e.integratedIn === mfG.id))),
     ...draft.graphics.filter(g => g.workspace === tab && (placed.v.includes(g) || placed.e.includes(g) || g === mfG || plan.elements.includes(g) || [...placed.v, ...placed.e, mfG].some(v => v && (g.attachTo === v.id || g.onVessel === v.id || g.capOn === v.id || bundleParts(v).includes(g)))))];
   wsName = tab;
-  for (const x of new Set(onTab)) keepOnBuild(x);
+  for (const x of new Set([...onTab, ...mfParts])) keepOnBuild(x);
   { const bw = buildWs(); if (bw) bw.forProfile = a.name; }      // the Build is for an Equipment Profile: the bar greys what can't go in one
   renderTabs(); renderWs();
   toast(`"${a.name}" is made, and the Tab ${tab} has its numbers. Its ${placed.v.length} vessel${placed.v.length === 1 ? '' : 's'}, ${devs.length} pump${devs.length === 1 ? '' : 's'} and valve${devs.length === 1 ? '' : 's'} and the rest are on the 🔨 Build Tab: press ✅ Finish Build ... > Move to Tab, then Save layout. Then ☰ Menu > Equipment Profile > 💾 Save as a profile ... copies the Tab's drawing into "${a.name}".`, false, 15000);
@@ -20114,6 +20193,7 @@ function addTemplateToTab(kind, t, tab, name, { cloneAs, stay } = {}) {
   if (cloneAs) b.cloneAs = cloneAs;
   const g = kind === 'vessel' ? placeTabVessel(t, b.name, name) : placeTabFitting(t, b.name, name, null);
   sel = { kind: 'gfx', id: g.id };
+  if (isMf(g) && breakMf(g)) sel = null;       // a Valve Tee or Supply Manifold breaks apart into its Long Tees and valves (Rule 5.35)
   renderTabs(); renderWs();
   if (stay) return toast(`${name} is on the 🔨 Build Tab. B (or Insert) puts another one there; click the 🔨 Build Tab to go to it.`, false, 6000);
   toast(cloneAs ? `${name} is on the 🔨 Build Tab. Change it there, then press ✅ Finish Build ... > As a Template to save the new Template.`

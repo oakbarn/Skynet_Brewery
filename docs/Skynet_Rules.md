@@ -2791,6 +2791,15 @@ Manifold (2 long Tees with 2 Integrated Valves with IPs only at Valve ends and 2
 and Motorized Versions with ability to swap manual to motorized individually by valve. And a Triple Supply Manifold the same. Add to
 Pipe Fitting"; "These have their own unique attributes ... the standard exceptions would apply if it fits"; thread "Add valve Tees and
 supply manifolds", Help 146).
+- **It breaks apart once placed** (OakBarn Brewery, 2026-11-25: "And once this template is placed on a Tab, it becomes 3 devices and
+  3 widgets"; "Any thing like the three valve supply tees needs to be individual Devices and widgets after placed because they need to
+  be manipulated individually"). The Valve Tee and the Supply Manifolds are only a way to place them: as soon as one is placed (its Add
+  box, the Setup interviews, a Template put on the 🔨 Build Tab), each tee becomes a TC Pipe Fittings **Long Tee**, joined end to end
+  to the next IP to IP (Rule 5.26), and each valve its own valve joined IP to IP on its tee's branch: a **Motorized** one a **Skynet
+  Motorized Ball Valve** Device (Vertical Right, or Horizontal when turned 90; same Name, Label, Interface and Port), a **Manual** one a
+  **Manual Valve Widget** (Manual Ball Valve, side view, Rule 5.24). Pipes that were on its IPs go on the part now on that spot. One
+  placed before this breaks apart the next time Edit layout opens (one note), kept with the next Save layout. The Add box has no
+  Name (each part gets its own). What follows is how it is set up before it breaks apart.
 - Three Skynet TC Pipe Fittings with valves built in: the **Valve Tee** (one Long Tee, Template Valve_Tee), the **Double Supply
   Manifold** (2 Long Tees joined end to end, Supply_Manifold_2) and the **Triple Supply Manifold** (3, Supply_Manifold_3). TC 1.5,
   Fritz's Long Tee drawing (Rule 5.25) with a valve on each branch, drawn to the Valve Standard (Rule 5.29).
@@ -7293,6 +7302,8 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 1.5 (the temperature probe) on the Front above it. Both programs show the same Templates and ports.
 
 ## Change log
+
+- 2026-11-25: Rule 5.35 changed (OakBarn Brewery: "And once this template is placed on a Tab, it becomes 3 devices and 3 widgets"; "Any thing like the three valve supply tees needs to be individual Devices and widgets after placed because they need to be manipulated individually"): a Valve Tee or Supply Manifold breaks apart as soon as it is placed (Add box, Setup interviews, Template on the 🔨 Build Tab) into Long Tees joined end to end and one valve per tee joined IP to IP on its branch: Motorized = Skynet Motorized Ball Valve Device (same Name, Label, Interface, Port), Manual = Manual Valve Widget (Manual Ball Valve, side view). Its pipes go on the part on the same spot. Older ones break apart when Edit layout opens. The Add box has no Name. Help 146 (and French). BruControl Import program: it never brings in a Valve Tee or Supply Manifold; nothing changes there.
 
 - 2026-11-25: Rules 5.19, 5.26, 5.37 and 5.45 (OakBarn Brewery: "Bigger Auto join area"; "lets try 25"): every auto join distance in Edit layout is now 25 px (was 12 px for IP to IP and 14 px for the rest): an IP dropped on an open IP, a pipe end or item IP dropped near a red dot or IP, Save layout rejoining open ends, and a loose end counted as joined for the flow drawing. A Skynet TC fitting (elbow, tee) with no pipes on it now also slides onto a red dot. Help 105 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 

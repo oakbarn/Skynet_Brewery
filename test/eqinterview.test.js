@@ -65,7 +65,7 @@ assert.ok(t);
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 assert.match(app, /\['@interview', 'Answer a few questions \(the Interview\)'\]/, 'Add new starts with the Interview');
 assert.match(app, /if \(w\.from === '@interview'\) return eqInterview\(/);
-assert.match(app, /for \(const x of new Set\(onTab\)\) keepOnBuild\(x\);/, 'everything starts on the Build Tab (Rule 4.1)');
+assert.match(app, /for \(const x of new Set\(\[\.\.\.onTab, \.\.\.mfParts\]\)\) keepOnBuild\(x\);/, 'everything starts on the Build Tab (Rule 4.1)');
 assert.match(app, /for \(const e of made\) keepOnBuild\(e\);/, 'pumps and valves given Ports too');
 assert.doesNotMatch(app, /key: 'vessel', title: 'Vessel'/, 'the Vessel tab is replaced by the Interview');
 const rules = fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8');
