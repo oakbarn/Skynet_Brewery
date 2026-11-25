@@ -371,7 +371,8 @@ engine.on('alert', a => broadcast('alert', a));
 engine.on('flow', f => broadcast('flow', f));
 engine.on('brewTimers', v => broadcast('brewTimers', v));      // the Skynet Brew Timers on every screen (Rule 2.68)           // flow colors a Process set (Rule 5.21)
 engine.on('config', () => { store.writeConfig(); broadcast('config', {}); });     // a Process moved a Quick Disconnect hose (Rule 5.34)
-engine.on('overrides', v => broadcast('overrides', v));      // Override pop-ups up now (Rule 2.26)
+engine.on('overrides', v => broadcast('overrides', v));
+engine.on('errorStops', v => broadcast('errorStops', v));      // a Process stopped on an error: ▶ Resume / ⏭ Skip on every screen (Rule 10.14)      // Override pop-ups up now (Rule 2.26)
 engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
@@ -495,7 +496,7 @@ function setBuildDraft(v) {
   store.writeConfig();
 }
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/emergencyoff' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p) || p.startsWith('/ui/errorlog')) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/emergencyoff' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart|resume)$/.test(p) || p === '/ui/errorstop/close' || p.startsWith('/ui/errorlog')) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -767,7 +768,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, patron: { brewery: patron.has('breweryname'), name: patron.status().name || '' }, words: processWords(), valves: engine.valveList(), overrides: engine.overrideList(), flow: engine.flowView(), brewTimers: engine.brewTimers.view(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, patron: { brewery: patron.has('breweryname'), name: patron.status().name || '' }, words: processWords(), valves: engine.valveList(), overrides: engine.overrideList(), errorStops: engine.errorStopList(), flow: engine.flowView(), brewTimers: engine.brewTimers.view(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
   // PID Auto-tune (Rule 6.39, Help 237): admins start or stop it on a Heating Element; it runs on the Brain (lib/control.js)
@@ -781,6 +782,13 @@ async function route(req, res) {
     return ok(res);
   }
   if (p === '/ui/flameout/close' && m === 'POST') { flame?.close(String((await jsonBody(req)).id ?? '')); return ok(res); }
+  // Resume after an error (Rule 10.14): { skip: true } goes on at the line after the one that stopped it
+  { const mm = p.match(/^\/ui\/scripts\/([^/]+)\/resume$/);
+    if (mm && m === 'POST') {
+      const b = await jsonBody(req);
+      try { const r = engine.resumeAfterError(decodeURIComponent(mm[1]), { skip: b.skip === true, by: me?.name || 'user' }); return r.ok ? ok(res, r) : fail(res, 400, r.msg || 'Not resumed'); } catch (e) { return fail(res, 400, e.message); }
+    } }
+  if (p === '/ui/errorstop/close' && m === 'POST') { engine.closeErrorStop(String((await jsonBody(req)).process ?? '')); return ok(res); }
   if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
   // the Resume button on that notice (Rule 6.31): turns back On what was On and starts each Process again at its step
   if (p === '/ui/brain/resume' && m === 'POST') {
