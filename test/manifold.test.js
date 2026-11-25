@@ -44,7 +44,7 @@ assert.ok(app.includes('if (isMf(it)) return mfDrillFields(it, '), 'the Properti
 for (const f of ["'1. Label'", "'2. Interface'", "'4. Tab'", "'5. Name'", "'Device Type'"]) assert.ok(app.includes(f), f);
 assert.ok(app.includes("const MF_ORIENT = [['0', 'Horizontal'], ['90', 'Left Vertical 90'], ['270', 'Right Vertical 90']]"), 'three Orientations');
 assert.ok(app.includes('const MF_ROTS = [0, 90, 270]'), 'the turn buttons and a pipe drop keep to them');
-assert.ok(app.includes("class: 'mfNum'"), 'valve numbers');
+assert.ok(!app.includes("class: 'mfNum'"), 'no valve numbers (OakBarn Brewery, 2026-11-24: "get rid of the yellow circle numbers")');
 assert.ok(app.includes('<rect x="77" y="0.8" width="56" height="16.5" rx="5"') && app.includes('<rect x="77" y="192.7" width="56" height="16.5" rx="5"'), 'each valve has the tee\'s 56 x 16.5 ferrule at both ends');
 for (const n of ['Valve_Tee', 'Supply_Manifold_2', 'Supply_Manifold_3']) {
   const t = tpl(n), svg = fs.readFileSync(path.join(ROOT, 'media', t.image), 'utf8');

@@ -34,6 +34,12 @@ Tee's IP:
 Beside it, **↔ Move with pipes** is the pop-up's other choice: press it (Properties saves and closes by itself), then grab the item and it moves **with** its
 pipes, without the pop-up. It is not on a Pipe or Hose, and it is grey when a 🔒 locked pipe or fitting would have to move with it.
 
+**Shift + drag:** hold **Shift** as you press the left mouse button on an item, then drag: it moves together with **everything joined
+to it** through its pipes (fittings, valves, pumps and the pipes between them), with no pop-up. Pipes that run to a vessel stay on the
+vessel and get longer or shorter; move sideways and a straight one gets a jog with two bends, so it stays joined. A note then names
+those pipes and warns that more pipes or fittings (elbows) may be needed there; its **⟲ Revert** button puts the move back, as
+↩ Put back (Ctrl+Z) does.
+
 **🔓 Unlock one IP ▾** (on a Pipe or Hose: **🔓 Unlock one end ▾**) is there when 2 or more pipe ends are joined to it. Pick one IP
 in the list and only that pipe end lets go; the others stay joined. Properties saves and closes by itself, and **↩ Put back**
 (Ctrl+Z) joins it again.
@@ -60,7 +66,7 @@ up and down, and **Shift + wheel** scrolls sideways.
 While an elbow, tee or other fitting that can turn is picked, the Zoom box's title has **⟲ 90**, **⟳ 90**, **⇆ Flip H** and **⇅ Flip V**: they turn or flip it a quarter turn at a time, as the turn buttons on the Edit layout bar do, and the Zoom box shows it at once. The keys do it too, in or out of the Zoom box: **R** turns the picked fitting a quarter turn right, **Shift + R** left, **H** flips it left to right and **V** top to bottom. Press **Esc** or the red **✕** in its upper right corner to close it.
 
 **Join two IPs with a trace (only in the Zoom box):** double-click a red IP to start a red trace line, then click the IP to join it
-to. Press **🔧 Auto configure**: the first IP moves onto the second and they join, and what is joined behind it follows so no join
+to. The red dot on an open pipe end counts as an IP here too, at either end of the trace. A trace starts and ends only on red IPs: a double-click on or next to a green (joined) IP picks what is there, as it does outside the Zoom box. Press **🔧 Auto configure**: the first IP moves onto the second and they join, and what is joined behind it follows so no join
 breaks. Two open ends (red dots) that meet at a corner get an elbow there (a tee where three pipes meet, and so on). Two IPs of things (an elbow and a valve, a valve and a pump ...) brought onto one spot join IP to IP, with no pipe between, and both turn green. A straight pipe gets longer or shorter for the part of the move along its own line, and only the part across it is passed
 on to what is on its other end (a tee slides along its level pipes, the pipe up to an elbow gets shorter), and so on back; a pipe with a bend
 in it takes the whole move at the bend, and a hose just bends. If that would break a join, the second IP is tried onto the first instead. If neither works, nothing moves and a

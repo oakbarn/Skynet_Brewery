@@ -2812,7 +2812,7 @@ supply manifolds", Help 146).
   and **Right Vertical 90** (a quarter the other way, the valves point right), with **Flip** on the same line: **No flip**, **Flip
   Vertical** (the valves on the other side of the tees: on top when Horizontal), **Flip Horizontal** (Valve 1 at the other end) or
   **Flip both**. The Valve Tee is the same. The Edit layout bar's turn buttons step through the three turns (no 45, an exception to
-  Rule 5.5) and its Flip H and Flip V buttons flip it as it looks on the Tab. The valves, their numbers and the IPs follow.
+  Rule 5.5) and its Flip H and Flip V buttons flip it as it looks on the Tab. The valves and the IPs follow.
   No Autosize to pipe (it is drawn at the Valve Standard size) and no Clone. Dropped on a straight pipe in Edit layout, its run goes
   along the pipe (turned to one of the three) and the pipe is cut, as a tee's (Rule 5.25).
 - **The valve ends match the tee ends** (Fritz, 2026-11-06: "The valve ends need to match the Tee ends in the graphic"): each valve is
@@ -2821,6 +2821,8 @@ supply manifolds", Help 146).
 - **Valve numbers** (Fritz, 2026-11-06: "When Building or editing a Manifold Supply the Valves need to be number corresponding to the
   Valve 1 in the dialog"): in Edit layout and on the Graphic of its Add box and Properties each valve shows its number (1, 2, 3), the
   same as **Valve 1**, **Valve 2**, **Valve 3** in the dialog and **V1**, **V2**, **V3** in its valves' Labels. Not shown in run mode.
+  **Taken away** (2026-11-24, OakBarn Brewery: "And get rid of the yellow circle numbers"): no number is drawn on the valves, on the
+  Tab or on the Graphic; Valve 1, 2, 3 count from the left as the fitting is drawn level.
 - **Size: it takes the size of its pipes** (Fritz, 2026-11-07: "any Pipe Fitting, even if a device should size to the majority of the
   pipes or hoses"; Rule 5.36). This replaces "No Autosize to pipe (it is drawn at the Valve Standard size)" above: a Valve Tee or
   Supply Manifold is sized like a tee, its tees as thick as most of the pipes and hoses on its IPs; its valves grow with it. With no
@@ -2877,6 +2879,16 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   and the pipes and fittings stay), **Move it with its pipes** (Rule 5.19 as before), **🔁 Swap places with...** or **Cancel**.
   Unlocking is never done unless the user picks it. **Don't ask again** lasts until Edit layout is left. A Pipe joined to other
   things offers **🔓 Unlock its ends** (it moves alone) or Cancel. A locked item stays locked (Rule 2.12): no pop-up.
+- **Shift + drag: move it with its pipes, no pop-up** (2026-11-24, OakBarn Brewery: "Left Mouse Key + a Key to move something with
+  all connected pipes"; "If the entire manifold was connected, elongate the pipes connected to the vessels"; "add pipes at the end of
+  a move if it did not just go down"): Shift held as the left button is pressed on an item, then a drag, moves it **and everything
+  joined to it through its pipes** (fittings, valves, pumps and the pipes between them) together, with no pop-up. A pipe that runs to
+  a vessel (or to something locked) keeps its end on the vessel and gets longer or shorter; moved across its line, a straight one gets
+  a jog in its middle (two bends), so it still runs level and upright and stays joined; a note then names those pipes, warns that more
+  pipes or fittings (elbows) may be needed there, and its **⟲ Revert** button puts the move back (the same as ↩ Put back; OakBarn
+  Brewery: "the clean up would have to Warn that additional pipes or fittings may be needed ... something like Revert rather than
+  Undo, but same as Undo"). ↩ Put back (Ctrl+Z) undoes the move. Shift +
+  left click is free on Windows, Mac, Linux and the Pi (Rule 2.73).
 - **🔓 Unlock its IPs in Properties** (OakBarn Brewery, 2026-11-21: "Need unlock IPs on property dialog for things that have IPs";
   "The hose got connected to a Tee IP and I could not unlock"): an IP has no dialog of its own (Rule 2.9), so the title line of the
   Properties of anything with IPs (Device, Widget, Manual Valve, Hose Bib, fitting, vessel, a bundled vessel too) has **🔓 Unlock its
@@ -2909,7 +2921,11 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   *Added (OakBarn Brewery, 2026-11-23: "ONLY INSIDE the Z Dialog, a double click on a red IP starts the Trace to another Ip. Trace
   would be red line. The a button to autoconfigure"; he picked "move the first onto the second": "has to trace back so no breaks
   in Ips"):* **only in the Zoom box**, a double-click on an IP starts a red **trace** and a click on another IP ends it (a
-  double-click on an IP there no longer opens Properties). **🔧 Auto configure** moves the first IP onto the second and joins them,
+  double-click on an IP there no longer opens Properties). The red dot of an open pipe end with no coupling counts as an IP for
+  the trace, at either end; it gets its coupling when the trace takes it (2026-11-24, OakBarn Brewery: "going from Valve Red IP
+  to Pump Red IP would not lock trace. Going from Pump Red IP to Valve IP worked fine"). Only a red (open) IP starts or ends a trace ("Tracing should only be on red dots"): a
+  double-click on or next to a green (joined) one goes on to the Tab as any double-click does, so the pipe there can be picked
+  (2026-11-24, OakBarn Brewery: "I was trying to grab the smaller pipe to delete and it started tracing"). **🔧 Auto configure** moves the first IP onto the second and joins them,
   and traces the move back through what is joined behind it so no join breaks (Fritz: "the tee below the elbow ... would have to
   move right shortening the right pipe and lengthen the left pipe on the tee. The pipe to the elbow would have to shorten"): a
   straight pipe takes the part of the move along its own line by getting longer or shorter and passes on only the part across it
@@ -7300,6 +7316,9 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-24: Rule 5.26 note (OakBarn Brewery: "I put the Valve Red Dot on top the Pump red dot and got a message. This is how real life the valves are on the Pump"): an IP dropped right on another open IP (within 12 px) joins it IP to IP with a pipe of no length, instead of cutting a pipe it lies over. Help 125 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-25: Rule 5.26 changed (OakBarn Brewery: "Still cannot join a Pump to a pipe there are no red Joins on the Pipes"; "A, the way it was before with just red IPs"; "Open Pipe ends should have the red dot join!"): a pump or valve still joined to its own pipes, dropped on another pipe, lets go of its old pipes (their ends stay, open, red dot) and cuts the pipe it is dropped on, instead of saying it is still joined. Help 125 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-25: Rule 5.23 note (OakBarn Brewery: "It may be they are joined to the Valves, but the IPs are not aligned"): a valve's box is fitted to its picture (Rule 5.29) before it is lined up on its pipes, when Edit layout opens and when a Tab is shown, so its IPs sit on its pipes. BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-25: Rule 5.37 note (OakBarn Brewery: "going from Valve Red IP to Pump Red IP would not lock trace. Going from Pump Red IP to Valve IP worked fine"): in the Zoom box the red dot of an open pipe end with no coupling counts as an IP for the trace, at either end, and gets its coupling when the trace takes it, so Auto configure joins it; only a red (open) IP starts or ends a trace ("Tracing should only be on red dots"; "I was trying to grab the smaller pipe to delete and it started tracing"), a double-click by a green one goes on to the Tab. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
+- 2026-11-25: Rule 5.35 changed (OakBarn Brewery: "And get rid of the yellow circle numbers"): a Valve Tee or Supply Manifold no longer shows its valve numbers (1, 2, 3) in Edit layout or on the Graphic of its dialogs. Bug fixed ("CONFIRM_WHY is not defined" on ➕ Add Device of a Supply Manifold): a line of the Device Review step (Rule 18.35) had landed in the Supply Manifold's Add box. Help 146 (and French). BruControl Import program: nothing changes there.
+- 2026-11-25: Rule 5.37 note (OakBarn Brewery: "Left Mouse Key + a Key to move something with all connected pipes"): in Edit layout, Shift held as the left button is pressed on an item, then a drag, moves it and everything joined to it through its pipes at once, with no grab pop-up; pipes to a vessel stretch ("If the entire manifold was connected, elongate the pipes connected to the vessels") and a straight one moved across its line gets a jog with two bends ("add pipes at the end of a move if it did not just go down") (Shift + left click is free on Windows, Mac, Linux and the Pi, Rule 2.73; docs/Skynet_Key_Combinations). Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 changed (OakBarn Brewery picked "Remove automatically": "Lets try B first because I think that is what will work as they are not needed with a new Join"): a pipe or hose end whose elbow, tee or Device is deleted is left a plain end (no coupling, no red dot, no red ring; its blue handle drags it, and it joins an IP it is dragged or drawn to), not a red-dot coupling as earlier the same day; red dots left over (a Skynet-made coupling with one pipe end and nothing else on it) become plain ends when Edit layout opens. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.37 red dot note (OakBarn Brewery: "trying to get the properties up so I can delete these coupling. How did they get here?"): a press on a red dot (the coupling on an open pipe end) still grabs the end, but the Delete key then deletes the dot, not its pipe; two quick presses (outside the Zoom box) open the dot's Properties. A red dot deleted by hand leaves its pipe end plain (no dot, no red ring), and it is not put back when Edit layout opens, until the end is joined again. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 - 2026-11-24: Rule 5.25 note (OakBarn Brewery: "Double click to add elbow saved and then no edit no elbow. Double click alone should add the elbow and open the Build Tab in edit mode. If I was on a Zoom Box, the Elbow should be in the Zoom Box"): picking a TC Pipe Fitting in Elbows, Tees … or Add Widget adds it with no Properties box and stays in Edit layout; with the Zoom box open it goes in the middle of the Zoom box on the Tab being zoomed (Rule 4.1 exception), else on the 🔨 Build Tab. Help 124 (and French). BruControl Import program: same Edit layout code; nothing else changes there.

@@ -49,7 +49,8 @@ assert.match(app, /const REVIEW_IFACE_PORT = 'You MUST Confirm the Interface and
 assert.match(app, /function reviewWire\(iface, port, portName = 'Available Ports'\)/);
 assert.match(app, /'◀ Back'/); assert.match(app, /'✔ Confirm'/);
 assert.match(app, /const conf = !dd \|\| \(!!wireKey\(w\) && confirmed === wireKey\(w\)\)/, 'not greyed out before Confirm');
-assert.match(app, /if \(missing === CONFIRM_WHY\) \{ await askReview\(work\); continue; \}/);
+// OakBarn Brewery, 2026-11-24 ("Confirm Why????"): the line had landed in the Supply Manifold's box, where CONFIRM_WHY is not defined
+assert.doesNotMatch(app, /if \(missing === CONFIRM_WHY\)/, 'no Review step in the Supply Manifold box');
 assert.match(app, /'⚠ Electricity can kill\. OakBarn Brewery and Skynet are not electricians and can give no electrical advice\. Consult a Licensed Electrician\.\\nBrain -> Arduino IO \(Port\)/, 'the red warning in the Interface balloon');
 assert.match(app, /tip: ifaceTip\(e\)/); assert.match(app, /tip: IFACE_PUMP_TIP/);
 assert.match(app, /if \(why\) b\.dataset\.help = same \? why \+ '\\n\\n' \+ same : why;/, 'Add Device: the missing line, a blank line, then that box\'s balloon');

@@ -405,3 +405,27 @@ test('valve boxes are fitted before valves are lined up on their pipes', async (
   assert.match(app, /if \(on\) \{ fitValveBoxes\(draft\); mvJoinEnds\(draft\); centerOnPipes\(draft\);/);
   assert.match(app, /if \(!editing\) \{ fitValveBoxes\(L\(\)\); mvJoinEnds\(L\(\), w\.name\); centerOnPipes\(L\(\), w\.name\); \}/);
 });
+
+// OakBarn Brewery, 2026-11-24: "going from Valve Red IP to Pump Red IP would not lock trace" (Rule 5.37)
+test('the Zoom box trace takes the red dot of an open pipe end', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /best = \{ d, id: null, plain: \{ p: pp, k \}, label: `the open end of /);
+  assert.match(app, /p\[k\] = endCoupling\(p\.points, i, j, p\.workspace\); delete p\[k === 'from' \? 'plainFrom' : 'plainTo'\];/);
+  assert.match(app, /zb\.trace = \{ a: zoomTakeEnd\(ip\), b: null/);
+  assert.match(app, /tr\.b = zoomTakeEnd\(ip\);/);
+  assert.match(app, /const ip = zoomIpAt\(x, y, true\); if \(!ip\) return false;/, 'only a red (open) IP starts a trace');
+  assert.match(app, /const ip = zoomIpAt\(x, y, true\);        \/\/ it ends on a red/, 'and ends it');
+});
+
+// OakBarn Brewery, 2026-11-24: "Left Mouse Key + a Key to move something with all connected pipes" (Rule 5.37)
+test('Shift + drag moves an item with its pipes, no grab pop-up', async () => {
+  const fs = await import('node:fs');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /if \(drag\.mode === 'move' && grabAsks\(item\) && !ev\.shiftKey\) drag\.ask = true;/);
+  assert.match(app, /if \(drag\.mode === 'move' && ev\.shiftKey && grabJoins\(item\)\.length\) \{ const g = joinedGroup\(item\);/, 'the whole joined group');
+  assert.match(app, /function moveGroup\(d, mx, my\)/);
+  assert.match(app, /More pipes or fittings \(elbows\) may be needed there\.`, \(\) => undoLast\(\), 8000, '⟲ Revert'\);/, 'the clean up warns, with Revert');
+  assert.match(app, /q\.p\.points = i === 0 \? \[b0, \.\.\.mid\.reverse\(\), a0\] : \[a0, \.\.\.mid, b0\];/, 'a jog with two bends');
+  assert.match(app, /\['move', 'resize', 'pipe', 'group'\]\.includes\(drag\.mode\)\) letGoBentEnds/);
+});

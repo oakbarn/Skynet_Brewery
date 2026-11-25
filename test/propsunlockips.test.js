@@ -47,7 +47,7 @@ assert.match(app, /Esc or ✕ closes it\.`\),\n    h\('button', \{ type: 'button
 console.log('zoom box ok');
 // 🔗 Trace + 🔧 Auto configure, only in the Zoom box (OakBarn Brewery, 2026-11-23, picked A, "has to trace back so no breaks in Ips")
 assert.match(app, /if \(zoomTracePass\(ev, x, y\)\) return;/, 'the box looks at the trace first');
-assert.match(app, /if \(ev\.type === 'dblclick' && \(!tr \|\| tr\.b\)\) \{\n    const ip = zoomIpAt\(x, y\); if \(!ip\) return false;/, 'a double-click on an IP starts it; anywhere else it is a double-click as before');
+assert.match(app, /if \(ev\.type === 'dblclick' && \(!tr \|\| tr\.b\)\) \{\n(?:    \/\/.*\n)*    const ip = zoomIpAt\(x, y, true\); if \(!ip\) return false;/, 'a double-click on an IP starts it; anywhere else it is a double-click as before');
 assert.match(app, /const one = ma \? zoomTraceBack\(ma, \[b\[0\] - a\[0\], b\[1\] - a\[1\]\], mb\)/, 'what is joined behind is traced back');
 assert.match(app, /const two = one\.fail && mb \? zoomTraceBack\(mb, \[a\[0\] - b\[0\], a\[1\] - b\[1\]\], ma\) : null;/, 'then the other way round');
 assert.match(app, /can't be done automatically without breaking a join or adding a pipe, hose or fitting/, 'else it says to do it by hand');

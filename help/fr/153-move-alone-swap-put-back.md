@@ -34,6 +34,12 @@ quelque chose sans que vous le vouliez, par exemple un tuyau souple qui s'est ac
 À côté, **↔ Move with pipes** est l'autre choix de la fenêtre : appuyez dessus (les Properties s'enregistrent et se ferment toutes seules), puis attrapez l'objet et il bouge
 **avec** ses tuyaux, sans la fenêtre. Il n'est pas sur un Pipe ou un Hose, et il est gris quand un tuyau ou raccord 🔒 verrouillé devrait bouger avec lui.
 
+**Maj + glisser :** tenez **Maj** (Shift) en appuyant sur le bouton gauche de la souris sur un objet, puis faites glisser : il bouge avec
+**tout ce qui y est joint** par ses tuyaux (raccords, vannes, pompes et les tuyaux entre eux), sans fenêtre. Les tuyaux qui vont à une cuve
+restent sur la cuve et s'allongent ou se raccourcissent ; déplacé de côté, un tuyau droit reçoit un décalage avec deux coudes, et reste
+joint. Une note nomme alors ces tuyaux et prévient que d'autres tuyaux ou raccords (coudes) peuvent y être nécessaires ; son bouton
+**⟲ Revert** remet le déplacement, comme ↩ Put back (Ctrl+Z).
+
 **🔓 Unlock one IP ▾** (sur un Pipe ou un Hose : **🔓 Unlock one end ▾**) est là quand 2 bouts de tuyau ou plus y sont joints.
 Choisissez un IP dans la liste et seul ce bout de tuyau se détache ; les autres restent joints. Les Properties s'enregistrent et se
 ferment toutes seules, et **↩ Put back** (Ctrl+Z) le rejoint.
@@ -61,7 +67,7 @@ Quand un coude, un té ou un autre raccord qui peut tourner est choisi, le titre
 rouge dans son coin en haut à droite pour la fermer.
 
 **Joindre deux IP avec un tracé (seulement dans la fenêtre de zoom) :** double-cliquez sur un IP rouge pour commencer une ligne
-de tracé rouge, puis cliquez sur l'IP auquel le joindre. Appuyez sur **🔧 Auto configure** : le premier IP se pose sur le second
+de tracé rouge, puis cliquez sur l'IP auquel le joindre. Le point rouge d'un bout de tuyau ouvert compte aussi comme un IP ici, à l'un ou l'autre bout du tracé. Un tracé commence et finit seulement sur des IP rouges : un double-clic sur un IP vert (joint) ou tout près prend ce qui est là, comme hors de la fenêtre de zoom. Appuyez sur **🔧 Auto configure** : le premier IP se pose sur le second
 et ils se joignent, et ce qui est joint derrière suit pour qu'aucun raccord ne se défasse. Deux bouts ouverts (points rouges) qui se rejoignent en angle reçoivent un coude (un té là où trois tuyaux se rejoignent, et ainsi de suite). Deux IP de choses (un coude et une vanne, une vanne et une pompe ...) amenés au même endroit se joignent IP sur IP, sans tuyau entre eux, et deviennent verts tous les deux. Un tuyau droit s'allonge ou se raccourcit
 pour la part du déplacement le long de sa ligne, et seule la part en travers passe à ce qui est à son autre bout (un té glisse le
 long de ses tuyaux à niveau, le tuyau qui monte à un coude se raccourcit), et ainsi de suite ; un tuyau coudé prend tout le déplacement à son coude, et un tuyau souple se plie. Si cela
