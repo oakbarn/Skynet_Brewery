@@ -22,10 +22,10 @@ Quand vous avez fini, appuyez sur **💾 Save** en haut de la fenêtre, puis sur
 ## Les boutons et les touches {#the-buttons-and-the-keys}
 
 - **🗑 Delete**, **✖ Cancel** et **💾 Save** restent en haut pendant que le reste de la fenêtre défile ; il n'y a pas de deuxième rangée en bas. Delete supprime le Tab et tout ce qu'il contient (il demande d'abord ; il n'est pas là quand c'est le seul Tab). Cancel demande d'abord quand quelque chose a été changé.
-- Le **Name** a le focus quand la fenêtre s'ouvre.
+- Le **Name** a le focus quand la fenêtre s'ouvre sur un nouveau Tab. Le Name d'un Tab enregistré est verrouillé (⛔ Name 🔒), alors c'est la **Color** qui a le focus.
 - La touche **Entrée** va seulement entre le **Name** et le **Tab ID** (un nouveau Tab). Entrée sur un Name vide y reste. Depuis toute autre case, Entrée revient au Name.
 - La touche **Tab** passe par toutes les cases, de la dernière à la première. Le ? (aide), Delete, Cancel et Save sont pour la souris.
-- Un Name vide, ou un Tab ID qui ne peut pas servir, bloque seulement **Save** : une petite fenêtre ⚠ dit pourquoi, la case reçoit le focus, et la fenêtre ⚠ disparaît d'elle-même après 5 secondes. Tout le reste reste accessible.
+- Un Name vide, ou un Tab ID qui ne peut pas servir, bloque seulement **Save** : une petite fenêtre ⚠ dit pourquoi, la case reçoit le focus, et la fenêtre ⚠ disparaît d'elle-même après 2 secondes. Tout le reste reste accessible.
 
 ## Name et Tab ID {#name-and-tab-id}
 
@@ -40,7 +40,7 @@ Quand vous avez fini, appuyez sur **💾 Save** en haut de la fenêtre, puis sur
 |---|---|
 | **Copy Profile** | Choisissez un Tab Profile à copier sur ce Tab quand vous faites Save : sa couleur de fond va dans Color, et son aspect (couleurs et style de valeur) devient l'aspect de départ d'un nouveau Device ou Widget de ce Tab. None = rien n'est copié. Les Profiles se font dans ☰ Menu > Tab Profile ([Tab, Valve and Pump Profiles](36-tab-and-valve-profiles)). C'est une copie, pas un lien (Règle Skynet 2.62) : changer ou supprimer le Profile plus tard ne change jamais ce Tab. |
 | **Color** | La couleur derrière tout ce qui est sur ce Tab. Elle se voit partout où la Picture ne couvre pas. Default = la couleur normale du panel. None = aucune couleur. Custom ouvre le Color Picker pour une couleur à vous, et sa case **Color (RGB)** s'affiche en dessous. Un Tab Profile choisi dans Copy Profile copie sa couleur ici quand vous faites Save. |
-| **Picture** | Une image derrière tout ce qui est sur ce Tab. Choisissez les images Skynet ou les vôtres, un groupe, puis l'image. None = aucune image. Add new ... prend le nom d'une autre image dans media/Images ; la page [File Move](32-file-move) y copie une image depuis votre ordinateur. La Color se voit partout où l'image ne couvre pas. |
+| **Picture** | Une image derrière tout ce qui est sur ce Tab. Choisissez les images Skynet ou les vôtres, un groupe, puis l'image. Seules les images Skynet du dossier Tab Background sont listées ici (il n'y en a pas encore, donc la liste commence sur Both et montre les vôtres). None = aucune image. Add new ... prend le nom d'une autre image dans media/Images ; la page [File Move](32-file-move) y copie une image depuis votre ordinateur. La Color se voit partout où l'image ne couvre pas. |
 | **Picture Left** / **Picture Top** | Où vont le bord gauche et le bord haut de la Picture, en pixels depuis la gauche et le haut du Tab. |
 | **Picture Width** / **Picture Height** | La largeur et la hauteur de la Picture, en pixels. |
 

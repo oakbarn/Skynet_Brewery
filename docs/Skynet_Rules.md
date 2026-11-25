@@ -1824,6 +1824,12 @@ Processes and Schemas. (2026-10-27)
 Editor, to set its `.attribute`. **Skynet names are fixed** and are never changed (only while building Skynet). **Any name a Process
 could use changes only with ✏ Change name** (Rule 3.6: the Processes follow). Exceptions: **User Template names** (only for picking
 one; renaming changes nothing in a Process), and picture paths / graphic file names (handled later).
+**A locked Name box says so** (OakBarn Brewery, 2026-11-24: "On the Tab Property Menu, the Name has the focus but cannot be edited
+here. The inner blue focus ring should be red and maybe lead by the name by the Do Not Enter icon. If anyone clicks into the field, it
+would have a pop-up 'Do you want to change the Name of the Tab?' If yes, same as clicking the Change name button"): in every Properties
+with a locked Name (a Tab, Device, Widget …), its name reads **⛔ Name 🔒**, its focus ring is red, and a click (or typing) in the box
+asks **Do you want to change the Name of the Tab?** (Device, Widget, item). **✏ Yes, change it** opens the same Name Change pop-up as
+✏ Change name; Close leaves it as it is.
 
 3.12 **Interfaces are easy to find and add.** ☰ Menu has **🔌 Interfaces (boards)** and **➕ Add
 Interface…**, and every Interface dropdown in a New Device box (any Tab, RIMS and kettle too) ends
@@ -4365,6 +4371,9 @@ would require a Full Path"; "Two-part paths (.path + .file) build as it simplifi
 - Each path is still kept whole inside Skynet (folder and file together), so nothing that already works changes.
 Both programs: the BruControl Import's Build page uses the same dialogs and the same Process reader; the pictures and sounds it copies
 into Images/User and sounds/User are found by their file name. Help 194.
+**A Tab's background lists only the Tab Background folder's Skynet pictures** (2026-11-25, OakBarn Brewery: "If there are ever any
+Skynet pictures they will be very simple background and be in a Tab Background folder"): media/Images/Skynet/Tab_Background/ (none
+yet). Your own pictures all show.
 
 7.24 **File Not Found picture** (OakBarn Brewery, 2026-11-13: "if a Path is missing it just does not display. Maybe we can create an
 Image that says File Not Found when the path does not work"; "Looks good use it"):
@@ -7266,6 +7275,8 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 - 2026-11-24: Rule 2.9 changed (OakBarn Brewery: "Can we make the drag and Hold (with the delay) universal"; "The right Drag and Hold can be deprecated as it too often brings up the help"): the right mouse button never drags, in Edit layout or out; it only opens Help, on any item (Rule 2.11). Outside Edit layout a Quick Disconnect hose end (Rules 5.28, 5.40), an Immersion Chiller (Rule 5.42) and a Template icon (Rule 4.9) move with the left button held still 400 ms, then dragged; a quick click keeps its normal action. Rule 5.37 note ("On a property allow individual Unlock of an IP in addition to Unlock IPs"): Properties with 2 or more joined pipe ends also have 🔓 Unlock one IP ▾ (a Pipe or Hose: Unlock one end ▾); the picked one lets go alone. The Zoom box drags and pans with the left button only, fills the work area at 2.5x, centered on the whole manifold (50 px all round) when it fits, and never opens Tab settings from inside it (Rule 5.37). Rule 4.10: → Right Arrow on a Template's icon does the same as B ("On a Template, could we make the Right Arrow the same as B"). Added Rule 2.73 (OakBarn Brewery: "can alt + Z = Zoom", then "I want things to work universal so ALT + Z and ALT + R are Out. and all the Firefox ones as well"): Alt + Z was built, then taken out; an Alt + key shortcut may use only a letter no browser, system or graphics overlay keeps. Help 43, 50, 55, 127, 142, 153, 200 (and French). BruControl Import program: same Edit layout code, so its build gets the same right-click Help; nothing else changes there.
 
+- 2026-11-25: Rule 7.23 note (OakBarn Brewery: "If there are ever any Skynet pictures they will be very simple background and be in a Tab Background folder"; "Right now, there is not a single good Skynet picture for a background"): a Tab's Picture lists only the Skynet pictures in media/Images/Skynet/Tab_Background/ (none yet; the list then starts on Both), and all your own. Tab Settings: a saved Tab (its Name locked) opens with the Color focused ("Color should be the first focus"). Help 26 (and French). BruControl Import program: nothing changes there.
+- 2026-11-25: Rule 3.11 note (OakBarn Brewery: "On the Tab Property Menu, the Name has the focus but cannot be edited here ..."): a locked Name box shows ⛔ before its name and a red focus ring, and a click or typing in it asks "Do you want to change the Name of the Tab?"; Yes opens the Name Change pop-up (✏ Change name). Help 114 (and French). BruControl Import program: same Properties code; nothing else changes there.
 - 2026-11-25: Rule 2.74 changed (OakBarn Brewery: "Blue and Red notes need to be 2 seconds. Even 3 is too long"): the small red ⚠ box in a dialog (Rule 18.28) goes after 2 seconds (was 5), and the QD hose end hint after 2 (was 3); a note with ↩ Undo keeps its time. Help 140 (and French). BruControl Import program: its notes were already 2 seconds; nothing else changes there.
 - 2026-11-24: Rule 2.74 changed (OakBarn Brewery: "Change Blue and Red Nanny to 2 seconds"): every note, blue or red, in the Panel and the BruControl Import program stays 2 seconds (blue was 3, red 5).
 - 2026-11-24: Rule 5.37 changed (OakBarn Brewery: "Used Delete and the Delete key. Pop-up says deleted but it is still there"): deleting a red dot on an open pipe end (Delete key or its Properties' Delete) deletes the pipe or hose with that end, not only the dot, since a plain end now shows the same red dot. Help 153 (and French). BruControl Import program: same Edit layout code; nothing else changes there.

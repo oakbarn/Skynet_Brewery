@@ -5,7 +5,7 @@ Properties de base, avec les mêmes noms partout. Apprenez-les une fois et elles
 
 ## Les Properties {#the-properties}
 
-- **Name** : commence comme le Suggested Name ; vous pouvez le changer avant le premier enregistrement. Ensuite il est verrouillé 🔒 et ne se change qu'avec **✏ Change name**.
+- **Name** : commence comme le Suggested Name ; vous pouvez le changer avant le premier enregistrement. Ensuite il est verrouillé 🔒 et ne se change qu'avec **✏ Change name**. Un Name verrouillé montre ⛔ devant lui et un anneau rouge quand il a le focus ; cliquez dans la case et Skynet demande si vous voulez changer le nom : **✏ Yes, change it** ouvre la même fenêtre Name Change que ✏ Change name.
 - **Label** : le texte affiché avec l'élément, avec un interrupteur **Show Label**.
 - **Rich Text** : la police, la taille, le gras, les couleurs de texte et de fond et l'alignement du Label et du propre texte de l'élément. Les **Rich Text Embedded Codes** (`\b`, `\i`, `\n`, `\c{Red}` ...) marchent dans n'importe quel texte.
 - **Position** (X, Y) et **Size** (Width, Height), en pixels.

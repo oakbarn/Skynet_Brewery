@@ -1458,6 +1458,7 @@ const groupOf = p => { const m = /^(?:Images\/(?:Skynet\/(?=[^/]+\/))?|sounds\/)
 const isSkynetPic = p => /^Images\/Skynet\//i.test(p || '');
 const inSource = (p, src) => src === 'both' || !/^Images\//i.test(p || '') || (src === 'mine') !== isSkynetPic(p);
 const SOURCES = [['skynet', 'Skynet pictures'], ['mine', 'My pictures'], ['both', 'Both']];
+const TAB_BG_GROUP = 'Tab_Background';      // the only Skynet pictures a Tab's background lists: media/Images/Skynet/Tab_Background/
 function groupChoices(sound, paths) {
   const top = sound ? 'sounds' : 'Images', seen = new Set(paths.map(groupOf).filter(Boolean));
   const out = sound ? [] : picGroups.map(g => [g.name, g.label + (g.standard ? '' : ' (yours)')]);
@@ -11718,13 +11719,17 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
     const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
     const keep = CHAIN_RE.test(key), real = v && v !== CHAIN_KEEP;      // an Alarm Chain step: No Change first (Rule 7.16)
-    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (real && !os.includes(v)) os.push(v);
+    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n]));
+    // a Tab's background: of the Skynet pictures only the Tab Background folder's (OakBarn Brewery, 2026-11-24: "If there are ever any
+    // Skynet pictures they will be very simple background and be in a Tab Background folder"; Rule 7.23); your own pictures all show
+    let os = vList(list); if (list === 'backgrounds') os = os.filter(p => !isSkynetPic(p) || groupOf(p).toLowerCase() === TAB_BG_GROUP.toLowerCase()); if (real && !os.includes(v)) os.push(v);
     const pv = h('img', { class: 'gprev' + (real && pic && !isTint(v) ? '' : ' hidden'), ...(real && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
     const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list, ...(rerender === true ? { 'data-rerender': '1' } : {}) });
     // the Group list beside it shows one picture group or All (it has no data-k, so it is never saved)
-    const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os);
+    const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os).filter(([n]) => list !== 'backgrounds' || os.some(p => inGroup(p, n)));
     let g = lastGroup[gk] || ''; if (!groups.some(([n]) => n === g)) g = '';
     let src = gk === 'sounds' ? 'both' : srcPick();
+    if (list === 'backgrounds' && src === 'skynet' && !os.some(isSkynetPic)) src = 'both';      // no Skynet Tab backgrounds yet: show yours
     const fill = () => {
       const cur = s.value || v || '';
       s.replaceChildren(...(keep ? [h('option', { value: CHAIN_KEEP }, 'No Change')] : []), h('option', { value: '' }, '(none)'),
@@ -12481,7 +12486,19 @@ function lockedName(key, label, obj) {
     input.value = to;
     for (const t of ['input', 'change']) input.dispatchEvent(new Event(t, { bubbles: true }));
   } }, '✏ Change name');
-  return [h('label', {}, label.replace(/\s*\(.*\)$/, '') + ' 🔒'), h('span', { class: 'nameRow' }, input, btn)];
+  // a click (or typing) in the locked box asks first (OakBarn Brewery, 2026-11-24: "the Name has the focus but cannot be edited here.
+  // The inner blue focus ring should be red and maybe lead by the name by the Do Not Enter icon. If anyone clicks into the field, it
+  // would have a pop-up 'Do you want to change the Name of the Tab?' If yes, same as clicking the Change name button"; Rule 18.45):
+  // its focus ring is red, its name starts with the ⛔ (CSS input.lockedName), and Yes opens the same Name Change pop-up as ✏ Change name
+  let asking = false;
+  const ask = async ev => {
+    ev.preventDefault(); if (asking) return; asking = true;
+    const what = (draft || S.config).workspaces.some(w => w._ref && w._ref === obj._ref) ? 'Tab' : obj.type && (S.types || []).includes(obj.type) ? (isDevice(obj) ? 'Device' : 'Widget') : 'item';
+    try { if (await skyConfirm(`Do you want to change the Name of the ${what}?`, { ok: '✏ Yes, change it', danger: false })) btn.click(); } finally { asking = false; }
+  };
+  input.addEventListener('click', ask);
+  input.addEventListener('keydown', ev => { if (ev.key === 'Backspace' || ev.key === 'Delete' || (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey)) ask(ev); });
+  return [h('label', {}, '⛔ ' + label.replace(/\s*\(.*\)$/, '') + ' 🔒'), h('span', { class: 'nameRow' }, input, btn)];
 }
 // what is wrong with a new name for this item (null when it is fine); the Properties' own Save checks the rest
 function nameCheck(n, obj) {
@@ -13586,7 +13603,9 @@ async function editWorkspace() {
   dlgEl.addEventListener('click', saveGuard, true);
   dlgEl.addEventListener('keydown', tabKey, true);
   if (idBox) { nameBox?.addEventListener('input', followName); idBox.addEventListener('input', ownId); idBox.addEventListener('change', upId); }
-  setTimeout(() => nameBox?.focus(), 0);      // the Name has the focus when the box opens
+  // the first box that can be changed has the focus when the box opens: the Name of a new Tab, the Color of a saved one, whose Name is
+  // locked (OakBarn Brewery, 2026-11-24: "Color should be the first focus")
+  setTimeout(() => (nameBox?.readOnly ? body.querySelector('input[data-k="color"]')?.parentElement?.querySelector('select') || nameBox : nameBox)?.focus(), 0);
   let r;
   try { r = await shown; }
   finally {

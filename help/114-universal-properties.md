@@ -5,7 +5,7 @@ basic Properties, with the same names everywhere. Learn them once and they work 
 
 ## The Properties
 
-- **Name**: starts as the Suggested Name; you may change it before the first save. After that it is locked 🔒 and changed only with **✏ Change name**.
+- **Name**: starts as the Suggested Name; you may change it before the first save. After that it is locked 🔒 and changed only with **✏ Change name**. A locked Name shows ⛔ before it and a red ring when it has the focus; click in the box and Skynet asks if you want to change the name: **✏ Yes, change it** opens the same Name Change pop-up as ✏ Change name.
 - **Label**: the text shown with the item, with a **Show Label** switch.
 - **Rich Text**: the font, size, bold, fore and back colors and alignment of the Label and of the item's own text. **Rich Text Embedded Codes** (`\b`, `\i`, `\n`, `\c{Red}` ...) work in any text.
 - **Position** (X, Y) and **Size** (Width, Height), in pixels.
