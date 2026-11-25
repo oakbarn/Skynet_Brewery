@@ -34,6 +34,11 @@ Tee's IP:
 Beside it, **↔ Move with pipes** is the pop-up's other choice: press it (Properties saves and closes by itself), then grab the item and it moves **with** its
 pipes, without the pop-up. It is not on a Pipe or Hose, and it is grey when a 🔒 locked pipe or fitting would have to move with it.
 
+**Shift + drag:** hold **Shift** as you press the left mouse button on an item, then drag: it moves together with **everything joined
+to it** through its pipes (fittings, valves, pumps and the pipes between them), with no pop-up. Pipes that run to a vessel stay on the
+vessel and get longer or shorter; move sideways and a straight one gets a jog with two bends, so it stays joined. ↩ Put back (Ctrl+Z)
+undoes the move.
+
 **🔓 Unlock one IP ▾** (on a Pipe or Hose: **🔓 Unlock one end ▾**) is there when 2 or more pipe ends are joined to it. Pick one IP
 in the list and only that pipe end lets go; the others stay joined. Properties saves and closes by itself, and **↩ Put back**
 (Ctrl+Z) joins it again.

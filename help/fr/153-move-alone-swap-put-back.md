@@ -34,6 +34,11 @@ quelque chose sans que vous le vouliez, par exemple un tuyau souple qui s'est ac
 À côté, **↔ Move with pipes** est l'autre choix de la fenêtre : appuyez dessus (les Properties s'enregistrent et se ferment toutes seules), puis attrapez l'objet et il bouge
 **avec** ses tuyaux, sans la fenêtre. Il n'est pas sur un Pipe ou un Hose, et il est gris quand un tuyau ou raccord 🔒 verrouillé devrait bouger avec lui.
 
+**Maj + glisser :** tenez **Maj** (Shift) en appuyant sur le bouton gauche de la souris sur un objet, puis faites glisser : il bouge avec
+**tout ce qui y est joint** par ses tuyaux (raccords, vannes, pompes et les tuyaux entre eux), sans fenêtre. Les tuyaux qui vont à une cuve
+restent sur la cuve et s'allongent ou se raccourcissent ; déplacé de côté, un tuyau droit reçoit un décalage avec deux coudes, et reste
+joint. ↩ Put back (Ctrl+Z) annule le déplacement.
+
 **🔓 Unlock one IP ▾** (sur un Pipe ou un Hose : **🔓 Unlock one end ▾**) est là quand 2 bouts de tuyau ou plus y sont joints.
 Choisissez un IP dans la liste et seul ce bout de tuyau se détache ; les autres restent joints. Les Properties s'enregistrent et se
 ferment toutes seules, et **↩ Put back** (Ctrl+Z) le rejoint.

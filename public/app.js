@@ -5832,7 +5832,13 @@ $('#ws').addEventListener('pointerdown', ev => {
   }
   drag = { mode: !pip && !bundle && (!item.bundled || isUnit(item) || isSkyV(item)) && ev.target.classList.contains('rs') ? 'resize' : 'move', dir: ev.target.dataset?.rs || 'se', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
-  if (drag.mode === 'move' && grabAsks(item)) drag.ask = true;      // pipes joined to it: ask first (Rule 5.37)
+  // pipes joined to it: ask first (Rule 5.37); Shift held as it is pressed moves it with all its pipes at once (OakBarn Brewery,
+  // 2026-11-24: "Left Mouse Key + a Key to move something with all connected pipes"; Shift + left click is free on every system, Rule 2.73)
+  if (drag.mode === 'move' && grabAsks(item) && !ev.shiftKey) drag.ask = true;
+  // Shift + drag moves the whole thing joined to it: every pipe, fitting, valve and pump reached through its pipes moves along; pipes
+  // that run to a vessel (or something locked) stay on it and stretch (OakBarn Brewery, 2026-11-24: "If the entire manifold was
+  // connected, elongate the pipes connected to the vessels")
+  if (drag.mode === 'move' && ev.shiftKey && grabJoins(item).length) { const g = joinedGroup(item); if (g) Object.assign(drag, { mode: 'group' }, g); }
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
   if (item.kind === 'ip') drag.stubs = [item.id, ...eqPorts(item).map(q => q.id)].flatMap(id => pipesOn(id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === id ? pp.to : pp.from, pp) }))).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
   node.setPointerCapture?.(ev.pointerId);
@@ -5863,6 +5869,7 @@ $('#ws').addEventListener('pointermove', ev => {
     mx = snap(drag.orig.x + dx) - drag.orig.x; my = snap(drag.orig.y + dy) - drag.orig.y;
     if (!ev.altKey) { const [ax, ay] = alignShift(drag, mx, my); mx += ax; my += ay; }    // hold Alt to place it without the jump
   }
+  if (drag.mode === 'group') { moveGroup(drag, snap(dx), snap(dy)); showGeo(ev, drag.item); return; }
   if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
     for (const q of drag.ports) { q.g.x = q.x + mx; q.g.y = q.y + my; const pn = $(`#ws .gfx[data-gid="${CSS.escape(q.g.id)}"]`); if (pn) place(pn, q.g); }
     placeEqIps(drag.item);
@@ -5887,6 +5894,51 @@ $('#ws').addEventListener('pointermove', ev => {
 const DRAG_DEAD_PX = 4;          // screen pixels
 let downAt = null;
 window.addEventListener('pointerdown', ev => { downAt = [ev.clientX, ev.clientY]; }, true);
+// Shift + drag (Rule 5.37): what moves with an item. Through each pipe on it to what is on the pipe's other end, and on from there:
+// those things and the pipes between them move together; a pipe to a vessel (or a vessel's part, or something locked) keeps that end
+// and stretches. null when the item itself can't move that way (a vessel, something locked).
+function joinedGroup(start) {
+  const ws = start.workspace, fixed = it => !it || it.locked || profileFrozen(it) || (it.kind === 'vessel' && !isUnit(it)) || (bundleOf(it) && !isUnit(bundleOf(it)));
+  if (fixed(start) && start.kind !== 'ip') return null;
+  const movers = new Set(), pipes = new Map(), todo = [start];
+  while (todo.length) {
+    const it = todo.shift(); if (movers.has(it)) continue; movers.add(it);
+    const ids = it.kind === 'ip' && it.fitting === 'coupling' ? [it.id] : zoomParts(it).flatMap(grabIpIds);
+    for (const id of ids) for (const p of pipesOn(id, ws)) {
+      if (p.locked) continue;
+      const k = p.from === id ? 'from' : 'to', o = k === 'from' ? 'to' : 'from', far = p[o] ? zoomMover(p[o]) : null;
+      if (!p[o] || (far && !fixed(far))) { pipes.set(p, 'all'); if (far) todo.push(far); }
+      else if (!far) pipes.set(p, 'all');
+      else if (pipes.get(p) !== 'all') pipes.set(p, k);
+    }
+  }
+  const things = [...new Set([...movers].flatMap(it => zoomParts(it)))].map(o => ({ o, x: o.x || 0, y: o.y || 0 }));
+  return { things, pipes: [...pipes].map(([p, k]) => ({ p, k, pts: clone(p.points) })) };
+}
+// move it by [mx, my]: the things and the pipes between them whole; a pipe to a vessel moves only its own end (and keeps its first
+// piece level or upright by moving the next point with it), so it gets longer or shorter
+function moveGroup(d, mx, my) {
+  for (const q of d.things) { q.o.x = q.x + mx; q.o.y = q.y + my; }
+  for (const q of d.pipes) {
+    const pts = q.pts.map(c => [...c]);
+    if (q.k === 'all') { q.p.points = pts.map(c => [c[0] + mx, c[1] + my]); continue; }
+    const n = pts.length, [i, j] = q.k === 'from' ? [0, 1] : [n - 1, n - 2];
+    const up = Math.abs(q.pts[i][0] - q.pts[j][0]) < 0.5, level = Math.abs(q.pts[i][1] - q.pts[j][1]) < 0.5;
+    pts[i] = [pts[i][0] + mx, pts[i][1] + my];
+    if (n > 2) { if (up) pts[j][0] += mx; else if (level) pts[j][1] += my; }
+    // a straight pipe moved across its line gets a jog in its middle, two bends, so it still runs level and upright and stays
+    // joined (OakBarn Brewery, 2026-11-24: "We might have to do a clean up and add pipes at the end of a move if it did not just go down")
+    else if ((up && Math.abs(mx) >= 0.5) || (level && Math.abs(my) >= 0.5)) {
+      const a0 = q.pts[j], b0 = pts[i];
+      const m = up ? Math.round((a0[1] + b0[1]) / 2) : Math.round((a0[0] + b0[0]) / 2);
+      const mid = up ? [[a0[0], m], [b0[0], m]] : [[m, a0[1]], [m, b0[1]]];
+      q.p.points = i === 0 ? [b0, ...mid.reverse(), a0] : [a0, ...mid, b0];
+      q.p.straight = false; continue;
+    }
+    q.p.points = pts;
+  }
+  renderWs();
+}
 // Snap to align (Fritz, 2026-10-28): while something with IPs is moved, when one of its IPs comes within 10 px of an IP of
 // something else on the Tab (a pipe end, a fitting, a valve, a vessel port), it jumps so the two IPs sit exactly on each other.
 // Returns the extra [x, y] shift, or [0, 0] when nothing is that close.
@@ -5940,7 +5992,7 @@ window.addEventListener('pointerup', () => {
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'resize' && drag.moved && isSized(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
-  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
+  if (drag?.moved && ['move', 'resize', 'pipe', 'group'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
   let endJoined = 0;
   if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)), took = ids.size && freeIpsTake(drag.item), snap = ids.size && !took && snapOpenEnd(drag.item), n = ids.size ? rejoinLetGo(drag.item) + rejoinEnds(ids) : 0; endJoined = n; if (n || took || snap) renderWs(); if ((took || snap) && n) toast(`🔗 ${lockName(drag.item)} joined ${n} open pipe end${n > 1 ? 's' : ''}${took ? ' where the last one let go' : ''}. ↩ Put back (Ctrl+Z) undoes it.`); }    // its IP dropped on an open pipe end (a red dot) joins it (Rule 5.37)
