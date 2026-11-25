@@ -11,6 +11,10 @@ When an admin signs in on a phone or tablet, the panel works the way it does for
 - **The buttons on the Tabs**: pumps, valves, switches, Override buttons, Timers and the rest work with a tap.
 - Watching the Tabs, alarms, the Log and the Simulator bar.
 
+**Holding a finger** on an item opens its Help, except on a valve or button that is held on purpose: a **Push Button** or **Dual Action** item, or a Hose Bib set to Push Button. Holding a finger on one keeps it On, and Help stays closed.
+
+**Text boxes and dropdowns** use slightly bigger text on a phone or tablet, so the iPhone does not zoom the page in when you tap one.
+
 ## What is not on a phone or tablet
 
 - The **Edit layout** button (and the ☰ Menu > Build screens).
