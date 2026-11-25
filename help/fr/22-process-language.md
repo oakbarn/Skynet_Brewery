@@ -174,7 +174,7 @@ Ces mots appartiennent au langage des Processes, donc aucun d'eux ne peut être 
 - **Valeurs :** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `countdown`, `countup`, `none`
 - **Mots de liaison :** `and`, `or`, `not`
 - **Types de variable :** `value`, `string`, `bool`, `time`, `datetime`
-- **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `hop_alert`, `take_reading`, `wait_boil`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
+- **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `delay`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `show`, `new`, `declare`, `play`, `step`, `ask`, `ask_Tab`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `all_heaters_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `hop_alert`, `take_reading`, `wait_boil`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Lieux :** `tab`, `workspace`
 - **Skynet Constants :** chaque nom qui commence par `skn_const_` (voir plus haut)
 

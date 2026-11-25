@@ -87,6 +87,7 @@ The Brew Process screen shows every value as it is now.
 |---|---|
 | `ask "Add the grain, then press Done"` | a pop-up on every screen with **✔ Done**; the Process waits until an operator or Admin presses it. Text codes work (`\b`, `\n` ...). |
 | `ask "Set the Run Time (hh:mm:ss)" gblT_SetTimer_Water` | the same pop-up with a **box for the answer**, filled with what the gGlobal or Value Widget holds now; **✔ Done** puts the answer in it (a time as hh:mm:ss, a number, or words), then the Process goes on. Skynet Rule 16.5. |
+| `ask_Tab "Set the manifold, then click Done when ready"` | the same ask with **✔ Done**, as a bar on top instead of a pop-up, so the Tab can still be run while it is up (valves, pumps, Override ...). Edit layout waits until Done. Put `show "Brew House"` before it to take every screen to the Tab it is about. Skynet Rule 16.5. |
 | `close_all_valves` | closes every valve on the **Close all valves** list (tap water valves always), then asks **Have you closed all Manual Valves?** and waits for **✔ Done** |
 | `open_all_valves` | opens every valve on the **Open all valves** list (never a tap water valve; how things are left after cleaning), then asks **Have you opened all Manual Valves?** and waits for **✔ Done** |
 | `all_pumps_off` | turns every pump off |

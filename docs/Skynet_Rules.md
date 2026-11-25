@@ -5639,6 +5639,11 @@ make, or review it.
 **box for the answer** to the same pop-up, filled with what Name holds now. Name is a gGlobal or a Value Widget; ✔ Done puts the answer
 in it (a time as hh:mm:ss, a number, or words, by its kind) and the Process goes on. A blank or wrong answer is not taken: the pop-up
 says what to type. Both programs: the BruControl Import has no such command (it is only written in Skynet Processes).
+**`ask_Tab "text"`** (OakBarn Brewery, 2026-11-25, on the Water fills: "Popup a Message to set the manifold and click done when
+ready... The dialog allows you to set the manifold (open and close valves, turn things off, ... Just Not Build!") is the same ask
+with ✔ Done, but as a **bar on top** (Rule 18.53) instead of a pop-up over the Tab, so the Tab can still be run while it is up:
+valves, pumps, switches, Override and so on. **Edit layout can't be opened until Done** (its button greys out; a click says why).
+It takes the text only. `show "Tab name"` before it takes every screen to the Tab the ask is about.
 
 16.6 **Schema Templates** (Fritz, 2026-11-06/07): Schema dropdown > Add new Schema > Start from **A Skynet Schema Template**.
 Answer a few questions, and the Schema is ready to brew. The **Brew House Tab Templates** are **1 Vessel, 1 Vessel + 1 Pump,
@@ -5713,7 +5718,8 @@ fill (the Fire Hose, the Manifold Supply Valve, a fill of a Vessel from tap wate
 the fill's wait and the Process closes the valves it opened (it ends by closing them, whatever ended the wait). **It appears only
 once the water flows** (OakBarn Brewery, 2026-11-20: "The Override appears after Flow is started not before. So there will not be an
 override in the before delay"): its **Shows** is **Only while tap water flows**, so it is on its Tab only while a tap water valve on
-that Tab is open; during a warning before the water comes on there is no Override (a button set to the Process, even unseen, keeps
+that Tab is open, or tap water moves through a pipe on that Tab, or a valve that the button's own Process opened is open (a
+Motorized valve after the Hose Bib with Tap Water off, or its Clone, OakBarn Brewery, 2026-11-25); during a warning before the water comes on there is no Override (a button set to the Process, even unseen, keeps
 the Override pop-up away too). Shows **Always** is the other choice, for any other Override button. A **Stop** button
 that stops the Process and closes the valves (FireHose Off on the Water Tab) is good to have too. The Process Samples follow it:
 the Water Tab's **Water Override** is set to `utility_FireHose_Manifold_Supply_Water`. Help 239. **Both programs:** the BruControl
@@ -8102,3 +8108,4 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-23: Added Rule 10.13 The Process Error Log, ☰ Menu > 🔧 Fix before next Brew Day (Panel Updates entry 55; OakBarn Brewery: "an error log with the line # of the error, what the error was and a way to fix it if evident"; "Log it, and if it was fixed, the fix.  and the Check button could be used to check it in a simulation mode just for the checking"; "I think B is best and use the Pop up Override to run from just above the error"; "Go ahead and build it"): every Process error by itself with its line, line text, what and how to fix; the fix kept when the line is changed; 🧪 Check in a check-only simulation from just above the error to the next wait or step, ▶ Override past it; your own issues. Help 247 (new) and 33, and French. Checked against both programs: the BruControl Import runs no Processes. (thread "Build Panel Update 12")
 - 2026-11-24: Rule 2.69 changed (OakBarn Brewery: "when you turn the sound on a quick beep"): the Sound icon plays a short browser-made beep when it turns sound on; turning it off is silent. Help 21 and 40 (English and French).
 - 2026-11-25: Rule 2.35 note (OakBarn Brewery: "Yes if possible we want to be touch screen friendly"): a finger held on a Push Button or Dual Action item, or a Push Button Hose Bib, no longer opens Help over it; text boxes and dropdowns use 16 px text on touch screens so iPhone Safari does not zoom in. Help 45 (and French). BruControl Import program: not affected (it has no Tabs to run).
+- 2026-11-25: Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")
