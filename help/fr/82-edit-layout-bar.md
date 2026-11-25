@@ -60,7 +60,7 @@ Un **Widget** n'existe que dans l'application, sans broche de carte.
 - **Override ➕** ajoute le [Bouton Override](96-override-button) (un par Tab).
 - **Boolean ➕** : d'abord une liste des types ON / OFF, comme la liste Probe : **Switch**, **Push Button**, **Pulse Button** et **LED** (Semi_Widgets_Devices, voir [Semi_Widgets_Devices](112-semi-widgets-devices)). Choisissez-en un et il est fait.
 - **Value ➕**, **Time ➕** et **DateTime ➕** : un clic chacun fait un [Widgets Value, Time et DateTime](134-value-time-and-datetime-widgets).
-- **Vessel** (ligne 1, juste avant ⧉ Clone Device) : un Vessel Widget (vous y ajoutez tout), une cuve Integrated (toute prête, voir [Ajouter une cuve](66-add-a-vessel)) ou une cuve manuelle (BrewZilla, DigiBoil).
+- **Vessel** (ligne 1, juste avant ⧉ Clone Device) : **Skynet Vessel Templates (build on them)** (des modèles de cuve Skynet sur lesquels construire), une cuve Integrated (toute prête, voir [Ajouter une cuve](66-add-a-vessel)) ou une cuve manuelle (BrewZilla, DigiBoil).
 - **Add equipment ➕** (ligne 2, après Elbows, Tees …) : refroidisseurs, serpentins, filtre à trub, tube RIMS et raccords de tuyauterie.
 
 La ligne 1 est serrée pour que tout tienne sur la ligne du haut dans une fenêtre d'environ 1900 pixels de large (un écran Full HD). Dans une fenêtre plus étroite, les derniers boutons passent sur une seconde ligne ; ils marchent toujours de la même façon.

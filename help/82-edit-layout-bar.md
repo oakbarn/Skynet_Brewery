@@ -60,7 +60,7 @@ A **Widget** lives only in the app, with no board pin.
 - **Override ➕** adds the [Override button](96-override-button) (one per Tab).
 - **Boolean ➕**: a list of the ON / OFF types first, like the Probe list: **Switch**, **Push Button**, **Pulse Button** and **LED** (Semi_Widgets_Devices, see [Semi_Widgets_Devices](112-semi-widgets-devices)). Pick one and it is made.
 - **Value ➕**, **Time ➕** and **DateTime ➕**: one click each makes a [Value, Time or DateTime Widget](134-value-time-and-datetime-widgets).
-- **Vessel** (row 1, just before ⧉ Clone Device): a Vessel Widget (you add everything to it), an Integrated vessel (ready-made, see [Add a Vessel](66-add-a-vessel)) or a manual vessel (BrewZilla, DigiBoil).
+- **Vessel** (row 1, just before ⧉ Clone Device): **Skynet Vessel Templates (build on them)**, an Integrated vessel (ready-made, see [Add a Vessel](66-add-a-vessel)) or a manual vessel (BrewZilla, DigiBoil).
 - **Add equipment ➕** (row 2, after Elbows, Tees …): chillers, coils, trub filter, RIMS tube and pipe fittings.
 
 Row 1 is tight so it all fits on the top line in a window about 1900 pixels wide (a full HD screen). In a narrower window the last buttons drop to a second line; they still work the same.

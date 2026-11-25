@@ -2,14 +2,14 @@
 
 A Vessel is a Kettle, an HLT, a Mash Tun, a Fermenter and so on. In **Edit layout**, pick **Vessel (kettle, HLT, MLT ...)** in the equipment list and press **Add equipment**. A box asks which kind you want:
 
-- **Widget**: you add everything to it yourself.
+- **Skynet Vessel Templates (build on them)**: pick one and build on it; you add everything else yourself.
 - **Integrated**: ready-made.
 
 Whatever you pick goes on the 🔨 [Build Tab](55-build-tab) first, and its Properties open. When it is done, press **✅ Finish Build ...** and pick **Move to Tab** (or **As a Template**).
 
 ## Widget
 
-The box shows the **Skynet Vessel Widgets** as small pictures. Click one to use it. Each is a vessel picture with its IPs built in and nothing else: no Devices. The Skynet Vessel Widget itself is set by Skynet and can't be changed, only cloned (☰ Menu > Vessel Templates > Clone).
+The box (**Skynet Vessel Templates (build on them)**) shows the **Skynet Vessel Widgets** as small pictures. Click one to use it. Each is a vessel picture with its IPs built in and nothing else: no Devices. The Skynet Vessel Widget itself is set by Skynet and can't be changed, only cloned (☰ Menu > Vessel Templates > Clone).
 
 The picture you clicked is the Widget's picture to start with, but the one on the Build Tab is yours: open its Properties and change the **Graphic** like on any other Widget. Its IPs stay on the openings of the Skynet picture.
 
