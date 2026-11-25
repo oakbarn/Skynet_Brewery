@@ -5509,11 +5509,12 @@ function zoomPass(ev) {
   if (/^pointer(up|cancel)$/.test(ev.type)) { zb.down = null; setTimeout(() => zoomDraw(true), 0); }
   else if (ev.type === 'pointermove' && zb.down) zoomDraw();
 }
-// the IP at a spot of the screen (within 10 screen pixels), or null
-function zoomIpAt(x, y) {
+// the IP at a spot of the screen (within 10 screen pixels), or null; openOnly: only a red (open) one
+function zoomIpAt(x, y, openOnly = false) {
   const r = $('#ws').getBoundingClientRect(), p = [(x - r.left) / Z(), (y - r.top) / Z()], lim = 10 / Z();
+  const open = id => { const n = pipesOn(id, wsName).length, g = draft?.graphics.find(x => x.id === id && x.kind === 'ip'); return g?.fitting === 'coupling' ? n < 2 : !n; };
   let best = null;
-  for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (!c) continue; const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= lim && (!best || d < best.d)) best = { d, id: q.id, label: q.label || q.id }; }
+  for (const q of allIps(wsName)) { if (openOnly && !open(q.id)) continue; const c = ipPoint(q.id, wsName); if (!c) continue; const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= lim && (!best || d < best.d)) best = { d, id: q.id, label: q.label || q.id }; }
   // an open pipe end with no coupling (its red dot, Rule 5.37) is an IP for the trace too (OakBarn Brewery, 2026-11-24: "going from
   // Valve Red IP to Pump Red IP would not lock trace"): it gets its coupling when the trace takes it (zoomTakeEnd)
   for (const pp of (draft?.graphics || []).filter(g => g.kind === 'pipe' && g.workspace === wsName && (g.points || []).length >= 2)) for (const k of ['from', 'to']) {
@@ -5535,13 +5536,15 @@ function zoomTakeEnd(ip) {
 function zoomTracePass(ev, x, y) {
   const zb = zoomBox, tr = zb.trace;
   if (ev.type === 'dblclick' && (!tr || tr.b)) {
-    const ip = zoomIpAt(x, y); if (!ip) return false;
+    // only a red (open) IP starts it; a double-click on or by a green (joined) one goes on to the Tab, so the pipe there can be
+    // picked (OakBarn Brewery, 2026-11-24: "I was trying to grab the smaller pipe to delete and it started tracing")
+    const ip = zoomIpAt(x, y, true); if (!ip) return false;
     zb.trace = { a: zoomTakeEnd(ip), b: null, m: [x, y] }; if (ip.plain) renderWs(); else zoomTraceShow(); return true;
   }
   if (!tr || tr.b) return false;
   if (ev.type === 'pointermove') { tr.m = [x, y]; zoomTraceShow(); return true; }
   if (ev.type === 'pointerdown') {
-    const ip = zoomIpAt(x, y);
+    const ip = zoomIpAt(x, y, true);        // it ends on a red (open) IP only too (OakBarn Brewery, 2026-11-24: "Tracing should only be on red dots")
     if (ip && ip.id !== tr.a.id) { tr.b = zoomTakeEnd(ip); if (ip.plain) renderWs(); else zoomTraceShow(); }
   }
   return true;

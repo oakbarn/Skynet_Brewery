@@ -414,4 +414,6 @@ test('the Zoom box trace takes the red dot of an open pipe end', async () => {
   assert.match(app, /p\[k\] = endCoupling\(p\.points, i, j, p\.workspace\); delete p\[k === 'from' \? 'plainFrom' : 'plainTo'\];/);
   assert.match(app, /zb\.trace = \{ a: zoomTakeEnd\(ip\), b: null/);
   assert.match(app, /tr\.b = zoomTakeEnd\(ip\);/);
+  assert.match(app, /const ip = zoomIpAt\(x, y, true\); if \(!ip\) return false;/, 'only a red (open) IP starts a trace');
+  assert.match(app, /const ip = zoomIpAt\(x, y, true\);        \/\/ it ends on a red/, 'and ends it');
 });

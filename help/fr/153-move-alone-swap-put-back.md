@@ -61,7 +61,7 @@ Quand un coude, un té ou un autre raccord qui peut tourner est choisi, le titre
 rouge dans son coin en haut à droite pour la fermer.
 
 **Joindre deux IP avec un tracé (seulement dans la fenêtre de zoom) :** double-cliquez sur un IP rouge pour commencer une ligne
-de tracé rouge, puis cliquez sur l'IP auquel le joindre. Le point rouge d'un bout de tuyau ouvert compte aussi comme un IP ici, à l'un ou l'autre bout du tracé. Appuyez sur **🔧 Auto configure** : le premier IP se pose sur le second
+de tracé rouge, puis cliquez sur l'IP auquel le joindre. Le point rouge d'un bout de tuyau ouvert compte aussi comme un IP ici, à l'un ou l'autre bout du tracé. Un tracé commence et finit seulement sur des IP rouges : un double-clic sur un IP vert (joint) ou tout près prend ce qui est là, comme hors de la fenêtre de zoom. Appuyez sur **🔧 Auto configure** : le premier IP se pose sur le second
 et ils se joignent, et ce qui est joint derrière suit pour qu'aucun raccord ne se défasse. Deux bouts ouverts (points rouges) qui se rejoignent en angle reçoivent un coude (un té là où trois tuyaux se rejoignent, et ainsi de suite). Deux IP de choses (un coude et une vanne, une vanne et une pompe ...) amenés au même endroit se joignent IP sur IP, sans tuyau entre eux, et deviennent verts tous les deux. Un tuyau droit s'allonge ou se raccourcit
 pour la part du déplacement le long de sa ligne, et seule la part en travers passe à ce qui est à son autre bout (un té glisse le
 long de ses tuyaux à niveau, le tuyau qui monte à un coude se raccourcit), et ainsi de suite ; un tuyau coudé prend tout le déplacement à son coude, et un tuyau souple se plie. Si cela
