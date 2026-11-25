@@ -11,6 +11,19 @@ Un **Valve Tee** (té à vanne) est un Long Tee TC 1.5 avec une vanne intégrée
 
 ![Double Supply Manifold](Images/Skynet/Other_Equipment/Skynet_TC15_Supply_Manifold_2.svg)
 
+## Il se sépare une fois posé {#it-breaks-apart-once-placed}
+
+Une fois posé, ce n'est **plus un seul raccord** : chaque partie devient son propre Device ou Widget, pour être déplacée, tournée,
+supprimée ou changée seule (Règle Skynet 5.35) :
+
+- chaque té devient un **Long Tee** (TC Pipe Fittings), joint au suivant bout à bout ;
+- chaque vanne **Motorized** devient un Device **Skynet Motorized Ball Valve**, avec le même Name, Label, Interface et Port ;
+- chaque vanne **Manual** devient un **Manual Valve Widget** (Manual Ball Valve, vue de côté).
+
+Chaque vanne est jointe IP à IP sur la branche de son té, au même endroit qu'avant. Un raccord posé avant ceci se sépare la prochaine
+fois qu'Edit layout s'ouvre ; **Save layout** le garde. Les parties ci-dessous sur les IP du raccord, ses Properties et le Flip disent
+comment il se règle dans la case d'ajout, avant de se séparer.
+
 ## Ses IP {#its-ips}
 
 Il y a des IP **seulement** sur les **deux bouts ouverts des tés joints** (gauche et droite) et sur le **bout extérieur de chaque vanne** (le bas).
@@ -30,8 +43,9 @@ La **case d'ajout** marche comme celle d'une pompe (Règle Skynet 18.29). Posez 
    même ligne. Deux vannes ne peuvent pas partager un Port.
 4. **Tab** : le Tab où il va.
 
-Puis le **Name** (ValveTee_1, Manifold2_1 ou Manifold3_1 au départ), le **Graphic**, son **Path**, l'**Orientation** et le **Flip**, X, Y, Width,
-Height et le **Device Type**. Appuyez sur **➕ Add Device** : il va sur ce Tab et ses Properties s'ouvrent. Entrée passe de champ en champ
+Puis le **Graphic**, son **Path**, l'**Orientation** et le **Flip**, X, Y, Width, Height et le **Device Type** (pas de Name : chaque
+partie a le sien). Appuyez sur **➕ Add Device** : il va sur le 🔨 Build Tab en Long Tees et vannes, et **Finish Build ...** les met
+sur ce Tab. Double-cliquez sur une partie pour ses Properties. Entrée passe de champ en champ
 et en dernier à ➕ Add Device.
 
 ## Quelle vanne est laquelle {#which-valve-is-which}

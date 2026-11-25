@@ -2791,6 +2791,15 @@ Manifold (2 long Tees with 2 Integrated Valves with IPs only at Valve ends and 2
 and Motorized Versions with ability to swap manual to motorized individually by valve. And a Triple Supply Manifold the same. Add to
 Pipe Fitting"; "These have their own unique attributes ... the standard exceptions would apply if it fits"; thread "Add valve Tees and
 supply manifolds", Help 146).
+- **It breaks apart once placed** (OakBarn Brewery, 2026-11-25: "And once this template is placed on a Tab, it becomes 3 devices and
+  3 widgets"; "Any thing like the three valve supply tees needs to be individual Devices and widgets after placed because they need to
+  be manipulated individually"). The Valve Tee and the Supply Manifolds are only a way to place them: as soon as one is placed (its Add
+  box, the Setup interviews, a Template put on the 🔨 Build Tab), each tee becomes a TC Pipe Fittings **Long Tee**, joined end to end
+  to the next IP to IP (Rule 5.26), and each valve its own valve joined IP to IP on its tee's branch: a **Motorized** one a **Skynet
+  Motorized Ball Valve** Device (Vertical Right, or Horizontal when turned 90; same Name, Label, Interface and Port), a **Manual** one a
+  **Manual Valve Widget** (Manual Ball Valve, side view, Rule 5.24). Pipes that were on its IPs go on the part now on that spot. One
+  placed before this breaks apart the next time Edit layout opens (one note), kept with the next Save layout. The Add box has no
+  Name (each part gets its own). What follows is how it is set up before it breaks apart.
 - Three Skynet TC Pipe Fittings with valves built in: the **Valve Tee** (one Long Tee, Template Valve_Tee), the **Double Supply
   Manifold** (2 Long Tees joined end to end, Supply_Manifold_2) and the **Triple Supply Manifold** (3, Supply_Manifold_3). TC 1.5,
   Fritz's Long Tee drawing (Rule 5.25) with a valve on each branch, drawn to the Valve Standard (Rule 5.29).
@@ -6183,6 +6192,7 @@ Valve drill-down dialog", Help 128):
    Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
    valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap Water flows instead, Rule 6.15).
+   A tap water valve also has **Water Supply** (None / Pipe / Hose): a picture-only house water line on its TAP end, always flowing blue; it is not a normal Pipe (Rule 6.15 note, 2026-11-25).
 5. Its Type ID is **Valve_E** (OakBarn Brewery, 2026-11-11: "Change ON Off Motorized Valves to DO@Valve_E"; was eVlv, before that E_L_Vlv; the Device Type reads **DO@Valve_E**). Older valves are
    upgraded on load, the stored Type ID and the name (Rule 15.2). The other electric valves follow (OakBarn Brewery, 2026-11-11:
    "Valve_E_H and Valve_Sgas"): a High Temperature Electric Valve is **Valve_E_H** (**DO@Valve_E_H**, was E_H_Vlv) and a Solenoid Gas
@@ -6740,7 +6750,10 @@ BruControl Import's Build page shares the Panel's dialogs).
    5.15). It is not a setting: 💾 Save and ✖ Cancel do not change it. Only the mouse reaches it. Greyed out until the item is saved.
 2. **🏷 Update to Suggested Name** ("If Label is Changed Pop Up Button with Update Suggested Name and populates Change Name Field"):
    once the Label is changed, the button pops up on the Label Visible line; it puts the Suggested Name of the new Label in the Change
-   Name box.
+   Name box. CHANGED 2026-11-25 (OakBarn Brewery: "When this pops up after an edit of the label, update the suggested Name and get rid
+   of the button. Blue pop-up that you can change the Name of the Device to the new Suggested Name"): no button. When the Label is
+   changed (left), the Change Name box takes the new Suggested Name and a blue pop-up (8 s, ✕ closes it) asks "Change the Name to …?"
+   with **✏ Change Name**, which does the same as the ✏ Change Name button (kept with 💾 Save).
 3. **Change Name** ("Change Name Field that a User can Edit. Fill with Current name on Open Add change name Button"): the **Name** is
    greyed out (⛔); below it the **Change Name** box starts with the Name now and can be typed in; **✏ Change Name** checks it (Rules
    3.3, 3.4) and puts it in the Name, kept with 💾 Save, and every Process follows (Rule 3.11). Once built, a Manual Valve's Name is
@@ -7293,6 +7306,16 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 1.5 (the temperature probe) on the Front above it. Both programs show the same Templates and ports.
 
 ## Change log
+
+- 2026-11-25: Rule 18.45 #2 changed (OakBarn Brewery: "When this pops up after an edit of the label, update the suggested Name and get rid of the button. Blue pop-up that you can change the Name of the Device to the new Suggested Name"): 🏷 Update to Suggested Name is gone; a Label change fills the Change Name box with the new Suggested Name and a blue pop-up offers ✏ Change Name. Help 87, 141, 148, 208 (and French).
+
+- 2026-11-25: Manual Ball Valve side view picture (Manual_Ball_Valve_Side_Closed.svg) gets a blue handle (OakBarn Brewery: "Manual Valve side view needs to show handle in blue. Create an SVG based on the one now, just add the blue handle as depicted"). Same file name, so every placed Manual Valve Widget with it shows the handle.
+
+- 2026-11-25: Rule 6.15 note (OakBarn Brewery: "Tap when Tap water is always the Tap icon and no user click on the screen"; "Get rid of the Out icon and leave as red or green dot only"; "choice of flow direction change with the valve Horizontal or Vertical"): on a tap water valve the TAP end always shows TAP and can't be clicked or joined; the Out end is a plain red or green IP dot; Tap Water flows offers Left to Right / Right to Left or Top to Bottom / Bottom to Top to fit the Orientation, and changing the Orientation keeps the way the water goes. New Water Supply (None / Pipe / Hose) on a tap water valve (OakBarn Brewery: "A Tap side will have a special Pipe or hose that can connect to it. Only one end of the special Pipe or Hose has an IP that can attach to a Tap side of a Tap Valve. Simply the water supply but just for visual. The Pipe will always have blue flow in it that is always ON"; "And it is not a normal pipe and only a selection for a Tap Water Valve and only on the Tap side"): Skynet draws it 90 px straight out from the TAP end (pipe.supplyOf), always blue flow, no handles, can't be moved or joined, goes when the valve or the choice goes. Help 31 and 128 (and French).
+
+- 2026-11-25: Rule 5.35 changed (OakBarn Brewery: "And once this template is placed on a Tab, it becomes 3 devices and 3 widgets"; "Any thing like the three valve supply tees needs to be individual Devices and widgets after placed because they need to be manipulated individually"): a Valve Tee or Supply Manifold breaks apart as soon as it is placed (Add box, Setup interviews, Template on the 🔨 Build Tab) into Long Tees joined end to end and one valve per tee joined IP to IP on its branch: Motorized = Skynet Motorized Ball Valve Device (same Name, Label, Interface, Port), Manual = Manual Valve Widget (Manual Ball Valve, side view). Its pipes go on the part on the same spot. Older ones break apart when Edit layout opens. The Add box has no Name. Help 146 (and French). BruControl Import program: it never brings in a Valve Tee or Supply Manifold; nothing changes there.
+
+- 2026-11-25: Rule 6.15 note (OakBarn Brewery: "Add Do Not Enter ICON as depicted when the Tap Water is True"): when Tap water valve is on, the knobs of the greyed On Close List and On Open List switches show the Do Not Enter sign ⛔ (Rule 18.45), always, not only on hover. Help 128 (and French). BruControl Import program: nothing changes there.
 
 - 2026-11-25: Rules 5.19, 5.26, 5.37 and 5.45 (OakBarn Brewery: "Bigger Auto join area"; "lets try 25"): every auto join distance in Edit layout is now 25 px (was 12 px for IP to IP and 14 px for the rest): an IP dropped on an open IP, a pipe end or item IP dropped near a red dot or IP, Save layout rejoining open ends, and a loose end counted as joined for the flow drawing. A Skynet TC fitting (elbow, tee) with no pipes on it now also slides onto a red dot. Help 105 (and French). BruControl Import program: same Edit layout code; nothing else changes there.
 

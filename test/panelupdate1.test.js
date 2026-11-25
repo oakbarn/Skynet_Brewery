@@ -11,12 +11,11 @@ assert.match(st, /await toggleManualValve\(obj\.id\)/, 'a Manual Valve: the same
 assert.match(st, /api\('POST', '\/ui\/set', \{ name: obj\.name, prop: 'state', value: want \}\)/, 'a Pump: On or Off at once');
 assert.match(st, /const quiet = ev => ev\.stopPropagation\(\)/, 'not a change to the Properties');
 assert.ok(app.includes("['_state', 'State', 'state', null, false, false, {}],      // On or Off now"), 'on the Pump');
-// #2 and #3 the Change Name box, ✏ Change Name and 🏷 Update to Suggested Name, mouse only
+// #2 and #3 the Change Name box and ✏ Change Name, mouse only; a Label change offers the Suggested Name on a blue pop-up
 const nc = app.slice(app.indexOf('function nameChangeRows('), app.indexOf('function stateRow('));
 assert.match(nc, /class: 'chgName', value: obj\[key\] \?\? '', tabindex: '-1', 'data-mouse-only': '1'/, 'starts with the Name now, mouse only');
-assert.match(nc, /'✏ Change Name'/); assert.match(nc, /'🏷 Update to Suggested Name'/);
+assert.match(nc, /'✏ Change Name'/); assert.ok(!nc.includes('🏷 Update to Suggested Name'), 'no button (Rule 18.45 #2 changed 2026-11-25)'); assert.ok(nc.includes("undoNote(`The Label was changed. Change the Name to ${n}?`") && nc.includes("'✏ Change Name', 'blue')"), 'a blue pop-up offers ✏ Change Name');
 assert.match(nc, /String\(lab\.value \?\? ''\) === label0/, 'pops up once the Label is changed');
-assert.match(nc, /\[data-k="hideName"\], \[data-k="labelVisible"\]/, 'on the Label Visible line');
 assert.ok(app.includes("['name', '4. Name', 'namechg'"), 'the Pump (the Blichmann Model)');
 assert.ok(app.includes("if (t.dataset.mouseOnly) return;") && app.includes('x.tabIndex >= 0);'), 'Enter never goes to a mouse-only box');
 // #4 #5 the Graphic, Orientation and Left / Right

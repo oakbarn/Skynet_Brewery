@@ -34,6 +34,26 @@ assert.equal(store.snapshotOne('VGC_HLT_Out').tapwater, true, 'screens get the c
 store.saveLayout({ elements: JSON.parse(fs.readFileSync(cfg, 'utf8')).elements });
 assert.equal(store.getProp('VGC_Tap', 'tapwater'), true);
 assert.equal(store.getProp('VGC_Tap', 'state'), true, 'the valve stays open');
+// Tap water valve marks and Water Supply (OakBarn Brewery, 2026-11-25, Rule 6.15 note): TAP always shown and not clickable, Out a plain dot,
+// the flow way kept when turned, and a picture-only house water line on the TAP side.
+{
+const ROOT = path.join(import.meta.dirname, '..');
+const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
+const css = fs.readFileSync(path.join(ROOT, 'public', 'style.css'), 'utf8');
+assert.ok(app.includes("const t = end => !tap ? '' : end === tap ? '' : 'TAP'"), 'only the TAP end has words; the Out end is a plain dot');
+assert.ok(/\.gfx\.ip\.devip\.tapIp \{[^}]*pointer-events: none/.test(css), 'the TAP end cannot be clicked');
+assert.ok(app.includes("q.text === 'TAP' ||"), 'the Zoom box never takes the TAP end');
+assert.ok(app.includes('function keepTapWay(') && app.includes('function tapShape('), 'turning keeps the way the water goes');
+assert.ok(app.includes("const SUPPLY_SEL = [['', 'None'], ['pipe', 'Pipe'], ['hose', 'Hose']]"), 'Water Supply: None, Pipe or Hose');
+assert.ok(app.includes('const isSupply = p => p?.kind === \'pipe\' && !!p.supplyOf'), 'a Water Supply is a pipe that belongs to its valve');
+assert.ok(app.includes('if (editing && draft) syncSupplies(draft, w.name);'), 'Skynet draws it');
+assert.ok(app.includes('flowing = flow.has(p.id) || byGrav || sup'), 'always flowing');
+assert.ok(app.includes('pipeFlowColor(sup ? { tap: true }'), 'always blue');
+assert.ok(app.includes('if (isSupply(pipe)) return null;'), 'it cannot be moved');
+assert.ok(app.includes('!p.locked && !isSupply(p) &&'), 'it has no handles');
+console.log('tap water marks and supply ok');
+}
+
 clearTimeout(store._persistTimer);
 console.log('tap water valve tests passed');
 process.exit(0);

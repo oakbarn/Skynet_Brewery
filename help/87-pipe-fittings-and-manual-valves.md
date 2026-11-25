@@ -39,12 +39,12 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
   - **State**: Open or Closed now, with a slider. Slide it to open or close the valve at once, the same as a click on it on its Tab
     (with .confirmation on it asks you to do it by hand and press Done first). It is not a setting: 💾 Save and Close do not
     change it. Only the mouse reaches it, not the Tab key or Enter.
-  - **1. Label** (used in the "by hand" message) and **Label Visible**. Once the Label is changed, **🏷 Update to Suggested Name**
-    pops up beside Label Visible: it puts the Suggested Name made from the new Label in the Change Name box.
+  - **1. Label** (used in the "by hand" message) and **Label Visible**. Once the Label is changed, the Change Name box
+    takes the Suggested Name made from the new Label, and a blue pop-up offers **✏ Change Name** with it.
   - **2. Tab**: the Tab it is on. Pick another Tab to move it there (the pipes joined to it stay on the old Tab). **Layer Order**
     is under it, as on the Pump (Skynet Rule 18.48).
-  - **3. Name**, greyed out, and below it the **Change Name** box, which starts with the Name now. Type a new Name (or use 🏷 Update
-    to Suggested Name) and press **✏ Change Name**: the new Name goes into the Name and is kept when you press 💾 Save, and every
+  - **3. Name**, greyed out, and below it the **Change Name** box, which starts with the Name now. Type a new Name (or change the
+    Label to get the Suggested Name) and press **✏ Change Name**: the new Name goes into the Name and is kept when you press 💾 Save, and every
     Process that uses the old Name follows it. The Change Name box and its buttons are for the mouse only.
   - **.confirmation**.
   - **Graphic**: the valve as it will be on the Tab, kept up to date while you pick.

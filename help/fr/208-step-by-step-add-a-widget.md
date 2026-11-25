@@ -34,7 +34,7 @@ Tapez le **Label** : le nom que vous lui donnez, en mots simples, par exemple **
 
 ## Étape 5. 3. Name {#step-5-3-name}
 
-Le **Suggested Name** sous le Name suit le Label. Pour l'utiliser, appuyez sur **🏷 Update to Suggested Name** : il va dans la case **Change Name**. Puis appuyez sur **✏ Change Name**. Ou tapez votre propre nom dans **Change Name** et appuyez sur **✏ Change Name**. Voir [Interface, Tab and Device names](46-interface-tab-device-names).
+Le **Suggested Name** sous le Name suit le Label. Quand vous changez le Label, il va dans la case **Change Name** et une fenêtre bleue propose de changer le Name : appuyez sur **✏ Change Name** dans la fenêtre. Ou tapez votre propre nom dans **Change Name** et appuyez sur **✏ Change Name**. Voir [Interface, Tab and Device names](46-interface-tab-device-names).
 
 ![Change Name](help_pictures/Step_Add_Widget_05_Name.png)
 
