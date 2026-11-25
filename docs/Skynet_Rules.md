@@ -5609,7 +5609,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 16.1 **The Standard Skynet Brew Process** (Fritz, 2026-10-30; changed 2026-11-07): a brew day is a **list of premade major
 steps**, each with its own minor steps (`step "..."`). The list is not a fixed count: Skynet can add or drop steps later. Today it
 is, in this order: **PreBrew, Heat Strike, Strike, Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Ferment,
-Clean**. **Clean is always last.** Any step can be skipped. **Whirlpool and Chill** and **Chill** do the same job, so a brew day
+Clean**. **Clean is always last.** Any step can be skipped, **but a Brew Day always has a Recipe** (Rule 16.14): with PreBrew skipped, the Brew Day still starts with the Recipe check. **Whirlpool and Chill** and **Chill** do the same job, so a brew day
 uses one of them (Chill to start, Whirlpool and Chill skipped). Strike was called Add Grain; Cool was split into Chill and
 Transfer to Fermentor, and a saved Brew Process changes over by itself. **Hop stand** (Fritz, 2026-11-07: "two Steps in the Whirlpool and
 Chill or just the chill regarding when to drop Aroma Hops"): with Whirlpool hops in the Recipe, either chill step chills to the hop
@@ -5744,6 +5744,18 @@ of the New Process and is set when the Process is created and cannot be changed 
   owner), then OakBarn Brewery's comment lines (spelling fixed): say what this <class> Process does and how
   it fits into your brew day, how `/* ... */` and `//` comments are written, and "Thank yourself in the future".
 Help 30. **Both programs:** the BruControl Import sets each Process's class when it brings it in (it guesses it from the name, as before).
+
+16.14 **A Brew Day always has a Recipe** (OakBarn Brewery, 2026-11-25, a General Rule: "On a Brew Day, there is ALWAYS a Recipe, from
+the simplest to the most complex. Even a Can Extract Kit has some details that need to be set."; "General Rule. I started the 3 Vessel
+Brew Day and that was the first Thing that came up"; picked "Change Rule 16.1"). Every Brew Day, on every Brewer Level and every Recipe
+Level (a Can Kit, a no-boil brew or a ginger beer too), starts with the Recipe. **The Recipe is never skipped**: skipping steps (Rule
+16.1) never skips it; with PreBrew skipped, the Brew Day still checks the Recipe first. A Recipe is made, imported or opened from the
+Recipe library on ☰ Menu > Recipe **well before** a Brew Day, and saved to the library to be used again (Rule 17.15). **Not built yet**
+(Process Sandbox entry 14, private plan `Plans/2026-11-23_Brewer_Levels_and_PreBrew_Interview.md`): when a Brew Day finds no Recipe,
+it **leads the brewer by the nose** to make one (OakBarn Brewery: "maybe lead by the nose after finding no recipe"): the pop-up's
+buttons open ☰ Menu > Recipe at IMPORT, NEW or the Recipe library, and the Brew Day goes on by itself once a Recipe is loaded. **Both
+programs:** the BruControl Import has no Recipe step to change; an imported Brew Day Process gets the same Recipe check when it is
+built from the Brew Process.
 
 ## 17. Recipes
 
@@ -7326,6 +7338,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-25: Rule 16.14 new and Rule 16.1 changed (OakBarn Brewery: "On a Brew Day, there is ALWAYS a Recipe ..."; "General Rule"): a Brew Day always has a Recipe; skipping steps never skips it. Leading the brewer to make one when none is loaded is not built yet (Process Sandbox entry 14).
 - 2026-11-25: Rules 18.43, 18.52, 5.10 and 5.5 changed (OakBarn Brewery, PDF "Panel Update 14"; picked "Change the Rules" and "flows and Flips stay linked"; "And have V and H and Shift + H work on devices in the Build Tab in Edit mode inside the Zoom Box"): every valve's Orientation is Horizontal or Vertical with Flip Horizontal and Flip Vertical beside it (Motorized Skynet and User Defined, Manual Valve, Hose Bib); pictures start Left to Right (Horizontal) and Bottom to Top (Vertical); Tap Water Flows (Right to Left, Left to Right / Bottom to Top, Top to Bottom) is tied to the Flips, the last one changed wins (replaces the 2026-11-25 "changing the Orientation keeps the way the water goes"); Vertical Right, Horizontal Flipped, Left / Right and Inlet saved before show as the matching Flips with the same look; a flipped Skynet side-view valve keeps its hugging box; in the Zoom box H, V and Shift + H work on a picked valve. Help 31, 87, 128, 141, 153 (and French). BruControl Import program: its Build page shares these dialogs and keys; its import makes no Orientation or Flips, so nothing else changes there. Checked on the 3 Vessel 1 Pump sample: its valves have no Orientation and no Left / Right saved, so they look the same.
 - 2026-11-25: Rule 18.45 #2 changed (OakBarn Brewery: "When this pops up after an edit of the label, update the suggested Name and get rid of the button. Blue pop-up that you can change the Name of the Device to the new Suggested Name"): 🏷 Update to Suggested Name is gone; a Label change fills the Change Name box with the new Suggested Name and a blue pop-up offers ✏ Change Name. Help 87, 141, 148, 208 (and French).
 
