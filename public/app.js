@@ -4452,9 +4452,9 @@ const isTapNode = (key, n) => n?.push && (n.tap || (devOfIp(key) !== null && elN
 // a vessel's low openings, where liquid runs out by gravity (OakBarn Brewery, 2026-11-16: "Assume gravity flow")
 const GRAV_PORTS = new Set(['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet']);
 // a loose pipe or hose end that sits on something is not an open end (OakBarn Brewery, 2026-11-20, Panel Update 7: "Looks like a leak.
-// The end is not open but connected to a Pipe. This is a Bug."; Rule 5.45). Within 14 px of an IP (as Save layout rejoins, Rule 5.19),
+// The end is not open but connected to a Pipe. This is a Bug."; Rule 5.45). Within 25 px of an IP (as Save layout rejoins, Rule 5.19),
 // or anywhere inside a Tab_Fitting (a Tee, an Elbow), it is in that IP: flow goes on through it as if it were joined.
-const LOOSE_JOIN = 14;
+const LOOSE_JOIN = 25;
 function looseEndIp(pt, ws, self) {
   if (!pt) return null;
   const d = q => Math.hypot(q[0] - pt[0], q[1] - pt[1]);
@@ -4763,7 +4763,7 @@ function letGoBentEnds(skip = null) {
 // Save layout joins pipe ends back on (Fritz, 2026-11-05, Rule 5.19): an open end (a coupling only that pipe uses) within
 // REJOIN_PX of an IP joins it again. A straight pipe joins only if it stays Horizontal, Vertical or 45; if not, a free IP point
 // with no other pipe on it moves back onto the pipe end instead. Returns how many ends joined.
-const REJOIN_PX = 14;
+const REJOIN_PX = 25;
 function rejoinEnds(only = null, one = null, end = null) {
   if (!draft) return 0;
   let n = 0;
@@ -4910,7 +4910,7 @@ function rejoinLetGo(it) {
 // "Pipe end needs the red dot, cannot join a valve to a pipe"; Rule 5.37). Returns true when it moved.
 function snapOpenEnd(it) {
   if (!it || !draft || it.locked || grabJoins(it).length) return false;
-  if (it.kind && it.kind !== 'ip') return false;
+  if (it.kind && it.kind !== 'ip' && !(it.kind === 'vessel' && isUnit(it))) return false;
   const ids = grabIpIds(it); if (!ids.length) return false;
   let best = null;
   for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace && (g.points || []).length >= 2 && !g.direct)) for (const k of ['from', 'to']) {
@@ -4974,10 +4974,10 @@ function freeIpsTake(it) {
 }
 // 🔗 An IP dropped right on another IP joins it, IP to IP, with no pipe between (OakBarn Brewery, 2026-11-24: "I put the Valve Red Dot
 // on top the Pump red dot and got a message. This is how real life the valves are on the Pump"; Rule 5.26): when a Device or Manual
-// Valve with no pipes on it is let go with one of its open IPs within 12 px of an open IP of something else, it slides so the two sit
+// Valve with no pipes on it is let go with one of its open IPs within 25 px of an open IP of something else, it slides so the two sit
 // on one spot and a pipe of no length joins them (flow goes through it, as through every join; nothing is drawn). It is not then put
 // into a pipe it lies over. Returns the name of what it joined, or null.
-const IP_ON_IP_PX = 12;
+const IP_ON_IP_PX = 25;
 // An IP to IP join goes as soon as its two IPs are no longer on one spot (OakBarn Brewery, 2026-11-24: "Both should have been red";
 // "The Pump IPs"; Rule 5.26): when either thing is moved off, unlocked or deleted, the pipe of no length goes, with any open-end
 // coupling an unlock left on it, so both IPs are open (red) again. Returns how many went.
@@ -6581,8 +6581,8 @@ function dropPipe(d) {
     const mine = pipe[k] && ownCoupling(pipe[k], pipe);
     if (pipe[k] && !mine) continue;
     const near = allIps(pipe.workspace).filter(q => q.id !== pipe.from && q.id !== pipe.to).map(q => ({ id: q.id, c: ipPoint(q.id, pipe.workspace) }))
-      .filter(q => q.c && Math.hypot(q.c[0] - pts[i][0], q.c[1] - pts[i][1]) <= 14).sort((a, b) => Math.hypot(a.c[0] - pts[i][0], a.c[1] - pts[i][1]) - Math.hypot(b.c[0] - pts[i][0], b.c[1] - pts[i][1]))[0]
-      || pumpSpotHit(pipe.workspace, pts[i], 14);       // near a pump: the nearest of its 8 IPs (Rule 5.27)
+      .filter(q => q.c && Math.hypot(q.c[0] - pts[i][0], q.c[1] - pts[i][1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - pts[i][0], a.c[1] - pts[i][1]) - Math.hypot(b.c[0] - pts[i][0], b.c[1] - pts[i][1]))[0]
+      || pumpSpotHit(pipe.workspace, pts[i], REJOIN_PX);       // near a pump: the nearest of its 8 IPs (Rule 5.27)
     if (near) {
       const mx = near.c[0] - pts[i][0], my = near.c[1] - pts[i][1];
       pipe.points = pts.map(q => [q[0] + mx, q[1] + my]);

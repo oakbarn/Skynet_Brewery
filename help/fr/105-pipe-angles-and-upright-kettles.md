@@ -24,7 +24,7 @@ L'ancienne façon, où un bout de tuyau était entraîné avec une pompe, une va
 - **Tout le tuyau suit** quand son autre bout est son propre bout ouvert (un manchon que seul ce tuyau utilise). Il garde sa longueur et son angle.
 - **Le tuyau s'allonge ou se raccourcit le long de sa propre ligne** quand vous déplacez la chose à son bout dans l'axe du tuyau.
 - **Déplacée sur le côté**, le tuyau garde sa direction et ne suit pas. Quand vous lâchez la souris, ce bout **lâche** l'IP, reçoit un bout ouvert (anneau rouge), et un message nomme le tuyau. Remettez l'élément dans l'axe, ou rejoignez le tuyau avec un coude ou un té.
-- **Save layout le rejoint** quand le bout ouvert est encore à moins de 14 px d'un IP. Si le tuyau devait se plier, un point IP libre (sans autre tuyau dessus) revient plutôt sur le bout du tuyau.
+- **Save layout le rejoint** quand le bout ouvert est encore à moins de 25 px d'un IP. Si le tuyau devait se plier, un point IP libre (sans autre tuyau dessus) revient plutôt sur le bout du tuyau.
 - Un clic ou un double-clic qui tremble de quelques pixels ne déplace rien, et déplacer une chose ne fait jamais lâcher un tuyau ailleurs sur le Tab.
 - Faire glisser un tuyau lui-même le déplace d'un bloc, comme avant. Lâché avec un bout sur un IP, il se joint à cet IP.
 

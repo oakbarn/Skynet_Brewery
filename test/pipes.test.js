@@ -281,7 +281,7 @@ test('a red dot can be deleted with the Delete key or its Properties, and a plai
 test('an IP dropped right on another open IP joins it IP to IP instead of cutting a pipe', async () => {
   const fs = await import('node:fs');
   const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
-  assert.match(app, /const IP_ON_IP_PX = 12;/);
+  assert.match(app, /const IP_ON_IP_PX = 25;/);
   assert.match(app, /kind: 'pipe', straight: true, direct: true, workspace: ws, points: \[\[\.\.\.c\], \[\.\.\.c\]\]/, 'a pipe of no length');
   assert.match(app, /const j = ipOnIpJoin\(drag\.item\);[\s\S]{0,300}else \{ const r = splitPipeFor\(drag\.item\);/, 'before cutting a pipe');
 });
@@ -457,3 +457,13 @@ test('a name Skynet filled in is never taken for one the user typed', async () =
   assert.match(app, /name = noSpaces\(!work\.name \|\| autoNames\.has\(work\.name\) \? sug : work\.name\);/);
   assert.match(app, /last = deviceSuggestion\(x\); autoNames\.add\(last\); if \(!touched && nameBox\) nameBox\.value = last;/, 'the name box follows the Confirm');
 });
+
+// Bigger Auto join area (OakBarn Brewery, 2026-11-25: "Bigger Auto join area"; "lets try 25"): every auto join is 25 px
+{
+  const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const REJOIN_PX = 25;/);
+  assert.match(app, /const IP_ON_IP_PX = 25;/);
+  assert.match(app, /const LOOSE_JOIN = 25;/);
+  assert.ok(app.includes('<= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - pts[i][0]'), 'dropping a pipe joins within 25 px too');
+  assert.ok(app.includes("!(it.kind === 'vessel' && isUnit(it))) return false;"), 'a TC fitting with no pipes slides onto a red dot');
+}
