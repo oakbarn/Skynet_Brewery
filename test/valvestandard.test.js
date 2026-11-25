@@ -25,19 +25,18 @@ for (const f of fs.readdirSync(path.join(ROOT, 'templates', 'device'))) {
 const store = fs.readFileSync(path.join(ROOT, 'lib', 'store.js'), 'utf8');
 assert.ok(store.includes('if (!c.valveStandard) {'), 'older Schemas make their valves square once');
 console.log('valve standard ok');
-// The 3 Vessel sample (the test bed, Rule 16.8) shows every valve at the full Valve Standard size, 150 x 150, in proportion with its
-// pipes (OakBarn Brewery, 2026-11-09: "the entire Valve Picture is out of proportion to the Pipes"); each pipe joined to a valve is
-// long enough that the once-per-Schema step never has to make it smaller.
+// The 3 Vessel sample (the test bed, Rule 16.8) shows every valve in its Valve Standard box cut to the valve (Rule 5.29: 75 long x 93
+// across on a Tab), as OakBarn Brewery laid it out (2026-11-25, new manifold layout); each pipe joined to a valve reaches out past the valve box.
 {
   const smp = JSON.parse(fs.readFileSync(path.join(ROOT, 'samples', 'configs', 'three-vessel-one-pump', 'config.json'), 'utf8'));
   const sv = smp.elements.filter(e => e.subtype === 'valve');
   assert.ok(sv.length >= 6, 'the sample has its valves');
   for (const e of sv) {
-    assert.ok(Math.max(e.w, e.h) === 150 && [75, 150].includes(Math.min(e.w, e.h)), `${e.name} is 150 across (75 long for a side view)`);
-    const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+    assert.deepEqual([e.w, e.h].sort((a, b) => a - b), [75, 93], `${e.name} is 75 long x 93 across`);
     for (const p of smp.graphics.filter(g => g.kind === 'pipe' && [`dev:${e.name}:in`, `dev:${e.name}:out`].some(k => k === g.from || k === g.to))) {
       const far = [`dev:${e.name}:in`, `dev:${e.name}:out`].includes(p.from) ? p.points.at(-1) : p.points[0];
-      assert.ok(Math.hypot(far[0] - cx, far[1] - cy) >= 81, `${p.id} is long enough for ${e.name} at full size`);
+      const inside = far[0] > e.x && far[0] < e.x + e.w && far[1] > e.y && far[1] < e.y + e.h;
+      assert.ok(!inside, `${p.id} reaches out past ${e.name}`);
     }
   }
 }

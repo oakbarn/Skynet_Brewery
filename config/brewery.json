@@ -777,7 +777,7 @@
    "nameColor": "#ffff00",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
-   "follow": "BM_32_DI@Float_Water~float_WA",
+   "follow": "BM_32_DI@Float_Force~floats_WA",
    "group": "Water"
   },
   {
@@ -881,11 +881,11 @@
    "nameColor": "#000000",
    "imageOff": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Open.svg",
    "imageOn": "Images/Skynet/Other_Equipment/Skynet_Float_NO_Closed.svg",
-   "follow": "BM_32_DI@Float_Water~float_WA",
+   "follow": "BM_32_DI@Float_Force~floats_WA",
    "group": "Water"
   },
   {
-   "name": "BM_33_DO@Valve_E_Manifold~Supply_WA",
+   "name": "BM_33_DO@Valve_E_Manifold~Valve_WA",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Water",
@@ -908,7 +908,7 @@
    "tapwaterOut": "in"
   },
   {
-   "name": "BM_31_DO@Valve_E_Fire~Hose_WA",
+   "name": "BM_31_DO@Valve_E_Firehose~Valve_WA",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Water",
@@ -931,7 +931,7 @@
    "tapwaterOut": "out"
   },
   {
-   "name": "BM_32_DI@Float_Water~float_WA",
+   "name": "BM_32_DI@Float_Force~floats_WA",
    "typeCode": "Float",
    "type": "digitalIn",
    "mode": "switch",
@@ -1054,7 +1054,7 @@
   },
   {
    "workspace": "Water",
-   "name": "wgt_TMR_Water_WA",
+   "name": "wgt_TMR_Water~timer_WA",
    "type": "timer",
    "label": "Water timer",
    "x": 760,
@@ -1067,7 +1067,7 @@
   },
   {
    "workspace": "Water",
-   "name": "wgt_ALM_Fire~Hose_WA",
+   "name": "wgt_ALM_Fire~Hose~warning_WA",
    "type": "alarm",
    "label": "Fire Hose warning",
    "x": 760,
@@ -1082,7 +1082,7 @@
   },
   {
    "workspace": "Water",
-   "name": "wgt_ALM_Water~flow_WA",
+   "name": "wgt_ALM_Manifold~warning_WA",
    "type": "alarm",
    "label": "Manifold warning",
    "x": 890,
@@ -3714,7 +3714,7 @@
    "kind": "pipe",
    "workspace": "Water",
    "from": "fw_tee_e",
-   "to": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:out",
+   "to": "dev:BM_33_DO@Valve_E_Manifold~Valve_WA:out",
    "points": [
     [
      1480,
@@ -3736,7 +3736,7 @@
    "kind": "pipe",
    "workspace": "Water",
    "from": "fw_tee_b",
-   "to": "dev:BM_31_DO@Valve_E_Fire~Hose_WA:in",
+   "to": "dev:BM_31_DO@Valve_E_Firehose~Valve_WA:in",
    "points": [
     [
      1508,
@@ -3771,7 +3771,7 @@
    "id": "p_fw_4",
    "kind": "pipe",
    "workspace": "Water",
-   "from": "dev:BM_33_DO@Valve_E_Manifold~Supply_WA:in",
+   "from": "dev:BM_33_DO@Valve_E_Manifold~Valve_WA:in",
    "to": "ip_brew_manifold",
    "points": [
     [
@@ -3808,7 +3808,7 @@
    "id": "p_fw_5",
    "kind": "pipe",
    "workspace": "Water",
-   "from": "dev:BM_31_DO@Valve_E_Fire~Hose_WA:out",
+   "from": "dev:BM_31_DO@Valve_E_Firehose~Valve_WA:out",
    "to": "ip_fh_qd",
    "points": [
     [
