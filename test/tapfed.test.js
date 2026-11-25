@@ -24,13 +24,16 @@ assert.match(app, /for \(const \[id, o\] of tvStill\) if \(!moving\(id\)\) still
 const iHb = app.indexOf('for (const [k, n] of nodes) if (n.tapIn) {'), iTv = app.indexOf('const tvIns = '), iPull = app.indexOf('for (const [k, n] of nodes) if (n.pull) trace(k, false);');
 assert.ok(iHb > 0 && iHb < iTv && iTv < iPull, 'Hose Bib Inlet first, then Tap water valves, then the traces');
 
-// the 3 Vessel 1 Pump sample: on the Brew House the Firehose and Manifold Valve Clones are Tap water valves fed by the Hose Bib
+// the 3 Vessel 1 Pump sample: on the Brew House the Hose Bib feeds the Manifold Valve and Firehose valve Clones. They are
+// plain Motorized valves, not Tap water valves (OakBarn Brewery, 2026-11-25: "They are downstream from the Hose Bib Supply and would
+// have flow if the Hose Bib was open just like any other Motorized valve and No Flow on their own")
 const cfg = JSON.parse(read('samples/configs/three-vessel-one-pump/config.json'));
-const fh = cfg.elements.find(e => e.name === 'BM_31_DO@Valve_E_Fire~Hose_WA');
-assert.equal(fh.tapwater, true);
-const tapSide = `dev:${fh.name}_Clone_1:${fh.tapwaterOut === 'in' ? 'out' : 'in'}`;
-assert.ok(cfg.graphics.some(g => g.kind === 'pipe' && g.workspace === 'Brew House' && (g.from === tapSide || g.to === tapSide)), 'its Clone has a pipe on its tap side');
-assert.ok(cfg.graphics.some(g => g.kind === 'pipe' && g.workspace === 'Brew House' && g.from === 'eq:g_chill_tap:out'), 'the Hose Bib feeds that side');
+for (const n of ['BM_31_DO@Valve_E_Firehose~Valve_WA', 'BM_33_DO@Valve_E_Manifold~Valve_WA']) assert.equal(cfg.elements.find(e => e.name === n).tapwater, false, `${n} is not a Tap water valve`);
+assert.ok(cfg.graphics.some(g => g.kind === 'pipe' && g.workspace === 'Brew House' && g.from === 'eq:g_chill_tap:out'), 'the Hose Bib feeds them');
+assert.ok(cfg.graphics.some(g => g.kind === 'pipe' && g.workspace === 'Brew House' && g.from === 'dev:BM_31_DO@Valve_E_Firehose~Valve_WA_Clone_1:in'), 'the Firehose Clone is piped on the Brew House');
+// the Brew House Manifold Supply is a Clone of the Water Tab Manifold Valve (pin 33), as the Water Processes use (OakBarn Brewery, 2026-11-25)
+assert.ok(cfg.graphics.some(g => g.kind === 'clone' && g.workspace === 'Brew House' && g.of === 'BM_33_DO@Valve_E_Manifold~Valve_WA'));
+assert.ok(!cfg.elements.some(e => e.channel === 30), 'pin 30 is free');
 
 assert.match(rules, /^5\.46 \*\*A Tap water valve with a pipe on its tap side gets its water along that pipe\*\*/m);
 console.log('tapfed: ok');

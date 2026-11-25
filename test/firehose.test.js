@@ -46,7 +46,8 @@ loadSample(SAMPLES, 'three-vessel-one-pump', { store, engine: eng, hw });
 const tick = setInterval(() => store.tickTimers(0.5), 50);           // ten times as fast: a 20 second warning takes 2 seconds
 const until = async (f, ms = 15000) => { for (let i = 0; i < ms / 25 && !f(); i++) await new Promise(r => setTimeout(r, 25)); return f(); };
 const st = n => eng.list().find(x => x.name === n)?.state;
-const FH = 'BM_31_DO@Valve_E_Fire~Hose_WA', MSV = 'BM_33_DO@Valve_E_Manifold~Supply_WA', FLOAT = 'BM_32_DI@Float_Water~float_WA', U = 'utility_FireHose_Manifold_Supply_Water';
+// the 3 Vessel sample's Suggested Names (OakBarn Brewery, 2026-11-25)
+const FH = 'BM_31_DO@Valve_E_Firehose~Valve_WA', MSV = 'BM_33_DO@Valve_E_Manifold~Valve_WA', FLOAT = 'BM_32_DI@Float_Force~floats_WA', U = 'utility_FireHose_Manifold_Supply_Water';
 const on = n => !!store.getProp(n, 'state');
 const asked = () => eng.valveList().find(a => a.ask && a.process === U);
 const done = () => eng.confirmValve(asked().name);
@@ -61,11 +62,11 @@ assert.ok(await until(() => !!asked()), 'Manifold Set? is asked');
 assert.equal(asked().label, 'Manifold Set?');
 assert.equal(store.getProp('gblV_Valve_Status', 'value'), -1);
 done();
-assert.ok(await until(() => store.getProp('wgt_ALM_Fire~Hose_WA', 'active')), 'the warning sound');
+assert.ok(await until(() => store.getProp('wgt_ALM_Fire~Hose~warning_WA', 'active')), 'the warning sound');
 assert.match(text(), /FireHose ON in 20 Seconds! Fire Hose ON for  Twenty Seconds/);
 assert.ok(!on(FH), 'not open during the warning');
 assert.ok(await until(() => on(FH)), 'the Fire Hose opens');
-assert.ok(!store.getProp('wgt_ALM_Fire~Hose_WA', 'active'), 'the warning sound stops');
+assert.ok(!store.getProp('wgt_ALM_Fire~Hose~warning_WA', 'active'), 'the warning sound stops');
 assert.ok(await until(() => !on(FH) && quiet()), 'it closes when the timer reaches 00:00:00');
 assert.equal(store.getProp('gblV_Water_Switch_Status_Water', 'value'), -9999);
 // the hidden count-up timer kept the true run time (about 20 s) in gblT_Elapsed_Water
@@ -108,7 +109,7 @@ assert.ok(await until(() => !on(FH) && quiet()), 'closes after the time set');
 eng.start('Manifold_Float', 'user');
 assert.ok(await until(() => !!asked())); done();
 assert.ok(await until(() => on(MSV)));
-assert.equal(store.getProp('wgt_TMR_Water_WA', 'type'), 'countup');
+assert.equal(store.getProp('wgt_TMR_Water~timer_WA', 'type'), 'countup');
 store.setProp(FLOAT, 'value', true, 'hw');
 assert.ok(await until(() => !on(MSV) && quiet()), 'the float shuts it off');
 store.setProp(FLOAT, 'value', false, 'hw');
@@ -119,12 +120,12 @@ assert.ok(await until(() => !!asked())); done();
 assert.ok(await until(() => on(FH)));
 eng.start('FireHose_Off', 'user');
 assert.ok(await until(() => !on(FH) && !on(MSV) && quiet()), 'FireHose Off');
-assert.ok(!store.getProp('wgt_TMR_Water_WA', 'running'));
+assert.ok(!store.getProp('wgt_TMR_Water~timer_WA', 'running'));
 
 // The Float buttons and the Water float show OakBarn Brewery's float switch pictures (Rule 1.31 Picture, 2026-11-20)
 {
-  const F = 'Images/Skynet/Other_Equipment/', FL = 'BM_32_DI@Float_Water~float_WA';
-  for (const f of ['config/brewery.json', 'samples/configs/three-vessel-one-pump/config.json']) {
+  const F = 'Images/Skynet/Other_Equipment/';
+  for (const [f, FL] of [['config/brewery.json', FLOAT], ['samples/configs/three-vessel-one-pump/config.json', FLOAT]]) {
     const c = JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
     for (const n of ['wgt_PSW_Use~FireHose~Float_WA', 'wgt_PSW_Use~Manifold~Float_WA', FL]) {
       const e = c.elements.find(x => x.name === n);

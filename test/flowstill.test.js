@@ -22,8 +22,7 @@ assert.match(app, /if \(n\?\.air\) return !n\.touch;/, 'no water splash on a loo
 assert.match(app, /on = looseEndIp\(pt, ws, p\[fixed\]\)/, 'a loose end in a Tab_Fitting or on an IP flows on as if joined');
 
 // the Manifold Valve (Tap water flows Right to Left): the tap water pipe is on its right (out) end, the manifold pipe on its left (in) end
-const MV = 'BM_33_DO@Valve_E_Manifold~Supply_WA';
-for (const f of ['samples/configs/three-vessel-one-pump/config.json', 'config/brewery.json']) {
+for (const [f, MV] of [['samples/configs/three-vessel-one-pump/config.json', 'BM_33_DO@Valve_E_Manifold~Valve_WA'], ['config/brewery.json', 'BM_33_DO@Valve_E_Manifold~Valve_WA']]) {
   const c = JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
   assert.equal(c.elements.find(e => e.name === MV).tapwaterOut, 'in', `${f}: the Manifold Valve lets tap water out of its left end`);
   const on = (id, end) => c.graphics.find(g => g.id === id) && assert.ok(Object.values({ a: c.graphics.find(g => g.id === id).from, b: c.graphics.find(g => g.id === id).to }).some(x => x === end), `${f}: ${id} on ${end}`);
