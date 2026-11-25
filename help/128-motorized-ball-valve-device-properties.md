@@ -79,7 +79,7 @@ Name **BM_15_DO@Valve_E_Mash~Valve_BH**. (Skynet Rule 18.42)
 6. **Overlay** with **Database and .API ⬢**.
 7. The valve's own settings: **Tap water valve**, **On Close List** and **On Open List**, all three on one line (see [Tap water valves](31-tap-water-valves)).
    On Close List: `close_all_valves` in a Process closes it. On Open List: `open_all_valves` opens it. A tap water valve shows its
-   **Tap Water flows** instead, and is always on the Close List and never on the Open List.
+   **Tap Water flows** instead, and is always on the Close List and never on the Open List; the knobs of those two switches then show the Do Not Enter sign ⛔ (they can't be changed).
 8. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height** on one line, and the **Device Type** greyed out (**DO@Valve_E**: an electric valve, Valve_E, on a Digital Out, DO; the same DO@Valve_E is in its Suggested Name).
 
 The Suggested Name follows the naming format (Rule 3.1): Interface ID, Port, `Valve_E`, Label, Tab ID, such as

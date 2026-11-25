@@ -563,6 +563,12 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .sw input:checked + .swk { background: #3fbf6a; }
 .sw input:checked + .swk::after { transform: translateX(20px); }
 .sw input:focus-visible + .swk { outline: 2px solid #4fb3ff; outline-offset: 2px; }
+/* a Tap Water valve's On Close List and On Open List can't be changed: their knobs show the Do Not Enter sign (OakBarn Brewery,
+   2026-11-25: "Add Do Not Enter ICON as depicted when the Tap Water is True"; Rules 6.15, 18.45) */
+.sw input:is([data-k="_tapClose"], [data-k="_tapOpen"]):disabled + .swk { cursor: default; }
+.sw input:is([data-k="_tapClose"], [data-k="_tapOpen"]):disabled + .swk::after {
+  background: #FAFAFA url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9.2' fill='%23d62828' stroke='%23fff' stroke-width='1.2'/%3E%3Crect x='4' y='8.2' width='12' height='3.6' rx='.6' fill='%23fff'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
 /* a plain checkbox drawn as a small switch: every on / off choice is a switch or a toggle icon, never a list box (Fritz, 2026-10-23) */
 input[type=checkbox].swc { appearance: none; -webkit-appearance: none; position: relative; display: inline-block; width: 36px; height: 20px; flex: none; margin: 0; padding: 0; border: none; border-radius: 10px; background: #9aa2aa; cursor: pointer; vertical-align: middle; transition: background .15s; }
 input[type=checkbox].swc::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
