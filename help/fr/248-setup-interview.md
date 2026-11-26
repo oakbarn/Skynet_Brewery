@@ -6,11 +6,16 @@ Schema d’exemple. Un Admin peut le relancer à tout moment depuis **☰ Menu >
 
 ## Comment ça marche {#how-it-works}
 
-- Une question par page, avec une courte explication dessous. La bande d’étapes en haut montre où vous en êtes.
+- Une question par page, avec une courte explication dessous. La bande d’étapes en haut montre où vous en êtes, en 6 étapes :
+  **1. Units · 2. Help language · 3. Brewer Type · 4. Brewery · 5. Recipes · 6. Other Defaults**, puis Done.
 - **◀ Back** revient à la question précédente. **Next ▶** garde votre réponse et continue. Un choix de 6 ou moins est une case : un
   clic le choisit et continue. Un choix de plus de 6 est une liste déroulante (règle 2.6).
-- **Skip** garde la réponse de Skynet et continue. Skynet ne vous le rappelle pas plus tard. Chaque question a Skip sauf les deux
-  auxquelles il faut répondre : **US or Metric** (toujours la première question) et **Brewer Level**.
+- Il faut répondre aux étapes 1 à 3, elles n’ont donc pas de Skip : **US or Metric** (toujours la première question),
+  **Help language** et **Brewer Type**.
+- Les étapes 4 **Brewery**, 5 **Recipes** et 6 **Other Defaults** sont des branches. Chacune s’ouvre sur une page qui liste ce
+  qu’elle demande. **Next ▶** la commence. **Skip** sur cette page saute toute la branche et garde les réponses de Skynet. Dans une
+  branche, chaque question a son propre **Skip**.
+- **Skip** garde la réponse de Skynet et continue. Skynet ne vous le rappelle pas plus tard.
 - Chaque page commence sur la réponse de Skynet (ou sur votre réponse enregistrée quand vous le relancez) : Next, Next, Next donne un
   panneau qui fonctionne.
 - La dernière page, **Done**, montre toutes les réponses. **✎** revient à cette question. **✔ Finish** les enregistre toutes.
@@ -22,17 +27,23 @@ l’écran est trop petit. Un téléphone ou une tablette convient pour suivre e
 
 ## Les questions {#the-questions}
 
-| Question | Ce qu’elle règle | Réponse de Skynet |
-|---|---|---|
-| **US or Metric?** (réponse obligatoire) | Units : l’unité de chaque quantité, température et Recipe affichée. Skynet garde tous les nombres en métrique (règle 2.59) : changer ne modifie jamais un nombre enregistré | US |
-| **Help language** | Anglais ou français pour les pages d’aide et les bulles, dans ce navigateur | English |
-| **Brewery Name** (Patrons seulement) | Le nom en haut de chaque Tab | Skynet Panel |
-| **Airport** | L’aéroport (code OACI, par exemple KDFW) dont le bulletin météo donne la pression de l’air pour la température d’ébullition. **Test** le récupère tout de suite | vide : air standard |
-| **Elevation** | L’altitude de votre brasserie, en pieds (US) ou en mètres (Metric) ; gardée en mètres | vide |
-| **Brewer Level** (réponse obligatoire) | Sur quoi vous brassez, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
-| **Brewer Type** | Ce que vous brassez d’habitude : le premier choix de la fenêtre No Recipe Found (règle 16.14) | All Grain |
-| **Yeast Starter** | Pour information : PreBrew vous le rappelle un jour ou deux avant | No |
-| **Pipe size** et **Hose size** | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
+| Étape | Question | Ce qu’elle règle | Réponse de Skynet |
+|---|---|---|---|
+| 1 | **US or Metric?** (réponse obligatoire) | Units : l’unité de chaque quantité, température et Recipe affichée. Skynet garde tous les nombres en métrique (règle 2.59) : changer ne modifie jamais un nombre enregistré | US |
+| 2 | **Help language** (réponse obligatoire) | Anglais ou français pour les pages d’aide et les bulles, dans ce navigateur. Dès qu’une User Language est sur ce Brain (? Help > 🌐 Languages), elle est aussi un choix | English |
+| 3 | **What is the highest level you will brew now?** (réponse obligatoire) | Votre Brewer Type : Extract Can Kit, Extract Partial Grain and Hops ou All Grain. C’est juste pour commencer : Skynet grandit avec vous. La fenêtre No Recipe Found commence sur lui (règle 16.14) | All Grain |
+| 3 | **Do you grind your own grain?** (seulement après All Grain) | Oui : All Grain (own Grain Mill) | No |
+| 4 Brewery | **Brewer Level** | Sur quoi vous brassez, ou ce que vous construisez, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
+| 4 Brewery | **Pipe size** et **Hose size** | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
+| 5 Recipes | **Yeast Starter** | Pour information : PreBrew vous le rappelle un jour ou deux avant | No |
+| 5 Recipes | **Batch Size** | La quantité de bière d’une nouvelle Recipe, dans le fermenteur, en gallons (US) ou en litres (Metric) ; gardée en litres | 5 gallons (18,9 litres) |
+| 5 Recipes | **Mash Profile** (All Grain seulement) et **Boil Profile** | Les Profiles avec lesquels une nouvelle Recipe commence | Single Step, Batch Sparge et le Boil Profile de 60 minutes de Skynet |
+| 6 Other Defaults | **Brewery Name** (Patrons seulement) | Le nom en haut de chaque Tab | Skynet Panel |
+| 6 Other Defaults | **Airport** | L’aéroport (code OACI, par exemple KDFW) dont le bulletin météo donne la pression de l’air pour la température d’ébullition. **Test** le récupère tout de suite | vide : air standard |
+| 6 Other Defaults | **Elevation** | L’altitude de votre brasserie, en pieds (US) ou en mètres (Metric) ; gardée en mètres | vide |
+
+L’étape Recipes règle seulement ce avec quoi une nouvelle Recipe commence. Un jour de brassage demande sa propre Recipe dans le
+**Recipe Interview**.
 
 ## Les Brewer Levels {#the-brewer-levels}
 

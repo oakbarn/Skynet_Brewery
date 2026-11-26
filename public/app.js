@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16328,9 +16328,15 @@ function rqSummary(q, a, ctx, metric) {
 
 // ---- The Setup Interview (Rule 2.75, Help 248; the questions are data in public/setupinterview.js). One question at a time: ◀ Back,
 // Skip (not on a must question), Next ▶, then a summary with ✎ on each answer and ✔ Finish. Nothing is saved until Finish.
+// Panel Update 17 (OakBarn Brewery, 2026-11-26): 6 steps in the strip; steps 4 Brewery, 5 Recipes and 6 Other Defaults are branches
+// that open on a page saying what they ask, and Skip there skips the whole branch.
 function setupCtx() {
-  return { defaults: S.config.brewDefaults || {}, boil: S.boil?.settings ?? null, patron: !!S.patron?.brewery, helpLang: (() => { try { return localStorage.getItem(LANG_KEY); } catch { return null; } })(),
-    brewerTypes: BREWER_TYPES.map(t => [t.key, t.name]), brewerTypeDefault: BREWER_TYPE_DEFAULT, pipeSizes: sizePick(PIPE_SIZES), hoseSizes: sizePick(HOSE_SIZES) };
+  // the Help languages of the ? Help window's 🌐 list: English, Français, and the User Language once it is on this Brain (Rule 11.16)
+  const helpLangs = [...($('#hpLang')?.options || [])].map(o => [o.value, o.textContent.replace(/^🌐\s*/, '')]);
+  return { defaults: S.config.brewDefaults || {}, boil: S.boil?.settings ?? null, patron: !!S.patron?.brewery, helpLang: (() => { try { return localStorage.getItem(LANG_KEY); } catch { return null; } })(), helpLangs,
+    brewerTypes: BREWER_TYPES.map(t => [t.key, t.name]), brewerTypeDefault: BREWER_TYPE_DEFAULT, pipeSizes: sizePick(PIPE_SIZES), hoseSizes: sizePick(HOSE_SIZES),
+    batchLDefault: NEW_RECIPE.batchL, mashDefault: NEW_RECIPE.mashProfile, boilDefault: NEW_RECIPE.boilProfile,
+    mashProfiles: [['', '(none)'], ...S.mashProfiles.map(x => [x.id, x.name])], boilProfiles: [['', '(none)'], ...S.boilProfiles.map(x => [x.id, x.name])] };
 }
 async function setupInterview({ first = false } = {}) {
   if (!can('admin')) return;
@@ -16349,16 +16355,24 @@ async function setupInterview({ first = false } = {}) {
     d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
     const draw = () => {
       const qs = shownQuestions(a, ctx), done = at >= qs.length, q = qs[at];
-      const steps = [...qs.map(x => x.step), 'Done'];
-      const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => h('li', { class: i === at ? 'now' : i < at ? 'done' : '' }, s)));
+      // the 6 steps (Panel Update 17), then Done; a branch's step stays lit on every page of it
+      const steps = [...SETUP_STEPS, 'Done'], now = done ? SETUP_STEPS.length : SETUP_STEPS.indexOf(q.step);
+      const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => h('li', { class: i === now ? 'now' : i < now ? 'done' : '' }, s)));
       const go = n => { at = n; draw(); };
       const next = () => { const err = q && answerError(q, a[q.id]); if (err) return toast(err, true); skipped.delete(q?.id); go(at + 1); };
-      const skip = () => { a[q.id] = q.start(ctx, a); skipped.add(q.id); go(at + 1); };
+      const keep = x => { if (x.start) { a[x.id] = x.start(ctx, a); skipped.add(x.id); } };
+      // Skip on a branch's first page skips every question of the branch; inside it, Skip skips that question
+      const skip = () => {
+        if (q.kind !== 'branch') { keep(q); return go(at + 1); }
+        let n = at + 1; while (n < qs.length && qs[n].step === q.step) keep(qs[n++]);
+        go(n);
+      };
       const finish = guard(async () => {
         const out = setupSave(a, ctx);
         if (out.boil) S.boil = await api('PUT', '/ui/boiltemp', out.boil);
         await api('PUT', '/ui/settings', { brewDefaults: out.brewDefaults }); S.config.brewDefaults = out.brewDefaults;
-        if (out.helpLang) { try { localStorage.setItem(LANG_KEY, out.helpLang); } catch { } refreshBalloonLang(); }
+        // the same switch as the ? Help window's 🌐 list (it keeps it in this browser and changes the balloons)
+        if (out.helpLang) { const hl = $('#hpLang'); if (hl && [...hl.options].some(o => o.value === out.helpLang)) { if (hl.value !== out.helpLang) { hl.value = out.helpLang; hl.dispatchEvent(new Event('change')); } } else { try { localStorage.setItem(LANG_KEY, out.helpLang); } catch { } refreshBalloonLang(); } }
         showBreweryName(); renderWs(); savedPop('Setup Interview saved: every answer is on ☰ Menu > Default settings');
         end('finish');
       });
@@ -16367,7 +16381,7 @@ async function setupInterview({ first = false } = {}) {
       bar.replaceChildren(h('span', { class: 'spacer' }),
         h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
         at ? h('button', { type: 'button', onclick: () => go(at - 1) }, '◀ Back') : '',
-        !done && !q.must ? h('button', { type: 'button', title: 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
+        !done && !q.must ? h('button', { type: 'button', title: q.kind === 'branch' ? `Skip the whole ${q.step} step: keep Skynet's own answers. You can change each one any time on ☰ Menu > Default settings.` : 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
         h('span', { class: 'dlgBtnGroup' },
           done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶'),
           h('button', { type: 'button', title: 'Stop the interview. Nothing is saved.', onclick: close }, 'Close'),
@@ -16375,17 +16389,24 @@ async function setupInterview({ first = false } = {}) {
       body.replaceChildren();
       if (done) {
         body.append(h('p', {}, 'Here is every answer. ✎ goes back to that question. ✔ Finish saves them all; each one is on ☰ Menu > Default settings too, where you can change it any time.'),
-          h('table', { class: 'setupSum' }, ...qs.map((x, i) => h('tr', {}, h('td', {}, x.step), h('td', {}, answerWords(x, a[x.id], ctx) + (skipped.has(x.id) ? '  (Skipped: Skynet\'s answer)' : '')),
-            h('td', {}, h('button', { type: 'button', title: 'Change this answer', onclick: () => go(i) }, '✎'))))));
+          // by step: the step's name, then each of its questions with its answer
+          h('table', { class: 'setupSum' }, ...qs.flatMap((x, i) => [
+            ...(i === 0 || qs[i - 1].step !== x.step ? [h('tr', {}, h('th', { colspan: 3 }, `${SETUP_STEPS.indexOf(x.step) + 1}. ${x.step}`))] : []),
+            ...(x.kind === 'branch' ? [] : [h('tr', {}, h('td', {}, askOf(x, a)), h('td', {}, answerWords(x, a[x.id], ctx) + (skipped.has(x.id) ? '  (Skipped: Skynet\'s answer)' : '')),
+              h('td', {}, h('button', { type: 'button', title: 'Change this answer', onclick: () => go(i) }, '✎')))])])));
       } else {
         if (q.note) body.append(h('p', { class: 'setupWarn' }, '⚠ ' + q.note));
         body.append(h('p', { class: 'setupAsk' }, askOf(q, a)), h('p', { class: 'muted' }, q.why));
         if (q.must) body.append(h('p', { class: 'muted' }, 'This question must be answered (no Skip).'));
         const ch = choicesOf(q, ctx);
-        if (q.kind === 'pick' && !asDropdown(ch)) {
+        if (q.kind === 'branch') {
+          // the branch's first page: what it asks
+          const its = qs.filter(x => x.step === q.step && x.kind !== 'branch');
+          body.append(h('p', {}, 'It asks:'), h('ul', { class: 'setupBranch' }, ...its.map(x => h('li', {}, askOf(x, a)))));
+        } else if (q.kind === 'pick' && !asDropdown(ch)) {
           // 6 or fewer: one click picks it and goes on (Rule 2.6, Rule 2.44)
           body.append(h('div', { class: 'setupPicks' }, ...ch.map(([k, t, tip]) => h('button', { type: 'button', class: 'setupPick' + (String(a[q.id]) === String(k) ? ' cur' : ''), title: tip || '',
-            onclick: () => { a[q.id] = k; if (q.id === 'units') a.elevation = SETUP_QUESTIONS.find(x => x.id === 'elevation').start(ctx, a); next(); } }, h('b', {}, t), tip ? h('div', { class: 'muted' }, tip) : ''))));
+            onclick: () => { a[q.id] = k; if (q.id === 'units') for (const x of SETUP_QUESTIONS) if (x.byUnits) a[x.id] = x.start(ctx, a); next(); } }, h('b', {}, t), tip ? h('div', { class: 'muted' }, tip) : ''))));
         } else if (q.kind === 'pick') {
           // more than 6: a dropdown (Rule 2.6)
           const sel = h('select', { onchange: e => { a[q.id] = e.target.value; } }, ...ch.map(([k, t]) => h('option', { value: k, ...(String(a[q.id]) === String(k) ? { selected: true } : {}) }, t)));
@@ -16409,6 +16430,7 @@ async function setupInterview({ first = false } = {}) {
           queueMicrotask(() => inp.focus());
         }
       }
+      if (!done && q.more) { const m = q.more(ctx); if (m) body.append(h('p', { class: 'muted' }, m)); }
       title.textContent = 'Setup Interview: ' + (done ? 'Done' : q.step); stripBox.replaceChildren(strip);
     };
     d.append(bar, title, stripBox, body); d._btnOrder = true;

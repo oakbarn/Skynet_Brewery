@@ -1911,6 +1911,9 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupPick.cur { outline: 2px solid var(--accent); }
 .setupDlg select, .setupDlg input { min-width: 16em; }
 .setupDlg .setupSum td { padding: 3px 8px; vertical-align: top; }
+.setupDlg .setupSum th { text-align: left; padding: 8px 8px 2px; color: var(--accent); }
+/* Panel Update 17: a branch's first page lists what it asks */
+.setupDlg .setupBranch { margin: 4px 0 8px 1.2em; }
 /* The Recipe Interview (Rule 17.22): several answers on one page, and tables of rows */
 .rqDlg { max-width: min(900px, calc(100vw - 32px)); }
 .rqDlg .rqBox { margin: 8px 0; }
