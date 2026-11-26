@@ -3,7 +3,7 @@
 **Chaque gGlobal est non volatile**. Elle garde sa **.value** comme le fait un réglage, pas comme une
 variable de Process :
 
-| | Une variable de Process (`new value vTemp`) | Une gGlobal (`gV_Strike_Temp`) |
+| | Une variable de Process (`new value vTemp`) | Une gGlobal (`gblV_Strike_Temp`) |
 |---|---|---|
 | Qui peut l'utiliser | Seulement le Process qui l'a faite | Chaque Process (portée globale) |
 | Quand un Process démarre | Recommence vide | **Garde sa valeur** |
@@ -35,8 +35,8 @@ Une gGlobal n'est remise à une valeur de départ que quand quelque chose la rè
 de son Flow Process des lignes qui les règlent, par exemple :
 
 ```
-gB_Grain_Added = false
-gS_Brewer_Note = ""
+gblB_Grain_Added = false
+gblS_Brewer_Note = ""
 ```
 
 Les journées de brassage exemples le font déjà.

@@ -1083,6 +1083,7 @@ button.hiddenTab { border-style: dotted; opacity: .8; }
    bold, COPY at the top, and the orange ? that opens a pop-up with the Properties and Attributes of that kind of Widget. */
 .gfx.txt { overflow-wrap: anywhere; }              /* word wrap is always on: even a long word goes onto the next line */
 .gfx.txt .tlabel { display: block; }
+#ws .gfx.txt.tapType { cursor: text; }      /* Tap to type (Rule 1.36) */
 #dlgBody .dlgBox { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 6px 10px; align-items: center; border: 2px solid var(--line, #888); border-radius: 12px; padding: 10px 12px; margin-top: 6px; }
 #dlgBody .dlgBox .full { grid-column: 1 / -1; }
 #dlgBody .dlgBox > select, #dlgBody .dlgBox > input { min-width: 0; max-width: 100%; }

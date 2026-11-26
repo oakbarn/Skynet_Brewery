@@ -21,7 +21,7 @@ Le fichier enregistré est relu chaque fois qu'un Process démarre, donc il ne f
 new value vVCount              make a number variable
 vVCount = 3                    set it
 new value vVHops = 10          make one and set it on one line
-new gV gV_Strike = 163         make a gGlobal (every Process can use it, Help 145)
+new gblV gblV_Strike = 163         make a gGlobal (every Process can use it, Help 145)
 V_BK_In = true                 open a valve (turn an output on)
 gblS_Msg = "Mash in"           set a variable
 tm_Whirlpool = 00:20:00        set a timer

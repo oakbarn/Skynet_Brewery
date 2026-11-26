@@ -1920,6 +1920,20 @@ function fillText(n, g) {
   }
   n.replaceChildren(...parts);
   n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden' || (v.hidden ?? g.hidden) === true);
+  n.classList.toggle('tapType', !editing && g.tapType === true && !!g.name);      // Tap to type (Rule 1.36)
+}
+// Tap to type (OakBarn Brewery, 2026-11-26: "tap to type", Rule 1.36): a Text Widget with Tap to type switched on opens a box on its
+// Tab where an operator types its Text (the brewer's Notes). Set puts it in, the same as a Process line wgt_TXT_Notes_RE = "...".
+function textTypeDialog(name) {
+  const g = L().graphics.find(x => x.kind === 'text' && x.name === name); if (!g?.tapType) return;
+  if (!can('operator')) return toast('Only an operator or an admin can type here', true);
+  const v = S.values[name] || {};
+  const d = $('#valDlg'); d.innerHTML = '';
+  const inp = h('textarea', { class: 'vdInput', rows: 4 }, v.text ?? g.text ?? '');
+  const done = ok => { if (ok) setProp(name, 'text', inp.value); d.close(); };
+  d.append(h('div', { class: 'vdTitle' }, g.label || name), inp,
+    h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
+  d.showModal(); setTimeout(() => inp.focus(), 50);
 }
 
 // The Override button (Fritz, 2026-10-30): one press and every running Process moves on 100 ms later, past the wait, sleep or
@@ -4108,6 +4122,7 @@ $('#ws').addEventListener('click', ev => {
   if (mfv) return isPushHeld(mfv.dataset.dev) ? undefined : toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35); a Push Button works on press
 
   { const o = ev.target.closest('.gfx.ovr'); if (o) return pressOverride({ id: o.dataset.gid }); }
+  { const tt = ev.target.closest('.gfx.txt.tapType'); if (tt) return textTypeDialog(tt.dataset.tname); }      // Tap to type (Rule 1.36)
   { const sb = ev.target.closest('.el .svBox'); if (sb) return svEdit(sb); }      // a Heating Element's SV box: type a new one (Panel Updates 40)
   // a Heating Element built into a Vessel Device: one click on its picture turns it ON or OFF at once in the method it is in, like a
   // Pump (Fritz, 2026-11-08: "Have the Graphic toggle on Off like a Pump", Rule 2.33); its box (tile) opens its pop-up
@@ -9980,7 +9995,7 @@ const F = {
   // "Update Names" is the ✏ Change name method: a name a Process can use changes only that way, and the Processes follow it (Fritz, 2026-10-29).
   text: [['name', 'Name', 'text', null, false, 'b'],
     ['_nm', 'w_Text_N is a default name given when a user makes a Text Widget. This name can be used, or a new name can be given. name.attribute = Something is how you use it in the Process Editor.', 'infonote', 'text'],
-    ['text', 'Text', 'text', null, false, 'b'], ['_rt', 'Rich Text Embedded Codes work in the Text and the Label: \\b bold, \\i italic, \\n new line, \\c{Red} color ... (Help > Rich Text Embedded Code)', 'note'],
+    ['text', 'Text', 'text', null, false, 'b'], ['tapType', 'Tap to type (an operator taps it on its Tab and types the Text, Rule 1.36)', 'bool', null, false, 'b'], ['_rt', 'Rich Text Embedded Codes work in the Text and the Label: \\b bold, \\i italic, \\n new line, \\c{Red} color ... (Help > Rich Text Embedded Code)', 'note'],
     ['_lb', '', 'box'], ['label', 'Label', 'text', null, false, 'b'], ['labelVisible', 'Visible (Show label)', 'bool', null, false, 'b'], ['labelSize', 'Font size', 'num'], ['labelFont', 'Font', 'sel', FONTS], ['labelBold', 'Bold', 'bool'],
     ['labelColor', 'Fore color', 'color'], ['labelBg', 'Back color', 'color'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
     ['_pb', 'Properties', 'box'], ['visible', 'Visible', 'bool', true, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
@@ -15421,8 +15436,8 @@ async function globalDialog(work, orig) {
     title.replaceChildren(work.kind ? `${VAR_KINDS[work.kind]} Properties` : 'New gGlobal', ' ', helpIcon(G_HELP, () => { if (snap() !== snap0 && !confirm('Leave without saving your changes, and open Help?')) return false; close(); }));
     body.replaceChildren();
     // Step 2: the Name (no ⬆ and no ⬢, never blank, unique: Rule 18.4)
-    body.append(row('Name', box('name', { placeholder: 'e.g. gV_Strike_Temp' }, x => x)),
-      note(`Can't be blank, no spaces, unique. A Process uses it by this Name: ${work.name || 'gV_Strike_Temp'}.value`));
+    body.append(row('Name', box('name', { placeholder: 'e.g. gblV_Strike_Temp' }, x => x)),
+      note(`Can't be blank, no spaces, unique. A Process uses it by this Name: ${work.name || 'gblV_Strike_Temp'}.value`));
     // Step 3: the Kind. Once picked it is fixed.
     if (!work.kind) {
       const s = h('select', {}, h('option', { value: '' }, '(pick a Kind)'), ...Object.entries(VAR_KINDS).map(([k, n]) => h('option', { value: k }, n)));

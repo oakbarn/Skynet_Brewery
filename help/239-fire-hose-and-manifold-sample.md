@@ -58,8 +58,7 @@ same pressure every time, a timed fill gives the same amount of water every time
 | Process | What it is |
 |---|---|
 | `utility_FireHose_Manifold_Supply_Water` | The Fire Hose and Manifold Process: Manifold Set?, the warning, the timed or float run, then everything off |
-| `FireHose_1_Minute` ... `Manifold_Float` | One per button: sets `gblV_Water_Switch_Status_Water` to its code and starts the Process |
+| `FireHose_1_Minute` ... `Manifold_Float` | One per button: starts the Process, which knows the button by `skn_Started_By` (the name of the Process that started it) |
 | `FireHose_Off` | Stops the Process and closes both valves |
 
-The codes are OakBarn Brewery's own: **1001** to **1005** for the Fire Hose (1 minute, 2 minutes, 20 seconds, Set Time, Float) and
-**2001** to **2005** for the Manifold (1, 2 and 3 minutes, Set Time, Float).
+No code number is needed: the Process reads the button's own name (`FireHose_1_Minute`, `Manifold_Float` ...).

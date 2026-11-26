@@ -8,21 +8,21 @@ Chaque gGlobal a une **Kind** (sorte). La sorte est choisie quand la gGlobal est
 
 | Sorte | .value est | Exemple |
 |---|---|---|
-| **gS_Global_String** | une chaîne (du texte) | `gS_Brewer_Note.value = "Add the yeast nutrient at 10 minutes"` |
-| **gV_Global_Value** | une valeur (un nombre) | `gV_Strike_Temp.value = 163` |
-| **gB_Global_Boolean** | un booléen : true ou false | `gB_Grain_Added.value = true` |
-| **gT_Global_Time** | une durée, `hh:mm:ss` | `gT_Mash_Rest.value = 01:00:00` |
-| **gD_Global_DateTime** | une date et heure | `gD_Brew_Day_Start.value = "2026-11-07T07:00:00"` |
+| **gS_Global_String** | une chaîne (du texte) | `gblS_Brewer_Note.value = "Add the yeast nutrient at 10 minutes"` |
+| **gV_Global_Value** | une valeur (un nombre) | `gblV_Strike_Temp.value = 163` |
+| **gB_Global_Boolean** | un booléen : true ou false | `gblB_Grain_Added.value = true` |
+| **gT_Global_Time** | une durée, `hh:mm:ss` | `gblT_Mash_Rest.value = 01:00:00` |
+| **gD_Global_DateTime** | une date et heure | `gblDT_Brew_Day_Start.value = "2026-11-07T07:00:00"` |
 
-Sur cet écran, les préfixes de noms (`gS_`, `gV_`, `gB_` ...) sont des indications et n'importe quel nom marche. Dans un Process, le préfixe d'un nom dit de quelle sorte il est (aide 145).
+Sur cet écran, les préfixes de noms (`gblS_`, `gblV_`, `gblB_` ...) sont des indications et n'importe quel nom marche. Dans un Process, le préfixe d'un nom dit de quelle sorte il est (aide 145).
 
 Il n'y a **pas de gGlobal Graphic** : une image sur un Tab est un **Graphic (Picture) Widget**.
 
 ## Faire une gGlobal {#making-a-gglobal}
 
-Un Process peut aussi en faire une, avec une ligne comme `new gV gV_Strike_Temp = 163` (aide 145).
+Un Process peut aussi en faire une, avec une ligne comme `new gblV gblV_Strike_Temp = 163` (aide 145).
 
-Une gGlobal ne prend que sa propre sorte de valeur : `gT_Mash_Rest = 00:15:00` marche, mais `gT_Mash_Rest = "My Rest"` est une erreur (aide 145).
+Une gGlobal ne prend que sa propre sorte de valeur : `gblT_Mash_Rest = 00:15:00` marche, mais `gblT_Mash_Rest = "My Rest"` est une erreur (aide 145).
 
 1. Ouvrez l'écran **gGlobal** (☰ Menu > Variables) et appuyez sur **➕ New gGlobal**.
 2. Tapez son **Name**. Il ne peut pas être vide, n'a pas d'espaces et doit être unique.
@@ -56,20 +56,20 @@ Chaque gGlobal garde sa .value quand un Process démarre et quand le Brain redé
 
 | Nom | Sorte | .value |
 |---|---|---|
-| gS_Brewer_Note | gS_Global_String | Add the yeast nutrient at 10 minutes |
-| gV_Strike_Temp | gV_Global_Value | 163 °F (32 à 212) |
-| gB_Grain_Added | gB_Global_Boolean | false |
-| gT_Mash_Rest | gT_Global_Time | 01:00:00 |
-| gD_Brew_Day_Start | gD_Global_DateTime | 2026-11-07 07:00:00 |
+| gblS_Brewer_Note | gS_Global_String | Add the yeast nutrient at 10 minutes |
+| gblV_Strike_Temp | gV_Global_Value | 163 °F (32 à 212) |
+| gblB_Grain_Added | gB_Global_Boolean | false |
+| gblT_Mash_Rest | gT_Global_Time | 01:00:00 |
+| gblDT_Brew_Day_Start | gD_Global_DateTime | 2026-11-07 07:00:00 |
 
 Un Process peut les utiliser ainsi :
 
 ```
-if gB_Grain_Added == false
-  gS_Brewer_Note.value = "Add the grain now"
-  wait gB_Grain_Added == true
+if gblB_Grain_Added == false
+  gblS_Brewer_Note.value = "Add the grain now"
+  wait gblB_Grain_Added == true
 endif
-gV_Strike_Temp.value = gV_Strike_Temp.value + 2
+gblV_Strike_Temp.value = gblV_Strike_Temp.value + 2
 ```
 
 ## Cancel demande avant de jeter les changements {#cancel-asks-before-throwing-changes-away}

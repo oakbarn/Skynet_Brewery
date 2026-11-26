@@ -8,21 +8,21 @@ Every gGlobal has one **Kind**. The Kind is picked when the gGlobal is made and 
 
 | Kind | .value is | Example |
 |---|---|---|
-| **gS_Global_String** | a String (text) | `gS_Brewer_Note.value = "Add the yeast nutrient at 10 minutes"` |
-| **gV_Global_Value** | a Value (a number) | `gV_Strike_Temp.value = 163` |
-| **gB_Global_Boolean** | a Boolean: true or false | `gB_Grain_Added.value = true` |
-| **gT_Global_Time** | a Time, `hh:mm:ss` | `gT_Mash_Rest.value = 01:00:00` |
-| **gD_Global_DateTime** | a Date Time | `gD_Brew_Day_Start.value = "2026-11-07T07:00:00"` |
+| **gS_Global_String** | a String (text) | `gblS_Brewer_Note.value = "Add the yeast nutrient at 10 minutes"` |
+| **gV_Global_Value** | a Value (a number) | `gblV_Strike_Temp.value = 163` |
+| **gB_Global_Boolean** | a Boolean: true or false | `gblB_Grain_Added.value = true` |
+| **gT_Global_Time** | a Time, `hh:mm:ss` | `gblT_Mash_Rest.value = 01:00:00` |
+| **gD_Global_DateTime** | a Date Time | `gblDT_Brew_Day_Start.value = "2026-11-07T07:00:00"` |
 
-On this screen the name prefixes (`gS_`, `gV_`, `gB_` ...) are hints and any name works. In a Process, a name's prefix tells which Kind it is (Help 145).
+On this screen the name prefixes (`gblS_`, `gblV_`, `gblB_` ...) are hints and any name works. In a Process, a name's prefix tells which Kind it is (Help 145).
 
 There is **no Graphic gGlobal**: a picture on a Tab is a **Graphic (Picture) Widget**.
 
 ## Making a gGlobal
 
-A Process can make one too, with a line such as `new gV gV_Strike_Temp = 163` (Help 145).
+A Process can make one too, with a line such as `new gblV gblV_Strike_Temp = 163` (Help 145).
 
-A gGlobal takes only its own Kind of value: `gT_Mash_Rest = 00:15:00` works, but `gT_Mash_Rest = "My Rest"` is an error (Help 145).
+A gGlobal takes only its own Kind of value: `gblT_Mash_Rest = 00:15:00` works, but `gblT_Mash_Rest = "My Rest"` is an error (Help 145).
 
 1. Open the **gGlobal** screen (☰ Menu > Variables) and press **➕ New gGlobal**.
 2. Type its **Name**. It can't be blank, has no spaces and must be unique.
@@ -56,20 +56,20 @@ Every gGlobal keeps its .value when a Process starts and when the Brain restarts
 
 | Name | Kind | .value |
 |---|---|---|
-| gS_Brewer_Note | gS_Global_String | Add the yeast nutrient at 10 minutes |
-| gV_Strike_Temp | gV_Global_Value | 163 °F (32 to 212) |
-| gB_Grain_Added | gB_Global_Boolean | false |
-| gT_Mash_Rest | gT_Global_Time | 01:00:00 |
-| gD_Brew_Day_Start | gD_Global_DateTime | 2026-11-07 07:00:00 |
+| gblS_Brewer_Note | gS_Global_String | Add the yeast nutrient at 10 minutes |
+| gblV_Strike_Temp | gV_Global_Value | 163 °F (32 to 212) |
+| gblB_Grain_Added | gB_Global_Boolean | false |
+| gblT_Mash_Rest | gT_Global_Time | 01:00:00 |
+| gblDT_Brew_Day_Start | gD_Global_DateTime | 2026-11-07 07:00:00 |
 
 A Process can use them like this:
 
 ```
-if gB_Grain_Added == false
-  gS_Brewer_Note.value = "Add the grain now"
-  wait gB_Grain_Added == true
+if gblB_Grain_Added == false
+  gblS_Brewer_Note.value = "Add the grain now"
+  wait gblB_Grain_Added == true
 endif
-gV_Strike_Temp.value = gV_Strike_Temp.value + 2
+gblV_Strike_Temp.value = gblV_Strike_Temp.value + 2
 ```
 
 ## Cancel asks before throwing changes away

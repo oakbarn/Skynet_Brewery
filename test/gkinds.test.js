@@ -13,18 +13,18 @@ assert.ok(isVarKind(undefined), 'no kind = value');
 for (const k of ['switch', 'pushbutton', 'momentary', 'list', 'step', 'longstring']) { assert.ok(!isVarKind(k)); assert.ok(!G_KINDS[k].variable, `${k} stays an on-screen kind`); }
 
 // the Kind is fixed: same key, other kind -> refused; a rename or a new value is fine
-const cur = [{ name: 'gV_A', type: 'gGlobal', kind: 'value', _key: 'k1' }, { name: 'Pump', type: 'digitalOut', _key: 'k2' }];
-assert.equal(kindChangeError(cur, [{ name: 'gV_B', type: 'gGlobal', kind: 'value', initial: '5', _key: 'k1' }]), '');
-assert.equal(kindChangeError(cur, [{ name: 'gV_A', type: 'gGlobal', _key: 'k1' }]), '', 'no kind is value');
-assert.match(kindChangeError(cur, [{ name: 'gV_A', type: 'gGlobal', kind: 'string', _key: 'k1' }]), /gV_Global_Value.*can't be changed/);
-assert.equal(kindChangeError(cur, [{ name: 'gS_New', type: 'gGlobal', kind: 'string', _key: 'k9' }]), '', 'a new one is fine');
-assert.equal(kindChangeError(cur, [{ name: 'gS_New', type: 'gGlobal', kind: 'string' }]), '', 'no key yet is fine');
+const cur = [{ name: 'gblV_A', type: 'gGlobal', kind: 'value', _key: 'k1' }, { name: 'Pump', type: 'digitalOut', _key: 'k2' }];
+assert.equal(kindChangeError(cur, [{ name: 'gblV_B', type: 'gGlobal', kind: 'value', initial: '5', _key: 'k1' }]), '');
+assert.equal(kindChangeError(cur, [{ name: 'gblV_A', type: 'gGlobal', _key: 'k1' }]), '', 'no kind is value');
+assert.match(kindChangeError(cur, [{ name: 'gblV_A', type: 'gGlobal', kind: 'string', _key: 'k1' }]), /gV_Global_Value.*can't be changed/);
+assert.equal(kindChangeError(cur, [{ name: 'gblS_New', type: 'gGlobal', kind: 'string', _key: 'k9' }]), '', 'a new one is fine');
+assert.equal(kindChangeError(cur, [{ name: 'gblS_New', type: 'gGlobal', kind: 'string' }]), '', 'no key yet is fine');
 
 // the sample: one of each Kind, not on a Tab, not added twice
 assert.deepEqual(SAMPLE_GLOBALS.map(s => s.kind).sort(), Object.keys(VAR_KINDS).sort());
 assert.ok(SAMPLE_GLOBALS.every(s => !s.workspace && s.type === 'gGlobal'));
 assert.equal(samplesToAdd([]).length, 5);
-assert.equal(samplesToAdd([{ name: 'gv_strike_temp' }]).length, 4, 'a name already used (any case) is skipped');
+assert.equal(samplesToAdd([{ name: 'gblV_strike_temp' }]).length, 4, 'a name already used (any case) is skipped');
 assert.ok(samplesToAdd([]).every(s => !('retain' in s)));      // no switch: every gGlobal keeps its value (Rule 1.22)
 
 assert.deepEqual(elementTopic({ type: 'gGlobal', kind: 'time' }), ['gglobal-kinds']);

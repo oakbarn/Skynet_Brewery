@@ -61,8 +61,7 @@ s'installe facilement, et avec la même pression à chaque fois, un remplissage 
 | Process | Ce que c'est |
 |---|---|
 | `utility_FireHose_Manifold_Supply_Water` | Le Process Fire Hose et Manifold : Manifold Set?, l'avertissement, la marche minutée ou au flotteur, puis tout est coupé |
-| `FireHose_1_Minute` ... `Manifold_Float` | Un par bouton : met dans `gblV_Water_Switch_Status_Water` son code et lance le Process |
+| `FireHose_1_Minute` ... `Manifold_Float` | Un par bouton : lance le Process, qui reconnaît le bouton par `skn_Started_By` (le nom du Process qui l'a lancé) |
 | `FireHose_Off` | Arrête le Process et ferme les deux vannes |
 
-Les codes sont ceux d'OakBarn Brewery : **1001** à **1005** pour la Fire Hose (1 minute, 2 minutes, 20 secondes, Set Time, Float) et
-**2001** à **2005** pour le Manifold (1, 2 et 3 minutes, Set Time, Float).
+Aucun numéro de code n'est nécessaire : le Process lit le nom du bouton lui-même (`FireHose_1_Minute`, `Manifold_Float` ...).
