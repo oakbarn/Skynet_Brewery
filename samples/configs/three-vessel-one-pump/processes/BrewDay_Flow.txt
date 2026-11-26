@@ -8,8 +8,8 @@
 //The Step timer says what is going on ("Transferring 1st Run"): it counts down a timed step (mash, boil, whirlpool) and counts up
 //every other step, so each transfer, heat and chill shows how long it is taking.
 //Each vessel's Manual Butterfly Valve (on its Low Center Outlet) is opened by hand the first time it is needed and stays open;
-//the Motorized out valves do the switching. The Kettle Manual Butterfly on its Left Tangential (Kettle in) is opened the same way
-//the first time wort goes to the kettle. The HLT in Butterfly (HLT Right Tangential) is hosed to the Motorized To HLT valve on a Tee
+//the Motorized out valves do the switching. The Kettle Manual Ball Valve on its Left Tangential (Kettle in) is opened the same way
+//the first time wort goes to the kettle. The HLT in Ball Valve (HLT Right Tangential) is hosed to the Motorized To HLT valve on a Tee
 //of the pump outlet manifold; Brew Day never pumps into the HLT, so To HLT stays closed.
 step 1.00000 "Start"
 new string vSMsg
