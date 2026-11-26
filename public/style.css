@@ -741,7 +741,12 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
 /* Resume after an error (Rule 10.14): Auto next time and its one warning */
 /* a line of the open Process still on Fix before next Brew Day (Rule 10.13): red background, bold yellow (OakBarn Brewery, 2026-11-26) */
 .errLineMark { background: #c62828; }
-.codeWrap.colored .errLineMark, .codeWrap.colored .errLineMark * { color: #ffeb3b !important; font-weight: 700; }
+.codeWrap.colored .errLineMark, .codeWrap.colored .errLineMark *, .codeWrap.errPaint .errLineMark, .codeWrap.errPaint .errLineMark * { color: #ffeb3b !important; font-weight: 700; }
+/* Colors off with an error line: the overlay paints the words (plain color), so the error line can be yellow */
+.codeWrap.errPaint #code { color: transparent; caret-color: var(--text); }
+.codeWrap.errPaint #code::selection { color: transparent; background: rgba(79, 179, 255, 0.35); }
+.codeWrap.errPaint #codeHl { color: var(--text); }
+.codeWrap.errPaint #codeHl mark { color: inherit; }
 .errLineMark .hl-var { background: none; box-shadow: none; }
 .brainNotice.errorStop.mini { align-items: center; padding: 6px 10px; }
 .brainNotice .errBtnRow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }

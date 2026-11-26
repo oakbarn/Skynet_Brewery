@@ -61,7 +61,8 @@ Skynet vous attend toujours pour choisir :
   même ligne tourne de nouveau et le Process continue à partir de là, avec les valeurs qu'il avait. Si elle échoue encore, réparez
   encore et réessayez.
 - **✎ Fix Process code** ouvre le Process dans le Process Editor à cette ligne. La ligne s'affiche avec un **fond rouge et un texte
-  jaune en gras** tant qu'elle est dans cette liste. Réparez-la et faites **Save**, puis appuyez sur **🔧 Try again** dans la
+  jaune en gras** tant qu'elle est dans cette liste, que les Colors soient allumées ou non. Ouvrir un Process fait aussi défiler
+  jusqu'à sa première ligne dans cette liste. Réparez-la et faites **Save**, puis appuyez sur **🔧 Try again** dans la
   fenêtre : le Process enregistré tourne à partir de cette ligne. Quand un **🧪 Check** ne trouve pas d'erreur (ou que vous cochez
   **✔ Fixed**), la ligne reprend ses couleurs normales.
 - **▶ Resume at the next line** saute cette ligne et continue à la suivante (par exemple la ligne 77 échoue, il continue à la 78).

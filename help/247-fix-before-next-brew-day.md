@@ -53,7 +53,7 @@ pick:
 - **🔧 Fixed hardware: try line N again**: you fixed or swapped what failed (a pump, a valve, a heater). That same line runs again
   and the Process goes on from there, with the values it had. If it fails again, fix more and try again.
 - **✎ Fix Process code** opens the Process in the Process Editor at that line. The line shows with a **red background and bold
-  yellow text** while it is on this list. Fix it and **Save**, then press **🔧 Try again** on the pop-up: the saved Process runs from
+  yellow text** while it is on this list, with Colors on or off. Opening a Process also scrolls to its first line on this list. Fix it and **Save**, then press **🔧 Try again** on the pop-up: the saved Process runs from
   that line. When a **🧪 Check** finds no error (or you tick **✔ Fixed**), the line goes back to normal colors.
 - **▶ Resume at the next line** leaves that line out and goes on at the next one (for example line 77 fails, it goes on at 78). Use
   it when you worked around the problem, for example you re-routed through the RIMS.

@@ -158,7 +158,7 @@ function errorStopNotices() {
   const fixCode = n => async () => {      // the Process Editor at that line; the pop-up stays small, so Try again runs the saved Process
     errorStopMini[n.process] = true; renderBrainNotices();
     setView('scripts');
-    if (curScript !== n.process) await openScript(n.process);
+    if (curScript !== n.process) { errJumpDone = !!n.line; await openScript(n.process); }
     if (curScript === n.process && n.line) gotoLine(n.line);
   };
   // a countdown on the pop-up while an Auto pick goes on by itself
@@ -14215,13 +14215,13 @@ async function openScript(name) {
   renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); fillOutPick(); renderConsole();
   api('GET', '/ui/scripts/words').then(w => { S.words = w; paintFind(); fillInsBar(); }).catch(() => { });
   fIdx = -1; refreshFind(false);
-  loadErrLines();
+  loadErrLines(true);
 }
 // The lines of the open Process that are still on ☰ Menu > 🔧 Fix before next Brew Day (Rule 10.13) show in the editor with a red
 // background and bold yellow text (OakBarn Brewery, 2026-11-26: "Put the Error in Red Background BOLD Yellow text in the editor"; "And
 // after a check with no issues normal Text colors"): when its entry moves to Fixed, the line is plain again
-let errLineSet = new Set();
-async function loadErrLines() {
+let errLineSet = new Set(), errJumpDone = false;      // errJumpDone: ✎ Fix Process code already went to its own line
+async function loadErrLines(jump = false) {
   const name = curScript;
   try {
     const r = name ? await api('GET', '/ui/errorlog') : { items: [] };
@@ -14229,6 +14229,9 @@ async function loadErrLines() {
     errLineSet = new Set((r.items || []).filter(e => e.kind === 'error' && e.status === 'open' && e.process === name && e.line > 0).map(e => e.line));
   } catch { errLineSet = new Set(); }
   if (view === 'scripts') paintFind();
+  // opening the Process shows its first error line (OakBarn Brewery: the editor scrolls to the error line), unless a line was already picked
+  if (jump && view === 'scripts' && errLineSet.size && !errJumpDone) gotoLine(Math.min(...errLineSet));
+  if (jump) errJumpDone = false;
 }
 // the overlay's HTML, line by line (a run never crosses a line end, public/colorize.js): the Error Log's open lines marked
 const markErrLines = html => !errLineSet.size ? html : html.split('\n').map((l, i) => errLineSet.has(i + 1) ? `<span class="errLineMark">${l || ' '}</span>` : l).join('\n');
@@ -14471,6 +14474,8 @@ function paintFind() {
   // the Process editor in color: every word painted by what it does, find matches on top (public/colorize.js)
   const ed = fTa() === $('#code');
   if (ed && colorsOn()) { fHl().innerHTML = markErrLines(toHtml(v, classify(v, S?.words), 0, v.length, findOpen() ? fMatches : [], fIdx)) + '\n '; syncHl(); return; }
+  // Colors off: with an error line, the words are painted by the overlay too, so the error line can be bold yellow (always, whatever the colors)
+  if (ed) $('#code').closest('.codeWrap').classList.toggle('errPaint', !colorsOn() && errLineSet.size > 0);
   if ((!findOpen() || !n) && !(ed && errLineSet.size)) { fHl().innerHTML = ''; return; }
   let out = '', last = 0;
   fMatches.forEach(([s, e], i) => { out += escHtml(v.slice(last, s)) + `<mark${i === fIdx ? ' class="cur"' : ''}>${escHtml(v.slice(s, e))}</mark>`; last = e; });
