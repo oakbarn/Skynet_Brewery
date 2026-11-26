@@ -8,6 +8,11 @@ sending codes and Patron), and the **🔐 Admin Settings** button at the top of 
 These settings belong to the **panel**, so they are the same in every Schema. **Admins** change them and press **Save**; everyone
 else can look.
 
+**The sections, in order** (Skynet Rule 2.42): **Mandatory** (Units, Brewer Type), **Your Brewery** (Brewery Name, Airport, Elevation,
+**Piped Manifold**), **Pipes, Hoses and Sizes** with its two sub-sections Pipes, Hoses and Sizes and IP Types (shown only when Piped
+Manifold is On; hidden, they keep their saved values), **New Build** (sub-section New Devices and Widgets), **Brewery Vessels**,
+**New User Recipes** (with Yeast Starter usually), then the rest. The parts below explain each setting.
+
 ## Units and your brewery
 
 | Setting | What it does |
@@ -85,7 +90,7 @@ without that Interface or Tab starts the old way. (Skynet Rule 4.6)
 
 What this brewery usually brews: **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** (to start) or **All Grain (own Grain Mill)**. When a Brew Day finds no Recipe, the **No Recipe Found** pop-up starts on it, and you can pick another there. See [No Recipe Found](100-brew-process#no-recipe-found).
 
-**Brewer Level**: what you brew on, from **1 Stove Top, One Pot, No Outlet** up to **9 All Grain Plus**. A new Brewing Tab in the New Schema Interview starts on the Level that fits it. **Yeast Starter usually**: information only; PreBrew reminds you a day or two ahead. Both are asked by the [Setup Interview](248-setup-interview).
+**Brewery Vessels**: a few questions (how many brewing vessels; then All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus, only the ones that fit the answers) work out your **Brewer Level**, from **1 Stove Top, One Pot, No Outlet** up to **9 All Grain Plus**, shown under them. A new Brewing Tab in the New Schema Interview starts on the Level that fits it. **Piped Manifold** (in Your Brewery): On when your vessels and pumps are joined by fixed pipes and valves. **Yeast Starter usually** (in New User Recipes): information only; PreBrew reminds you a day or two ahead. All are asked by the [Setup Interview](248-setup-interview).
 
 ## New User Recipes
 

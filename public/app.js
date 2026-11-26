@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -18390,7 +18390,9 @@ function btSend(now, set, was, metric) {
 }
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
-    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, brewerType: BREWER_TYPE_DEFAULT, brewerLevel: BREWER_LEVEL_DEFAULT, yeastStarter: false, pipedManifold: false, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
+    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, brewerType: BREWER_TYPE_DEFAULT, brewerLevel: BREWER_LEVEL_DEFAULT, yeastStarter: false, pipedManifold: false, ...NEW_RECIPE, ...(S.config.brewDefaults || {}),
+    // Brewery Vessels: the saved answers, or the ones of the saved Brewer Level
+    ...Object.fromEntries(VESSEL_KEYS.map(k => [k, vesselStart(S.config.brewDefaults || {}, k)])) };
   const shownMetric = d.units === 'Metric', shownUnits = d.units;      // what the boxes show now; Units changed here applies after Save
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
@@ -18398,39 +18400,54 @@ function renderDefaultTab(box) {
   // in Settings show here too, and both places change the same saved value (Rule 2.42)
   const pf = panelSetFields(d), unitsRow = pf.find(x => x[0] === 'units'), panelRows = pf.filter(x => x[0] !== '_un' && x[0] !== 'units');
   const fields = w => [['_d', 'Every default is here, for every Schema (Rule 2.42). Accounts, users and Patron are in Admin Settings (the button at the top).', 'note'],
-    ['_ub', 'Units and your brewery', 'head'],
+    // Default settings markup (OakBarn Brewery, 2026-11-26): "Change to Mandatory", Units "Question 1", Brewer Type "Move to Mandatory"
+    ['_ub', 'Mandatory', 'head'],
     unitsRow,
+    ['brewerType', 'Brewer Type', 'sel', BREWER_TYPES.map(t => [t.key, t.name]), true, false, { tip: 'What this brewery usually brews. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14), and you can pick another there.' }],
+    // "Add Your Brewery as the next Blue Section": Brewery Name, the Airport and Elevation ("Move to new Your Brewery Section") and
+    // "Add Piped Manifold Question If Yes go to Branch Manifold"
+    ['_yb', 'Your Brewery', 'head'],
     // Brewery Name (OakBarn Brewery, 2026-11-21: "Default Brewery Name (Patron Level)"; "It is Just a Name we can display at the top of
     // every tab menu bar"; "greyed out later if not a Patron": Panel Updates)
     ['breweryName', 'Brewery Name', 'text', null, false, false, { tip: NEW_TIPS.brewery }],
     // the same boxes and Test as ☰ Menu > Default settings > Boil temperature (air pressure) (OakBarn Brewery, 2026-11-21: "There is no test beside the
     // ICOA field")
-    ['_btH', 'Boil temperature (air pressure)', 'head'],
     ['_btAirport', 'Airport (ICAO)', 'text', null, false, false, { tip: BT_TIPS.airport }],
     ['_btElev', `Elevation (${shownMetric ? 'm' : 'ft'})`, 'num', null, false, false, { tip: BT_TIPS.elev }],
-    ['_ps', 'Pipes, hoses and sizes', 'head'],
-    ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
     // Piped Manifold (OakBarn Brewery, 2026-11-26: "add a settings default Piped Manifold as a boolean"; a Switch, Rule 2.44)
-    ['pipedManifold', 'Piped Manifold', 'bool', null, false, false, { tip: 'On: your vessels and pumps are joined by fixed pipes and valves (a manifold), like the 3 Vessel sample. Off: you move hoses by hand. Information only for now: it changes nothing else. Asked by the Setup Interview (☰ Menu > 🧭 Setup Interview).' }],
+    ['pipedManifold', 'Piped Manifold', 'bool', null, false, false, { tip: 'On: your vessels and pumps are joined by fixed pipes and valves (a manifold), like the 3 Vessel sample. Off: you move hoses by hand. The Setup Interview asks about your pipes and hoses only when it is On. Asked by the Setup Interview (☰ Menu > 🧭 Setup Interview).' }],
+    // the Branch Manifold ("On the Settings Tab we need them as Sub Sections"): Pipes, Hoses and Sizes, and IP Types
+    ['_ps', 'Pipes, Hoses and Sizes', 'head'],
+    ['_psb', 'Pipes, Hoses and Sizes', 'box'],
+    ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
     ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
     // the Pipe and Hose pixels moved into the Tab Profile with the New Tabs boxes (OakBarn Brewery, 2026-11-17: "Tab Profile")
     // IP Type sizes (OakBarn Brewery, 2026-11-16: "A list of the sizes and type in Defualts with a TickBox to show in the List"; "all
     // Unclicked in the Default"): only the ticked ones, and the ones already used, show in the IP Type lists
-    ['_ipt', 'IP Types', 'head'],
+    ['_ipt', 'IP Types', 'box'],
     ['ipTicks', 'Sizes to show in the IP Type lists', 'ticks', null, false, false, { tip: DEF_TIPS.ipTicks }],
-    ['_bd', 'New Devices and Widgets (the Build)', 'head'],
+    ['_ipe', '', 'boxend'],
+    // "Sub Section of New Build Section (add it)"
+    ['_nbh', 'New Build', 'head'],
+    ['_bd', 'New Devices and Widgets (the Build)', 'box'],
     ['buildIface', 'Default Interface', 'sel', [['', '(the last one used)'], ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return [id, `${id}: ${x.name}`]; })], false, false, { tip: 'The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used (Rule 4.6).' }],
     ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).' }],
-    // New User Recipes (Default Tab 3, 2026-11-16): Units is a Skynet Panel Setting (☰ Menu > Default settings); Equipment Profile,
-    // Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are not Recipe defaults
-    // Brewer Type (OakBarn Brewery, 2026-11-25, "No Recipe Found": "Choice default is set by brewer Type from Skynet Settings")
-    ['_bwt', 'Brewer Type', 'head'],
-    ['brewerType', 'Brewer Type', 'sel', BREWER_TYPES.map(t => [t.key, t.name]), true, false, { tip: 'What this brewery usually brews. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14), and you can pick another there.' }],
-    // the Setup Interview's answers (Rule 2.75, Rule 2.42): Brewer Level (OakBarn Brewery, 2026-11-26: "A and Mandatory") and Yeast Starter
-    ['brewerLevel', 'Brewer Level', 'sel', BREWER_LEVELS.map(([k, t]) => [k, t]), true, false, { tip: 'What you brew on, from one pot on the stove (1) to All Grain Plus (9). It picks the Level a new Brewing Tab starts on in the New Schema Interview. You can always pick a lower level. Asked by the Setup Interview (☰ Menu > 🧭 Setup Interview).' }],
-    ['yeastStarter', 'Yeast Starter usually', 'bool', null, false, false, { tip: 'Information only: PreBrew reminds you a day or two ahead when it is On. It changes nothing else.' }],
+    ['_bde', '', 'boxend'],
+    // Brewer Level: "New Section of Brewery Vessels and with be questions not a DDLB": the same questions as the Setup Interview; the
+    // Brewer Level is worked out from them (the line under them)
+    ['_bv', 'Brewery Vessels', 'head'],
+    ['vesselCount', 'How many brewing vessels?', 'sel', VESSEL_COUNTS.map(([k, t]) => [k, t]), false, false, { tip: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the questions under it, it works out your Brewer Level: it picks the Level a new Brewing Tab starts on in the New Schema Interview.' }],
+    ['allInOne', 'An All In One?', 'bool', null, false, false, { tip: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).' }],
+    ['kettleOutlet', 'Kettle has an outlet (a ball valve low on the side)', 'bool', null, false, false, { tip: 'Off: you pour or siphon.' }],
+    ['kettlePump', 'A pump (whirlpool, transfer or chiller)', 'bool', null, false, false, { tip: 'A pump with your stove top kettle.' }],
+    ['pumpCount', 'How many pumps?', 'sel', PUMP_COUNTS, false, false, { tip: 'The pumps that move your wort and water between the two vessels.' }],
+    ['recirculate', 'Recirculating mash (HERMS or RIMS), two pumps, motorized valves', 'bool', null, false, false, { tip: 'Off: HLT, Mash Tun and Kettle with one pump, like the 3 Vessel sample.' }],
+    ['allGrainPlus', 'Controlled fermentors, motorized valves and a tap water Supply Manifold', 'bool', null, false, false, { tip: 'On: All Grain Plus, the top Brewer Level.' }],
+    ['_blv', '', 'note'],
     ['_r', 'New User Recipes', 'head'],
     ['_rn', 'A new Recipe starts with these, and you can change each one in the Recipe.', 'note'],
+    // "Move to New User Recipes"
+    ['yeastStarter', 'Yeast Starter usually', 'bool', null, false, false, { tip: 'Information only: PreBrew reminds you a day or two ahead when it is On. It changes nothing else.' }],
     ['_batch', `Batch Size (${w.units === 'Metric' ? 'Liters' : 'Gallons'})`, 'num', null, false, false, { tip: DEF_TIPS.batch }],
     ['mashProfile', 'Mash Profile', 'sel', [...pick(S.mashProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.mash }],
     ['boilProfile', 'Boil Profile', 'sel', [...pick(S.boilProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.boil }],
@@ -18488,6 +18505,25 @@ function renderDefaultTab(box) {
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   // the Brewery Name is a Patron perk (Panel Update 10, item 4): greyed out with the ⛔ for a non-Patron (Rule 18.46); what was typed is kept
   if (!S.patron?.brewery) { const bn = f.box.querySelector('[data-k="breweryName"]'); if (bn) bn.disabled = true; }
+  // Brewery Vessels: only the questions that fit the answers so far show (the same `when` as the Setup Interview), and the Brewer Level
+  // they give is the line under them. The Branch Manifold (Pipes, Hoses and Sizes with its two sub-sections) shows only when Piped
+  // Manifold is On (Default settings markup, 2026-11-26: "only displayed when Piped Manifold is Yes"; Rule 2.42). Hidden boxes keep
+  // their saved values.
+  const defBranch = () => {
+    const el = k => f.box.querySelector(`[data-k="${k}"]`), val = k => { const e = el(k); return !e ? undefined : e.type === 'checkbox' ? e.checked : e.value; };
+    const a = Object.fromEntries([...VESSEL_KEYS, 'pipedManifold'].map(k => [k, val(k)]));
+    const rowOf = e => { while (e?.parentElement && !e.parentElement.matches('.menuForm, .dlgBox')) e = e.parentElement; return e; };
+    for (const k of VESSEL_KEYS) {
+      const q = SETUP_QUESTIONS.find(x => x.id === k), row = rowOf(el(k)), on = !q || whenOk(q, a);
+      if (row) { row.classList.toggle('hidden', !on); row.previousElementSibling?.classList.toggle('hidden', !on); }
+    }
+    const lv = brewerLevelOf(a), note = f.box.querySelector('[data-note="_blv"]');
+    if (note) note.textContent = 'Your Brewer Level: ' + (BREWER_LEVELS.find(([k]) => k === lv)?.[1] ?? '');
+    const branch = [...f.box.querySelectorAll('.dlgHead')].filter(x => x.textContent === 'Pipes, Hoses and Sizes')
+      .concat([...f.box.querySelectorAll('.dlgBox')].filter(x => ['Pipes, Hoses and Sizes', 'IP Types'].includes(x.querySelector('.dlgBoxTitle')?.textContent)));
+    for (const x of branch) x.classList.toggle('hidden', !a.pipedManifold);
+  };
+  f.box.addEventListener('change', defBranch); defBranch();
   // Test beside the Airport (ICAO) box: keeps the Airport and Elevation as typed (as Test in Settings does), fetches the report now
   // and shows the airport, the air pressure and the boil temperature
   const btRes = h('div', { class: S.boil?.note ? 'btWarn' : 'muted', style: 'grid-column:1/-1' }, btLine(S.boil));
@@ -18502,6 +18538,7 @@ function renderDefaultTab(box) {
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
     f.read();
+    { const lv = brewerLevelOf(d); if (lv) d.brewerLevel = lv; }      // the Brewer Level from the Brewery Vessels questions
     // the Panel settings boxes are here too (2026-11-21, Rule 2.42): empty = Skynet's own, as in ☰ Menu > Default settings
     for (const k of PANEL_SET_KEYS) if (d[k] === undefined || d[k] === '' || d[k] === null) delete d[k];
     if (typeof d.breweryName === 'string') d.breweryName = d.breweryName.trim();

@@ -40,6 +40,27 @@ export const BREWER_LEVELS = [
   ['9', '9 All Grain Plus', 'Three or more vessels, controlled fermentors, motorized valves, a tap water Supply Manifold.'],
 ];
 export const BREWER_LEVEL_DEFAULT = '7';
+// Brewery Vessels (OakBarn Brewery, 2026-11-26, Default settings markup: Brewer Level "New Section of Brewery Vessels and with be
+// questions not a DDLB"): a few plain questions about the vessels work out the Brewer Level, kept as brewerLevel as before
+export const VESSEL_COUNTS = [['1', 'One vessel', 'One pot, or one All In One'], ['2', 'Two vessels', 'A Mash Tun (it may be a cooler) and a Kettle'], ['3', 'Three or more vessels', 'HLT, Mash Tun and Kettle']];
+export const PUMP_COUNTS = [['1', 'One pump (or none)'], ['2', 'Two pumps']];
+export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
+// the Brewer Level (1 to 9) from the answers
+export function brewerLevelOf(v) {
+  const n = String(v?.vesselCount ?? '');
+  if (n === '1') return v.allInOne ? '4' : v.kettlePump ? '3' : v.kettleOutlet ? '2' : '1';
+  if (n === '2') return String(v.pumpCount) === '2' ? '6' : '5';
+  if (n === '3') return v.allGrainPlus ? '9' : v.recirculate ? '8' : '7';
+  return null;
+}
+// the answers that give a Brewer Level (a saved Level from before the questions, or Skynet's 7)
+export function vesselAnswersOf(level) {
+  const l = +level || +BREWER_LEVEL_DEFAULT;
+  const a = { vesselCount: l <= 4 ? '1' : l <= 6 ? '2' : '3', allInOne: l === 4, kettleOutlet: l === 2 || l === 3, kettlePump: l === 3, pumpCount: l === 6 ? '2' : '1', recirculate: l >= 8, allGrainPlus: l === 9 };
+  return a;
+}
+// the saved answers, or the ones from the saved Brewer Level
+export const vesselStart = (d, k) => d?.[k] !== undefined ? d[k] : vesselAnswersOf(d?.brewerLevel)[k];
 // the Level the New Schema Interview starts a Brewing Tab on (Rule 2.58), from the Brewer Level and the Brewer Type, when no Tab
 // Level was picked before
 export function nsiLevelOf(brewerLevel, brewerType) {
@@ -95,27 +116,51 @@ export const SETUP_QUESTIONS = [
   { id: '_brewery', step: 'Brewery', kind: 'branch', save: 'none',
     ask: 'The Brewery Equipment Interview',
     why: 'A few questions about the equipment in the brewery you have, or the one you are building. Next ▶ starts it. Skip keeps Skynet\'s own answers for all of them; you can change each one any time on ☰ Menu > Default settings.' },
-  { id: 'brewerLevel', step: 'Brewery', kind: 'pick', save: 'defaults',
-    ask: 'What do you brew on (or what are you building)?',
-    why: 'Your Brewer Level: your equipment, from one pot on the stove to All Grain Plus. Skynet uses it to pick the Schema Template, the Level of a new Brewing Tab and the Brew Day steps that fit. You can always pick a lower level.',
-    choices: BREWER_LEVELS,
-    start: ctx => BREWER_LEVELS.some(([k]) => k === String(ctx.defaults?.brewerLevel)) ? String(ctx.defaults.brewerLevel) : BREWER_LEVEL_DEFAULT },
-  { id: 'defPipeSize', step: 'Brewery', kind: 'pick', save: 'defaults',
+  // Brewery Vessels: the questions that work out the Brewer Level (from one pot on the stove, 1, to All Grain Plus, 9). Skynet uses the
+  // Level to pick the Schema Template, the Level of a new Brewing Tab and the Brew Day steps that fit
+  { id: 'vesselCount', step: 'Brewery', kind: 'pick', save: 'defaults',
+    ask: 'How many brewing vessels do you have (or are you building)?',
+    why: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT). Not the fermentors. With the next few questions it works out your Brewer Level, from one pot on the stove to All Grain Plus.',
+    choices: VESSEL_COUNTS, start: ctx => vesselStart(ctx.defaults, 'vesselCount') },
+  { id: 'allInOne', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
+    ask: 'Is it an All In One?',
+    why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
+    start: ctx => vesselStart(ctx.defaults, 'allInOne') },
+  { id: 'kettleOutlet', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '1', allInOne: false },
+    ask: 'Does your kettle have an outlet (a ball valve low on the side)?',
+    why: 'No: you pour or siphon.',
+    start: ctx => vesselStart(ctx.defaults, 'kettleOutlet') },
+  { id: 'kettlePump', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '1', allInOne: false },
+    ask: 'Do you have a pump (whirlpool, transfer or chiller)?',
+    why: 'A pump with your stove top kettle.',
+    start: ctx => vesselStart(ctx.defaults, 'kettlePump') },
+  { id: 'pumpCount', step: 'Brewery', kind: 'pick', save: 'defaults', when: { vesselCount: '2' },
+    ask: 'How many pumps?', why: 'The pumps that move your wort and water between the two vessels.',
+    choices: PUMP_COUNTS, start: ctx => String(vesselStart(ctx.defaults, 'pumpCount')) },
+  { id: 'recirculate', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+    ask: 'Do you recirculate the mash (HERMS or RIMS) with two pumps and motorized valves?',
+    why: 'No: HLT, Mash Tun and Kettle with one pump, like the 3 Vessel sample.',
+    start: ctx => vesselStart(ctx.defaults, 'recirculate') },
+  { id: 'allGrainPlus', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+    ask: 'Do you also have controlled fermentors, motorized valves and a tap water Supply Manifold?',
+    why: 'Yes: All Grain Plus, the top Brewer Level.',
+    start: ctx => vesselStart(ctx.defaults, 'allGrainPlus') },
+  // Piped Manifold (OakBarn Brewery, 2026-11-26: "add a settings default Piped Manifold as a boolean"): Yes goes to the Branch Manifold: Pipe size and Hose size (Default settings markup, 2026-11-26: "Add Piped Manifold Question If Yes go to Branch Manifold")
+  { id: 'pipedManifold', step: 'Brewery', kind: 'yesno', save: 'defaults',
+    ask: 'Is your brewery a Piped Manifold?',
+    why: 'Yes: your vessels and pumps are joined by fixed pipes and valves (a manifold), like the 3 Vessel sample. No: you move hoses by hand. Yes: Skynet asks about your pipes and hoses next.',
+    start: ctx => ctx.defaults?.pipedManifold === true },
+
+  { id: 'defPipeSize', step: 'Brewery', kind: 'pick', save: 'defaults', when: { pipedManifold: true },
     ask: 'What size are most of your pipes?',
     why: 'A new pipe on a Tab starts at this size. You can change any pipe later.',
     choices: ctx => ctx.pipeSizes,
     start: ctx => ctx.defaults?.defPipeSize || '0.5' },
-  { id: 'defHoseSize', step: 'Brewery', kind: 'pick', save: 'defaults',
+  { id: 'defHoseSize', step: 'Brewery', kind: 'pick', save: 'defaults', when: { pipedManifold: true },
     ask: 'What size are most of your hoses?',
     why: 'A new hose on a Tab starts at this size. You can change any hose later.',
     choices: ctx => ctx.hoseSizes,
     start: ctx => ctx.defaults?.defHoseSize || '0.5' },
-
-  // Piped Manifold (OakBarn Brewery, 2026-11-26: "add a settings default Piped Manifold as a boolean"): information only for now
-  { id: 'pipedManifold', step: 'Brewery', kind: 'yesno', save: 'defaults',
-    ask: 'Is your brewery a Piped Manifold?',
-    why: 'Yes: your vessels and pumps are joined by fixed pipes and valves (a manifold), like the 3 Vessel sample. No: you move hoses by hand. Information only for now: it changes nothing else.',
-    start: ctx => ctx.defaults?.pipedManifold === true },
 
   // ---- 5 Recipes: the Recipe Default Interview (Panel Update 17: "Opens the Recipe Default Interview"; item 7: "Yeast Starter goes to
   // Recipe Interview"). The defaults of a new User Recipe (☰ Menu > Default settings > New User Recipes). The Recipe Interview of a
@@ -170,7 +215,7 @@ export const setupNeeded = config => !config?.brewDefaults?.setupDone && !Object
 export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
-const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.includes(a?.[k]) : a?.[k] === v);
+export const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.includes(a?.[k]) : a?.[k] === v);
 export const shownQuestions = (a, ctx, list = SETUP_QUESTIONS) => list.filter(q => whenOk(q, a) && (!q.show || q.show(a, ctx)));
 // Skynet's own answers to start (what Next, Next, Next, or Skip, keeps)
 export function startAnswers(ctx, list = SETUP_QUESTIONS) {
@@ -214,6 +259,8 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null) {
   const elevationM = el === '' || el == null ? null : Math.round((metric ? +el : +el * US_FT) * 10) / 10;
   if (ap !== (ctx.boil?.airport || '') || elevationM !== (ctx.boil?.elevationM ?? null))
     out.boil = { airport: ap, elevationM, pressure: ctx.boil?.pressureHpa ?? null };
+  // the Brewer Level from the Brewery Vessels answers (when they were asked)
+  if (shownQuestions(a, ctx, list).some(q => q.id === 'vesselCount')) { const l = brewerLevelOf(a); if (l) brewDefaults.brewerLevel = l; }
   brewDefaults.setupDone = true;
   if (answered) brewDefaults.setupAnswered = list.filter(q => q.kind !== 'branch' && answered.has(q.id)).map(q => q.id);
   return out;

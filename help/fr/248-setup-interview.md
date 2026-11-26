@@ -43,9 +43,9 @@ l’écran est trop petit. Un téléphone ou une tablette convient pour suivre e
 | 2 | **Help language** (réponse obligatoire) | Anglais ou français pour les pages d’aide et les bulles, dans ce navigateur. Dès qu’une User Language est sur ce Brain (? Help > 🌐 Languages), elle est aussi un choix | English |
 | 3 | **What is the highest level you will brew now?** (réponse obligatoire) | Votre Brewer Type : Extract Can Kit, Extract Partial Grain and Hops ou All Grain. C’est juste pour commencer : Skynet grandit avec vous. La fenêtre No Recipe Found commence sur lui (règle 16.14) | All Grain |
 | 3 | **Do you grind your own grain?** (seulement après All Grain) | Oui : All Grain (own Grain Mill) | No |
-| 4 Brewery | **Brewer Level** | Sur quoi vous brassez, ou ce que vous construisez, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
-| 4 Brewery | **Pipe size** et **Hose size** | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
-| 4 Brewery | **Is your brewery a Piped Manifold?** | Oui : vos cuves et pompes sont reliées par des tuyaux fixes et des vannes, comme dans l’exemple 3 Vessel. Non : vous déplacez des tuyaux souples à la main. Pour information pour l’instant. L’interrupteur **Piped Manifold** de Default settings | No |
+| 4 Brewery | **Brewery Vessels** : combien de cuves de brassage, puis (selon la réponse) All In One, sortie, pompe, combien de pompes, HERMS ou RIMS, All Grain Plus | Elles calculent votre **Brewer Level**, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
+| 4 Brewery | **Is your brewery a Piped Manifold?** | Oui : vos cuves et pompes sont reliées par des tuyaux fixes et des vannes, comme dans l’exemple 3 Vessel. Non : vous déplacez des tuyaux souples à la main. L’interrupteur **Piped Manifold** de Default settings | No |
+| 4 Brewery | **Pipe size** et **Hose size** (seulement après Piped Manifold Oui) | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
 | 5 Recipes | **Yeast Starter** | Pour information : PreBrew vous le rappelle un jour ou deux avant | No |
 | 5 Recipes | **Batch Size** | La quantité de bière d’une nouvelle Recipe, dans le fermenteur, en gallons (US) ou en litres (Metric) ; gardée en litres | 5 gallons (18,9 litres) |
 | 5 Recipes | **Mash Profile** (All Grain seulement) et **Boil Profile** | Les Profiles avec lesquels une nouvelle Recipe commence | Single Step, Batch Sparge et le Boil Profile de 60 minutes de Skynet |
@@ -58,7 +58,7 @@ L’étape Recipes règle seulement ce avec quoi une nouvelle Recipe commence. U
 
 ## Les Brewer Levels {#the-brewer-levels}
 
-Chaque niveau a tout ce qu’a le niveau du dessous. Vous pouvez toujours choisir un niveau plus bas.
+Chaque niveau a tout ce qu’a le niveau du dessous. Les questions Brewery Vessels (dans l’entretien et dans Default settings) le calculent.
 
 1. **Stove Top, One Pot, No Outlet** : une marmite sur la cuisinière ; vous versez ou siphonnez.
 2. **Stove Top, One Pot, Manual Outlet** : une marmite avec une vanne à bille en bas sur le côté.

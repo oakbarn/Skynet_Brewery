@@ -39,9 +39,9 @@ phone or tablet is fine for watching and running a brew day.
 | 2 | **Help language** (must be answered) | English or French for the Help pages and balloons, in this browser. Once a User Language is on this Brain (? Help > 🌐 Languages), it is a choice too | English |
 | 3 | **What is the highest level you will brew now?** (must be answered) | Your Brewer Type: Extract Can Kit, Extract Partial Grain and Hops, or All Grain. This is just to get started: Skynet can grow with you. The No Recipe Found pop-up starts on it (Rule 16.14) | All Grain |
 | 3 | **Do you grind your own grain?** (only after All Grain) | Yes: All Grain (own Grain Mill) | No |
-| 4 Brewery | **Brewer Level** | What you brew on, or are building, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
-| 4 Brewery | **Pipe size** and **Hose size** | The size a new pipe or hose starts at | 1/2" |
-| 4 Brewery | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. Information only for now. The **Piped Manifold** switch on Default settings | No |
+| 4 Brewery | **Brewery Vessels**: how many brewing vessels, then (by the answer) All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus | They work out your **Brewer Level**, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
+| 4 Brewery | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. The **Piped Manifold** switch on Default settings | No |
+| 4 Brewery | **Pipe size** and **Hose size** (only after Piped Manifold Yes) | The size a new pipe or hose starts at | 1/2" |
 | 5 Recipes | **Yeast Starter** | Information only: PreBrew reminds you a day or two ahead | No |
 | 5 Recipes | **Batch Size** | How much beer a new Recipe makes, into the fermenter, in gallons (US) or liters (Metric); kept in liters | 5 gallons (18.9 liters) |
 | 5 Recipes | **Mash Profile** (All Grain only) and **Boil Profile** | The Profiles a new Recipe starts with | Single Step, Batch Sparge and Skynet's 60 minute Boil Profile |
@@ -53,7 +53,7 @@ The Recipes step only sets what a new Recipe starts with. A Brew Day asks about 
 
 ## The Brewer Levels
 
-Each level has everything the level below has. You can always pick a lower level.
+Each level has everything the level below has. The Brewery Vessels questions (in the interview and on Default settings) work it out.
 
 1. **Stove Top, One Pot, No Outlet**: one kettle on the stove; you pour or siphon.
 2. **Stove Top, One Pot, Manual Outlet**: one kettle with a ball valve low on the side.
