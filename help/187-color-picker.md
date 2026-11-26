@@ -8,7 +8,7 @@ Each color box is one dropdown with a swatch in front of it:
 
 1. **Default** keeps the item's normal color.
 2. **None** means no color at all (see-through).
-3. The standard colors by name, each with its swatch (White is RGB 250 250 250, Rule 2.7).
+3. The standard colors by name, each with its swatch. **White (Opaque)** is RGB 250 250 250, the White of all white text on the screen. **White (Transparent)** is RGB 255 255 255 and see-through, like None (Rule 2.7).
 4. Your own colors, shown by their RGB numbers, for example **RGB 32 178 170**.
 5. **Custom (add new) ...** pops up the **Color Picker** at once.
 

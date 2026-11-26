@@ -67,7 +67,7 @@ export function stoveSvg(w, h, outlet = '') {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${r(w)} ${r(h)}" width="${r(w)}" height="${r(h)}">` +
     handle(x0 - side * 0.85) + handle(x1 - 4) + out +
     `<rect x="${r(x0)}" y="${r(top)}" width="${r(bw)}" height="${r(bottom - top)}" rx="${r(rx)}" fill="#808080" stroke="#000" stroke-width="2"/>` +
-    `<rect x="${r(x0 + bw * 0.16)}" y="${r(top + rim + 4)}" width="${r(Math.max(2, bw * 0.07))}" height="${r(Math.max(2, bottom - top - rim - 12))}" rx="${r(Math.max(1, bw * 0.035))}" fill="#ffffff" fill-opacity="0.22"/>` +
+    `<rect x="${r(x0 + bw * 0.16)}" y="${r(top + rim + 4)}" width="${r(Math.max(2, bw * 0.07))}" height="${r(Math.max(2, bottom - top - rim - 12))}" rx="${r(Math.max(1, bw * 0.035))}" fill="#fafafa" fill-opacity="0.22"/>` +
     `<rect x="${r(x0 - 4)}" y="${r(top - rim / 2)}" width="${r(bw + 8)}" height="${r(rim)}" rx="${r(rim / 2)}" fill="#9a9a9a" stroke="#000" stroke-width="2"/>` +
     '</svg>';
 }
