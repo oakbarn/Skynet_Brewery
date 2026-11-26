@@ -135,13 +135,41 @@ function alertBar(text) {
 // Brain notices (OakBarn Brewery, 2026-11-12, Rule 6.31): Skynet stopped or the computer slept during a brew, or Windows has an
 // update waiting to restart the computer. They stay on every screen until a brewer closes them (closed on one, closed on all).
 // A stop or sleep notice has a Resume button for 15 minutes after the stop (OakBarn Brewery, 2026-11-12: "Resume Button").
-function renderBrainNotices(list) {
+let brainList = [];
+function renderBrainNotices(list = brainList) {
+  brainList = list || [];
   let box = document.getElementById('brainNotices');
   if (!box) { box = h('div', { id: 'brainNotices' }); document.body.append(box); }
-  box.replaceChildren(...(list || []).map(n => h('div', { class: 'brainNotice ' + (n.kind || ''), role: 'alert' },
+  box.replaceChildren(...errorStopNotices(), ...brainList.map(n => h('div', { class: 'brainNotice ' + (n.kind || ''), role: 'alert' },
     h('span', { style: 'white-space:pre-line' }, (n.kind === 'update' ? '🔄 ' : '⚠ ') + n.text),
     n.resume && can('operator') ? h('button', { class: 'resumeBtn', title: 'Turn back On what was On and start each Process again at its step', onclick: e => { e.target.disabled = true; api('POST', '/ui/brain/resume', { id: n.id }).then(r => { if (r?.failed?.length) alertBar('Not resumed: ' + r.failed.join(', ')); }).catch(err => { e.target.disabled = false; alertBar(err.message); }); } }, '▶ Resume') : null,
     h('button', { title: 'Close this notice on every screen', onclick: () => api('POST', '/ui/brain/notice', { id: n.id }).catch(e => alertBar(e.message)) }, '✕'))));
+}
+// A Process that stopped on an error (Rule 10.14; OakBarn Brewery, 2026-11-25: "leave up to the User to Resume"; "I could just re route
+// through the RIMS"). Everything stays as it is. On every screen until a brewer picks: ▶ Resume runs the line again (a pump, valve or heater
+// fixed or swapped), ⏭ Skip goes on at the next line (worked around it), ✕ leaves it stopped. It may stop on the same line again: Resume again.
+let errorAutoPick = {}, errorAutoTick = null;      // Next time this line fails, on each pop-up, by Process (this screen): '' | 'popup' | 'quiet'
+function errorStopNotices() {
+  const list = S?.errorStops || [];
+  const go = (n, skip) => e => { e.target.disabled = true; api('POST', `/ui/scripts/${encodeURIComponent(n.process)}/resume`, { skip, auto: errorAutoPick[n.process] || false }).then(() => { delete errorAutoPick[n.process]; }).catch(err => { e.target.disabled = false; alertBar(err.message); }); };
+  // a countdown on the pop-up while an Auto next time goes on by itself
+  clearInterval(errorAutoTick); errorAutoTick = list.some(n => n.auto) ? setInterval(() => renderBrainNotices(), 1000) : null;
+  return list.map(n => {
+    const op = can('operator'), secs = n.auto ? Math.max(0, Math.ceil((n.auto.at - Date.now()) / 1000)) : 0;
+    const pick = h('select', { onchange: e => { errorAutoPick[n.process] = e.target.value; renderBrainNotices(); } },
+      ...[['', 'Stop and wait for me'], ['popup', 'Auto: pop-up for 5 s, then go on'], ['quiet', 'Auto: no pop-up, go on']].map(([v, t]) => h('option', { value: v, ...(v === (errorAutoPick[n.process] || '') ? { selected: '' } : {}) }, t)));
+    return h('div', { class: 'brainNotice errorStop', role: 'alert' },
+      h('span', { style: 'white-space:pre-line' }, `⚠ ${n.process} stopped on an error, line ${n.line}: ${n.msg}\n${n.lineText}\n`,
+        n.auto ? h('b', {}, `Auto ${n.auto.skip ? 'Skip' : 'Resume'} in ${secs} s (picked the first time). Hold to stop it.`)
+          : 'Everything is left as it is. Fix what you can, then Resume. It is also on ☰ Menu > 🔧 Fix before next Brew Day.',
+        // Auto next time (OakBarn Brewery: "They have to set to auto resume as an Option. User Choice"): off unless picked, one warning
+        op && !n.auto ? h('label', { class: 'errAuto', title: `What happens if line ${n.line} fails again: Resume or Skip the same way you pick now, or wait for you` }, `\nNext time line ${n.line} fails: `, pick) : null,
+        op && !n.auto && errorAutoPick[n.process] ? h('div', { class: 'errAutoWarn' }, `⚠ You are responsible. If this line fails again, Skynet goes on by itself${errorAutoPick[n.process] === 'quiet' ? ' with no pop-up' : ' after 5 seconds'}. Stay with the brew and watch it.`) : null),
+      op && n.auto ? h('button', { class: 'resumeBtn', title: 'Stop the countdown: it waits for you, like the first time', onclick: () => api('POST', '/ui/errorstop/hold', { process: n.process }).catch(e => alertBar(e.message)) }, '⏸ Hold') : null,
+      op && !n.auto ? h('button', { class: 'resumeBtn', title: `Run line ${n.line} again and go on from there (after a pump, valve or heater is fixed)`, onclick: go(n, false) }, '▶ Resume') : null,
+      op && !n.auto ? h('button', { class: 'resumeBtn', title: `Leave line ${n.line} out and go on at the next line (you worked around it)`, onclick: go(n, true) }, `⏭ Skip line ${n.line}`) : null,
+      h('button', { title: 'Leave it stopped and close this on every screen', onclick: () => api('POST', '/ui/errorstop/close', { process: n.process }).catch(e => alertBar(e.message)) }, '✕'));
+  });
 }
 // Flame Out (OakBarn Brewery, 2026-11-14, Rule 6.33): a gas burner's Flame Out safety shut its gas. Every screen shows it in red, with a
 // beep every 2 seconds and the words spoken once, until a brewer closes it (closed on one, closed on all). Nothing turns back on by itself.
@@ -449,6 +477,7 @@ function connect() {
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
   es.addEventListener('brainNotices', e => renderBrainNotices(JSON.parse(e.data)));
+  es.addEventListener('errorStops', e => { S.errorStops = JSON.parse(e.data); renderBrainNotices(); });      // Resume after an error (Rule 10.14)
   es.addEventListener('flameOut', e => renderFlameOut(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
