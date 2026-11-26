@@ -85,6 +85,8 @@ without that Interface or Tab starts the old way. (Skynet Rule 4.6)
 
 What this brewery usually brews: **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** (to start) or **All Grain (own Grain Mill)**. When a Brew Day finds no Recipe, the **No Recipe Found** pop-up starts on it, and you can pick another there. See [No Recipe Found](100-brew-process#no-recipe-found).
 
+**Brewer Level**: what you brew on, from **1 Stove Top, One Pot, No Outlet** up to **9 All Grain Plus**. A new Brewing Tab in the New Schema Interview starts on the Level that fits it. **Yeast Starter usually**: information only; PreBrew reminds you a day or two ahead. Both are asked by the [Setup Interview](248-setup-interview).
+
 ## New User Recipes
 
 What a new Recipe starts with when you press **NEW** on the Recipe tab. You can change each one in the Recipe. **Units** (US or Metric) is at the top of this tab (see **Units and your brewery**).

@@ -85,6 +85,8 @@ sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6
 
 Ce que cette brasserie brasse d'habitude : **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** (au départ) ou **All Grain (own Grain Mill)**. Quand un jour de brassage ne trouve aucune recette, la fenêtre **No Recipe Found** commence sur ce choix, et vous pouvez en choisir un autre. Voir [Aucune recette trouvée](100-brew-process#no-recipe-found).
 
+**Brewer Level** : sur quoi vous brassez, de **1 Stove Top, One Pot, No Outlet** jusqu’à **9 All Grain Plus**. Un nouveau Tab de brassage dans le New Schema Interview commence sur le Level qui lui correspond. **Yeast Starter usually** : pour information ; PreBrew vous le rappelle un jour ou deux avant. Les deux sont demandés par le [Setup Interview](248-setup-interview).
+
 ## New User Recipes {#new-user-recipes}
 
 Ce avec quoi commence une nouvelle Recette quand vous appuyez sur **NEW** sur le Tab Recipe. Vous pouvez changer chaque chose dans la Recette. **Units** (US ou Métrique) est en haut de ce Tab (voir **Unités et votre brasserie**).

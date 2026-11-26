@@ -1740,6 +1740,28 @@ drag** hint on a Quick Disconnect hose end (was 3) (OakBarn Brewery, 2026-11-25:
 is too long"). A note with a button on it (**↩ Undo**) keeps its own time, so there is time to press it. *Was (2026-11-24):* blue
 notes 3 seconds, red notes 5.
 
+2.75 **The Setup Interview** (OakBarn Brewery, 2026-11-26, typos fixed: "Build what we have so far. I will add to it as we go. Start
+the no Skynet settings interview first so that the Skynet settings can be set with a skip button. First question (that cannot be
+skipped) US or Metric"; "We may change the order and have other mandatory but I have to see in practice and what we need for the
+program to work"; on the Brewer Level: "A and Mandatory"; Skynet_Private Plans 2026-11-23_Brewer_Levels_and_PreBrew_Interview.md
+section 1A). On a **new installation** (no Skynet settings saved yet) an Admin is asked the Skynet settings **one question at a
+time**, before the Welcome sample Schema page. **☰ Menu > 🧭 Setup Interview** runs it again any time (Admins); it starts on the saved
+answers and changes nothing until **✔ Finish**.
+- Each page: the question, a short explanation, and **◀ Back · Skip · Next ▶**, then **Close · ✕** (Rule 2.54). 6 or fewer choices are
+  one-click boxes (one click picks and goes on); more than 6 are a dropdown (Rule 2.6). The last page, **Done**, lists every answer
+  with **✎** to go back to it, and **✔ Finish** saves them. Close saves nothing (a new installation asks again next start).
+- **Skip** keeps Skynet's own answer, with no reminder later (ONE WARNING ONLY). **Must** questions have no Skip: **US or Metric**
+  (always question 1) and the **Brewer Level**.
+- The first page carries the one big warning (red, Rule 6.20 look), shown to everyone: design on a computer, not a phone or tablet.
+- Questions now: Units (must), Help language, Brewery Name (Patrons), Airport (with Test), Elevation, **Brewer Level** (must; the 9
+  level ladder of the plan, section 1), Brewer Type, Yeast Starter, Pipe size, Hose size. Every answer is also on ☰ Menu > Default
+  settings (Rule 2.42; Brewer Level and Yeast Starter added there); the Help language is this browser's (Rule 11.11). Data stays
+  metric (Elevation kept in meters, Rule 2.59).
+- **The questions are data** (public/setupinterview.js `SETUP_QUESTIONS`): the order, which are **must**, and new questions are
+  changed there, one row each, with nothing else to change.
+- The New Schema Interview (Rule 2.58) starts a Brewing Tab's Level from the Brewer Level when no Level was picked before.
+Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -7447,6 +7469,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-26: Rule 2.75 new (OakBarn Brewery: "Start the no Skynet settings interview first ... First question (that cannot be skipped) US or Metric"; Brewer Level "A and Mandatory"): the Setup Interview on a new installation and on ☰ Menu; questions kept as data; Brewer Level and Yeast Starter on Default settings. Help 248.
 - 2026-11-25: Rule 16.11 changed (OakBarn Brewery: "I want it on the Manifold Tab ... By default it goes where it started but can be on a different tab (or we could just put a true Clone on the other Tab)"; picked Change the Rule): the fill's Override goes by default on the Tab where the fill starts, and may be on a different Tab or have a Clone there. Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")
 - 2026-11-26: Rule 17.15 changed (OakBarn Brewery picked A, "Yes, dated like the Library"): Save this Recipe after an import saves dated ("Name yyyy:mm:dd (n)", Actual AAU 0, Rule 17.21); no Overwrite / Add new question. Help 99.
 - 2026-11-25: Rule 17.11 note (OakBarn Brewery: "The Boil time can be different for each kit and I did not even realize the one I got was a No Boil one"): a NEW Level 1 Can Kit Recipe starts with Boil Minutes 0 (No Boil) and no Boil Profile; Boil Minutes tip. Help 99.
