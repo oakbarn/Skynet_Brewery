@@ -1820,5 +1820,11 @@
  "Change this answer": "Changer cette réponse",
  "Ask the Setup questions again: Units, Help language, your airport and Elevation, Brewer Level, Brewer Type, Yeast Starter, pipe and hose sizes. Starts on your saved answers; nothing changes until ✔ Finish.": "Reposer les questions de configuration : Units, langue de l'aide, votre aéroport et Elevation, Brewer Level, Brewer Type, Yeast Starter, tailles des tuyaux rigides et souples. Commence sur vos réponses enregistrées ; rien ne change avant ✔ Finish.",
  "What you brew on, from one pot on the stove (1) to All Grain Plus (9). It picks the Level a new Brewing Tab starts on in the New Schema Interview. You can always pick a lower level. Asked by the Setup Interview (☰ Menu > 🧭 Setup Interview).": "Sur quoi vous brassez, d'une marmite sur la cuisinière (1) jusqu'à All Grain Plus (9). Il choisit le Level sur lequel commence un nouveau Tab de brassage dans le New Schema Interview. Vous pouvez toujours choisir un niveau plus bas. Demandé par le Setup Interview (☰ Menu > 🧭 Setup Interview).",
- "Information only: PreBrew reminds you a day or two ahead when it is On. It changes nothing else.": "Pour information : PreBrew vous le rappelle un jour ou deux avant quand il est sur On. Il ne change rien d'autre."
+ "Information only: PreBrew reminds you a day or two ahead when it is On. It changes nothing else.": "Pour information : PreBrew vous le rappelle un jour ou deux avant quand il est sur On. Il ne change rien d'autre.",
+ "Make the Recipe by answering questions, one page at a time (or IMPORT a file)": "Créer la recette en répondant à des questions, une page à la fois (ou IMPORTer un fichier)",
+ "Open the Help page of the Recipe Interview": "Ouvrir la page d'aide du Recipe Interview",
+ "Leave this one empty and go on. You can fill it in on the Recipe tab later.": "Laisser celle-ci vide et continuer. Vous pourrez la remplir plus tard dans le Tab Recipe.",
+ "Stop the interview. Nothing is changed.": "Arrêter l'entretien. Rien n'est changé.",
+ "Take this row out": "Retirer cette ligne",
+ "Make the Recipe by answering questions, one page at a time: every amount, time and temperature (Rule 17.22)": "Créer la recette en répondant à des questions, une page à la fois : chaque quantité, durée et température (règle 17.22)"
 }

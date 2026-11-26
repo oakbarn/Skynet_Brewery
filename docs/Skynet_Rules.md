@@ -6153,6 +6153,26 @@ in the saved copy; the open Recipe keeps its name and its Actual AAUs. A Recipe 
 first"). **Library ... > 🗑 Delete a saved Recipe** takes one out (as before). The import's "Save this Recipe?" (Rule 17.15) is
 unchanged. Help 99. **Both programs:** the BruControl Import makes no Recipes.
 
+
+17.22 **The Recipe Interview** (OakBarn Brewery, 2026-11-26, typos fixed: "The recipe from northern brewer recipe needs to be turned into
+a generic interview with the questions answered to set up the recipe and Brew Day. I will likely add some questions that are not
+there"; "how much water and for how long. Any temperatures. Like the stuff you might get from Beer smith recipe, but have to ask about
+every thing with an interview ... The first question should be do you have a Recipe XML you want to Import. 2 Branches Yes 1: Go to the
+Import 2 No: Go to Interview for Manual Recipe. The question like Is this an Extract Kit: Branch again if Yes for question Pertaining
+only to and Extract Kit>No, All Grain Yes All Grain Interview No: Kombucha, Ginger Beer ... in a DDLB and so on"; "Build what we have so
+far. I will add to it as we go"; Skynet_Private Plans 2026-11-23_Brewer_Levels_and_PreBrew_Interview.md section 5.3). **🧭 INTERVIEW**
+on ☰ Menu > Recipe and **🧭 Recipe Interview** on the No Recipe Found pop-up (Rule 16.14) ask the Recipe one page at a time:
+- R1 IMPORT? (Yes: the Recipe tab's IMPORT) · R2 Extract Kit? (branch E) · R3 All Grain? (branch A) · else What are you making?
+  (dropdown, branch O); then every branch: Ferment and Package (F) and Brew Day (B). Every water amount, time and temperature is asked.
+  A row shows only when it fits (steeping grains for Level 3 kits, no hops for a Can Kit, "grain milled?" for All Grain (own Grain
+  Mill), Mead's nutrients ...). R1 to R3 and O1 pick the branch: no Skip; every other page has Skip.
+- Typed in Units, kept metric (Rule 2.59). ✔ Finish makes the Recipe at its Level (Can Kit 1, Extract with Hops 2, Steeping Grains 3,
+  All Grain 4, Other Brews 1) and opens it on the Recipe tab; Calculate and Save as always; a waiting ask_recipe goes on.
+- An answer with no Recipe box yet is kept in the Recipe's **interview** part (metric), never dropped (plan 5.3 "New Recipe fields").
+- **The questions are data** (public/recipeinterview.js `RECIPE_QUESTIONS`), numbered as in the plan; a new one takes the next free
+  number of its branch or a letter (E7a), and the row before it points to it.
+Help 249. **Both programs:** the BruControl Import's recipes are IMPORTed; nothing changes there.
+
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
@@ -7469,6 +7489,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
 - 2026-11-26: Rule 2.75 new (OakBarn Brewery: "Start the no Skynet settings interview first ... First question (that cannot be skipped) US or Metric"; Brewer Level "A and Mandatory"): the Setup Interview on a new installation and on ☰ Menu; questions kept as data; Brewer Level and Yeast Starter on Default settings. Help 248.
 - 2026-11-25: Rule 16.11 changed (OakBarn Brewery: "I want it on the Manifold Tab ... By default it goes where it started but can be on a different tab (or we could just put a true Clone on the other Tab)"; picked Change the Rule): the fill's Override goes by default on the Tab where the fill starts, and may be on a different Tab or have a Clone there. Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")
 - 2026-11-26: Rule 17.15 changed (OakBarn Brewery picked A, "Yes, dated like the Library"): Save this Recipe after an import saves dated ("Name yyyy:mm:dd (n)", Actual AAU 0, Rule 17.21); no Overwrite / Add new question. Help 99.

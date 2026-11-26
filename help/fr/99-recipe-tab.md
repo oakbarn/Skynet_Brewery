@@ -6,6 +6,7 @@ En haut :
 
 - **IMPORT** fait venir un fichier de recette (plus bas).
 - **NEW** vide la recette et en commence une à partir des valeurs par défaut (☰ Menu > Default).
+- **🧭 INTERVIEW** crée la recette en vous posant des questions, une page à la fois : chaque quantité, durée et température. Voir [Recipe Interview](249-recipe-interview).
 - **Library ...** ouvre une recette enregistrée, enregistre celle-ci (💾 **Save this Recipe to the library**), ou supprime une recette enregistrée (🗑). Les recettes enregistrées sont sur le Brain dans `config/recipes`. **Save this Recipe** l'enregistre telle qu'elle a été corrigée, avec la date à la fin de son nom (`Pale Ale 2026:11:25` ; enregistrée de nouveau à la même date : `Pale Ale 2026:11:25 (2)`). L'Actual AAU de chaque houblon est enregistré à 0, car il doit être à zéro si la recette sert de nouveau. La recette ouverte garde son nom et ses Actual AAU. Après un **IMPORT**, Skynet demande **Save this Recipe?** : Yes l'enregistre de la même façon, datée.
 - **Cancel** et **Save**.
 

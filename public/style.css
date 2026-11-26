@@ -1911,3 +1911,14 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupPick.cur { outline: 2px solid var(--accent); }
 .setupDlg select, .setupDlg input { min-width: 16em; }
 .setupDlg .setupSum td { padding: 3px 8px; vertical-align: top; }
+/* The Recipe Interview (Rule 17.22): several answers on one page, and tables of rows */
+.rqDlg { max-width: min(900px, calc(100vw - 32px)); }
+.rqDlg .rqBox { margin: 8px 0; }
+.rqDlg .rqBox > label { display: block; font-weight: 600; margin-bottom: 3px; }
+.rqDlg .rqPicks { flex-direction: row; flex-wrap: wrap; }
+.rqDlg .rqRow { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+.rqDlg .rqList table { border-collapse: collapse; margin: 6px 0; }
+.rqDlg .rqList th { text-align: left; font-weight: 600; padding: 2px 6px; }
+.rqDlg .rqList td { padding: 2px 4px; }
+.rqDlg .rqList input, .rqDlg .rqList select { min-width: 0; width: 100%; box-sizing: border-box; }
+.rqDlg .rqList input[type=number] { width: 6em; }
