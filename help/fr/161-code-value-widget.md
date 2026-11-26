@@ -21,7 +21,7 @@ Dans le Code, **`{value}`** représente la Value du Widget qui vient d'être ré
 
 ```
 MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value}
-gV_Strike_Temp = {value} + 2
+gblV_Strike_Temp = {value} + 2
 print "Kettle Setpoint is now " + {value}
 ```
 

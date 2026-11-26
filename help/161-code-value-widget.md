@@ -22,7 +22,7 @@ In the Code, **`{value}`** stands for the Value of the Widget just set. Use it a
 
 ```
 MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value}
-gV_Strike_Temp = {value} + 2
+gblV_Strike_Temp = {value} + 2
 print "Kettle Setpoint is now " + {value}
 ```
 

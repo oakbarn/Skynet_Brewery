@@ -58,20 +58,10 @@
    "layer": 89
   },
   {
-   "workspace": "Brew House",
    "name": "gblV_Brew_Status",
    "type": "gGlobal",
-   "x": 400,
-   "y": 480,
-   "w": 120,
-   "h": 56,
-   "label": "Brew status",
    "initial": 0,
-   "precision": 0,
    "kind": "value",
-   "backColor": "#000000",
-   "foreColor": "#fafafa",
-   "layer": 88,
    "dataType": "value"
   },
   {
@@ -979,44 +969,6 @@
    "visibility": "hidden",
    "dataType": "time",
    "layer": 17
-  },
-  {
-   "workspace": "Water",
-   "name": "gblV_Water_Switch_Status_Water",
-   "type": "gGlobal",
-   "kind": "value",
-   "label": "Water code",
-   "x": 30,
-   "y": 730,
-   "w": 150,
-   "h": 56,
-   "initial": -9999,
-   "precision": 0,
-   "readOnly": true,
-   "backColor": "#000000",
-   "foreColor": "#fafafa",
-   "visibility": "hidden",
-   "dataType": "value",
-   "layer": 15
-  },
-  {
-   "workspace": "Water",
-   "name": "gblV_Valve_Status",
-   "type": "gGlobal",
-   "kind": "value",
-   "label": "Valve status",
-   "x": 190,
-   "y": 730,
-   "w": 150,
-   "h": 56,
-   "initial": 0,
-   "precision": 0,
-   "readOnly": true,
-   "backColor": "#000000",
-   "foreColor": "#fafafa",
-   "visibility": "hidden",
-   "dataType": "value",
-   "layer": 14
   },
   {
    "workspace": "Brew House",
@@ -5026,7 +4978,8 @@
    "labelColor": "#fafafa",
    "labelBg": "#000000",
    "labelAlign": "Center",
-   "layer": 1
+   "layer": 1,
+   "tapType": true
   },
   {
    "id": "t_water_msg",

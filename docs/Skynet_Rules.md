@@ -280,10 +280,11 @@ Properties in the Pump's drill-down look (Rule 18.30), with Format after 3 Name 
 element). (thread "Build a Code Value Widget", Help 161)
 
 1.24 **Making a gGlobal in a Process** (Fritz, 2026-11-06). Besides the gGlobal screen (Rule 1.19), a Process line makes a
-gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gV_X = 10` (the long word), `new gV gV_X = 10` (the
-short word) and `new value gV_X = 10` (a normal variable word with a name that starts gV_). The words are **gGlobalValue / gV**
-(gV_), **gGlobalString / gS** (gS_), **gGlobalTime / gT** (gT_), **gGlobalDateTime / gD** (gD_, as Rule 1.19) and
-**gGlobalBoolean / gB** (gB_). **`declare` is the same word as `new`.** Picking or typing the long word in the Process editor
+gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gblV_X = 10` (the long word), `new gblV gblV_X = 10` (the
+short word) and `new value gblV_X = 10` (a normal variable word with a name that starts gblV_). The words are **gGlobalValue / gblV**
+(gblV_), **gGlobalString / gblS** (gblS_, Text "as a string"), **gGlobalTime / gblT** (gblT_), **gGlobalDateTime / gblDT** (gblDT_) and
+**gGlobalBoolean / gblB** (gblB_). *Changed 2026-11-26* (OakBarn Brewery's gGlobal rules: "Text gblS_ as a string", Value gblV_, Time
+gblT_, DateTime gblDT_, Boolean gblB_; they were gV_ gS_ gT_ gD_ gB_, which no longer make a gGlobal). **`declare` is the same word as `new`.** Picking or typing the long word in the Process editor
 fills in the start of the name (gV_ ...). **A start that does not fit the word is an error** (`new value gS_X`: gS_ is for a
 String), and so is a long or short word with a name that does not start with its letters. A Graphic gGlobal (gG_) is made only
 on the gGlobal screen. The gGlobal is made **the first time the line runs**, saved in the Schema like one made on the gGlobal
@@ -408,7 +409,7 @@ Panel Update 9, item 12):
   when it starts.
 - **A click forces it ON for (seconds), then OFF** (a Digital Input's Properties, empty to start): a click on a forced float makes it
   ON and it goes OFF by itself after that many seconds. The sample's float is labeled **Force floats**, 2 seconds.
-- The sample's two status gGlobals (`gblV_Water_Switch_Status_Water`, `gblV_Valve_Status`) are hidden on the Water tab; they still work.
+- The sample's two status gGlobals (`gblV_Water_Switch_Status_Water`, `gblV_Valve_Status`) are gone (OakBarn Brewery, 2026-11-26): the Fire Hose and Manifold Process knows its button by `skn_Started_By` (Rule 1.35).
 **Both programs:** the BruControl Import is not changed (BruControl had neither). Help 92, 173.
 
 1.29 **Layer Order** (OakBarn Brewery, 2026-11-09: "also missing is a new Univeral .attribute .layer"; ".layer is layer Order";
@@ -461,6 +462,22 @@ gGlobal has to exist and a line copies it (`gblV_Seconds = vV_Seconds`). To show
 vV_Seconds` shows 00:01:30 for 90). A value that can't be read as a time stops the Process with a plain error. In the 3 Vessel sample
 it takes the place of the gGlobal gblT_Elapsed_Water: `newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH`. A Time gGlobal's
 `.seconds` (Rule 1.30) still works. Both programs: the BruControl Import has no such command. Help 100, 239.
+
+1.35 **skn_Started_By, and Brew Status off the Tab** (OakBarn Brewery, 2026-11-26, typing fixed: "the Water switch code could be
+deleted as it was a way for me to keep track of what code to use. The process could be rewritten so it was not needed", "the
+gblV_Valve_Status was used by me as a visual aide ... not needed", "lets keep the brew status as a global ... as a gGlobal Value Type").
+**`skn_Started_By`** is a read only Skynet value: the name of the Process that started this one with `start`, or blank when a person,
+a Process Widget's own press, autostart, a restart or the Brain started it. A Process that several buttons share reads it instead of a
+code put in a gGlobal: the 3 Vessel sample's utility_FireHose_Manifold_Supply_Water checks `skn_Started_By == "FireHose_1_Minute"` ...,
+and its ten button Processes only `start` it. `gblV_Water_Switch_Status_Water` and `gblV_Valve_Status` are deleted.
+**gblV_Brew_Status** stays a gGlobal of the Value Kind (Rule 1.19) and is no longer on the Brew House Tab (no place, size, colors or
+Label). Both programs: the BruControl Import has no skn_Started_By. Help 239, docs/Process_Skynet_Commands.md.
+
+1.36 **Text Widget: Tap to type** (OakBarn Brewery, 2026-11-26: "tap to type", for Brew Notes). A Text Widget has a **Tap to type**
+switch in its Properties (off at the start). Switched on, an operator taps the Text Widget on its Tab, types its Text in the box
+that opens, and presses Set; it is the same as a Process setting it. Switched off, a tap does nothing and only its Properties or a
+Process change it, and the Brain refuses a Text set from a Tab. The 3 Vessel sample's Notes (`wgt_TXT_Notes_RE`, was gGS_Brew_Notes)
+has it on. Both programs: the BruControl Import makes Text Widgets with it off. Help 91.
 
 ## 2. Screen design and clicks
 
@@ -8221,4 +8238,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-26: 3 Vessel sample Tangential inlets (OakBarn Brewery, typing fixed: "HLT and Brew kettle both should have Tangential IPs and a hose and manual valve attached and be on the pump Outlet Manifold with a Tee and from the tee to the tangential a hose"): the HLT Right Tangential and the Boil Kettle Left Tangential each have a Manual Ball Valve on a front elbow (OakBarn Brewery: "ball valves on tangentials not butterfly") (wgt_MV_HLT~in_BH, wgt_MV_Kettle~in_BH) and a hose to the pump outlet manifold. The HLT branch is a Tee in the manifold beside To mash tun, then a new Motorized valve BM_34_DO@Valve_E_To~HLT_BH (pin 34), then the hose (OakBarn Brewery picked A from the pictures); the Kettle hose comes from its To kettle valve in place of the pipe and elbow. Brew Day Flow keeps To HLT closed and opens Kettle in by hand the first time wort goes to the kettle (it stays open); the Kettle probe's simulation also follows Kettle in.
 - 2026-11-26: Rule 16.5 extended (OakBarn Brewery, word for word: "gblT_SetTimer_Water to a Time Widget"): `ask "text" Name` also puts the answer in a Time Widget or a DateTime Widget. In the 3 Vessel sample and the default Schema, gblT_SetTimer_Water is now the hidden Time Widget `wgt_TM_Set~Timer_BH`, and (OakBarn Brewery: "All gblS and the gGS get changed to a Text Widget", typing fixed) gblS_Step_Text, gblS_Advance_Label, gblS_Water_Text_1_Water and gGS_Brew_Notes are now the Text Widgets `wgt_TXT_Step~text_BH`, `wgt_TXT_Advance~label_BH`, `wgt_TXT_Water~message_BH` and `wgt_TXT_Notes_RE`. Their Processes write the Widgets; the old `.background = 2 / 4 / 5` lines are gone (a Text Widget has no .background, and on the gGlobals those numbers showed nothing). Help 100, 239.
 - 2026-11-26: Added Rule 1.34 (OakBarn Brewery: "Create a backhouse converter that can take a Time Value regardless of format, and change to seconds", "newSec vT_Seconds = tm_Elapsed_Time"): the back house Time to seconds converter and the Process command newSec Name = Time; the 3 Vessel sample and the default Schema use it in place of the gGlobal gblT_Elapsed_Water (removed). Help 100, 239 (and French).
+- 2026-11-26: Added Rule 1.35 (OakBarn Brewery: "the Water switch code could be deleted", "keep the brew status as a global ... as a gGlobal Value Type"): skn_Started_By (the Process that started this one); the 3 Vessel sample and the default Schema lose gblV_Water_Switch_Status_Water and gblV_Valve_Status, and gblV_Brew_Status comes off the Brew House Tab. Help 239 (and French).
+- 2026-11-26: Rule 1.24 changed (OakBarn Brewery, gGlobal rules PDF and "text is gblS_ as a string"): the gGlobal prefixes and short words are gblS_ / gblS (String, shown as Text), gblV_ / gblV, gblT_ / gblT, gblDT_ / gblDT and gblB_ / gblB (were gS_ gV_ gT_ gD_ gB_). The suggested names on the gGlobal screen and the ➕ sample gGlobals follow. The Kind names (gS_Global_String ...) are unchanged. Help 145 and the pages with gGlobal examples (and French).
+- 2026-11-26: Added Rule 1.36 (OakBarn Brewery: "tap to type"): the Text Widget Tap to type switch; on for the 3 Vessel sample's Notes. Help 91 (and French), Widget Library.
 - 2026-11-26: Rule 2.7 changed (OakBarn Brewery, his picture): White in the color picker is renamed White (Opaque) (250,250,250) and White (Transparent) (255,255,255 see-through, like None) is added; all white text on the screen is 250,250,250 (dark Look text, Skynet Tab Styles, Override, new Vessel labels, timer digits and titles). Help 90, 187 updated (English + French). Checked against both programs: one shared color list; the Importer brings no text colors. (thread "Make White text White (Opaque)")

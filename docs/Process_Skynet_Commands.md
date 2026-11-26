@@ -54,6 +54,7 @@ Built from the Process reader and runner (lib/engine.js), 2026-11-21. Upper and 
 | Word | What it is | Rule |
 |---|---|---|
 | `skn_Air_Pressure` | R. Air pressure at the brewery now (hPa). | 1.18 |
+| `skn_Started_By` | R. The name of the Process that started this one with `start`; blank when a person, a button or the Brain started it. | 1.35 |
 | `skn_Boil_Temp` | R. The temperature water boils at here and now (°C inside a Process; your Units in a message). | 1.18 |
 | `skn_Boil_Temp_C` | R. The same, in °C. | 1.18 |
 | `skn_Boil_Temp_F` | R. The same, in °F. | 1.18 |

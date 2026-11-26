@@ -3,7 +3,7 @@
 **Every gGlobal is non-volatile**. It keeps its **.value** like a setting does, not like a
 Process variable:
 
-| | A Process variable (`new value vTemp`) | A gGlobal (`gV_Strike_Temp`) |
+| | A Process variable (`new value vTemp`) | A gGlobal (`gblV_Strike_Temp`) |
 |---|---|---|
 | Who can use it | Only the Process that made it | Every Process (global scope) |
 | When a Process starts | Starts empty again | **Keeps its value** |
@@ -35,8 +35,8 @@ A gGlobal is only put back to a start value when something sets it. If a brew da
 top of its Flow Process that set them, for example:
 
 ```
-gB_Grain_Added = false
-gS_Brewer_Note = ""
+gblB_Grain_Added = false
+gblS_Brewer_Note = ""
 ```
 
 The sample brew days already do this.

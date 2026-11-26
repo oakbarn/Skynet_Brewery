@@ -30,7 +30,7 @@ assert.equal(new Set(all).size, all.length, 'no command in two lists');
 for (const [c] of COMMANDS) assert.ok(all.includes(c) || c === 'else if', c + ' is on a button');
 assert.deepEqual(Object.keys(CATEGORY_LISTS), ['cond', 'skn', 'com']);
 assert.ok(COMMON.includes('sleep') && COMMON.includes('print') && !COMMON.includes('if'));
-assert.equal(commandText('endif'), 'endif'); assert.equal(commandText('if'), 'if '); assert.equal(commandText('new gGlobalValue'), 'new gGlobalValue gV_');
+assert.equal(commandText('endif'), 'endif'); assert.equal(commandText('if'), 'if '); assert.equal(commandText('new gGlobalValue'), 'new gGlobalValue gblV_');
 
 // Insert Line After: a new line after line n, with its indent; 0 = the top; past the end = the end
 const code = 'a = 1\n  b = 2\nc = 3';

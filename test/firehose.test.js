@@ -69,7 +69,6 @@ assert.equal(asked().label, 'Manifold Set? Set the manifold, then click Done whe
 assert.ok(asked().free, 'ask_Tab: a bar on top, the Tab can still be run (Rule 16.5)');
 assert.deepEqual(shown, ['Brew House'], 'every screen goes to the Brew House, the Tab with the manifold');
 assert.equal(store.getProp(FLOAT, 'visibility'), 'hidden', 'no Float for a timed fill');
-assert.equal(store.getProp('gblV_Valve_Status', 'value'), -1);
 done();
 assert.ok(await until(() => store.getProp('wgt_ALM_Fire~Hose~warning_BH', 'active')), 'the warning sound');
 assert.match(text(), /FireHose ON in 20 Seconds! Fire Hose ON for  Twenty Seconds/);
@@ -77,7 +76,6 @@ assert.ok(!on(FH), 'not open during the warning');
 assert.ok(await until(() => on(FH)), 'the Fire Hose opens');
 assert.ok(!store.getProp('wgt_ALM_Fire~Hose~warning_BH', 'active'), 'the warning sound stops');
 assert.ok(await until(() => !on(FH) && quiet()), 'it closes when the timer reaches 00:00:00');
-assert.equal(store.getProp('gblV_Water_Switch_Status_Water', 'value'), -9999);
 // the hidden count-up timer kept the true run time (about 20 s) in its stopped timer (newSec turns it into seconds, Rule 1.34)
 assert.equal(store.getProp('wgt_TMR_Water~elapsed_BH', 'visibility'), 'hidden');
 assert.ok(secs('wgt_TMR_Water~elapsed_BH') >= 19 && secs('wgt_TMR_Water~elapsed_BH') <= 22, 'true run time ' + store.getProp('wgt_TMR_Water~elapsed_BH', 'value'));

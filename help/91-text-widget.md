@@ -25,6 +25,8 @@ A line above the Text. Empty = the Name.
 
 **Word wrap is always on**: a long text goes onto the next line inside the box.
 
+**Tap to type**: switched on, an operator taps the Text Widget on its Tab, types its Text in the box that opens, and presses **Set**. It is how the brewer writes the Notes on the 3 Vessel sample's Reporting Tab. Switched off (the start), a tap does nothing and only its Properties or a Process change the Text (Skynet Rule 1.36).
+
 ## In a Process
 
 `name.attribute = Something` is how a Process uses it, for example `w_Text_1.fore = "Red"`. `""` puts back what its Properties say. Reading one gives what it is now.

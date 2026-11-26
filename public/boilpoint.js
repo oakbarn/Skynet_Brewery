@@ -12,6 +12,8 @@ export const SKN_GLOBALS = [
   ['skn_Boil_Temp_C', 'the temperature water boils at here and now, in °C'],
   ['skn_Boil_Temp_F', 'the temperature water boils at here and now, in °F'],
   ['skn_Air_Pressure', 'the air pressure at the brewery now, in hPa'],
+  // Rule 1.35 (OakBarn Brewery, 2026-11-26): which Process started this one, so a shared Process needs no code in a gGlobal
+  ['skn_Started_By', 'the name of the Process that started this one with start (blank when a person, a button or the Brain started it)'],
 ];
 const SKN = new Map(SKN_GLOBALS.map(([n]) => [n.toLowerCase(), n]));
 export const isSknGlobal = name => SKN.has(String(name ?? '').toLowerCase());

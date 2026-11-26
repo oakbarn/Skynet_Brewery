@@ -150,15 +150,15 @@ Des nombres fixes pour les conversions courantes sont intégrés, pour qu'un Pro
 
 `NULL` veut dire **aucune valeur du tout**. Ce n'est pas 0, pas `false` et pas `""` : c'est vide.
 
-1. **Vider une valeur :** `gV_Strike = NULL`. Sa case sur le Tab s'affiche **vide** jusqu'à ce que quelque chose la règle de nouveau, et elle reste vide après un redémarrage.
-2. **Demander si elle est vide :** `if gV_Strike == NULL` (ou `!= NULL` pour « a une valeur »).
-3. **Les calculs ont besoin d'une valeur :** `gV_Strike + 5`, `gV_Strike += 1` ou `if gV_Strike > 150` sur une valeur vide **arrête le Process** et dit quelle valeur est vide. Testez-la d'abord :
+1. **Vider une valeur :** `gblV_Strike = NULL`. Sa case sur le Tab s'affiche **vide** jusqu'à ce que quelque chose la règle de nouveau, et elle reste vide après un redémarrage.
+2. **Demander si elle est vide :** `if gblV_Strike == NULL` (ou `!= NULL` pour « a une valeur »).
+3. **Les calculs ont besoin d'une valeur :** `gblV_Strike + 5`, `gblV_Strike += 1` ou `if gblV_Strike > 150` sur une valeur vide **arrête le Process** et dit quelle valeur est vide. Testez-la d'abord :
 
 ```
-if gV_Strike == NULL
-  gV_Strike = 152
+if gblV_Strike == NULL
+  gblV_Strike = 152
 endif
-gV_Strike = gV_Strike + 1
+gblV_Strike = gblV_Strike + 1
 ```
 
 `NULL` marche pour chaque Kind (type) : un nombre, du texte, une durée, une date et une heure, ou vrai / faux, dans une variable de Process, un gGlobal ou un Value Widget. Un Device (une pompe, une vanne, un Heating Element) est toujours allumé ou éteint, donc `Pump_1 = NULL` est une erreur. `NULL`, `Null` et `null` sont le même mot.

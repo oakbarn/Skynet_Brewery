@@ -25,3 +25,16 @@ for (const [cfg, procs] of [['config/brewery.json', 'processes'], ['samples/conf
   }
 }
 console.log('gglobalwidgets: ok');
+
+// Tap to type (OakBarn Brewery, 2026-11-26, Rule 1.36): on for the Notes only
+{
+  const app = fs.readFileSync(path.join(ROOT, 'public/app.js'), 'utf8'), srv = fs.readFileSync(path.join(ROOT, 'server.js'), 'utf8');
+  assert.match(app, /\['tapType', 'Tap to type/, 'a switch in the Text Widget Properties');
+  assert.match(app, /function textTypeDialog\(name\)/, 'a tap opens the box to type in');
+  assert.match(srv, /is a Text Widget without Tap to type/, 'the Brain refuses a Text set from a Tab without it');
+  for (const cfg of ['config/brewery.json', 'samples/configs/three-vessel-one-pump/config.json']) {
+    const c = JSON.parse(fs.readFileSync(path.join(ROOT, cfg), 'utf8'));
+    assert.deepEqual(c.graphics.filter(g => g.kind === 'text' && g.tapType).map(g => g.name), ['wgt_TXT_Notes_RE'], `${cfg}: only the Notes`);
+  }
+  console.log('tap to type: ok');
+}
