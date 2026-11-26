@@ -5981,8 +5981,11 @@ HAVE INFO AS AN IMPORT"):
 - Design Rule #1 (Never Take Away): removing the Default settings boxes is allowed because it is before the first Public Production.
 
 17.15 **Saving an imported Recipe** (OakBarn Brewery, 2026-11-13: "saved when user says yes, and then the overwrite question comes up In
-this case Overwrite or add new"): after an import, **Save this Recipe?** (Yes / No). A saved Recipe with the same name asks
-**Overwrite** (the old one is kept in `config/backups/recipes`) or **Add new** (saved as "Name #2", the next free number).
+this case Overwrite or add new"): after an import, **Save this Recipe?** (Yes / No). ~~A saved Recipe with the same name asks
+**Overwrite** (the old one is kept in `config/backups/recipes`) or **Add new** (saved as "Name #2", the next free number).~~
+**Changed 2026-11-26** (OakBarn Brewery picked A, "Yes, dated like the Library"): Yes saves it **dated**, like the Library's Save this
+Recipe (Rule 17.21): "Name yyyy:mm:dd", "(2)" on a second save that day, every hop's Actual AAU at 0. A dated name never clashes, so
+there is no Overwrite / Add new question after an import (the overwrite and "#2" saves stay in the Panel's save, unused here).
 
 17.16 **Amounts follow Units** (OakBarn Brewery, 2026-11-13: "Come From US or Metric so not needed"): the "How amounts show" dropdowns
 are gone; every amount shows in US or Metric as Units says. Each **Misc** line picks its own unit, Tablet and Pack added ("Each its own
@@ -7390,6 +7393,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-26: Rule 17.15 changed (OakBarn Brewery picked A, "Yes, dated like the Library"): Save this Recipe after an import saves dated ("Name yyyy:mm:dd (n)", Actual AAU 0, Rule 17.21); no Overwrite / Add new question. Help 99.
 - 2026-11-25: Rule 17.11 note (OakBarn Brewery: "The Boil time can be different for each kit and I did not even realize the one I got was a No Boil one"): a NEW Level 1 Can Kit Recipe starts with Boil Minutes 0 (No Boil) and no Boil Profile; Boil Minutes tip. Help 99.
 - 2026-11-25: Rule 16.14 built (OakBarn Brewery, PDF "No Recipe Found", "Put in 620"): `ask_recipe` and the No Recipe Found pop-up, Brewer Type on Default settings; Rule 17.21 new: Save this Recipe dated yyyy:mm:dd (n), Actual AAU 0.
 - 2026-11-25: Rule 16.14 new and Rule 16.1 changed (OakBarn Brewery: "On a Brew Day, there is ALWAYS a Recipe ..."; "General Rule"): a Brew Day always has a Recipe; skipping steps never skips it. Leading the brewer to make one when none is loaded is not built yet (Process Sandbox entry 14).

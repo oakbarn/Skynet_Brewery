@@ -53,5 +53,8 @@ assert.ok(out.includes('after'), 'a Recipe saved, opened or imported: it goes on
 assert.ok(!lastAsks.some(a => a.recipe), 'the pop-up is gone');
 out.length = 0; eng.start('pb'); await wait(300);
 assert.ok(out.includes('after'), 'a Recipe loaded: straight on');
+// Rule 17.15 changed 2026-11-26: Save this Recipe after an import saves dated too
+{ const app = fs.readFileSync('public/app.js', 'utf8'), fn = app.slice(app.indexOf('async function askSaveImported'), app.indexOf('async function askSaveImported') + 600);
+  assert.match(fn, /mode: 'dated'/, 'an imported Recipe saves dated'); assert.doesNotMatch(fn, /'overwrite'/, 'no Overwrite question after an import'); }
 console.log('No Recipe Found tests passed');
 process.exit(0);

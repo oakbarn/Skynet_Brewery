@@ -20834,16 +20834,12 @@ async function newBrewProfile(kind, openTab = false) {
   toast(`${K.title} "${w.name}" made`);
 }
 
-// An imported Recipe is saved to the library only when the user says Yes (OakBarn Brewery, 2026-11-13). A saved Recipe with the same
-// name asks: Overwrite (its old copy goes to the backups folder) or Add new (saved as "Name #2").
+// An imported Recipe is saved to the library only when the user says Yes (OakBarn Brewery, 2026-11-13). It is saved dated like the
+// Library's Save this Recipe (OakBarn Brewery, 2026-11-26, picked A: "Name yyyy:mm:dd", "(2)" on a second save that day, Actual AAU 0;
+// Rules 17.15, 17.21): a dated name never clashes, so there is no Overwrite / Add new question any more.
 async function askSaveImported(name) {
-  if (await choose(`Save this Recipe? "${name}" goes in the Recipe library (Library ...).`, [['💾 Yes', 'yes'], ['No', 'no']]) !== 'yes') return;
-  let mode = 'overwrite';
-  if (rcView?.saved?.some(x => String(x.name).toLowerCase() === String(name).toLowerCase())) {
-    mode = await choose(`A saved Recipe is already called "${name}"`, [['Overwrite it (the old one goes to the backups folder)', 'overwrite'], ['Add new (a number is added to the name, "#2")', 'new']]);
-    if (!mode) return;
-  }
-  const r = await api('POST', '/ui/recipe/save', { mode });
+  if (await choose(`Save this Recipe? "${name}" goes in the Recipe library with today's date on its name (Library ...).`, [['💾 Yes', 'yes'], ['No', 'no']]) !== 'yes') return;
+  const r = await api('POST', '/ui/recipe/save', { mode: 'dated' });
   await rcLoad(); renderMenuPane(); toast(`"${r.name}" saved to the library`);
 }
 // ---- ☰ Menu > Recipe (Fritz, 2026-10-30; his layout 2026-10-31): the Recipe for brew day. IMPORT a BeerSmith .bsmx
