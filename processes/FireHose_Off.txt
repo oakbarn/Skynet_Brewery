@@ -17,6 +17,6 @@ wgt_ALM_Fire~Hose~warning_BH = false
 wgt_ALM_Manifold~warning_BH = false
 BM_32_DI@Float_Force~floats_BH.visible = false
 gblV_Water_Switch_Status_Water = -9999
-gblS_Water_Text_1_Water = "Fire Hose and Manifold Supply Valve are off."
+wgt_TXT_Water~message_BH = "Fire Hose and Manifold Supply Valve are off."
 // every Water button shows Stopped and its Start works again (Panel Update 9, item 12a)
 wgt_PSW_FireHose~1~Minute_WA.phase = "stopped"

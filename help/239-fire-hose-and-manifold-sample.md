@@ -27,7 +27,7 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
 | FireHose 1 Minute | Manifold 1 Minute | Water for 1 minute |
 | FireHose 2 Minutes | Manifold 2 Minutes | Water for 2 minutes |
 | FireHose 20 Seconds | Manifold 3 Minutes | Water for 20 seconds or 3 minutes |
-| Firehose Set Time | Set Time | A pop-up asks for the time; it goes in the gGlobal `gblT_SetTimer_Water` |
+| Firehose Set Time | Set Time | A pop-up asks for the time; it goes in the hidden Time Widget `wgt_TM_Set~Timer_BH` |
 | Use FireHose Float | Use Manifold Float | Water until the **Water float** is made |
 | FireHose Off | | Stops it now and closes both valves |
 
