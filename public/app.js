@@ -71,6 +71,7 @@ import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack
 import { qNeedsTurn, qShow, qUnitShown, qBoxShow, qBoxBack, qtyFamily, METRIC_PRESSURE } from './qtyshow.js';
 import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
+import { errSplit } from './errorfix.js';      // the Error Log entry's words in two (Error Text PDF, 2026-11-25)
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -17252,6 +17253,13 @@ function menuHelpLang(list, go) {
 // first. 🧪 Check runs the saved Process from just above the error to the next wait or step in a check-only copy (lib/checkrun.js):
 // nothing real is switched. When it stops at a wait, ▶ Override goes on past it. No error: the entry is fixed and keeps the change.
 const ERR_WHEN = t => new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+// An error's words (OakBarn Brewery, Error Text PDF 2026-11-25): what went wrong in red on its own line, then, when the error lists the
+// names that are allowed ("... (they are: a, b, c)"), a light blue "Possible Suggested Replacement at Line N:" on the next line and the list
+function errWhatOf(e) {
+  const { what, list } = errSplit(e.msg);
+  return h('div', { class: 'errWhat' }, h('div', { class: 'errFirst' }, what),
+    list ? h('div', { class: 'errSuggest' }, h('span', { class: 'errSuggestHead' }, `Possible Suggested Replacement at Line ${e.line}:`), ' ', list) : null);
+}
 async function errorLogDialog() {
   let d = $('#errLogDlg');
   if (!d) {
@@ -17290,7 +17298,7 @@ async function renderErrorLog() {
 function errorRow(e, brewer) {
   const res = h('div', { class: 'errCheck' });
   const where = e.kind === 'error'
-    ? [h('b', {}, e.process), ` · line ${e.line}`, e.count > 1 ? ` · ${e.count} times` : '', e.notStarted ? ' · did not start' : '']
+    ? [h('span', { class: 'errHead' }, h('b', {}, e.process), ` · line ${e.line}`), e.count > 1 ? ` · ${e.count} times` : '', e.notStarted ? ' · did not start' : '']
     : [h('b', {}, 'Your issue'), e.by ? ` · ${e.by}` : '', e.process ? ` · ${e.process}${e.line ? ` line ${e.line}` : ''}` : ''];
   const openLine = guard(async () => {
     $('#errLogDlg')?.close(); setView('scripts');
@@ -17316,7 +17324,7 @@ function errorRow(e, brewer) {
   showCheck(e.check);
   return h('div', { class: 'errRow' + (e.status === 'open' ? '' : ' fixed') },
     h('div', { class: 'errWhere' }, h('span', { class: 'muted' }, ERR_WHEN(e.lastAt ?? e.at) + ' · '), ...where),
-    e.kind === 'error' ? h('div', { class: 'errWhat' }, e.msg) : h('div', { class: 'errWhat' }, e.text),
+    e.kind === 'error' ? errWhatOf(e) : h('div', { class: 'errWhat' }, e.text),
     e.lineText ? h('code', { class: 'errLine' }, e.lineText) : null,
     e.fix ? h('div', { class: 'errFix' }, '💡 How to fix: ' + e.fix) : null,
     e.changed ? h('div', { class: 'muted' }, 'The Process was changed after it started, so this line number is of the copy that was running.') : null,

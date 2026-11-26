@@ -12,6 +12,10 @@ When a Process stops on an error, or does not start because of one, an entry is 
 - **what the error was**,
 - **💡 How to fix**, when the fix is clear (for example a name spelled differently from the Devices page, or an `if` with no `endif`).
 
+The Process, its line number and what the error was are in **red**. When the error lists the names you can use (for example a
+Recipe value that is spelled wrong), the list starts on its own line after **Possible Suggested Replacement at Line N:** in light
+blue: pick the one you meant and put it in that line.
+
 The same error on the same line again (in a loop, for example) stays one entry, with how many times it happened.
 
 **How exact is the line number?** It is the line in the Process file, the same number as in the Process Editor, counting blank

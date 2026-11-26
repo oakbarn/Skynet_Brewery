@@ -14,6 +14,11 @@ Quand un Process s'arrête sur une erreur, ou ne démarre pas à cause d'une err
 - **💡 How to fix** (comment réparer), quand la réparation est claire (par exemple un nom écrit autrement que sur la page Devices,
   ou un `if` sans `endif`).
 
+Le Process, son numéro de ligne et ce qu'était l'erreur sont en **rouge**. Quand l'erreur donne la liste des noms que vous pouvez
+utiliser (par exemple une valeur de Recipe mal écrite), la liste commence sur sa propre ligne après **Possible Suggested Replacement
+at Line N:** (remplacement suggéré possible à la ligne N) en bleu clair : choisissez celui que vous vouliez et mettez-le dans cette
+ligne.
+
 La même erreur sur la même ligne (dans une boucle, par exemple) reste une seule entrée, avec le nombre de fois où elle est arrivée.
 
 **Le numéro de ligne est-il exact ?** C'est la ligne dans le fichier du Process, le même numéro que dans le Process Editor, en

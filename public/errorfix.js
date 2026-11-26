@@ -28,3 +28,11 @@ export function fixHint(msg) {
   for (const [re, f] of HINTS) { const m = re.exec(s); if (m) return f(m); }
   return '';
 }
+
+// An error's words split in two for the Error Log (OakBarn Brewery, Error Text PDF 2026-11-25): what went wrong, and the names that are
+// allowed when the error lists them ("... is not a Recipe value (they are: a, b, c)"), shown after "Possible Suggested Replacement at Line N:"
+export function errSplit(msg) {
+  // an old entry may have its list cut short (no closing bracket): the list shows as far as it goes
+  const m = /^([\s\S]*?)\s*\(they are:\s*([\s\S]*?)\)?\s*$/.exec(String(msg ?? ''));
+  return m ? { what: m[1], list: m[2] } : { what: String(msg ?? ''), list: '' };
+}

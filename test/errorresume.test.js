@@ -63,3 +63,17 @@ await new Promise(r => setTimeout(r, 2600)); await runL();      // fails at N = 
 assert.equal(store.getProp('gV_Done', 'value'), 3, 'Auto Skip, no pop-up, carried it to the end');
 engine.stopAll(); clearTimeout(store._persistTimer);
 console.log('error resume tests passed');
+
+// the Error Log entry's words (OakBarn Brewery, Error Text PDF 2026-11-25): the error, then the allowed names after a light blue line
+{
+  const { errSplit } = await import('../public/errorfix.js');
+  assert.deepEqual(errSplit('skn_rcp_Bad is not a Recipe value (they are: skn_rcp_Loaded, skn_rcp_Name ...)'), { what: 'skn_rcp_Bad is not a Recipe value', list: 'skn_rcp_Loaded, skn_rcp_Name ...' });
+  assert.deepEqual(errSplit('Y is NULL (empty), so it has no value'), { what: 'Y is NULL (empty), so it has no value', list: '' });
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /Possible Suggested Replacement at Line \$\{e\.line\}:/);
+  console.log('error words tests passed');
+}
+{
+  const { errSplit } = await import('../public/errorfix.js');
+  assert.deepEqual(errSplit('skn_rcp_X is not a Recipe value (they are: skn_rcp_Loaded, skn_rcp_Hop_Stand_Middle_Mi'), { what: 'skn_rcp_X is not a Recipe value', list: 'skn_rcp_Loaded, skn_rcp_Hop_Stand_Middle_Mi' }, 'an old entry cut short');
+}
