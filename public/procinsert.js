@@ -12,7 +12,7 @@ import { G_DECLARE } from './gkinds.js';
 export const CONDITIONALS = ['if', 'elseif', 'else', 'endif', 'wait', 'goto', 'goLine', 'step'];
 // Skynet Special: the commands only Skynet has (Rules 6.15, 16.11, 16.12, 5.42 ...)
 export const SKYNET_SPECIAL = ['ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'all_heaters_off', 'wait_boil', 'take_reading',
-  'ask_recipe', 'import_recipe', 'start_hop_alerts', 'stop_hop_alerts', 'hop_alert', 'place_Chiller', 'remove_Chiller', 'lock_Equipment', 'unlock_Equipment'];
+  'ask_recipe', 'newSec', 'import_recipe', 'start_hop_alerts', 'stop_hop_alerts', 'hop_alert', 'place_Chiller', 'remove_Chiller', 'lock_Equipment', 'unlock_Equipment'];
 // Common: every other normal command, worked out from the Process commands, so a command added later lands here by itself.
 // "else if" is the same as elseif (Conditionals), so it is left out.
 const SAME_AS = new Set(['else if']);

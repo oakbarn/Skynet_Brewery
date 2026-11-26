@@ -40,7 +40,7 @@ const h2 = { ...h, newId: () => 'gnw' + (++m), widgetName: (x, taken, old) => ne
 const b = copyTab(c, 'Brew House', 'Brew House 2', isDevice, () => 'new', h2);
 assert.equal(b.elements.length, p.widgets.length);
 assert.equal(b.names.get('wgt_SW_Testing_BH'), 'wgt_SW_Testing_B2');
-assert.equal(b.names.get('gblT_Elapsed_Water'), 'gblT_Elapsed_Water_2', 'a taken name gets _2');
+assert.equal(b.names.get('gblV_Brew_Status'), 'gblV_Brew_Status_2', 'a taken name gets _2');
 assert.ok(b.elements.every(e => e.workspace === 'Brew House 2' && !('_ref' in e)));
 assert.equal(b.graphics.filter(g => g.kind === 'clone').length, p.devices.length + p.clones.length, 'Devices (and the Tab\'s own Clones) are still Clones');
 

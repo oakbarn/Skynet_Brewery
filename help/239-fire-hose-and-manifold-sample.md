@@ -44,8 +44,8 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
    ([Override button](96-override-button)). Every tap water fill gets its own Override button. It shows only once the water is
    on, so there is none during the 20 second warning. **FireHose Off** stops it at any time.
 5. **The true run time is kept.** A hidden count-up timer, **Water elapsed**, runs from the valve opening until the time is up, the
-   float is made, or Override or FireHose Off ends it. That time goes in the hidden gGlobal `gblT_Elapsed_Water` (True Run Time),
-   for seconds per gallon.
+   float is made, or Override or FireHose Off ends it. The timer keeps that time, and the line `newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH`
+   turns it into seconds for seconds per gallon ([Process commands](100-brew-process)).
 
 In the simulator, tap the **Water float** and pick **Simulate: input ON** to make it (the float is lifted, contacts closed, red), and
 **Simulate: input OFF** to drop it again. The Water float and the two Float buttons show the float switch picture of its state.
