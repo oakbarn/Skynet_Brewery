@@ -71,6 +71,7 @@ import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack
 import { qNeedsTurn, qShow, qUnitShown, qBoxShow, qBoxBack, qtyFamily, METRIC_PRESSURE } from './qtyshow.js';
 import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
+import { errSplit, whyOf } from './errorfix.js';      // the Error Log entry's words in two (Error Text PDF, 2026-11-25)
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -148,26 +149,44 @@ function renderBrainNotices(list = brainList) {
 // A Process that stopped on an error (Rule 10.14; OakBarn Brewery, 2026-11-25: "leave up to the User to Resume"; "I could just re route
 // through the RIMS"). Everything stays as it is. On every screen until a brewer picks: ▶ Resume runs the line again (a pump, valve or heater
 // fixed or swapped), ⏭ Skip goes on at the next line (worked around it), ✕ leaves it stopped. It may stop on the same line again: Resume again.
-let errorAutoPick = {}, errorAutoTick = null;      // Next time this line fails, on each pop-up, by Process (this screen): '' | 'popup' | 'quiet'
+let errorAutoTick = null, errorStopMini = {}, errorIgnoreAsk = {};      // errorStopMini: pop-ups made small on this screen while the Process Editor is used
+// the pop-up's choices (OakBarn Brewery, 2026-11-26: "1: Fix hardware 2: Fix Process code 3. Ignore same Error in any Process, Skip this
+// Line and Proceed"; "Resume ... needs to start one line past 77 (line 78)"). The first time an error happens Skynet always waits.
 function errorStopNotices() {
   const list = S?.errorStops || [];
-  const go = (n, skip) => e => { e.target.disabled = true; api('POST', `/ui/scripts/${encodeURIComponent(n.process)}/resume`, { skip, auto: errorAutoPick[n.process] || false }).then(() => { delete errorAutoPick[n.process]; }).catch(err => { e.target.disabled = false; alertBar(err.message); }); };
-  // a countdown on the pop-up while an Auto next time goes on by itself
+  const go = (n, body) => e => { e.target.disabled = true; api('POST', `/ui/scripts/${encodeURIComponent(n.process)}/resume`, body).catch(err => { e.target.disabled = false; alertBar(err.message); }); };
+  const fixCode = n => async () => {      // the Process Editor at that line; the pop-up stays small, so Try again runs the saved Process
+    errorStopMini[n.process] = true; renderBrainNotices();
+    setView('scripts');
+    if (curScript !== n.process) { errJumpDone = !!n.line; await openScript(n.process); }
+    if (curScript === n.process && n.line) gotoLine(n.line);
+  };
+  // a countdown on the pop-up while an Auto pick goes on by itself
   clearInterval(errorAutoTick); errorAutoTick = list.some(n => n.auto) ? setInterval(() => renderBrainNotices(), 1000) : null;
   return list.map(n => {
-    const op = can('operator'), secs = n.auto ? Math.max(0, Math.ceil((n.auto.at - Date.now()) / 1000)) : 0;
-    const pick = h('select', { onchange: e => { errorAutoPick[n.process] = e.target.value; renderBrainNotices(); } },
-      ...[['', 'Stop and wait for me'], ['popup', 'Auto: pop-up for 5 s, then go on'], ['quiet', 'Auto: no pop-up, go on']].map(([v, t]) => h('option', { value: v, ...(v === (errorAutoPick[n.process] || '') ? { selected: '' } : {}) }, t)));
+    const op = can('operator');
+    if (errorStopMini[n.process] && !n.auto) return h('div', { class: 'brainNotice errorStop mini', role: 'alert' },
+      h('span', {}, `⚠ ${n.process} stopped, line ${n.line}. Fix it, Save, then:`),
+      op ? h('button', { class: 'resumeBtn', title: `Run line ${n.line} of the saved Process again and go on from there`, onclick: go(n, { skip: false }) }, `🔧 Try line ${n.line} again`) : null,
+      h('button', { title: 'Show all the choices again', onclick: () => { delete errorStopMini[n.process]; renderBrainNotices(); } }, '▾ More'));
+    const secs = n.auto ? Math.max(0, Math.ceil((n.auto.at - Date.now()) / 1000)) : 0;
     return h('div', { class: 'brainNotice errorStop', role: 'alert' },
-      h('span', { style: 'white-space:pre-line' }, `⚠ ${n.process} stopped on an error, line ${n.line}: ${n.msg}\n${n.lineText}\n`,
-        n.auto ? h('b', {}, `Auto ${n.auto.skip ? 'Skip' : 'Resume'} in ${secs} s (picked the first time). Hold to stop it.`)
-          : 'Everything is left as it is. Fix what you can, then Resume. It is also on ☰ Menu > 🔧 Fix before next Brew Day.',
-        // Auto next time (OakBarn Brewery: "They have to set to auto resume as an Option. User Choice"): off unless picked, one warning
-        op && !n.auto ? h('label', { class: 'errAuto', title: `What happens if line ${n.line} fails again: Resume or Skip the same way you pick now, or wait for you` }, `\nNext time line ${n.line} fails: `, pick) : null,
-        op && !n.auto && errorAutoPick[n.process] ? h('div', { class: 'errAutoWarn' }, `⚠ You are responsible. If this line fails again, Skynet goes on by itself${errorAutoPick[n.process] === 'quiet' ? ' with no pop-up' : ' after 5 seconds'}. Stay with the brew and watch it.`) : null),
+      h('span', { style: 'white-space:pre-line' }, `⚠ ${n.process} stopped on an error, line ${n.line}: ${n.msg}\n${whyOf(n.msg) ? 'Why: ' + whyOf(n.msg) + '\n' : ''}${n.lineText}\n`,
+        n.auto ? h('b', {}, `Auto ${n.auto.skip ? 'Resume at the next line' : 'Try again'} in ${secs} s (picked for this error the first time). Hold to stop it.`)
+          : 'Everything is left as it is. It is also on ☰ Menu > 🔧 Fix before next Brew Day.',
+        // ⏭ Ignore asks once: the brewer clicks that they take responsibility (OakBarn Brewery, 2026-11-26: "Maybe Have to Click a Key
+        // that they take Resposibility"); Cancel leaves it stopped, with the choices again
+        op && !n.auto && errorIgnoreAsk[n.process] ? h('div', { class: 'errAutoWarn' },
+          '⚠ Ignore this error: you are responsible. This same error is then left out in every Process with no pop-up until the Brain restarts (it is still on the Error Log). Stay with the brew and watch it.',
+          h('span', { class: 'errBtnRow' },
+            h('button', { class: 'resumeBtn', title: 'Ignore this error and go on at the next line', onclick: e => { delete errorIgnoreAsk[n.process]; go(n, { skip: true, ignore: true })(e); } }, '✔ I take responsibility'),
+            h('button', { title: 'Do not ignore it: it stays stopped, and the choices show again', onclick: () => { delete errorIgnoreAsk[n.process]; renderBrainNotices(); } }, 'Cancel'))) :
+        op && !n.auto ? h('span', { class: 'errBtnRow' },
+          h('button', { class: 'resumeBtn', title: `You fixed or swapped what failed (a pump, valve or heater): run line ${n.line} again and go on from there`, onclick: go(n, { skip: false }) }, `🔧 Fixed hardware: try line ${n.line} again`),
+          h('button', { class: 'resumeBtn', title: `Open this Process in the Process Editor at line ${n.line}. Fix it and Save, then press Try again here`, onclick: guard(fixCode(n)) }, '✎ Fix Process code'),
+          h('button', { class: 'resumeBtn', title: `Go on at the line after line ${n.line} (line ${n.line} is left out)`, onclick: go(n, { skip: true }) }, '▶ Resume at the next line'),
+          h('button', { class: 'resumeBtn', title: 'Leave this line out and go on. From now on this same error, in any Process, is left out with no pop-up (still on the Error Log) until the Brain restarts', onclick: () => { errorIgnoreAsk[n.process] = true; renderBrainNotices(); } }, '⏭ Ignore this error in any Process and go on')) : null),
       op && n.auto ? h('button', { class: 'resumeBtn', title: 'Stop the countdown: it waits for you, like the first time', onclick: () => api('POST', '/ui/errorstop/hold', { process: n.process }).catch(e => alertBar(e.message)) }, '⏸ Hold') : null,
-      op && !n.auto ? h('button', { class: 'resumeBtn', title: `Run line ${n.line} again and go on from there (after a pump, valve or heater is fixed)`, onclick: go(n, false) }, '▶ Resume') : null,
-      op && !n.auto ? h('button', { class: 'resumeBtn', title: `Leave line ${n.line} out and go on at the next line (you worked around it)`, onclick: go(n, true) }, `⏭ Skip line ${n.line}`) : null,
       h('button', { title: 'Leave it stopped and close this on every screen', onclick: () => api('POST', '/ui/errorstop/close', { process: n.process }).catch(e => alertBar(e.message)) }, '✕'));
   });
 }
@@ -491,6 +510,7 @@ function connect() {
   es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
   es.addEventListener('brainNotices', e => renderBrainNotices(JSON.parse(e.data)));
   es.addEventListener('errorStops', e => { S.errorStops = JSON.parse(e.data); renderBrainNotices(); });      // Resume after an error (Rule 10.14)
+  es.addEventListener('errorlog', () => { if (view === 'scripts') loadErrLines(); });      // the error lines in the Process Editor (Rule 10.14)
   es.addEventListener('flameOut', e => renderFlameOut(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
@@ -14271,7 +14291,26 @@ async function openScript(name) {
   renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); fillOutPick(); renderConsole();
   api('GET', '/ui/scripts/words').then(w => { S.words = w; paintFind(); fillInsBar(); }).catch(() => { });
   fIdx = -1; refreshFind(false);
+  loadErrLines(true);
 }
+// The lines of the open Process that are still on ☰ Menu > 🔧 Fix before next Brew Day (Rule 10.13) show in the editor with a red
+// background and bold yellow text (OakBarn Brewery, 2026-11-26: "Put the Error in Red Background BOLD Yellow text in the editor"; "And
+// after a check with no issues normal Text colors"): when its entry moves to Fixed, the line is plain again
+let errLineSet = new Set(), errJumpDone = false;      // errJumpDone: ✎ Fix Process code already went to its own line
+async function loadErrLines(jump = false) {
+  const name = curScript;
+  try {
+    const r = name ? await api('GET', '/ui/errorlog') : { items: [] };
+    if (name !== curScript) return;
+    errLineSet = new Set((r.items || []).filter(e => e.kind === 'error' && e.status === 'open' && e.process === name && e.line > 0).map(e => e.line));
+  } catch { errLineSet = new Set(); }
+  if (view === 'scripts') paintFind();
+  // opening the Process shows its first error line (OakBarn Brewery: the editor scrolls to the error line), unless a line was already picked
+  if (jump && view === 'scripts' && errLineSet.size && !errJumpDone) gotoLine(Math.min(...errLineSet));
+  if (jump) errJumpDone = false;
+}
+// the overlay's HTML, line by line (a run never crosses a line end, public/colorize.js): the Error Log's open lines marked
+const markErrLines = html => !errLineSet.size ? html : html.split('\n').map((l, i) => errLineSet.has(i + 1) ? `<span class="errLineMark">${l || ' '}</span>` : l).join('\n');
 function updateScriptState() {
   const s = S.scripts.find(x => x.name === curScript);
   $('#scriptVersion').textContent = s ? 'Version ' + (s.version || '(none yet)') : '';
@@ -14509,11 +14548,15 @@ function paintFind() {
   for (const b of ['#findPrev', '#findNext', '#replOne', '#replAll']) $(b).disabled = !n;
   const v = fTa().value;
   // the Process editor in color: every word painted by what it does, find matches on top (public/colorize.js)
-  if (fTa() === $('#code') && colorsOn()) { fHl().innerHTML = toHtml(v, classify(v, S?.words), 0, v.length, findOpen() ? fMatches : [], fIdx) + '\n '; syncHl(); return; }
-  if (!findOpen() || !n) { fHl().innerHTML = ''; return; }
+  const ed = fTa() === $('#code');
+  if (ed && colorsOn()) { fHl().innerHTML = markErrLines(toHtml(v, classify(v, S?.words), 0, v.length, findOpen() ? fMatches : [], fIdx)) + '\n '; syncHl(); return; }
+  // Colors off: with an error line, the words are painted by the overlay too, so the error line can be bold yellow (always, whatever the colors)
+  if (ed) $('#code').closest('.codeWrap').classList.toggle('errPaint', !colorsOn() && errLineSet.size > 0);
+  if ((!findOpen() || !n) && !(ed && errLineSet.size)) { fHl().innerHTML = ''; return; }
   let out = '', last = 0;
   fMatches.forEach(([s, e], i) => { out += escHtml(v.slice(last, s)) + `<mark${i === fIdx ? ' class="cur"' : ''}>${escHtml(v.slice(s, e))}</mark>`; last = e; });
-  fHl().innerHTML = out + escHtml(v.slice(last)) + '\n ';
+  out += escHtml(v.slice(last));
+  fHl().innerHTML = (ed ? markErrLines(out) : out) + '\n ';
   syncHl();
 }
 const syncHl = () => { const ta = fTa(); fHl().style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`; };
@@ -17322,6 +17365,15 @@ function menuHelpLang(list, go) {
 // first. 🧪 Check runs the saved Process from just above the error to the next wait or step in a check-only copy (lib/checkrun.js):
 // nothing real is switched. When it stops at a wait, ▶ Override goes on past it. No error: the entry is fixed and keeps the change.
 const ERR_WHEN = t => new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+// An error's words (OakBarn Brewery, Error Text PDF 2026-11-25): what went wrong in red on its own line, then, when the error lists the
+// names that are allowed ("... (they are: a, b, c)"), a light blue "Possible Suggested Replacement at Line N:" on the next line and the list
+function errWhatOf(e) {
+  const { what, list } = errSplit(e.msg);
+  const why = whyOf(e.msg);      // why it failed, in plain words (OakBarn Brewery, 2026-11-26)
+  return h('div', { class: 'errWhat' }, h('div', { class: 'errFirst' }, what),
+    why ? h('div', { class: 'errWhy' }, 'Why: ' + why) : null,
+    list ? h('div', { class: 'errSuggest' }, h('span', { class: 'errSuggestHead' }, `Possible Suggested Replacement at Line ${e.line}:`), ' ', list) : null);
+}
 async function errorLogDialog() {
   let d = $('#errLogDlg');
   if (!d) {
@@ -17360,7 +17412,7 @@ async function renderErrorLog() {
 function errorRow(e, brewer) {
   const res = h('div', { class: 'errCheck' });
   const where = e.kind === 'error'
-    ? [h('b', {}, e.process), ` · line ${e.line}`, e.count > 1 ? ` · ${e.count} times` : '', e.notStarted ? ' · did not start' : '']
+    ? [h('span', { class: 'errHead' }, h('b', {}, e.process), ` · line ${e.line}`), e.count > 1 ? ` · ${e.count} times` : '', e.notStarted ? ' · did not start' : '']
     : [h('b', {}, 'Your issue'), e.by ? ` · ${e.by}` : '', e.process ? ` · ${e.process}${e.line ? ` line ${e.line}` : ''}` : ''];
   const openLine = guard(async () => {
     $('#errLogDlg')?.close(); setView('scripts');
@@ -17386,7 +17438,7 @@ function errorRow(e, brewer) {
   showCheck(e.check);
   return h('div', { class: 'errRow' + (e.status === 'open' ? '' : ' fixed') },
     h('div', { class: 'errWhere' }, h('span', { class: 'muted' }, ERR_WHEN(e.lastAt ?? e.at) + ' · '), ...where),
-    e.kind === 'error' ? h('div', { class: 'errWhat' }, e.msg) : h('div', { class: 'errWhat' }, e.text),
+    e.kind === 'error' ? errWhatOf(e) : h('div', { class: 'errWhat' }, e.text),
     e.lineText ? h('code', { class: 'errLine' }, e.lineText) : null,
     e.fix ? h('div', { class: 'errFix' }, '💡 How to fix: ' + e.fix) : null,
     e.changed ? h('div', { class: 'muted' }, 'The Process was changed after it started, so this line number is of the copy that was running.') : null,

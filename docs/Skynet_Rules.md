@@ -19,7 +19,8 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
 - **Two rules behind every update** (OakBarn Brewery, 2026-11-09: "Rule # 1: Never Take Away, Only Add! and Rule # 2: Always use a
   Meaningless Key. 90% of issues with software updates are removed if you follow those rules."):
   1. **Never take away, only add.** An update adds things; it does not remove what users already have (after the Public Production,
-     above).
+     above). **Rule #1 is suspended until Production** (OakBarn Brewery, 2026-11-26: "Rule # 1 only applies AFTER Production, not
+     before"; "Suspend Rule #1 Until production"): before then, anything may be changed or taken away with no exception noted.
   2. **Always use a meaningless key.** Everything is found by a hidden key that means nothing (Rule 3.10), never by its name, so a
      rename never breaks a link.
 - **The Programming Rule: KISS, Keep It Simple Stupid** (OakBarn Brewery, 2026-11-10: "Simpler said than Before: Programming Rules:
@@ -5015,6 +5016,9 @@ the Pop up Override to run from just above the error"; "Go ahead and build it").
   Editor, blank and comment lines counted), the line's own text, what the error was, and **how to fix it when evident**
   (public/errorfix.js; nothing when the error's own words already show how). A Process that does not start is written the same way.
   The same error on the same line again is one entry with a count. A Process saved while it ran is marked, as its lines may have moved.
+  **Look** (OakBarn Brewery, Error Text PDF 2026-11-25): the Process and line in red, the error in red on its own line, and when the
+  error lists the names that are allowed ("(they are: ...)"), a light blue **Possible Suggested Replacement at Line N:** on the next
+  line, then the list. The whole message is kept (up to 4000 characters), so the list is not cut short.
 - **The fix is kept:** when the Process is saved with the error's line changed, the entry keeps the line as it was and as it is now.
 - **🧪 Check** runs the saved Process in a **check-only simulation** (lib/checkrun.js): its own Engine on a copy of the Brain that
   reads every Device, Widget and gGlobal as it is now; what it sets stays in the copy (and is listed), nothing goes to a board, the
@@ -5036,23 +5040,27 @@ had to continue without the software. If I could have resumed, I could still fol
 error later"; "I might even be able to swap a Heater!"; "I could just re route through the RIMS!").
 - A Process that stops on an error **leaves everything as it is** (nothing is switched Off by the error) and keeps the line it stopped
   on and its variables. The error still goes on the Process Error Log (Rule 10.13).
-- A red pop-up on **every screen** (with the Brain notices, Rule 6.31) shows the Process, the line number, the line and the error, and
-  stays until a brewer picks: **▶ Resume** runs that line again and goes on (after a pump, valve or heater is fixed or swapped);
-  **⏭ Skip line N** goes on at the next line (worked around, or the line is wrong); **✕** leaves it stopped. Operators and Admins
-  pick; view-only accounts see it.
-- Resume can be used again and again: the same error again gives the pop-up again. Starting the Process over, or ✕, lets it go. A
-  Process fixed and saved in the Process Editor resumes with the saved file at the same line number.
-- **The first stop always waits for a brewer:** what counts as "not critical" is the brewer's call (Skynet can not see a pump swapped
-  or a path re-routed). A Check run (Rule 10.13) and a Code Value Widget's code have no Resume.
-- **Next time line N fails** (OakBarn Brewery: "it is not the First Fail, but subsequent failures. Give the Nanny Warning about them
-  being responsible and to Monitor it, but let them do it"; "They have to set to auto resume as an Option. User Choice"; "another
-  option is Auto Resume with no Popup for something like the Hop Name error, but again, the User selects the fix, not Skynet"): a
-  dropdown on the pop-up, picked with Resume or Skip: **Stop and wait for me** (the start), **Auto: pop-up for 5 s, then go on**, or
-  **Auto: no pop-up, go on**. An Auto pick shows its **one warning** (you are responsible, stay with the brew and watch it). When that
-  same line fails again, it does the same (Resume or Skip) by itself: with the pop-up and a 5 second countdown (**⏸ Hold** stops it
-  and it waits for a brewer again), or with no pop-up after 1 second (still printed and on the Error Log). Starting the Process over
-  lets every Auto pick go. The pop-up for an error that keeps coming back may be refined later (OakBarn Brewery: "WE can refine the
-  Popup for a Recurring Message").
+- A red pop-up on **every screen** (with the Brain notices, Rule 6.31) shows the Process, the line number, the line and the error.
+  **The first time an error happens it always waits for a brewer** (Skynet can not see a pump swapped or a path re-routed). The
+  choices (OakBarn Brewery, 2026-11-26: "1: Fix hardware 2: Fix Process code 3. Ignore same Error in any Process, Skip this Line and
+  Proceed"; "Resume does not work. It needs to start one line past 77 (line 78)"):
+  1. **🔧 Fixed hardware: try line N again**: the same line runs again (a pump, valve or heater fixed or swapped), as often as needed.
+  2. **✎ Fix Process code**: the Process Editor opens at that line; Save, then Try again runs the saved Process from that line. A
+     line still open on the Error Log shows in the editor with a **red background and bold yellow text**, and goes back to normal
+     colors when its entry is Fixed (a 🧪 Check with no error, or ✔ Fixed) (OakBarn Brewery: "Put the Error in Red Background BOLD
+     Yellow text in the editor"; "And after a check with no issues normal Text colors").
+  3. **▶ Resume at the next line**: that line is left out and the Process goes on at the next one.
+  4. **⏭ Ignore this error in any Process and go on**: the line is left out, and from then on the same error (the same words) in any
+     Process, on any line, is left out by itself with no pop-up (still printed and on the Error Log) until the Brain restarts. Its
+     **one warning** shows when it is pressed: you are responsible, stay with the brew and watch it. It takes effect only after
+     **✔ I take responsibility** is clicked (OakBarn Brewery, 2026-11-26: "Maybe Have to Click a Key that they take Resposibility");
+     **Cancel** leaves it stopped with the choices again.
+  The pop-up and the Error Log show a plain **Why:** line under the error when Skynet can tell why it failed (OakBarn Brewery,
+  2026-11-26: "if you can add plain text to the error and why it failed, do so"; public/errorfix.js).
+  **✕** leaves it stopped. Operators and Admins pick; view-only accounts see it. Starting the Process over lets the pop-up go. The
+  variables come back as they were. A Check run (Rule 10.13) and a Code Value Widget's code have no Resume.
+- The "Next time this error happens" dropdown (Auto with a 5 second pop-up / Auto with no pop-up, 2026-11-25) is **replaced** by
+  choice 4 (OakBarn Brewery picked it 2026-11-26; Design Rule #1 is suspended until Production).
 **Both programs:** the BruControl Import runs no Processes, so nothing changes there. (Help 247)
 
 ## 11. Help pages
@@ -8183,5 +8191,9 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-23: Rule 2.6 changed (OakBarn Brewery, Panel Update 12 follow-up: "I think change the Rule. Add New goes first on every DDLB where appropriate"): in every dropdown that can grow, Add new ... is the first choice (after a "(pick ...)" line), not the last; on screen only, nothing saved changes. Rule 2.72's three open questions answered (Help language boxes OK; Add new Schema first; Switch to Simulator kept). Added Rule 10.12 (OakBarn Brewery: "We want to be able to switch to a simulator except on a Brew Day and Actively brewing"): Switch to Simulator is grayed while a Flow, Sub or Repeat Process runs. Help and French. Checked against both programs: the BruControl Import has no Simulator, and the Panel dropdowns on its Build page follow the same order. (thread "Build Panel Update 12")
 - 2026-11-23: Added Rule 10.13 The Process Error Log, ☰ Menu > 🔧 Fix before next Brew Day (Panel Updates entry 55; OakBarn Brewery: "an error log with the line # of the error, what the error was and a way to fix it if evident"; "Log it, and if it was fixed, the fix.  and the Check button could be used to check it in a simulation mode just for the checking"; "I think B is best and use the Pop up Override to run from just above the error"; "Go ahead and build it"): every Process error by itself with its line, line text, what and how to fix; the fix kept when the line is changed; 🧪 Check in a check-only simulation from just above the error to the next wait or step, ▶ Override past it; your own issues. Help 247 (new) and 33, and French. Checked against both programs: the BruControl Import runs no Processes. (thread "Build Panel Update 12")
 - 2026-11-25: Added Rule 10.14 Resume after an error (OakBarn Brewery: "leave up to the User to Resume"; "I could just re route through the RIMS!"): a Process stopped on an error leaves everything as it is; a pop-up on every screen gives ▶ Resume (the line again), ⏭ Skip line (the next line) or ✕ (stays stopped), as often as needed; "Next time line N fails" (the user picks: Stop and wait, Auto with a 5 second pop-up, or Auto with no pop-up; one warning for Auto) repeats the pick by itself when the same line fails again (⏸ Hold stops the countdown). Rule 1.13 note: a Label a Process sets shows while the panel runs, "" puts back the Properties' Label; the 3 Vessel Step timer says what the brew is doing ("Transferring 1st Run") and counts up on untimed steps. Fix: with no Recipe loaded, every Recipe tab name (skn_rcp_Whirlpool_Minutes and 20 more) reads as 0 or empty instead of stopping the Process. Help 247, 72 and French. Checked against both programs: the BruControl Import runs no Processes. (thread "Fix Brew Day stop after Whirlpool hops")
+- 2026-11-26: Rule 10.13 note (OakBarn Brewery, Error Text PDF): an Error Log entry shows the Process, line and error in red, each on its own line, and a list of allowed names after a light blue "Possible Suggested Replacement at Line N:"; the whole message is kept (4000 characters). Help 247 and French. Checked against both programs: the BruControl Import runs no Processes. (thread "Fix Brew Day stop after Whirlpool hops")
+- 2026-11-26: Rule 10.14 changed (OakBarn Brewery: "I had the exact same error at 181. It should have resumed without any input on my part"; "Resume does not work. It needs to start one line past 77 (line 78)"; "1: Fix hardware 2: Fix Process code 3. Ignore same Error in any Process, Skip this Line and Proceed"; "Put the Error in Red Background BOLD Yellow text in the editor"; "And after a check with no issues normal Text colors"): the pop-up's choices are Fixed hardware (try the line again), Fix Process code (the editor at the line, the line red with bold yellow text until Fixed), Resume at the next line, and Ignore this error in any Process (the same words anywhere left out with no pop-up until the Brain restarts, one warning); the Auto dropdown is replaced. Help 247 and French. (thread "Fix Brew Day stop after Whirlpool hops")
+- 2026-11-26: Design Rule #1 (Never Take Away) is suspended until Production (OakBarn Brewery: "Rule # 1 only applies AFTER Production, not before"; "Suspend Rule #1 Until production"). The Process Editor's error line is red with bold yellow text whether Colors is on or off, and opening a Process scrolls to its first error line (OakBarn Brewery: "Error Text always Red with Bold Yellow"). (thread "Fix Brew Day stop after Whirlpool hops")
+- 2026-11-26: Rule 10.14 and 10.13 notes (OakBarn Brewery: "Maybe Have to Click a Key that they take Resposibility"; "if you can add plain text to the error and why it failed, do so"): ⏭ Ignore shows its one warning first and needs ✔ I take responsibility (Cancel leaves it stopped); the pop-up and the Error Log add a plain "Why:" line under the error when Skynet can tell (public/errorfix.js whyOf). Help 247 and French. (thread "Fix Brew Day stop after Whirlpool hops")
 - 2026-11-24: Rule 2.69 changed (OakBarn Brewery: "when you turn the sound on a quick beep"): the Sound icon plays a short browser-made beep when it turns sound on; turning it off is silent. Help 21 and 40 (English and French).
 - 2026-11-25: Rule 2.35 note (OakBarn Brewery: "Yes if possible we want to be touch screen friendly"): a finger held on a Push Button or Dual Action item, or a Push Button Hose Bib, no longer opens Help over it; text boxes and dropdowns use 16 px text on touch screens so iPhone Safari does not zoom in. Help 45 (and French). BruControl Import program: not affected (it has no Tabs to run).

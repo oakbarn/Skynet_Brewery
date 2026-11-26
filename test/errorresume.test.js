@@ -61,5 +61,45 @@ engine.resumeAfterError('Loop', { skip: true, auto: 'quiet' }); await runL();
 assert.deepEqual(engine.errorStopList(), [], 'no pop-up');
 await new Promise(r => setTimeout(r, 2600)); await runL();      // fails at N = 2 and N = 3, a second each
 assert.equal(store.getProp('gV_Done', 'value'), 3, 'Auto Skip, no pop-up, carried it to the end');
+// Ignore this error in any Process (OakBarn Brewery, 2026-11-26: "Ignore same Error in any Process, Skip this Line and Proceed"): the
+// line is left out, and the same error in any Process (on any line) is left out too with no pop-up
+engine.write('Two', ['// Two', 'new value Q = NULL', 'new value R = 0', 'R = Q + 1', 'gV_Fixed = 7'].join('\n'));
+engine.write('Loop2', ['// Loop2', 'new value Q = NULL', 'new value N = 0', 'new value R = 0', 'N = 1', 'R = Q + 1', 'N = 2', 'R = Q + 1', 'gV_Done = 22'].join('\n'));
+const runN = async n => { await engine.running.get(n)?.done; await new Promise(r => setTimeout(r, 20)); };
+engine.start('Loop2', 'user'); await runN('Loop2');
+assert.equal(engine.errorStopList()[0].line, 6, 'the first time it waits');
+engine.resumeAfterError('Loop2', { ignore: true }); await runN('Loop2');
+assert.deepEqual(engine.errorStopList(), [], 'line 8, the same error: no pop-up');
+await new Promise(r => setTimeout(r, 1300)); await runN('Loop2');
+assert.equal(store.getProp('gV_Done', 'value'), 22, 'left out and went on');
+engine.start('Two', 'user'); await runN('Two');
+assert.deepEqual(engine.errorStopList(), [], 'another Process, the same error: no pop-up');
+await new Promise(r => setTimeout(r, 1300)); await runN('Two');
+assert.equal(store.getProp('gV_Fixed', 'value'), 7);
 engine.stopAll(); clearTimeout(store._persistTimer);
 console.log('error resume tests passed');
+
+// the Error Log entry's words (OakBarn Brewery, Error Text PDF 2026-11-25): the error, then the allowed names after a light blue line
+{
+  const { errSplit } = await import('../public/errorfix.js');
+  assert.deepEqual(errSplit('skn_rcp_Bad is not a Recipe value (they are: skn_rcp_Loaded, skn_rcp_Name ...)'), { what: 'skn_rcp_Bad is not a Recipe value', list: 'skn_rcp_Loaded, skn_rcp_Name ...' });
+  assert.deepEqual(errSplit('Y is NULL (empty), so it has no value'), { what: 'Y is NULL (empty), so it has no value', list: '' });
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /Possible Suggested Replacement at Line \$\{e\.line\}:/);
+  console.log('error words tests passed');
+}
+{
+  const { errSplit } = await import('../public/errorfix.js');
+  assert.deepEqual(errSplit('skn_rcp_X is not a Recipe value (they are: skn_rcp_Loaded, skn_rcp_Hop_Stand_Middle_Mi'), { what: 'skn_rcp_X is not a Recipe value', list: 'skn_rcp_Loaded, skn_rcp_Hop_Stand_Middle_Mi' }, 'an old entry cut short');
+}
+{
+  // why it failed, in plain words (OakBarn Brewery, 2026-11-26)
+  const { whyOf } = await import('../public/errorfix.js');
+  assert.match(whyOf('skn_rcp_Whirlpool_Minutes is not a Recipe value (they are: a, b)'), /asks the Recipe for skn_rcp_Whirlpool_Minutes/);
+  assert.match(whyOf('vVErrTest is NULL (empty), so it has no value to work with. Test it first, for example: if X == NULL'), /vVErrTest has no value yet/);
+  assert.match(whyOf('skn_rcp_Boil_Time is NULL (empty), so it has no value'), /no Recipe is loaded/);
+  assert.match(whyOf('Unknown name Y: no variable made with new'), /does not know the name Y:/);
+  assert.match(whyOf('Mega1 is not connected (closed), so the line cannot be sent'), /board Mega1 is not talking to the Brain/);
+  assert.equal(whyOf('something plain'), '');
+  console.log('why tests passed');
+}

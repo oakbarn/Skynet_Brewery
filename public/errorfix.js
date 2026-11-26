@@ -28,3 +28,44 @@ export function fixHint(msg) {
   for (const [re, f] of HINTS) { const m = re.exec(s); if (m) return f(m); }
   return '';
 }
+
+// An error's words split in two for the Error Log (OakBarn Brewery, Error Text PDF 2026-11-25): what went wrong, and the names that are
+// allowed when the error lists them ("... is not a Recipe value (they are: a, b, c)"), shown after "Possible Suggested Replacement at Line N:"
+export function errSplit(msg) {
+  // an old entry may have its list cut short (no closing bracket): the list shows as far as it goes
+  const m = /^([\s\S]*?)\s*\(they are:\s*([\s\S]*?)\)?\s*$/.exec(String(msg ?? ''));
+  return m ? { what: m[1], list: m[2] } : { what: String(msg ?? ''), list: '' };
+}
+
+// Why it failed, in plain words (OakBarn Brewery, 2026-11-26: "if you can add plain text to the error and why it failed, do so"). One
+// sentence on what went wrong, for the pop-up and the Error Log, next to the error's own words. '' when the error's words are already plain.
+const WHY = [
+  [/^(skn_rcp_\S+) is not a Recipe value/, m => `This line asks the Recipe for ${m[1]}, but the Recipe has no value with that name, so there is nothing to use here.`],
+  [/^(\S+) is NULL \(empty\)/, m => /^skn_rcp_/.test(m[1]) ? `${m[1]} has no value: no Recipe is loaded, or the Recipe leaves it empty, so this line has nothing to work with.`
+    : `${m[1]} has no value yet (nothing was put in it), so this line has nothing to work with.`],
+  [/^Unknown (?:name|variable) (\S+?):?(\s|$)/, m => `Skynet does not know the name ${m[1]}: no Device, Widget or variable has that name.`],
+  [/^Variable (\S+) used before "new"/, m => `${m[1]} is used on this line before the line that makes it.`],
+  [/^(\S+) has no property (\S+)/, m => `${m[1]} has nothing called .${m[2]}.`],
+  [/has no property (\S+)/, m => `The name before the dot has nothing called .${m[1]}.`],
+  [/(no process or element named|no process named|nothing is named|No valve named|No hose named|No pipe, hose or IP named|no alarm or sound player named) "([^"]+)"/,
+    m => `Nothing in this Schema is called "${m[2]}".`],
+  [/^Process not found: "([^"]+)"/, m => `There is no Process called "${m[1]}".`],
+  [/^Element not found: "([^"]+)"/, m => `Nothing in this Schema is called "${m[1]}".`],
+  [/^(\S+) is not connected \(([^)]*)\)/, m => `The board ${m[1]} is not talking to the Brain (${m[2]}), so the Device on this line could not be switched or read.`],
+  [/^Missing closing quote/, () => 'A text on this line starts with " but does not end with one.'],
+  [/^(\{ needs an if|\} without \{|if has no endif|endif without if|else without if|elseif without if|else after else|elseif after else|\{ has no \})/,
+    () => 'The if, else and endif lines do not pair up, so Skynet cannot tell where this part ends.'],
+  [/^goto: no label \[([^\]]+)\]/, m => `goto points to [${m[1]}], but no line in this Process is that label.`],
+  [/^Label \[([^\]]+)\] is used twice/, m => `Two lines are the label [${m[1]}], so a goto cannot tell which one to go to.`],
+  [/^(Do not understand|Unknown statement|Bad expression|Missing expression|Unexpected character)/, () => 'Skynet could not read this line: a word or sign in it is not one it knows.'],
+  [/^wait_boil: no temperature probe has Boil Probe/, () => 'wait_boil needs a probe marked Boil Probe, and no probe is.'],
+  [/^goLine (\d+): the Process has only (\d+) lines/, m => `goLine points to line ${m[1]}, past the end of the Process.`],
+  [/Cannot divide by zero|division by zero|divide by 0/i, () => 'This line divides by 0, which has no answer.'],
+  [/^start_hop_alerts: no timer named "([^"]+)"/, m => `start_hop_alerts names the timer "${m[1]}", and there is no timer with that name.`],
+  [/^send_db: "([^"]+)" has no value to send/, m => `"${m[1]}" is empty, so there is nothing to send.`],
+];
+export function whyOf(msg) {
+  const s = String(msg ?? '').replace(/^line \d+:\s*/, '').trim();
+  for (const [re, f] of WHY) { const m = re.exec(s); if (m) return f(m); }
+  return '';
+}
