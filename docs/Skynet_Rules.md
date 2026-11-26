@@ -636,7 +636,7 @@ screen now anywhere needs to be White (Opaque). Change the choice of White on th
 Add White (Transparent) as an option on the color Picker (255,255,255 and transparent)"): the choice is named **White (Opaque)**
 (250 250 250), and **White (Transparent)** follows it: 255 255 255 and see-through, the same as None (saved as rgba(255,255,255,0)).
 All white text anywhere on the screen is White (Opaque): the normal text of the dark Looks, the Skynet Tab Styles and the starting
-colors (Override text, new Vessel labels, timers) are 250 250 250. `\c{White}` is White (Opaque).
+colors (Override text, new Vessel labels, timers) are 250 250 250. `\c{White}` is White (Opaque). Fritz, 2026-11-26: "Yes, all screen text to White Opaque. When I do a screen shot of a Tab and overlay it in Paint, all the white text is transparent and takes extra steps so it is not." So the Panel draws no pure 255 white anywhere on the screen: outlines, IP dots, borders and highlights drawn in code are 250 250 250 too (pictures in the Image Library are not changed).
 
 2.8 **Properties dialogs** have Delete, Cancel and Save at both the top and the bottom. (2026-10-04,
 PR #15)

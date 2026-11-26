@@ -1122,7 +1122,7 @@ const MF_TPLS = { Valve_Tee: { what: 'Long Tee with a Valve', prefix: 'ValveTee'
 const MF_FIT = 'fill="#808080" stroke="#505050" stroke-width="1.6" stroke-linejoin="round"';
 const MF_BODY = `<rect x="85.8" y="16" width="38.4" height="180" ${MF_FIT}/><rect x="77" y="0.8" width="56" height="16.5" rx="5" ${MF_FIT}/>`
   + `<rect x="77" y="192.7" width="56" height="16.5" rx="5" ${MF_FIT}/><rect x="70" y="0" width="70" height="12" rx="3" fill="#b9bec4" stroke="#505050" stroke-width="1.6"/>`
-  + `<rect x="66" y="76" width="78" height="58" rx="10" ${MF_FIT}/><circle cx="105" cy="105" r="13" fill="#fff" stroke="#111" stroke-width="5"/>`;
+  + `<rect x="66" y="76" width="78" height="58" rx="10" ${MF_FIT}/><circle cx="105" cy="105" r="13" fill="#fafafa" stroke="#111" stroke-width="5"/>`;
 const MF_SVG = inner => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 210">${MF_BODY}${inner}</svg>`);
 const MF_PICS = {
   manual: MF_SVG('<rect x="143" y="99" width="12" height="12" fill="#8f9296" stroke="#2b2b2b" stroke-width="2"/><rect x="152" y="96" width="54" height="18" rx="6" fill="#2b2b2b"/><rect x="156" y="100" width="46" height="10" rx="4" fill="#5b6066"/>'),
@@ -12133,7 +12133,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': 'text', value: cur });
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') }); sw.style.background = flowHex(cur) || '';
     const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); };
-    const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fff'}` } : {}) }, n);
+    const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fafafa'}` } : {}) }, n);
     const s = h('select', {}, opt('', opts === 'tab' ? 'None' : opts === 'vessel' || opts === 'ip' ? `None (the flow out of it is not colored by this ${opts === 'ip' ? 'IP' : 'vessel'})` : 'None (it follows the Tab Flow Color)'),
       ...FLOW_COLORS.map(([k, n]) => opt(k, n)), opt('rgb', 'RGB (pick your own color) ...'));
     let last = s.value;
@@ -12154,7 +12154,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
     const sw = h('span', { class: 'cswatch' }), named = c => COLORS.some(k => k[1] === c) || c === CHAIN_KEEP;
     const set = c => { val.value = c; sw.style.background = c === CHAIN_KEEP ? '' : c; sw.classList.toggle('dflt', !c || c === CHAIN_KEEP); sw.classList.toggle('none', c === 'transparent' || c === WHITE_SEE); };
-    const optOf = (n, c) => h('option', { value: c, ...(c && c !== 'transparent' && c !== WHITE_SEE && c !== CHAIN_KEEP ? { style: `background:${c};color:${['#fafafa', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n);
+    const optOf = (n, c) => h('option', { value: c, ...(c && c !== 'transparent' && c !== WHITE_SEE && c !== CHAIN_KEEP ? { style: `background:${c};color:${['#fafafa', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fafafa'}` } : {}) }, n);
     const custom = h('option', { value: 'custom' }, 'Custom (add new) ...');
     const s = h('select', {}, ...cols.map(([n, c]) => optOf(n, c)), custom);
     s.value = cur; if (s.selectedIndex < 0) s.value = '';
