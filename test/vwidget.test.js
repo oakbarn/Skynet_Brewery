@@ -60,7 +60,8 @@ assert.ok(read('help/133-vessel-widget.md').includes('TC, NPT or BSP'), 'Help ex
 const c = JSON.parse(read('samples/configs/three-vessel-one-pump/config.json'));
 // (OakBarn Brewery, 2026-11-26: the Low Center Outlet, not the Bottom Drain, on all 3, hosed to the manifold's out valves; the Boil
 // Kettle's high left moved to its Left Tangential)
-const want = { HLT_Vessel: ['cOutlet', 'lElement', 'rElement'], MLT_Vessel: ['cOutlet', 'lSparge', 'lElement'], BK_Vessel: ['cOutlet', 'lTangential', 'lElement', 'rElement'] };
+// (2026-11-26: the HLT Right Tangential is back, fed from a Tee on the pump outlet manifold through To HLT (pin 34) and a hose to the HLT in Butterfly)
+const want = { HLT_Vessel: ['cOutlet', 'lElement', 'rElement', 'rTangential'], MLT_Vessel: ['cOutlet', 'lSparge', 'lElement'], BK_Vessel: ['cOutlet', 'lTangential', 'lElement', 'rElement'] };
 const parts = { HLT_Vessel: { lElement: ['BM1w1_1_HLT_BH', 'thermowell'], rElement: ['BM_8_DO@H_Element_HLT~element_BH', 'element'] }, MLT_Vessel: { lElement: ['BM1w1_2_Mash_BH', 'thermowell'] },
   BK_Vessel: { lElement: ['BM1w1_3_Kettle_BH', 'thermowell'], rElement: ['BM_9_DO@H_Element_Kettle~element_BH', 'element'] } };
 for (const [n, on] of Object.entries(want)) {

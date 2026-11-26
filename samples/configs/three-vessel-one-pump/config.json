@@ -496,7 +496,8 @@
      "BM_22_DO@Pump_Pump_BH",
      "BM_25_DO@Valve_E_Mash~tun~out_BH",
      "wgt_MV_Mash~tun~out_BH",
-     "BM_28_DO@Valve_E_To~kettle_BH"
+     "BM_28_DO@Valve_E_To~kettle_BH",
+     "wgt_MV_Kettle~in_BH"
     ],
     "followLoss": 0.56,
     "cooler": "BM_22_DO@Pump_Pump_BH",
@@ -703,6 +704,29 @@
    "offText": "CLOSED",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "layer": 75
+  },
+  {
+   "name": "BM_34_DO@Valve_E_To~HLT_BH",
+   "type": "digitalOut",
+   "subtype": "valve",
+   "workspace": "Brew House",
+   "device": "Brewery Mega",
+   "channel": 34,
+   "label": "To HLT",
+   "x": 766.7,
+   "y": 401,
+   "w": 93,
+   "h": 75,
+   "ipIn": "top",
+   "ipOut": "bottom",
+   "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg",
+   "hideName": true,
+   "hideValue": true,
+   "tap": "toggle",
+   "onText": "OPEN",
+   "offText": "CLOSED",
+   "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
+   "layer": 76
   },
   {
    "name": "BM_29_DO@Valve_E_To~fermenter_BH",
@@ -1282,7 +1306,7 @@
      "label": "Left Tangential"
     },
     "rTangential": {
-     "installed": false,
+     "installed": true,
      "position": "VW R Tangential",
      "standard": "TC 1.5",
      "label": "Right Tangential"
@@ -1364,6 +1388,23 @@
    "x": 695,
    "y": 312,
    "label": "Center Outlet",
+   "layer": 60
+  },
+  {
+   "id": "ip_h_in",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_HLT",
+   "port": "rTangential",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 772,
+   "y": 288,
+   "label": "Right Tangential",
    "layer": 60
   },
   {
@@ -2181,14 +2222,14 @@
    "id": "p_Brewhouse_13",
    "kind": "pipe",
    "workspace": "Brew House",
-   "to": "gmw2lvfnuf49",
+   "to": "g_hlt_tee_s",
    "points": [
     [
      1149,
      540
     ],
     [
-     908,
+     917.5,
      540
     ]
    ],
@@ -2206,12 +2247,12 @@
    "id": "p_Brewhouse_13_2",
    "kind": "pipe",
    "workspace": "Brew House",
-   "from": "gmw2lvfnu209",
+   "from": "g_hlt_tee_b",
    "to": "dev:BM_27_DO@Valve_E_To~mash~tun_BH:out",
    "points": [
     [
      890,
-     522
+     512.56
     ],
     [
      890,
@@ -2223,6 +2264,56 @@
    "straight": true,
    "label": "pipe_7",
    "name": "Pipe_7",
+   "layer": 106,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
+  },
+  {
+   "id": "p_hlt_in_1",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "from": "g_hlt_tee_e",
+   "to": "gmw2lvfnuf49",
+   "points": [
+    [
+     862.5,
+     540
+    ],
+    [
+     805,
+     540
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "label": "pipe_7",
+   "name": "Pipe_33",
+   "layer": 106,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
+  },
+  {
+   "id": "p_hlt_in_2",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "from": "gmw2lvfnu209",
+   "to": "dev:BM_34_DO@Valve_E_To~HLT_BH:out",
+   "points": [
+    [
+     787,
+     522
+    ],
+    [
+     787,
+     476
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "label": "pipe_7",
+   "name": "Pipe_34",
    "layer": 106,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
@@ -2324,56 +2415,6 @@
    "label": "pipe_9",
    "name": "Pipe_9",
    "layer": 102,
-   "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
-  },
-  {
-   "id": "p_Brewhouse_16",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "dev:BM_28_DO@Valve_E_To~kettle_BH:in",
-   "to": "gmw2lvfnvgm9",
-   "points": [
-    [
-     1260,
-     401
-    ],
-    [
-     1260,
-     321.46
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "layer": 101,
-   "name": "Pipe_29",
-   "label": "pipe_29",
-   "ipTypeFrom": "TC1.5",
-   "ipTypeTo": "TC1.5"
-  },
-  {
-   "id": "p_Brewhouse_16_2",
-   "kind": "pipe",
-   "workspace": "Brew House",
-   "from": "gmw2lvfnvybd",
-   "to": "ip_b_in",
-   "points": [
-    [
-     1278,
-     303
-    ],
-    [
-     1353,
-     303
-    ]
-   ],
-   "width": 10,
-   "color": "#8a8f96",
-   "straight": true,
-   "label": "pipe_10",
-   "name": "Pipe_10",
-   "layer": 100,
    "ipTypeFrom": "TC1.5",
    "ipTypeTo": "TC1.5"
   },
@@ -3001,7 +3042,7 @@
     "start": "0.29,1",
     "end": "1,0.29"
    },
-   "x": 882,
+   "x": 779,
    "y": 522,
    "bundled": true,
    "rot": 270,
@@ -3021,6 +3062,131 @@
    }
   },
   {
+   "id": "g_hlt_tee",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brew House",
+   "name": "Tee_6",
+   "template": "Tee",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "tee"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0,0.216",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.216",
+     "standard": "TC 1.5"
+    },
+    "branch1": {
+     "installed": true,
+     "position": "0.5,1",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 862.5,
+   "y": 512.56,
+   "label": "coupling_6",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0,0.216",
+    "end": "1,0.216",
+    "branch1": "0.5,1"
+   },
+   "w": 55,
+   "h": 35,
+   "fit": {
+    "bend": "0.5,0.216",
+    "body": 0.183,
+    "size": [
+     160,
+     102
+    ],
+    "ipPos": {
+     "start": "0,0.216",
+     "end": "1,0.216",
+     "branch1": "0.5,1"
+    }
+   },
+   "layer": 67,
+   "rot": 180
+  },
+  {
+   "id": "g_hlt_tee_s",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_hlt_tee",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 902.5,
+   "y": 525,
+   "label": "Start (vessel side) (TC 1.5)",
+   "layer": 22
+  },
+  {
+   "id": "g_hlt_tee_e",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_hlt_tee",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 847.5,
+   "y": 525,
+   "label": "End (TC 1.5)",
+   "layer": 22
+  },
+  {
+   "id": "g_hlt_tee_b",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_hlt_tee",
+   "port": "branch1",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 875,
+   "y": 497.56,
+   "label": "Tee 1 branch (TC 1.5)",
+   "layer": 22
+  },
+  {
    "id": "gmw2lvfnuf49",
    "kind": "ip",
    "workspace": "Brew House",
@@ -3032,7 +3198,7 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 893,
+   "x": 790,
    "y": 525,
    "label": "Start (vessel side) (TC 1.5)",
    "layer": 38
@@ -3049,7 +3215,7 @@
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
-   "x": 875,
+   "x": 772,
    "y": 507,
    "label": "End (TC 1.5)",
    "layer": 37
@@ -3254,106 +3420,6 @@
    "y": 525,
    "label": "End (TC 1.5)",
    "layer": 33
-  },
-  {
-   "id": "gmw2lvfnv1os",
-   "kind": "vessel",
-   "vesselType": "bfit",
-   "workspace": "Brew House",
-   "w": 26,
-   "h": 26,
-   "name": "Elbow_10",
-   "template": "Elbow_90",
-   "templateCls": "skynet",
-   "fittings": [
-    {
-     "kind": "elbow90"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    },
-    {
-     "kind": "none"
-    }
-   ],
-   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
-   "labelAlign": "below",
-   "labelSize": 12,
-   "labelVisible": false,
-   "ports": {
-    "start": {
-     "installed": true,
-     "position": "0.29,1",
-     "standard": "TC 1.5"
-    },
-    "end": {
-     "installed": true,
-     "position": "1,0.29",
-     "standard": "TC 1.5"
-    }
-   },
-   "std": {
-    "type": "TC",
-    "size": 1.5
-   },
-   "ipPos": {
-    "start": "0.29,1",
-    "end": "1,0.29"
-   },
-   "x": 1252,
-   "y": 295.46,
-   "bundled": true,
-   "layer": 64,
-   "label": "elbow_10",
-   "fit": {
-    "bend": "0.29,0.29",
-    "body": 0.384,
-    "size": [
-     90,
-     90
-    ],
-    "ipPos": {
-     "start": "0.29,1",
-     "end": "1,0.29"
-    }
-   }
-  },
-  {
-   "id": "gmw2lvfnvgm9",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnv1os",
-   "port": "start",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1244.54,
-   "y": 306.46,
-   "label": "Start (vessel side) (TC 1.5)",
-   "layer": 32
-  },
-  {
-   "id": "gmw2lvfnvybd",
-   "kind": "ip",
-   "workspace": "Brew House",
-   "w": 30,
-   "h": 30,
-   "color": "#e8a33a",
-   "attachTo": "gmw2lvfnv1os",
-   "port": "end",
-   "labelVisible": false,
-   "labelAlign": "below",
-   "labelSize": 12,
-   "x": 1263,
-   "y": 288,
-   "label": "End (TC 1.5)",
-   "layer": 31
   },
   {
    "id": "g_tap_tee",
@@ -4551,6 +4617,68 @@
    "layer": 17
   },
   {
+   "id": "g_mv_h_in",
+   "kind": "ip",
+   "fitting": "manualValve",
+   "image": "Images/Skynet/Valves/Manual_Butterfly_Valve_Front_Elbow_Closed.svg",
+   "workspace": "Brew House",
+   "x": 762,
+   "y": 278,
+   "w": 50,
+   "h": 50,
+   "label": "HLT in",
+   "name": "wgt_MV_HLT~in_BH",
+   "color": "#8a8f96",
+   "confirmation": true,
+   "layer": 31,
+   "labelVisible": false
+  },
+  {
+   "id": "p_h_in_direct",
+   "kind": "pipe",
+   "straight": true,
+   "direct": true,
+   "workspace": "Brew House",
+   "points": [
+    [
+     787,
+     303
+    ],
+    [
+     787,
+     303
+    ]
+   ],
+   "from": "ip_h_in",
+   "to": "eq:g_mv_h_in:in",
+   "color": "#8a8f96",
+   "name": "Pipe_35",
+   "layer": 16
+  },
+  {
+   "id": "p_h_in_hose",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "points": [
+    [
+     787,
+     327.5
+    ],
+    [
+     787,
+     401
+    ]
+   ],
+   "color": "#c9ced3",
+   "hose": true,
+   "from": "eq:g_mv_h_in:out",
+   "to": "dev:BM_34_DO@Valve_E_To~HLT_BH:in",
+   "name": "Hose_7",
+   "label": "hose_7",
+   "labelVisible": false,
+   "layer": 17
+  },
+  {
    "id": "g_mv_m_out",
    "kind": "ip",
    "fitting": "manualValve",
@@ -4671,6 +4799,68 @@
    "to": "dev:BM_26_DO@Valve_E_Kettle~out_BH:in",
    "name": "Hose_6",
    "label": "hose_6",
+   "labelVisible": false,
+   "layer": 17
+  },
+  {
+   "id": "g_mv_b_in",
+   "kind": "ip",
+   "fitting": "manualValve",
+   "image": "Images/Skynet/Valves/Manual_Butterfly_Valve_Front_Elbow_Closed.svg",
+   "workspace": "Brew House",
+   "x": 1328,
+   "y": 278,
+   "w": 50,
+   "h": 50,
+   "label": "Kettle in",
+   "name": "wgt_MV_Kettle~in_BH",
+   "color": "#8a8f96",
+   "confirmation": true,
+   "layer": 31,
+   "labelVisible": false
+  },
+  {
+   "id": "p_b_in_direct",
+   "kind": "pipe",
+   "straight": true,
+   "direct": true,
+   "workspace": "Brew House",
+   "points": [
+    [
+     1353,
+     303
+    ],
+    [
+     1353,
+     303
+    ]
+   ],
+   "from": "ip_b_in",
+   "to": "eq:g_mv_b_in:in",
+   "color": "#8a8f96",
+   "name": "Pipe_39",
+   "layer": 16
+  },
+  {
+   "id": "p_b_in_hose",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "points": [
+    [
+     1353,
+     327.5
+    ],
+    [
+     1260,
+     401
+    ]
+   ],
+   "color": "#c9ced3",
+   "hose": true,
+   "from": "eq:g_mv_b_in:out",
+   "to": "dev:BM_28_DO@Valve_E_To~kettle_BH:in",
+   "name": "Hose_8",
+   "label": "hose_8",
    "labelVisible": false,
    "layer": 17
   },

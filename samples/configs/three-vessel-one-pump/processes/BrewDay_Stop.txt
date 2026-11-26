@@ -17,6 +17,7 @@ BM_25_DO@Valve_E_Mash~tun~out_BH = false
 BM_26_DO@Valve_E_Kettle~out_BH = false
 BM_27_DO@Valve_E_To~mash~tun_BH = false
 BM_28_DO@Valve_E_To~kettle_BH = false
+BM_34_DO@Valve_E_To~HLT_BH = false
 BM_29_DO@Valve_E_To~fermenter_BH = false
 BM_33_DO@Valve_E_Manifold~Valve_WA = false
 remove_Chiller
