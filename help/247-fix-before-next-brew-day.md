@@ -40,6 +40,32 @@ lines and comment lines. Two things to know:
 Type an issue in the box at the top, for example *the HLT valve sticks*, and press **➕ Add an issue**. The Tab you were on (or the
 Process open in the Process Editor) is written with it. It stays on the list until you tick it off.
 
+## Resume after an error
+
+When a Process stops on an error during a brew (Skynet Rule 10.14), **everything is left as it is** and a red pop-up shows on every
+screen with the Process, the line, the line itself and the error. You decide what happens next:
+
+- **▶ Resume** runs that same line again and goes on from there. Use it after you fix or swap what failed (a pump, a valve, a
+  heater). The Process keeps the values it had. If it stops on the same line again, fix more and Resume again.
+- **⏭ Skip line** leaves that line out and goes on at the next line. Use it when you worked around the problem (for example you
+  re-routed through the RIMS), or when the line itself is wrong.
+- **✕** leaves the Process stopped and closes the pop-up on every screen.
+
+**Next time line N fails** is a dropdown on the pop-up. The first time a line fails, Skynet always waits for you. Before you pick
+Resume or Skip, choose what happens if that same line fails again:
+
+- **Stop and wait for me** (it starts on this): the pop-up again.
+- **Auto: pop-up for 5 s, then go on**: the pop-up shows a 5 second countdown, then does the same thing again (Resume or Skip) by
+  itself. **⏸ Hold** stops the countdown, and it waits for you again.
+- **Auto: no pop-up, go on**: no pop-up at all; after a second it does the same thing again. Good for a small error such as a hop
+  name. It is still written in the Console and on this list.
+
+An Auto choice gives you one warning: you are responsible, so stay with the brew and watch it. Starting the Process over turns Auto
+off again.
+
+The pop-up stays until someone picks. Starting the Process over lets the Resume go. The error is still written on this list, so you
+can fix the Process before the next Brew Day.
+
 ## How long they are kept
 
 The list is kept on the Brain, so a restart keeps it. Open entries stay until they are fixed or deleted. Fixed ones are kept for

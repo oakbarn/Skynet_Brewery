@@ -46,6 +46,34 @@ comptant les lignes vides et les lignes de commentaire. Deux choses à savoir :
 Tapez un problème dans la case du haut, par exemple *la vanne du HLT colle*, et appuyez sur **➕ Add an issue**. Le Tab où vous
 étiez (ou le Process ouvert dans le Process Editor) est noté avec. Il reste dans la liste jusqu'à ce que vous le cochiez.
 
+## Reprendre après une erreur {#resume-after-an-error}
+
+Quand un Process s'arrête sur une erreur pendant un brassage (Règle Skynet 10.14), **tout est laissé tel quel** et une fenêtre
+rouge s'affiche sur tous les écrans avec le Process, la ligne, la ligne elle-même et l'erreur. C'est vous qui décidez de la suite :
+
+- **▶ Resume** refait tourner cette même ligne et continue à partir de là. Servez-vous-en après avoir réparé ou remplacé ce qui a
+  lâché (une pompe, une vanne, une résistance). Le Process garde les valeurs qu'il avait. S'il s'arrête encore sur la même ligne,
+  réparez encore et refaites Resume.
+- **⏭ Skip line** saute cette ligne et continue à la ligne suivante. Servez-vous-en quand vous avez contourné le problème (par
+  exemple en passant par le RIMS), ou quand la ligne elle-même est fausse.
+- **✕** laisse le Process arrêté et ferme la fenêtre sur tous les écrans.
+
+**Next time line N fails** (la prochaine fois que la ligne N échoue) est une liste déroulante sur la fenêtre. La première fois
+qu'une ligne échoue, Skynet vous attend toujours. Avant de choisir Resume ou Skip, choisissez ce qui se passe si cette même ligne
+échoue à nouveau :
+
+- **Stop and wait for me** (au départ) : la fenêtre de nouveau.
+- **Auto: pop-up for 5 s, then go on** : la fenêtre montre un compte à rebours de 5 secondes, puis refait la même chose (Resume ou
+  Skip) toute seule. **⏸ Hold** arrête le compte à rebours, et Skynet vous attend de nouveau.
+- **Auto: no pop-up, go on** : pas de fenêtre du tout ; après une seconde, il refait la même chose. Pratique pour une petite erreur
+  comme un nom de houblon. C'est quand même noté dans la Console et dans cette liste.
+
+Un choix Auto vous donne un seul avertissement : vous êtes responsable, restez donc avec le brassage et surveillez-le. Redémarrer le
+Process depuis le début éteint Auto.
+
+La fenêtre reste jusqu'à ce que quelqu'un choisisse. Redémarrer le Process depuis le début abandonne le Resume. L'erreur est quand
+même notée dans cette liste, pour que vous puissiez réparer le Process avant le prochain brassage.
+
 ## Combien de temps elles sont gardées {#how-long-they-are-kept}
 
 La liste est gardée sur le Brain, un redémarrage la garde donc. Les entrées ouvertes restent jusqu'à ce qu'elles soient réparées ou

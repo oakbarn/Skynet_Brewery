@@ -26,4 +26,9 @@ tm_Mash.label = "Mash rest"
 
 `label` est le seul mot pour cela dans un Process.
 
+Un Label réglé par un Process s'affiche sur tous les écrans tant que le panneau tourne. Le Schema garde le Label des Properties, et
+`tm_Mash.label = ""` remet celui-là. Le Brew Day de l'exemple 3 Vessel s'en sert sur son Step timer : le minuteur dit ce que fait le
+brassage, par exemple **Transferring 1st Run**. Une étape minutée (empâtage, ébullition, whirlpool) compte à rebours ; toutes les
+autres comptent vers le haut, vous voyez donc combien de temps prend chaque transfert, chauffe et refroidissement.
+
 Voir aussi [Les zones de texte](49-text-boxes) et [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).

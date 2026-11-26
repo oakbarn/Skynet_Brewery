@@ -121,6 +121,10 @@ OFF until pressed again. A 100 ms one-shot is a **Pulse**. (2026-10-05, PR #28)
 Schema file and in Processes (`tm_Mash.label = "Mash"`). Old Schemas move over when they load, and
 BruControl's `displayname` still works in a Process and means label. (2026-10-27, thread "Apply
 clean-up requests and standards", Help 72)
+**Note (2026-11-25):** a Label a Process sets shows on every screen while the panel runs; the Schema keeps the Properties' Label, and
+`.label = ""` puts it back. The 3 Vessel sample's Step timer says what the brew is doing (OakBarn Brewery: "Change the label of the
+Step time to say what it is doing i.e. Transferring 1st Run"; "the Step Time needs to be used to show transfer times"): a timed step
+counts down, every other step counts up. (Help 72)
 
 1.14 **Skynet Standard: a Widget is a Widget, never an "element".** Things on a Tab are Devices or
 Widgets; stay away from the word Element. A Picture Widget's dialog is "Picture Widget" (it was
@@ -5025,6 +5029,32 @@ the Pop up Override to run from just above the error"; "Go ahead and build it").
   open ones are kept until fixed, fixed ones 90 days; Brewers and Admins add and tick, view-only accounts read.
 **Both programs:** the BruControl Import has no Processes running and no ☰ Menu, so nothing changes there. (Help 247, 33)
 
+10.14 **Resume after an error: the brewer decides** (OakBarn Brewery, 2026-11-25, after a Brew Day stopped on an error: "Can we have
+the Brew day Progress if the error is not critical with a resume?"; on who decides, "any error may be able to be fixed during a Brew
+Day so I would say leave up to the User to Resume. I have had to replace Pumps and Valves, but BruControl would just start over and I
+had to continue without the software. If I could have resumed, I could still follow the Process and resume again if it hit the same
+error later"; "I might even be able to swap a Heater!"; "I could just re route through the RIMS!").
+- A Process that stops on an error **leaves everything as it is** (nothing is switched Off by the error) and keeps the line it stopped
+  on and its variables. The error still goes on the Process Error Log (Rule 10.13).
+- A red pop-up on **every screen** (with the Brain notices, Rule 6.31) shows the Process, the line number, the line and the error, and
+  stays until a brewer picks: **▶ Resume** runs that line again and goes on (after a pump, valve or heater is fixed or swapped);
+  **⏭ Skip line N** goes on at the next line (worked around, or the line is wrong); **✕** leaves it stopped. Operators and Admins
+  pick; view-only accounts see it.
+- Resume can be used again and again: the same error again gives the pop-up again. Starting the Process over, or ✕, lets it go. A
+  Process fixed and saved in the Process Editor resumes with the saved file at the same line number.
+- **The first stop always waits for a brewer:** what counts as "not critical" is the brewer's call (Skynet can not see a pump swapped
+  or a path re-routed). A Check run (Rule 10.13) and a Code Value Widget's code have no Resume.
+- **Next time line N fails** (OakBarn Brewery: "it is not the First Fail, but subsequent failures. Give the Nanny Warning about them
+  being responsible and to Monitor it, but let them do it"; "They have to set to auto resume as an Option. User Choice"; "another
+  option is Auto Resume with no Popup for something like the Hop Name error, but again, the User selects the fix, not Skynet"): a
+  dropdown on the pop-up, picked with Resume or Skip: **Stop and wait for me** (the start), **Auto: pop-up for 5 s, then go on**, or
+  **Auto: no pop-up, go on**. An Auto pick shows its **one warning** (you are responsible, stay with the brew and watch it). When that
+  same line fails again, it does the same (Resume or Skip) by itself: with the pop-up and a 5 second countdown (**⏸ Hold** stops it
+  and it waits for a brewer again), or with no pop-up after 1 second (still printed and on the Error Log). Starting the Process over
+  lets every Auto pick go. The pop-up for an error that keeps coming back may be refined later (OakBarn Brewery: "WE can refine the
+  Popup for a Recurring Message").
+**Both programs:** the BruControl Import runs no Processes, so nothing changes there. (Help 247)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
@@ -8106,6 +8136,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-23: Rule 2.70 changed (OakBarn Brewery, Panel Update 13 follow-up): the Output dropdown also lists every running Process under Running; picking one opens it in the Process Editor and it is the Current Process until another is picked; Start or Restart there takes precedence. Help 5 and 30 and French. Checked against both programs: the BruControl Import has no Process Editor. (thread "Build Panel Update 13")
 - 2026-11-23: Rule 2.6 changed (OakBarn Brewery, Panel Update 12 follow-up: "I think change the Rule. Add New goes first on every DDLB where appropriate"): in every dropdown that can grow, Add new ... is the first choice (after a "(pick ...)" line), not the last; on screen only, nothing saved changes. Rule 2.72's three open questions answered (Help language boxes OK; Add new Schema first; Switch to Simulator kept). Added Rule 10.12 (OakBarn Brewery: "We want to be able to switch to a simulator except on a Brew Day and Actively brewing"): Switch to Simulator is grayed while a Flow, Sub or Repeat Process runs. Help and French. Checked against both programs: the BruControl Import has no Simulator, and the Panel dropdowns on its Build page follow the same order. (thread "Build Panel Update 12")
 - 2026-11-23: Added Rule 10.13 The Process Error Log, ☰ Menu > 🔧 Fix before next Brew Day (Panel Updates entry 55; OakBarn Brewery: "an error log with the line # of the error, what the error was and a way to fix it if evident"; "Log it, and if it was fixed, the fix.  and the Check button could be used to check it in a simulation mode just for the checking"; "I think B is best and use the Pop up Override to run from just above the error"; "Go ahead and build it"): every Process error by itself with its line, line text, what and how to fix; the fix kept when the line is changed; 🧪 Check in a check-only simulation from just above the error to the next wait or step, ▶ Override past it; your own issues. Help 247 (new) and 33, and French. Checked against both programs: the BruControl Import runs no Processes. (thread "Build Panel Update 12")
+- 2026-11-25: Added Rule 10.14 Resume after an error (OakBarn Brewery: "leave up to the User to Resume"; "I could just re route through the RIMS!"): a Process stopped on an error leaves everything as it is; a pop-up on every screen gives ▶ Resume (the line again), ⏭ Skip line (the next line) or ✕ (stays stopped), as often as needed; "Next time line N fails" (the user picks: Stop and wait, Auto with a 5 second pop-up, or Auto with no pop-up; one warning for Auto) repeats the pick by itself when the same line fails again (⏸ Hold stops the countdown). Rule 1.13 note: a Label a Process sets shows while the panel runs, "" puts back the Properties' Label; the 3 Vessel Step timer says what the brew is doing ("Transferring 1st Run") and counts up on untimed steps. Fix: with no Recipe loaded, every Recipe tab name (skn_rcp_Whirlpool_Minutes and 20 more) reads as 0 or empty instead of stopping the Process. Help 247, 72 and French. Checked against both programs: the BruControl Import runs no Processes. (thread "Fix Brew Day stop after Whirlpool hops")
 - 2026-11-24: Rule 2.69 changed (OakBarn Brewery: "when you turn the sound on a quick beep"): the Sound icon plays a short browser-made beep when it turns sound on; turning it off is silent. Help 21 and 40 (English and French).
 - 2026-11-25: Rule 2.35 note (OakBarn Brewery: "Yes if possible we want to be touch screen friendly"): a finger held on a Push Button or Dual Action item, or a Push Button Hose Bib, no longer opens Help over it; text boxes and dropdowns use 16 px text on touch screens so iPhone Safari does not zoom in. Help 45 (and French). BruControl Import program: not affected (it has no Tabs to run).
 - 2026-11-25: Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")

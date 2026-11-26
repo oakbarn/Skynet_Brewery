@@ -69,7 +69,7 @@
  "68-double-click-in-lists": "642e3760a00b99f7",
  "69-connection-ratings": "1dd016158a702e8d",
  "71-cloned-devices": "05dc1af645b015aa",
- "72-labels": "56a520093427e8d4",
+ "72-labels": "a9c6b7052fd4b2d8",
  "73-double-click-in-pickers": "c2556ec2cd4bd29d",
  "74-picture-widget": "928a639cf5a22b60",
  "75-build-tab-add-button": "92478527e0a0781b",
@@ -240,5 +240,5 @@
  "244-emergency-off": "727a1e1b0d7ffcf6",
  "245-value-widget-formats": "862fd1499939fe6f",
  "246-skynet-brew-timers": "e1a030f685c7d932",
- "247-fix-before-next-brew-day": "1f58940caeeaae71"
+ "247-fix-before-next-brew-day": "58ced7caf82e67bc"
 }
