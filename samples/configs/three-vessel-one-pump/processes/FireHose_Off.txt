@@ -10,7 +10,7 @@ stop "wgt_TMR_Water~delay_BH"
 stop "wgt_TMR_Water~timer_BH"
 // the true run time up to FireHose Off
 stop "wgt_TMR_Water~elapsed_BH"
-gblT_Elapsed_Water = wgt_TMR_Water~elapsed_BH
+newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH
 BM_31_DO@Valve_E_Firehose~Valve_WA = false
 BM_33_DO@Valve_E_Manifold~Valve_WA = false
 wgt_ALM_Fire~Hose~warning_BH = false

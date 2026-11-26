@@ -9,7 +9,7 @@
 //   - "Manifold Set?" is an ask with Done (was the Advance switch and gblVEndlessLoop 799 / 800);
 //   - Set Time is a pop-up that asks for the time into wgt_TM_Set~Timer_BH (was a Set Timer slot on his Water workspace);
 //   - the run is one wait; the Water Override button (Rule 16.11) shuts the water off early;
-//   - a hidden count-up timer, wgt_TMR_Water~elapsed_BH, keeps the true run time in gblT_Elapsed_Water (for seconds per gallon);
+//   - a hidden count-up timer, wgt_TMR_Water~elapsed_BH, keeps the true run time; newSec turns it into seconds, vV_Elapsed_Seconds (for seconds per gallon, Rule 1.34);
 //   - his screen boxes (gblS_Brewery_Top_2 / _3, Bottom_1 / _3 / _4, the insp_ pictures) are one message box, wgt_TXT_Water~message_BH;
 //   - the Water Tab is for picking only (OakBarn Brewery, 2026-11-25): a button goes to the Brew House, the Tab with the manifold,
 //     where the message, both timers, the warnings, the Water Override and the Float are. "Manifold Set?" is an ask_Tab there: a bar
@@ -287,9 +287,9 @@ goto "Exit_Timer_End"
 [Exit_Timer_End]
 print "@ 454 Exit_Timer_End"
 stop "wgt_TMR_Water~timer_BH"
-// the true run time, whether the wait was met or Override ended it, is kept in gblT_Elapsed_Water
+// the true run time, whether the wait was met or Override ended it, stays in the stopped timer; newSec puts it in seconds (Rule 1.34)
 stop "wgt_TMR_Water~elapsed_BH"
-gblT_Elapsed_Water = wgt_TMR_Water~elapsed_BH
+newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH
 if vVPump == 100
 	BM_33_DO@Valve_E_Manifold~Valve_WA = false
 endif

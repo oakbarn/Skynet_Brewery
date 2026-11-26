@@ -29,7 +29,7 @@ for (const f of [path.join(SAMPLES, 'three-vessel-one-pump', 'config.json'), pat
   const BH = c.elements.filter(e => e.workspace === 'Brew House').length;
   assert.ok(BH > 10 && !c.elements.some(e => e.workspace === 'Brew House' && /_WA$/.test(e.name)), 'nothing on the Brew House carries the Water Tab ID');
   // the Water Tab is for picking only (OakBarn Brewery, 2026-11-25): the fill is watched on the Brew House, the Tab with the manifold
-  for (const n of ['wgt_TXT_Water~message_BH', 'wgt_TMR_Water~timer_BH', 'wgt_TMR_Water~delay_BH', 'wgt_ALM_Fire~Hose~warning_BH', 'wgt_ALM_Manifold~warning_BH', 'BM_32_DI@Float_Force~floats_BH', 'gblT_Elapsed_Water'])
+  for (const n of ['wgt_TXT_Water~message_BH', 'wgt_TMR_Water~timer_BH', 'wgt_TMR_Water~delay_BH', 'wgt_ALM_Fire~Hose~warning_BH', 'wgt_ALM_Manifold~warning_BH', 'BM_32_DI@Float_Force~floats_BH', 'wgt_TMR_Water~elapsed_BH'])
     assert.equal((c.elements.find(e => e.name === n) ?? c.graphics.find(g => g.name === n))?.workspace, 'Brew House', `${f}: ${n} is on the Brew House`);
   assert.equal(c.graphics.find(g => g.kind === 'override' && g.process === 'utility_FireHose_Manifold_Supply_Water')?.workspace, 'Brew House', 'the Water Override is on the Brew House');
   assert.equal(c.elements.find(e => e.name === 'BM_32_DI@Float_Force~floats_BH').visibility, 'hidden', 'the Float shows only when a Float button is used');
@@ -78,9 +78,9 @@ assert.ok(await until(() => on(FH)), 'the Fire Hose opens');
 assert.ok(!store.getProp('wgt_ALM_Fire~Hose~warning_BH', 'active'), 'the warning sound stops');
 assert.ok(await until(() => !on(FH) && quiet()), 'it closes when the timer reaches 00:00:00');
 assert.equal(store.getProp('gblV_Water_Switch_Status_Water', 'value'), -9999);
-// the hidden count-up timer kept the true run time (about 20 s) in gblT_Elapsed_Water
+// the hidden count-up timer kept the true run time (about 20 s) in its stopped timer (newSec turns it into seconds, Rule 1.34)
 assert.equal(store.getProp('wgt_TMR_Water~elapsed_BH', 'visibility'), 'hidden');
-assert.ok(secs('gblT_Elapsed_Water') >= 19 && secs('gblT_Elapsed_Water') <= 22, 'true run time ' + store.getProp('gblT_Elapsed_Water', 'value'));
+assert.ok(secs('wgt_TMR_Water~elapsed_BH') >= 19 && secs('wgt_TMR_Water~elapsed_BH') <= 22, 'true run time ' + store.getProp('wgt_TMR_Water~elapsed_BH', 'value'));
 
 // Manifold 3 Minutes: the Water Override button on the Brew House (Rule 16.11: every Tap Water Fill gets one) shuts the valve off early;
 // with a button set to it, no Override pop-up comes by itself (Rule 2.26)
@@ -97,7 +97,7 @@ await new Promise(r => setTimeout(r, 4000));
 assert.ok(!pops().some(p => p.how === 'auto'), 'no pop-up by itself: the button is there');
 eng.override('Fritz', ovrBtn.process);
 assert.ok(await until(() => !on(MSV) && quiet()), 'Override shuts it off');
-assert.ok(secs('gblT_Elapsed_Water') > 0 && secs('gblT_Elapsed_Water') < 180, 'true run time to the Override ' + store.getProp('gblT_Elapsed_Water', 'value'));
+assert.ok(secs('wgt_TMR_Water~elapsed_BH') > 0 && secs('wgt_TMR_Water~elapsed_BH') < 180, 'true run time to the Override ' + store.getProp('wgt_TMR_Water~elapsed_BH', 'value'));
 assert.ok(!store.getProp('wgt_TMR_Water~elapsed_BH', 'running'));
 
 // Firehose Set Time: waits for a time in Set Timer

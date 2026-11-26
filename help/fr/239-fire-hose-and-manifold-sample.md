@@ -46,8 +46,8 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
    ([Override button](96-override-button)). Chaque remplissage d'eau du robinet a son propre bouton Override. Il n'apparaît
    qu'une fois l'eau ouverte, donc il n'y en a pas pendant l'avertissement de 20 secondes. **FireHose Off** l'arrête à tout moment.
 5. **Le vrai temps de marche est gardé.** Un minuteur caché qui compte vers le haut, **Water elapsed**, tourne de l'ouverture de la
-   vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Ce temps va dans le gGlobal caché
-   `gblT_Elapsed_Water` (True Run Time), pour les secondes par gallon.
+   vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Le minuteur garde ce temps, et la ligne
+   `newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH` le change en secondes pour les secondes par gallon ([Commandes de Process](100-brew-process)).
 
 Dans le simulateur, touchez le **Water float** et choisissez **Simulate: input ON** pour le faire (le flotteur est soulevé, contacts
 fermés, en rouge), et **Simulate: input OFF** pour le faire retomber. Le Water float et les deux boutons Float montrent l'image de

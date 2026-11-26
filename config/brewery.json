@@ -912,19 +912,6 @@
    "visibility": "hidden"
   },
   {
-   "workspace": "Brew House",
-   "name": "gblT_Elapsed_Water",
-   "type": "gGlobal",
-   "kind": "time",
-   "label": "True Run Time",
-   "x": 0,
-   "y": 900,
-   "w": 170,
-   "h": 62,
-   "initial": "00:00:00",
-   "visibility": "hidden"
-  },
-  {
    "workspace": "Water",
    "name": "gblV_Water_Switch_Status_Water",
    "type": "gGlobal",
