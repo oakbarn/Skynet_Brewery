@@ -858,7 +858,7 @@
    "foreColor": "#000000",
    "nameAlign": "TopCenter",
    "nameBg": "#000000",
-   "nameColor": "#ffffff",
+   "nameColor": "#fafafa",
    "layer": 27
   },
   {
@@ -3658,7 +3658,7 @@
    "label": "Water Override",
    "fontSize": 20,
    "bold": true,
-   "color": "#ffffff",
+   "color": "#fafafa",
    "backColor": "#c0392b",
    "align": "Center",
    "process": "utility_FireHose_Manifold_Supply_Water",

@@ -8,7 +8,7 @@ Chaque case de couleur est une liste déroulante avec un échantillon devant :
 
 1. **Default** garde la couleur normale de l'élément.
 2. **None** veut dire pas de couleur du tout (transparent).
-3. Les couleurs standard par leur nom, chacune avec son échantillon (White est RGB 250 250 250, Règle 2.7).
+3. Les couleurs standard par leur nom, chacune avec son échantillon. **White (Opaque)** est RGB 250 250 250, le blanc de tout texte blanc à l'écran. **White (Transparent)** est RGB 255 255 255 et transparent, comme None (Règle 2.7).
 4. Vos propres couleurs, affichées par leurs nombres RGB, par exemple **RGB 32 178 170**.
 5. **Custom (add new) ...** fait apparaître tout de suite le **Color Picker**.
 

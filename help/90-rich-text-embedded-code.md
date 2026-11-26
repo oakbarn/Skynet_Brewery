@@ -24,7 +24,7 @@ These are switches: the first code turns the look on and the next one turns it o
 | `\c{Red}` | the text after it is red | `\c{Red}HOT\c 212\degF` |
 | `\c` | back to the normal color | |
 
-Use any panel color name: Red, Green, Blue, Yellow, Orange, Purple, Copper, Brown, Steel grey, Light grey, White, Black. Capital letters and spaces don't matter (`\c{steelgrey}` works), and a color code like `\c{#ff8800}` works too. A name that is not a color stays on the screen as it is typed, so you can see the mistake.
+Use any panel color name: Red, Green, Blue, Yellow, Orange, Purple, Copper, Brown, Steel grey, Light grey, White (Opaque), White (Transparent), Black (plain White is White (Opaque)). Capital letters and spaces don't matter (`\c{steelgrey}` works), and a color code like `\c{#ff8800}` works too. A name that is not a color stays on the screen as it is typed, so you can see the mistake.
 
 ## Signs and spacing
 

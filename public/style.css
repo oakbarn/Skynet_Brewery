@@ -1,6 +1,6 @@
 :root {
   /* the Look (theme, Rule 2.39): Office Black here; public/themes.js sets the picked Look's colors over these */
-  --bg: #1f1f1f; --panel: #262626; --panel2: #363636; --line: #4a4a4a; --text: #f0f0f0; --muted: #ababab;
+  --bg: #1f1f1f; --panel: #262626; --panel2: #363636; --line: #4a4a4a; --text: #fafafa; --muted: #ababab;
   --accent: #3a86d4; --on-accent: #fafafa; --ok: #3fbf6a; --bad: #e0524a; --warn: #e8c33a; --flow: #4fb3ff;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --mono: ui-monospace, Menlo, Consolas, monospace;
 }
@@ -169,7 +169,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
   background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.35); font: 13px/1.5 var(--mono); }
 #autofill li { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
 #autofill li.sel { background: var(--accent); color: #fafafa; }
-#autofill li.sel .muted { color: #eee; }
+#autofill li.sel .muted { color: #fafafa; }
 /* predictive text: the rest of the best pick, in gray after the cursor (public/autofill.js) */
 .afGhost { position: absolute; z-index: 5; pointer-events: none; white-space: pre; color: var(--muted); opacity: .75; }
 .scriptList li.clsHead { cursor: pointer; font-weight: 600; background: var(--panel2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
@@ -852,7 +852,7 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 /* the Skynet Brew Timers (Rule 2.68): top middle of every screen while one runs */
 .brewTimers { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 8px; pointer-events: none; }
 .brewTimer { pointer-events: auto; background: #111; color: #ff4d3a; border: 2px solid #c0392b; border-radius: 8px; padding: 2px 12px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,.4); }
-.brewTimerLbl { font-size: .8em; color: #eee; white-space: nowrap; }
+.brewTimerLbl { font-size: .8em; color: #fafafa; white-space: nowrap; }
 .brewTimerTime { font: 700 1.6em/1.1 ui-monospace, Consolas, monospace; letter-spacing: 1px; }
 .brewTimer.last5 .brewTimerTime { color: #ffd23a; }
 
@@ -1123,7 +1123,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .el.timer.look-timer .seg7 .on { fill: var(--seg, #fff); stroke: rgba(0,0,0,.35); stroke-width: .6; }
 .el.timer.look-timer .seg7 .off { fill: var(--seg, #fff); opacity: .07; }
 .el.timer.look-timer .btns { flex: none; }
-.el.timer.look-timer .btns button { background: #3a3a3a; color: #eee; border-color: #555; }
+.el.timer.look-timer .btns button { background: #3a3a3a; color: #fafafa; border-color: #555; }
 /* the User Style pop-up (Styles, Fritz 2026-10-29) */
 .styleBody { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 10px 0; }
 .styleBody .full { grid-column: 1 / -1; }
@@ -1158,7 +1158,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rc-g .rcBoxHead { background: #d9d9d9; color: #111; }
 .rc-b .rcBoxHead { background: #3f48cc; }
 .rc-r .rcBoxHead { background: #e8141c; }
-.rc-c .rcBoxHead { background: #8c8c8c; color: #eee; }
+.rc-c .rcBoxHead { background: #8c8c8c; color: #fafafa; }
 .rc-s .rcBoxHead { background: #b87a5a; color: #111; }
 .rcBoxVal { display: flex; align-items: center; gap: 4px; padding: 6px 8px; flex: 1; }
 .rcBoxVal input, .rcBoxVal select { width: 4.5em; flex: 1; min-width: 0; font-size: 1.25em; border: none; background: transparent; color: #111; padding: 2px 0; }
@@ -1170,7 +1170,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rcCalcBtn { background: #ff7a1a; color: #fafafa; border: 3px solid #e8141c; border-radius: 10px; font-weight: 800; font-size: 1.2em; padding: 8px 26px; align-self: center; margin-left: auto; }
 .rcCalcMini { font-size: .7em; padding: 2px 8px; margin: 0; flex: none; }
 .rcNote { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 10px 0 14px; font-size: 1.05em; }
-.rcMini { background: #8c8c8c; color: #eee; font-family: Georgia, serif; padding: 2px 10px; border-radius: 3px; }
+.rcMini { background: #8c8c8c; color: #fafafa; font-family: Georgia, serif; padding: 2px 10px; border-radius: 3px; }
 .rcLower { display: flex; flex-wrap: wrap; gap: 16px 40px; }
 .rcDaughters { flex: 3 1 520px; display: flex; flex-direction: column; gap: 12px; }
 .rcLegend { flex: 1 1 300px; display: flex; flex-direction: column; gap: 20px; justify-content: flex-end; }
@@ -1479,7 +1479,7 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .el.manual .mvRun.on { background: #164d2a; color: #b6ffcc; }
 /* the Vessel Device Builder (Rule 19.5): the Vessel Builder panel beside the vessel on the Build Tab, and a part still to be picked */
 .vbPanel { position: fixed; right: 16px; top: 190px; width: 340px; max-width: calc(100vw - 32px); max-height: calc(100vh - 220px); overflow: auto; z-index: 40;
-  background: var(--panel, #222); color: var(--fg, #eee); border: 2px solid #1D56B0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+  background: var(--panel, #222); color: var(--fg, #fafafa); border: 2px solid #1D56B0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
 .vbPanel h3 { margin: 0 0 8px; font-size: 16px; }
 .vbPanel .vbRow { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 6px 8px; border-radius: 8px; }
 .vbPanel .vbTodo { border: 2px solid #e8a33a; }
@@ -1719,7 +1719,7 @@ body.eqViewing #ws { pointer-events: none; }
 .shareInfo .shareMedia ul { columns: 2 260px; }
 /* a left-button press on a QD hose end (Rule 5.40, OakBarn Brewery 2026-11-18): the Do Not Enter sign and "Move with Held Right Click" */
 .qdHint { position: fixed; z-index: 9999; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; background: var(--panel, #222);
-  color: var(--text, #eee); border: 2px solid #d62828; box-shadow: 0 4px 14px #0008; font-weight: 600; pointer-events: none; white-space: nowrap; }
+  color: var(--text, #fafafa); border: 2px solid #d62828; box-shadow: 0 4px 14px #0008; font-weight: 600; pointer-events: none; white-space: nowrap; }
 .qdHint .qdHintSign { width: 20px; height: 20px; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9.2' fill='%23d62828' stroke='%23fff' stroke-width='1.2'/%3E%3Crect x='4' y='8.2' width='12' height='3.6' rx='.6' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat; }
 
 /* Background None on a Widget with no Graphic (Rule 18.50 #2): no panel behind its words */
