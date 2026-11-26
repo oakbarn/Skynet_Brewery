@@ -15,10 +15,18 @@ again any time from **☰ Menu > 🧭 Setup Interview**.
 - Steps 4 **Brewery**, 5 **Recipes** and 6 **Other Defaults** are branches. Each one opens on a page that lists what it asks.
   **Next ▶** starts it. **Skip** on that page skips the whole branch and keeps Skynet's own answers. Inside a branch, each question
   has its own **Skip**.
-- **Skip** keeps Skynet's own answer and goes on. Skynet does not remind you later.
+- **Skip** keeps Skynet's own answer and goes on, and the question stays not green. Skynet does not remind you later.
+- A question turns **green** when you answer it (Next). A step turns green when every question in it is answered. Click a step to go
+  to it.
+- The interview opens on the first question that is not green, and **Next ▶** goes on to the next one that is not green, in order.
+  Answered (green) questions do not take your turn again; click their step, or **✎** on Done, to change one.
 - Every page starts on Skynet's own answer (or on your saved answer when you run it again), so Next, Next, Next gives a working panel.
 - The last page, **Done**, shows every answer. **✎** goes back to that question. **✔ Finish** saves them all.
-- **Close** or **✕** stops the interview and saves nothing. On a new installation it opens again the next time the panel opens.
+- **Close** or **✕**:
+  - while steps 1 to 3 are not all answered, a **red** pop-up says they must be completed first, and the interview stays open.
+  - after that, when some questions are not green yet, a **blue** pop-up says: they do need completing; setting up Skynet depends
+    on the answers to many of these questions to make it your own, but it will work with just the first 3 questions. **◀ Keep
+    answering** goes back; **Close** saves the answers so far and closes. Run it again from ☰ Menu to answer the rest.
 
 The first page has one warning: design your brewery on a computer, not on a phone or tablet, because the screen is too small. A
 phone or tablet is fine for watching and running a brew day.
@@ -33,6 +41,7 @@ phone or tablet is fine for watching and running a brew day.
 | 3 | **Do you grind your own grain?** (only after All Grain) | Yes: All Grain (own Grain Mill) | No |
 | 4 Brewery | **Brewer Level** | What you brew on, or are building, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
 | 4 Brewery | **Pipe size** and **Hose size** | The size a new pipe or hose starts at | 1/2" |
+| 4 Brewery | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. Information only for now. The **Piped Manifold** switch on Default settings | No |
 | 5 Recipes | **Yeast Starter** | Information only: PreBrew reminds you a day or two ahead | No |
 | 5 Recipes | **Batch Size** | How much beer a new Recipe makes, into the fermenter, in gallons (US) or liters (Metric); kept in liters | 5 gallons (18.9 liters) |
 | 5 Recipes | **Mash Profile** (All Grain only) and **Boil Profile** | The Profiles a new Recipe starts with | Single Step, Batch Sparge and Skynet's 60 minute Boil Profile |
@@ -61,4 +70,5 @@ The New Schema Interview starts a new Brewing Tab on the Level that fits your Br
 ## Where the answers are kept
 
 Every answer is on **☰ Menu > Default settings** too (Rule 2.42), the same saved value: change it there any time. The Help language
-is also on the **?** Help window. Running the Setup Interview again starts on your saved answers and changes nothing until ✔ Finish.
+is also on the **?** Help window. Running the Setup Interview again starts on your saved answers and on the first question that is
+not green; it changes nothing until ✔ Finish (or Close, which saves the answers so far).

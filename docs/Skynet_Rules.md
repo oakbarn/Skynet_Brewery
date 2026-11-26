@@ -1749,7 +1749,16 @@ time**, before the Welcome sample Schema page. **☰ Menu > 🧭 Setup Interview
 answers and changes nothing until **✔ Finish**.
 - Each page: the question, a short explanation, and **◀ Back · Skip · Next ▶**, then **Close · ✕** (Rule 2.54). 6 or fewer choices are
   one-click boxes (one click picks and goes on); more than 6 are a dropdown (Rule 2.6). The last page, **Done**, lists every answer
-  with **✎** to go back to it, and **✔ Finish** saves them. Close saves nothing (a new installation asks again next start).
+  with **✎** to go back to it, and **✔ Finish** saves them.
+- **Green and focus** (OakBarn Brewery, 2026-11-26, typos fixed: "Complete do not get focus on Open. Focus in Numeric Order."): a
+  question is **green** once Next was pressed on it (Skip leaves it not green); a step of the strip is green when every question in
+  it is. The green list is kept (brewDefaults.setupAnswered). The interview **opens on the first question that is not green**, and
+  Next goes to the next one that is not green, in numeric order; a click on a step goes to it.
+- **Close · ✕** (OakBarn Brewery, 2026-11-26, typos fixed: "Close Button 1 - 3: Red Popup that 1 - 3 must be completed first. After
+  that if all not green, Blue Pop up advising they do need completing and setting up Skynet depends on the answers to many of these
+  questions to make it their own but it will work with just the first 3 questions"): while steps 1 to 3 are not all green, a **red
+  pop-up** says they must be completed first, and the interview stays open. After that, when any question is not green, one **blue
+  pop-up** says so (◀ Keep answering · Close). Close then **saves the answers so far**. ✔ Finish checks steps 1 to 3 the same way.
 - **Skip** keeps Skynet's own answer, with no reminder later (ONE WARNING ONLY). **Must** questions have no Skip: **US or Metric**
   (always question 1), the **Help language** and the **Brewer Type** (steps 1 to 3).
 - **Six steps** (Panel Update 17, OakBarn Brewery, 2026-11-26, typos fixed: "1. Units 2. Help language 3. Brewer Type 4. Brewery
@@ -1763,12 +1772,16 @@ answers and changes nothing until **✔ Finish**.
   started. Skynet can grow with you"): Extract Can Kit, Extract Partial Grain and Hops, All Grain; **All Grain** asks next "Do you
   grind your own grain?", and Yes is All Grain (own Grain Mill). **4 Brewery**: **Brewer Level** (the 9 level ladder of the plan,
   section 1; it may be skipped now: "Equipment in the Brewery you have or Building ... Can skip"), Pipe size, Hose size ("Under the
-  Equipment Branch"). **5 Recipes**: Yeast Starter ("Yeast Starter goes to Recipe Interview"), Batch Size, Mash Profile (All Grain
+  Equipment Branch"), **Piped Manifold** (OakBarn Brewery, 2026-11-26: "add a settings default Piped Manifold as a boolean": a
+  Switch on Default settings, Off to start; information only for now). **5 Recipes**: Yeast Starter ("Yeast Starter goes to Recipe Interview"), Batch Size, Mash Profile (All Grain
   only), Boil Profile: the New User Recipes defaults. The Recipe Interview of a Brew Day (Rule 17.22) is another interview. **6 Other
   Defaults**: Brewery Name (Patrons), Airport (with Test), Elevation ("Needs to be later as you can Skip"). Every answer is also on
   ☰ Menu > Default settings (Rule 2.42); the Help language is this browser's (Rule 11.11). Data stays metric (Elevation kept in
   meters, Batch Size in liters, Rule 2.59). More Brewery questions will come ("we will expand this to several questions").
-  *Replaced (Panel Update 17):* 10 steps in a row, Brewer Level must be answered, Airport and Elevation third and fourth.
+- **Branching on an answer** (OakBarn Brewery, 2026-11-26: "I might add small item like the Piped Manifold as further questions will
+  branch on it"): a question row may have `when: { pipedManifold: true }`; it is asked only when those answers match.
+  *Replaced (Panel Update 17):* 10 steps in a row, Brewer Level must be answered, Airport and Elevation third and fourth, Close saved
+  nothing.
 - **The questions are data** (public/setupinterview.js `SETUP_QUESTIONS`): the order, which are **must**, and new questions are
   changed there, one row each, with nothing else to change.
 - The New Schema Interview (Rule 2.58) starts a Brewing Tab's Level from the Brewer Level when no Level was picked before.
@@ -7503,7 +7516,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
 - 2026-11-26: Rule 2.75 new (OakBarn Brewery: "Start the no Skynet settings interview first ... First question (that cannot be skipped) US or Metric"; Brewer Level "A and Mandatory"): the Setup Interview on a new installation and on ☰ Menu; questions kept as data; Brewer Level and Yeast Starter on Default settings. Help 248.
-- 2026-11-26: Rule 2.75 changed (Panel Update 17, OakBarn Brewery): 6 steps, Units, Help language (with the User Language) and Brewer Type must be answered; Brewer Type asks "Do you grind your own grain?" after All Grain; Brewery, Recipes and Other Defaults are branches with Skip for the whole branch; Brewer Level is in Brewery and may be skipped; Batch Size, Mash Profile and Boil Profile added in Recipes. Help 248 (and French).
+- 2026-11-26: Rule 2.75 changed (Panel Update 17, OakBarn Brewery): 6 steps, Units, Help language (with the User Language) and Brewer Type must be answered; Brewer Type asks "Do you grind your own grain?" after All Grain; Brewery, Recipes and Other Defaults are branches with Skip for the whole branch; Brewer Level is in Brewery and may be skipped; Batch Size, Mash Profile and Boil Profile added in Recipes; Piped Manifold (a Switch, Default settings) added in Brewery; green answered questions, open and Next on the first not green; Close red pop-up until steps 1 to 3, then one blue pop-up and the answers so far saved; `when:` branching in a question row. Help 248 (and French).
 - 2026-11-25: Rule 16.11 changed (OakBarn Brewery: "I want it on the Manifold Tab ... By default it goes where it started but can be on a different tab (or we could just put a true Clone on the other Tab)"; picked Change the Rule): the fill's Override goes by default on the Tab where the fill starts, and may be on a different Tab or have a Clone there. Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")
 - 2026-11-26: Rule 17.15 changed (OakBarn Brewery picked A, "Yes, dated like the Library"): Save this Recipe after an import saves dated ("Name yyyy:mm:dd (n)", Actual AAU 0, Rule 17.21); no Overwrite / Add new question. Help 99.
 - 2026-11-25: Rule 17.11 note (OakBarn Brewery: "The Boil time can be different for each kit and I did not even realize the one I got was a No Boil one"): a NEW Level 1 Can Kit Recipe starts with Boil Minutes 0 (No Boil) and no Boil Profile; Boil Minutes tip. Help 99.

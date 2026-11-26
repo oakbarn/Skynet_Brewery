@@ -20,6 +20,9 @@
 //         save   'defaults' (☰ Menu > Default settings) · 'boil' (the boil temperature place) · 'browser' (this browser only) · 'none'
 //         must   true: no Skip button (it must be answered)
 //         show   (answers, ctx) => false leaves the question out (optional)
+//         when   { answerId: value, ... }: the question shows only when each of those answers is that value (optional; OakBarn Brewery,
+//                2026-11-26: "I might add small item like the Piped Manifold as further questions will branch on it"). For example
+//                when: { pipedManifold: true } asks it only of a brewery with a Piped Manifold. A value may be a list: any of them.
 //         note   a warning shown on that page (optional);  more  ctx => a plain line under the answers (optional)
 //         byUnits  true: its start is worked out again when US or Metric is picked
 
@@ -108,6 +111,12 @@ export const SETUP_QUESTIONS = [
     choices: ctx => ctx.hoseSizes,
     start: ctx => ctx.defaults?.defHoseSize || '0.5' },
 
+  // Piped Manifold (OakBarn Brewery, 2026-11-26: "add a settings default Piped Manifold as a boolean"): information only for now
+  { id: 'pipedManifold', step: 'Brewery', kind: 'yesno', save: 'defaults',
+    ask: 'Is your brewery a Piped Manifold?',
+    why: 'Yes: your vessels and pumps are joined by fixed pipes and valves (a manifold), like the 3 Vessel sample. No: you move hoses by hand. Information only for now: it changes nothing else.',
+    start: ctx => ctx.defaults?.pipedManifold === true },
+
   // ---- 5 Recipes: the Recipe Default Interview (Panel Update 17: "Opens the Recipe Default Interview"; item 7: "Yeast Starter goes to
   // Recipe Interview"). The defaults of a new User Recipe (☰ Menu > Default settings > New User Recipes). The Recipe Interview of a
   // Brew Day (Rule 17.22) is another interview.
@@ -161,7 +170,8 @@ export const setupNeeded = config => !config?.brewDefaults?.setupDone && !Object
 export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
-export const shownQuestions = (a, ctx, list = SETUP_QUESTIONS) => list.filter(q => !q.show || q.show(a, ctx));
+const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.includes(a?.[k]) : a?.[k] === v);
+export const shownQuestions = (a, ctx, list = SETUP_QUESTIONS) => list.filter(q => whenOk(q, a) && (!q.show || q.show(a, ctx)));
 // Skynet's own answers to start (what Next, Next, Next, or Skip, keeps)
 export function startAnswers(ctx, list = SETUP_QUESTIONS) {
   const a = {};
@@ -185,7 +195,7 @@ export function answerError(q, v) {
 }
 // what Finish saves: the Default settings (merged into the ones there), the boil temperature place (in meters), and this browser's
 // Help language. A question left out (show false) saves nothing.
-export function setupSave(a, ctx, list = SETUP_QUESTIONS) {
+export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null) {
   const brewDefaults = { ...(ctx.defaults || {}) }, out = { brewDefaults, boil: null, helpLang: null };
   for (const q of shownQuestions(a, ctx, list)) {
     const v = a[q.id];
@@ -205,5 +215,40 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS) {
   if (ap !== (ctx.boil?.airport || '') || elevationM !== (ctx.boil?.elevationM ?? null))
     out.boil = { airport: ap, elevationM, pressure: ctx.boil?.pressureHpa ?? null };
   brewDefaults.setupDone = true;
+  if (answered) brewDefaults.setupAnswered = list.filter(q => q.kind !== 'branch' && answered.has(q.id)).map(q => q.id);
   return out;
 }
+
+// ---- green (answered) questions (OakBarn Brewery, 2026-11-26: "Complete do not get focus on Open. Focus in Numeric Order."). A question
+// is green once Next was pressed on it (Skip leaves it not green). The green ones are kept in brewDefaults.setupAnswered, so the
+// interview opens again on the first question that is not green, and Next goes on to the next one that is not green. A branch's
+// first page is green when every question of the branch is.
+export function answeredAtStart(ctx, list = SETUP_QUESTIONS) {
+  const bd = ctx.defaults || {};
+  if (Array.isArray(bd.setupAnswered)) return new Set(bd.setupAnswered.filter(id => list.some(q => q.id === id)));
+  // an interview finished before the green list was kept: what it saved counts as answered
+  if (!bd.setupDone) return new Set();
+  return new Set(list.filter(q => q.save === 'defaults' ? bd[q.id] !== undefined || (q.id === 'batch' && bd.batchL !== undefined) || (q.id === 'grindOwn' && bd.brewerType !== undefined)
+    : q.id === 'airport' ? !!ctx.boil?.airport : q.id === 'elevation' ? ctx.boil?.elevationM != null : q.id === 'helpLang' ? !!ctx.helpLang : false).map(q => q.id));
+}
+export function isGreen(q, qs, answered) {
+  if (q.kind !== 'branch') return answered.has(q.id);
+  return qs.filter(x => x.step === q.step && x.kind !== 'branch').every(x => answered.has(x.id));
+}
+// the place of the first question at or after `from` that is not green (qs.length: the Done page)
+export function nextOpen(qs, answered, from = 0) {
+  for (let i = Math.max(0, from); i < qs.length; i++) if (!isGreen(qs[i], qs, answered)) return i;
+  return qs.length;
+}
+// a step of the strip is green when every question in it is
+export const stepGreen = (step, qs, answered) => qs.filter(q => q.step === step).every(q => isGreen(q, qs, answered));
+// the must questions (steps 1 to 3) that are not green yet
+export const mustMissing = (qs, answered) => qs.filter(q => q.must && !answered.has(q.id));
+// Close (OakBarn Brewery, 2026-11-26, typos fixed): "Close Button 1 - 3: Red Popup that 1 - 3 must be completed first. After that if all
+// not green, Blue Pop up advising they do need completing and setting up Skynet depends on the answers to many of these questions to
+// make it their own but it will work with just the first 3 questions."
+export function setupMustMsg(qs) {
+  const g = SETUP_STEPS.filter(x => qs.some(q => q.must && q.step === x)), n = g.map(x => SETUP_STEPS.indexOf(x) + 1);
+  return `${n.length > 1 ? `Steps ${n[0]} to ${n[n.length - 1]}` : `Step ${n[0]}`} (${g.join(', ')}) must be completed first.`;
+}
+export const SETUP_OPEN_MSG = 'The questions that are not green do need completing. Setting up Skynet depends on the answers to many of these questions to make it your own, but it will work with just the first 3 questions.';

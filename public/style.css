@@ -1911,6 +1911,12 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupPick.cur { outline: 2px solid var(--accent); }
 .setupDlg select, .setupDlg input { min-width: 16em; }
 .setupDlg .setupSum td { padding: 3px 8px; vertical-align: top; }
+.setupDlg .setupSum td.setupGreen { color: var(--ok); }
+/* the Setup Interview's Close pop-ups (OakBarn Brewery, 2026-11-26): the same red and blue as every note (#toast), with buttons */
+.setupPop { max-width: 34em; color: #fafafa; border: 2px solid #fafafa; box-shadow: 0 6px 28px rgba(0,0,0,.55); }
+.setupPop.red { background: #b3261e; }
+.setupPop.blue { background: #1f4e9c; }
+.setupPop .setupPopText { font-size: 1.2em; font-weight: 700; margin: 10px 4px; }
 .setupDlg .setupSum th { text-align: left; padding: 8px 8px 2px; color: var(--accent); }
 /* Panel Update 17: a branch's first page lists what it asks */
 .setupDlg .setupBranch { margin: 4px 0 8px 1.2em; }

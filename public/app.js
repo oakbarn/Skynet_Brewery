@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16329,7 +16329,23 @@ function rqSummary(q, a, ctx, metric) {
 // ---- The Setup Interview (Rule 2.75, Help 248; the questions are data in public/setupinterview.js). One question at a time: ◀ Back,
 // Skip (not on a must question), Next ▶, then a summary with ✎ on each answer and ✔ Finish. Nothing is saved until Finish.
 // Panel Update 17 (OakBarn Brewery, 2026-11-26): 6 steps in the strip; steps 4 Brewery, 5 Recipes and 6 Other Defaults are branches
-// that open on a page saying what they ask, and Skip there skips the whole branch.
+// that open on a page saying what they ask, and Skip there skips the whole branch. A question is green once answered (Next); the
+// interview opens on the first one that is not green, and Next goes to the next one (OakBarn Brewery, 2026-11-26: "Complete do not get
+// focus on Open. Focus in Numeric Order."). Close: a red pop-up while steps 1 to 3 are not answered; after that the answers so far are
+// saved, with one blue pop-up when some are not green yet.
+// the red and blue pop-ups of the Setup Interview's Close: on top of the interview; resolves with the value of the button pressed
+// (✕ and Esc: false)
+function setupPop(color, text, buttons) {
+  return new Promise(res => {
+    const p = h('dialog', { class: 'miniDlg setupPop ' + color, 'data-nomenu': '' }), end = v => { p.close(); p.remove(); res(v); };
+    p.append(h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' },
+      ...buttons.map(([t, v, cls]) => h('button', { type: 'button', ...(cls ? { class: cls } : {}), onclick: () => end(v) }, t)),
+      h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: () => end(false) }, '✕'))),
+      h('p', { class: 'setupPopText' }, (color === 'red' ? '⚠ ' : 'ℹ ') + text));
+    p.addEventListener('cancel', ev => { ev.preventDefault(); end(false); });
+    p._btnOrder = true; document.body.append(p); p.showModal();
+  });
+}
 function setupCtx() {
   // the Help languages of the ? Help window's 🌐 list: English, Français, and the User Language once it is on this Brain (Rule 11.16)
   const helpLangs = [...($('#hpLang')?.options || [])].map(o => [o.value, o.textContent.replace(/^🌐\s*/, '')]);
@@ -16341,39 +16357,53 @@ function setupCtx() {
 async function setupInterview({ first = false } = {}) {
   if (!can('admin')) return;
   if (!S.boil) try { S.boil = await api('GET', '/ui/boiltemp'); } catch { }
-  const ctx = setupCtx(), a = setupStart(ctx);
-  let at = 0, skipped = new Set();
+  const ctx = setupCtx(), a = setupStart(ctx), answered = answeredAtStart(ctx);
+  let at = nextOpen(shownQuestions(a, ctx), answered), skipped = new Set();
   const d = h('dialog', { class: 'miniDlg ivDlg nsiDlg setupDlg', 'data-nomenu': '' }), body = h('div', { class: 'setupBody' });
   const bar = h('div', { class: 'bar nsiBar' }), title = h('h3'), stripBox = h('div');
   document.body.append(d);
   return new Promise(res => {
     const end = r => { d.close(); d.remove(); res(r); };
-    const close = () => {
-      if (!confirm(first ? 'Stop the Setup Interview? Nothing is saved, and it starts again the next time the panel opens (or from ☰ Menu > 🧭 Setup Interview).' : 'Stop the Setup Interview? Nothing is changed.')) return;
-      end('close');
+    // save the answers so far (Finish, and Close once steps 1 to 3 are answered): each one is a Default setting (Rule 2.42)
+    const save = async () => {
+      const out = setupSave(a, ctx, undefined, answered);
+      if (out.boil) S.boil = await api('PUT', '/ui/boiltemp', out.boil);
+      await api('PUT', '/ui/settings', { brewDefaults: out.brewDefaults }); S.config.brewDefaults = out.brewDefaults;
+      // the same switch as the ? Help window's 🌐 list (it keeps it in this browser and changes the balloons)
+      if (out.helpLang) { const hl = $('#hpLang'); if (hl && [...hl.options].some(o => o.value === out.helpLang)) { if (hl.value !== out.helpLang) { hl.value = out.helpLang; hl.dispatchEvent(new Event('change')); } } else { try { localStorage.setItem(LANG_KEY, out.helpLang); } catch { } refreshBalloonLang(); } }
+      showBreweryName(); renderWs();
     };
+    const close = guard(async () => {
+      const qs = shownQuestions(a, ctx);
+      if (mustMissing(qs, answered).length) return setupPop('red', setupMustMsg(qs), [['OK', true]]);
+      if (qs.some(q => !isGreen(q, qs, answered)) && !await setupPop('blue', SETUP_OPEN_MSG, [['◀ Keep answering', false], ['Close', true, 'primary']])) return;
+      await save(); savedPop('Setup Interview: the answers so far are saved on ☰ Menu > Default settings'); end('close');
+    });
     d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
     const draw = () => {
       const qs = shownQuestions(a, ctx), done = at >= qs.length, q = qs[at];
       // the 6 steps (Panel Update 17), then Done; a branch's step stays lit on every page of it
       const steps = [...SETUP_STEPS, 'Done'], now = done ? SETUP_STEPS.length : SETUP_STEPS.indexOf(q.step);
-      const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => h('li', { class: i === now ? 'now' : i < now ? 'done' : '' }, s)));
       const go = n => { at = n; draw(); };
-      const next = () => { const err = q && answerError(q, a[q.id]); if (err) return toast(err, true); skipped.delete(q?.id); go(at + 1); };
-      const keep = x => { if (x.start) { a[x.id] = x.start(ctx, a); skipped.add(x.id); } };
+      // a step is green when every question in it is answered; a click goes to its first open question
+      const firstOf = (s, open) => { const i = qs.findIndex(x => x.step === s && (!open || !isGreen(x, qs, answered))); return i < 0 ? (open ? firstOf(s, false) : qs.length) : i; };
+      const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => h('li', { class: i === now ? 'now' : (s === 'Done' ? false : stepGreen(s, qs, answered)) ? 'done' : '',
+        style: 'cursor:pointer', title: 'Go to this step', onclick: () => go(s === 'Done' ? qs.length : firstOf(s, true)) }, s)));
+      const next = () => {
+        const err = q && answerError(q, a[q.id]); if (err) return toast(err, true);
+        if (q.kind === 'branch') return go(nextOpen(qs, answered, at + 1) < qs.length && qs[nextOpen(qs, answered, at + 1)].step === q.step ? nextOpen(qs, answered, at + 1) : at + 1);
+        skipped.delete(q.id); answered.add(q.id); go(nextOpen(qs, answered, at + 1));
+      };
+      const keep = x => { if (x.start) { a[x.id] = x.start(ctx, a); skipped.add(x.id); answered.delete(x.id); } };
       // Skip on a branch's first page skips every question of the branch; inside it, Skip skips that question
       const skip = () => {
-        if (q.kind !== 'branch') { keep(q); return go(at + 1); }
+        if (q.kind !== 'branch') { keep(q); return go(nextOpen(qs, answered, at + 1)); }
         let n = at + 1; while (n < qs.length && qs[n].step === q.step) keep(qs[n++]);
-        go(n);
+        go(nextOpen(qs, answered, n));
       };
       const finish = guard(async () => {
-        const out = setupSave(a, ctx);
-        if (out.boil) S.boil = await api('PUT', '/ui/boiltemp', out.boil);
-        await api('PUT', '/ui/settings', { brewDefaults: out.brewDefaults }); S.config.brewDefaults = out.brewDefaults;
-        // the same switch as the ? Help window's 🌐 list (it keeps it in this browser and changes the balloons)
-        if (out.helpLang) { const hl = $('#hpLang'); if (hl && [...hl.options].some(o => o.value === out.helpLang)) { if (hl.value !== out.helpLang) { hl.value = out.helpLang; hl.dispatchEvent(new Event('change')); } } else { try { localStorage.setItem(LANG_KEY, out.helpLang); } catch { } refreshBalloonLang(); } }
-        showBreweryName(); renderWs(); savedPop('Setup Interview saved: every answer is on ☰ Menu > Default settings');
+        if (mustMissing(qs, answered).length) return setupPop('red', setupMustMsg(qs), [['OK', true]]);
+        await save(); savedPop('Setup Interview saved: every answer is on ☰ Menu > Default settings');
         end('finish');
       });
       // Back, Skip and Next (Finish), then Close and ✕ together in the upper right (Rule 2.54)
@@ -16384,7 +16414,7 @@ async function setupInterview({ first = false } = {}) {
         !done && !q.must ? h('button', { type: 'button', title: q.kind === 'branch' ? `Skip the whole ${q.step} step: keep Skynet's own answers. You can change each one any time on ☰ Menu > Default settings.` : 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
         h('span', { class: 'dlgBtnGroup' },
           done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶'),
-          h('button', { type: 'button', title: 'Stop the interview. Nothing is saved.', onclick: close }, 'Close'),
+          h('button', { type: 'button', title: 'Stop the interview. Steps 1 to 3 must be answered first; the answers so far are saved.', onclick: close }, 'Close'),
           h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: close }, '✕')));
       body.replaceChildren();
       if (done) {
@@ -16392,12 +16422,12 @@ async function setupInterview({ first = false } = {}) {
           // by step: the step's name, then each of its questions with its answer
           h('table', { class: 'setupSum' }, ...qs.flatMap((x, i) => [
             ...(i === 0 || qs[i - 1].step !== x.step ? [h('tr', {}, h('th', { colspan: 3 }, `${SETUP_STEPS.indexOf(x.step) + 1}. ${x.step}`))] : []),
-            ...(x.kind === 'branch' ? [] : [h('tr', {}, h('td', {}, askOf(x, a)), h('td', {}, answerWords(x, a[x.id], ctx) + (skipped.has(x.id) ? '  (Skipped: Skynet\'s answer)' : '')),
+            ...(x.kind === 'branch' ? [] : [h('tr', {}, h('td', { class: answered.has(x.id) ? 'setupGreen' : '' }, askOf(x, a)), h('td', {}, answerWords(x, a[x.id], ctx) + (skipped.has(x.id) ? '  (Skipped: Skynet\'s answer)' : !answered.has(x.id) ? '  (Not answered yet: Skynet\'s answer)' : '')),
               h('td', {}, h('button', { type: 'button', title: 'Change this answer', onclick: () => go(i) }, '✎')))])])));
       } else {
         if (q.note) body.append(h('p', { class: 'setupWarn' }, '⚠ ' + q.note));
         body.append(h('p', { class: 'setupAsk' }, askOf(q, a)), h('p', { class: 'muted' }, q.why));
-        if (q.must) body.append(h('p', { class: 'muted' }, 'This question must be answered (no Skip).'));
+        if (q.must) body.append(h('p', { class: 'muted' }, 'Steps 1 to 3 must be answered (no Skip).'));
         const ch = choicesOf(q, ctx);
         if (q.kind === 'branch') {
           // the branch's first page: what it asks
@@ -18360,7 +18390,7 @@ function btSend(now, set, was, metric) {
 }
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
-    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, brewerType: BREWER_TYPE_DEFAULT, brewerLevel: BREWER_LEVEL_DEFAULT, yeastStarter: false, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
+    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, brewerType: BREWER_TYPE_DEFAULT, brewerLevel: BREWER_LEVEL_DEFAULT, yeastStarter: false, pipedManifold: false, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
   const shownMetric = d.units === 'Metric', shownUnits = d.units;      // what the boxes show now; Units changed here applies after Save
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
@@ -18380,6 +18410,8 @@ function renderDefaultTab(box) {
     ['_btElev', `Elevation (${shownMetric ? 'm' : 'ft'})`, 'num', null, false, false, { tip: BT_TIPS.elev }],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
+    // Piped Manifold (OakBarn Brewery, 2026-11-26: "add a settings default Piped Manifold as a boolean"; a Switch, Rule 2.44)
+    ['pipedManifold', 'Piped Manifold', 'bool', null, false, false, { tip: 'On: your vessels and pumps are joined by fixed pipes and valves (a manifold), like the 3 Vessel sample. Off: you move hoses by hand. Information only for now: it changes nothing else. Asked by the Setup Interview (☰ Menu > 🧭 Setup Interview).' }],
     ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
     // the Pipe and Hose pixels moved into the Tab Profile with the New Tabs boxes (OakBarn Brewery, 2026-11-17: "Tab Profile")
     // IP Type sizes (OakBarn Brewery, 2026-11-16: "A list of the sizes and type in Defualts with a TickBox to show in the List"; "all

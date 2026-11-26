@@ -15,12 +15,22 @@ Schema d’exemple. Un Admin peut le relancer à tout moment depuis **☰ Menu >
 - Les étapes 4 **Brewery**, 5 **Recipes** et 6 **Other Defaults** sont des branches. Chacune s’ouvre sur une page qui liste ce
   qu’elle demande. **Next ▶** la commence. **Skip** sur cette page saute toute la branche et garde les réponses de Skynet. Dans une
   branche, chaque question a son propre **Skip**.
-- **Skip** garde la réponse de Skynet et continue. Skynet ne vous le rappelle pas plus tard.
+- **Skip** garde la réponse de Skynet et continue, et la question ne devient pas verte. Skynet ne vous le rappelle pas plus tard.
+- Une question devient **verte** quand vous y répondez (Next). Une étape devient verte quand chacune de ses questions a une réponse.
+  Cliquez sur une étape pour y aller.
+- L’entretien s’ouvre sur la première question qui n’est pas verte, et **Next ▶** passe à la suivante qui n’est pas verte, dans
+  l’ordre. Les questions déjà répondues (vertes) ne reviennent pas ; cliquez sur leur étape, ou sur **✎** dans Done, pour en changer
+  une.
 - Chaque page commence sur la réponse de Skynet (ou sur votre réponse enregistrée quand vous le relancez) : Next, Next, Next donne un
   panneau qui fonctionne.
 - La dernière page, **Done**, montre toutes les réponses. **✎** revient à cette question. **✔ Finish** les enregistre toutes.
-- **Close** ou **✕** arrête l’entretien sans rien enregistrer. Sur une nouvelle installation, il s’ouvre de nouveau la prochaine fois
-  que le panneau s’ouvre.
+- **Close** ou **✕** :
+  - tant que les étapes 1 à 3 n’ont pas toutes une réponse, une fenêtre **rouge** dit qu’elles doivent être remplies d’abord, et
+    l’entretien reste ouvert.
+  - ensuite, quand certaines questions ne sont pas encore vertes, une fenêtre **bleue** dit : elles ont besoin d’une réponse ; régler
+    Skynet dépend des réponses à beaucoup de ces questions pour qu’il soit vraiment le vôtre, mais il fonctionne avec seulement les 3
+    premières questions. **◀ Keep answering** revient ; **Close** enregistre les réponses données et ferme. Relancez-le depuis
+    ☰ Menu pour répondre au reste.
 
 La première page porte un seul avertissement : concevez votre brasserie sur un ordinateur, pas sur un téléphone ou une tablette, car
 l’écran est trop petit. Un téléphone ou une tablette convient pour suivre et mener un jour de brassage.
@@ -35,6 +45,7 @@ l’écran est trop petit. Un téléphone ou une tablette convient pour suivre e
 | 3 | **Do you grind your own grain?** (seulement après All Grain) | Oui : All Grain (own Grain Mill) | No |
 | 4 Brewery | **Brewer Level** | Sur quoi vous brassez, ou ce que vous construisez, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
 | 4 Brewery | **Pipe size** et **Hose size** | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
+| 4 Brewery | **Is your brewery a Piped Manifold?** | Oui : vos cuves et pompes sont reliées par des tuyaux fixes et des vannes, comme dans l’exemple 3 Vessel. Non : vous déplacez des tuyaux souples à la main. Pour information pour l’instant. L’interrupteur **Piped Manifold** de Default settings | No |
 | 5 Recipes | **Yeast Starter** | Pour information : PreBrew vous le rappelle un jour ou deux avant | No |
 | 5 Recipes | **Batch Size** | La quantité de bière d’une nouvelle Recipe, dans le fermenteur, en gallons (US) ou en litres (Metric) ; gardée en litres | 5 gallons (18,9 litres) |
 | 5 Recipes | **Mash Profile** (All Grain seulement) et **Boil Profile** | Les Profiles avec lesquels une nouvelle Recipe commence | Single Step, Batch Sparge et le Boil Profile de 60 minutes de Skynet |
@@ -64,5 +75,5 @@ Le New Schema Interview démarre un nouveau Tab de brassage sur le Level qui cor
 ## Où les réponses sont gardées {#where-the-answers-are-kept}
 
 Chaque réponse est aussi sur **☰ Menu > Default settings** (règle 2.42), la même valeur enregistrée : changez-la là à tout moment. La
-langue de l’aide est aussi dans la fenêtre d’aide **?**. Relancer le Setup Interview commence sur vos réponses enregistrées et ne
-change rien avant ✔ Finish.
+langue de l’aide est aussi dans la fenêtre d’aide **?**. Relancer le Setup Interview commence sur vos réponses enregistrées et sur
+la première question qui n’est pas verte ; il ne change rien avant ✔ Finish (ou Close, qui enregistre les réponses données).
