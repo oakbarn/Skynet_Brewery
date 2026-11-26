@@ -29,8 +29,8 @@ for (const f of [path.join(SAMPLES, 'three-vessel-one-pump', 'config.json'), pat
   const BH = c.elements.filter(e => e.workspace === 'Brew House').length;
   assert.ok(BH > 10 && !c.elements.some(e => e.workspace === 'Brew House' && /_WA$/.test(e.name)), 'nothing on the Brew House carries the Water Tab ID');
   // the Water Tab is for picking only (OakBarn Brewery, 2026-11-25): the fill is watched on the Brew House, the Tab with the manifold
-  for (const n of ['gblS_Water_Text_1_Water', 'wgt_TMR_Water~timer_BH', 'wgt_TMR_Water~delay_BH', 'wgt_ALM_Fire~Hose~warning_BH', 'wgt_ALM_Manifold~warning_BH', 'BM_32_DI@Float_Force~floats_BH', 'gblT_Elapsed_Water'])
-    assert.equal(c.elements.find(e => e.name === n)?.workspace, 'Brew House', `${f}: ${n} is on the Brew House`);
+  for (const n of ['wgt_TXT_Water~message_BH', 'wgt_TMR_Water~timer_BH', 'wgt_TMR_Water~delay_BH', 'wgt_ALM_Fire~Hose~warning_BH', 'wgt_ALM_Manifold~warning_BH', 'BM_32_DI@Float_Force~floats_BH', 'gblT_Elapsed_Water'])
+    assert.equal((c.elements.find(e => e.name === n) ?? c.graphics.find(g => g.name === n))?.workspace, 'Brew House', `${f}: ${n} is on the Brew House`);
   assert.equal(c.graphics.find(g => g.kind === 'override' && g.process === 'utility_FireHose_Manifold_Supply_Water')?.workspace, 'Brew House', 'the Water Override is on the Brew House');
   assert.equal(c.elements.find(e => e.name === 'BM_32_DI@Float_Force~floats_BH').visibility, 'hidden', 'the Float shows only when a Float button is used');
 }
@@ -58,7 +58,7 @@ const asked = () => eng.valveList().find(a => a.ask && a.process === U);
 const shown = []; eng.on('show', t => shown.push(t));
 const done = () => eng.confirmValve(asked().name);
 const pops = () => eng.overrideList().filter(a => a.process === U);
-const text = () => store.getProp('gblS_Water_Text_1_Water', 'value');
+const text = () => store.getProp('wgt_TXT_Water~message_BH', 'value');
 const quiet = () => st(U) !== 'running';
 
 const secs = n => String(store.getProp(n, 'value') ?? '').split(':').reduce((a, x) => a * 60 + (+x || 0), 0);
@@ -103,16 +103,16 @@ assert.ok(!store.getProp('wgt_TMR_Water~elapsed_BH', 'running'));
 // Firehose Set Time: waits for a time in Set Timer
 eng.start('FireHose_Set_Time', 'user');
 assert.ok(await until(() => !!asked())); done();
-// a pop-up asks for the time into the gGlobal gblT_SetTimer_Water (ask "text" Name, Rule 16.5); no box on the Tab
+// a pop-up asks for the time into the Time Widget wgt_TM_Set~Timer_BH (ask "text" Name, Rule 16.5); no box on the Tab
 assert.ok(await until(() => asked()?.input), 'the pop-up asks for the time');
-assert.deepEqual([asked().input.name, asked().input.kind, asked().input.label], ['gblT_SetTimer_Water', 'time', 'Set Timer']);
-assert.equal(store.getProp('gblT_SetTimer_Water', 'visibility'), 'hidden', 'no Set Timer box on the Tab');
+assert.deepEqual([asked().input.name, asked().input.kind, asked().input.label], ['wgt_TM_Set~Timer_BH', 'time', 'Set Timer']);
+assert.equal(store.getProp('wgt_TM_Set~Timer_BH', 'visibility'), 'hidden', 'no Set Timer box on the Tab');
 assert.throws(() => eng.confirmValve(asked().name, ''), /Type the answer/);
 assert.throws(() => eng.confirmValve(asked().name, '10 seconds'), /hh:mm:ss/);
 eng.confirmValve(asked().name, '00:00:00');                                  // no time: asked again
 assert.ok(await until(() => asked()?.input), 'asked again for 00:00:00');
 eng.confirmValve(asked().name, '00:00:10');
-assert.equal(String(store.getProp('gblT_SetTimer_Water', 'value')), '00:00:10', 'the answer is in the gGlobal');
+assert.equal(String(store.getProp('wgt_TM_Set~Timer_BH', 'value')), '00:00:10', 'the answer is in the Time Widget');
 assert.ok(await until(() => on(FH)), 'opens after the warning');
 assert.ok(await until(() => !on(FH) && quiet()), 'closes after the time set');
 

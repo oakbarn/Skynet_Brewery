@@ -29,7 +29,7 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
 | FireHose 1 Minute | Manifold 1 Minute | De l'eau pendant 1 minute |
 | FireHose 2 Minutes | Manifold 2 Minutes | De l'eau pendant 2 minutes |
 | FireHose 20 Seconds | Manifold 3 Minutes | De l'eau pendant 20 secondes ou 3 minutes |
-| Firehose Set Time | Set Time | Une fenêtre demande le temps ; il va dans le gGlobal `gblT_SetTimer_Water` |
+| Firehose Set Time | Set Time | Une fenêtre demande le temps ; il va dans le Time Widget caché `wgt_TM_Set~Timer_BH` |
 | Use FireHose Float | Use Manifold Float | De l'eau jusqu'à ce que le **Water float** (flotteur) soit fait |
 | FireHose Off | | L'arrête tout de suite et ferme les deux vannes |
 

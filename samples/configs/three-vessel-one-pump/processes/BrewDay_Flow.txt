@@ -54,10 +54,8 @@ wgt_TMR_Step~timer_BH.label = "Checking the Recipe"
 if skn_rcp_Loaded == false
 	vSMsg = "No Recipe is loaded: import one on ☰ Menu > Recipe, or the Default tab's values are used and there are no hop alerts. Strike " + skn_rcp_Strike_Temp + " " + skn_rcp_Temp_Units + ", mash " + skn_rcp_Mash_Step_1_Temp + " " + skn_rcp_Temp_Units + "."
 endif
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Recipe Ready?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Recipe Ready?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 101
 wgt_SW_Advance_BH.visible = false
@@ -70,10 +68,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Filling the HLT"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "HLT Filled?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "HLT Filled?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 103
 wgt_SW_Advance_BH.visible = false
@@ -86,10 +82,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Heating Strike Water"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Wait.  Will Auto Advance"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Wait.  Will Auto Advance"
 wgt_SW_Advance_BH.visible = false
 wait HLT_Vessel.BM1w1_1_HLT_BH >= skn_rcp_Strike_Temp
 //Rule 17.20: the Pre Boil hops (All Grain): get them ready
@@ -104,10 +98,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Strike Water Ready"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Start Transfer?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Start Transfer?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 105
 wgt_SW_Advance_BH.visible = false
@@ -134,10 +126,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Transferring Strike Water"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Strike Moved?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Strike Moved?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 107
 wgt_SW_Advance_BH.visible = false
@@ -161,10 +151,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Adding the Grain"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Grain Added?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Grain Added?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 151
 wgt_SW_Advance_BH.visible = false
@@ -190,10 +178,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Vorlauf"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Vorlauf Set?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Vorlauf Set?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 153
 wgt_SW_Advance_BH.visible = false
@@ -211,10 +197,8 @@ start "wgt_TMR_Step~timer_BH"
 hop_alert "Mash"
 vSMsg = "Mash step 1: holding " + skn_rcp_Mash_Step_1_Temp + " " + skn_rcp_Temp_Units + ". Recirculating."
 wgt_TMR_Step~timer_BH.label = "Mashing Step 1"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Mashing: step 1"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Mashing: step 1"
 wgt_SW_Advance_BH.visible = false
 wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
@@ -241,10 +225,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Raising to Mash Step 2"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Step 2 Set?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Step 2 Set?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 221
 wgt_SW_Advance_BH.visible = false
@@ -269,10 +251,8 @@ wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
 vSMsg = "Mash step 2: holding " + skn_rcp_Mash_Step_2_Temp + " " + skn_rcp_Temp_Units + ". Recirculating."
 wgt_TMR_Step~timer_BH.label = "Mashing Step 2"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Mashing: step 2"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Mashing: step 2"
 wgt_SW_Advance_BH.visible = false
 wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
@@ -299,10 +279,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Raising to Mash Step 3"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Step 3 Set?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Step 3 Set?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 231
 wgt_SW_Advance_BH.visible = false
@@ -327,10 +305,8 @@ wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
 vSMsg = "Mash step 3: holding " + skn_rcp_Mash_Step_3_Temp + " " + skn_rcp_Temp_Units + ". Recirculating."
 wgt_TMR_Step~timer_BH.label = "Mashing Step 3"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Mashing: step 3"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Mashing: step 3"
 wgt_SW_Advance_BH.visible = false
 wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
@@ -357,10 +333,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Adding 1st Wort Hops"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Lauter Now?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Lauter Now?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 301
 wgt_SW_Advance_BH.visible = false
@@ -388,10 +362,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Transferring 1st Run"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "First Run Done?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "First Run Done?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 303
 wgt_SW_Advance_BH.visible = false
@@ -426,10 +398,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Transferring Sparge Water"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Sparge Water In?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Sparge Water In?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 305
 wgt_SW_Advance_BH.visible = false
@@ -452,10 +422,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Settling the Mash"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Second Run?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Second Run?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 307
 wgt_SW_Advance_BH.visible = false
@@ -482,10 +450,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Transferring 2nd Run"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Mash Tun Drained?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Mash Tun Drained?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 309
 wgt_SW_Advance_BH.visible = false
@@ -507,10 +473,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Pre Boil Readings"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Pre Boil Volume Good?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Pre Boil Volume Good?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 311
 wgt_SW_Advance_BH.visible = false
@@ -524,10 +488,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Heating to a Boil"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Wait.  Will Auto Advance"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Wait.  Will Auto Advance"
 wgt_SW_Advance_BH.visible = false
 wait BK_Vessel.BM1w1_3_Kettle_BH >= 99.4
 start "wgt_ALM_Step~alarm_BH"
@@ -540,10 +502,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Hot Break"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Hot Break?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Hot Break?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 401
 wgt_SW_Advance_BH.visible = false
@@ -559,10 +519,8 @@ if skn_rcp_Loaded == true
 endif
 vSMsg = "Boiling for " + skn_rcp_Boil_Time + ". Skynet's hop alerts show each warning and each drop on every screen."
 wgt_TMR_Step~timer_BH.label = "Boiling"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Boiling"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Boiling"
 wgt_SW_Advance_BH.visible = false
 [Boil_Loop]
 step 1.00020 "Boil Loop"
@@ -570,7 +528,7 @@ vVLeft = wgt_TMR_Step~timer_BH
 if vVLeft <= 15 * vVScale
 	if vVStep != -1
 		vSMsg = "Boiling. Put the chiller in to sanitize it."
-		gblS_Step_Text = vSMsg
+		wgt_TXT_Step~text_BH = vSMsg
 		place_Chiller = Immersion_Chiller, BK_Vessel
 		start "wgt_ALM_Warning_BH"
 		vVStep = -1
@@ -597,10 +555,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Boil Done"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Heat Off?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Heat Off?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 481
 wgt_SW_Advance_BH.visible = false
@@ -615,10 +571,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Adding Whirlpool Hops"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Whirlpool Hops Added?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Whirlpool Hops Added?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 501
 wgt_SW_Advance_BH.visible = false
@@ -643,10 +597,8 @@ wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
 vSMsg = "Whirlpool, " + skn_rcp_Whirlpool_Minutes + " minutes."
 wgt_TMR_Step~timer_BH.label = "Whirlpooling"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Whirlpooling"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Whirlpooling"
 wgt_SW_Advance_BH.visible = false
 wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
@@ -656,10 +608,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Chilling"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Wait.  Will Auto Advance"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Wait.  Will Auto Advance"
 wgt_SW_Advance_BH.visible = false
 wait BK_Vessel.BM1w1_3_Kettle_BH <= skn_rcp_Ferment_Temp
 BM_22_DO@Pump_Pump_BH = false
@@ -681,10 +631,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Ready to Transfer"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Transfer WORT?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Transfer WORT?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 601
 wgt_SW_Advance_BH.visible = false
@@ -712,10 +660,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Transferring to the Fermenter"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Fermenter Full?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Fermenter Full?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 603
 hop_alert "Fermenter"
@@ -739,10 +685,8 @@ wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "OG Readings"
 remove_Chiller = BK_Vessel
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "OG Entered?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "OG Entered?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 605
 wgt_SW_Advance_BH.visible = false
@@ -757,10 +701,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Cleaning (PBW)"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "PBW Added?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "PBW Added?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 701
 wgt_SW_Advance_BH.visible = false
@@ -773,10 +715,8 @@ wgt_TMR_Step~timer_BH.countdown = false
 wgt_TMR_Step~timer_BH = 00:00:00
 start "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Rinsing"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Rinse Drained?"
-gblS_Advance_Label.background = 4
-gblS_Step_Text.background = 4
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Rinse Drained?"
 wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 703
 wgt_SW_Advance_BH.visible = false
@@ -784,13 +724,9 @@ vSHops = skn_rcp_Dry_Hops
 vSMsg = "Brew day finished. Dry hops: " + vSHops + " Total time " + wgt_TMR_Brew~day_BH
 stop "wgt_TMR_Step~timer_BH"
 wgt_TMR_Step~timer_BH.label = "Brew Day Done"
-gblS_Step_Text = vSMsg
-gblS_Advance_Label = "Done!"
-gblS_Advance_Label.background = 5
-gblS_Step_Text.background = 5
+wgt_TXT_Step~text_BH = vSMsg
+wgt_TXT_Advance~label_BH = "Done!"
 wgt_SW_Advance_BH.visible = false
-gblS_Advance_Label.background = 2
-gblS_Step_Text.background = 2
 stop "wgt_TMR_Brew~day_BH"
 gblV_Brew_Status = 999
 stop "looper_Advance_Switch"
