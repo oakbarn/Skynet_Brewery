@@ -786,7 +786,7 @@ async function route(req, res) {
   { const mm = p.match(/^\/ui\/scripts\/([^/]+)\/resume$/);
     if (mm && m === 'POST') {
       const b = await jsonBody(req);
-      try { const r = engine.resumeAfterError(decodeURIComponent(mm[1]), { skip: b.skip === true, auto: b.auto === 'quiet' ? 'quiet' : b.auto === true || b.auto === 'popup', by: me?.name || 'user' }); return r.ok ? ok(res, r) : fail(res, 400, r.msg || 'Not resumed'); } catch (e) { return fail(res, 400, e.message); }
+      try { const r = engine.resumeAfterError(decodeURIComponent(mm[1]), { skip: b.skip === true, auto: b.auto === 'quiet' ? 'quiet' : b.auto === true || b.auto === 'popup', ignore: b.ignore === true, by: me?.name || 'user' }); return r.ok ? ok(res, r) : fail(res, 400, r.msg || 'Not resumed'); } catch (e) { return fail(res, 400, e.message); }
     } }
   if (p === '/ui/errorstop/close' && m === 'POST') { engine.closeErrorStop(String((await jsonBody(req)).process ?? '')); return ok(res); }
   if (p === '/ui/errorstop/hold' && m === 'POST') { engine.holdErrorStop(String((await jsonBody(req)).process ?? '')); return ok(res); }

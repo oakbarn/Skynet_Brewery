@@ -47,28 +47,23 @@ Process open in the Process Editor) is written with it. It stays on the list unt
 ## Resume after an error
 
 When a Process stops on an error during a brew (Skynet Rule 10.14), **everything is left as it is** and a red pop-up shows on every
-screen with the Process, the line, the line itself and the error. You decide what happens next:
+screen with the Process, the line, the line itself and the error. The first time an error happens, Skynet always waits for you to
+pick:
 
-- **▶ Resume** runs that same line again and goes on from there. Use it after you fix or swap what failed (a pump, a valve, a
-  heater). The Process keeps the values it had. If it stops on the same line again, fix more and Resume again.
-- **⏭ Skip line** leaves that line out and goes on at the next line. Use it when you worked around the problem (for example you
-  re-routed through the RIMS), or when the line itself is wrong.
+- **🔧 Fixed hardware: try line N again**: you fixed or swapped what failed (a pump, a valve, a heater). That same line runs again
+  and the Process goes on from there, with the values it had. If it fails again, fix more and try again.
+- **✎ Fix Process code** opens the Process in the Process Editor at that line. The line shows with a **red background and bold
+  yellow text** while it is on this list. Fix it and **Save**, then press **🔧 Try again** on the pop-up: the saved Process runs from
+  that line. When a **🧪 Check** finds no error (or you tick **✔ Fixed**), the line goes back to normal colors.
+- **▶ Resume at the next line** leaves that line out and goes on at the next one (for example line 77 fails, it goes on at 78). Use
+  it when you worked around the problem, for example you re-routed through the RIMS.
+- **⏭ Ignore this error in any Process and go on** leaves the line out and goes on. From then on, the same error (the same words),
+  in any Process and on any line, is left out by itself with no pop-up until the Brain restarts. It is still written in the Console
+  and on this list. You get one warning: you are responsible, so stay with the brew and watch it.
 - **✕** leaves the Process stopped and closes the pop-up on every screen.
 
-**Next time line N fails** is a dropdown on the pop-up. The first time a line fails, Skynet always waits for you. Before you pick
-Resume or Skip, choose what happens if that same line fails again:
-
-- **Stop and wait for me** (it starts on this): the pop-up again.
-- **Auto: pop-up for 5 s, then go on**: the pop-up shows a 5 second countdown, then does the same thing again (Resume or Skip) by
-  itself. **⏸ Hold** stops the countdown, and it waits for you again.
-- **Auto: no pop-up, go on**: no pop-up at all; after a second it does the same thing again. Good for a small error such as a hop
-  name. It is still written in the Console and on this list.
-
-An Auto choice gives you one warning: you are responsible, so stay with the brew and watch it. Starting the Process over turns Auto
-off again.
-
-The pop-up stays until someone picks. Starting the Process over lets the Resume go. The error is still written on this list, so you
-can fix the Process before the next Brew Day.
+The pop-up stays until someone picks. Starting the Process over lets it go. The error is still written on this list, so you can fix
+the Process before the next Brew Day.
 
 ## How long they are kept
 

@@ -54,30 +54,26 @@ Tapez un problème dans la case du haut, par exemple *la vanne du HLT colle*, et
 ## Reprendre après une erreur {#resume-after-an-error}
 
 Quand un Process s'arrête sur une erreur pendant un brassage (Règle Skynet 10.14), **tout est laissé tel quel** et une fenêtre
-rouge s'affiche sur tous les écrans avec le Process, la ligne, la ligne elle-même et l'erreur. C'est vous qui décidez de la suite :
+rouge s'affiche sur tous les écrans avec le Process, la ligne, la ligne elle-même et l'erreur. La première fois qu'une erreur arrive,
+Skynet vous attend toujours pour choisir :
 
-- **▶ Resume** refait tourner cette même ligne et continue à partir de là. Servez-vous-en après avoir réparé ou remplacé ce qui a
-  lâché (une pompe, une vanne, une résistance). Le Process garde les valeurs qu'il avait. S'il s'arrête encore sur la même ligne,
-  réparez encore et refaites Resume.
-- **⏭ Skip line** saute cette ligne et continue à la ligne suivante. Servez-vous-en quand vous avez contourné le problème (par
-  exemple en passant par le RIMS), ou quand la ligne elle-même est fausse.
+- **🔧 Fixed hardware: try line N again** : vous avez réparé ou remplacé ce qui a lâché (une pompe, une vanne, une résistance). Cette
+  même ligne tourne de nouveau et le Process continue à partir de là, avec les valeurs qu'il avait. Si elle échoue encore, réparez
+  encore et réessayez.
+- **✎ Fix Process code** ouvre le Process dans le Process Editor à cette ligne. La ligne s'affiche avec un **fond rouge et un texte
+  jaune en gras** tant qu'elle est dans cette liste. Réparez-la et faites **Save**, puis appuyez sur **🔧 Try again** dans la
+  fenêtre : le Process enregistré tourne à partir de cette ligne. Quand un **🧪 Check** ne trouve pas d'erreur (ou que vous cochez
+  **✔ Fixed**), la ligne reprend ses couleurs normales.
+- **▶ Resume at the next line** saute cette ligne et continue à la suivante (par exemple la ligne 77 échoue, il continue à la 78).
+  Servez-vous-en quand vous avez contourné le problème, par exemple en passant par le RIMS.
+- **⏭ Ignore this error in any Process and go on** saute la ligne et continue. Ensuite, la même erreur (les mêmes mots), dans
+  n'importe quel Process et sur n'importe quelle ligne, est sautée toute seule sans fenêtre jusqu'au redémarrage du Brain. Elle est
+  quand même notée dans la Console et dans cette liste. Vous recevez un seul avertissement : vous êtes responsable, restez donc avec
+  le brassage et surveillez-le.
 - **✕** laisse le Process arrêté et ferme la fenêtre sur tous les écrans.
 
-**Next time line N fails** (la prochaine fois que la ligne N échoue) est une liste déroulante sur la fenêtre. La première fois
-qu'une ligne échoue, Skynet vous attend toujours. Avant de choisir Resume ou Skip, choisissez ce qui se passe si cette même ligne
-échoue à nouveau :
-
-- **Stop and wait for me** (au départ) : la fenêtre de nouveau.
-- **Auto: pop-up for 5 s, then go on** : la fenêtre montre un compte à rebours de 5 secondes, puis refait la même chose (Resume ou
-  Skip) toute seule. **⏸ Hold** arrête le compte à rebours, et Skynet vous attend de nouveau.
-- **Auto: no pop-up, go on** : pas de fenêtre du tout ; après une seconde, il refait la même chose. Pratique pour une petite erreur
-  comme un nom de houblon. C'est quand même noté dans la Console et dans cette liste.
-
-Un choix Auto vous donne un seul avertissement : vous êtes responsable, restez donc avec le brassage et surveillez-le. Redémarrer le
-Process depuis le début éteint Auto.
-
-La fenêtre reste jusqu'à ce que quelqu'un choisisse. Redémarrer le Process depuis le début abandonne le Resume. L'erreur est quand
-même notée dans cette liste, pour que vous puissiez réparer le Process avant le prochain brassage.
+La fenêtre reste jusqu'à ce que quelqu'un choisisse. Redémarrer le Process depuis le début l'abandonne. L'erreur est quand même
+notée dans cette liste, pour que vous puissiez réparer le Process avant le prochain brassage.
 
 ## Combien de temps elles sont gardées {#how-long-they-are-kept}
 
