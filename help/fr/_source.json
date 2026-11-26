@@ -94,7 +94,7 @@
  "95-closing-skynet-brewer": "be757109ab342939",
  "96-override-button": "575708a8260b9c42",
  "98-database-and-api": "3c27c87803254930",
- "99-recipe-tab": "db34e615625cc3fc",
+ "99-recipe-tab": "4765a1d2fbb363b1",
  "100-brew-process": "f5f1eb2deaae04aa",
  "101-tab-styles": "0befb6f392d7c884",
  "102-process-version": "10e516f468bb74db",
@@ -241,5 +241,6 @@
  "245-value-widget-formats": "862fd1499939fe6f",
  "246-skynet-brew-timers": "e1a030f685c7d932",
  "247-fix-before-next-brew-day": "97cf56bbda405ccf",
- "248-setup-interview": "07ffdac0f06cc403"
+ "248-setup-interview": "07ffdac0f06cc403",
+ "249-recipe-interview": "60fed7f4be517177"
 }

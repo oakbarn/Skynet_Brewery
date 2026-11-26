@@ -34,6 +34,7 @@ import { HEAT_METHODS, heatSendsPwm, switchedBy, HEAT_SETTINGS, HEAT_MAIN, NEEDS
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
+import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
 import { SETUP_QUESTIONS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
@@ -357,7 +358,10 @@ function renderRecipeAsks(list) {
     h('div', { class: 'valveAsk' }, h('div', { class: 'valveDo' }, 'A Brew Day always has a Recipe. Pick one to start:'),
       h('div', {}, pick), savedRow,
       h('div', { class: 'muted' }, `The Process ${a.process} waits until a Recipe is opened, IMPORTed or saved.`),
-      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), who ? h('button', { class: 'primary', onclick: open }, 'Open ▶') : h('span', { class: 'muted' }, 'An operator or admin must pick one.'))));
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }),
+        // the Recipe Interview (Rule 17.22): the same Recipe, made by answering questions; the Process goes on once it is made
+        who ? h('button', { title: 'Make the Recipe by answering questions, one page at a time (or IMPORT a file)', onclick: guard(async () => { d.close(); recipeAsked.add(a.name); renderRecipeAsks(list); await recipeInterview(); }) }, '🧭 Recipe Interview') : '',
+        who ? h('button', { class: 'primary', onclick: open }, 'Open ▶') : h('span', { class: 'muted' }, 'An operator or admin must pick one.'))));
   if (!d.open) d.showModal();
 }
 function renderMvAsks(list) {
@@ -16211,6 +16215,117 @@ async function firstRunSamples() {
   d.showModal();
 }
 
+// ---- The Recipe Interview (Rule 17.22, Help 249; the questions are data in public/recipeinterview.js). One page per question, the
+// branches as the answers go (Import · Extract Kit · All Grain · Other Brews, then Ferment, Package and Brew Day). ◀ Back, Skip, Next ▶,
+// a Done page with ✎, and ✔ Finish makes the Recipe (the Recipe tab opens with it; Library ... > Save this Recipe keeps it).
+const RQ_MUST = new Set(['R1', 'R2', 'R3', 'O1']);      // the branching answers: no Skip
+async function recipeInterview() {
+  if (!can('operator')) return toast('An operator or admin makes the Recipe', true);
+  if (profDirty.recipe && !confirm('The Recipe has changes that are not saved. Start the Recipe Interview anyway? The interview makes a new Recipe at Finish.')) return;
+  const metric = S.config.brewDefaults?.units === 'Metric';
+  const ctx = { brewerType: S.config.brewDefaults?.brewerType, waterProfiles: (S.waterProfiles || []).map(x => [x.id, x.name]) };
+  const a = {}, trail = [RECIPE_START];
+  const d = h('dialog', { class: 'miniDlg ivDlg nsiDlg setupDlg rqDlg', 'data-nomenu': '' }), body = h('div', { class: 'setupBody' });
+  const bar = h('div', { class: 'bar nsiBar' }), title = h('h3'), stripBox = h('div');
+  document.body.append(d);
+  return new Promise(res => {
+    const end = r => { d.close(); d.remove(); res(r); };
+    const close = () => { if (!confirm('Stop the Recipe Interview? Nothing is changed.')) return; end('close'); };
+    d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
+    const nextId = q => typeof q.next === 'function' ? q.next(a) : q.next;
+    const draw = () => {
+      const id = trail[trail.length - 1], done = id === 'done', q = done ? null : questionById(id);
+      if (q?.show && !q.show(a, ctx)) { trail[trail.length - 1] = nextId(q); return draw(); }      // a row that does not fit is passed over
+      const path = recipePath(a, ctx).rows, at = done ? path.length : Math.max(0, path.findIndex(x => x.id === id));
+      const branches = [...new Set(path.map(x => x.branch))];
+      stripBox.replaceChildren(h('ol', { class: 'nsiSteps' }, ...[...branches, 'Done'].map(b => h('li', { class: (done ? b === 'Done' : b === q.branch) ? 'now' : '' }, b))));
+      const go = nid => {
+        if (nid === 'import') { end('import'); rcImportNext = true; rcView = null; rcSub = 'recipe'; openMenuTab('recipe'); return; }
+        trail.push(nid); draw();
+      };
+      const next = () => {
+        if (RQ_MUST.has(q.id) && (q.boxes || []).some(b => a[b.k] === undefined || a[b.k] === '')) return toast('This one must be answered: it picks the questions that come next', true);
+        go(nextId(q));
+      };
+      const finish = guard(async () => {
+        const lvl = interviewRecipe(a, { metric, ctx }).level;
+        await api('POST', '/ui/recipe/new', { level: lvl });
+        const v = await api('GET', '/ui/recipe');
+        const r = interviewRecipe(a, { metric, base: v.recipe, ctx });
+        await api('PUT', '/ui/recipe', r);
+        end('finish'); profDirty.recipe = false; rcView = null; rcSub = 'recipe'; openMenuTab('recipe');
+        savedPop('Recipe made from the interview. Library ... > 💾 Save this Recipe keeps it in the library');
+      });
+      bar.replaceChildren(h('span', { class: 'spacer' }),
+        h('button', { type: 'button', title: 'Open the Help page of the Recipe Interview', onclick: () => openHelp('249-recipe-interview') }, '? Help'),
+        trail.length > 1 ? h('button', { type: 'button', onclick: () => { trail.pop(); draw(); } }, '◀ Back') : '',
+        !done && !RQ_MUST.has(q.id) ? h('button', { type: 'button', title: 'Leave this one empty and go on. You can fill it in on the Recipe tab later.', onclick: () => go(nextId(q)) }, 'Skip') : '',
+        h('span', { class: 'dlgBtnGroup' },
+          done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶'),
+          h('button', { type: 'button', title: 'Stop the interview. Nothing is changed.', onclick: close }, 'Close'),
+          h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: close }, '✕')));
+      title.textContent = 'Recipe Interview: ' + (done ? 'Done' : `${q.branch} (${q.id})`);
+      body.replaceChildren();
+      if (done) {
+        body.append(h('p', {}, 'Every page you answered. ✎ goes back to it. ✔ Finish makes the Recipe and opens it on the Recipe tab, where Calculate and Save work as always.'),
+          h('table', { class: 'setupSum' }, ...path.map(x => h('tr', {}, h('td', {}, x.id), h('td', {}, x.ask), h('td', {}, rqSummary(x, a, ctx, metric)),
+            h('td', {}, h('button', { type: 'button', title: 'Change this answer', onclick: () => { trail.push(x.id); draw(); } }, '✎'))))));
+        return;
+      }
+      body.append(h('p', { class: 'setupAsk' }, q.ask));
+      if (q.why) body.append(h('p', { class: 'muted' }, q.why));
+      const only = (q.boxes || []).length === 1 && !q.list;
+      const dep = (q.boxes || []).some(b => b.show);
+      for (const b of (q.boxes || []).filter(b => !b.show || b.show(a))) body.append(rqBox(b, a, ctx, metric, () => only ? next() : draw(), dep ? draw : null));
+      if (q.list) body.append(rqList(q.list, a, ctx, metric, draw));
+    };
+    d.append(bar, title, stripBox, body); d._btnOrder = true;
+    draw(); d.showModal();
+  });
+}
+// one answer box: one-click boxes for 6 or fewer choices (Rule 2.6), a dropdown for more, else a typed box with its unit (Rule 2.59)
+function rqBox(b, a, ctx, metric, picked, redraw) {      // redraw: the page has boxes that show by this answer
+  const wrap = h('div', { class: 'rqBox' }, b.label ? h('label', {}, b.label) : '');
+  if (b.kind === 'yesno' || (b.kind === 'pick' && rqChoices(b, ctx).length <= 6)) {
+    const ch = b.kind === 'yesno' ? [[true, 'Yes'], [false, 'No']] : rqChoices(b, ctx);
+    wrap.append(h('div', { class: 'setupPicks rqPicks' }, ...ch.map(([k, t]) => h('button', { type: 'button', class: 'setupPick' + (a[b.k] === k ? ' cur' : ''), onclick: () => { a[b.k] = k; picked(); } }, h('b', {}, t)))));
+  } else if (b.kind === 'pick') {
+    wrap.append(h('select', { onchange: e => { a[b.k] = e.target.value; } }, h('option', { value: '' }, '(pick one)'), ...rqChoices(b, ctx).map(([k, t]) => h('option', { value: k, ...(a[b.k] === k ? { selected: true } : {}) }, t))));
+  } else if (b.kind === 'hopsActual') {
+    a.hopsActual ??= {};
+    for (const hp of (a.hops || []).filter(x => x?.name)) wrap.append(h('div', { class: 'rqRow' }, h('span', {}, `${hp.name} (sheet ${hp.aa ?? '?'} %)`),
+      h('input', { type: 'number', step: 'any', value: a.hopsActual[hp.name] ?? '', oninput: e => { a.hopsActual[hp.name] = e.target.value; } }), ' %'));
+  } else {
+    const typed = b.kind === 'text' ? 'text' : b.kind === 'datetime' ? 'datetime-local' : 'number';
+    const inp = h('input', { type: typed, ...(typed === 'number' ? { step: 'any' } : {}), value: a[b.k] ?? '', oninput: e => { a[b.k] = typed === 'number' && e.target.value !== '' ? +e.target.value : e.target.value; },
+      onchange: () => { if (redraw) redraw(); } });
+    wrap.append(inp, h('span', { class: 'muted' }, ' ' + rqUnit(b.kind, metric)));
+  }
+  return wrap;
+}
+// a table of rows (each extract, each hop ...): ➕ Add another, 🗑 takes a row out
+function rqList(L, a, ctx, metric, redraw) {
+  a[L.k] ??= [{}];
+  const rows = a[L.k];
+  const cell = (row, c) => {
+    if (c.kind === 'pick') return h('select', { onchange: e => { row[c.k] = e.target.value; } }, h('option', { value: '' }, ''), ...rqChoices(c, ctx).map(([k, t]) => h('option', { value: k, ...(row[c.k] === k ? { selected: true } : {}) }, t)));
+    const typed = c.kind === 'text' ? 'text' : 'number';
+    return h('input', { type: typed, ...(typed === 'number' ? { step: 'any' } : {}), value: row[c.k] ?? '', oninput: e => { row[c.k] = typed === 'number' && e.target.value !== '' ? +e.target.value : e.target.value; } });
+  };
+  return h('div', { class: 'rqList' }, h('table', {},
+    h('tr', {}, ...L.cols.map(c => h('th', {}, c.label + (rqUnit(c.kind, metric) ? ` (${rqUnit(c.kind, metric)})` : ''))), h('th', {})),
+    ...rows.map((row, i) => h('tr', {}, ...L.cols.map(c => h('td', {}, cell(row, c))),
+      h('td', {}, h('button', { type: 'button', title: 'Take this row out', onclick: () => { rows.splice(i, 1); if (!rows.length) rows.push({}); redraw(); } }, '🗑'))))),
+    h('button', { type: 'button', onclick: () => { rows.push({}); redraw(); } }, '➕ Add another'));
+}
+// the answers of one page, in a line, for the Done page
+function rqSummary(q, a, ctx, metric) {
+  const words = (b, v) => v === undefined || v === '' || v === null ? '' : b.kind === 'yesno' ? (v ? 'Yes' : 'No') : b.kind === 'pick' ? (rqChoices(b, ctx).find(([k]) => k === v)?.[1] ?? v) : `${v}${rqUnit(b.kind, metric) ? ' ' + rqUnit(b.kind, metric) : ''}`;
+  if (q.list) { const n = (a[q.list.k] || []).filter(x => String(x?.name ?? '').trim()); return n.length ? n.map(x => x.name).join(', ') : '(none)'; }
+  if (q.boxes?.[0]?.kind === 'hopsActual') return Object.entries(a.hopsActual || {}).filter(([, v]) => v !== '').map(([k, v]) => `${k} ${v} %`).join(', ') || '(none)';
+  return (q.boxes || []).filter(b => !b.show || b.show(a)).map(b => (b.label ? b.label + ': ' : '') + words(b, a[b.k])).filter(x => !/: $/.test(x) && x).join(' · ') || '(skipped)';
+}
+
 // ---- The Setup Interview (Rule 2.75, Help 248; the questions are data in public/setupinterview.js). One question at a time: ◀ Back,
 // Skip (not on a must question), Next ▶, then a summary with ✎ on each answer and ✔ Finish. Nothing is saved until Finish.
 function setupCtx() {
@@ -21040,7 +21155,7 @@ async function askSaveImported(name) {
 // (black: names, grey: times and choices, blue: volumes, red: temperatures, light grey: worked out by Calculate). The
 // Daughter Tabs (Hops, Drops, Grain, Yeast, Adjuncts, Waters, Mash) open from their buttons; Fritz sends their fields later.
 // The Recipe is kept in kg, L and °C (lib/recipe.js) and shows in the units picked on the Default tab.
-let rcView = null, rcWork = null, rcSub = 'recipe';
+let rcView = null, rcWork = null, rcSub = 'recipe', rcImportNext = false;
 const RC_DAUGHTERS = [
   ['hops', 'HOPs', 'Add, Edit or Delete Hops. All Hops details. The Actual AAU of the Hops that are used in the Brew MUST be updated. The Actual AAU varies from the Recipe AAU and to obtain the desired IBUs, they must be calculated from the Actual AAUs and the Hops Amounts are adjusted.'],
   ['posthops', 'Pre and Post Boil Hops', 'Add, Edit or Delete the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry Hop and Whirlpool. Their Actual AAU must be updated too.'],
@@ -21143,6 +21258,7 @@ function renderRecipeTab(box) {
   });
   // IMPORT: a .bsmx or .xml file from this computer or phone. A file with many recipes asks which one.
   const file = h('input', { type: 'file', accept: '.bsmx,.xml,text/xml', hidden: true });
+  if (rcImportNext) { rcImportNext = false; queueMicrotask(() => file.click()); }      // the Recipe Interview's first answer was Yes (R1)
   file.onchange = guard(async () => {
     const f = file.files[0]; file.value = ''; if (!f) return;
     if (profDirty.recipe && !confirm('The Recipe has changes that are not saved. Import over them?')) return;
@@ -21187,7 +21303,8 @@ function renderRecipeTab(box) {
   const crumb = sub ? h('button', { class: 'rcCrumb', onclick: () => { rcSub = 'recipe'; renderMenuPane(); }, title: 'Back to the Recipe tab' }, 'Recipe') : h('span', {}, 'Recipe');
   box.append(file, h('div', { class: 'rcHead' }, h('h3', {}, crumb, sub ? ` > ${sub[1]}` : ': Import >'),
     op && !sub ? [h('button', { class: 'rcYellow', onclick: () => file.click(), title: 'A BeerSmith .bsmx file (BeerSmith 3 or 4) or a BeerXML .xml file' }, 'IMPORT'),
-      h('button', { class: 'rcYellow', onclick: fresh, title: 'Clear the Recipe and start a new one from the Defaults' }, 'NEW'), levelBox, h('b', {}, 'Fields can be edited.')] : !sub ? levelBox : '',
+      h('button', { class: 'rcYellow', onclick: fresh, title: 'Clear the Recipe and start a new one from the Defaults' }, 'NEW'),
+      h('button', { class: 'rcYellow', onclick: guard(() => recipeInterview()), title: 'Make the Recipe by answering questions, one page at a time: every amount, time and temperature (Rule 17.22)' }, '🧭 INTERVIEW'), levelBox, h('b', {}, 'Fields can be edited.')] : !sub ? levelBox : '',
     h('span', { class: 'spacer' }), right));
   const pane = h('fieldset', { class: 'menuSet rcPane', ...(op ? {} : { disabled: true }) });
   box.append(pane);
