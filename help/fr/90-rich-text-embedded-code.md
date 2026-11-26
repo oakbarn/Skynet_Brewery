@@ -24,7 +24,7 @@ Ce sont des interrupteurs : le premier code allume l'aspect et le suivant l'éte
 | `\c{Red}` | le texte qui suit est rouge | `\c{Red}HOT\c 212\degF` |
 | `\c` | retour à la couleur normale | |
 
-Utilisez n'importe quel nom de couleur du panel : Red, Green, Blue, Yellow, Orange, Purple, Copper, Brown, Steel grey, Light grey, White, Black. Les majuscules et les espaces ne comptent pas (`\c{steelgrey}` marche), et un code de couleur comme `\c{#ff8800}` marche aussi. Un nom qui n'est pas une couleur reste à l'écran tel qu'il est tapé, pour que vous voyiez l'erreur.
+Utilisez n'importe quel nom de couleur du panel : Red, Green, Blue, Yellow, Orange, Purple, Copper, Brown, Steel grey, Light grey, White (Opaque), White (Transparent), Black (White tout court est White (Opaque)). Les majuscules et les espaces ne comptent pas (`\c{steelgrey}` marche), et un code de couleur comme `\c{#ff8800}` marche aussi. Un nom qui n'est pas une couleur reste à l'écran tel qu'il est tapé, pour que vous voyiez l'erreur.
 
 ## Les signes et l'espacement {#signs-and-spacing}
 

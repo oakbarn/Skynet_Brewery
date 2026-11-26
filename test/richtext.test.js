@@ -37,7 +37,9 @@ setTempUnitSource(() => 'F'); assert.equal(plainText('152\\dFC'), '152°F', 'US:
 setTempUnitSource(() => { throw new Error('not ready'); }); assert.equal(plainText('\\dFC'), '°F');
 setTempUnitSource(null);
 assert.equal(textColor('White'), '#fafafa', 'White is RGB 250 250 250 (Rule 2.7)');
-assert.equal(NAMED_COLORS.length, 12);
+assert.equal(NAMED_COLORS.length, 13);
+assert.equal(textColor('White (Opaque)'), '#fafafa');
+assert.equal(textColor('White (Transparent)'), 'rgba(255,255,255,0)', 'White (Transparent) is 255 255 255 see-through (Rule 2.7)');
 const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 assert.match(app, /const COLORS = \[\['Default', ''\], \['None', 'transparent'\], \.\.\.NAMED_COLORS\];/, 'one list of color names');
 assert.match(app, /setTempUnitSource\(\(\) => rcUnits\(\)\.tempUnit\);/, '\\dFC follows the Default Temperatures unit');

@@ -21,11 +21,13 @@ const TOGGLE = { b: 'b', B: 'b', L: 'L', l: 'L', _: 'sub', '^': 'sup', i: 'i', u
 const LOOKS = ['b', 'L', 'sub', 'sup', 'i', 'u', 's', 'sm'];
 
 // the panel's color names: one list, app.js puts Default and None in front of it for its color dropdowns.
-// White is RGB 250 250 250 in every color picker (Rule 2.7).
+// White (Opaque) is RGB 250 250 250 in every color picker; White (Transparent) is 255 255 255 see-through, like None (Rule 2.7, 2026-11-26).
+export const WHITE_SEE = 'rgba(255,255,255,0)';      // White (Transparent): 255 255 255 and see-through
 export const NAMED_COLORS = [['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
-  ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White', '#fafafa'], ['Black', '#000000']];
+  ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White (Opaque)', '#fafafa'], ['White (Transparent)', WHITE_SEE],
+  ['Black', '#000000']];
 const colorKey = n => String(n).toLowerCase().replace(/[^a-z]/g, '').replace('gray', 'grey');
-const BY_NAME = Object.fromEntries(NAMED_COLORS.map(([n, c]) => [colorKey(n), c]));
+const BY_NAME = { white: '#fafafa', ...Object.fromEntries(NAMED_COLORS.map(([n, c]) => [colorKey(n), c])) };      // plain White is White (Opaque)
 // a color name (capitals and spaces don't matter, gray = grey) or #hex -> the color, or null when it is not one
 export const textColor = n => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(n).trim()) ? String(n).trim() : BY_NAME[colorKey(n)] || null;
 

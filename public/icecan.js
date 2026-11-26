@@ -36,7 +36,7 @@ export function iceCanSvg(w, h) {
   let ribs = '';
   for (const f of [0.3, 0.5, 0.7]) {
     const [a] = at(water + 4), [b] = at(bottom - 6), [, c] = at(water + 4), [, d] = at(bottom - 6);
-    ribs += `<line x1="${r(a + (c - a) * f)}" y1="${r(water + 6)}" x2="${r(b + (d - b) * f)}" y2="${r(bottom - 6)}" stroke="#ffffff" stroke-opacity="0.18" stroke-width="${r(Math.max(2, w * 0.02))}" stroke-linecap="round"/>`;
+    ribs += `<line x1="${r(a + (c - a) * f)}" y1="${r(water + 6)}" x2="${r(b + (d - b) * f)}" y2="${r(bottom - 6)}" stroke="#fafafa" stroke-opacity="0.18" stroke-width="${r(Math.max(2, w * 0.02))}" stroke-linecap="round"/>`;
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${r(w)} ${r(h)}" width="${r(w)}" height="${r(h)}">` +
     `<polygon points="${r(tl)},${r(top)} ${r(tr)},${r(top)} ${r(br)},${r(bottom)} ${r(bl)},${r(bottom)}" fill="#6b7279" stroke="#000" stroke-width="2"/>` +
