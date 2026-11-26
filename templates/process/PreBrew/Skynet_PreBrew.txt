@@ -4,11 +4,8 @@
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 step "Recipe"
-[Recipe_Check]
-if skn_rcp_Loaded == false
-  ask "No Recipe is loaded.\nOpen ☰ Menu > Recipe: import a BeerSmith (.bsmx) or BeerXML (.xml) file, or make a new Recipe. Then press Done."
-  goto Recipe_Check
-endif
+// A Brew Day always has a Recipe (Rule 16.14): with none loaded, the No Recipe Found pop-up leads the way to one
+ask_recipe
 ask "Check the Recipe \b" + skn_rcp_Name + "\b on ☰ Menu > Recipe (clear it and import another if this is not today's beer).\nBatch " + skn_rcp_Batch_Volume + " " + skn_rcp_Volume_Units + ", grain " + skn_rcp_Total_Grain_Weight + " " + skn_rcp_Weight_Units + ", boil " + skn_rcp_Boil_Time + ".\nPress Done when it is right."
 step "Chilling water"
 ask "Pick how you chill today:\n- just tap water (the most common)\n- tap water chilled by an ice bath\n- only ice water\n- tap water chilled by glycol\n- ice water chilled by glycol\nIf it uses ice, have the ice bath ready at the end of the boil. If it uses glycol, make sure the glycol is cold. Press Done when it is set."

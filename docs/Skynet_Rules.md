@@ -5639,7 +5639,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 16.1 **The Standard Skynet Brew Process** (Fritz, 2026-10-30; changed 2026-11-07): a brew day is a **list of premade major
 steps**, each with its own minor steps (`step "..."`). The list is not a fixed count: Skynet can add or drop steps later. Today it
 is, in this order: **PreBrew, Heat Strike, Strike, Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Ferment,
-Clean**. **Clean is always last.** Any step can be skipped. **Whirlpool and Chill** and **Chill** do the same job, so a brew day
+Clean**. **Clean is always last.** Any step can be skipped, **but a Brew Day always has a Recipe** (Rule 16.14): with PreBrew skipped, the Brew Day still starts with the Recipe check. **Whirlpool and Chill** and **Chill** do the same job, so a brew day
 uses one of them (Chill to start, Whirlpool and Chill skipped). Strike was called Add Grain; Cool was split into Chill and
 Transfer to Fermentor, and a saved Brew Process changes over by itself. **Hop stand** (Fritz, 2026-11-07: "two Steps in the Whirlpool and
 Chill or just the chill regarding when to drop Aroma Hops"): with Whirlpool hops in the Recipe, either chill step chills to the hop
@@ -5775,6 +5775,28 @@ of the New Process and is set when the Process is created and cannot be changed 
   it fits into your brew day, how `/* ... */` and `//` comments are written, and "Thank yourself in the future".
 Help 30. **Both programs:** the BruControl Import sets each Process's class when it brings it in (it guesses it from the name, as before).
 
+16.14 **A Brew Day always has a Recipe** (OakBarn Brewery, 2026-11-25, a General Rule: "On a Brew Day, there is ALWAYS a Recipe, from
+the simplest to the most complex. Even a Can Extract Kit has some details that need to be set."; "General Rule. I started the 3 Vessel
+Brew Day and that was the first Thing that came up"; picked "Change Rule 16.1"). Every Brew Day, on every Brewer Level and every Recipe
+Level (a Can Kit, a no-boil brew or a ginger beer too), starts with the Recipe. **The Recipe is never skipped**: skipping steps (Rule
+16.1) never skips it; with PreBrew skipped, the Brew Day still checks the Recipe first. A Recipe is made, imported or opened from the
+Recipe library on ☰ Menu > Recipe **well before** a Brew Day, and saved to the library to be used again (Rules 17.15, 17.21).
+**No Recipe Found** (OakBarn Brewery, 2026-11-25, his PDF "No Recipe Found", and "maybe lead by the nose after finding no recipe"; "Put
+in 620"): the Process command **`ask_recipe`** goes straight on when a Recipe is loaded; with none, the **No Recipe Found** pop-up shows on
+every screen with one dropdown, his list word for word: **Saved Recipe, Extract Can Kit, Extract Partial Grain and Hops, All Grain, All
+Grain (own Grain Mill)** (5 choices: a dropdown "if desired", Rule 2.6, as he drew it). **Extract Can Kit** (OakBarn Brewery, 2026-11-25: "Extract Kits mean that it is a Malt Extract Kit. The Malt Extract can be liquid or
+Dry in the kit. I just order a Kit but you also need to buy a KG of Dextrose (Corn Sugar)"): a Malt Extract Kit, its extract liquid or dry;
+it MAY need added sugar such as 1 kg of Dextrose (corn sugar), and sometimes everything is in the can ("May require it.  Sometime it is just in the can"),
+so added sugar is optional; there is no separate plain Extract choice. It starts on the **Brewer Type** ("Choice default
+is set by brewer Type from Skynet Settings"), a new ☰ Menu > Default settings dropdown of the four kinds of brewer (All Grain unless
+changed, Rule 2.42). **Open ▶** ("Opens the Recipe Tab"): a Saved Recipe is opened from the library and the Process goes on; any other
+choice makes a NEW Recipe at its Level (Can Kit 1, Partial Grain and Hops 3, All Grain 4, All Grain own Grain Mill 4; Rule 17.11) and
+opens the Recipe tab, and a bar at the top says the Process waits. The Process goes on when a Recipe is **opened, IMPORTed or saved**
+(a NEW Recipe alone is still to be filled in). Skynet_PreBrew and the 3 Vessel 1 Pump sample's BrewDay_Flow start with it. The PreBrew
+question "Is the grain milled?" for All Grain (own Grain Mill) waits for the PreBrew build (Process Sandbox entry 14). Help 100, 22, 5,
+155. **Both programs:** the BruControl Import has no Recipe step to change; a Brew Day Process built from the Brew Process gets
+`ask_recipe` from Skynet_PreBrew.
+
 ## 17. Recipes
 
 17.1 **The Recipe tab follows Fritz's layout** (☰ Menu > Recipe, 2026-10-31): IMPORT and NEW at the top, Cancel and Save,
@@ -5882,7 +5904,9 @@ Changing the Level only hides or shows; nothing is deleted, and a hidden box kee
 Calculate does not check its Actual AAU. The Level is saved with the Recipe as `level`, and the Recipe's BeerXML type says the same
 thing (Levels 1 and 2 Extract, 3 Partial Mash, 4 All Grain); an imported BeerSmith or BeerXML file comes in at Level 2, 3 or 4 from its
 type, and the user can change it. Skynet_Field `skn_rcp_Level` (1 to 4) lets a Process do the steps for its Level. A NEW Recipe starts at
-the Level picked. (Help 99)
+the Level picked. **A Level 1 Can Kit starts with No Boil** (OakBarn Brewery, 2026-11-25: "The Boil time can be different for
+each kit and I did not even realize the one I got was a No Boil one"): a NEW Can Kit Recipe has Boil Minutes 0 (0 = No Boil) and no
+Boil Profile; the brewer types the kit's own boil time. (Help 99)
 
 17.12 **Tap Water** (OakBarn Brewery, 2026-11-11: "Waters should be on each level defaulted to Tap Water. And maybe a Page in the
 Defaults for the common Water things important for brewing available from the Water Supplier or a Test Kit"; "Also in help: Suggestion
@@ -5957,8 +5981,11 @@ HAVE INFO AS AN IMPORT"):
 - Design Rule #1 (Never Take Away): removing the Default settings boxes is allowed because it is before the first Public Production.
 
 17.15 **Saving an imported Recipe** (OakBarn Brewery, 2026-11-13: "saved when user says yes, and then the overwrite question comes up In
-this case Overwrite or add new"): after an import, **Save this Recipe?** (Yes / No). A saved Recipe with the same name asks
-**Overwrite** (the old one is kept in `config/backups/recipes`) or **Add new** (saved as "Name #2", the next free number).
+this case Overwrite or add new"): after an import, **Save this Recipe?** (Yes / No). ~~A saved Recipe with the same name asks
+**Overwrite** (the old one is kept in `config/backups/recipes`) or **Add new** (saved as "Name #2", the next free number).~~
+**Changed 2026-11-26** (OakBarn Brewery picked A, "Yes, dated like the Library"): Yes saves it **dated**, like the Library's Save this
+Recipe (Rule 17.21): "Name yyyy:mm:dd", "(2)" on a second save that day, every hop's Actual AAU at 0. A dated name never clashes, so
+there is no Overwrite / Add new question after an import (the overwrite and "#2" saves stay in the Panel's save, unused here).
 
 17.16 **Amounts follow Units** (OakBarn Brewery, 2026-11-13: "Come From US or Metric so not needed"): the "How amounts show" dropdowns
 are gone; every amount shows in US or Metric as Units says. Each **Misc** line picks its own unit, Tablet and Pack added ("Each its own
@@ -6039,6 +6066,16 @@ Brewers as the other lower levels have none"; "If the go in before 1st Run, that
   Process goes on. The Skynet Process Templates (Heat Strike, Mash, Chill, Whirlpool and Chill, Transfer to Fermentor) and the 3 Vessel
   sample's brew day send them. The Recipe's **Drops** tab lists them under **Alerts the Process sends**.
 **Both programs:** the BruControl Import has no recipe lines and no `hop_alert`; nothing changes there. (Help 99, 100, 22)
+
+17.21 **Save this Recipe: dated, Actual AAU at 0** (OakBarn Brewery, 2026-11-25, "No Recipe Found": "Also need a Save this recipe which
+saves the recipe as it has been fixed but the AAU Actual are not sent because they need to be zero if used again. Save can include an
+Automatic date State in format yyyy:mm:dd; if saved again on same date (n). Put at end of name. Way to delete in the saved files").
+**Library ... > 💾 Save this Recipe to the library** saves a **new** copy of the Recipe as it is now, named with the date at the end in
+his form, `Pale Ale 2026:11:25`, and `Pale Ale 2026:11:25 (2)`, `(3)` ... when that name is already saved that day. A date and number
+already on the name are taken off first, so a saved Recipe opened and saved again gets the new date. Every hop's **Actual AAU is 0**
+in the saved copy; the open Recipe keeps its name and its Actual AAUs. A Recipe with no name is not saved ("Give the Recipe a name
+first"). **Library ... > 🗑 Delete a saved Recipe** takes one out (as before). The import's "Save this Recipe?" (Rule 17.15) is
+unchanged. Help 99. **Both programs:** the BruControl Import makes no Recipes.
 
 ## 18. General Dialog Rules
 
@@ -7356,6 +7393,10 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-26: Rule 17.15 changed (OakBarn Brewery picked A, "Yes, dated like the Library"): Save this Recipe after an import saves dated ("Name yyyy:mm:dd (n)", Actual AAU 0, Rule 17.21); no Overwrite / Add new question. Help 99.
+- 2026-11-25: Rule 17.11 note (OakBarn Brewery: "The Boil time can be different for each kit and I did not even realize the one I got was a No Boil one"): a NEW Level 1 Can Kit Recipe starts with Boil Minutes 0 (No Boil) and no Boil Profile; Boil Minutes tip. Help 99.
+- 2026-11-25: Rule 16.14 built (OakBarn Brewery, PDF "No Recipe Found", "Put in 620"): `ask_recipe` and the No Recipe Found pop-up, Brewer Type on Default settings; Rule 17.21 new: Save this Recipe dated yyyy:mm:dd (n), Actual AAU 0.
+- 2026-11-25: Rule 16.14 new and Rule 16.1 changed (OakBarn Brewery: "On a Brew Day, there is ALWAYS a Recipe ..."; "General Rule"): a Brew Day always has a Recipe; skipping steps never skips it. Leading the brewer to make one when none is loaded is not built yet (Process Sandbox entry 14).
 - 2026-11-25: Rules 18.43, 18.52, 5.10 and 5.5 changed (OakBarn Brewery, PDF "Panel Update 14"; picked "Change the Rules" and "flows and Flips stay linked"; "And have V and H and Shift + H work on devices in the Build Tab in Edit mode inside the Zoom Box"): every valve's Orientation is Horizontal or Vertical with Flip Horizontal and Flip Vertical beside it (Motorized Skynet and User Defined, Manual Valve, Hose Bib); pictures start Left to Right (Horizontal) and Bottom to Top (Vertical); Tap Water Flows (Right to Left, Left to Right / Bottom to Top, Top to Bottom) is tied to the Flips, the last one changed wins (replaces the 2026-11-25 "changing the Orientation keeps the way the water goes"); Vertical Right, Horizontal Flipped, Left / Right and Inlet saved before show as the matching Flips with the same look; a flipped Skynet side-view valve keeps its hugging box; in the Zoom box H, V and Shift + H work on a picked valve. Help 31, 87, 128, 141, 153 (and French). BruControl Import program: its Build page shares these dialogs and keys; its import makes no Orientation or Flips, so nothing else changes there. Checked on the 3 Vessel 1 Pump sample: its valves have no Orientation and no Left / Right saved, so they look the same.
 - 2026-11-25: Rule 18.45 #2 changed (OakBarn Brewery: "When this pops up after an edit of the label, update the suggested Name and get rid of the button. Blue pop-up that you can change the Name of the Device to the new Suggested Name"): 🏷 Update to Suggested Name is gone; a Label change fills the Change Name box with the new Suggested Name and a blue pop-up offers ✏ Change Name. Help 87, 141, 148, 208 (and French).
 

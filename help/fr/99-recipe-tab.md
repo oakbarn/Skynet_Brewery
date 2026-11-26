@@ -6,7 +6,7 @@ En haut :
 
 - **IMPORT** fait venir un fichier de recette (plus bas).
 - **NEW** vide la recette et en commence une à partir des valeurs par défaut (☰ Menu > Default).
-- **Library ...** ouvre une recette enregistrée, enregistre celle-ci (💾), ou supprime une recette enregistrée. Les recettes enregistrées sont sur le Brain dans `config/recipes`.
+- **Library ...** ouvre une recette enregistrée, enregistre celle-ci (💾 **Save this Recipe to the library**), ou supprime une recette enregistrée (🗑). Les recettes enregistrées sont sur le Brain dans `config/recipes`. **Save this Recipe** l'enregistre telle qu'elle a été corrigée, avec la date à la fin de son nom (`Pale Ale 2026:11:25` ; enregistrée de nouveau à la même date : `Pale Ale 2026:11:25 (2)`). L'Actual AAU de chaque houblon est enregistré à 0, car il doit être à zéro si la recette sert de nouveau. La recette ouverte garde son nom et ses Actual AAU. Après un **IMPORT**, Skynet demande **Save this Recipe?** : Yes l'enregistre de la même façon, datée.
 - **Cancel** et **Save**.
 
 ## Brew on : le Tab du brassin {#brew-on-the-tab-for-the-brew}
@@ -42,6 +42,7 @@ Chaque case a un haut coloré qui dit de quelle sorte elle est :
 
 - **Noir** : les noms (Beer Name, Style, Brew Length).
 - **Gris** : les temps et les choix (Sparge Type, Sparge Minutes, Boil Minutes, Whirlpool Minutes, Grain Ratio).
+  **Boil Minutes** 0 veut dire pas d'ébullition (No Boil). Chaque kit a son propre temps d'ébullition (certains sont No Boil), alors lisez le kit ; une nouvelle Recipe Can Kit commence à 0.
 - **Bleu** : les volumes (Strike Volume, Sparge Volume, PreBoil Volume).
 - **Rouge** : les températures (Strike, Grain et Sparge Temperature, Pitch At).
 - **Gris clair** : calculé par Skynet, pas tapé : **Grain Wt.**, **1st Mash** et **IBU** viennent des onglets Grain, MASH et HOPs.

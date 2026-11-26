@@ -79,6 +79,17 @@ Templates read the Recipe through names that start with **`skn_rcp_`**. They are
 
 While no Recipe is loaded, the values come from the **☰ Menu > Default** tab: its Mash Profile and Boil Profile. The strike temperature is worked out from the first mash step (water to grain ratio 1.5 qt/lb or 3.1 L/kg, grain at 68 °F or 20 °C). PreBrew always asks for a Recipe first.
 
+## No Recipe Found
+
+On a Brew Day, there is ALWAYS a Recipe, from the simplest to the most complex. Even a Can Extract Kit has some details that need to be set. (Skynet Rule 16.14)
+
+So PreBrew starts with `ask_recipe`. With a Recipe loaded it goes straight on. With none, the **No Recipe Found** pop-up shows on every screen. Pick one in its dropdown, then **Open ▶**:
+
+- **Saved Recipe**: pick it from the Recipe library. It opens at once, and the Brew Day goes on.
+- **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** or **All Grain (own Grain Mill)**: a NEW Recipe at that Level opens on the Recipe tab. Fill it in (or IMPORT a recipe file there) and press **Save**. A bar at the top says the Brew Day is waiting; once the Recipe is saved, it goes on.
+
+The dropdown starts on your **Brewer Type** (☰ Menu > Default settings). You can make the Recipe well before Brew Day on ☰ Menu > Recipe, and save it to the Recipe library to use again.
+
 The Brew Process screen shows every value as it is now.
 
 ## New Process commands
@@ -90,6 +101,7 @@ The Brew Process screen shows every value as it is now.
 | `close_all_valves` | closes every valve on the **Close all valves** list (tap water valves always), then asks **Have you closed all Manual Valves?** and waits for **✔ Done** |
 | `open_all_valves` | opens every valve on the **Open all valves** list (never a tap water valve; how things are left after cleaning), then asks **Have you opened all Manual Valves?** and waits for **✔ Done** |
 | `all_pumps_off` | turns every pump off |
+| `ask_recipe` | with no Recipe loaded, the **No Recipe Found** pop-up (above); the Process waits until a Recipe is opened, IMPORTed or saved. With one loaded, it goes straight on. Skynet Rule 16.14. |
 | `wait_boil -1` | waits until the Boil Probe is 1 degree (in your Units) under today's boil temperature. See [Boil temperature](238-boil-temperature). Skynet Rule 1.18. |
 | `start skn_Boil_Timer` | starts the Skynet Boil Timer from the Recipe's boil time; the hop alerts follow it. See [The Skynet Brew Timers](246-skynet-brew-timers). Skynet Rule 2.68. |
 | `all_heaters_off` | turns every heater off: each Heating Element (on any method, so its PID or Hysteresis can't turn it back on), any older PID, Hysteresis, Duty Cycle or Deadband control, and each gas burner (its Solenoid Gas Valve closed, its igniter off). The same heaters as Emergency Off. Skynet Rule 6.15. |
