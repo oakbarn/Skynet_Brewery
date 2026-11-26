@@ -434,7 +434,7 @@ function connect() {
     if (!editing && view === 'workspace' && Object.entries(ch).some(([n, p]) => 'layer' in p || ('active' in p && S.config.elements.some(e => e.type === 'soundPlayer' && e.name === n)))) renderWs();      // a Process changed a Layer Order (Rule 1.29), or an Audio Widget started or stopped (on top while it plays)
     schedulePipes(); updateMeters(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
-  es.addEventListener('errorlog', e => { S.errorOpen = JSON.parse(e.data).open ?? 0; if ($('#errLogDlg')?.open) renderErrorLog(); if (view === 'scripts') loadErrLines(); });
+  es.addEventListener('errorlog', e => { S.errorOpen = JSON.parse(e.data).open ?? 0; if ($('#errLogDlg')?.open) renderErrorLog(); });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); fillOutPick(); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('media', () => recheckMissingPics());      // pictures added from the panel (File Move): File Not Found looks again
   es.addEventListener('started', e => outResetOnStart(JSON.parse(e.data).script));
@@ -443,6 +443,7 @@ function connect() {
   es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
   es.addEventListener('brainNotices', e => renderBrainNotices(JSON.parse(e.data)));
   es.addEventListener('errorStops', e => { S.errorStops = JSON.parse(e.data); renderBrainNotices(); });      // Resume after an error (Rule 10.14)
+  es.addEventListener('errorlog', () => { if (view === 'scripts') loadErrLines(); });      // the error lines in the Process Editor (Rule 10.14)
   es.addEventListener('flameOut', e => renderFlameOut(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
