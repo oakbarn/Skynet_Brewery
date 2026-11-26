@@ -12,6 +12,10 @@ dans un Té ; un côté passe par la **Manifold Valve** vers le **Brewery manifo
 d'eau du robinet qui va à son manifold, alimentée par le robinet **Tap water** (ce sont des Clones : les mêmes vannes, donc en ouvrir
 une sur un onglet l'ouvre sur les deux).
 
+L'onglet **Water** sert seulement à choisir. Un bouton amène chaque écran sur la **Brew House**, l'onglet qui a le manifold, et le
+remplissage se fait là, où vous pouvez le regarder : la boîte de message, le **Water delay** et le **Water timer**, les
+avertissements, le **Water Override** et, avec un bouton Float, le **Water float** sont tous sur la Brew House.
+
 C'est le premier exemple de Process, fait à partir des Processes Fire Hose et Manifold d'OakBarn Brewery. Ouvrez-le sur le simulateur
 et appuyez sur un bouton pour le voir fonctionner.
 
@@ -31,12 +35,13 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
 
 ## Ce qui se passe {#what-happens}
 
-1. **Manifold Set?** vous demande de régler d'abord à la main les vannes du manifold, puis d'appuyer sur **Done**. C'est vous qui
-   assurez la sécurité et le contrôle.
-2. **Un avertissement de 20 secondes.** Le minuteur **Water delay** compte à rebours et l'alarme sonne, avec des messages à 10 et 5
-   secondes.
+1. **Manifold Set?** La Brew House s'ouvre avec une barre en haut : réglez le manifold, puis cliquez sur **✔ Done** quand vous êtes
+   prêt. Pendant que la barre est là, l'onglet marche toujours : ouvrir et fermer des vannes, arrêter la pompe, etc. Seul Edit layout
+   attend le Done. C'est vous qui assurez la sécurité et le contrôle.
+2. **Un délai de 20 secondes**, le temps de déplacer un tuyau à la main avant que l'eau coule. Le minuteur **Water delay** compte à
+   rebours et l'alarme sonne, avec des messages à 10 et 5 secondes.
 3. **La vanne s'ouvre.** Le **Water timer** compte jusqu'à 00:00:00, puis la vanne se ferme. Avec un bouton Float il compte vers le
-   haut, jusqu'à ce que le flotteur soit fait.
+   haut, jusqu'à ce que le flotteur soit fait. Le **Water float** n'apparaît sur la Brew House que si un bouton Float a été choisi.
 4. **Arrêtez-la plus tôt** avec le bouton **Water Override** : un appui finit la marche et la vanne se ferme
    ([Override button](96-override-button)). Chaque remplissage d'eau du robinet a son propre bouton Override. Il n'apparaît
    qu'une fois l'eau ouverte, donc il n'y en a pas pendant l'avertissement de 20 secondes. **FireHose Off** l'arrête à tout moment.

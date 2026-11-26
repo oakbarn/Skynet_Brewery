@@ -5669,6 +5669,11 @@ make, or review it.
 **box for the answer** to the same pop-up, filled with what Name holds now. Name is a gGlobal or a Value Widget; ✔ Done puts the answer
 in it (a time as hh:mm:ss, a number, or words, by its kind) and the Process goes on. A blank or wrong answer is not taken: the pop-up
 says what to type. Both programs: the BruControl Import has no such command (it is only written in Skynet Processes).
+**`ask_Tab "text"`** (OakBarn Brewery, 2026-11-25, on the Water fills: "Popup a Message to set the manifold and click done when
+ready... The dialog allows you to set the manifold (open and close valves, turn things off, ... Just Not Build!") is the same ask
+with ✔ Done, but as a **bar on top** (Rule 18.53) instead of a pop-up over the Tab, so the Tab can still be run while it is up:
+valves, pumps, switches, Override and so on. **Edit layout can't be opened until Done** (its button greys out; a click says why).
+It takes the text only. `show "Tab name"` before it takes every screen to the Tab the ask is about.
 
 16.6 **Schema Templates** (Fritz, 2026-11-06/07): Schema dropdown > Add new Schema > Start from **A Skynet Schema Template**.
 Answer a few questions, and the Schema is ready to brew. The **Brew House Tab Templates** are **1 Vessel, 1 Vessel + 1 Pump,
@@ -5739,11 +5744,16 @@ to its new line number"):
 16.11 **Every Tap Water Fill gets an Override button** (OakBarn Brewery, 2026-11-20: "And as a Rule: Every Tap Water Fill gets an
 Over Ride Button. It could even be a special one that simply closes the valves used."). A Process that opens a tap water valve to
 fill (the Fire Hose, the Manifold Supply Valve, a fill of a Vessel from tap water) has an **Override button set to that Process**
-(Rule 2.26) on the Tab where it is started, so the water can be shut off at once without waiting for the pop-up. One press passes
+(Rule 2.26), so the water can be shut off at once without waiting for the pop-up. **Where it goes** (OakBarn Brewery, 2026-11-25:
+"I want it on the Manifold Tab. The Water Page is only where it is selected. Change Rule 16.11 By default it goes where it started but can
+be on a different tab (or we could just put a true Clone on the other Tab)"): by default on the Tab where the fill is started; it **may be
+on a different Tab** instead, such as the Tab with the manifold where the fill is watched, or a Clone of it may be put on the other Tab.
+The 3 Vessel 1 Pump sample's Water Tab is only for picking, so its Water Override is on the Brew House. One press passes
 the fill's wait and the Process closes the valves it opened (it ends by closing them, whatever ended the wait). **It appears only
 once the water flows** (OakBarn Brewery, 2026-11-20: "The Override appears after Flow is started not before. So there will not be an
 override in the before delay"): its **Shows** is **Only while tap water flows**, so it is on its Tab only while a tap water valve on
-that Tab is open; during a warning before the water comes on there is no Override (a button set to the Process, even unseen, keeps
+that Tab is open, or tap water moves through a pipe on that Tab, or a valve that the button's own Process opened is open (a
+Motorized valve after the Hose Bib with Tap Water off, or its Clone, OakBarn Brewery, 2026-11-25); during a warning before the water comes on there is no Override (a button set to the Process, even unseen, keeps
 the Override pop-up away too). Shows **Always** is the other choice, for any other Override button. A **Stop** button
 that stops the Process and closes the valves (FireHose Off on the Water Tab) is good to have too. The Process Samples follow it:
 the Water Tab's **Water Override** is set to `utility_FireHose_Manifold_Supply_Water`. Help 239. **Both programs:** the BruControl
@@ -7393,6 +7403,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-25: Rule 16.11 changed (OakBarn Brewery: "I want it on the Manifold Tab ... By default it goes where it started but can be on a different tab (or we could just put a true Clone on the other Tab)"; picked Change the Rule): the fill's Override goes by default on the Tab where the fill starts, and may be on a different Tab or have a Clone there. Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")
 - 2026-11-26: Rule 17.15 changed (OakBarn Brewery picked A, "Yes, dated like the Library"): Save this Recipe after an import saves dated ("Name yyyy:mm:dd (n)", Actual AAU 0, Rule 17.21); no Overwrite / Add new question. Help 99.
 - 2026-11-25: Rule 17.11 note (OakBarn Brewery: "The Boil time can be different for each kit and I did not even realize the one I got was a No Boil one"): a NEW Level 1 Can Kit Recipe starts with Boil Minutes 0 (No Boil) and no Boil Profile; Boil Minutes tip. Help 99.
 - 2026-11-25: Rule 16.14 built (OakBarn Brewery, PDF "No Recipe Found", "Put in 620"): `ask_recipe` and the No Recipe Found pop-up, Brewer Type on Default settings; Rule 17.21 new: Save this Recipe dated yyyy:mm:dd (n), Actual AAU 0.

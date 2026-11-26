@@ -192,10 +192,10 @@ function renderFlameOut(list = []) {
 // Tab, and clicking it there is the confirm. The Process goes on once it shows the way the Process asked for.
 const mvAsked = g => (S?.valves || []).some(a => a.widget && a.name === g.name);
 function renderValves(all = []) {
-  renderMvAsks(all.filter(a => a.widget));
+  renderMvAsks(all.filter(a => a.widget || a.free));
   renderReadings(all.filter(a => a.reading));
   renderRecipeAsks(all.filter(a => a.recipe));
-  const list = all.filter(a => !a.widget && !a.reading && !a.recipe);
+  const list = all.filter(a => !a.widget && !a.reading && !a.recipe && !a.free);
   for (const n of $$('#ws .gfx.ip[data-fit="manualValve"]')) { const g = L().graphics.find(x => x.id === n.dataset.gid); n.classList.toggle('mvAsk', !!g && mvAsked(g)); }
   let d = $('#valveDlg');
   if (!list.length) { if (d?.open) d.close(); return; }
@@ -291,6 +291,8 @@ function drawReadings() {
   }));
   if (!d.open) d.showModal();
 }
+// an ask_Tab is up (Rule 16.5): Edit layout waits for its Done
+const askTabUp = () => (S?.valves || []).some(a => a.free);
 // ask_recipe in a Process (OakBarn Brewery, 2026-11-25, "No Recipe Found", Rule 16.14: "On a Brew Day, there is ALWAYS a Recipe"):
 // one dropdown, his list word for word: Saved Recipe, Extract Can Kit, Extract Partial Grain and Hops, All Grain, All Grain (own Grain
 // Mill). It starts on the Brewer Type of ☰ Menu > Default settings ("Choice default is set by brewer Type from Skynet Settings").
@@ -340,10 +342,21 @@ function renderRecipeAsks(list) {
 }
 function renderMvAsks(list) {
   let bar = $('#mvAskBar');
+  $('#barEdit')?.classList.toggle('askWait', list.some(a => a.free) && !editing);
   if (!list.length) { bar?.remove(); return; }
   if (!bar) { bar = h('div', { id: 'mvAskBar', class: 'mvAskBar', role: 'alert' }); document.body.append(bar); }
   bar.innerHTML = '';
   for (const a of list) {
+    // ask_Tab "text" (OakBarn Brewery, 2026-11-25, Rule 16.5): the ask on this bar, not a pop-up over the Tab, so the Tab can still be run
+    // (valves, pumps, Override ...) while it is up. Done lets the Process go on. Edit layout can't be opened until then ("Just Not Build!").
+    if (a.free) {
+      bar.append(h('div', { class: 'mvAskRow askTabRow' },
+        (n => (setRich(n, a.label), n))(h('div', { class: 'valveDo', style: 'white-space: pre-line' })),
+        h('div', { class: 'bar' }, h('span', { class: 'muted' }, `The Process ${a.process} waits until you press Done. You can run the Tab; Edit layout waits.`), h('span', { class: 'spacer' }),
+          can('operator') ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, '✔ Done')
+            : h('span', { class: 'muted' }, 'An operator or admin must press Done.'))));
+      continue;
+    }
     const g = S.config.graphics.find(x => isMv(x) && x.name === a.name), tab = g?.workspace;
     bar.append(h('div', { class: 'mvAskRow' },
       h('span', { class: 'valveDo' }, `✋ ${a.open ? 'OPEN' : 'CLOSE'} ${a.label} by hand`),
@@ -470,7 +483,7 @@ function connect() {
     schedulePipes(); updateMeters(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('errorlog', e => { S.errorOpen = JSON.parse(e.data).open ?? 0; if ($('#errLogDlg')?.open) renderErrorLog(); });
-  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); fillOutPick(); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
+  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); fillOutPick(); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (!editing) refreshWaterOverrides(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('media', () => recheckMissingPics());      // pictures added from the panel (File Move): File Not Found looks again
   es.addEventListener('started', e => outResetOnStart(JSON.parse(e.data).script));
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
@@ -1895,7 +1908,15 @@ function fillText(n, g) {
 const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#ffffff', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
 // Shows: Only while tap water flows (Rule 16.11, OakBarn Brewery, 2026-11-20: "The Override appears after Flow is started not before"):
 // the button is on its Tab only while a tap water valve on that Tab is open, so a warning before the water comes on has no Override
-const ovrWaitsForWater = g => g?.showWhen === 'water' && !L().elements.some(e => e.tapwater && e.workspace === g.workspace && isOn(e.name));
+// A valve whose Tap Water is off but that tap water runs through (a Motorized valve after the Hose Bib, or its Clone on the manifold Tab,
+// OakBarn Brewery, 2026-11-25) counts too: tap water moving in a pipe on that Tab shows the button.
+const tapMovesOn = ws => { try { const src = new Map(); return [...computeFlow(ws, src).keys()].some(id => src.get(id)?.tap); } catch { return false; } };
+// A valve its own Process opened that is open now counts as well (the Brain lists them), so the Water Override comes up as the valve opens
+// even where no tap water is drawn reaching it (a Hose Bib left closed in the drawing).
+const procOpened = p => (S?.scripts || []).some(x => x.state === 'running' && (!p || x.name === p) && (x.opened || []).some(n => isOn(n)));
+const ovrWaitsForWater = g => g?.showWhen === 'water' && !L().elements.some(e => e.tapwater && e.workspace === g.workspace && isOn(e.name)) && !procOpened(String(g.process ?? '').trim()) && !tapMovesOn(g.workspace);
+// the Override buttons that wait for water, on this Tab, looked at again (a valve changed, or a Process opened or ended)
+function refreshWaterOverrides() { if (!S?.config) return; for (const g of L()?.graphics || []) if (g.kind === 'override' && g.showWhen === 'water' && g.workspace === wsName) { const on = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"]`); if (on) on.classList.toggle('vhidden', ovrWaitsForWater(g)); } }
 function fillOverride(n, g) {
   n.classList.add('ovr'); place(n, g);
   n.classList.toggle('vhidden', ovrWaitsForWater(g));
@@ -3900,7 +3921,7 @@ function updateEl(name) {
   if (t && (gTab(t) === wsName) !== !!tn) renderWs();          // a Process moved it to or from this Tab (.tab)
   else if (t && tn) fillText(tn, t);
   for (const cn of $$(`#ws .el[data-clone="${CSS.escape(name)}"]`)) { const ce = elNamed(cn.dataset.name); if (ce) fillEl(cn, ce); }     // its clones
-  if (e?.tapwater) for (const g of L().graphics) if (g.kind === 'override' && g.showWhen === 'water') { const on = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"]`); if (on) on.classList.toggle('vhidden', ovrWaitsForWater(g)); }
+  if (e && (e.tapwater || e.type === 'digitalOut')) refreshWaterOverrides();
   for (const p of L().elements) if ((p.type === 'picture' || isProcessWidget(p)) && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
   // what holds a probe's temperature changed (its Setpoint, ON / OFF): the probe's SV box shows it (Panel Updates 41)
   const ip = e?.input && elNamed(e.input);
@@ -5489,6 +5510,7 @@ function setEditing(on) {
   // lose the work if not saved"). Leaving goes through leaveLayout, which asks to Save first.
   if (on && editing && draft) { renderTabs(); renderWs(); return; }
   if (on && eqv) eqViewClose(true);          // Edit layout leaves the Equipment Profile view
+  if (on && !editing && askTabUp()) { toast('✋ Edit layout waits until the Process asking on the bar at the top gets its ✔ Done', true); return; }
   if (on && touchRun()) { toast('📱 Edit layout is not on phones and tablets: editing and building are done on a computer (Rule 2.35)', true); return; }
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
@@ -11057,7 +11079,7 @@ const OVR_TIPS = {
   label: 'What the button says on this Tab, for example Skip Fire Hose. One press and its Process moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.',
   process: 'Which Process this button moves on. Any (the usual): every running Process except Loopers. A Process picked: only that one, so a Fire Hose or Manifold Process running beside the Brew is overridden on its own. A Process that waits with no button set to it (or to Any) gets an Override pop-up naming it. If the Process gets a new name, the button follows it.',
   name: 'Made by Skynet from the Label and the Tab (Rule 3.14).',
-  showWhen: 'Always: the button is always on its Tab. Only while tap water flows: it shows only while a tap water valve on its Tab is open, so a Tap Water Fill has its Override once the water is on and none during a warning before (Rule 16.11).',
+  showWhen: 'Always: the button is always on its Tab. Only while tap water flows: it shows only while tap water flows: a tap water valve on its Tab is open, tap water runs through a pipe there, or a valve its Process opened is open, so a Tap Water Fill has its Override once the water is on and none during a warning before (Rule 16.11).',
   color: 'The color of its words. The ⬢ beside it sets the font, size, Back color and alignment.',
 };
 // 4. Process: Any (empty) or one Process, picked from the list as on the Process Widget

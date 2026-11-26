@@ -27,7 +27,12 @@ for (const f of [path.join(SAMPLES, 'three-vessel-one-pump', 'config.json'), pat
   assert.deepEqual(btns.slice(0, 5).map(b => b.label), ['FireHose 1 Minute', 'FireHose 2 Minutes', 'FireHose 20 Seconds', 'Firehose Set Time', 'Use FireHose Float'], 'his Fire Hose Labels');
   assert.deepEqual(btns.slice(6).map(b => b.label), ['Manifold 1 Minute', 'Manifold 2 Minutes', 'Manifold 3 Minutes', 'Set Time', 'Use Manifold Float'], 'his Manifold Labels');
   const BH = c.elements.filter(e => e.workspace === 'Brew House').length;
-  assert.ok(BH > 10 && !c.elements.some(e => e.workspace === 'Brew House' && /_WA$/.test(e.name)), 'the Brew House Tab is not changed');
+  assert.ok(BH > 10 && !c.elements.some(e => e.workspace === 'Brew House' && /_WA$/.test(e.name)), 'nothing on the Brew House carries the Water Tab ID');
+  // the Water Tab is for picking only (OakBarn Brewery, 2026-11-25): the fill is watched on the Brew House, the Tab with the manifold
+  for (const n of ['gblS_Water_Text_1_Water', 'wgt_TMR_Water~timer_BH', 'wgt_TMR_Water~delay_BH', 'wgt_ALM_Fire~Hose~warning_BH', 'wgt_ALM_Manifold~warning_BH', 'BM_32_DI@Float_Force~floats_BH', 'gblT_Elapsed_Water'])
+    assert.equal(c.elements.find(e => e.name === n)?.workspace, 'Brew House', `${f}: ${n} is on the Brew House`);
+  assert.equal(c.graphics.find(g => g.kind === 'override' && g.process === 'utility_FireHose_Manifold_Supply_Water')?.workspace, 'Brew House', 'the Water Override is on the Brew House');
+  assert.equal(c.elements.find(e => e.name === 'BM_32_DI@Float_Force~floats_BH').visibility, 'hidden', 'the Float shows only when a Float button is used');
 }
 for (const dir of [path.join(ROOT, 'processes'), path.join(SAMPLES, 'three-vessel-one-pump', 'processes')])
   for (const p of WATER) {
@@ -47,9 +52,10 @@ const tick = setInterval(() => store.tickTimers(0.5), 50);           // ten time
 const until = async (f, ms = 15000) => { for (let i = 0; i < ms / 25 && !f(); i++) await new Promise(r => setTimeout(r, 25)); return f(); };
 const st = n => eng.list().find(x => x.name === n)?.state;
 // the 3 Vessel sample's Suggested Names (OakBarn Brewery, 2026-11-25)
-const FH = 'BM_31_DO@Valve_E_Firehose~Valve_WA', MSV = 'BM_33_DO@Valve_E_Manifold~Valve_WA', FLOAT = 'BM_32_DI@Float_Force~floats_WA', U = 'utility_FireHose_Manifold_Supply_Water';
+const FH = 'BM_31_DO@Valve_E_Firehose~Valve_WA', MSV = 'BM_33_DO@Valve_E_Manifold~Valve_WA', FLOAT = 'BM_32_DI@Float_Force~floats_BH', U = 'utility_FireHose_Manifold_Supply_Water';
 const on = n => !!store.getProp(n, 'state');
 const asked = () => eng.valveList().find(a => a.ask && a.process === U);
+const shown = []; eng.on('show', t => shown.push(t));
 const done = () => eng.confirmValve(asked().name);
 const pops = () => eng.overrideList().filter(a => a.process === U);
 const text = () => store.getProp('gblS_Water_Text_1_Water', 'value');
@@ -59,35 +65,40 @@ const secs = n => String(store.getProp(n, 'value') ?? '').split(':').reduce((a, 
 // FireHose 20 Seconds: the button sets 1003 and starts the Fire Hose Process; Manifold Set? then the 20 second warning then 20 s open
 eng.start('FireHose_20_Seconds', 'user');
 assert.ok(await until(() => !!asked()), 'Manifold Set? is asked');
-assert.equal(asked().label, 'Manifold Set?');
+assert.equal(asked().label, 'Manifold Set? Set the manifold, then click Done when ready.');
+assert.ok(asked().free, 'ask_Tab: a bar on top, the Tab can still be run (Rule 16.5)');
+assert.deepEqual(shown, ['Brew House'], 'every screen goes to the Brew House, the Tab with the manifold');
+assert.equal(store.getProp(FLOAT, 'visibility'), 'hidden', 'no Float for a timed fill');
 assert.equal(store.getProp('gblV_Valve_Status', 'value'), -1);
 done();
-assert.ok(await until(() => store.getProp('wgt_ALM_Fire~Hose~warning_WA', 'active')), 'the warning sound');
+assert.ok(await until(() => store.getProp('wgt_ALM_Fire~Hose~warning_BH', 'active')), 'the warning sound');
 assert.match(text(), /FireHose ON in 20 Seconds! Fire Hose ON for  Twenty Seconds/);
 assert.ok(!on(FH), 'not open during the warning');
 assert.ok(await until(() => on(FH)), 'the Fire Hose opens');
-assert.ok(!store.getProp('wgt_ALM_Fire~Hose~warning_WA', 'active'), 'the warning sound stops');
+assert.ok(!store.getProp('wgt_ALM_Fire~Hose~warning_BH', 'active'), 'the warning sound stops');
 assert.ok(await until(() => !on(FH) && quiet()), 'it closes when the timer reaches 00:00:00');
 assert.equal(store.getProp('gblV_Water_Switch_Status_Water', 'value'), -9999);
 // the hidden count-up timer kept the true run time (about 20 s) in gblT_Elapsed_Water
-assert.equal(store.getProp('wgt_TMR_Water~elapsed_WA', 'visibility'), 'hidden');
+assert.equal(store.getProp('wgt_TMR_Water~elapsed_BH', 'visibility'), 'hidden');
 assert.ok(secs('gblT_Elapsed_Water') >= 19 && secs('gblT_Elapsed_Water') <= 22, 'true run time ' + store.getProp('gblT_Elapsed_Water', 'value'));
 
-// Manifold 3 Minutes: the Water Tab's own Override button (Rule 16.11: every Tap Water Fill gets one) shuts the valve off early;
+// Manifold 3 Minutes: the Water Override button on the Brew House (Rule 16.11: every Tap Water Fill gets one) shuts the valve off early;
 // with a button set to it, no Override pop-up comes by itself (Rule 2.26)
-const ovrBtn = store.config.graphics.find(g => g.kind === 'override' && g.workspace === 'Water');
+const ovrBtn = store.config.graphics.find(g => g.kind === 'override' && g.workspace === 'Brew House');
 assert.equal(ovrBtn?.process, U, 'the Water Override button is set to the Fire Hose and Manifold Process');
 assert.equal(ovrBtn.label, 'Water Override');
 assert.equal(ovrBtn.showWhen, 'water', 'it shows only once the water flows: no Override during the 20 second warning (Rule 16.11)');
 eng.start('Manifold_3_Minutes', 'user');
 assert.ok(await until(() => !!asked())); done();
 assert.ok(await until(() => on(MSV)), 'the Manifold Supply Valve opens');
+// the Brain lists the valves a Process opened: the Water Override (Only while tap water flows) comes up once one is open (Rule 16.11)
+assert.ok(eng.list().find(x => x.name === U).opened?.includes(MSV), 'the Process lists the valve it opened');
 await new Promise(r => setTimeout(r, 4000));
 assert.ok(!pops().some(p => p.how === 'auto'), 'no pop-up by itself: the button is there');
 eng.override('Fritz', ovrBtn.process);
 assert.ok(await until(() => !on(MSV) && quiet()), 'Override shuts it off');
 assert.ok(secs('gblT_Elapsed_Water') > 0 && secs('gblT_Elapsed_Water') < 180, 'true run time to the Override ' + store.getProp('gblT_Elapsed_Water', 'value'));
-assert.ok(!store.getProp('wgt_TMR_Water~elapsed_WA', 'running'));
+assert.ok(!store.getProp('wgt_TMR_Water~elapsed_BH', 'running'));
 
 // Firehose Set Time: waits for a time in Set Timer
 eng.start('FireHose_Set_Time', 'user');
@@ -107,11 +118,14 @@ assert.ok(await until(() => !on(FH) && quiet()), 'closes after the time set');
 
 // Use Manifold Float: open until the float is made
 eng.start('Manifold_Float', 'user');
-assert.ok(await until(() => !!asked())); done();
+assert.ok(await until(() => !!asked()));
+assert.equal(store.getProp(FLOAT, 'visibility'), 'visible', 'a Float button: the Float shows on the Brew House');
+done();
 assert.ok(await until(() => on(MSV)));
-assert.equal(store.getProp('wgt_TMR_Water~timer_WA', 'type'), 'countup');
+assert.equal(store.getProp('wgt_TMR_Water~timer_BH', 'type'), 'countup');
 store.setProp(FLOAT, 'value', true, 'hw');
 assert.ok(await until(() => !on(MSV) && quiet()), 'the float shuts it off');
+assert.equal(store.getProp(FLOAT, 'visibility'), 'hidden', 'the Float hides again');
 store.setProp(FLOAT, 'value', false, 'hw');
 
 // FireHose Off: stops the Process at any point and closes both valves
@@ -120,7 +134,7 @@ assert.ok(await until(() => !!asked())); done();
 assert.ok(await until(() => on(FH)));
 eng.start('FireHose_Off', 'user');
 assert.ok(await until(() => !on(FH) && !on(MSV) && quiet()), 'FireHose Off');
-assert.ok(!store.getProp('wgt_TMR_Water~timer_WA', 'running'));
+assert.ok(!store.getProp('wgt_TMR_Water~timer_BH', 'running'));
 
 // The Float buttons and the Water float show OakBarn Brewery's float switch pictures (Rule 1.31 Picture, 2026-11-20)
 {

@@ -10,6 +10,10 @@ The piping is drawn as OakBarn Brewery's is: the **Tap Water Supply** comes in f
 clips on. The same two valves also show on the **Brew House** Tab, on the tap water line into its manifold, fed by the **Tap water**
 hose bib (they are Clones: the same valves, so opening one on either Tab opens it on both).
 
+The **Water** Tab is only for picking. A button takes every screen to the **Brew House**, the Tab with the manifold, and the fill runs
+there, where you can watch it: the message box, the **Water delay** and **Water timer**, the warnings, the **Water Override** and,
+with a Float button, the **Water float** are all on the Brew House.
+
 It is the first Process Sample, made from OakBarn Brewery's own Fire Hose and Manifold Processes. Open it on the simulator and press a
 button to watch it work.
 
@@ -29,10 +33,13 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
 
 ## What happens
 
-1. **Manifold Set?** asks you to set any manifold valves by hand first, then press **Done**. You are the Safety and Control.
-2. **A 20 second warning.** The **Water delay** timer counts down and the warning sounds, with messages at 10 and 5 seconds.
+1. **Manifold Set?** The Brew House opens with a bar on top: set the manifold, then click **✔ Done** when ready. While the bar is
+   up the Tab still works: open and close valves, turn the pump off and so on. Only Edit layout waits until Done. You are the Safety
+   and Control.
+2. **A 20 second delay**, time to move a hose by hand before the water flows. The **Water delay** timer counts down and the
+   warning sounds, with messages at 10 and 5 seconds.
 3. **The valve opens.** The **Water timer** counts down to 00:00:00, then the valve closes. With a Float button it counts up instead,
-   until the float is made.
+   until the float is made. The **Water float** shows on the Brew House only when a Float button was picked.
 4. **Shut it off early** with the **Water Override** button: one press ends the run and the valve closes
    ([Override button](96-override-button)). Every tap water fill gets its own Override button. It shows only once the water is
    on, so there is none during the 20 second warning. **FireHose Off** stops it at any time.
