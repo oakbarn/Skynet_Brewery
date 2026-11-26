@@ -661,7 +661,12 @@ Add new by itself. Lists that already had Add new first (the Process pick, the G
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
 a swatch, then Custom, which opens the Color Picker (Rule 2.48). (2026-10-05, PR #31) **White** in any color picker is **RGB 250 250 250 (#FAFAFA)**, the same White
 as the pump covers of Rule 7.13 (Fritz, 2026-11-05); an item saved with pure white (#FFFFFF) shows as White and is saved as
-250 250 250 the next time its Properties are saved.
+250 250 250 the next time its Properties are saved. **Changed 2026-11-26** (OakBarn Brewery, typing fixed: "All White Text on the
+screen now anywhere needs to be White (Opaque). Change the choice of White on the color Picker to White (Opaque) 250,250,250.
+Add White (Transparent) as an option on the color Picker (255,255,255 and transparent)"): the choice is named **White (Opaque)**
+(250 250 250), and **White (Transparent)** follows it: 255 255 255 and see-through, the same as None (saved as rgba(255,255,255,0)).
+All white text anywhere on the screen is White (Opaque): the normal text of the dark Looks, the Skynet Tab Styles and the starting
+colors (Override text, new Vessel labels, timers) are 250 250 250. `\c{White}` is White (Opaque). Fritz, 2026-11-26: "Yes, all screen text to White Opaque. When I do a screen shot of a Tab and overlay it in Paint, all the white text is transparent and takes extra steps so it is not." So the Panel draws no pure 255 white anywhere on the screen: outlines, IP dots, borders and highlights drawn in code are 250 250 250 too (pictures in the Image Library are not changed).
 
 2.8 **Properties dialogs** have Delete, Cancel and Save at both the top and the bottom. (2026-10-04,
 PR #15)
@@ -8236,3 +8241,4 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-26: Added Rule 1.35 (OakBarn Brewery: "the Water switch code could be deleted", "keep the brew status as a global ... as a gGlobal Value Type"): skn_Started_By (the Process that started this one); the 3 Vessel sample and the default Schema lose gblV_Water_Switch_Status_Water and gblV_Valve_Status, and gblV_Brew_Status comes off the Brew House Tab. Help 239 (and French).
 - 2026-11-26: Rule 1.24 changed (OakBarn Brewery, gGlobal rules PDF and "text is gblS_ as a string"): the gGlobal prefixes and short words are gblS_ / gblS (String, shown as Text), gblV_ / gblV, gblT_ / gblT, gblDT_ / gblDT and gblB_ / gblB (were gS_ gV_ gT_ gD_ gB_). The suggested names on the gGlobal screen and the ➕ sample gGlobals follow. The Kind names (gS_Global_String ...) are unchanged. Help 145 and the pages with gGlobal examples (and French).
 - 2026-11-26: Added Rule 1.36 (OakBarn Brewery: "tap to type"): the Text Widget Tap to type switch; on for the 3 Vessel sample's Notes. Help 91 (and French), Widget Library.
+- 2026-11-26: Rule 2.7 changed (OakBarn Brewery, his picture): White in the color picker is renamed White (Opaque) (250,250,250) and White (Transparent) (255,255,255 see-through, like None) is added; all white text on the screen is 250,250,250 (dark Look text, Skynet Tab Styles, Override, new Vessel labels, timer digits and titles). Help 90, 187 updated (English + French). Checked against both programs: one shared color list; the Importer brings no text colors. (thread "Make White text White (Opaque)")

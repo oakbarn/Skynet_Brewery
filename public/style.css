@@ -1,6 +1,6 @@
 :root {
   /* the Look (theme, Rule 2.39): Office Black here; public/themes.js sets the picked Look's colors over these */
-  --bg: #1f1f1f; --panel: #262626; --panel2: #363636; --line: #4a4a4a; --text: #f0f0f0; --muted: #ababab;
+  --bg: #1f1f1f; --panel: #262626; --panel2: #363636; --line: #4a4a4a; --text: #fafafa; --muted: #ababab;
   --accent: #3a86d4; --on-accent: #fafafa; --ok: #3fbf6a; --bad: #e0524a; --warn: #e8c33a; --flow: #4fb3ff;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --mono: ui-monospace, Menlo, Consolas, monospace;
 }
@@ -102,7 +102,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .gfx { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; }
 .gfx.txt { background: none; white-space: pre-wrap; }
 /* Edit layout: every item gets a black-and-white dashed edge that shows on any background (Fritz: hard to see what is where) */
-#ws.editing .el, #ws.editing .gfx { cursor: move; outline: 2px dashed #fff; box-shadow: 0 0 0 2px #000; display: flex; }
+#ws.editing .el, #ws.editing .gfx { cursor: move; outline: 2px dashed #fafafa; box-shadow: 0 0 0 2px #000; display: flex; }
 #ws.editing .gfx:not(.ip):not(.vessel):not(.has-img) { background-color: rgba(128,128,128,.3); }
 #ws.editing .gfx { display: block; }
 #ws.editing .el.vhidden, #ws.editing .gfx.vhidden { opacity: 0.35; }
@@ -121,7 +121,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .cloneMark { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 3px; border-radius: 4px; background: rgba(255,255,255,.85); color: #333; pointer-events: none; display: none; }
 #ws.editing .cloneMark { display: block; }
 #ws.editing .el.clone { outline: 1px dashed #4fb3ff; }
-#ws.editing .locked { cursor: default; outline: 2px dotted #fff; box-shadow: 0 0 0 2px #000; }
+#ws.editing .locked { cursor: default; outline: 2px dotted #fafafa; box-shadow: 0 0 0 2px #000; }
 #ws.editing .locked.sel { outline: 2px solid var(--accent); }
 
 /* ===== scripts ===== */
@@ -169,7 +169,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
   background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.35); font: 13px/1.5 var(--mono); }
 #autofill li { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
 #autofill li.sel { background: var(--accent); color: #fafafa; }
-#autofill li.sel .muted { color: #eee; }
+#autofill li.sel .muted { color: #fafafa; }
 /* predictive text: the rest of the best pick, in gray after the cursor (public/autofill.js) */
 .afGhost { position: absolute; z-index: 5; pointer-events: none; white-space: pre; color: var(--muted); opacity: .75; }
 .scriptList li.clsHead { cursor: pointer; font-weight: 600; background: var(--panel2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
@@ -201,7 +201,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 /* the short notice (OakBarn Brewery, 2026-11-16: "Change its background and Middle of Screen for these types of Info or Warnings and
    Larger. It was small and I did not even see it"): every short info, warning and "✔ Saved" (Rule 2.54) shows here, big, in the
    middle of the screen, on a strong background, then goes on its own. Nothing to click: it never blocks the screen under it. */
-#toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: #1f4e9c; color: #fafafa; border: 2px solid #fff; padding: 16px 30px; border-radius: 12px; font-size: 1.3em; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 9999; max-width: 80vw; box-shadow: 0 6px 28px rgba(0,0,0,.55); }
+#toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: #1f4e9c; color: #fafafa; border: 2px solid #fafafa; padding: 16px 30px; border-radius: 12px; font-size: 1.3em; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 9999; max-width: 80vw; box-shadow: 0 6px 28px rgba(0,0,0,.55); }
 #toast.show { opacity: 1; }
 /* Rule 18.53: every pop-up is on top of every dialog (public/ontop.js makes each a popover). Take away the browser's own popover look
    (centered, border, white box) so each keeps its own; zero weight, so each pop-up's own rules win. The holder in a dialog takes no room. */
@@ -213,7 +213,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 /* a kept Build came back (Rule 4.1): one click to Discard it, then ↩ Undo for a few seconds */
 #buildBack, #undoNote { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--accent, var(--line)); border-radius: 8px; padding: 8px 12px; max-width: 92vw; flex-wrap: wrap; }
 #buildBack .bbX, #undoNote .bbX { padding: 2px 8px; }
-#undoNote.blue { background: #1f4e9c; color: #fafafa; border: 2px solid #fff; font-weight: bold; box-shadow: 0 6px 28px rgba(0,0,0,.55); }      /* a blue pop-up with a button, e.g. ✏ Change Name after a Label change (Rule 18.45 #2) */
+#undoNote.blue { background: #1f4e9c; color: #fafafa; border: 2px solid #fafafa; font-weight: bold; box-shadow: 0 6px 28px rgba(0,0,0,.55); }      /* a blue pop-up with a button, e.g. ✏ Change Name after a Label change (Rule 18.45 #2) */
 /* Sound is off (OakBarn Brewery, 2026-11-13): a reminder on the Tab until sound is turned on */
 #toast.bad { background: #b3261e; color: #fafafa; }
 #wsSizer { position: relative; margin: 0 auto; }
@@ -307,8 +307,8 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws:not(.editing) .gfx.ip:not(.fit):not(.has-img) { border-color: transparent; background: none; box-shadow: none; pointer-events: none; }
 #ws:not(.editing) .gfx.ip:not(.fit):not(.has-img) > span { display: none; }
 #ws.editing .gfx.ip { outline: none; box-shadow: none; }
-#ws.editing .gfx.ip:not(.fit) { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000; }
-#ws.editing .gfx.ip.fit { outline: 1px dashed #fff; box-shadow: 0 0 0 1px #000; }
+#ws.editing .gfx.ip:not(.fit) { box-shadow: 0 0 0 2px #fafafa, 0 0 0 4px #000; }
+#ws.editing .gfx.ip.fit { outline: 1px dashed #fafafa; box-shadow: 0 0 0 1px #000; }
 #ws:not(.editing) .gfx.ip.fit.lonely { visibility: hidden; }
 /* Small IP dots (OakBarn Brewery, 2026-11-23: "The IPS cover up the Other IPs I want to connect to. So maybe the IPs Need to be small
    red dots on only become large when you hover on one"; Rule 5.20): in Edit layout a round IP marker is only a small red dot, and only
@@ -316,13 +316,13 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
    its colored ring with its letters and its name tag again. A Label set to show stays as it is. */
 #ws.editing .gfx.ip:not(.fit):not(.has-img):not(:hover):not(.sel) { border-color: transparent; background: none; box-shadow: none; pointer-events: none; }
 #ws.editing .gfx.ip:not(.fit):not(.has-img):not(:hover):not(.sel) > span { visibility: hidden; }
-#ws.editing .gfx.ip:not(.fit):not(.has-img)::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #e01b12; border: 2px solid #fff; box-shadow: 0 0 0 1px #000; pointer-events: auto; }
+#ws.editing .gfx.ip:not(.fit):not(.has-img)::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #e01b12; border: 2px solid #fafafa; box-shadow: 0 0 0 1px #000; pointer-events: auto; }
 /* joined IPs are green dots, open ones stay red (OakBarn Brewery, 2026-11-23: "Change the color of Connected ips to green and unconnected to red") */
 #ws.editing .gfx.ip.joined:not(.fit):not(.has-img)::before { background: #1e9e3a; }
 /* an open pipe end (a coupling on one pipe end) is a red IP dot like any open IP (OakBarn Brewery, 2026-11-24: "these should all be the red dot") */
 #ws.editing .gfx.ip.fit.lonely { outline: none; box-shadow: none; border-color: transparent; background: none; }
 #ws.editing .gfx.ip.fit.lonely > svg { display: none; }
-#ws.editing .gfx.ip.fit.lonely::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #e01b12; border: 2px solid #fff; box-shadow: 0 0 0 1px #000; pointer-events: auto; }
+#ws.editing .gfx.ip.fit.lonely::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #e01b12; border: 2px solid #fafafa; box-shadow: 0 0 0 1px #000; pointer-events: auto; }
 #ws.editing .gfx.ip.fit.lonely:is(:hover, .sel)::before { width: 15px; height: 15px; margin: -9.5px 0 0 -9.5px; }
 #ws.editing .gfx.ip:not(.fit):not(.has-img):is(:hover, .sel)::before { display: none; }
 #ws.editing .gfx.ip:not(.fit):not(.has-img):hover { z-index: 40; }
@@ -334,7 +334,7 @@ div.zoomBox { pointer-events: auto; }
 #ws.drawing, #ws.drawing * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23fff' stroke-width='5'/%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23fff' stroke-width='4'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23e8a33a' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E") 24 24, crosshair !important; }
 .pipes .drawmark { pointer-events: none; fill: none; }
 .pipes .drawmark .bk { stroke: #000; stroke-width: 6; }
-.pipes .drawmark .wh { stroke: #fff; stroke-width: 2.5; }
+.pipes .drawmark .wh { stroke: #fafafa; stroke-width: 2.5; }
 .pipes .drawmark circle.bk { fill: rgba(232,163,58,.3); }
 .pipes .drawmark.on .wh { stroke: #3fbf6a; }
 .pipes .drawmark.on circle.bk { fill: rgba(63,191,106,.45); }
@@ -345,11 +345,11 @@ div.zoomBox { pointer-events: auto; }
 #ws.editing .gfx.ip.devip { cursor: crosshair; }
 /* a tap water valve's TAP side: its TAP mark always shows, not a small dot, and it is not clicked on (OakBarn Brewery, 2026-11-25: "Tap when
    Tap water is always the Tap ICON and no user Click on the screen"; Rule 6.15) */
-#ws.editing .gfx.ip.devip.tapIp { border-color: var(--ipc) !important; background: #FAFAFA !important; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000 !important; pointer-events: none !important; cursor: default; }
+#ws.editing .gfx.ip.devip.tapIp { border-color: var(--ipc) !important; background: #FAFAFA !important; box-shadow: 0 0 0 2px #fafafa, 0 0 0 4px #000 !important; pointer-events: none !important; cursor: default; }
 #ws.editing .gfx.ip.devip.tapIp > span { visibility: visible !important; }
 #ws.editing .gfx.ip.devip.tapIp::before { display: none !important; }
 .pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
-.pipes .plainDot { fill: #e01b12; stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 0.6px #000) drop-shadow(0 0 0.6px #000); }
+.pipes .plainDot { fill: #e01b12; stroke: #fafafa; stroke-width: 2; filter: drop-shadow(0 0 0.6px #000) drop-shadow(0 0 0.6px #000); }
 .pipes circle.plainDot:not(.handle) { pointer-events: none; }
 .pipes .handle.plainDot:hover { r: 7.5; }
 /* IP widget fittings: tee, elbows, cross, manual valve */
@@ -492,7 +492,7 @@ body.role-viewer .op-only { display: none !important; }
 /* the BruControl Importer's Build page: Processes greyed out (OakBarn Brewery, 2026-11-08) */
 body.importBuild #views button:disabled, body.importBuild #procTab:disabled { opacity: .4; cursor: not-allowed; }
 @media print {
-  body.loginPage { background: #fff; color: #000; }
+  body.loginPage { background: #fafafa; color: #000; }
   .codeBox { border: 1px solid #000; }
   .codeBtns, .codeBox .saved, #codeDone { display: none !important; }
 }
@@ -537,7 +537,7 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .dbGroupList { width: 100%; min-width: 280px; font-family: inherit; }
 .cpick .cswatch { width: 22px; height: 22px; flex: none; border-radius: 4px; border: 1px solid #888; }
 .cpick .cswatch.dflt { background: transparent !important; border-style: dashed; }
-.cpick .cswatch.none { background: repeating-linear-gradient(45deg, #ccc 0 4px, #fff 4px 8px) !important; }
+.cpick .cswatch.none { background: repeating-linear-gradient(45deg, #ccc 0 4px, #fafafa 4px 8px) !important; }
 .cpick input[type=color] { width: 40px; height: 28px; padding: 0; border: none; background: none; }
 .rgbBox { display: flex; align-items: center; gap: 6px; }      /* the Color (RGB) box: swatch and 250,250,250 (Rule 2.48) */
 .rgbBox .cswatch { width: 22px; height: 22px; flex: none; border-radius: 4px; border: 1px solid #888; }
@@ -674,7 +674,7 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 }
 @media print {
   header#top, .hpSide, .hpTools, .hpEditor, #toast { display: none !important; }
-  html, body, .hpMain { background: #fff; color: #000; border: 0; }
+  html, body, .hpMain { background: #fafafa; color: #000; border: 0; }
   .hpLayout { display: block; }
   .hpPage { max-width: none; }
   .hpPage a { color: #000; }
@@ -732,12 +732,12 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
 .brainNotice.update { background: #f2c94c; color: #1a1a1a; }
 /* Flame Out (Rule 6.33): a gas burner's gas was shut; red on every screen until closed */
 #flameOutBox { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1002; width: min(640px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.flameOutNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fafafa; padding: 12px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.45); font-weight: 700; font-size: 1.1em; outline: 3px solid #fff; }
+.flameOutNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fafafa; padding: 12px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.45); font-weight: 700; font-size: 1.1em; outline: 3px solid #fafafa; }
 .flameOutNotice span { flex: 1; }
 .flameOutNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
 .brainNotice span { flex: 1; }
 .brainNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
-.brainNotice button.resumeBtn { background: #fff; color: #b3261e; font-weight: 700; }
+.brainNotice button.resumeBtn { background: #fafafa; color: #b3261e; font-weight: 700; }
 /* Resume after an error (Rule 10.14): Auto next time and its one warning */
 /* a line of the open Process still on Fix before next Brew Day (Rule 10.13): red background, bold yellow (OakBarn Brewery, 2026-11-26) */
 .errLineMark { background: #c62828; }
@@ -777,7 +777,7 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 .hl-cmd { color: var(--hl-cmd); } .hl-dev { color: var(--hl-dev); } .hl-wid { color: var(--hl-wid); } .hl-vk { color: var(--hl-vk); }
 .hl-vapi { color: var(--hl-vapi); } .hl-proc { color: var(--hl-proc); } .hl-op { color: var(--hl-op); } .hl-str { color: var(--hl-str); }
 .hl-num { color: var(--hl-num); } .hl-com { color: var(--hl-com); } .hl-lab { color: var(--hl-lab); } .hl-attr { color: var(--hl-attr); }
-.hl-var { color: #000; background: #fff; border-radius: 2px; box-shadow: 0 0 0 1px #9aa2aa; }
+.hl-var { color: #000; background: #fafafa; border-radius: 2px; box-shadow: 0 0 0 1px #9aa2aa; }
 /* the text is painted on the layer behind; the box on top only shows the cursor and the highlight */
 .codeWrap.colored #code { color: transparent; caret-color: var(--text); }
 .codeWrap.colored #code::selection { color: transparent; background: rgba(79, 179, 255, 0.35); }
@@ -852,7 +852,7 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 /* the Skynet Brew Timers (Rule 2.68): top middle of every screen while one runs */
 .brewTimers { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 8px; pointer-events: none; }
 .brewTimer { pointer-events: auto; background: #111; color: #ff4d3a; border: 2px solid #c0392b; border-radius: 8px; padding: 2px 12px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,.4); }
-.brewTimerLbl { font-size: .8em; color: #eee; white-space: nowrap; }
+.brewTimerLbl { font-size: .8em; color: #fafafa; white-space: nowrap; }
 .brewTimerTime { font: 700 1.6em/1.1 ui-monospace, Consolas, monospace; letter-spacing: 1px; }
 .brewTimer.last5 .brewTimerTime { color: #ffd23a; }
 
@@ -1121,10 +1121,10 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .el.timer.look-timer .tmPanel.frame-squaretop { border-radius: 0 0 8px 8px; }
 .el.timer.look-timer .tmPanel { position: relative; overflow: hidden; align-self: stretch; }
 .el.timer.look-timer .seg7 { position: absolute; inset: 4px 8px; width: calc(100% - 16px); height: calc(100% - 8px); }      /* a box of its own, so 2 digits (SS) fit as well as 6 */
-.el.timer.look-timer .seg7 .on { fill: var(--seg, #fff); stroke: rgba(0,0,0,.35); stroke-width: .6; }
-.el.timer.look-timer .seg7 .off { fill: var(--seg, #fff); opacity: .07; }
+.el.timer.look-timer .seg7 .on { fill: var(--seg, #fafafa); stroke: rgba(0,0,0,.35); stroke-width: .6; }
+.el.timer.look-timer .seg7 .off { fill: var(--seg, #fafafa); opacity: .07; }
 .el.timer.look-timer .btns { flex: none; }
-.el.timer.look-timer .btns button { background: #3a3a3a; color: #eee; border-color: #555; }
+.el.timer.look-timer .btns button { background: #3a3a3a; color: #fafafa; border-color: #555; }
 /* the User Style pop-up (Styles, Fritz 2026-10-29) */
 .styleBody { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 10px 0; }
 .styleBody .full { grid-column: 1 / -1; }
@@ -1159,7 +1159,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rc-g .rcBoxHead { background: #d9d9d9; color: #111; }
 .rc-b .rcBoxHead { background: #3f48cc; }
 .rc-r .rcBoxHead { background: #e8141c; }
-.rc-c .rcBoxHead { background: #8c8c8c; color: #eee; }
+.rc-c .rcBoxHead { background: #8c8c8c; color: #fafafa; }
 .rc-s .rcBoxHead { background: #b87a5a; color: #111; }
 .rcBoxVal { display: flex; align-items: center; gap: 4px; padding: 6px 8px; flex: 1; }
 .rcBoxVal input, .rcBoxVal select { width: 4.5em; flex: 1; min-width: 0; font-size: 1.25em; border: none; background: transparent; color: #111; padding: 2px 0; }
@@ -1171,12 +1171,12 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rcCalcBtn { background: #ff7a1a; color: #fafafa; border: 3px solid #e8141c; border-radius: 10px; font-weight: 800; font-size: 1.2em; padding: 8px 26px; align-self: center; margin-left: auto; }
 .rcCalcMini { font-size: .7em; padding: 2px 8px; margin: 0; flex: none; }
 .rcNote { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 10px 0 14px; font-size: 1.05em; }
-.rcMini { background: #8c8c8c; color: #eee; font-family: Georgia, serif; padding: 2px 10px; border-radius: 3px; }
+.rcMini { background: #8c8c8c; color: #fafafa; font-family: Georgia, serif; padding: 2px 10px; border-radius: 3px; }
 .rcLower { display: flex; flex-wrap: wrap; gap: 16px 40px; }
 .rcDaughters { flex: 3 1 520px; display: flex; flex-direction: column; gap: 12px; }
 .rcLegend { flex: 1 1 300px; display: flex; flex-direction: column; gap: 20px; justify-content: flex-end; }
 .rcDRow { display: flex; align-items: center; gap: 22px; font-family: Georgia, serif; font-weight: 600; }
-.rcTabBtn { flex: none; min-width: 6.5em; background: #fff; color: #000; font-family: system-ui, sans-serif; font-weight: 800; border: 3px solid #111; border-bottom: none;
+.rcTabBtn { flex: none; min-width: 6.5em; background: #fafafa; color: #000; font-family: system-ui, sans-serif; font-weight: 800; border: 3px solid #111; border-bottom: none;
   border-radius: 12px 12px 0 0; padding: 6px 14px; box-shadow: 18px 3px 0 -15px #111; cursor: pointer; }
 .rcTabDemo { cursor: default; font-family: Georgia, serif; }
 /* every Daughter Tab button the same size as the widest (Panel Update 9, item 33a) */
@@ -1465,7 +1465,7 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .el.chartW .vl .chartSvg { display: block; }
 /* a Hydrometer line on a Graph: SG / °P / °Bx switch (Rule 6.25) */
 .el.chartW .gravSw { position: absolute; top: 2px; right: 4px; display: flex; gap: 2px; z-index: 2; }
-.el.chartW .gravSw button { font-size: 10px; padding: 0 4px; line-height: 16px; min-height: 0; border: 1px solid #888; border-radius: 3px; background: var(--panel, #fff); color: inherit; opacity: .8; cursor: pointer; }
+.el.chartW .gravSw button { font-size: 10px; padding: 0 4px; line-height: 16px; min-height: 0; border: 1px solid #888; border-radius: 3px; background: var(--panel, #fafafa); color: inherit; opacity: .8; cursor: pointer; }
 .el.chartW .gravSw button.on { opacity: 1; font-weight: 700; outline: 1px solid currentColor; }
 
 /* Click to pick a Brew Process job (Rule 16.3): the items that fit are lit, the rest greyed */
@@ -1473,14 +1473,14 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 #ws .jobNoFit { opacity: .35; filter: grayscale(1); }
 .jobPickBar { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 9000; background: #fffbe6; color: #222; border: 2px solid #f5a623;
   border-radius: 8px; padding: 8px 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.25); max-width: calc(100vw - 32px); flex-wrap: wrap; }
-.jobPickBar button { background: #fff; color: #222; border: 1px solid #999; }
+.jobPickBar button { background: #fafafa; color: #222; border: 1px solid #999; }
 /* the Controls of a DigiBoil or 65 L Brewzilla (Rule 5.39): its name, then its switches, screen and valves; the Brewzilla's Run spot */
 .el.manual .mvRow.mvHead { justify-content: center; }
 .el.manual .mvRun { margin-top: 3px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--muted); background: #20262d; color: #cfe8ff; cursor: pointer; font-size: 12px; }
 .el.manual .mvRun.on { background: #164d2a; color: #b6ffcc; }
 /* the Vessel Device Builder (Rule 19.5): the Vessel Builder panel beside the vessel on the Build Tab, and a part still to be picked */
 .vbPanel { position: fixed; right: 16px; top: 190px; width: 340px; max-width: calc(100vw - 32px); max-height: calc(100vh - 220px); overflow: auto; z-index: 40;
-  background: var(--panel, #222); color: var(--fg, #eee); border: 2px solid #1D56B0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+  background: var(--panel, #222); color: var(--fg, #fafafa); border: 2px solid #1D56B0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
 .vbPanel h3 { margin: 0 0 8px; font-size: 16px; }
 .vbPanel .vbRow { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 6px 8px; border-radius: 8px; }
 .vbPanel .vbTodo { border: 2px solid #e8a33a; }
@@ -1632,7 +1632,7 @@ table.picIds .piNum { font-weight: bold; text-align: right; width: 4em; }
 table.picIds img { width: 48px; height: 48px; object-fit: contain; }
 @media print {
   .noPrint { display: none !important; }
-  body.picIdsPage { background: #fff; color: #000; }
+  body.picIdsPage { background: #fafafa; color: #000; }
   table.picIds tr { break-inside: avoid; }
 }
 /* the Pre-Hop Alarm (Rule 7.21): its Skynet watermark stays in view while it sounds; the Active overlay blinks instead of the box */
@@ -1681,7 +1681,7 @@ body.menuOverBuild #editBar { display: none; }
 .pipes .spout { pointer-events: none; --spc: #3d9be9; }     /* --spc: the flow color */
 .pipes .spout .spoutBody { transform-box: fill-box; transform-origin: 0% 50%; animation: spoutPulse .5s ease-in-out infinite alternate; }
 .pipes .spout .spoutFill { fill: color-mix(in srgb, var(--spc) 72%, white); stroke: color-mix(in srgb, var(--spc) 55%, black); stroke-width: 2.4; stroke-linejoin: round; }
-.pipes .spout .spoutHi { fill: none; stroke: #ffffff; stroke-width: 2.6; stroke-linecap: round; opacity: .9; stroke-dasharray: 14 8; animation: flow .4s linear infinite; }
+.pipes .spout .spoutHi { fill: none; stroke: #fafafa; stroke-width: 2.6; stroke-linecap: round; opacity: .9; stroke-dasharray: 14 8; animation: flow .4s linear infinite; }
 .pipes .spout .spoutDrop { fill: color-mix(in srgb, var(--spc) 60%, white); stroke: color-mix(in srgb, var(--spc) 55%, black); stroke-width: 1.6; transform-box: fill-box; transform-origin: center; animation: spoutDrop .8s ease-in infinite; }
 .pipes .spout .spoutDrop.d1 { animation-delay: -.15s; } .pipes .spout .spoutDrop.d2 { animation-delay: -.3s; }
 .pipes .spout .spoutDrop.d3 { animation-delay: -.45s; } .pipes .spout .spoutDrop.d4 { animation-delay: -.6s; } .pipes .spout .spoutDrop.d5 { animation-delay: -.7s; }
@@ -1720,7 +1720,7 @@ body.eqViewing #ws { pointer-events: none; }
 .shareInfo .shareMedia ul { columns: 2 260px; }
 /* a left-button press on a QD hose end (Rule 5.40, OakBarn Brewery 2026-11-18): the Do Not Enter sign and "Move with Held Right Click" */
 .qdHint { position: fixed; z-index: 9999; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; background: var(--panel, #222);
-  color: var(--text, #eee); border: 2px solid #d62828; box-shadow: 0 4px 14px #0008; font-weight: 600; pointer-events: none; white-space: nowrap; }
+  color: var(--text, #fafafa); border: 2px solid #d62828; box-shadow: 0 4px 14px #0008; font-weight: 600; pointer-events: none; white-space: nowrap; }
 .qdHint .qdHintSign { width: 20px; height: 20px; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9.2' fill='%23d62828' stroke='%23fff' stroke-width='1.2'/%3E%3Crect x='4' y='8.2' width='12' height='3.6' rx='.6' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat; }
 
 /* Background None on a Widget with no Graphic (Rule 18.50 #2): no panel behind its words */
@@ -1734,7 +1734,7 @@ body.eqViewing #ws { pointer-events: none; }
   background: rgba(0, 0, 0, .55); color: #3ddc5a; font-family: var(--mono); font-weight: 600; text-shadow: 0 0 6px rgba(61, 220, 90, .45); cursor: pointer; white-space: nowrap; }
 .el .vl .svBox:hover { border-color: #3ddc5a; }
 .el .vl .svBox .svTag { font-size: .6em; font-family: inherit; opacity: .85; }
-.el .vl .svBox.editing { border-color: #fff; }
+.el .vl .svBox.editing { border-color: #fafafa; }
 .el .vl .svIn { width: 4.2em; font: inherit; color: inherit; background: transparent; border: none; outline: none; padding: 0; text-align: right; }
 .el.img-missing .vl .svBox { color: #3ddc5a !important; }
 

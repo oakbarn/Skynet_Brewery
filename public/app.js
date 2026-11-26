@@ -11,7 +11,7 @@ import { attachAutofill } from './autofill.js';
 import { CATEGORY_LISTS, SKN_NAMES, commandText, commandNote, lineAfter, lineOf } from './procinsert.js';      // Insert Line After and the five command buttons (Panel Update 11)
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { SKYNET_CONSTANT_GROUPS, SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstant } from './skconst.js';
-import { setRich, NAMED_COLORS, setTempUnitSource } from './richtext.js';
+import { setRich, NAMED_COLORS, WHITE_SEE, setTempUnitSource } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
 import { NUM_FORMATS, NUM_FORMAT_DEFAULT, FIXED_PLACES_DEFAULT, CURRENCY_SIGN_DEFAULT, formatNumber } from './numformat.js';
@@ -1122,7 +1122,7 @@ const MF_TPLS = { Valve_Tee: { what: 'Long Tee with a Valve', prefix: 'ValveTee'
 const MF_FIT = 'fill="#808080" stroke="#505050" stroke-width="1.6" stroke-linejoin="round"';
 const MF_BODY = `<rect x="85.8" y="16" width="38.4" height="180" ${MF_FIT}/><rect x="77" y="0.8" width="56" height="16.5" rx="5" ${MF_FIT}/>`
   + `<rect x="77" y="192.7" width="56" height="16.5" rx="5" ${MF_FIT}/><rect x="70" y="0" width="70" height="12" rx="3" fill="#b9bec4" stroke="#505050" stroke-width="1.6"/>`
-  + `<rect x="66" y="76" width="78" height="58" rx="10" ${MF_FIT}/><circle cx="105" cy="105" r="13" fill="#fff" stroke="#111" stroke-width="5"/>`;
+  + `<rect x="66" y="76" width="78" height="58" rx="10" ${MF_FIT}/><circle cx="105" cy="105" r="13" fill="#fafafa" stroke="#111" stroke-width="5"/>`;
 const MF_SVG = inner => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 210">${MF_BODY}${inner}</svg>`);
 const MF_PICS = {
   manual: MF_SVG('<rect x="143" y="99" width="12" height="12" fill="#8f9296" stroke="#2b2b2b" stroke-width="2"/><rect x="152" y="96" width="54" height="18" rx="6" fill="#2b2b2b"/><rect x="156" y="100" width="46" height="10" rx="4" fill="#5b6066"/>'),
@@ -1737,7 +1737,7 @@ const TS = () => tabStyleOf(curWs(), S.config.brewDefaults, S.config.userStyles)
 const fontPx = v => +v > 0 ? +v : 0;
 // standard colors for the flow widgets' color dropdowns ('' = the default color)
 // Default = the item's normal color, None = no color at all (see-through)
-const COLORS = [['Default', ''], ['None', 'transparent'], ...NAMED_COLORS];     // the one list of color names, in public/richtext.js (also the \c{Red} code); White is RGB 250 250 250 (Rule 2.7)
+const COLORS = [['Default', ''], ['None', 'transparent'], ...NAMED_COLORS];     // the one list of color names, in public/richtext.js (also the \c{Red} code); White (Opaque) is RGB 250 250 250, White (Transparent) is see-through (Rule 2.7)
 // a color of your own (picked with the Color Picker, Rule 2.48) shows in a color dropdown by its RGB: 'RGB 160 69 42'
 const customColorName = c => rgbText(c) || c;
 // where it starts Centered: Left, Centered or Right, no Default choice (a saved MiddleCenter shows as Centered)
@@ -1939,7 +1939,7 @@ function textTypeDialog(name) {
 // The Override button (Fritz, 2026-10-30): one press and every running Process moves on 100 ms later, past the wait, sleep or
 // loop that holds it. Any number on a Tab, each with its own Label, Process and look (Rule 2.26). Only the Label and its style
 // can be changed (font, size, bold, fore and back color, alignment), never a background picture.
-const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#ffffff', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
+const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#fafafa', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
 // Shows: Only while tap water flows (Rule 16.11, OakBarn Brewery, 2026-11-20: "The Override appears after Flow is started not before"):
 // the button is on its Tab only while a tap water valve on that Tab is open, so a warning before the water comes on has no Override
 // A valve whose Tap Water is off but that tap water runs through (a Motorized valve after the Hose Bib, or its Clone on the manifold Tab,
@@ -3639,9 +3639,9 @@ function fillEl(n, e0) {
     if (ts.bezel) panel.style.borderColor = ts.bezel;
     n.style.setProperty('--tmBack', ts.back || '');      // the Back color round the panel (Timer Digits, Rule 2.40)
     n.classList.toggle('tmBack', !!ts.back);
-    panel.style.setProperty('--seg', firstSet(v.forecolor, ts.digits, '#ffffff'));
+    panel.style.setProperty('--seg', firstSet(v.forecolor, ts.digits, '#fafafa'));
     vl.replaceChildren(panel); vl.style.backgroundColor = '';
-    nm.style.color = e.nameColor || ts.titleFore || '#ffffff'; nm.style.backgroundColor = e.nameBg || ts.titleBack || '#000000';
+    nm.style.color = e.nameColor || ts.titleFore || '#fafafa'; nm.style.backgroundColor = e.nameBg || ts.titleBack || '#000000';
   }
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true || (e.type === 'alarm' && !!e.alarmClass && !v.active) || (e.type === 'soundPlayer' && !v.active));   // .hidden = true wins over .visible = true; an Alarm Widget shows only while it is On (Rule 7.21; faint in Edit layout)
@@ -8775,7 +8775,7 @@ function addEquipment(t) {
   const base = VESSELS[t] || 'Vessel';
   let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.label === base + ' ' + i)) i++;
   const size = [200, 260];
-  const g = { id: newId(), kind: 'vessel', vesselType: t, workspace: wsName, x: 60, y: 60, w: size[0], h: size[1], image: '', label: base + ' ' + i, labelAlign: 'top', labelColor: '#ffffff', labelSize: 16, labelVisible: true };
+  const g = { id: newId(), kind: 'vessel', vesselType: t, workspace: wsName, x: 60, y: 60, w: size[0], h: size[1], image: '', label: base + ' ' + i, labelAlign: 'top', labelColor: '#fafafa', labelSize: 16, labelVisible: true };
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
 // ---- Add a Vessel (Kettle, HLT, MLT ...) (Fritz, 2026-10-23). First: a Widget or Integrated?
@@ -12148,7 +12148,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': 'text', value: cur });
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') }); sw.style.background = flowHex(cur) || '';
     const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); };
-    const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fff'}` } : {}) }, n);
+    const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fafafa'}` } : {}) }, n);
     const s = h('select', {}, opt('', opts === 'tab' ? 'None' : opts === 'vessel' || opts === 'ip' ? `None (the flow out of it is not colored by this ${opts === 'ip' ? 'IP' : 'vessel'})` : 'None (it follows the Tab Flow Color)'),
       ...FLOW_COLORS.map(([k, n]) => opt(k, n)), opt('rgb', 'RGB (pick your own color) ...'));
     let last = s.value;
@@ -12168,8 +12168,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     if (cur && !cols.some(c => c[1] === cur) && hexToRgb(cur)) cols.push([customColorName(cur), cur]);      // a color of its own shows by its RGB
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
     const sw = h('span', { class: 'cswatch' }), named = c => COLORS.some(k => k[1] === c) || c === CHAIN_KEEP;
-    const set = c => { val.value = c; sw.style.background = c === CHAIN_KEEP ? '' : c; sw.classList.toggle('dflt', !c || c === CHAIN_KEEP); sw.classList.toggle('none', c === 'transparent'); };
-    const optOf = (n, c) => h('option', { value: c, ...(c && c !== 'transparent' && c !== CHAIN_KEEP ? { style: `background:${c};color:${['#fafafa', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n);
+    const set = c => { val.value = c; sw.style.background = c === CHAIN_KEEP ? '' : c; sw.classList.toggle('dflt', !c || c === CHAIN_KEEP); sw.classList.toggle('none', c === 'transparent' || c === WHITE_SEE); };
+    const optOf = (n, c) => h('option', { value: c, ...(c && c !== 'transparent' && c !== WHITE_SEE && c !== CHAIN_KEEP ? { style: `background:${c};color:${['#fafafa', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fafafa'}` } : {}) }, n);
     const custom = h('option', { value: 'custom' }, 'Custom (add new) ...');
     const s = h('select', {}, ...cols.map(([n, c]) => optOf(n, c)), custom);
     s.value = cur; if (s.selectedIndex < 0) s.value = '';

@@ -211,7 +211,7 @@ export function sightGlassSvg(ratio, caged) {
     `<rect x="1" y="1" width="16.5" height="56" rx="5"/><rect x="${r(W - 17.5)}" y="1" width="16.5" height="56" rx="5"/>` +
     `<rect x="17.5" y="6" width="9" height="46" rx="2"/><rect x="${r(W - 26.5)}" y="6" width="9" height="46" rx="2"/></g>`;
   const glass = `<rect x="${g0}" y="10" width="${gl}" height="38" fill="#d6ecf7" fill-opacity="0.85" stroke="#6a8fa3" stroke-width="1.4"/>` +
-    `<rect x="${r(g0 + 3)}" y="14" width="${r(Math.max(1, gl - 6))}" height="4" rx="2" fill="#ffffff" fill-opacity="0.9"/>` +
+    `<rect x="${r(g0 + 3)}" y="14" width="${r(Math.max(1, gl - 6))}" height="4" rx="2" fill="#fafafa" fill-opacity="0.9"/>` +
     `<rect x="${r(g0 + 3)}" y="40" width="${r(Math.max(1, gl - 6))}" height="2" rx="1" fill="#9cc3d6" fill-opacity="0.8"/>`;
   let cage = '';
   if (caged) {          // a stainless guard round the glass: top and bottom bars and posts between them, about every inch
