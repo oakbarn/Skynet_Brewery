@@ -32,11 +32,10 @@ const ys = box.map(q => q[1]), xs = box.map(q => q[0]);
 assert.ok(Math.max(...ys) - Math.min(...ys) > 20 && Math.max(...ys) - Math.min(...ys) < 30);
 assert.ok(Math.max(...xs) - Math.min(...xs) > 10 && Math.max(...xs) - Math.min(...xs) < 20);
 
-// the 3 Vessel 1 Pump sample's Brew House: its crossings went with the bottom drain header (OakBarn Brewery, 2026-11-26: Low Center
-// Outlets with hoses to the pump replace the bottom drains); any crossing it has has the up-and-down pipe in front
+// the 3 Vessel 1 Pump sample's Brew House has its three crossings (the manifold, OakBarn Brewery's layout 2026-11-25), each with the up-and-down pipe in front
 const c = JSON.parse(fs.readFileSync(path.join(ROOT, 'samples', 'configs', 'three-vessel-one-pump', 'config.json'), 'utf8'));
 const bh = pipeCrossings(c.graphics.filter(g => g.kind === 'pipe' && g.workspace === 'Brew House'));
-assert.equal(bh.length, 0, 'no crossings left on the Brew House');
+assert.equal(bh.length, 3, 'three crossings on the Brew House');
 for (const k of bh) assert.equal(k.seg[0][0], k.seg[1][0], `${k.front.name} in front is the up-and-down pipe`);
 
 // the Panel draws them (Rule 5.44)
