@@ -20,7 +20,7 @@ import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
-import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName, LANG_KEY } from './hoverhelp.js';
+import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName, LANG_KEY, refreshBalloonLang } from './hoverhelp.js';
 import { safetyWord } from './screenwords.js';      // Override and Stop in the Help language (Rule 11.11)
 import { plainLetters } from './letters.js';      // ß ss, æ ae, ø o in a Name (Rule 3.4)
 import { setStopWord } from './processwidget.js';
@@ -34,6 +34,7 @@ import { HEAT_METHODS, heatSendsPwm, switchedBy, HEAT_SETTINGS, HEAT_MAIN, NEEDS
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
+import { SETUP_QUESTIONS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16185,11 +16186,104 @@ async function sampleCards(box, after) {
     }) }, S.config.sample === sm.id ? 'Load again' : 'Load this one')));
 }
 async function firstRunSamples() {
-  if (!S.config.chooseSample || !can('admin')) return;
+  if (!can('admin')) return;
+  // a new installation (no Skynet settings yet): the Setup Interview first (Rule 2.75), then the Welcome sample picker
+  if (setupNeeded(S.config)) await setupInterview({ first: true });
+  if (!S.config.chooseSample) return;
   const d = $('#sampleDlg');
   await sampleCards($('#sampleDlgList'), () => d.close());
   $('#sampleKeep').onclick = guard(async () => { d.close(); await api('PUT', '/ui/settings', { chooseSample: false }); S.config.chooseSample = false; });
   d.showModal();
+}
+
+// ---- The Setup Interview (Rule 2.75, Help 248; the questions are data in public/setupinterview.js). One question at a time: ◀ Back,
+// Skip (not on a must question), Next ▶, then a summary with ✎ on each answer and ✔ Finish. Nothing is saved until Finish.
+function setupCtx() {
+  return { defaults: S.config.brewDefaults || {}, boil: S.boil?.settings ?? null, patron: !!S.patron?.brewery, helpLang: (() => { try { return localStorage.getItem(LANG_KEY); } catch { return null; } })(),
+    brewerTypes: BREWER_TYPES.map(t => [t.key, t.name]), brewerTypeDefault: BREWER_TYPE_DEFAULT, pipeSizes: sizePick(PIPE_SIZES), hoseSizes: sizePick(HOSE_SIZES) };
+}
+async function setupInterview({ first = false } = {}) {
+  if (!can('admin')) return;
+  if (!S.boil) try { S.boil = await api('GET', '/ui/boiltemp'); } catch { }
+  const ctx = setupCtx(), a = setupStart(ctx);
+  let at = 0, skipped = new Set();
+  const d = h('dialog', { class: 'miniDlg ivDlg nsiDlg setupDlg', 'data-nomenu': '' }), body = h('div', { class: 'setupBody' });
+  const bar = h('div', { class: 'bar nsiBar' }), title = h('h3'), stripBox = h('div');
+  document.body.append(d);
+  return new Promise(res => {
+    const end = r => { d.close(); d.remove(); res(r); };
+    const close = () => {
+      if (!confirm(first ? 'Stop the Setup Interview? Nothing is saved, and it starts again the next time the panel opens (or from ☰ Menu > 🧭 Setup Interview).' : 'Stop the Setup Interview? Nothing is changed.')) return;
+      end('close');
+    };
+    d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
+    const draw = () => {
+      const qs = shownQuestions(a, ctx), done = at >= qs.length, q = qs[at];
+      const steps = [...qs.map(x => x.step), 'Done'];
+      const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => h('li', { class: i === at ? 'now' : i < at ? 'done' : '' }, s)));
+      const go = n => { at = n; draw(); };
+      const next = () => { const err = q && answerError(q, a[q.id]); if (err) return toast(err, true); skipped.delete(q?.id); go(at + 1); };
+      const skip = () => { a[q.id] = q.start(ctx, a); skipped.add(q.id); go(at + 1); };
+      const finish = guard(async () => {
+        const out = setupSave(a, ctx);
+        if (out.boil) S.boil = await api('PUT', '/ui/boiltemp', out.boil);
+        await api('PUT', '/ui/settings', { brewDefaults: out.brewDefaults }); S.config.brewDefaults = out.brewDefaults;
+        if (out.helpLang) { try { localStorage.setItem(LANG_KEY, out.helpLang); } catch { } refreshBalloonLang(); }
+        showBreweryName(); renderWs(); savedPop('Setup Interview saved: every answer is on ☰ Menu > Default settings');
+        end('finish');
+      });
+      // Back, Skip and Next (Finish), then Close and ✕ together in the upper right (Rule 2.54)
+      // (the group is made here, so the dialog's own button order, Rule 2.54, is not added again when a page is drawn)
+      bar.replaceChildren(h('span', { class: 'spacer' }),
+        h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
+        at ? h('button', { type: 'button', onclick: () => go(at - 1) }, '◀ Back') : '',
+        !done && !q.must ? h('button', { type: 'button', title: 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
+        h('span', { class: 'dlgBtnGroup' },
+          done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶'),
+          h('button', { type: 'button', title: 'Stop the interview. Nothing is saved.', onclick: close }, 'Close'),
+          h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: close }, '✕')));
+      body.replaceChildren();
+      if (done) {
+        body.append(h('p', {}, 'Here is every answer. ✎ goes back to that question. ✔ Finish saves them all; each one is on ☰ Menu > Default settings too, where you can change it any time.'),
+          h('table', { class: 'setupSum' }, ...qs.map((x, i) => h('tr', {}, h('td', {}, x.step), h('td', {}, answerWords(x, a[x.id], ctx) + (skipped.has(x.id) ? '  (Skipped: Skynet\'s answer)' : '')),
+            h('td', {}, h('button', { type: 'button', title: 'Change this answer', onclick: () => go(i) }, '✎'))))));
+      } else {
+        if (q.note) body.append(h('p', { class: 'setupWarn' }, '⚠ ' + q.note));
+        body.append(h('p', { class: 'setupAsk' }, askOf(q, a)), h('p', { class: 'muted' }, q.why));
+        if (q.must) body.append(h('p', { class: 'muted' }, 'This question must be answered (no Skip).'));
+        const ch = choicesOf(q, ctx);
+        if (q.kind === 'pick' && !asDropdown(ch)) {
+          // 6 or fewer: one click picks it and goes on (Rule 2.6, Rule 2.44)
+          body.append(h('div', { class: 'setupPicks' }, ...ch.map(([k, t, tip]) => h('button', { type: 'button', class: 'setupPick' + (String(a[q.id]) === String(k) ? ' cur' : ''), title: tip || '',
+            onclick: () => { a[q.id] = k; if (q.id === 'units') a.elevation = SETUP_QUESTIONS.find(x => x.id === 'elevation').start(ctx, a); next(); } }, h('b', {}, t), tip ? h('div', { class: 'muted' }, tip) : ''))));
+        } else if (q.kind === 'pick') {
+          // more than 6: a dropdown (Rule 2.6)
+          const sel = h('select', { onchange: e => { a[q.id] = e.target.value; } }, ...ch.map(([k, t]) => h('option', { value: k, ...(String(a[q.id]) === String(k) ? { selected: true } : {}) }, t)));
+          const tip = h('p', { class: 'muted' }), showTip = () => { tip.textContent = ch.find(([k]) => String(k) === String(a[q.id]))?.[2] || ''; };
+          sel.addEventListener('change', showTip); showTip();
+          body.append(sel, tip);
+        } else if (q.kind === 'yesno') {
+          body.append(h('div', { class: 'setupPicks' }, ...[[true, 'Yes'], [false, 'No']].map(([k, t]) => h('button', { type: 'button', class: 'setupPick' + (a[q.id] === k ? ' cur' : ''), onclick: () => { a[q.id] = k; next(); } }, h('b', {}, t)))));
+        } else {
+          const inp = h('input', { type: q.kind === 'num' ? 'number' : 'text', value: a[q.id] ?? '', oninput: e => { a[q.id] = e.target.value; }, onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); next(); } } });
+          body.append(inp);
+          if (q.id === 'airport') {
+            // Test: the same as on ☰ Menu > Default settings; it keeps the Airport typed (and the Elevation so far) and fetches the report now
+            const res = h('div', { class: 'muted' }, S.boil ? btLine(S.boil) : '');
+            body.append(h('button', { type: 'button', title: 'Fetch the airport\'s report now and show its pressure and the boil temperature', onclick: guard(async () => {
+              res.textContent = 'Getting the report...';
+              const o = setupSave({ ...a, airport: inp.value }, ctx).boil ?? { airport: String(inp.value).trim().toUpperCase(), elevationM: ctx.boil?.elevationM ?? null, pressure: ctx.boil?.pressureHpa ?? null };
+              await api('PUT', '/ui/boiltemp', o); S.boil = await api('POST', '/ui/boiltemp/test'); ctx.boil = S.boil?.settings ?? ctx.boil;
+              res.textContent = btLine(S.boil); }) }, 'Test'), res);
+          }
+          queueMicrotask(() => inp.focus());
+        }
+      }
+      title.textContent = 'Setup Interview: ' + (done ? 'Done' : q.step); stripBox.replaceChildren(strip);
+    };
+    d.append(bar, title, stripBox, body); d._btnOrder = true;
+    draw(); d.showModal();
+  });
 }
 
 function renderSettings() {
@@ -17054,7 +17148,8 @@ async function schemaInterview({ short = false } = {}) {
   const idUsed = d => d.id && have.some(x => String(x.id || '').toUpperCase() === String(d.id).toUpperCase());
   const boards = found.filter(d => !have.some(x => x.name.toLowerCase() === d.name.toLowerCase()) && !idUsed(d));
   const tabs = S.config.workspaces.filter(w => !w.build && !isHiddenTab(w));
-  const level0 = NSI_LEVELS.some(([k]) => k === S.config.brewDefaults?.brewLevel) ? S.config.brewDefaults.brewLevel : 'mashtun';      // the Skynet Brewer Level
+  // the Skynet Brewer Level: the Tab Level picked last time, else worked out from the Brewer Level of the Setup Interview (Rule 2.75)
+  const bdl = S.config.brewDefaults || {}, level0 = NSI_LEVELS.some(([k]) => k === bdl.brewLevel) ? bdl.brewLevel : nsiLevelOf(bdl.brewerLevel, bdl.brewerType) || 'mashtun';
   const a = { name: act.name, about: act.about || '', newBoard: false, more: 0 };
   boards.forEach((d, i) => { a['b' + i] = false; });
   // each Tab on the page: the ones the Schema has, then the ones ➕ Add New Tab adds (Panel Update 5 #3)
@@ -17498,6 +17593,8 @@ function menuItems(list, go) {
   // the Process Error Log and the Fix before next Brew Day list (Rule 10.13): for everyone, with how many are open
   list.append(item(['🔧 Fix before next Brew Day', S.errorOpen ? h('span', { class: 'menuCount' }, ` (${S.errorOpen})`) : ''], guard(errorLogDialog),
     { key: '🔧 Fix before next Brew Day', title: 'The Process Error Log (each error with its line, what it was and how to fix it) and your own issues to fix before the next Brew Day' }));
+  // the Setup Interview (Rule 2.75): an Admin can run it again any time; it starts on what was saved and changes nothing until ✔ Finish
+  if (can('admin') && !S.importBuild) list.append(item('🧭 Setup Interview', guard(() => setupInterview()), { title: 'Ask the Setup questions again: Units, Help language, your airport and Elevation, Brewer Level, Brewer Type, Yeast Starter, pipe and hose sizes. Starts on your saved answers; nothing changes until ✔ Finish.' }));
   list.append(item('🐞 Report a Bug', () => reportDialog({}), { title: 'Tell OakBarn Brewery about a bug, on GitHub or by email. Your Skynet version and browser are filled in.' }));
   list.append(item('⭐ Request a Feature', guard(requestFeature), { title: 'Ask the OakBarn Brewery team for a new feature (a Patron perk)' }));
   const lastSpot = h('div', { class: 'menuLastSpot' });
@@ -18111,7 +18208,7 @@ function btSend(now, set, was, metric) {
 }
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
-    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, brewerType: BREWER_TYPE_DEFAULT, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
+    newSchemaLook: 'officeBlack', breweryName: BREWERY_NAME, brewerType: BREWER_TYPE_DEFAULT, brewerLevel: BREWER_LEVEL_DEFAULT, yeastStarter: false, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
   const shownMetric = d.units === 'Metric', shownUnits = d.units;      // what the boxes show now; Units changed here applies after Save
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
@@ -18145,6 +18242,9 @@ function renderDefaultTab(box) {
     // Brewer Type (OakBarn Brewery, 2026-11-25, "No Recipe Found": "Choice default is set by brewer Type from Skynet Settings")
     ['_bwt', 'Brewer Type', 'head'],
     ['brewerType', 'Brewer Type', 'sel', BREWER_TYPES.map(t => [t.key, t.name]), true, false, { tip: 'What this brewery usually brews. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14), and you can pick another there.' }],
+    // the Setup Interview's answers (Rule 2.75, Rule 2.42): Brewer Level (OakBarn Brewery, 2026-11-26: "A and Mandatory") and Yeast Starter
+    ['brewerLevel', 'Brewer Level', 'sel', BREWER_LEVELS.map(([k, t]) => [k, t]), true, false, { tip: 'What you brew on, from one pot on the stove (1) to All Grain Plus (9). It picks the Level a new Brewing Tab starts on in the New Schema Interview. You can always pick a lower level. Asked by the Setup Interview (☰ Menu > 🧭 Setup Interview).' }],
+    ['yeastStarter', 'Yeast Starter usually', 'bool', null, false, false, { tip: 'Information only: PreBrew reminds you a day or two ahead when it is On. It changes nothing else.' }],
     ['_r', 'New User Recipes', 'head'],
     ['_rn', 'A new Recipe starts with these, and you can change each one in the Recipe.', 'note'],
     ['_batch', `Batch Size (${w.units === 'Metric' ? 'Liters' : 'Gallons'})`, 'num', null, false, false, { tip: DEF_TIPS.batch }],

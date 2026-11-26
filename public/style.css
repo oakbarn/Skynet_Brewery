@@ -1901,3 +1901,12 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .errBtns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .errDone summary { cursor: pointer; margin: 8px 0; font-weight: 600; }
 .errLogDlg > .bar:first-child { position: sticky; top: -16px; z-index: 2; background: var(--panel, #222); padding: 6px 0; }
+/* The Setup Interview (Rule 2.75): one question per page, one-click choices (Rule 2.6), the one big warning (Rule 6.20 look) */
+.setupDlg .setupBody { margin: 8px 0; }
+.setupDlg .setupAsk { font-size: 1.25em; font-weight: 600; margin: 6px 0; }
+.setupDlg .setupWarn { color: var(--bad, #d33); font-weight: 700; font-size: 1.1em; border: 2px solid currentColor; border-radius: 8px; padding: 8px 10px; }
+.setupDlg .setupPicks { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.setupDlg .setupPick { text-align: left; padding: 10px 12px; }
+.setupDlg .setupPick.cur { outline: 2px solid var(--accent); }
+.setupDlg select, .setupDlg input { min-width: 16em; }
+.setupDlg .setupSum td { padding: 3px 8px; vertical-align: top; }
