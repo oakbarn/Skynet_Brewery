@@ -92,3 +92,14 @@ console.log('error resume tests passed');
   const { errSplit } = await import('../public/errorfix.js');
   assert.deepEqual(errSplit('skn_rcp_X is not a Recipe value (they are: skn_rcp_Loaded, skn_rcp_Hop_Stand_Middle_Mi'), { what: 'skn_rcp_X is not a Recipe value', list: 'skn_rcp_Loaded, skn_rcp_Hop_Stand_Middle_Mi' }, 'an old entry cut short');
 }
+{
+  // why it failed, in plain words (OakBarn Brewery, 2026-11-26)
+  const { whyOf } = await import('../public/errorfix.js');
+  assert.match(whyOf('skn_rcp_Whirlpool_Minutes is not a Recipe value (they are: a, b)'), /asks the Recipe for skn_rcp_Whirlpool_Minutes/);
+  assert.match(whyOf('vVErrTest is NULL (empty), so it has no value to work with. Test it first, for example: if X == NULL'), /vVErrTest has no value yet/);
+  assert.match(whyOf('skn_rcp_Boil_Time is NULL (empty), so it has no value'), /no Recipe is loaded/);
+  assert.match(whyOf('Unknown name Y: no variable made with new'), /does not know the name Y:/);
+  assert.match(whyOf('Mega1 is not connected (closed), so the line cannot be sent'), /board Mega1 is not talking to the Brain/);
+  assert.equal(whyOf('something plain'), '');
+  console.log('why tests passed');
+}

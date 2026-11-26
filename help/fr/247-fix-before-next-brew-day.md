@@ -10,7 +10,9 @@ Quand un Process s'arrête sur une erreur, ou ne démarre pas à cause d'une err
 
 - l'**heure**, le **Process** et le **numéro de ligne**,
 - la **ligne elle-même**, telle qu'elle était quand elle a tourné,
-- **ce qu'était l'erreur**,
+- **ce qu'était l'erreur**, et en dessous **Why:** (pourquoi) en mots simples, quand Skynet peut le dire (par exemple *This line
+  asks the Recipe for skn_rcp_Whirlpool_Minutes, but the Recipe has no value with that name* : cette ligne demande à la Recipe
+  skn_rcp_Whirlpool_Minutes, mais la Recipe n'a pas de valeur avec ce nom),
 - **💡 How to fix** (comment réparer), quand la réparation est claire (par exemple un nom écrit autrement que sur la page Devices,
   ou un `if` sans `endif`).
 
@@ -54,7 +56,7 @@ Tapez un problème dans la case du haut, par exemple *la vanne du HLT colle*, et
 ## Reprendre après une erreur {#resume-after-an-error}
 
 Quand un Process s'arrête sur une erreur pendant un brassage (Règle Skynet 10.14), **tout est laissé tel quel** et une fenêtre
-rouge s'affiche sur tous les écrans avec le Process, la ligne, la ligne elle-même et l'erreur. La première fois qu'une erreur arrive,
+rouge s'affiche sur tous les écrans avec le Process, la ligne, la ligne elle-même, l'erreur et pourquoi elle a échoué. La première fois qu'une erreur arrive,
 Skynet vous attend toujours pour choisir :
 
 - **🔧 Fixed hardware: try line N again** : vous avez réparé ou remplacé ce qui a lâché (une pompe, une vanne, une résistance). Cette
@@ -69,8 +71,9 @@ Skynet vous attend toujours pour choisir :
   Servez-vous-en quand vous avez contourné le problème, par exemple en passant par le RIMS.
 - **⏭ Ignore this error in any Process and go on** saute la ligne et continue. Ensuite, la même erreur (les mêmes mots), dans
   n'importe quel Process et sur n'importe quelle ligne, est sautée toute seule sans fenêtre jusqu'au redémarrage du Brain. Elle est
-  quand même notée dans la Console et dans cette liste. Vous recevez un seul avertissement : vous êtes responsable, restez donc avec
-  le brassage et surveillez-le.
+  quand même notée dans la Console et dans cette liste. Vous recevez d'abord un seul avertissement : vous êtes responsable, restez
+  donc avec le brassage et surveillez-le. Appuyez sur **✔ I take responsibility** (je prends la responsabilité) pour l'ignorer, ou
+  sur **Cancel** (annuler) pour le laisser arrêté avec de nouveau les choix.
 - **✕** laisse le Process arrêté et ferme la fenêtre sur tous les écrans.
 
 La fenêtre reste jusqu'à ce que quelqu'un choisisse. Redémarrer le Process depuis le début l'abandonne. L'erreur est quand même

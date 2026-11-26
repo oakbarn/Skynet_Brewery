@@ -6,6 +6,8 @@
  "Close this note": "Fermer cette note",
  "Run line {0} of the saved Process again and go on from there": "Refaire tourner la ligne {0} du Process enregistré et continuer à partir de là",
  "Show all the choices again": "Montrer de nouveau tous les choix",
+ "Ignore this error and go on at the next line": "Ignorer cette erreur et continuer à la ligne suivante",
+ "Do not ignore it: it stays stopped, and the choices show again": "Ne pas l'ignorer : il reste arrêté, et les choix s'affichent de nouveau",
  "You fixed or swapped what failed (a pump, valve or heater): run line {0} again and go on from there": "Vous avez réparé ou remplacé ce qui a lâché (une pompe, une vanne ou une résistance) : refaire tourner la ligne {0} et continuer à partir de là",
  "Open this Process in the Process Editor at line {0}. Fix it and Save, then press Try again here": "Ouvrir ce Process dans le Process Editor à la ligne {0}. Réparez-le et faites Save, puis appuyez ici sur Try again",
  "Leave this line out and go on. From now on this same error, in any Process, is left out with no pop-up (still on the Error Log) until the Brain restarts": "Sauter cette ligne et continuer. À partir de maintenant, cette même erreur, dans n'importe quel Process, est sautée sans fenêtre (toujours dans le journal des erreurs) jusqu'au redémarrage du Brain",

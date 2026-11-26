@@ -9,7 +9,8 @@ When a Process stops on an error, or does not start because of one, an entry is 
 
 - the **time**, the **Process** and the **line number**,
 - the **line itself**, as it was when it ran,
-- **what the error was**,
+- **what the error was**, and under it **Why:** in plain words, when Skynet can tell (for example *This line asks the Recipe for
+  skn_rcp_Whirlpool_Minutes, but the Recipe has no value with that name*),
 - **💡 How to fix**, when the fix is clear (for example a name spelled differently from the Devices page, or an `if` with no `endif`).
 
 The Process, its line number and what the error was are in **red**. When the error lists the names you can use (for example a
@@ -47,7 +48,7 @@ Process open in the Process Editor) is written with it. It stays on the list unt
 ## Resume after an error
 
 When a Process stops on an error during a brew (Skynet Rule 10.14), **everything is left as it is** and a red pop-up shows on every
-screen with the Process, the line, the line itself and the error. The first time an error happens, Skynet always waits for you to
+screen with the Process, the line, the line itself, the error and why it failed. The first time an error happens, Skynet always waits for you to
 pick:
 
 - **🔧 Fixed hardware: try line N again**: you fixed or swapped what failed (a pump, a valve, a heater). That same line runs again
@@ -59,7 +60,8 @@ pick:
   it when you worked around the problem, for example you re-routed through the RIMS.
 - **⏭ Ignore this error in any Process and go on** leaves the line out and goes on. From then on, the same error (the same words),
   in any Process and on any line, is left out by itself with no pop-up until the Brain restarts. It is still written in the Console
-  and on this list. You get one warning: you are responsible, so stay with the brew and watch it.
+  and on this list. You get one warning first: you are responsible, so stay with the brew and watch it. Press **✔ I take
+  responsibility** to ignore it, or **Cancel** to leave it stopped with the choices again.
 - **✕** leaves the Process stopped and closes the pop-up on every screen.
 
 The pop-up stays until someone picks. Starting the Process over lets it go. The error is still written on this list, so you can fix

@@ -1891,6 +1891,7 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .errWhat { font-weight: 600; margin: 2px 0; }
 /* the error in red, its allowed names after a light blue line (OakBarn Brewery, Error Text PDF 2026-11-25) */
 .errHead, .errFirst { color: #ff5c5c; }
+.errWhy { font-weight: 400; margin: 2px 0; }
 .errSuggest { margin-top: 4px; font-weight: 400; }
 .errSuggestHead { color: #6cc4ff; font-weight: 700; }
 .errLine, .errChange code { display: inline-block; font-family: Consolas, 'Courier New', monospace; background: rgba(127, 127, 127, .15); padding: 1px 6px; border-radius: 4px; white-space: pre-wrap; }
