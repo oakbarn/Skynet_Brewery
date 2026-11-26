@@ -1954,6 +1954,10 @@ const mvOverPic = g => g?.mvOverlay && !String(g.mvOverlay).startsWith('tint:') 
 const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Manual Ball Valve, side view'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', 'Manual Ball Valve, front view (looking down the pipe)'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow'],
+  // a Manual Butterfly Valve seen from the front, as on the face of a vessel at its Low Center Outlet (OakBarn Brewery, 2026-11-26:
+  // "Manual Butterfly Valves on face of vessel on the outlet")
+  ['Images/Skynet/Valves/Manual_Butterfly_Valve_Front_Closed.svg', 'Manual Butterfly Valve, front view (looking down the pipe)'],
+  ['Images/Skynet/Valves/Manual_Butterfly_Valve_Front_Elbow_Closed.svg', 'Manual Butterfly Valve on a front elbow'],
   ['Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg', 'Manual Butterfly Valve (level pipe)'], ['Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_R.svg', 'Manual Butterfly Valve (up and down pipe)'],
   ['Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg', 'Tap Water Valve (household hose bib; one IP, the hose outlet)']];
 // The Tap Water Valve (Fritz, 2026-11-06, Rule 5.33): a Manual Valve Widget with the household hose bib picture. The house water
@@ -1972,7 +1976,7 @@ const isBfly = p => Object.values(MV_BFLY).includes(p);
 // the Skynet Manual Ball and Butterfly Valve drawings look the same mirrored (Rule 18.52): Horizontal Left / Right is greyed for them; a
 // User's own picture may not be, so it keeps Left / Right
 const mvSameBothWays = g => mvOrientOf(g) === 'h' && ['', 'Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', ...Object.values(MV_BFLY)].includes(g?.image || '');
-const mvFront = g => /Manual_Ball_Valve_Front(?:_Elbow)?_(?:Open|Closed)\.svg$/.test(String(g?.image || ''));
+const mvFront = g => /Manual_(?:Ball|Butterfly)_Valve_Front(?:_Elbow)?_(?:Open|Closed)\.svg$/.test(String(g?.image || ''));
 const mvOrientOf = g => mvFront(g) ? 'h' : ['h', 'v'].includes(g.mvOrient) ? g.mvOrient : /_ClosedV_[LR]\.svg$/.test(String(g.image || '')) ? 'v' : 'h';
 const mvSideOf = g => mvFront(g) ? 'r' : ['l', 'r'].includes(g.mvSide) ? g.mvSide : /_ClosedV_L\.svg$/.test(String(g.image || '')) ? 'l' : 'r';
 // A Vertical Hose Bib is laid out like a Vertical Motorized Valve (OakBarn Brewery, 2026-11-19: "The Hose Bib Graphic should be more like a
@@ -2056,7 +2060,7 @@ function hbLinkSvg(g) {
 const MV_ENDS = { plain: [[0, 0.5], [1, 0.5]], Side: [[0.015, 0.5], [0.985, 0.5]], Front: [[0.5, 0.5], [0.5, 0.5]], Front_Elbow: [[0.5, 0.5], [0.5, 0.99]],
   vert: [[0.5, 0], [0.5, 1]] };      // vert: a Butterfly Valve's own up and down drawing; a Hose Bib's IP is its spot (HB_SPOTS, Rule 18.45)
 function mvEnds(g) {
-  const m = String(g.image || '').match(/Manual_Ball_Valve_(Side|Front_Elbow|Front)_(?:Open|Closed)\.svg$/);
+  const m = String(g.image || '').match(/Manual_(?:Ball|Butterfly)_Valve_(Side|Front_Elbow|Front)_(?:Open|Closed)\.svg$/);      // a Manual Butterfly front view has the Ball's ends (2026-11-26)
   const L = mvLook(g);
   let ends = !g.image ? MV_ENDS.plain : isTapMv(g) ? [hbSpotAt(g), HB_INLET] : m ? MV_ENDS[m[1]] : L.vert ? MV_ENDS.vert : MV_ENDS.plain;      // a Hose Bib: its IP spot (Rule 18.45)
   if (L.flip) ends = ends.map(([fx, fy]) => [1 - fx, fy]);      // Left: mirrored, so its ends are too (Rule 18.45)

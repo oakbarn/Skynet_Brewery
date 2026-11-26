@@ -39,6 +39,7 @@ The **Manual Valve Widget** is the same special Widget as before: its Open/Close
 
 The picture stays the same open or closed; while open the **open overlay** (a green ring and a tick) is drawn on top (the Open pictures are retired).
 - **Manual Ball Valve on a front elbow**: the same, with the elbow's leg going down.
+- **Manual Butterfly Valve, front view** and **Manual Butterfly Valve on a front elbow**: the same two, with a butterfly valve's lever on top. They fit a valve on the face of a vessel, at its Low Center Outlet, as on the 3 Vessel sample.
 
 The Tab swaps between the open and the closed picture by itself, and the green open overlay still shows while it is open. A Manual Valve has one IP, in the middle of its picture.
 

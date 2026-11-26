@@ -29,8 +29,8 @@ for (const g of drawn.filter(g => g.kind === 'pipe')) for (const k of ['from', '
   const m = /^dev:(.+):\w+$/.exec(g[k]);
   assert.ok(m ? cloneNames.has(m[1]) : ids.has(g[k]) || /^(eq|vtop):/.test(g[k]), `${g.name} ${k} = ${g[k]} is on the copy`);
 }
-const pipe = drawn.find(g => g.kind === 'pipe' && g.to === 'dev:BM_24_DO@Valve_E_HLT~out_BH_Clone_1:in');
-assert.ok(pipe, 'the HLT out pipe ends on the valve\'s Clone');
+const pipe = drawn.find(g => g.kind === 'pipe' && g.from === 'dev:BM_24_DO@Valve_E_To~HLT_BH_Clone_1:in');
+assert.ok(pipe, 'the To HLT pipe ends on the valve\'s Clone');
 for (const g of drawn.filter(g => g.attachTo)) assert.ok(ids.has(g.attachTo), 'an IP sits on the copied vessel');
 assert.ok(!c.graphics.some(g => g.workspace === 'Brew House 2'), 'the Schema itself is not changed');
 

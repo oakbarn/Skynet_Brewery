@@ -118,6 +118,8 @@ async function brewDay(id, tweak) {
     const lb = store.getProp('wgt_TMR_Step~timer_BH', 'label'); if (!labels.includes(lb)) labels.push(lb);
     if (store.getProp(n.advance, 'visibility') === 'visible' && !store.getProp(n.advance, 'state')) store.setProp(n.advance, 'state', true, 'ui');
     for (const a of n.alarms) if (store.getProp(a, 'active')) store.setProp(a, 'active', false, 'ui');
+    // and turns the Manual Butterfly Valves by hand when asked (OakBarn Brewery, 2026-11-26: the vessels' Low Center Outlets)
+    for (const v of engine.valveAsks.values()) if (!!store.getProp(v.name, 'state') !== v.open) store.setProp(v.name, 'state', v.open, 'ui');
   }, 120);
   engine.start('BrewDay_Flow', 'user');
   const t0 = Date.now();
