@@ -75,12 +75,12 @@ export function dialSvg(e = {}, value, sp = null, text = null) {
   const major = dialMajor(e) - 1, minor = dialMinor(e);
   for (let i = 0; i < major; i++) for (let j = 1; j <= minor; j++) {
     const a = START + (END - START) * (i + j / (minor + 1)) / major, [m0x, m0y] = pt(R - W / 2, a), [m1x, m1y] = pt(R - W / 2 + 5, a);
-    out.push(`<line x1="${f(m0x)}" y1="${f(m0y)}" x2="${f(m1x)}" y2="${f(m1y)}" stroke="#ffffff" stroke-opacity=".7" stroke-width="1"/>`);
+    out.push(`<line x1="${f(m0x)}" y1="${f(m0y)}" x2="${f(m1x)}" y2="${f(m1y)}" stroke="#fafafa" stroke-opacity=".7" stroke-width="1"/>`);
   }
   for (let i = 0; i <= major; i++) {
     const a = START + (END - START) * i / major, n = lo + (hi - lo) * i / major;
     const [t0x, t0y] = pt(R - W / 2, a), [t1x, t1y] = pt(R + W / 2, a), [nx, ny] = pt(R + W / 2 + 12, a);
-    out.push(`<line x1="${f(t0x)}" y1="${f(t0y)}" x2="${f(t1x)}" y2="${f(t1y)}" stroke="#ffffff" stroke-opacity=".85" stroke-width="2"/>`);
+    out.push(`<line x1="${f(t0x)}" y1="${f(t0y)}" x2="${f(t1x)}" y2="${f(t1y)}" stroke="#fafafa" stroke-opacity=".85" stroke-width="2"/>`);
     out.push(`<text x="${f(nx)}" y="${f(ny + 4)}" text-anchor="middle" font-size="${major > 10 ? 9 : 12}" fill="currentColor" fill-opacity=".8">${esc(round(n))}</text>`);
   }
   // the needle
@@ -88,7 +88,7 @@ export function dialSvg(e = {}, value, sp = null, text = null) {
     const a = ang(v), [nx, ny] = pt(R - 10, a), [bx0, by0] = pt(6, a - 90), [bx1, by1] = pt(6, a + 90);
     out.push(`<path d="M${f(bx0)} ${f(by0)}L${f(nx)} ${f(ny)}L${f(bx1)} ${f(by1)}Z" fill="currentColor"/>`);
   }
-  out.push(`<circle cx="${cx}" cy="${cy}" r="9" fill="currentColor"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="#ffffff" fill-opacity=".85"/>`);
+  out.push(`<circle cx="${cx}" cy="${cy}" r="9" fill="currentColor"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="#fafafa" fill-opacity=".85"/>`);
   // the reading, colored by its zone
   const shown = text ?? (v === null ? '--' : v.toFixed(dec)) + (e.units ? String(e.units) : '');
   const full = e.dialShape === 'full', big = full ? 24 : 30;      // Full round: the reading sits inside the ring, a little smaller
