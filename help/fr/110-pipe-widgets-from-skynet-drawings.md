@@ -39,6 +39,7 @@ Le **Widget Manual Valve** est le même Widget spécial qu'avant : son état ouv
 
 L'image reste la même ouverte ou fermée ; tant qu'elle est ouverte, la **superposition ouverte** (un anneau vert et une coche) est dessinée par-dessus (les images Open sont retirées).
 - **Manual Ball Valve on a front elbow** (sur un coude de face) : la même, avec la jambe du coude qui descend.
+- **Manual Butterfly Valve, front view** et **Manual Butterfly Valve on a front elbow** : les deux mêmes, avec le levier d'une vanne papillon en haut. Elles vont sur la face d'une cuve, à sa sortie basse centrale (Low Center Outlet), comme sur l'exemple 3 Vessel.
 
 Le Tab passe tout seul de l'image ouverte à l'image fermée, et la superposition verte ouverte s'affiche toujours tant qu'elle est ouverte. Une vanne manuelle a un IP, au milieu de son image.
 

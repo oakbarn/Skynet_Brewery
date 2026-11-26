@@ -252,6 +252,8 @@
   { "id": 249, "file": "Vessels/Skynet_OakBarn_Stout_Kettle.svg" },
   { "id": 250, "file": "Vessels/Skynet_OakBarn_MLT.svg" },
   { "id": 251, "file": "Vessels/Skynet_OakBarn_Big_MAC_HLT.svg" },
-  { "id": 252, "file": "Vessels/Skynet_OakBarn_HLT_Radiator.svg" }
+  { "id": 252, "file": "Vessels/Skynet_OakBarn_HLT_Radiator.svg" },
+  { "id": 253, "file": "Valves/Manual_Butterfly_Valve_Front_Closed.svg" },
+  { "id": 254, "file": "Valves/Manual_Butterfly_Valve_Front_Elbow_Closed.svg" }
  ]
 }

@@ -25,6 +25,8 @@ du tuyau, comme pour toutes les autres Orientations. Cela marche pour chaque des
 | Manual Ball Valve, side view | la face extérieure de chaque virole, à gauche et à droite |
 | Manual Ball Valve, front view | les deux au centre de l'ouverture |
 | Manual Ball Valve on a front elbow | le centre de l'ouverture, et la face extérieure de la virole du bas |
+| Manual Butterfly Valve, front view | les deux au centre de l'ouverture |
+| Manual Butterfly Valve on a front elbow | le centre de l'ouverture, et la face extérieure de la virole du bas |
 | Une image à vous | le milieu de ses côtés gauche et droit |
 
 - **Rotate 45** dans la barre Edit layout tourne la vanne, et ses IP tournent avec elle. Deux pas la mettent debout (Vertical).

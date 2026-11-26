@@ -69,7 +69,9 @@ test('the shipped sample Schemas and the default Schema follow the rule', async 
   for (const f of ['config/brewery.json', 'samples/configs/three-vessel-one-pump/config.json']) {   // the other Schemas wait in Sandbox/ (Rule 16.8)
     const c = JSON.parse(fs.readFileSync(new URL('../' + f, import.meta.url), 'utf8'));
     for (const p of (c.graphics || []).filter(g => g.kind === 'pipe' && !g.hose)) {
-      assert.ok(p.straight && p.points.length === 2 && onAngle(p.points[0], p.points[1]), `${f}: ${p.id}`);
+      // a pipe of no length joining two IPs on one spot (the 3 Vessel sample's butterflies on the vessel outlets, 2026-11-26) is straight too
+      const none = p.direct && p.points.length === 2 && p.points[0][0] === p.points[1][0] && p.points[0][1] === p.points[1][1];
+      assert.ok(p.straight && p.points.length === 2 && (none || onAngle(p.points[0], p.points[1])), `${f}: ${p.id}`);
     }
     assert.deepEqual(straightenPipes(c), [], f);
   }

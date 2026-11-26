@@ -25,6 +25,8 @@ ends, the same as every other Orientation. This works for every Skynet valve dra
 | Manual Ball Valve, side view | the outer face of each ferrule, left and right |
 | Manual Ball Valve, front view | both at the center of the opening |
 | Manual Ball Valve on a front elbow | the center of the opening, and the bottom ferrule's outer face |
+| Manual Butterfly Valve, front view | both at the center of the opening |
+| Manual Butterfly Valve on a front elbow | the center of the opening, and the bottom ferrule's outer face |
 | A picture of your own | the middle of its left and right sides |
 
 - **Rotate 45** on the Edit layout bar turns the valve, and its IPs turn with it. Two steps stand it up (Vertical).
