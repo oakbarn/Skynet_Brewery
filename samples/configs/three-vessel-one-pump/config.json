@@ -455,7 +455,7 @@
     "follow": "BM1w1_1_HLT_BH",
     "followWhen": [
      "BM_22_DO@Pump_Pump_BH",
-     "BM_24_DO@Valve_E_HLT~out_BH",
+     "wgt_MV_HLT~out_BH",
      "BM_27_DO@Valve_E_To~mash~tun_BH"
     ],
     "followLoss": 6.11,
@@ -493,7 +493,7 @@
     "follow": "BM1w1_2_Mash_BH",
     "followWhen": [
      "BM_22_DO@Pump_Pump_BH",
-     "BM_25_DO@Valve_E_Mash~tun~out_BH",
+     "wgt_MV_Mash~tun~out_BH",
      "BM_28_DO@Valve_E_To~kettle_BH"
     ],
     "followLoss": 0.56,
