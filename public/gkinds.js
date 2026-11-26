@@ -39,11 +39,11 @@ export function kindChangeError(current, incoming, keyOf = el => el?._key) {
 
 // The sample: one gGlobal of each Kind, none of them on a Tab.
 export const SAMPLE_GLOBALS = [
-  { name: 'gS_Brewer_Note', type: 'gGlobal', kind: 'string', initial: 'Add the yeast nutrient at 10 minutes' },
-  { name: 'gV_Strike_Temp', type: 'gGlobal', kind: 'value', initial: '163', precision: 1, units: '°F', min: 32, max: 212 },
-  { name: 'gB_Grain_Added', type: 'gGlobal', kind: 'bool', initial: 'false' },
-  { name: 'gT_Mash_Rest', type: 'gGlobal', kind: 'time', initial: '01:00:00' },
-  { name: 'gD_Brew_Day_Start', type: 'gGlobal', kind: 'datetime', initial: '2026-11-07T07:00:00' },
+  { name: 'gblS_Brewer_Note', type: 'gGlobal', kind: 'string', initial: 'Add the yeast nutrient at 10 minutes' },
+  { name: 'gblV_Strike_Temp', type: 'gGlobal', kind: 'value', initial: '163', precision: 1, units: '°F', min: 32, max: 212 },
+  { name: 'gblB_Grain_Added', type: 'gGlobal', kind: 'bool', initial: 'false' },
+  { name: 'gblT_Mash_Rest', type: 'gGlobal', kind: 'time', initial: '01:00:00' },
+  { name: 'gblDT_Brew_Day_Start', type: 'gGlobal', kind: 'datetime', initial: '2026-11-07T07:00:00' },
 ];
 // the samples whose names are not used yet, so adding them twice does nothing
 export function samplesToAdd(elements, graphics = []) {
@@ -59,11 +59,13 @@ export function samplesToAdd(elements, graphics = []) {
 // There is no Graphic gGlobal (Panel Update 8): a gG_ name is an error; a picture is a Graphic (Picture) Widget.
 // The = 152 is the first value, used only when the gGlobal is made: a gGlobal keeps its value (Rule 1.22).
 export const G_DECLARE = {
-  value: { long: 'gGlobalValue', short: 'gV', prefix: 'gV_', what: 'a Value (a number)', local: 'value' },
-  string: { long: 'gGlobalString', short: 'gS', prefix: 'gS_', what: 'a String (text)', local: 'string' },
-  time: { long: 'gGlobalTime', short: 'gT', prefix: 'gT_', what: 'a Time', local: 'time' },
-  datetime: { long: 'gGlobalDateTime', short: 'gD', prefix: 'gD_', what: 'a Date Time', local: 'datetime' },
-  bool: { long: 'gGlobalBoolean', short: 'gB', prefix: 'gB_', what: 'a Boolean (true or false)', local: 'bool' },
+  // the prefixes (OakBarn Brewery, 2026-11-26, gGlobal rules: Text gblS_ "as a string", Value gblV_, Time gblT_, DateTime gblDT_,
+  // Boolean gblB_); the short word is the prefix without its _
+  value: { long: 'gGlobalValue', short: 'gblV', prefix: 'gblV_', what: 'a Value (a number)', local: 'value' },
+  string: { long: 'gGlobalString', short: 'gblS', prefix: 'gblS_', what: 'a String (text)', local: 'string' },
+  time: { long: 'gGlobalTime', short: 'gblT', prefix: 'gblT_', what: 'a Time', local: 'time' },
+  datetime: { long: 'gGlobalDateTime', short: 'gblDT', prefix: 'gblDT_', what: 'a Date Time', local: 'datetime' },
+  bool: { long: 'gGlobalBoolean', short: 'gblB', prefix: 'gblB_', what: 'a Boolean (true or false)', local: 'bool' },
 };
 const LOCAL_WORDS = ['value', 'string', 'bool', 'time', 'datetime'];
 // the word after new: { kind, global } or null when it is not a variable word
@@ -73,13 +75,14 @@ export function declareWord(word) {
   for (const [kind, d] of Object.entries(G_DECLARE)) if (w === d.long.toLowerCase() || w === d.short.toLowerCase()) return { kind, global: true };
   return null;
 }
-// the Kind a name's start says (gV_ -> value, gG_ -> graphic), or null for a name with no gGlobal start
+// the Kind a name's start says (gblV_ -> value, gblDT_ -> datetime, gG_ -> graphic), or null for a name with no gGlobal start
 export function prefixKind(name) {
-  const m = /^g([a-z])_/i.exec(String(name ?? ''));
+  const n = String(name ?? '');
+  if (/^gG_/i.test(n)) return 'graphic';
+  const m = /^gbl(DT|S|V|T|B)_/i.exec(n);
   if (!m) return null;
   const c = m[1].toUpperCase();
-  if (c === 'G') return 'graphic';
-  return Object.keys(G_DECLARE).find(k => G_DECLARE[k].prefix[1] === c) ?? null;
+  return Object.keys(G_DECLARE).find(k => G_DECLARE[k].prefix.slice(3, -1).toUpperCase() === c) ?? null;
 }
 // new <word> <name>: { kind, global } when it is fine, or { error } in plain words
 export function declareCheck(word, name) {

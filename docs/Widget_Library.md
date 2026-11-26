@@ -159,6 +159,7 @@ The pattern for Properties dialogs: Delete, **COPY**, Cancel, Save at the top; f
 | Properties box | Visible, Hidden Locked, Font size, Font, Bold, Fore color, Back color, Alignment, Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
 | COPY | Saves, then makes a copy (next `w_Text_N`) on the Build Tab |
 | Word wrap | Always on (no switch) |
+| Tap to type | Off at the start. On: an operator taps it on its Tab and types its Text (Rule 1.36) |
 
 Process attributes: `.text` (`.value` = `.text`), `.label`, `.label_visible`, `.font_label`, `.size_label`, `.fore_label`, `.back_label`, `.bold_label`, `.alignment_label`, `.font`, `.size`, `.fore`, `.back`, `.bold`, `.alignment`, `.visible`, `.hiddenlock`, `.x` (`.xh`, `.x_hPosition`), `.y` (`.yv`, `.y_vPosition`), `.width`, `.height`, `.lock` (read only), `.tab`.
 

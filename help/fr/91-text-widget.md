@@ -25,6 +25,8 @@ Une ligne au-dessus du Text. Vide = le Name.
 
 **Le retour à la ligne est toujours actif** : un long texte passe à la ligne suivante à l'intérieur de la case.
 
+**Tap to type** : activé, un operator touche le Widget Text sur son onglet, tape son Text dans la case qui s'ouvre et appuie sur **Set**. C'est ainsi que le brasseur écrit les Notes sur l'onglet Reporting de l'exemple 3 Vessel. Désactivé (au départ), une touche ne fait rien et seuls ses Properties ou un Process changent le Text (Règle Skynet 1.36).
+
 ## Dans un Process {#in-a-process}
 
 `name.attribute = Something` (nom.attribut = quelque chose) est la façon dont un Process l'utilise, par exemple `w_Text_1.fore = "Red"`. `""` remet ce que disent ses Properties. Le lire donne ce qu'il est maintenant.

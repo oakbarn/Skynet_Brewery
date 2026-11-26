@@ -41,6 +41,8 @@ export const COMMANDS = [
   ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
   ['ask_recipe', 'no Recipe loaded: the No Recipe Found pop-up, waits for one'],
   ['wait_boil', 'until the Boil Probe reaches skn_Boil_Temp (wait_boil -1: 1 degree under)'],
+  // newSec (OakBarn Brewery, 2026-11-26, Rule 1.34): a Process variable with the seconds of a Timer, Time Widget or any time
+  ['newSec', 'newSec vV_Seconds = a Timer, Time Widget or time: makes vV_Seconds the seconds'],
   // the Chiller Overlay (OakBarn Brewery, 2026-11-15, Rule 5.42): picking one opens the list of Chiller Templates, then of Vessels
   ['place_Chiller', 'draw a Chiller Template in a vessel, with its hoses'], ['remove_Chiller', 'take a placed chiller off again'],
 ];

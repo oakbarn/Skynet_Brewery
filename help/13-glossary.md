@@ -80,7 +80,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **gGlobal**: a variable with Global Scope, for Processes. It has no Database and .API box: a Process sends it to the database with `send_db` or `DBSend`. Suggested names start with `gG` (`gGV_`, `gGB_` ...). It was gKonstant and gAPI (and before that vKonstant and vAPI).
 
-**gGlobal Kind**: what a gGlobal holds: a Value (gV_), a String of text (gS_), a Boolean, true or false (gB_), a Time (gT_), a Date Time (gD_) or a Graphic (gG_). The Kind is set once and never changes. A gGlobal keeps its value after a restart. See [gGlobal Kinds](108-gglobal-kinds).
+**gGlobal Kind**: what a gGlobal holds: a Value (gblV_), a String of text (gblS_), a Boolean, true or false (gblB_), a Time (gblT_), a Date Time (gblDT_) or a Graphic (gG_). The Kind is set once and never changes. A gGlobal keeps its value after a restart. See [gGlobal Kinds](108-gglobal-kinds).
 
 **gKonstant**: retired 2026-10-30, now a **gGlobal**.
 

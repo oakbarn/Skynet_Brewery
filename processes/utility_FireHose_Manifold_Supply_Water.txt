@@ -7,35 +7,40 @@
 // Water Tab (Process Sample 1, 2026-11-20; Panel Update 9: the Water buttons act as one Group). His codes, labels and messages are kept; only what Skynet needs changed:
 //   - a Process Widget on the Water Tab sets the code and starts this Process (no looper switch);
 //   - "Manifold Set?" is an ask with Done (was the Advance switch and gblVEndlessLoop 799 / 800);
-//   - Set Time is a pop-up that asks for the time into gblT_SetTimer_Water (was a Set Timer slot on his Water workspace);
+//   - Set Time is a pop-up that asks for the time into wgt_TM_Set~Timer_BH (was a Set Timer slot on his Water workspace);
 //   - the run is one wait; the Water Override button (Rule 16.11) shuts the water off early;
-//   - a hidden count-up timer, wgt_TMR_Water~elapsed_BH, keeps the true run time in gblT_Elapsed_Water (for seconds per gallon);
-//   - his screen boxes (gblS_Brewery_Top_2 / _3, Bottom_1 / _3 / _4, the insp_ pictures) are one message box, gblS_Water_Text_1_Water;
+//   - a hidden count-up timer, wgt_TMR_Water~elapsed_BH, keeps the true run time; newSec turns it into seconds, vV_Elapsed_Seconds (for seconds per gallon, Rule 1.34);
+//   - his screen boxes (gblS_Brewery_Top_2 / _3, Bottom_1 / _3 / _4, the insp_ pictures) are one message box, wgt_TXT_Water~message_BH;
 //   - the Water Tab is for picking only (OakBarn Brewery, 2026-11-25): a button goes to the Brew House, the Tab with the manifold,
 //     where the message, both timers, the warnings, the Water Override and the Float are. "Manifold Set?" is an ask_Tab there: a bar
 //     on top, so the valves and the rest of the Tab still work while it is up (but not Edit layout). Done starts the 20 second delay,
 //     time to move a hose by hand before the water flows.
-// The code in gblV_Water_Switch_Status_Water:
-//   1001 Fire Hose 1 Minute, 1002 2 Minutes, 1003 20 Seconds, 1004 Set Time, 1005 until the Float
-//   2001 Manifold 1 Minute, 2002 2 Minutes, 2003 3 Minutes, 2004 Set Time, 2005 until the Float
-//   999 or -9999: nothing to do
+// Which Water button was pressed: skn_Started_By is the name of the button's Process that started this one (Rule 1.35;
+// OakBarn Brewery, 2026-11-26: "the Water switch code could be deleted ... The process could be rewritten so it was not needed").
+//   FireHose_1_Minute, FireHose_2_Minutes, FireHose_20_Seconds, FireHose_Set_Time, FireHose_Float
+//   Manifold_1_Minute, Manifold_2_Minutes, Manifold_3_Minutes, Manifold_Set_Time, Manifold_Float
+//   started any other way: nothing to do
 new string vSMsg
 new string vSMsg1
-new value vVSwitchNumber
+new string vSButton
 new value vV_GBrew_Status
 new string vSTimerDisplayName
 new value vVPump
 new string vSVesselFrom
 new string vS_Label
 new time vT_Set
-vVSwitchNumber = gblV_Water_Switch_Status_Water
+vSButton = skn_Started_By
 vV_GBrew_Status = gblV_Brew_Status
-print "@16 Water Valve = "
-print vVSwitchNumber
-if vVSwitchNumber == -9999
-	goto "End_FMS_Water"
+print "@16 Water button = " + vSButton
+vSVesselFrom = ""
+if vSButton == "FireHose_1_Minute" or vSButton == "FireHose_2_Minutes" or vSButton == "FireHose_20_Seconds" or vSButton == "FireHose_Set_Time" or vSButton == "FireHose_Float"
+	vSVesselFrom = "Fire Hose"
 endif
-if vVSwitchNumber == 999
+if vSButton == "Manifold_1_Minute" or vSButton == "Manifold_2_Minutes" or vSButton == "Manifold_3_Minutes" or vSButton == "Manifold_Set_Time" or vSButton == "Manifold_Float"
+	vSVesselFrom = "Manifold Supply Valve"
+endif
+if vSVesselFrom == ""
+	print "Not started by a Fire Hose or Manifold button"
 	goto "End_FMS_Water"
 endif
 BM_33_DO@Valve_E_Manifold~Valve_WA = false
@@ -45,76 +50,68 @@ BM_32_DI@Float_Force~floats_BH.visible = false
 // the Water timer shows 00:00:00 from the press until the water flows (Panel Update 9, item 12d)
 stop "wgt_TMR_Water~timer_BH"
 wgt_TMR_Water~timer_BH = 00:00:00
-gblS_Water_Text_1_Water = "Wait! Will Auto Advance"
+wgt_TXT_Water~message_BH = "Wait! Will Auto Advance"
 //...........................................
 //Set Water Valve Status
 //FireHose
-if vVSwitchNumber > 999
-	if vVSwitchNumber < 2000
-		print "@ 92 Firehose Timers"
-		vSVesselFrom = "Fire Hose"
-		vVPump = 200
-		vSTimerDisplayName = "Firehose Timer"
-		vS_Label = "Get Fire Hose Ready!"
-		gblV_Water_Switch_Status_Water = -1
-		vSMsg = "Fire Hose ON for "
-		goto "Timed_FireHose"
-	endif
+if vSVesselFrom == "Fire Hose"
+	print "@ 92 Firehose Timers"
+	vVPump = 200
+	vSTimerDisplayName = "Firehose Timer"
+	vS_Label = "Get Fire Hose Ready!"
+	vSMsg = "Fire Hose ON for "
+	goto "Timed_FireHose"
 endif
 //...........................................
-if vVSwitchNumber > 1999
-	if vVSwitchNumber < 3000
-		vSVesselFrom = "Manifold Supply Valve"
-		vVPump = 100
-		vSTimerDisplayName = "Manifold Supply On"
-		vSMsg = "Manifold Supply Valve ON for "
-		goto "Manifold_Timed"
-	endif
+if vSVesselFrom == "Manifold Supply Valve"
+	vVPump = 100
+	vSTimerDisplayName = "Manifold Supply On"
+	vSMsg = "Manifold Supply Valve ON for "
+	goto "Manifold_Timed"
 endif
-print "Not a Fire Hose or Manifold code"
 goto "End_FMS_Water"
 //..............................................
 [Timed_FireHose]
 print "@ 119  Timed_FireHose"
-gblS_Water_Text_1_Water = "You may set the Manifold Manually how the transfer should be as needed. The Firehose can be used without setting any additional valves.  Simply set the manifold to the desired configuration by clicking on a valve to toggle between On and Off. You are the Safety and Control. The Brewery Pane and Valves will be restored to the way they were prior."
+wgt_TXT_Water~message_BH = "You may set the Manifold Manually how the transfer should be as needed. The Firehose can be used without setting any additional valves.  Simply set the manifold to the desired configuration by clicking on a valve to toggle between On and Off. You are the Safety and Control. The Brewery Pane and Valves will be restored to the way they were prior."
 show "Brew House"
-if vVSwitchNumber == 1005
+if vSButton == "FireHose_Float"
 	// a Float button: the float shows on the Brew House while it is used
 	BM_32_DI@Float_Force~floats_BH.visible = true
 endif
 ask_Tab "Manifold Set? Set the manifold, then click Done when ready."
 //FireHose 1 minutes
-if vVSwitchNumber == 1001
+if vSButton == "FireHose_1_Minute"
 	vT_Set = 00:01:00
 	vSMsg1 = " One Minute. It will shut off when timer reaches 00:00:00!"
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_FireHose"
 endif
 //FireHose 2 minutes
-if vVSwitchNumber == 1002
+if vSButton == "FireHose_2_Minutes"
 	vT_Set = 00:02:00
 	vSMsg1 = " Two Minutes. "
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_FireHose"
 endif
 //FireHose 20 Seconds
-if vVSwitchNumber == 1003
+if vSButton == "FireHose_20_Seconds"
 	vT_Set = 00:00:20
 	vSMsg1 = " Twenty Seconds. "
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_FireHose"
 endif
 //Firehose Set Time
-if vVSwitchNumber == 1004
-	gblT_SetTimer_Water = 00:00:00
-	gblS_Water_Text_1_Water = "Set the desired Run Time."
-	// a pop-up asks for the time and puts it in the gGlobal gblT_SetTimer_Water (Rule 16.5); asked again if it is 00:00:00
+if vSButton == "FireHose_Set_Time"
+	wgt_TM_Set~Timer_BH = 00:00:00
+	wgt_TXT_Water~message_BH = "Set the desired Run Time."
+	// a pop-up asks for the time and puts it in the Time Widget wgt_TM_Set~Timer_BH (Rule 16.5); asked again if it is 00:00:00
 	[Ask_Set_Time_FH]
-	ask "Set the desired Run Time (hh:mm:ss)" gblT_SetTimer_Water
-	if gblT_SetTimer_Water <= 00:00:00
+	ask "Set the desired Run Time (hh:mm:ss)" wgt_TM_Set~Timer_BH
+	if wgt_TM_Set~Timer_BH <= 00:00:00
 		goto "Ask_Set_Time_FH"
 	endif
-	vT_Set = gblT_SetTimer_Water
+	vT_Set = wgt_TM_Set~Timer_BH
 	vSMsg1 = " "
 	vSMsg = vSMsg + vSMsg1
 	vSMsg1 = vT_Set
@@ -123,7 +120,7 @@ if vVSwitchNumber == 1004
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_FireHose"
 endif
-if vVSwitchNumber == 1005
+if vSButton == "FireHose_Float"
 	vT_Set = 00:00:00
 	vSMsg1 = " The Firehose will be on until the FireHose Float is made.  A Timer will start and count up.  Click OverRide? to shut off the Firehose!"
 	vSMsg = vSMsg + vSMsg1
@@ -134,7 +131,7 @@ goto "End_FMS_Water"
 //................................................................
 [Delay_FireHose]
 print "@ 204 Delay_FireHose"
-gblS_Water_Text_1_Water = "FireHose ON in 20 Seconds! " + vSMsg
+wgt_TXT_Water~message_BH = "FireHose ON in 20 Seconds! " + vSMsg
 stop "wgt_TMR_Water~delay_BH"
 wgt_TMR_Water~delay_BH = 00:00:20
 wgt_TMR_Water~delay_BH.countdown = true
@@ -142,15 +139,15 @@ wgt_TMR_Water~delay_BH.visible = true
 start "wgt_TMR_Water~delay_BH"
 wgt_ALM_Fire~Hose~warning_BH = true
 wait wgt_TMR_Water~delay_BH <= 00:00:10
-gblS_Water_Text_1_Water = "FireHose ON in 10 Seconds!"
+wgt_TXT_Water~message_BH = "FireHose ON in 10 Seconds!"
 wait wgt_TMR_Water~delay_BH <= 00:00:05
-gblS_Water_Text_1_Water = "FireHose ALMOST On!"
+wgt_TXT_Water~message_BH = "FireHose ALMOST On!"
 wait wgt_TMR_Water~delay_BH <= 00:00:00
 stop "wgt_TMR_Water~delay_BH"
 wgt_TMR_Water~delay_BH.visible = false
 wgt_ALM_Fire~Hose~warning_BH = false
-gblS_Water_Text_1_Water = vSMsg
-if vVSwitchNumber == 1005
+wgt_TXT_Water~message_BH = vSMsg
+if vSButton == "FireHose_Float"
 	goto "Start_Timer_Floats"
 endif
 goto "Start_Timers"
@@ -158,44 +155,44 @@ goto "Start_Timers"
 [Manifold_Timed]
 print "@ 256 Manifold Timed"
 vS_Label = "Manifold Supply Valve will Open!"
-gblS_Water_Text_1_Water = "You need to set the Manifold Manually how the transfer should be.  Simply set the manifold to the desired configuration by clicking on a valve to toggle between On and Off.  You are the Safety and Control. The Brewery Pane and Valves will be restored to the way they were prior."
+wgt_TXT_Water~message_BH = "You need to set the Manifold Manually how the transfer should be.  Simply set the manifold to the desired configuration by clicking on a valve to toggle between On and Off.  You are the Safety and Control. The Brewery Pane and Valves will be restored to the way they were prior."
 show "Brew House"
-if vVSwitchNumber == 2005
+if vSButton == "Manifold_Float"
 	// a Float button: the float shows on the Brew House while it is used
 	BM_32_DI@Float_Force~floats_BH.visible = true
 endif
 ask_Tab "Manifold Set? Set the manifold, then click Done when ready."
 //Manifold 1 minute
-if vVSwitchNumber == 2001
+if vSButton == "Manifold_1_Minute"
 	vT_Set = 00:01:00
 	vSMsg1 = " One Minute. "
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_Manifold"
 endif
 //Manifold 2 minute
-if vVSwitchNumber == 2002
+if vSButton == "Manifold_2_Minutes"
 	vT_Set = 00:02:00
 	vSMsg1 = " Two Minutes. "
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_Manifold"
 endif
 //Manifold 3 minute
-if vVSwitchNumber == 2003
+if vSButton == "Manifold_3_Minutes"
 	vT_Set = 00:03:00
 	vSMsg1 = " Three Minutes. "
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_Manifold"
 endif
-if vVSwitchNumber == 2004
-	gblT_SetTimer_Water = 00:00:00
-	gblS_Water_Text_1_Water = "Set the desired Run Time."
-	// a pop-up asks for the time and puts it in the gGlobal gblT_SetTimer_Water (Rule 16.5); asked again if it is 00:00:00
+if vSButton == "Manifold_Set_Time"
+	wgt_TM_Set~Timer_BH = 00:00:00
+	wgt_TXT_Water~message_BH = "Set the desired Run Time."
+	// a pop-up asks for the time and puts it in the Time Widget wgt_TM_Set~Timer_BH (Rule 16.5); asked again if it is 00:00:00
 	[Ask_Set_Time_MSV]
-	ask "Set the desired Run Time (hh:mm:ss)" gblT_SetTimer_Water
-	if gblT_SetTimer_Water <= 00:00:00
+	ask "Set the desired Run Time (hh:mm:ss)" wgt_TM_Set~Timer_BH
+	if wgt_TM_Set~Timer_BH <= 00:00:00
 		goto "Ask_Set_Time_MSV"
 	endif
-	vT_Set = gblT_SetTimer_Water
+	vT_Set = wgt_TM_Set~Timer_BH
 	vSMsg1 = " "
 	vSMsg = vSMsg + vSMsg1
 	vSMsg1 = vT_Set
@@ -204,7 +201,7 @@ if vVSwitchNumber == 2004
 	vSMsg = vSMsg + vSMsg1
 	goto "Delay_Manifold"
 endif
-if vVSwitchNumber == 2005
+if vSButton == "Manifold_Float"
 	vT_Set = 00:00:00
 	vSMsg1 = " The Manifold Supply Valve will be open until the Main Brewery Float is made.  A Timer will start and count up.  Click OverRide? to shut the Manifold Supply Valve!"
 	vSMsg = vSMsg + vSMsg1
@@ -214,7 +211,7 @@ endif
 goto "End_FMS_Water"
 [Delay_Manifold]
 print "@ 342 Delay Manifold"
-gblS_Water_Text_1_Water = "Manifold Supply Valve ON in 20 Seconds! " + vSMsg
+wgt_TXT_Water~message_BH = "Manifold Supply Valve ON in 20 Seconds! " + vSMsg
 stop "wgt_TMR_Water~delay_BH"
 wgt_TMR_Water~delay_BH = 00:00:20
 wgt_TMR_Water~delay_BH.countdown = true
@@ -222,15 +219,15 @@ wgt_TMR_Water~delay_BH.visible = true
 start "wgt_TMR_Water~delay_BH"
 wgt_ALM_Manifold~warning_BH = true
 wait wgt_TMR_Water~delay_BH <= 00:00:10
-gblS_Water_Text_1_Water = "Manifold Supply Valve ON in 10 Seconds!"
+wgt_TXT_Water~message_BH = "Manifold Supply Valve ON in 10 Seconds!"
 wait wgt_TMR_Water~delay_BH <= 00:00:05
-gblS_Water_Text_1_Water = "Manifold Supply Valve ALMOST On!"
+wgt_TXT_Water~message_BH = "Manifold Supply Valve ALMOST On!"
 wait wgt_TMR_Water~delay_BH <= 00:00:00
 stop "wgt_TMR_Water~delay_BH"
 wgt_TMR_Water~delay_BH.visible = false
 wgt_ALM_Manifold~warning_BH = false
-gblS_Water_Text_1_Water = vSMsg
-if vVSwitchNumber == 2005
+wgt_TXT_Water~message_BH = vSMsg
+if vSButton == "Manifold_Float"
 	goto "Start_Timer_Floats"
 endif
 goto "Start_Timers"
@@ -271,10 +268,10 @@ stop "wgt_TMR_Water~elapsed_BH"
 wgt_TMR_Water~elapsed_BH = 00:00:00
 wgt_TMR_Water~elapsed_BH.countdown = false
 start "wgt_TMR_Water~elapsed_BH"
-if vVSwitchNumber == 1005
+if vSButton == "FireHose_Float"
 	BM_31_DO@Valve_E_Firehose~Valve_WA = true
 endif
-if vVSwitchNumber == 2005
+if vSButton == "Manifold_Float"
 	BM_33_DO@Valve_E_Manifold~Valve_WA = true
 endif
 // the water flows: the button pressed shows Running, the other Water buttons stay greyed out (Panel Update 9, item 12a)
@@ -287,9 +284,9 @@ goto "Exit_Timer_End"
 [Exit_Timer_End]
 print "@ 454 Exit_Timer_End"
 stop "wgt_TMR_Water~timer_BH"
-// the true run time, whether the wait was met or Override ended it, is kept in gblT_Elapsed_Water
+// the true run time, whether the wait was met or Override ended it, stays in the stopped timer; newSec puts it in seconds (Rule 1.34)
 stop "wgt_TMR_Water~elapsed_BH"
-gblT_Elapsed_Water = wgt_TMR_Water~elapsed_BH
+newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH
 if vVPump == 100
 	BM_33_DO@Valve_E_Manifold~Valve_WA = false
 endif
@@ -302,11 +299,10 @@ wgt_ALM_Fire~Hose~warning_BH = false
 wgt_ALM_Manifold~warning_BH = false
 wgt_TMR_Water~delay_BH.visible = false
 BM_32_DI@Float_Force~floats_BH.visible = false
-gblS_Water_Text_1_Water = "Wait.  Will Auto Advance"
+wgt_TXT_Water~message_BH = "Wait.  Will Auto Advance"
 gblV_Brew_Status = vV_GBrew_Status
-gblV_Water_Switch_Status_Water = -9999
 BM_33_DO@Valve_E_Manifold~Valve_WA = false
 BM_31_DO@Valve_E_Firehose~Valve_WA = false
-gblS_Water_Text_1_Water = "Ready. Pick a Fire Hose or Manifold button."
+wgt_TXT_Water~message_BH = "Ready. Pick a Fire Hose or Manifold button."
 // every Water button shows Stopped and its Start works again (Panel Update 9, item 12a)
 wgt_PSW_FireHose~1~Minute_WA.phase = "stopped"

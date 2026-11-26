@@ -148,15 +148,15 @@ Fixed numbers for common conversions are built in, so a Process can write `gGV_B
 
 `NULL` means **no value at all**. It is not 0, not `false` and not `""`: it is empty.
 
-1. **Empty a value:** `gV_Strike = NULL`. Its box on the Tab shows **blank** until something sets it again, and it stays empty after a restart.
-2. **Ask if it is empty:** `if gV_Strike == NULL` (or `!= NULL` for "has a value").
-3. **Math needs a value:** `gV_Strike + 5`, `gV_Strike += 1` or `if gV_Strike > 150` on an empty value **stops the Process** and says which value is empty. Test it first:
+1. **Empty a value:** `gblV_Strike = NULL`. Its box on the Tab shows **blank** until something sets it again, and it stays empty after a restart.
+2. **Ask if it is empty:** `if gblV_Strike == NULL` (or `!= NULL` for "has a value").
+3. **Math needs a value:** `gblV_Strike + 5`, `gblV_Strike += 1` or `if gblV_Strike > 150` on an empty value **stops the Process** and says which value is empty. Test it first:
 
 ```
-if gV_Strike == NULL
-  gV_Strike = 152
+if gblV_Strike == NULL
+  gblV_Strike = 152
 endif
-gV_Strike = gV_Strike + 1
+gblV_Strike = gblV_Strike + 1
 ```
 
 `NULL` works for every Kind: a number, text, a time, a date and time, or true / false, in a Process variable, a gGlobal or a Value Widget. A Device (a pump, a valve, a Heating Element) is always on or off, so `Pump_1 = NULL` is an error. `NULL`, `Null` and `null` are the same word.

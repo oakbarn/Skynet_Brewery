@@ -80,7 +80,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **gGlobal** : une variable à portée globale, pour les Processes. Elle n'a pas de case Database and .API : un Process l'envoie à la base de données avec `send_db` ou `DBSend`. Les noms proposés commencent par `gG` (`gGV_`, `gGB_` ...). C'était gKonstant et gAPI (et avant cela vKonstant et vAPI).
 
-**gGlobal Kind** (sorte de gGlobal) : ce que contient un gGlobal : une valeur, Value (gV_), un texte, String (gS_), vrai ou faux, Boolean (gB_), une heure, Time (gT_), une date et heure, Date Time (gD_) ou une image, Graphic (gG_). La sorte est choisie une fois et ne change jamais. Un gGlobal garde sa valeur après un redémarrage. Voir [Les sortes de gGlobals](108-gglobal-kinds).
+**gGlobal Kind** (sorte de gGlobal) : ce que contient un gGlobal : une valeur, Value (gblV_), un texte, String (gblS_), vrai ou faux, Boolean (gblB_), une heure, Time (gblT_), une date et heure, Date Time (gblDT_) ou une image, Graphic (gG_). La sorte est choisie une fois et ne change jamais. Un gGlobal garde sa valeur après un redémarrage. Voir [Les sortes de gGlobals](108-gglobal-kinds).
 
 **gKonstant** : retiré le 2026-10-30, c'est maintenant un **gGlobal**.
 

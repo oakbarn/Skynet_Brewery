@@ -819,6 +819,8 @@ async function route(req, res) {
     const { name, prop, value } = await jsonBody(req);
     const el = store.get(name);
     if (!el) return fail(res, 404, `No element "${name}"`);
+    // a Text Widget is set from its Tab only when Tap to type is on, and only its Text (Rule 1.36)
+    if (el.type === 'text' && !(store.config.graphics ?? []).some(g => g.kind === 'text' && g.name === el.name && g.tapType === true && ['text', 'value'].includes(String(prop).toLowerCase()))) return fail(res, 400, `"${name}" is a Text Widget without Tap to type`);
     if (INPUT_PROPS[el.type]?.includes(String(prop).toLowerCase()) && el.device && hw.devices.get(el.device)?.connection !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
     store.setProp(name, prop, value, 'ui');
     runWidgetCode(name, prop, 'user');      // a Code Value Widget runs its Code (Rule 1.27)

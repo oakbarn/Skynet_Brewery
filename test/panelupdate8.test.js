@@ -124,6 +124,6 @@ assert.match(hw, /emergencyOff\(source = 'emergency'\)/);
 // ---- no Graphic gGlobal ----
 assert.ok(!('graphic' in VAR_KINDS));
 assert.ok(!SAMPLE_GLOBALS.some(s => s.kind === 'graphic'));
-assert.match(declareCheck('new', 'gG_Pic')?.error ?? declareCheck('gV', 'gG_Pic')?.error ?? '', /no Graphic gGlobal/);
+assert.match(declareCheck('new', 'gG_Pic')?.error ?? declareCheck('gblV', 'gG_Pic')?.error ?? '', /no Graphic gGlobal/);
 
 console.log('panelupdate8 ok');

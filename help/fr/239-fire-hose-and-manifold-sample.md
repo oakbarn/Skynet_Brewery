@@ -29,7 +29,7 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
 | FireHose 1 Minute | Manifold 1 Minute | De l'eau pendant 1 minute |
 | FireHose 2 Minutes | Manifold 2 Minutes | De l'eau pendant 2 minutes |
 | FireHose 20 Seconds | Manifold 3 Minutes | De l'eau pendant 20 secondes ou 3 minutes |
-| Firehose Set Time | Set Time | Une fenêtre demande le temps ; il va dans le gGlobal `gblT_SetTimer_Water` |
+| Firehose Set Time | Set Time | Une fenêtre demande le temps ; il va dans le Time Widget caché `wgt_TM_Set~Timer_BH` |
 | Use FireHose Float | Use Manifold Float | De l'eau jusqu'à ce que le **Water float** (flotteur) soit fait |
 | FireHose Off | | L'arrête tout de suite et ferme les deux vannes |
 
@@ -46,8 +46,8 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
    ([Override button](96-override-button)). Chaque remplissage d'eau du robinet a son propre bouton Override. Il n'apparaît
    qu'une fois l'eau ouverte, donc il n'y en a pas pendant l'avertissement de 20 secondes. **FireHose Off** l'arrête à tout moment.
 5. **Le vrai temps de marche est gardé.** Un minuteur caché qui compte vers le haut, **Water elapsed**, tourne de l'ouverture de la
-   vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Ce temps va dans le gGlobal caché
-   `gblT_Elapsed_Water` (True Run Time), pour les secondes par gallon.
+   vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Le minuteur garde ce temps, et la ligne
+   `newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH` le change en secondes pour les secondes par gallon ([Commandes de Process](100-brew-process)).
 
 Dans le simulateur, touchez le **Water float** et choisissez **Simulate: input ON** pour le faire (le flotteur est soulevé, contacts
 fermés, en rouge), et **Simulate: input OFF** pour le faire retomber. Le Water float et les deux boutons Float montrent l'image de
@@ -61,8 +61,7 @@ s'installe facilement, et avec la même pression à chaque fois, un remplissage 
 | Process | Ce que c'est |
 |---|---|
 | `utility_FireHose_Manifold_Supply_Water` | Le Process Fire Hose et Manifold : Manifold Set?, l'avertissement, la marche minutée ou au flotteur, puis tout est coupé |
-| `FireHose_1_Minute` ... `Manifold_Float` | Un par bouton : met dans `gblV_Water_Switch_Status_Water` son code et lance le Process |
+| `FireHose_1_Minute` ... `Manifold_Float` | Un par bouton : lance le Process, qui reconnaît le bouton par `skn_Started_By` (le nom du Process qui l'a lancé) |
 | `FireHose_Off` | Arrête le Process et ferme les deux vannes |
 
-Les codes sont ceux d'OakBarn Brewery : **1001** à **1005** pour la Fire Hose (1 minute, 2 minutes, 20 secondes, Set Time, Float) et
-**2001** à **2005** pour le Manifold (1, 2 et 3 minutes, Set Time, Float).
+Aucun numéro de code n'est nécessaire : le Process lit le nom du bouton lui-même (`FireHose_1_Minute`, `Manifold_Float` ...).

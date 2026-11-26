@@ -27,7 +27,7 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
 | FireHose 1 Minute | Manifold 1 Minute | Water for 1 minute |
 | FireHose 2 Minutes | Manifold 2 Minutes | Water for 2 minutes |
 | FireHose 20 Seconds | Manifold 3 Minutes | Water for 20 seconds or 3 minutes |
-| Firehose Set Time | Set Time | A pop-up asks for the time; it goes in the gGlobal `gblT_SetTimer_Water` |
+| Firehose Set Time | Set Time | A pop-up asks for the time; it goes in the hidden Time Widget `wgt_TM_Set~Timer_BH` |
 | Use FireHose Float | Use Manifold Float | Water until the **Water float** is made |
 | FireHose Off | | Stops it now and closes both valves |
 
@@ -44,8 +44,8 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
    ([Override button](96-override-button)). Every tap water fill gets its own Override button. It shows only once the water is
    on, so there is none during the 20 second warning. **FireHose Off** stops it at any time.
 5. **The true run time is kept.** A hidden count-up timer, **Water elapsed**, runs from the valve opening until the time is up, the
-   float is made, or Override or FireHose Off ends it. That time goes in the hidden gGlobal `gblT_Elapsed_Water` (True Run Time),
-   for seconds per gallon.
+   float is made, or Override or FireHose Off ends it. The timer keeps that time, and the line `newSec vV_Elapsed_Seconds = wgt_TMR_Water~elapsed_BH`
+   turns it into seconds for seconds per gallon ([Process commands](100-brew-process)).
 
 In the simulator, tap the **Water float** and pick **Simulate: input ON** to make it (the float is lifted, contacts closed, red), and
 **Simulate: input OFF** to drop it again. The Water float and the two Float buttons show the float switch picture of its state.
@@ -58,8 +58,7 @@ same pressure every time, a timed fill gives the same amount of water every time
 | Process | What it is |
 |---|---|
 | `utility_FireHose_Manifold_Supply_Water` | The Fire Hose and Manifold Process: Manifold Set?, the warning, the timed or float run, then everything off |
-| `FireHose_1_Minute` ... `Manifold_Float` | One per button: sets `gblV_Water_Switch_Status_Water` to its code and starts the Process |
+| `FireHose_1_Minute` ... `Manifold_Float` | One per button: starts the Process, which knows the button by `skn_Started_By` (the name of the Process that started it) |
 | `FireHose_Off` | Stops the Process and closes both valves |
 
-The codes are OakBarn Brewery's own: **1001** to **1005** for the Fire Hose (1 minute, 2 minutes, 20 seconds, Set Time, Float) and
-**2001** to **2005** for the Manifold (1, 2 and 3 minutes, Set Time, Float).
+No code number is needed: the Process reads the button's own name (`FireHose_1_Minute`, `Manifold_Float` ...).
