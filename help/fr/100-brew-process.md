@@ -79,6 +79,17 @@ Les Templates lisent la recette par des noms qui commencent par **`skn_rcp_`**. 
 
 Tant qu'aucune recette n'est chargée, les valeurs viennent du Tab **☰ Menu > Default** : son Mash Profile et son Boil Profile. La température d'empâtage est calculée à partir du premier palier (rapport eau/grain 1.5 qt/lb ou 3.1 L/kg, grain à 68 °F ou 20 °C). PreBrew demande toujours d'abord une recette.
 
+## Aucune recette trouvée {#no-recipe-found}
+
+Un jour de brassage, il y a TOUJOURS une recette, de la plus simple à la plus complexe. Même un kit d'extrait en boîte a quelques détails à régler. (Skynet Rule 16.14)
+
+PreBrew commence donc par `ask_recipe`. Avec une recette chargée, il continue tout de suite. Sans recette, la fenêtre **No Recipe Found** s'affiche sur chaque écran. Choisissez dans sa liste, puis **Open ▶** :
+
+- **Saved Recipe** : choisissez-la dans la bibliothèque de recettes. Elle s'ouvre tout de suite et le jour de brassage continue.
+- **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** ou **All Grain (own Grain Mill)** : une NOUVELLE recette à ce niveau s'ouvre sur le Tab Recipe. Remplissez-la (ou importez-y un fichier de recette avec IMPORT) et appuyez sur **Save**. Une barre en haut indique que le jour de brassage attend ; dès que la recette est enregistrée, il continue.
+
+La liste commence sur votre **Brewer Type** (☰ Menu > Default settings). Vous pouvez préparer la recette bien avant le jour de brassage dans ☰ Menu > Recipe, et l'enregistrer dans la bibliothèque de recettes pour la réutiliser.
+
 L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 
 ## Nouvelles commandes de Process {#new-process-commands}
@@ -91,6 +102,7 @@ L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 | `close_all_valves` | ferme chaque vanne de la liste **Close all valves** (toujours les vannes d'eau du robinet), puis demande **Have you closed all Manual Valves?** et attend **✔ Done** |
 | `open_all_valves` | ouvre chaque vanne de la liste **Open all valves** (jamais une vanne d'eau du robinet ; l'état dans lequel on laisse tout après le nettoyage), puis demande **Have you opened all Manual Valves?** et attend **✔ Done** |
 | `all_pumps_off` | arrête chaque pompe |
+| `ask_recipe` | sans recette chargée, la fenêtre **No Recipe Found** (ci-dessus) ; le Process attend qu'une recette soit ouverte, importée ou enregistrée. Avec une recette chargée, il continue tout de suite. Skynet Rule 16.14. |
 | `wait_boil -1` | attend que la Boil Probe soit 1 degré (dans vos Units) sous la température d'ébullition du jour. Voir [Température d'ébullition](238-boil-temperature). Règle Skynet 1.18. |
 | `start skn_Boil_Timer` | démarre le Skynet Boil Timer avec le temps d'ébullition de la Recipe ; les alertes houblon le suivent. Voir [Les Skynet Brew Timers](246-skynet-brew-timers). Règle Skynet 2.68. |
 | `all_heaters_off` | arrête chaque chauffage : chaque Heating Element (quelle que soit sa méthode, pour que son PID ou son Hysteresis ne le rallume pas), tout ancien contrôle PID, Hysteresis, Duty Cycle ou Deadband, et chaque brûleur à gaz (sa Solenoid Gas Valve fermée, son allumeur arrêté). Les mêmes chauffages que l'Emergency Off. Règle Skynet 6.15. |

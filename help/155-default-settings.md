@@ -81,6 +81,10 @@ before that. A fitting sitting on a vessel opening with no pipe keeps its size. 
 They are the same two dropdowns as on the 🔨 Build Tab's Edit layout bar. They are kept by the Interface ID and Tab ID, so a Schema
 without that Interface or Tab starts the old way. (Skynet Rule 4.6)
 
+## Brewer Type
+
+What this brewery usually brews: **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** (to start) or **All Grain (own Grain Mill)**. When a Brew Day finds no Recipe, the **No Recipe Found** pop-up starts on it, and you can pick another there. See [No Recipe Found](100-brew-process#no-recipe-found).
+
 ## New User Recipes
 
 What a new Recipe starts with when you press **NEW** on the Recipe tab. You can change each one in the Recipe. **Units** (US or Metric) is at the top of this tab (see **Units and your brewery**).

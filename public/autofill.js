@@ -39,6 +39,7 @@ export const COMMANDS = [
   ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'], ['all_heaters_off', 'every heater off'],
   ['import_recipe', 'a .bsmx or .xml file'], ['start_hop_alerts', 'hop alerts for the boil'], ['stop_hop_alerts', 'stop the hop alerts'], ['hop_alert', 'one hop alert: "Pre Boil", "Mash", "1st Wort", "Hop Stand High", "Fermenter" ...'],
   ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
+  ['ask_recipe', 'no Recipe loaded: the No Recipe Found pop-up, waits for one'],
   ['wait_boil', 'until the Boil Probe reaches skn_Boil_Temp (wait_boil -1: 1 degree under)'],
   // the Chiller Overlay (OakBarn Brewery, 2026-11-15, Rule 5.42): picking one opens the list of Chiller Templates, then of Vessels
   ['place_Chiller', 'draw a Chiller Template in a vessel, with its hoses'], ['remove_Chiller', 'take a placed chiller off again'],
