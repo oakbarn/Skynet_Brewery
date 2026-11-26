@@ -6,37 +6,59 @@ Schema d’exemple. Un Admin peut le relancer à tout moment depuis **☰ Menu >
 
 ## Comment ça marche {#how-it-works}
 
-- Une question par page, avec une courte explication dessous. La bande d’étapes en haut montre où vous en êtes.
+- Une question par page, avec une courte explication dessous. La bande d’étapes en haut montre où vous en êtes, en 6 étapes :
+  **1. Units · 2. Help language · 3. Brewer Type · 4. Brewery · 5. Recipes · 6. Other Defaults**, puis Done.
 - **◀ Back** revient à la question précédente. **Next ▶** garde votre réponse et continue. Un choix de 6 ou moins est une case : un
   clic le choisit et continue. Un choix de plus de 6 est une liste déroulante (règle 2.6).
-- **Skip** garde la réponse de Skynet et continue. Skynet ne vous le rappelle pas plus tard. Chaque question a Skip sauf les deux
-  auxquelles il faut répondre : **US or Metric** (toujours la première question) et **Brewer Level**.
+- Il faut répondre aux étapes 1 à 3, elles n’ont donc pas de Skip : **US or Metric** (toujours la première question),
+  **Help language** et **Brewer Type**.
+- Les étapes 4 **Brewery**, 5 **Recipes** et 6 **Other Defaults** sont des branches. Chacune s’ouvre sur une page qui liste ce
+  qu’elle demande. **Next ▶** la commence. **Skip** sur cette page saute toute la branche et garde les réponses de Skynet. Dans une
+  branche, chaque question a son propre **Skip**.
+- **Skip** garde la réponse de Skynet et continue, et la question ne devient pas verte. Skynet ne vous le rappelle pas plus tard.
+- Une question devient **verte** quand vous y répondez (Next). Une étape devient verte quand chacune de ses questions a une réponse.
+  Cliquez sur une étape pour y aller.
+- L’entretien s’ouvre sur la première question qui n’est pas verte, et **Next ▶** passe à la suivante qui n’est pas verte, dans
+  l’ordre. Les questions déjà répondues (vertes) ne reviennent pas ; cliquez sur leur étape, ou sur **✎** dans Done, pour en changer
+  une.
 - Chaque page commence sur la réponse de Skynet (ou sur votre réponse enregistrée quand vous le relancez) : Next, Next, Next donne un
   panneau qui fonctionne.
 - La dernière page, **Done**, montre toutes les réponses. **✎** revient à cette question. **✔ Finish** les enregistre toutes.
-- **Close** ou **✕** arrête l’entretien sans rien enregistrer. Sur une nouvelle installation, il s’ouvre de nouveau la prochaine fois
-  que le panneau s’ouvre.
+- **Close** ou **✕** :
+  - tant que les étapes 1 à 3 n’ont pas toutes une réponse, une fenêtre **rouge** dit qu’elles doivent être remplies d’abord, et
+    l’entretien reste ouvert.
+  - ensuite, quand certaines questions ne sont pas encore vertes, une fenêtre **bleue** dit : elles ont besoin d’une réponse ; régler
+    Skynet dépend des réponses à beaucoup de ces questions pour qu’il soit vraiment le vôtre, mais il fonctionne avec seulement les 3
+    premières questions. **◀ Keep answering** revient ; **Close** enregistre les réponses données et ferme. Relancez-le depuis
+    ☰ Menu pour répondre au reste.
 
 La première page porte un seul avertissement : concevez votre brasserie sur un ordinateur, pas sur un téléphone ou une tablette, car
 l’écran est trop petit. Un téléphone ou une tablette convient pour suivre et mener un jour de brassage.
 
 ## Les questions {#the-questions}
 
-| Question | Ce qu’elle règle | Réponse de Skynet |
-|---|---|---|
-| **US or Metric?** (réponse obligatoire) | Units : l’unité de chaque quantité, température et Recipe affichée. Skynet garde tous les nombres en métrique (règle 2.59) : changer ne modifie jamais un nombre enregistré | US |
-| **Help language** | Anglais ou français pour les pages d’aide et les bulles, dans ce navigateur | English |
-| **Brewery Name** (Patrons seulement) | Le nom en haut de chaque Tab | Skynet Panel |
-| **Airport** | L’aéroport (code OACI, par exemple KDFW) dont le bulletin météo donne la pression de l’air pour la température d’ébullition. **Test** le récupère tout de suite | vide : air standard |
-| **Elevation** | L’altitude de votre brasserie, en pieds (US) ou en mètres (Metric) ; gardée en mètres | vide |
-| **Brewer Level** (réponse obligatoire) | Sur quoi vous brassez, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
-| **Brewer Type** | Ce que vous brassez d’habitude : le premier choix de la fenêtre No Recipe Found (règle 16.14) | All Grain |
-| **Yeast Starter** | Pour information : PreBrew vous le rappelle un jour ou deux avant | No |
-| **Pipe size** et **Hose size** | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
+| Étape | Question | Ce qu’elle règle | Réponse de Skynet |
+|---|---|---|---|
+| 1 | **US or Metric?** (réponse obligatoire) | Units : l’unité de chaque quantité, température et Recipe affichée. Skynet garde tous les nombres en métrique (règle 2.59) : changer ne modifie jamais un nombre enregistré | US |
+| 2 | **Help language** (réponse obligatoire) | Anglais ou français pour les pages d’aide et les bulles, dans ce navigateur. Dès qu’une User Language est sur ce Brain (? Help > 🌐 Languages), elle est aussi un choix | English |
+| 3 | **What is the highest level you will brew now?** (réponse obligatoire) | Votre Brewer Type : Extract Can Kit, Extract Partial Grain and Hops ou All Grain. C’est juste pour commencer : Skynet grandit avec vous. La fenêtre No Recipe Found commence sur lui (règle 16.14) | All Grain |
+| 3 | **Do you grind your own grain?** (seulement après All Grain) | Oui : All Grain (own Grain Mill) | No |
+| 4 Brewery | **Brewery Vessels** : combien de cuves de brassage, puis (selon la réponse) All In One, sortie, pompe, combien de pompes, HERMS ou RIMS, All Grain Plus | Elles calculent votre **Brewer Level**, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
+| 4 Brewery | **Is your brewery a Piped Manifold?** | Oui : vos cuves et pompes sont reliées par des tuyaux fixes et des vannes, comme dans l’exemple 3 Vessel. Non : vous déplacez des tuyaux souples à la main. L’interrupteur **Piped Manifold** de Default settings | No |
+| 4 Brewery | **Pipe size** et **Hose size** (seulement après Piped Manifold Oui) | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
+| 5 Recipes | **Yeast Starter** | Pour information : PreBrew vous le rappelle un jour ou deux avant | No |
+| 5 Recipes | **Batch Size** | La quantité de bière d’une nouvelle Recipe, dans le fermenteur, en gallons (US) ou en litres (Metric) ; gardée en litres | 5 gallons (18,9 litres) |
+| 5 Recipes | **Mash Profile** (All Grain seulement) et **Boil Profile** | Les Profiles avec lesquels une nouvelle Recipe commence | Single Step, Batch Sparge et le Boil Profile de 60 minutes de Skynet |
+| 6 Other Defaults | **Brewery Name** (Patrons seulement) | Le nom en haut de chaque Tab | Skynet Panel |
+| 6 Other Defaults | **Airport** | L’aéroport (code OACI, par exemple KDFW) dont le bulletin météo donne la pression de l’air pour la température d’ébullition. **Test** le récupère tout de suite | vide : air standard |
+| 6 Other Defaults | **Elevation** | L’altitude de votre brasserie, en pieds (US) ou en mètres (Metric) ; gardée en mètres | vide |
+
+L’étape Recipes règle seulement ce avec quoi une nouvelle Recipe commence. Un jour de brassage demande sa propre Recipe dans le
+**Recipe Interview**.
 
 ## Les Brewer Levels {#the-brewer-levels}
 
-Chaque niveau a tout ce qu’a le niveau du dessous. Vous pouvez toujours choisir un niveau plus bas.
+Chaque niveau a tout ce qu’a le niveau du dessous. Les questions Brewery Vessels (dans l’entretien et dans Default settings) le calculent.
 
 1. **Stove Top, One Pot, No Outlet** : une marmite sur la cuisinière ; vous versez ou siphonnez.
 2. **Stove Top, One Pot, Manual Outlet** : une marmite avec une vanne à bille en bas sur le côté.
@@ -53,5 +75,5 @@ Le New Schema Interview démarre un nouveau Tab de brassage sur le Level qui cor
 ## Où les réponses sont gardées {#where-the-answers-are-kept}
 
 Chaque réponse est aussi sur **☰ Menu > Default settings** (règle 2.42), la même valeur enregistrée : changez-la là à tout moment. La
-langue de l’aide est aussi dans la fenêtre d’aide **?**. Relancer le Setup Interview commence sur vos réponses enregistrées et ne
-change rien avant ✔ Finish.
+langue de l’aide est aussi dans la fenêtre d’aide **?**. Relancer le Setup Interview commence sur vos réponses enregistrées et sur
+la première question qui n’est pas verte ; il ne change rien avant ✔ Finish (ou Close, qui enregistre les réponses données).

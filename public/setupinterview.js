@@ -11,15 +11,20 @@
 // a row. Nothing else needs to change. public/app.js only shows them; test/setupinterview.test.js checks them.
 //
 // A row:  id     the answer's name (and the saved default's name when `save` is 'defaults')
-//         step   the word in the steps strip at the top
+//         step   which of the 6 steps (SETUP_STEPS) the row is in: the word lit in the steps strip at the top
 //         ask    the question, plain English; why  the explanation under it
-//         kind   'pick' (one click, a dropdown when there are more than 6 choices, Rule 2.6) · 'text' · 'num' · 'yesno'
+//         kind   'pick' (one click, a dropdown when there are more than 6 choices, Rule 2.6) · 'text' · 'num' · 'yesno' ·
+//                'branch' (the first page of a branch: it says what the branch asks; its Skip skips the whole branch)
 //         choices  [[value, words, explanation?], ...] or ctx => that list
 //         start  ctx => Skynet's own answer (what Skip keeps, and what the box starts on)
-//         save   'defaults' (☰ Menu > Default settings) · 'boil' (the boil temperature place) · 'browser' (this browser only)
+//         save   'defaults' (☰ Menu > Default settings) · 'boil' (the boil temperature place) · 'browser' (this browser only) · 'none'
 //         must   true: no Skip button (it must be answered)
 //         show   (answers, ctx) => false leaves the question out (optional)
-//         note   a warning shown on that page (optional)
+//         when   { answerId: value, ... }: the question shows only when each of those answers is that value (optional; OakBarn Brewery,
+//                2026-11-26: "I might add small item like the Piped Manifold as further questions will branch on it"). For example
+//                when: { pipedManifold: true } asks it only of a brewery with a Piped Manifold. A value may be a list: any of them.
+//         note   a warning shown on that page (optional);  more  ctx => a plain line under the answers (optional)
+//         byUnits  true: its start is worked out again when US or Metric is picked
 
 // the Brewer Levels (Plans section 1): what you brew ON, from the simplest stove top to All Grain Plus. Each level has everything the
 // one below has, and a brewer may always pick a lower one (OakBarn Brewery, 2026-11-17)
@@ -35,6 +40,27 @@ export const BREWER_LEVELS = [
   ['9', '9 All Grain Plus', 'Three or more vessels, controlled fermentors, motorized valves, a tap water Supply Manifold.'],
 ];
 export const BREWER_LEVEL_DEFAULT = '7';
+// Brewery Vessels (OakBarn Brewery, 2026-11-26, Default settings markup: Brewer Level "New Section of Brewery Vessels and with be
+// questions not a DDLB"): a few plain questions about the vessels work out the Brewer Level, kept as brewerLevel as before
+export const VESSEL_COUNTS = [['1', 'One vessel', 'One pot, or one All In One'], ['2', 'Two vessels', 'A Mash Tun (it may be a cooler) and a Kettle'], ['3', 'Three or more vessels', 'HLT, Mash Tun and Kettle']];
+export const PUMP_COUNTS = [['1', 'One pump (or none)'], ['2', 'Two pumps']];
+export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
+// the Brewer Level (1 to 9) from the answers
+export function brewerLevelOf(v) {
+  const n = String(v?.vesselCount ?? '');
+  if (n === '1') return v.allInOne ? '4' : v.kettlePump ? '3' : v.kettleOutlet ? '2' : '1';
+  if (n === '2') return String(v.pumpCount) === '2' ? '6' : '5';
+  if (n === '3') return v.allGrainPlus ? '9' : v.recirculate ? '8' : '7';
+  return null;
+}
+// the answers that give a Brewer Level (a saved Level from before the questions, or Skynet's 7)
+export function vesselAnswersOf(level) {
+  const l = +level || +BREWER_LEVEL_DEFAULT;
+  const a = { vesselCount: l <= 4 ? '1' : l <= 6 ? '2' : '3', allInOne: l === 4, kettleOutlet: l === 2 || l === 3, kettlePump: l === 3, pumpCount: l === 6 ? '2' : '1', recirculate: l >= 8, allGrainPlus: l === 9 };
+  return a;
+}
+// the saved answers, or the ones from the saved Brewer Level
+export const vesselStart = (d, k) => d?.[k] !== undefined ? d[k] : vesselAnswersOf(d?.brewerLevel)[k];
 // the Level the New Schema Interview starts a Brewing Tab on (Rule 2.58), from the Brewer Level and the Brewer Type, when no Tab
 // Level was picked before
 export function nsiLevelOf(brewerLevel, brewerType) {
@@ -46,56 +72,140 @@ export function nsiLevelOf(brewerLevel, brewerType) {
 
 const US_FT = 0.3048;      // feet to metres (the same factor the boil temperature place uses)
 
+// the 6 steps of the strip (Panel Update 17, OakBarn Brewery, 2026-11-26: "1. Units 2. Help language 3. Brewer Type 4. Brewery
+// 5. Recipes 6. Other Defaults"; "Skip Button Appears Not Available Before"; "These only pertain to the Skynet Panel Settings Defaults").
+// Steps 1 to 3 must be answered. Steps 4 to 6 are branches: each opens on a page that says what it asks; Skip there skips the whole
+// branch, and inside it each question has its own Skip.
+export const SETUP_STEPS = ['Units', 'Help language', 'Brewer Type', 'Brewery', 'Recipes', 'Other Defaults'];
+// the Brewer Types the Setup Interview offers: All Grain asks "Grind your own grain?" next (Panel Update 17, item 6a), which picks
+// All Grain (own Grain Mill)
+const MILL = 'allgrainmill', GRAIN = 'allgrain';
+const L_PER_GAL = 3.785411784;
+const round2 = n => Math.round(n * 100) / 100;
+
 export const SETUP_QUESTIONS = [
+  // ---- 1 to 3: must be answered (no Skip)
   { id: 'units', step: 'Units', kind: 'pick', save: 'defaults', must: true,
     ask: 'US or Metric?',
     why: 'Every amount, temperature and Recipe on every screen shows in this. Skynet keeps every number in metric inside, so you can change it any time on ☰ Menu > Default settings and nothing you saved changes.',
     note: 'Design your brewery on a computer, not on a phone or tablet: the screen is too small. A phone or tablet is fine for watching and running a brew day.',
     choices: [['US', 'US', 'gallons, pounds, °F'], ['Metric', 'Metric', 'liters, kilograms, °C']],
     start: ctx => ctx.defaults?.units === 'Metric' ? 'Metric' : 'US' },
-  { id: 'helpLang', step: 'Help language', kind: 'pick', save: 'browser',
+  // the additional language (Panel Update 17, item 2: "But additional Language?"): the User Language too, once it is on this Brain (Rule 11.16)
+  { id: 'helpLang', step: 'Help language', kind: 'pick', save: 'browser', must: true,
     ask: 'Which language for the Help?',
-    why: 'The Help pages and the balloons can be English or French. The screens, buttons and labels stay English. It is kept in this browser; the ? Help window can change it any time.',
-    choices: [['en', 'English'], ['fr', 'Français']],
-    start: ctx => ctx.helpLang === 'fr' ? 'fr' : 'en' },
-  { id: 'breweryName', step: 'Brewery Name', kind: 'text', save: 'defaults',
-    ask: 'What is your brewery called?',
-    why: 'It shows at the top of every Tab. A Patron perk (Rule 12.4).',
-    show: (a, ctx) => !!ctx.patron,
-    start: ctx => ctx.defaults?.breweryName || '' },
-  { id: 'airport', step: 'Airport', kind: 'text', save: 'boil',
-    ask: 'Your nearest airport (its ICAO code, for example KDFW)?',
-    why: 'Skynet reads the air pressure from the airport\'s weather report to work out the temperature water boils at for you (skn_Boil_Temp). Leave it empty and Skynet uses standard air at your Elevation.',
-    start: ctx => ctx.boil?.airport || '' },
-  { id: 'elevation', step: 'Elevation', kind: 'num', save: 'boil',
-    ask: a => `How high is your brewery above sea level (${a.units === 'Metric' ? 'meters' : 'feet'})?`,
-    why: 'Water boils at a lower temperature up high. Skynet keeps it in meters inside and shows it in your Units.',
-    start: (ctx, a) => ctx.boil?.elevationM == null ? '' : Math.round(a?.units === 'Metric' ? ctx.boil.elevationM : ctx.boil.elevationM / US_FT) },
-  // Mandatory (OakBarn Brewery, 2026-11-26: "A and Mandatory": the 9 level ladder, no Skip)
-  { id: 'brewerLevel', step: 'Brewer Level', kind: 'pick', save: 'defaults', must: true,
-    ask: 'What do you brew on?',
-    why: 'Your Brewer Level: your equipment, from one pot on the stove to All Grain Plus. Skynet uses it to pick the Schema Template, the Level of a new Brewing Tab and the Brew Day steps that fit. You can always pick a lower level.',
-    choices: BREWER_LEVELS,
-    start: ctx => BREWER_LEVELS.some(([k]) => k === String(ctx.defaults?.brewerLevel)) ? String(ctx.defaults.brewerLevel) : BREWER_LEVEL_DEFAULT },
-  { id: 'brewerType', step: 'Brewer Type', kind: 'pick', save: 'defaults',
-    ask: 'What do you usually brew?',
-    why: 'Your Brewer Type. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14), and you can pick another there any brew day.',
-    choices: ctx => ctx.brewerTypes,
-    start: ctx => ctx.brewerTypes.some(([k]) => k === ctx.defaults?.brewerType) ? ctx.defaults.brewerType : ctx.brewerTypeDefault },
-  { id: 'yeastStarter', step: 'Yeast Starter', kind: 'yesno', save: 'defaults',
-    ask: 'Do you usually make a Yeast Starter?',
-    why: 'Information only: PreBrew reminds you a day or two ahead when it is Yes. It changes nothing else.',
-    start: ctx => ctx.defaults?.yeastStarter === true },
-  { id: 'defPipeSize', step: 'Pipe size', kind: 'pick', save: 'defaults',
+    why: 'The Help pages and the balloons can be English or French, or the User Language once one is on this Brain. The screens, buttons and labels stay English. It is kept in this browser; the ? Help window can change it any time.',
+    more: ctx => ctx.helpLangs?.some(([k]) => k === 'user') ? '' : 'Another language: after the interview, an Admin adds one on the ? Help window > 🌐 Languages (Help by AI translation). It then shows here and on ☰ Menu.',
+    choices: ctx => ctx.helpLangs?.length ? ctx.helpLangs : [['en', 'English'], ['fr', 'Français']],
+    start: ctx => (ctx.helpLangs?.length ? ctx.helpLangs : [['en'], ['fr']]).some(([k]) => k === ctx.helpLang) ? ctx.helpLang : 'en' },
+  // Panel Update 17, item 6: "The highest level you will brew now. This is just to get started. Skynet can grow with you. Needs to be
+  // 3 mandatory. Select All Grain and follow up question Grind your own grain?"
+  { id: 'brewerType', step: 'Brewer Type', kind: 'pick', save: 'defaults', must: true,
+    ask: 'What is the highest level you will brew now?',
+    why: 'Your Brewer Type. This is just to get started: Skynet can grow with you, and you can change it any time on ☰ Menu > Default settings. The No Recipe Found pop-up of a Brew Day starts on it (Rule 16.14).',
+    choices: ctx => ctx.brewerTypes.filter(([k]) => k !== MILL),
+    start: ctx => { const t = ctx.defaults?.brewerType; return t === MILL ? GRAIN : ctx.brewerTypes.some(([k]) => k === t) ? t : ctx.brewerTypeDefault; } },
+  { id: 'grindOwn', step: 'Brewer Type', kind: 'yesno', save: 'defaults', must: true,
+    ask: 'Do you grind your own grain?',
+    why: 'Yes: your Brewer Type is All Grain (own Grain Mill), and Brew Day can have a milling step. No: you buy your grain already milled.',
+    show: a => a.brewerType === GRAIN,
+    start: ctx => ctx.defaults?.brewerType === MILL },
+
+  // ---- 4 Brewery: the Brewery Equipment Interview (Panel Update 17, items 5, 8, 9: "Equipment in the Brewery you have or Building
+  // and we will expand this to several questions"; "Can skip"; Pipe size and Hose size "Under the Equipment Branch")
+  { id: '_brewery', step: 'Brewery', kind: 'branch', save: 'none',
+    ask: 'The Brewery Equipment Interview',
+    why: 'A few questions about the equipment in the brewery you have, or the one you are building. Next ▶ starts it. Skip keeps Skynet\'s own answers for all of them; you can change each one any time on ☰ Menu > Default settings.' },
+  // Brewery Vessels: the questions that work out the Brewer Level (from one pot on the stove, 1, to All Grain Plus, 9). Skynet uses the
+  // Level to pick the Schema Template, the Level of a new Brewing Tab and the Brew Day steps that fit
+  { id: 'vesselCount', step: 'Brewery', kind: 'pick', save: 'defaults',
+    ask: 'How many brewing vessels do you have (or are you building)?',
+    why: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT). Not the fermentors. With the next few questions it works out your Brewer Level, from one pot on the stove to All Grain Plus.',
+    choices: VESSEL_COUNTS, start: ctx => vesselStart(ctx.defaults, 'vesselCount') },
+  { id: 'allInOne', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
+    ask: 'Is it an All In One?',
+    why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
+    start: ctx => vesselStart(ctx.defaults, 'allInOne') },
+  { id: 'kettleOutlet', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '1', allInOne: false },
+    ask: 'Does your kettle have an outlet (a ball valve low on the side)?',
+    why: 'No: you pour or siphon.',
+    start: ctx => vesselStart(ctx.defaults, 'kettleOutlet') },
+  { id: 'kettlePump', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '1', allInOne: false },
+    ask: 'Do you have a pump (whirlpool, transfer or chiller)?',
+    why: 'A pump with your stove top kettle.',
+    start: ctx => vesselStart(ctx.defaults, 'kettlePump') },
+  { id: 'pumpCount', step: 'Brewery', kind: 'pick', save: 'defaults', when: { vesselCount: '2' },
+    ask: 'How many pumps?', why: 'The pumps that move your wort and water between the two vessels.',
+    choices: PUMP_COUNTS, start: ctx => String(vesselStart(ctx.defaults, 'pumpCount')) },
+  { id: 'recirculate', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+    ask: 'Do you recirculate the mash (HERMS or RIMS) with two pumps and motorized valves?',
+    why: 'No: HLT, Mash Tun and Kettle with one pump, like the 3 Vessel sample.',
+    start: ctx => vesselStart(ctx.defaults, 'recirculate') },
+  { id: 'allGrainPlus', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+    ask: 'Do you also have controlled fermentors, motorized valves and a tap water Supply Manifold?',
+    why: 'Yes: All Grain Plus, the top Brewer Level.',
+    start: ctx => vesselStart(ctx.defaults, 'allGrainPlus') },
+  // Piped Manifold (OakBarn Brewery, 2026-11-26: "add a settings default Piped Manifold as a boolean"): Yes goes to the Branch Manifold: Pipe size and Hose size (Default settings markup, 2026-11-26: "Add Piped Manifold Question If Yes go to Branch Manifold")
+  { id: 'pipedManifold', step: 'Brewery', kind: 'yesno', save: 'defaults',
+    ask: 'Is your brewery a Piped Manifold?',
+    why: 'Yes: your vessels and pumps are joined by fixed pipes and valves (a manifold), like the 3 Vessel sample. No: you move hoses by hand. Yes: Skynet asks about your pipes and hoses next.',
+    start: ctx => ctx.defaults?.pipedManifold === true },
+
+  { id: 'defPipeSize', step: 'Brewery', kind: 'pick', save: 'defaults', when: { pipedManifold: true },
     ask: 'What size are most of your pipes?',
     why: 'A new pipe on a Tab starts at this size. You can change any pipe later.',
     choices: ctx => ctx.pipeSizes,
     start: ctx => ctx.defaults?.defPipeSize || '0.5' },
-  { id: 'defHoseSize', step: 'Hose size', kind: 'pick', save: 'defaults',
+  { id: 'defHoseSize', step: 'Brewery', kind: 'pick', save: 'defaults', when: { pipedManifold: true },
     ask: 'What size are most of your hoses?',
     why: 'A new hose on a Tab starts at this size. You can change any hose later.',
     choices: ctx => ctx.hoseSizes,
     start: ctx => ctx.defaults?.defHoseSize || '0.5' },
+
+  // ---- 5 Recipes: the Recipe Default Interview (Panel Update 17: "Opens the Recipe Default Interview"; item 7: "Yeast Starter goes to
+  // Recipe Interview"). The defaults of a new User Recipe (☰ Menu > Default settings > New User Recipes). The Recipe Interview of a
+  // Brew Day (Rule 17.22) is another interview.
+  { id: '_recipes', step: 'Recipes', kind: 'branch', save: 'none',
+    ask: 'The Recipe Default Interview',
+    why: 'What a new Recipe starts with. You can change each one in the Recipe. Next ▶ starts it. Skip keeps Skynet\'s own answers for all of them. (A Brew Day asks about its own Recipe in the Recipe Interview.)' },
+  { id: 'yeastStarter', step: 'Recipes', kind: 'yesno', save: 'defaults',
+    ask: 'Do you usually make a Yeast Starter?',
+    why: 'Information only: PreBrew reminds you a day or two ahead when it is Yes. It changes nothing else.',
+    start: ctx => ctx.defaults?.yeastStarter === true },
+  { id: 'batch', step: 'Recipes', kind: 'num', save: 'defaults', byUnits: true,
+    ask: a => `How much beer do you usually make, into the fermenter (${a.units === 'Metric' ? 'liters' : 'gallons'})?`,
+    why: 'The Batch Size a new Recipe starts with. Skynet keeps it in liters inside and shows it in your Units.',
+    start: (ctx, a) => { const l = ctx.defaults?.batchL ?? ctx.batchLDefault; return l == null ? '' : round2(a?.units === 'Metric' ? l : l / L_PER_GAL); } },
+  { id: 'mashProfile', step: 'Recipes', kind: 'pick', save: 'defaults',
+    ask: 'Which Mash Profile does a new Recipe start with?',
+    why: 'The mash steps (temperatures and times) of a new All Grain Recipe. ☰ Menu > Mash Profile adds and changes them.',
+    show: a => a.brewerType === GRAIN,
+    choices: ctx => ctx.mashProfiles || [],
+    start: ctx => (ctx.mashProfiles || []).some(([k]) => k === (ctx.defaults?.mashProfile ?? ctx.mashDefault)) ? (ctx.defaults?.mashProfile ?? ctx.mashDefault) : '' },
+  { id: 'boilProfile', step: 'Recipes', kind: 'pick', save: 'defaults',
+    ask: 'Which Boil Profile does a new Recipe start with?',
+    why: 'How long the boil is, and its boil off. ☰ Menu > Boil Profile adds and changes them.',
+    choices: ctx => ctx.boilProfiles || [],
+    start: ctx => (ctx.boilProfiles || []).some(([k]) => k === (ctx.defaults?.boilProfile ?? ctx.boilDefault)) ? (ctx.defaults?.boilProfile ?? ctx.boilDefault) : '' },
+
+  // ---- 6 Other Defaults: the catch all (Panel Update 17: "Opens a catch all"; items 3 and 4, Airport and Elevation: "Needs to be later
+  // as you can Skip")
+  { id: '_other', step: 'Other Defaults', kind: 'branch', save: 'none',
+    ask: 'Other Defaults',
+    why: 'The rest of the Skynet settings this interview asks about. Next ▶ starts them. Skip keeps Skynet\'s own answers for all of them; every one is on ☰ Menu > Default settings.' },
+  { id: 'breweryName', step: 'Other Defaults', kind: 'text', save: 'defaults',
+    ask: 'What is your brewery called?',
+    why: 'It shows at the top of every Tab. A Patron perk (Rule 12.4).',
+    show: (a, ctx) => !!ctx.patron,
+    start: ctx => ctx.defaults?.breweryName || '' },
+  { id: 'airport', step: 'Other Defaults', kind: 'text', save: 'boil',
+    ask: 'Your nearest airport (its ICAO code, for example KDFW)?',
+    why: 'Skynet reads the air pressure from the airport\'s weather report to work out the temperature water boils at for you (skn_Boil_Temp). Leave it empty and Skynet uses standard air at your Elevation.',
+    start: ctx => ctx.boil?.airport || '' },
+  { id: 'elevation', step: 'Other Defaults', kind: 'num', save: 'boil', byUnits: true,
+    ask: a => `How high is your brewery above sea level (${a.units === 'Metric' ? 'meters' : 'feet'})?`,
+    why: 'Water boils at a lower temperature up high. Skynet keeps it in meters inside and shows it in your Units.',
+    start: (ctx, a) => ctx.boil?.elevationM == null ? '' : Math.round(a?.units === 'Metric' ? ctx.boil.elevationM : ctx.boil.elevationM / US_FT) },
 ];
 
 // Rule 2.6: more than 6 choices MUST be a dropdown; 6 or fewer are one-click boxes
@@ -105,15 +215,17 @@ export const setupNeeded = config => !config?.brewDefaults?.setupDone && !Object
 export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
-export const shownQuestions = (a, ctx, list = SETUP_QUESTIONS) => list.filter(q => !q.show || q.show(a, ctx));
+export const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.includes(a?.[k]) : a?.[k] === v);
+export const shownQuestions = (a, ctx, list = SETUP_QUESTIONS) => list.filter(q => whenOk(q, a) && (!q.show || q.show(a, ctx)));
 // Skynet's own answers to start (what Next, Next, Next, or Skip, keeps)
 export function startAnswers(ctx, list = SETUP_QUESTIONS) {
   const a = {};
-  for (const q of list) a[q.id] = q.start(ctx, a);
+  for (const q of list) if (q.start) a[q.id] = q.start(ctx, a);
   return a;
 }
 // the words of an answer, for the summary page
 export function answerWords(q, v, ctx) {
+  if (q.kind === 'branch') return '';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
   if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
@@ -121,18 +233,24 @@ export function answerWords(q, v, ctx) {
 // a typed answer that is no good (null: fine)
 export function answerError(q, v) {
   if (q.id === 'elevation' && v !== '' && v != null && !(Number.isFinite(+v) && +v >= -500 && +v <= 30000)) return 'Elevation must be a number (or empty).';
+  if (q.id === 'batch' && v !== '' && v != null && !(Number.isFinite(+v) && +v > 0)) return 'The Batch Size must be more than 0 (or empty).';
   if (q.id === 'airport' && v && !/^[A-Za-z0-9]{3,4}$/.test(String(v).trim())) return 'An airport code is 4 letters, for example KDFW (or leave it empty).';
   if (q.kind === 'pick' && q.must && (v === '' || v == null)) return 'This one must be answered.';
   return null;
 }
 // what Finish saves: the Default settings (merged into the ones there), the boil temperature place (in meters), and this browser's
 // Help language. A question left out (show false) saves nothing.
-export function setupSave(a, ctx, list = SETUP_QUESTIONS) {
+export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null) {
   const brewDefaults = { ...(ctx.defaults || {}) }, out = { brewDefaults, boil: null, helpLang: null };
   for (const q of shownQuestions(a, ctx, list)) {
     const v = a[q.id];
     if (q.save === 'defaults') {
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
+      // All Grain and "Grind your own grain?" Yes: All Grain (own Grain Mill)
+      else if (q.id === 'brewerType') brewDefaults.brewerType = v === GRAIN && a.grindOwn ? MILL : v;
+      else if (q.id === 'grindOwn') { }
+      // kept in liters (Rule 2.59), typed in gallons or liters
+      else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;
     } else if (q.save === 'browser' && q.id === 'helpLang') out.helpLang = v;
   }
@@ -141,6 +259,43 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS) {
   const elevationM = el === '' || el == null ? null : Math.round((metric ? +el : +el * US_FT) * 10) / 10;
   if (ap !== (ctx.boil?.airport || '') || elevationM !== (ctx.boil?.elevationM ?? null))
     out.boil = { airport: ap, elevationM, pressure: ctx.boil?.pressureHpa ?? null };
+  // the Brewer Level from the Brewery Vessels answers (when they were asked)
+  if (shownQuestions(a, ctx, list).some(q => q.id === 'vesselCount')) { const l = brewerLevelOf(a); if (l) brewDefaults.brewerLevel = l; }
   brewDefaults.setupDone = true;
+  if (answered) brewDefaults.setupAnswered = list.filter(q => q.kind !== 'branch' && answered.has(q.id)).map(q => q.id);
   return out;
 }
+
+// ---- green (answered) questions (OakBarn Brewery, 2026-11-26: "Complete do not get focus on Open. Focus in Numeric Order."). A question
+// is green once Next was pressed on it (Skip leaves it not green). The green ones are kept in brewDefaults.setupAnswered, so the
+// interview opens again on the first question that is not green, and Next goes on to the next one that is not green. A branch's
+// first page is green when every question of the branch is.
+export function answeredAtStart(ctx, list = SETUP_QUESTIONS) {
+  const bd = ctx.defaults || {};
+  if (Array.isArray(bd.setupAnswered)) return new Set(bd.setupAnswered.filter(id => list.some(q => q.id === id)));
+  // an interview finished before the green list was kept: what it saved counts as answered
+  if (!bd.setupDone) return new Set();
+  return new Set(list.filter(q => q.save === 'defaults' ? bd[q.id] !== undefined || (q.id === 'batch' && bd.batchL !== undefined) || (q.id === 'grindOwn' && bd.brewerType !== undefined)
+    : q.id === 'airport' ? !!ctx.boil?.airport : q.id === 'elevation' ? ctx.boil?.elevationM != null : q.id === 'helpLang' ? !!ctx.helpLang : false).map(q => q.id));
+}
+export function isGreen(q, qs, answered) {
+  if (q.kind !== 'branch') return answered.has(q.id);
+  return qs.filter(x => x.step === q.step && x.kind !== 'branch').every(x => answered.has(x.id));
+}
+// the place of the first question at or after `from` that is not green (qs.length: the Done page)
+export function nextOpen(qs, answered, from = 0) {
+  for (let i = Math.max(0, from); i < qs.length; i++) if (!isGreen(qs[i], qs, answered)) return i;
+  return qs.length;
+}
+// a step of the strip is green when every question in it is
+export const stepGreen = (step, qs, answered) => qs.filter(q => q.step === step).every(q => isGreen(q, qs, answered));
+// the must questions (steps 1 to 3) that are not green yet
+export const mustMissing = (qs, answered) => qs.filter(q => q.must && !answered.has(q.id));
+// Close (OakBarn Brewery, 2026-11-26, typos fixed): "Close Button 1 - 3: Red Popup that 1 - 3 must be completed first. After that if all
+// not green, Blue Pop up advising they do need completing and setting up Skynet depends on the answers to many of these questions to
+// make it their own but it will work with just the first 3 questions."
+export function setupMustMsg(qs) {
+  const g = SETUP_STEPS.filter(x => qs.some(q => q.must && q.step === x)), n = g.map(x => SETUP_STEPS.indexOf(x) + 1);
+  return `${n.length > 1 ? `Steps ${n[0]} to ${n[n.length - 1]}` : `Step ${n[0]}`} (${g.join(', ')}) must be completed first.`;
+}
+export const SETUP_OPEN_MSG = 'The questions that are not green do need completing. Setting up Skynet depends on the answers to many of these questions to make it your own, but it will work with just the first 3 questions.';
