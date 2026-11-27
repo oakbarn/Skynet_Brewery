@@ -1884,6 +1884,15 @@ answers and changes nothing until **✔ Finish**.
   Vessel Templates Kettle_5_Gal_Electric_Stove (Kettle on an Electric Stove) and Kettle_5_Gal_Electric_Stove_Low_Drain (Kettle with a
   Ball Valve on an Electric Stove). The choices and heading by how the vessel is heated are in `ONE_VESSEL_PICKS`; the answer is the
   same `vesselTemplate`.
+- **CHANGED 2026-11-27, every way to heat one vessel** (OakBarn Brewery: "Create all the branches for a 1 vessel system, Pot on Gas
+  Stove top, all the way to Internal Electric element. The goal in the end of the interview is to find the best match from a sample
+  brewery. We may add a lot of samples"; "on something like a Brewery Gas Burner it would add the burner and ignition to the end
+  build and Internal Electric would use a vessel template with an element and a Probe"): each answer of How is the vessel heated? has
+  its own heading and vessel choices (`ONE_VESSEL_PICKS`). Internal Electric Element shows only Templates with an Element Port and a
+  Thermowell. Brewery Gas Burner adds a Gas Burner and a Burner Igniter, Internal Electric Element a Heating Element and a Temperature
+  Probe: said under the pictures and kept in the Brewery Build as `adds`. The end of the interview finds the best matching Sample
+  Brewery (not built yet). At most **6** pictures on one line ("Try to limit the choices to 6 or less in the upper selection but
+  you can add more"); more go under Other Skynet Template.
 - **CHANGED 2026-11-27, the Brewery Build** (OakBarn Brewery: "we have to store the answer on the Brewery Build because at the end we
   will either have templates to choose from or build one from their answers"): every Brewery answer that fits the answers before it
   (its `when`), held ones too, is kept together in `brewDefaults.breweryBuild` with the Brewer Level they give (`breweryBuildOf`).
@@ -7633,6 +7642,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-27: Rule 2.75 changed: every way to heat one vessel has its own vessel choices (Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal Electric Element); burner + igniter or element + probe kept in the Brewery Build as adds. Help 248.
 - 2026-11-27: Rule 2.75 changed: one vessel on an Electric Stove Top picks its vessel (Electric Stove Top Brewer, two kettle-on-a-stove Templates). Help 248.
 - 2026-11-27: Rule 2.75 changed: the Brewery answers are kept together as the Brewery Build (brewDefaults.breweryBuild), for the end of the interview to offer Templates or build one. Help 248.
 - 2026-11-27: Rule 15.4 changed (OakBarn Brewery: "Remove the option to install the BruControl Importer which will become a standalone exe and only for Windows as it needs to be on the same machine as the BruControl Program"): the Skynet Setup no longer asks the Importer question or adds its shortcuts (an earlier Setup's are taken away on update); the last Setup page has only Start Skynet Brewer now. The Importer will be its own Windows Setup .exe (on hold). Rule 9 "Both programs" notes say so. Help 143.

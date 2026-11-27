@@ -2,7 +2,7 @@
 // Help language and Brewer Type must be answered (Panel Update 17), every other question has Skip; the questions are data in one list
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { breweryBuildOf, headOf, STOVE_ELECTRIC_VESSELS, brewerLevelOf, vesselAnswersOf, VESSEL_KEYS, VESSELS_3UP } from '../public/setupinterview.js';
+import { breweryBuildOf, headOf, STOVE_ELECTRIC_VESSELS, ONE_VESSEL_PICKS, VESSEL_HEATS, addsNote, brewerLevelOf, vesselAnswersOf, VESSEL_KEYS, VESSELS_3UP } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
 import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf, asTicks, tickChoices } from '../public/setupinterview.js';
 
@@ -259,7 +259,7 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.deepEqual(choicesOf(vt, ctx()).map(c => c[1]), ['Plain Pot', 'Pot with 1.5 TC Outlet', 'Pot with NPT Outlet']);
   for (const [n] of choicesOf(vt, ctx())) assert.ok(fs.existsSync(new URL(`../templates/vessel/${n}.json`, import.meta.url)), n);
   const brew = (heat) => shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: heat }, ctx()).map(q => q.id);
-  assert.ok(brew('noboil').includes('vesselTemplate')); assert.ok(!brew('gasstove').includes('vesselTemplate'));
+  assert.ok(brew('noboil').includes('vesselTemplate')); assert.ok(!shownQuestions({ ...startAnswers(ctx()), vesselCount: '2' }, ctx()).some(q => q.id === 'vesselTemplate'), 'only one vessel');
   // Electric Stove Top (2026-11-27): its own heading and its kettle-on-a-stove Templates
   assert.ok(brew('electricstove').includes('vesselTemplate'));
   assert.equal(headOf(vt, { vesselHeat: 'electricstove' }), 'Electric Stove Top Brewer');
@@ -279,4 +279,26 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   const b3 = breweryBuildOf({ vesselCount: '3', vesselHeat: 'noboil', vesselTemplate: 'x', recirculate: true });
   assert.equal(b3.vesselCount, 3); assert.equal(b3.vesselHeat, undefined); assert.equal(b3.vesselTemplate, undefined); assert.equal(b3.recirculate, true);
   assert.match(fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), /d\.breweryBuild = breweryBuildOf\(d\)/, 'Default settings keeps the same Brewery Build');
+}
+
+// ---- every way to heat one vessel has its own branch (2026-11-27: "Create all the branches for a 1 vessel system, Pot on Gas Stove
+// top, all the way to Internal Electric element")
+{
+  const vt = SETUP_QUESTIONS.find(q => q.id === 'vesselTemplate');
+  for (const [heat] of VESSEL_HEATS) {
+    assert.ok(ONE_VESSEL_PICKS[heat], `${heat} has its vessel choices`);
+    assert.ok(ONE_VESSEL_PICKS[heat].choices.length <= 6, `${heat}: 6 or fewer pictures; more under Other Skynet Template`);
+    assert.ok(shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: heat }, ctx()).some(q => q.id === 'vesselTemplate'), heat);
+    for (const [n] of choicesOf(vt, ctx(), { vesselHeat: heat })) assert.ok(fs.existsSync(new URL(`../templates/vessel/${n}.json`, import.meta.url)), n);
+  }
+  // Internal Electric Element: only Templates with an element and a probe (a Thermowell)
+  for (const [n] of ONE_VESSEL_PICKS.element.choices) {
+    const t = JSON.parse(fs.readFileSync(new URL(`../templates/vessel/${n}.json`, import.meta.url), 'utf8'));
+    assert.ok(t.ports?.element && t.ports.element.installed !== false && t.ports?.thermowell && t.ports.thermowell.installed !== false, n);
+  }
+  // the burner and ignition, or the element and probe, go to the end build
+  assert.deepEqual(breweryBuildOf({ vesselCount: '1', vesselHeat: 'gasburner' }).adds, ['burner', 'igniter']);
+  assert.deepEqual(breweryBuildOf({ vesselCount: '1', vesselHeat: 'element' }).adds, ['element', 'probe']);
+  assert.equal(breweryBuildOf({ vesselCount: '1', vesselHeat: 'gasstove' }).adds, undefined);
+  assert.equal(addsNote({ vesselHeat: 'gasburner' }), 'Your build also gets: Gas Burner and Burner Igniter.');
 }

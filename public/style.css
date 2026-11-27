@@ -1939,7 +1939,7 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupTickBox { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border: 2px solid var(--muted); border-radius: 5px; color: var(--ok); font-weight: 900; }
 .setupDlg .setupClick { height: 2.6em; }
 /* Single Vessel Brewer: his vessels, their pictures with his words under them */
-.setupDlg .setupVessels { display: flex; gap: 40px; flex-wrap: wrap; margin: 8px 0 10px 8px; }
+.setupDlg .setupVessels { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 10px 8px; }
 .setupDlg .setupVessel { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 9em; text-align: center; }
 .setupDlg .setupVessel .tplIcon { width: 100%; }
 .setupDlg .setupVessel .tplIcon.cur { border: 2px solid var(--ok); background: var(--panel2); }
@@ -2004,3 +2004,4 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .rqDlg .rqList input, .rqDlg .rqList select { min-width: 0; width: 100%; box-sizing: border-box; }
 .rqDlg .rqList input[type=number] { width: 6em; }
 .vesselPick .vesselCard .tplName { white-space: normal; overflow-wrap: anywhere; text-align: center; }
+.setupDlg .setupAdds { font-weight: 600; margin: 4px 0 10px 8px; }
