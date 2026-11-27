@@ -1939,6 +1939,11 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupDropOpen .setupDropHead { background: #9ad7e6; color: #1f1f1f; }
 .setupDlg .setupDropOpen .setupDropHi { background: var(--accent); color: #fafafa; }
 .setupDlg .setupClickSmall { font-weight: 800; font-size: 1.3em; }
+/* screen 5, Hot Spots: a sample strip to try, and under it how the clicked step's page looks */
+.setupDlg .setupSampleStrip { margin: 6px 0 2px; }
+.setupDlg .setupClickUnder { margin: 0 0 8px 13em; }
+.setupDlg .setupSample { border: 2px dashed var(--line); border-radius: 8px; padding: 6px 12px; margin: 4px 0 10px; }
+.setupDlg .setupSampleTitle { font-weight: 700; font-size: 1.1em; margin: 4px 0; }
 /* the Setup Interview's Welcome page (OakBarn Brewery, 2026-11-27): the blue phone and small screen note, then the text */
 .setupDlg .setupWelcomeNote { background: #0b8fd8; color: #fafafa; font-size: 1.35em; font-weight: 700; line-height: 1.3; border: 3px solid #fafafa; border-radius: 16px; padding: 10px 14px; margin: 6px 0 12px; }
 .setupDlg .setupWelcomeText { max-width: 46em; line-height: 1.4; }

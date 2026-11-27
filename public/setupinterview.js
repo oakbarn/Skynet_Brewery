@@ -134,6 +134,15 @@ export const SETUP_DROP = {
   done: 'Chocolate was selected.',
 };
 
+// Screen 5, Hot Spots (OakBarn Brewery, 2026-11-27, his picture, spelling and grammar corrected): the steps strip can be clicked to
+// go to a step; the sample strip on the page can be tried (it shows below how that step's page looks)
+export const SETUP_HOTSPOTS = {
+  intro: 'We are almost ready to start the interview, but one last option is available on some screens.',
+  spots: 'These are all Hot Spots. You can click them to navigate.',
+  sample: 'Other Defaults',
+  click: 'Click 4. Other Defaults and you are taken to the Setup Interview: Other Defaults',
+};
+
 export const SETUP_QUESTIONS = [
   // ---- 1 and 2: must be answered (Skip shows 🚫 Not allowed)
   { id: 'units', step: 'Units', kind: 'pick', save: 'defaults', must: true,

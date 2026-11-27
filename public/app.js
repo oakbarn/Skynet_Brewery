@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16358,10 +16358,10 @@ async function setupInterview({ first = false } = {}) {
   if (!can('admin')) return;
   if (!S.boil) try { S.boil = await api('GET', '/ui/boiltemp'); } catch { }
   const ctx = setupCtx(), a = setupStart(ctx), answered = answeredAtStart(ctx);
-  // the interview always opens on the Welcome page (at -4), then the button guide (at -3), then how to answer: a Tick Box (at -2) and
-  // a Drop Down list (at -1) (OakBarn Brewery, 2026-11-27, screens 1 to 4); the last one's Next ▶ goes to the first question that is
-  // not green
-  let at = -4, skipped = new Set();
+  // the interview always opens on the Welcome page (at -5), then the button guide (at -4), then how to answer: a Tick Box (at -3) and
+  // a Drop Down list (at -2), then the Hot Spots (at -1) (OakBarn Brewery, 2026-11-27, screens 1 to 5); the last one's Next ▶ goes to
+  // the first question that is not green
+  let at = -5, skipped = new Set();
   const d = h('dialog', { class: 'miniDlg ivDlg nsiDlg setupDlg', 'data-nomenu': '' }), body = h('div', { class: 'setupBody' });
   const bar = h('div', { class: 'bar nsiBar' }), title = h('h3'), stripBox = h('div');
   document.body.append(d);
@@ -16435,7 +16435,7 @@ async function setupInterview({ first = false } = {}) {
       // (the group is made here, so the dialog's own button order, Rule 2.54, is not added again when a page is drawn)
       bar.replaceChildren(h('span', { class: 'spacer' }),
         h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
-        h('button', { type: 'button', title: at ? 'The question before' : 'How to answer', onclick: () => go(at - 1) }, '◀ Back'),
+        h('button', { type: 'button', title: at ? 'The question before' : 'The Hot Spots page', onclick: () => go(at - 1) }, '◀ Back'),
         // a must question not answered yet: Skip shows but is not allowed (🚫 pointer, OakBarn Brewery, 2026-11-27: "Skip will get the
         // Do Not Enter on the mandatory questions"; "they cannot be skipped if unanswered. If answered skip would work"). ◀ Back and
         // Close always work ("they can go back and close at any time")
@@ -16509,7 +16509,7 @@ async function setupInterview({ first = false } = {}) {
         h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
         // the same buttons as every page (his pictures); nothing is before the Welcome page, so its ◀ Back has the ⛔ ("the Back on
         // screen 1 would get the do Not Enter as there is nothing to go back to")
-        at === -4 ? h('button', { type: 'button', class: 'setupNoSkip setupNo', 'aria-disabled': 'true', title: 'This is the first page.' }, '◀ Back')
+        at === -5 ? h('button', { type: 'button', class: 'setupNoSkip setupNo', 'aria-disabled': 'true', title: 'This is the first page.' }, '◀ Back')
           : h('button', { type: 'button', title: 'The page before', onclick: () => go(at - 1) }, '◀ Back'),
         // Skip works here: it goes on like Next ▶ (OakBarn Brewery, 2026-11-27: "Leave all the Menu Items at the top active")
         h('button', { type: 'button', title: 'Go on, like Next ▶.', onclick: start }, 'Skip'),
@@ -16528,15 +16528,28 @@ async function setupInterview({ first = false } = {}) {
       const tryIt = h('select', { class: 'setupDrop', onchange: e => { said.textContent = e.target.value ? `${e.target.value} was selected.` : ''; } },
         h('option', { value: '' }, D.ask), ...D.choices.map(c => h('option', { value: c }, c)));
       const shut = (t, cls = '') => h('div', { class: 'setupDropLook ' + cls }, h('span', {}, t), h('span', { class: 'setupDropArrow' }, '▾'));
-      if (at === -1) body.replaceChildren(...D.intro.map(t => h('p', { class: 'setupGuideIntro' }, t)), tryIt, said,
+      // screen 5: the Hot Spots. A sample steps strip: a click lights that step and shows, under it, how its page looks (it does not
+      // leave this screen; the real strip at the top does go there)
+      const HS = SETUP_HOTSPOTS, sample = h('div', { class: 'setupSample' });
+      const showStep = st => {
+        const qsOf = qs.filter(x => x.step === st), first = qsOf[0], br = first?.kind === 'branch';
+        sampleStrip.querySelectorAll('li').forEach(li => li.classList.toggle('now', li.dataset.step === st));
+        sample.replaceChildren(h('div', { class: 'setupSampleTitle' }, 'Setup Interview: ' + st),
+          ...(first ? [h('p', { class: 'setupAsk' }, askOf(first, a)), h('p', { class: 'muted' }, first.why),
+            ...(br ? [h('p', {}, 'It asks:'), h('ul', { class: 'setupBranch' }, ...qsOf.filter(x => x.kind !== 'branch').map(x => h('li', {}, askOf(x, a))))] : [])] : []));
+      };
+      const sampleStrip = h('ol', { class: 'nsiSteps setupSampleStrip' }, ...SETUP_STEPS.map(st => h('li', { 'data-step': st, style: 'cursor:pointer', title: 'Try it: shows how this step looks', onclick: () => showStep(st) }, st)));
+      if (at === -1) { body.replaceChildren(h('p', { class: 'setupGuideIntro' }, HS.intro), h('p', { class: 'setupGuideIntro' }, HS.spots), h('p', { class: 'setupGuideIntro' }, HS.click),
+        sampleStrip, h('div', { class: 'setupClickSmall setupClickUnder' }, '↖ CLICK'), sample, proceed); showStep(HS.sample); }
+      else if (at === -2) body.replaceChildren(...D.intro.map(t => h('p', { class: 'setupGuideIntro' }, t)), tryIt, said,
         h('p', { class: 'setupGuideIntro' }, D.arrow), h('div', { class: 'setupDropRow' }, shut(D.ask), h('span', { class: 'setupClickSmall' }, '↖ CLICK')),
         h('p', { class: 'setupGuideIntro' }, D.pick),
         h('div', { class: 'setupDropRow' }, h('div', { class: 'setupDropOpen' }, h('div', { class: 'setupDropHead' }, D.ask),
           ...D.choices.map((c, i) => h('div', { class: i === D.picked ? 'setupDropHi' : '' }, c))), h('span', { class: 'setupClickSmall' }, '↖ CLICK')),
         h('p', { class: 'setupGuideIntro' }, D.done), shut(D.choices[D.picked], 'picked'), proceed);
-      else if (at === -2) body.replaceChildren(h('p', { class: 'setupGuideIntro' }, SETUP_TICK.intro), h('p', { class: 'setupGuideIntro' }, SETUP_TICK.ask),
+      else if (at === -3) body.replaceChildren(h('p', { class: 'setupGuideIntro' }, SETUP_TICK.intro), h('p', { class: 'setupGuideIntro' }, SETUP_TICK.ask),
         ticks(-1, true), h('div', { class: 'setupClick' }, '↖ CLICK'), ticks(SETUP_TICK.ticked, false), proceed);
-      else if (at === -4) body.replaceChildren(h('div', { class: 'setupWelcomeNote' }, SETUP_WELCOME.note), ...SETUP_WELCOME.paras.map(t => h('p', { class: 'setupWelcomeText' }, t)), proceed);
+      else if (at === -5) body.replaceChildren(h('div', { class: 'setupWelcomeNote' }, SETUP_WELCOME.note), ...SETUP_WELCOME.paras.map(t => h('p', { class: 'setupWelcomeText' }, t)), proceed);
       else body.replaceChildren(h('p', { class: 'setupGuideIntro' }, SETUP_GUIDE.intro),
         h('div', { class: 'setupGuide' }, ...SETUP_GUIDE.rows.flatMap(([btns, words]) => [
           h('div', { class: 'setupGuideBtns' }, ...btns.map(b => typeof b === 'string' ? h('span', { class: 'setupGuideAnd' }, b) : look(b))),

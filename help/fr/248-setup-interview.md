@@ -39,9 +39,9 @@ Les boutons, le titre et la bande d’étapes restent figés en haut : seule la 
     premières questions. **◀ Keep answering** revient ; **Close** enregistre les réponses données et ferme. Relancez-le depuis
     ☰ Menu pour répondre au reste.
 
-## Les quatre premiers écrans {#the-first-four-screens}
+## Les cinq premiers écrans {#the-first-five-screens}
 
-Chaque passage commence par quatre écrans avant la première question. **Next ▶** (en haut, ou après **Click to proceed:**) ou
+Chaque passage commence par cinq écrans avant la première question. **Next ▶** (en haut, ou après **Click to proceed:**) ou
 **Skip** continue ; **◀ Back** revient à l’écran précédent.
 
 1. **Welcome** (bienvenue) : voir plus bas.
@@ -53,6 +53,9 @@ Chaque passage commence par quatre écrans avant la première question. **Next �
    Chocolate choisi ; vous pouvez essayer la première. Elle limite vos choix : il y a parfois un choix Other pour ce qui n’est pas
    dans la liste ; sinon, choisissez la réponse la meilleure ou la plus proche. Les deux exemples sont aussi dans
    [Getting started](01-getting-started).
+5. **Hot Spots** (zones cliquables) : la bande d’étapes en haut n’est faite que de zones cliquables : cliquez sur une étape pour y
+   aller. La bande d’exemple de cet écran peut être essayée : cliquez sur une étape (elle commence sur 4. Other Defaults) et l’écran
+   montre dessous à quoi ressemble la page de cette étape.
 
 ## La page de bienvenue {#the-welcome-page}
 
@@ -61,7 +64,7 @@ les téléphones et les petits écrans : Skynet peut être commandé depuis pres
 connexion Internet, mais il est bien plus facile de concevoir sur un ordinateur, car les détails fins sont difficiles à voir sur un
 petit écran. En dessous, la page explique ce qu’est l’entretien : rien n’est gravé dans le marbre, chaque réponse peut être changée à
 tout moment dans **☰ Menu > Default settings**, et vous pouvez relancer l’entretien depuis ☰ Menu. Son **◀ Back** porte le ⛔ (rien n’est avant elle). **◀ Back** sur la
-première question revient à l’écran de la liste déroulante.
+première question revient à l’écran Hot Spots.
 
 ## Les questions {#the-questions}
 
