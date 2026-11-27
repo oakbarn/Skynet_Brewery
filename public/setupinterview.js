@@ -372,6 +372,21 @@ export function answerError(q, v) {
 // onlyAnswered (OakBarn Brewery, 2026-11-27: "We have to save these like a gGlobal as they need to be persistent. No implicit save. Even
 // if a computer is shut, these stay."): each answer is saved the moment it is given; only the answered (green) questions are written,
 // the others keep what was saved before. setupDone is set only once the must questions (steps 1 and 2) are answered.
+// the Brewery Build (OakBarn Brewery, 2026-11-27: "we have to store the answer on the Brewery Build because at the end we will either
+// have templates to choose from or build one from their answers"): every Brewery answer that fits the answers before it, kept
+// together with the Brewer Level they give, for the end of the interview to offer matching Templates or to build a Schema from them.
+// Made from the saved Default settings, so the Setup Interview and Default settings always give the same Brewery Build.
+export function breweryBuildOf(d, list = SETUP_QUESTIONS) {
+  const b = {};
+  for (const q of list) {
+    if (q.step !== 'Brewery' || q.kind === 'branch' || !whenOk(q, d)) continue;
+    const v = d[q.id];
+    if (v === undefined || v === null || v === '') continue;
+    b[q.id] = q.id === 'vesselCount' ? vesselCountOf(v) : q.kind === 'yesno' ? !!v : v;
+  }
+  const lv = brewerLevelOf(d); if (lv) b.brewerLevel = lv;
+  return b;
+}
 export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyAnswered = false) {
   const brewDefaults = { ...(ctx.defaults || {}) }, out = { brewDefaults, boil: null, helpLang: null };
   const did = id => !onlyAnswered || !!answered?.has(id);
@@ -395,6 +410,8 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
     out.boil = { airport: ap, elevationM, pressure: ctx.boil?.pressureHpa ?? null };
   // the Brewer Level from the Brewery Vessels answers (when they were asked)
   if (shownQuestions(a, ctx, list).some(q => q.id === 'vesselCount') && did('vesselCount')) { const l = brewerLevelOf(a); if (l) brewDefaults.brewerLevel = l; }
+  // the Brewery Build: every Brewery answer kept together (breweryBuildOf below)
+  if (SETUP_QUESTIONS.some(q => q.step === 'Brewery' && brewDefaults[q.id] !== undefined)) brewDefaults.breweryBuild = breweryBuildOf(brewDefaults);
   if (!onlyAnswered || !mustMissing(shownQuestions(a, ctx, list), answered || new Set()).length) brewDefaults.setupDone = true;
   if (answered) brewDefaults.setupAnswered = list.filter(q => q.kind !== 'branch' && answered.has(q.id)).map(q => q.id);
   return out;

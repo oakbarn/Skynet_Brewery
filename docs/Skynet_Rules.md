@@ -1879,6 +1879,11 @@ answers and changes nothing until **✔ Finish**.
   Templates as pictures (Generic_Brew_Vessel_Widget, Brew_Vessel_Low_TC_Output_Widget, Brew_Vessel_Low_NPT_Output_Widget) and his
   plain words under them (Plain Pot, Pot with 1.5 TC Outlet, Pot with NPT Outlet). A click lights one; Next ▶ is ⛔ until one is
   picked. **Other Skynet Template** opens every other Skynet Vessel Template. Saved as `vesselTemplate`, also on Default settings.
+- **CHANGED 2026-11-27, the Brewery Build** (OakBarn Brewery: "we have to store the answer on the Brewery Build because at the end we
+  will either have templates to choose from or build one from their answers"): every Brewery answer that fits the answers before it
+  (its `when`), held ones too, is kept together in `brewDefaults.breweryBuild` with the Brewer Level they give (`breweryBuildOf`).
+  The Setup Interview and Default settings both make it from the saved answers, so they always agree. The end of the interview
+  reads it to offer matching Templates or to build a Schema (not built yet).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
@@ -7620,6 +7625,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-27: Rule 2.75 changed: the Brewery answers are kept together as the Brewery Build (brewDefaults.breweryBuild), for the end of the interview to offer Templates or build one. Help 248.
 - 2026-11-27: Rule 2.77 new: hover help is plain and short, no personal name, no Rule numbers (every balloon cleaned, English and French); Skynet Vessel Templates get a plain `tip`, shown under each picture in the wider Add a Vessel picker. Help 66.
 - 2026-11-27: Rule 2.75 changed: one vessel and No Boil Brewer asks Single Vessel Brewer: Choose the Vessel that matches yours (vesselTemplate, also on Default settings). Help 248.
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.

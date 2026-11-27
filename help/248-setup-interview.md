@@ -111,3 +111,9 @@ The New Schema Interview starts a new Brewing Tab on the Level that fits your Br
 Every answer is on **☰ Menu > Default settings** too (Rule 2.42), the same saved value: change it there any time. The Help language
 is also on the **?** Help window. Running the Setup Interview again starts on your saved answers and on the first question that is
 not green; it changes nothing until ✔ Finish (or Close, which saves the answers so far).
+
+**The Brewery Build.** The Brewery answers (Number of Hot Side Vessels, How is the vessel heated?, Single Vessel Brewer and the ones
+after them) are also kept together as your **Brewery Build**, with the Brewer Level they give. Only the answers that fit go in: with
+three vessels, How is the vessel heated? (a one vessel question) is left out. At the end of the interview the Brewery Build is used
+to offer the Templates that match your brewery, or to build one from your answers. Changing a Brewery answer on Default settings
+changes the Brewery Build too.

@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { breweryBuildOf, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -18697,6 +18697,7 @@ function renderDefaultTab(box) {
   const save = guard(async () => {
     f.read();
     { const lv = brewerLevelOf(d); if (lv) d.brewerLevel = lv; }      // the Brewer Level from the Brewery Vessels questions
+    d.breweryBuild = breweryBuildOf(d);      // the Brewery Build: the Brewery answers kept together (Rule 2.75)
     // the Panel settings boxes are here too (2026-11-21, Rule 2.42): empty = Skynet's own, as in ☰ Menu > Default settings
     for (const k of PANEL_SET_KEYS) if (d[k] === undefined || d[k] === '' || d[k] === null) delete d[k];
     if (typeof d.breweryName === 'string') d.breweryName = d.breweryName.trim();

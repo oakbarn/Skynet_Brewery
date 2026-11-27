@@ -118,3 +118,9 @@ Le New Schema Interview démarre un nouveau Tab de brassage sur le Level qui cor
 Chaque réponse est aussi sur **☰ Menu > Default settings** (règle 2.42), la même valeur enregistrée : changez-la là à tout moment. La
 langue de l’aide est aussi dans la fenêtre d’aide **?**. Relancer le Setup Interview commence sur vos réponses enregistrées et sur
 la première question qui n’est pas verte ; il ne change rien avant ✔ Finish (ou Close, qui enregistre les réponses données).
+
+**Le Brewery Build.** Les réponses Brewery (Number of Hot Side Vessels, How is the vessel heated?, Single Vessel Brewer et celles qui
+suivent) sont aussi gardées ensemble comme votre **Brewery Build**, avec le Brewer Level qu’elles donnent. Seules les réponses qui
+vont ensemble y entrent : avec trois cuves, How is the vessel heated? (une question pour une seule cuve) est laissée de côté. À la
+fin de l’entretien, le Brewery Build sert à proposer les Templates qui correspondent à votre brasserie, ou à en construire un à partir
+de vos réponses. Changer une réponse Brewery dans Default settings change aussi le Brewery Build.
