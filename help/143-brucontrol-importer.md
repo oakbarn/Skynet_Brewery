@@ -10,8 +10,8 @@ makes is exactly what the Panel makes.
 
 ## Starting it
 
-Double-click **Skynet BruControl Importer** on the Desktop or in the Start menu (Skynet Brewer folder). The Setup .exe puts it
-there. A black command window opens and stays open while you use the Importer; **✖ Close Importer** at the top right stops it.
+Double-click **Skynet BruControl Importer** on the Desktop or in the Start menu. The Importer's own Setup .exe will put it
+there (see Installing the Importer). A black command window opens and stays open while you use the Importer; **✖ Close Importer** at the top right stops it.
 
 ## Page 1: Welcome
 
@@ -306,10 +306,10 @@ Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema fi
 
 ## Installing the Importer
 
-The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Under the question it says: "If you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the **Skynet BruControl
-Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. If you answered Yes, the last Setup page has two tick boxes, **Start Skynet Brewer now** (ticked) and **Start the BruControl
-Importer now**: only one can be ticked, so only one program starts. Setup never clears the Importer's answers: use **Restart Fresh**
-in the Importer. Setup
+The Importer is **not** in the Skynet Setup. It will be its **own Windows Setup .exe**, which you run on the computer that has
+BruControl (it must be on the same computer as BruControl). That Setup is not ready yet. The Skynet Setup asks no Importer question,
+and an update takes away the Importer shortcuts an earlier Setup added. Setup never clears the Importer's answers: use **Restart Fresh**
+in the Importer. The Skynet Setup
 always makes the Import folder, as BeerSmith or other programs may save their files there too.
 
 ## Next steps (being built)
