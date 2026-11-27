@@ -1926,8 +1926,11 @@ answers and changes nothing until **✔ Finish**.
   Manual Ice Bath also, Glycol"; "Type Conicals, Brew Bucket, Carboy, common fermentors"): after the Hot Side, for every Brewer Type,
   **Cold Side: Number of Fermentors**, a box for a whole number from **1 to 9** (not set until typed). Then for each fermentor, one
   after the other ("Might ask Type first as that can limit how cooled"): What kind of fermentor? (Tick Boxes with a picture drawn by
-  Skynet over each, "similar to what they sell as graphics": Conical, Unitank, Stainless Bucket, Plastic Bucket, Glass Carboy,
-  Plastic Carboy, Corny Keg ("I have fermented in them"), Other; no shop or maker names), then How is it cooled? with only the ways
+  Skynet over each, "similar to what they sell as graphics", "just similar profiles": Plastic Bucket first ("most people start there"),
+  Conical, Unitank, Stainless Bucket, Glass Carboy,
+  Plastic Carboy, Corny Keg ("I have fermented in them"), Other, and a **second row**: Stainless Conical Bucket and Plastic Pressure
+  Conical: "On the Type add a second row (I know this violates the rule but here it makes sense)", the one exception to Rule 2.6's 8
+  Tick Boxes on a line; no shop or maker names), then How is it cooled? with only the ways
   that fit that kind (Not Cooled, Fermentation Chamber, Peltier, Manual Ice Bath, Glycol Coil, Glycol Jacket: "Glycol can be Coil or
   Jacket"); a Fermentation Chamber is always one. A way to cool that no longer fits the kind is not kept. Saved as `fermentorCount`,
   `f1Cool`, `f1Type` ..., on Default settings, and in the Brewery Build as `fermentors`. Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each

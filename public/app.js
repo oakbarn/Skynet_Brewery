@@ -16498,11 +16498,11 @@ async function setupInterview({ first = false } = {}) {
           // Tick Boxes (screen 3's method): a tick picks it but does not go on; Next ▶ (at the top and after Click to proceed) has the ⛔
           // until one is ticked
           const on = tickedOf(q);
-          body.append(h('div', { class: 'setupTicks' }, ...ch.map(([k, t, tip]) => h('label', { class: 'setupTick' }, q.pics?.[k] ? (() => { const pic = h('span', { class: 'setupTickPic' }); pic.innerHTML = q.pics[k]; return pic; })() : '', h('span', {}, t), tip ? h('span', { class: 'muted setupTickTip' }, tip) : '',
+          body.append(...(q.tickRow && ch.length > q.tickRow ? [ch.slice(0, q.tickRow), ch.slice(q.tickRow)] : [ch]).map(rowCh => h('div', { class: 'setupTicks' }, ...rowCh.map(([k, t, tip]) => h('label', { class: 'setupTick' }, q.pics?.[k] ? (() => { const pic = h('span', { class: 'setupTickPic' }); pic.innerHTML = q.pics[k]; return pic; })() : '', h('span', {}, t), tip ? h('span', { class: 'muted setupTickTip' }, tip) : '',
             h('input', { type: 'checkbox', ...(on != null && String(on) === String(k) ? { checked: true } : {}), onchange: e => {
               if (e.target.checked) { a[q.id] = k; ticked.set(q.id, k); if (q.id === 'units') for (const x of SETUP_QUESTIONS) if (x.byUnits) a[x.id] = x.start(ctx, a); }
               else ticked.set(q.id, null);
-              draw(); } })))),
+              draw(); } }))))),
             // not a must one: Skip keeps Skynet's own answer, said here
             !q.must && q.start ? h('p', { class: 'muted' }, `Skip keeps Skynet's answer: ${answerWords(q, q.start(ctx, a), ctx) || '(none)'}.`) : '',
             h('p', { class: 'setupProceed' }, h('b', {}, SETUP_WELCOME.proceed), ' ', tickedOf(q) == null ? noNext() : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')));

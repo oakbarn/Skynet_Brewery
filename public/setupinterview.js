@@ -261,12 +261,18 @@ export const FERMENTOR_COOLS = [['none', 'Not Cooled'], ['chamber', 'Fermentatio
 // graphics"; "carboys can be glass or plastic and a Corny Keg is an option as I have fermented in them"). No shop or maker names.
 // [key, words, the ways it can be cooled ("Might ask Type first as that can limit how cooled"; "One option is always a Fermentation
 // Chamber")]
-export const FERMENTOR_TYPES = [['conical', 'Conical', ['none', 'chamber', 'peltier', 'glycolcoil', 'glycoljacket']],
+export const FERMENTOR_TYPES = [['bucket', 'Plastic Bucket', ['none', 'chamber', 'icebath']],      // "Plastic Bucket: most people start there"
+  ['conical', 'Conical', ['none', 'chamber', 'peltier', 'glycolcoil', 'glycoljacket']],
   ['unitank', 'Unitank', ['none', 'chamber', 'glycolcoil', 'glycoljacket']],
   ['brewbucket', 'Stainless Bucket', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
-  ['bucket', 'Plastic Bucket', ['none', 'chamber', 'icebath']], ['glasscarboy', 'Glass Carboy', ['none', 'chamber', 'icebath']],
+  ['glasscarboy', 'Glass Carboy', ['none', 'chamber', 'icebath']],
   ['plasticcarboy', 'Plastic Carboy', ['none', 'chamber', 'icebath']], ['corny', 'Corny Keg', ['none', 'chamber', 'icebath', 'glycolcoil']],
-  ['other', 'Other', FERMENTOR_COOLS.map(([k]) => k)]];
+  ['other', 'Other', FERMENTOR_COOLS.map(([k]) => k)],
+  // a second row (2026-11-27: "On the Type add a second row (I know this violates the rule but here it makes sense). For a Conical
+  // Stainless Bucket and the" plastic pressure fermentor "looking thing"): the one exception to 8 Tick Boxes on a line (Rule 2.6)
+  ['ssconical', 'Stainless Conical Bucket', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
+  ['pressureconical', 'Plastic Pressure Conical', ['none', 'chamber', 'icebath', 'glycolcoil']]];
+export const FERMENTOR_TYPE_ROW = 8;      // the first row has 8, the second row the rest
 export const coolsFor = type => { const t = FERMENTOR_TYPES.find(([k]) => k === type); return t ? FERMENTOR_COOLS.filter(([k]) => t[2].includes(k)) : FERMENTOR_COOLS; };
 // the pictures over the Tick Boxes: simple drawings by Skynet (no shop pictures), colors from the page
 const P = (body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 90" width="60" height="90" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">${body}</svg>`;
@@ -274,11 +280,13 @@ export const FERMENTOR_PICS = {
   conical: P('<path d="M12 8h36v42l-18 22-18-22z"/><path d="M30 72v8M24 80h12M14 52l-6 30M46 52l6 30"/><path d="M12 8q18-6 36 0"/>'),
   unitank: P('<path d="M12 10h36v44l-18 18-18-18z"/><path d="M12 10q18-7 36 0"/><path d="M12 18h36M12 28h36M12 38h36" stroke-dasharray="3 3"/><path d="M30 72v8M14 56l-6 26M46 56l6 26"/>'),
   brewbucket: P('<path d="M14 14h32l-3 60H17z"/><path d="M12 14h36"/><path d="M14 14q16-10 32 0"/><circle cx="30" cy="62" r="3"/><path d="M33 62h6"/>'),
-  bucket: P('<path d="M12 20h36l-4 58H16z"/><path d="M10 20h40"/><path d="M12 20q18-22 36 0"/><path d="M26 14h8v6h-8z"/>'),
+  bucket: P('<path d="M13 24h34l-4 54H17z"/><path d="M11 18h38v6H11z"/><path d="M13 32h34M14 40h32"/><path d="M11 21q19-26 38 0"/><path d="M26 4h8" stroke-width="4"/>'),
   glasscarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M16 44h28" opacity=".5"/>'),
   plasticcarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M10 46h40M10 58h40M10 70h40" stroke-dasharray="4 3"/>'),
-  corny: P('<path d="M14 16h32v58H14z"/><path d="M14 16q16-6 32 0M14 74q16 6 32 0"/><path d="M22 6h16v8H22z"/><path d="M20 16v-4M40 16v-4"/>'),
-  other: P('<path d="M14 12h32v66H14z"/><path d="M24 34q0-8 6-8t6 8q0 5-6 8v6"/><circle cx="30" cy="56" r="1.5" fill="currentColor"/>') };
+  corny: P('<path d="M20 16h20v60H20z"/><path d="M18 14h24v5H18zM18 73h24v5H18z"/><path d="M25 8h10v6H25z"/><path d="M22 14v-4M38 14v-4"/>'),
+  other: P('<path d="M14 12h32v66H14z"/><path d="M24 34q0-8 6-8t6 8q0 5-6 8v6"/><circle cx="30" cy="56" r="1.5" fill="currentColor"/>'),
+  ssconical: P('<path d="M14 12h32v38l-16 16-16-16z"/><path d="M12 12h36"/><path d="M14 12q16-9 32 0"/><path d="M30 66v6M16 48l-4 32M44 48l4 32M12 70h36"/>'),
+  pressureconical: P('<path d="M22 6h16v6H22z"/><path d="M16 14q14-6 28 0v38l-14 16-14-16z"/><path d="M16 26h28M16 38h28" stroke-dasharray="4 3"/><path d="M30 68v6M20 58l-6 22M40 58l6 22M14 80h32"/>') };
 const upTo = n => Array.from({ length: FERMENTORS_MAX - n + 1 }, (_, i) => String(n + i));      // fermentor n shows when there are n or more
 // for each fermentor: what kind first ("Might ask Type first as that can limit how cooled"), then how it is cooled (only the ways that
 // fit that kind)
@@ -286,6 +294,7 @@ export const FERMENTOR_ROWS = Array.from({ length: FERMENTORS_MAX }, (_, i) => {
     head = a => `Cold Side: Fermentor ${n} of ${fermentorCountOf(a?.fermentorCount) ?? n}`, typeId = `f${n}Type`, coolId = `f${n}Cool`;
   return [{ id: typeId, step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', ifSet: true, when, head, pics: FERMENTOR_PICS,
       ask: `What kind of fermentor is Fermentor ${n}?`, why: 'Tick the one that is most like it.', choices: FERMENTOR_TYPES.map(([k, w]) => [k, w]),
+      tickMax: FERMENTOR_TYPES.length, tickRow: FERMENTOR_TYPE_ROW,
       start: ctx => FERMENTOR_TYPES.some(([k]) => k === ctx.defaults?.[typeId]) ? ctx.defaults[typeId] : '' },
     { id: coolId, step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', ifSet: true, when, head,
       ask: `How is Fermentor ${n} cooled?`, why: 'Tick the one that cools this fermentor, or Not Cooled. Only the ways that fit its kind are here.',

@@ -422,8 +422,12 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   const ids = n => shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', fermentorCount: n }, ctx()).map(q => q.id).filter(x => /^f\d(Cool|Type)$|^fermentorCount$/.test(x));
   assert.deepEqual(ids('3'), ['fermentorCount', 'f1Type', 'f1Cool', 'f2Type', 'f2Cool', 'f3Type', 'f3Cool']);
   assert.equal(ids('9').length, 19);
-  assert.deepEqual(m.FERMENTOR_TYPES.map(([, w]) => w), ['Conical', 'Unitank', 'Stainless Bucket', 'Plastic Bucket', 'Glass Carboy', 'Plastic Carboy', 'Corny Keg', 'Other']);
-  assert.ok(asTicks(SETUP_QUESTIONS.find(q => q.id === 'f1Type'), ctx()), '8 Tick Boxes');
+  assert.deepEqual(m.FERMENTOR_TYPES.map(([, w]) => w), ['Plastic Bucket', 'Conical', 'Unitank', 'Stainless Bucket', 'Glass Carboy', 'Plastic Carboy', 'Corny Keg', 'Other',
+    'Stainless Conical Bucket', 'Plastic Pressure Conical']);
+  // "add a second row (I know this violates the rule but here it makes sense)": 8 on the first line, the rest on a second
+  const ft = SETUP_QUESTIONS.find(q => q.id === 'f1Type');
+  assert.ok(asTicks(ft, ctx()) && ft.tickRow === 8 && ft.tickMax === 10);
+  assert.match(fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), /q\.tickRow && ch\.length > q\.tickRow \? \[ch\.slice\(0, q\.tickRow\), ch\.slice\(q\.tickRow\)\]/);
   for (const v of ['1', '2', '3']) { const all = shownQuestions({ ...startAnswers(ctx()), vesselCount: v, fermentorCount: '1' }, ctx()).map(q => q.id);
     assert.ok(all.indexOf('fermentorCount') > all.indexOf('vesselCount') && all.includes('f1Type'), `${v} vessels: the Cold Side after the Hot Side`); }
   const f2 = SETUP_QUESTIONS.find(q => q.id === 'f2Cool');
