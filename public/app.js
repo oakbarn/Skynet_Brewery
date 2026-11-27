@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { PART_SPOT, partsWords, partsClean, VESSEL_PARTS, VESSEL_SPOTS, VESSEL_USES, MULTI_HEATS, VESSEL_POOL, breweryBuildOf, headOf, addsNote, sizeFieldsOf, sizeUnit, sizeVolume, sizeSafe, sizeIn, sizeClean, VESSEL_SIZE_FIELDS, ONE_VESSEL_PICKS, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { PART_SPOT, partsWords, partsClean, spotsOf, LAYOUT_SIDES, vesselLayoutSvg, VESSEL_PARTS, VESSEL_SPOTS, VESSEL_USES, MULTI_HEATS, VESSEL_POOL, breweryBuildOf, headOf, addsNote, sizeFieldsOf, sizeUnit, sizeVolume, sizeSafe, sizeIn, sizeClean, VESSEL_SIZE_FIELDS, ONE_VESSEL_PICKS, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16341,6 +16341,17 @@ function rqSummary(q, a, ctx, metric) {
 // saved, with one blue pop-up when some are not green yet.
 // the red and blue pop-ups of the Setup Interview's Close: on top of the interview; resolves with the value of the button pressed
 // (✕ and Esc: false)
+// the Vessel Layout sample (Rule 2.75, 2026-11-27: "Create a Vessel Sample for Layout that a User can Pop Up"): where each place is,
+// with the parts ticked so far filled in
+function vesselLayoutPop(parts) {
+  const p = h('dialog', { class: 'miniDlg vesselLayout', 'data-nomenu': '' }), end = () => { p.close(); p.remove(); };
+  const pic = h('div', { class: 'vesselLayoutPic' }); pic.innerHTML = vesselLayoutSvg(parts);
+  p.append(h('div', { class: 'bar' }, h('b', {}, 'Vessel Layout'), h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' },
+      h('button', { type: 'button', class: 'primary', onclick: end }, 'Close'), h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: end }, '✕'))),
+    h('p', { class: 'muted' }, 'Where each place is on a vessel, as you look at it. The Front and the Back have the same places; a Sight Glass is on the Right or the Left only. The parts you ticked are filled in.'), pic);
+  p.addEventListener('cancel', ev => { ev.preventDefault(); end(); });
+  p._btnOrder = true; document.body.append(p); p.showModal();
+}
 function setupPop(color, text, buttons) {
   return new Promise(res => {
     const p = h('dialog', { class: 'miniDlg setupPop ' + color, 'data-nomenu': '' }), end = v => { p.close(); p.remove(); res(v); };
@@ -16524,11 +16535,16 @@ async function setupInterview({ first = false } = {}) {
           const v = a[q.id] = { ...(a[q.id] || {}) };
           body.append(h('div', { class: 'setupTicks setupMulti' }, ...q.choices.map(([k, t]) => h('div', { class: 'setupTick' },
             h('label', { class: 'setupMultiTick' }, h('span', {}, t), h('input', { type: 'checkbox', ...(v[k] ? { checked: true } : {}), onchange: e => {
-              if (e.target.checked) v[k] = PART_SPOT[k] || q.spots[0][0]; else delete v[k];
+              if (e.target.checked) v[k] = PART_SPOT[k] || spotsOf(k)[0][0]; else delete v[k];
               draw(); } })),
-            v[k] ? h('label', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Where on the vessel?'),
-              h('select', { title: 'Where it is on the vessel', onchange: e => { v[k] = e.target.value; draw(); } }, ...q.spots.map(([s, w]) => h('option', { value: s, ...(v[k] === s ? { selected: true } : {}) }, w)))) : ''))),
+            // the Sight Glass: Left or Right only, two boxes (Rule 2.6); the rest: Front or Back, 20 places, a Drop Down
+            !v[k] ? '' : k === 'sight' ? h('div', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Which side?'),
+              h('span', { class: 'setupWhereBtns' }, ...spotsOf(k).map(([s, w]) => h('button', { type: 'button', class: 'setupPick' + (v[k] === s ? ' cur' : ''), onclick: () => { v[k] = s; draw(); } }, w))))
+            : h('label', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Where on the vessel?'),
+              h('select', { title: 'Where it is on the vessel', onchange: e => { v[k] = e.target.value; draw(); } }, ...LAYOUT_SIDES.map(([sd, sw]) => h('optgroup', { label: sw },
+                ...VESSEL_SPOTS.filter(([s]) => s.startsWith(sd)).map(([s, w]) => h('option', { value: s, ...(v[k] === s ? { selected: true } : {}) }, w))))))))),
             h('p', { class: 'muted' }, `Ticked: ${partsWords(v)}.`),
+            h('p', {}, h('button', { type: 'button', title: 'Show the places on a sample vessel: Front, Back and Sight Glass', onclick: () => vesselLayoutPop(v) }, '📐 Vessel Layout')),
             h('p', { class: 'setupProceed' }, h('b', {}, SETUP_WELCOME.proceed), ' ', h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')));
         } else if (q.kind === 'branch') {
           // the branch's first page: what it asks
@@ -18628,7 +18644,7 @@ function renderDefaultTab(box) {
     ...[1, 2].flatMap(n => { const v = 'v' + n, of = `Vessel ${n} of 2`, was = S.config.brewDefaults?.[v + 'Template'];
       return [[v + 'Heat', `${of}: how is it heated?`, 'sel', [['', '(not set)'], ...MULTI_HEATS], false, false, { tip: 'Only for two vessels: what heats this vessel.' }],
         [v + 'Use', `${of}: used for`, 'sel', [['', '(not set)'], ...VESSEL_USES], false, false, { tip: 'Only for two vessels: what this vessel does on Brew Day.' }],
-        ...VESSEL_PARTS.map(([k, t]) => [`_vp${n}_${k}`, `${of}: ${t}`, 'sel', [['', '(none)'], ...VESSEL_SPOTS], false, false, { tip: 'Only for two vessels: where this part is on the vessel, or none.' }]),
+        ...VESSEL_PARTS.map(([k, t]) => [`_vp${n}_${k}`, `${of}: ${t}`, 'sel', [['', '(none)'], ...spotsOf(k)], false, false, { tip: 'Only for two vessels: where this part is on the vessel, or none.' }]),
         [v + 'Template', `${of}: the vessel`, 'sel', [['', '(not set)'], ...VESSEL_POOL.map(([k, w]) => [k, `${w} (${k})`]), ...(was && !VESSEL_POOL.some(([k]) => k === was) ? [[was, was]] : [])], false, false, { tip: 'Only for two vessels: the Skynet Vessel Template that matches this vessel.' }],
         ...VESSEL_SIZE_FIELDS.map(([k, w, kind]) => [`_v${n}s_${k}`, `${of}: ${w} (${sizeUnit(kind, shownUnits)})`, 'num', null, false, false, { tip: 'Only for two vessels: its inside size, as in the Setup Interview. Diameter and Height draw it to size; Skynet works out the Volume from them.' }])]; }),
     ['allInOne', 'An All In One?', 'bool', null, false, false, { tip: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).' }],

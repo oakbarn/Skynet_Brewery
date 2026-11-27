@@ -2015,3 +2015,8 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupCalc { font-weight: 600; margin: 6px 0 10px 8px; }
 .setupDlg .setupSizeBox { display: flex; align-items: center; gap: 8px; }
 .setupDlg .setupSizeBox input { width: 8em; }
+/* the Vessel Layout sample (Rule 2.75) */
+.vesselLayout { width: min(1100px, 96vw); }
+.vesselLayout .vesselLayoutPic { color: var(--text); }
+.setupDlg .setupWhereBtns { display: flex; gap: 8px; }
+.setupDlg .setupWhereBtns .setupPick { padding: 4px 14px; min-width: 0; }

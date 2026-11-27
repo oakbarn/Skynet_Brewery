@@ -1912,8 +1912,9 @@ answers and changes nothing until **✔ Finish**.
   Sparge Arm, and Sight Glass so we can give the proper choice of vessels starting with 2 vessels"; "If you do in Tick Box format they
   can pick more than 1 and ask where on vessel"): with 2 Hot Side Vessels, the same questions for Vessel 1, then Vessel 2
   (`vesselRows`, kept for 3 or more): How heated (the 6 Tick Boxes without No Boil Brewer), Used for (BK, HLT, BK and HLT, MLT), the
-  parts (Tick Boxes that may tick more than one, each with a Drop Down of where it is: his 13 places from High Right to Low Back
-  Left), then the vessel (up to 6 Skynet Templates that fit the use, the heat and the parts, best match first; more under Other
+  parts (Tick Boxes that may tick more than one, each with where it is: his Vessel Layout picture, the same 10 places on the Front
+  and the Back in a Drop Down, and "Sight Glass left or Right only" as two boxes; 📐 Vessel Layout pops up a sample vessel with
+  every place, the ticked ones filled in: "Create a Vessel Sample for Layout that a User can Pop Up"), then the vessel (up to 6 Skynet Templates that fit the use, the heat and the parts, best match first; more under Other
   Skynet Template), then its Size. Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
   with what its heat `adds`).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.

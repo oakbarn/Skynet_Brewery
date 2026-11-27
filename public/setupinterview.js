@@ -138,14 +138,45 @@ export const MULTI_HEATS = VESSEL_HEATS.filter(([k]) => k !== 'noboil');
 export const VESSEL_USES = [['bk', 'Boil Kettle (BK)'], ['hlt', 'Hot Liquor Tank (HLT)'], ['bkhlt', 'BK and HLT'], ['mlt', 'Mash Tun (MLT)']];
 // the parts asked about, each with where it is on the vessel
 export const VESSEL_PARTS = [['tangential', 'Tangential Inlet'], ['steamSlayer', 'Steam Slayer'], ['sparge', 'Sparge Arm'], ['sight', 'Sight Glass']];
-// where on the vessel (OakBarn Brewery, 2026-11-27, his list, his order). 13: a Drop Down (Rule 2.6)
-export const VESSEL_SPOTS = [['hr', 'High Right'], ['hl', 'High Left'], ['mr', 'Middle Right'], ['ml', 'Middle Left'], ['mlr', 'Mid Low Right'],
-  ['mll', 'Mid Low Left'], ['lr', 'Low Right'], ['ll', 'Low Left'], ['hbc', 'High Back Center'], ['mlbr', 'Mid Low Back Right'],
-  ['mlbl', 'Mid Low Back Left'], ['lbr', 'Low Back Right'], ['lbl', 'Low Back Left']];
+// where on the vessel (OakBarn Brewery, 2026-11-27, his Vessel Layout picture): the same 10 places on the Front and on the Back;
+// "Sight Glass left or Right only". [key, words, x, y] with x and y from 0 to 1 across and down the vessel, as on his picture (the
+// left of the drawing is Right, as he drew it)
+export const LAYOUT_PLACES = [['hr', 'High Right', 0.06, 0.07], ['hl', 'High Left', 0.94, 0.07], ['mr', 'Middle Right', 0.06, 0.5],
+  ['ml', 'Middle Left', 0.94, 0.5], ['mlr', 'Mid Low Right', 0.22, 0.72], ['mlc', 'Mid Low Center', 0.5, 0.79], ['mll', 'Mid Low Left', 0.8, 0.72],
+  ['lr', 'Low Right', 0.06, 0.95], ['lc', 'Low Center', 0.5, 0.95], ['ll', 'Low Left', 0.94, 0.95]];
+export const LAYOUT_SIDES = [['f', 'Front'], ['b', 'Back']];
+export const VESSEL_SPOTS = LAYOUT_SIDES.flatMap(([s, sw]) => LAYOUT_PLACES.map(([k, w]) => [s + k, `${sw} ${w}`]));
+export const SIGHT_SPOTS = [['right', 'Right'], ['left', 'Left']];
+export const spotsOf = part => part === 'sight' ? SIGHT_SPOTS : VESSEL_SPOTS;
 // where a part starts when it is ticked
-export const PART_SPOT = { tangential: 'll', steamSlayer: 'hr', sparge: 'hr', sight: 'hl' };
-export const partsClean = v => { const o = {}; for (const [k] of VESSEL_PARTS) if (v?.[k] && VESSEL_SPOTS.some(([s]) => s === v[k])) o[k] = v[k]; return o; };
-export const partsWords = v => { const o = partsClean(v), w = VESSEL_PARTS.filter(([k]) => o[k]).map(([k, t]) => `${t} (${VESSEL_SPOTS.find(([s]) => s === o[k])[1]})`); return w.length ? w.join(', ') : 'None of these'; };
+export const PART_SPOT = { tangential: 'fll', steamSlayer: 'fhr', sparge: 'fhl', sight: 'right' };
+export const partsClean = v => { const o = {}; for (const [k] of VESSEL_PARTS) if (v?.[k] && spotsOf(k).some(([s]) => s === v[k])) o[k] = v[k]; return o; };
+export const partsWords = v => { const o = partsClean(v), w = VESSEL_PARTS.filter(([k]) => o[k]).map(([k, t]) => `${t} (${spotsOf(k).find(([s]) => s === o[k])[1]})`); return w.length ? w.join(', ') : 'None of these'; };
+// the Vessel Layout sample (OakBarn Brewery, 2026-11-27: "Create a Vessel Sample for Layout that a User can Pop Up"): his picture drawn
+// by Skynet, the Front, the Back and the Sight Glass; the places of the parts ticked are filled in. An SVG string, colors from the page
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+export function vesselLayoutSvg(parts = {}) {
+  const on = partsClean(parts), used = new Map(VESSEL_PARTS.filter(([k]) => on[k]).map(([k, t]) => [on[k], t]));
+  const W = 220, Hh = 300, M = 120, PW = W + 2 * M, top = 50, out = [];
+  const panel = (i, title, color, spots) => {
+    const x0 = i * PW + M;
+    out.push(`<text x="${x0 + W / 2}" y="${top - 18}" text-anchor="middle" font-weight="700" font-size="16" fill="currentColor">${esc(title)}</text>`,
+      `<rect x="${x0}" y="${top}" width="${W}" height="${Hh}" fill="none" stroke="currentColor" stroke-width="3"/>`);
+    for (const [key, w, x, y, la] of spots) {
+      const cx = x0 + x * W, cy = top + y * Hh, part = used.get(key);
+      out.push(`<circle cx="${cx}" cy="${cy}" r="8" stroke="${color}" stroke-width="3" fill="${part ? color : 'none'}"><title>${esc(part ? `${part}: ${w}` : w)}</title></circle>`);
+      const [tx, ty, an] = la === 'none' ? [] : x < 0.15 ? [x0 - 12, cy + 4, 'end'] : x > 0.85 ? [x0 + W + 12, cy + 4, 'start'] : w.includes('Mid Low Center') ? [cx, cy + 24, 'middle'] : y > 0.9 ? [cx, top + Hh + 18, 'middle'] : [cx, cy - 14, 'middle'];
+      if (tx !== undefined) out.push(`<text x="${tx}" y="${ty}" text-anchor="${an}" font-size="12" fill="currentColor"${part ? ' font-weight="700"' : ''}>${esc(part ? `${w}: ${part}` : w)}</text>`);
+    }
+  };
+  LAYOUT_SIDES.forEach(([s, sw], i) => panel(i, sw, i ? '#a050c8' : '#e03c3c', LAYOUT_PLACES.map(([k, w, x, y]) => [s + k, w, x, y])));
+  // the Sight Glass: a tube from high to low, on the Right or the Left only
+  const x2 = 2 * PW + M;
+  for (const [k, w] of SIGHT_SPOTS) { const x = x2 + (k === 'right' ? 0.2 : 0.8) * W; out.push(`<line x1="${x}" y1="${top + 0.12 * Hh}" x2="${x}" y2="${top + 0.85 * Hh}" stroke="${on.sight === k ? '#e03c3c' : 'currentColor'}" stroke-opacity="${on.sight === k ? 1 : 0.35}" stroke-width="4"/>`); }
+  panel(2, 'Sight Glass: Left or Right only', '#e03c3c', SIGHT_SPOTS.flatMap(([k, w]) => [[k, w, k === 'right' ? 0.2 : 0.8, 0.12, 'none'], [k, w, k === 'right' ? 0.2 : 0.8, 0.85, 'none']]));
+  for (const [k, w] of SIGHT_SPOTS) out.push(`<text x="${x2 + (k === 'right' ? 0.2 : 0.8) * W}" y="${top + 0.5 * Hh}" text-anchor="middle" font-size="12" fill="currentColor"${on.sight === k ? ' font-weight="700"' : ''}>${esc(w)}</text>`);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${3 * PW} ${top + Hh + 30}" width="100%" role="img" aria-label="Vessel Layout">${out.join('')}</svg>`;
+}
 // the Skynet Vessel Templates a vessel of 2 or more is picked from: [Template, plain words, used for, parts it has, heat]
 // heat: 'element' (an Element Port), 'estove' or 'gstove' (on a stove), '' (heated from under it: a burner, a hot plate ...)
 const K = ['bk', 'bkhlt'], H = ['hlt', 'bkhlt'];
@@ -191,7 +222,7 @@ export function vesselRows(n, count) {
       ask: `What is Vessel ${n} used for?`, why: 'Tick what this vessel does on Brew Day.', choices: VESSEL_USES, start: ctx => ok(VESSEL_USES, D(ctx, 'Use')) },
     { id: v + 'Parts', step: 'Brewery', kind: 'multi', save: 'defaults', when, head: of,
       ask: `Does Vessel ${n} have any of these?`, why: 'Tick every one it has (or none), and pick where it is on the vessel. Skynet picks the vessels that match.',
-      choices: VESSEL_PARTS, spots: VESSEL_SPOTS, start: ctx => partsClean(D(ctx, 'Parts')) },
+      choices: VESSEL_PARTS, start: ctx => partsClean(D(ctx, 'Parts')) },
     { id: v + 'Template', step: 'Brewery', kind: 'vessel', save: 'defaults', ifSet: true, when, heat: v + 'Heat', head: of,
       ask: `Choose the Vessel that matches Vessel ${n}:`, why: 'Click the picture of your vessel, then Next ▶. The best match is first.',
       group: 'Vessel Widget', groupNote: 'Skynet Templates that fit what you ticked. Other Skynet Template has every one.',

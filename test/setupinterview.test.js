@@ -347,17 +347,24 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.equal(choicesOf(heat, ctx()).length, 6);
   assert.deepEqual(m.VESSEL_USES.map(([, w]) => w), ['Boil Kettle (BK)', 'Hot Liquor Tank (HLT)', 'BK and HLT', 'Mash Tun (MLT)']);
   assert.deepEqual(m.VESSEL_PARTS.map(([, w]) => w), ['Tangential Inlet', 'Steam Slayer', 'Sparge Arm', 'Sight Glass']);
-  assert.deepEqual(m.VESSEL_SPOTS.map(([, w]) => w), ['High Right', 'High Left', 'Middle Right', 'Middle Left', 'Mid Low Right', 'Mid Low Left', 'Low Right', 'Low Left',
-    'High Back Center', 'Mid Low Back Right', 'Mid Low Back Left', 'Low Back Right', 'Low Back Left']);
+  // his Vessel Layout picture: the same 10 places on the Front and the Back; "Sight Glass left or Right only"
+  assert.deepEqual(m.LAYOUT_PLACES.map(([, w]) => w), ['High Right', 'High Left', 'Middle Right', 'Middle Left', 'Mid Low Right', 'Mid Low Center', 'Mid Low Left', 'Low Right', 'Low Center', 'Low Left']);
+  assert.equal(m.VESSEL_SPOTS.length, 20);
+  assert.deepEqual([m.VESSEL_SPOTS[0][1], m.VESSEL_SPOTS[10][1]], ['Front High Right', 'Back High Right']);
+  assert.deepEqual(m.spotsOf('sight').map(([, w]) => w), ['Right', 'Left']);
+  // the Vessel Layout sample: the places ticked are filled in
+  const svg = m.vesselLayoutSvg({ sparge: 'fhl', sight: 'left' });
+  assert.match(svg, /^<svg /); assert.match(svg, /High Left: Sparge Arm/); assert.equal((svg.match(/<circle/g) || []).length, 24);
+  assert.ok(!/#fff\b|white/i.test(svg), 'no pure white (Rule 2.7)');
   const parts = SETUP_QUESTIONS.find(q => q.id === 'v1Parts');
   assert.equal(parts.kind, 'multi');
-  assert.equal(answerWords(parts, { sparge: 'hr', sight: 'hl' }, ctx()), 'Sparge Arm (High Right), Sight Glass (High Left)');
+  assert.equal(answerWords(parts, { sparge: 'fhr', sight: 'left' }, ctx()), 'Sparge Arm (Front High Right), Sight Glass (Left)');
   assert.equal(answerWords(parts, {}, ctx()), 'None of these');
-  assert.deepEqual(m.partsClean({ sparge: 'hr', bogus: 'x', sight: 'nowhere' }), { sparge: 'hr' });
+  assert.deepEqual(m.partsClean({ sparge: 'bmlc', bogus: 'x', sight: 'fhl', tangential: 'left' }), { sparge: 'bmlc' }, 'a Sight Glass only Left or Right; the rest only Front or Back places');
   // the vessels: what fits the use, the heat and the parts, the best match first, at most 6
   const tpl = SETUP_QUESTIONS.find(q => q.id === 'v1Template');
-  assert.equal(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'gasburner', v1Parts: { steamSlayer: 'hr' } })[0][0], 'Kettle_Tangential_Steam_Slayer');
-  assert.equal(choicesOf(tpl, ctx(), { v1Use: 'hlt', v1Heat: 'element', v1Parts: { sight: 'hl' } })[0][0], 'OakBarn_Big_MAC_HLT');
+  assert.equal(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'gasburner', v1Parts: { steamSlayer: 'fhr' } })[0][0], 'Kettle_Tangential_Steam_Slayer');
+  assert.equal(choicesOf(tpl, ctx(), { v1Use: 'hlt', v1Heat: 'element', v1Parts: { sight: 'left' } })[0][0], 'OakBarn_Big_MAC_HLT');
   assert.ok(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'element' }).every(([k]) => m.VESSEL_POOL.find(p => p[0] === k)[4] === 'element'), 'electric: only Templates with an element');
   assert.ok(choicesOf(tpl, ctx(), { v1Use: 'mlt', v1Heat: 'gasburner' }).every(([k]) => m.VESSEL_POOL.find(p => p[0] === k)[2].includes('mlt')));
   for (const [h] of m.MULTI_HEATS) for (const [u] of m.VESSEL_USES) {
@@ -372,10 +379,10 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.ok(sizeFieldsOf({ v2Heat: 'element' }, 'v2Heat').some(([k]) => k === 'elementDepth'));
   assert.ok(!sizeFieldsOf({ v2Heat: 'gasburner' }, 'v2Heat').some(([k]) => k === 'elementDepth'));
   // saved, and kept together in the Brewery Build
-  const a = { ...a0, v1Heat: 'element', v1Use: 'hlt', v1Parts: { sparge: 'hr' }, v1Template: 'HLT', v1Size: { diameter: '16', vheight: '18', elementDepth: '12' },
+  const a = { ...a0, v1Heat: 'element', v1Use: 'hlt', v1Parts: { sparge: 'fhl' }, v1Template: 'HLT', v1Size: { diameter: '16', vheight: '18', elementDepth: '12' },
     v2Heat: 'gasburner', v2Use: 'bk', v2Parts: {}, v2Template: 'Kettle_Basic' };
   const out = setupSave(a, ctx(), undefined, new Set(shownQuestions(a, ctx()).map(q => q.id)), true).brewDefaults;
-  assert.deepEqual(out.v1Parts, { sparge: 'hr' });
+  assert.deepEqual(out.v1Parts, { sparge: 'fhl' });
   assert.equal(out.v1Size.safeVolume, 6.1);
   assert.deepEqual(out.breweryBuild.vessels.map(v => [v.n, v.use, v.template, v.adds]), [[1, 'hlt', 'HLT', ['element', 'probe']], [2, 'bk', 'Kettle_Basic', ['burner', 'igniter']]]);
   assert.equal(out.breweryBuild.adds, undefined, 'the one vessel adds: only for one vessel');
