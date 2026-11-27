@@ -1,6 +1,6 @@
 {
  "00-tailscale-windows": "7718c563861cc0e1",
- "01-getting-started": "d6dbab7c654c0aeb",
+ "01-getting-started": "42c9b9a7d145af45",
  "02-tabs": "013ca89006df260c",
  "03-devices": "a9fa4471ca33c425",
  "04-variables": "7472204677c308b8",
@@ -241,6 +241,6 @@
  "245-value-widget-formats": "862fd1499939fe6f",
  "246-skynet-brew-timers": "e1a030f685c7d932",
  "247-fix-before-next-brew-day": "97cf56bbda405ccf",
- "248-setup-interview": "ef316b3370bc507e",
+ "248-setup-interview": "d2c346e212b83b7a",
  "249-recipe-interview": "60fed7f4be517177"
 }

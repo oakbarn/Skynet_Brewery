@@ -1906,6 +1906,54 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupBody { margin: 8px 0; }
 .setupDlg .setupAsk { font-size: 1.25em; font-weight: 600; margin: 6px 0; }
 .setupDlg .setupWarn { color: var(--bad, #d33); font-weight: 700; font-size: 1.1em; border: 2px solid currentColor; border-radius: 8px; padding: 8px 10px; }
+/* the Setup Interview's frozen top: buttons, title and steps strip stay put while the page scrolls (OakBarn Brewery, 2026-11-27) */
+.setupDlg .setupHead { position: sticky; top: 0; z-index: 2; background: var(--panel, #252525); margin: -2px 0 0; padding-bottom: 4px; }
+/* Skip (and Back on the Welcome page) where it is not allowed: the 🚫 Do Not Enter pointer (OakBarn Brewery, 2026-11-27) */
+.setupDlg .setupNoSkip { cursor: not-allowed; opacity: .45; }
+/* the ⛔ Do Not Enter sign on a button that is not available (OakBarn Brewery, 2026-11-27, screen 2) */
+.setupDlg .setupNo { position: relative; }
+.setupDlg .setupNoSkip.setupNo { opacity: 1; color: rgba(250,250,250,.4); }
+.setupDlg .setupNo::after { content: '⛔'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1.1em; opacity: 1; pointer-events: none; }
+/* screen 2, the button guide: each row is the buttons as they look, then what they do */
+.setupDlg .setupGuideIntro { font-weight: 700; margin: 10px 0; }
+.setupDlg .setupGuide { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 14px 16px; align-items: center; margin: 8px 0 4px; }
+.setupDlg .setupGuideBtns { display: flex; gap: 8px; align-items: center; }
+.setupDlg .setupLook { display: inline-block; padding: 5px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); color: var(--text); white-space: nowrap; }
+.setupDlg .setupLook.primary { background: var(--accent); border-color: var(--accent); color: #fafafa; }
+.setupDlg .setupLook.setupNo { opacity: .6; }
+.setupDlg .setupGuideAnd { color: var(--muted); }
+/* screen 3, a Tick Box: the boxes with their words over them; the ticked one is green */
+.setupDlg .setupTicks { display: flex; gap: 28px; align-items: flex-end; margin: 10px 0 4px 12px; }
+.setupDlg .setupTick { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 700; text-align: center; max-width: 9em; cursor: pointer; }
+.setupDlg .setupTick .setupTickTip { font-weight: 400; font-size: .85em; }
+.setupDlg .setupTick input { width: 1.6em; height: 1.6em; min-width: 0; accent-color: var(--ok); cursor: pointer; }
+.setupDlg .setupTickBox { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border: 2px solid var(--muted); border-radius: 5px; color: var(--ok); font-weight: 900; }
+.setupDlg .setupClick { font-weight: 800; font-size: 1.6em; margin: 0 0 14px 4.4em; }
+/* screen 4, a Drop Down list: one to try, then how it looks closed, open (Chocolate lit) and picked */
+.setupDlg select.setupDrop { min-width: 16em; font-weight: 700; margin: 2px 0 0 4px; }
+.setupDlg .setupDropRow { display: flex; align-items: flex-end; gap: 10px; margin: 4px 0 10px 4px; }
+.setupDlg .setupDropLook { display: inline-flex; justify-content: space-between; align-items: center; gap: 24px; min-width: 15em; padding: 5px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel2); font-weight: 700; }
+.setupDlg .setupDropLook.picked { background: #9ad7e6; color: #1f1f1f; margin-left: 4px; }
+.setupDlg .setupDropArrow { color: var(--muted); }
+.setupDlg .setupDropOpen { min-width: 11em; border: 2px solid var(--muted); border-radius: 10px; padding: 0 0 6px; background: var(--panel); font-weight: 700; overflow: hidden; }
+.setupDlg .setupDropOpen > div { padding: 1px 10px; }
+.setupDlg .setupDropOpen .setupDropHead { background: #9ad7e6; color: #1f1f1f; }
+.setupDlg .setupDropOpen .setupDropHi { background: var(--accent); color: #fafafa; }
+.setupDlg .setupClickSmall { font-weight: 800; font-size: 1.3em; }
+/* a step of the strip that is not available yet: the ⛔ before its name */
+.setupDlg .nsiSteps li.setupNoStep { opacity: .6; }
+.setupDlg .nsiSteps li.setupNoStep::after { content: ' ⛔'; }
+.setupDlg .setupHead2 { font-size: 1.5em; font-weight: 800; margin: 8px 0 4px; }
+/* screen 5, Hot Spots: a sample strip to try, and under it how the clicked step's page looks */
+.setupDlg .setupSampleStrip { margin: 6px 0 2px; }
+.setupDlg .setupClickUnder { margin: 0 0 8px 13em; }
+.setupDlg .setupSample { border: 2px dashed var(--line); border-radius: 8px; padding: 6px 12px; margin: 4px 0 10px; }
+.setupDlg .setupSampleTitle { font-weight: 700; font-size: 1.1em; margin: 4px 0; }
+/* the Setup Interview's Welcome page (OakBarn Brewery, 2026-11-27): the blue phone and small screen note, then the text */
+.setupDlg .setupWelcomeNote { background: #0b8fd8; color: #fafafa; font-size: 1.35em; font-weight: 700; line-height: 1.3; border: 3px solid #fafafa; border-radius: 16px; padding: 10px 14px; margin: 6px 0 12px; }
+.setupDlg .setupWelcomeText { max-width: 46em; line-height: 1.4; }
+.setupDlg .setupProceed { font-size: 1.4em; margin-top: 14px; }
+.setupDlg .setupProceed button { font-size: .75em; margin-left: 8px; }
 .setupDlg .setupPicks { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
 .setupDlg .setupPick { text-align: left; padding: 10px 12px; }
 .setupDlg .setupPick.cur { outline: 2px solid var(--accent); }

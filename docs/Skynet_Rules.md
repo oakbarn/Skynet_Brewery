@@ -1775,7 +1775,46 @@ answers and changes nothing until **✔ Finish**.
   Defaults"): steps 1 to 3 must be answered. Steps **4 Brewery** (the Brewery Equipment Interview), **5 Recipes** (the Recipe Default
   Interview) and **6 Other Defaults** (a catch all) are **branches**: each opens on a page that lists what it asks, and **Skip there
   skips the whole branch**; inside it each question has its own Skip. Then **Done**.
-- The first page carries the one big warning (red, Rule 6.20 look), shown to everyone: design on a computer, not a phone or tablet.
+- **CHANGED 2026-11-27** (OakBarn Brewery, his picture of the first screen, picked "A"; "Skip will get the Do Not Enter on the
+  mandatory questions"). This wins over the order and the "steps 1 to 3" in this Rule: the six steps are now **1 Units · 2 Brewer
+  Type · 3 Brewery · 4 Other Defaults · 5 Recipe Defaults · 6 Help Language**. **Only steps 1 and 2 must be answered** (Units, and
+  Brewer Type); Close's red pop-up and ✔ Finish check those two, and the blue pop-up says
+  it "will work with just the first 2 questions". Steps 3 to 5 are the branches. Step 6 Help Language is one question with its own
+  Skip (English). Skip always shows; on a must question **not answered yet** it has the **🚫 not-allowed pointer** and does nothing;
+  once answered (Next, or saved from an earlier run) Skip works and keeps the answer ("they cannot be skipped if unanswered. If
+  answered skip would work"). **◀ Back and Close always work** ("they can go back and close at any time"). The steps strip stays
+  active ("Leave all the Menu Items at the top active").
+  **Then (OakBarn Brewery, 2026-11-27, screen 2 and "the close is Not Available until 1 and 2 are answered"; "and that applies to
+  screen 1 as well"; "and every screen until we get past the mandatory questions"), this wins over "close at any time":** on
+  **every** screen, the Welcome page too, **Close and ✕ are not available** (⛔ Do Not Enter sign, 🚫 pointer; Esc does nothing)
+  until 1. Units and 2. Brewer Type are answered. On a must question not answered yet, **Skip and Next ▶** both have the ⛔: a click
+  on an answer answers it. ◀ Back always works, except on the Welcome page (⛔: nothing to go back to). **Every step of the strip**
+  has the ⛔ too until 1 and 2 are answered ("a Click on any of the 1. Units 2. Brewer Type .. hot spots do not work").
+- **Question 1** (OakBarn Brewery, 2026-11-27, his picture; "Have all the Next Do Not Enter until a tick is made"): words about
+  Units first (row `lead`), then "And now for that 1st Question: US or Metric Units? Choose One." as **Tick Boxes** (row `tick: true`).
+  A tick does not go on; every Next ▶ (top and Click to proceed) has the ⛔ until one is ticked.
+  **Every answer is saved the moment it is given** ("save these like a gGlobal as they need to be persistent. No implicit save. Even
+  if a computer is shut, these stay"): only answered (green) questions are written; setupDone only once steps 1 and 2 are answered,
+  so a first run left early opens again. The buttons, title and steps strip are **frozen** at the top ("Also this is frozen").
+- **The Welcome page** (OakBarn Brewery, 2026-11-27, his text word for word, spelling and grammar corrected) is the first page of
+  every run, before question 1: a **blue box**, the one note about phones and small screens ("While Skynet can do many things, it
+  cannot make a physical screen any larger ..."), then what the interview is, then "Click to proceed: Next ▶". It replaces the red
+  warning that was on question 1 (ONE WARNING ONLY). Skip there goes on like Next ▶; ◀ Back shows with the 🚫 pointer (nothing is before it); ◀ Back on question 1 comes back
+  to it. More pages come in Fritz's order.
+- **Screen 2, the button guide** (OakBarn Brewery, 2026-11-27, "Screen Interview 2"): each button of the bar as it looks, with what it
+  does, and the ⛔ ones (Skip and Next on unanswered 1 and 2; Close and ✕ until 1 and 2 are answered). **Screen 3, how to answer**
+  ("Screen 3"): questions are answered in two methods; the first is a **Tick Box** ("Are you a morning person?" Yes · If 11:59 =
+  morning · No), shown before and after a click (the first row can be tried). **Screen 4** ("next screen"): the second method, a
+  **Drop Down list** ("Favorite Ice Cream?": Vanilla, Chocolate, Strawberry, Mint, Cookie, Orange Sherbet; no Other "as the Skynet
+  Shop only has these flavors available today"), shown closed, open and with Chocolate picked (the first one can be tried). Screens
+  1 to 4 come before question 1, every run; their Skip goes on like Next ▶. **Screen 5, Hot Spots** ("We are almost ready to start
+  the interview, but one last option is available on some screens"): the steps strip is Hot Spots, click a step to go there; a
+  sample strip on the page can be tried and shows below how that step's page looks (4. Other Defaults to start). **Screen 6** ("We
+  are now going to start the interview with two easy questions"): no bad answers, "canned" Processes, "the learning curve is a
+  ladder and not a mountain", then "Let's get to the Interview: Next ▶". Screens 1 to 6 come before question 1, in the order of
+  SETUP_INTRO. The pages are data in public/setupinterview.js (SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS,
+  SETUP_START). **No "7. Done" in the steps strip** ("remove 7. Done as while I like the
+  done screen it will be accessed differently which will be later"): the Done page still follows the last question for now.
 - Questions now: **1 Units** (must). **2 Help language** (must): English, Français, and the User Language once it is on this Brain
   (Rule 11.16; "But additional Language?"). **3 Brewer Type** (must; "The highest level you will brew now. This is just to get
   started. Skynet can grow with you"): Extract Can Kit, Extract Partial Grain and Hops, All Grain; **All Grain** asks next "Do you
@@ -1797,7 +1836,32 @@ answers and changes nothing until **✔ Finish**.
 - **The questions are data** (public/setupinterview.js `SETUP_QUESTIONS`): the order, which are **must**, and new questions are
   changed there, one row each, with nothing else to change.
 - The New Schema Interview (Rule 2.58) starts a Brewing Tab's Level from the Brewer Level when no Level was picked before.
+- **CHANGED 2026-11-27, question 2** (OakBarn Brewery, his picture: "All on one screen so get rid of reference to any follow-up
+  question above as there are none. So it does become two simple questions"): **2 Brewer Type** is one screen of lead text and four
+  **Tick Boxes**: Extract Kit, Extract Brewer add Own Hops, All Grain, All Grain Mill own Grain (All Grain (own Grain Mill)). Every
+  Next has the ⛔ until a box is ticked. *Replaced:* "What is the highest level you will brew now?" with three choices and the
+  follow-up "Do you grind your own grain?" after All Grain.
+- **CHANGED 2026-11-27, Number of Vessels** (OakBarn Brewery: "Create the first brewery question which will be for all brewers
+  regardless of type. Number of Vessels"): the first question of **3 Brewery** (after its branch page) is **Number of Vessels**,
+  asked of every Brewer Type, as three **Tick Boxes** (One vessel, Two vessels, Three or more vessels, each with a short line under
+  it). Next has the ⛔ until a box is ticked; Skip works (not a must).
+- **CHANGED 2026-11-27, Brewery held to one question** (OakBarn Brewery: "Leave the brewery interview to the one question for now but
+  build all the rest"): the other Brewery questions (All In One, outlet, pump, pumps, HERMS or RIMS, All Grain Plus, Piped Manifold,
+  Pipe size, Hose size) have `held: true`: not asked, still on Default settings. Taking `held` off brings one back.
+- **CHANGED 2026-11-27, Tick Boxes after Brewery** (OakBarn Brewery: "Rebuild all the Interview Dialogs in Order After the Brewery
+  interview using check boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to
+  up to 4 Lines for a check Box if needed"): a row with `tick` is Tick Boxes when it is Yes/No or has **fewer than 6** choices
+  (Yeast Starter, Mash Profile, Boil Profile, Help language); 6 or more is a Drop Down list (Rule 2.6 still holds: more than 6 MUST
+  be one). A non-must one shows what Skip keeps.
+- **New questions** (OakBarn Brewery, 2026-11-27: "if you can add a selection to the Tick box, do not add followup questions but
+  remember that things may need to be a new branch"): add a choice to a question's Tick Boxes instead of a follow-up question; when a
+  choice needs more questions, they go in a new branch.
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
+
+2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
+this is frozen"; "And that should be a rule on any dialogs that have a selection or menu on the top"). The buttons, the title and the
+menu (steps strip, tabs, a selection) stay in place at the top of the dialog; only what is under them scrolls. First built in the
+Setup Interview (Rule 2.75); other dialogs follow it as they are changed.
 
 ## 3. Names and file names
 
@@ -7527,6 +7591,11 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
+- 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
+- 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
+- 2026-11-27: Rule 2.75 changed: question 2 Brewer Type is four Tick Boxes on one screen; the "Do you grind your own grain?" follow-up is gone. Help 248.
+- 2026-11-27: Rule 2.76 new (OakBarn Brewery: "that should be a rule on any dialogs that have a selection or menu on the top"): a dialog's top (buttons, title, menu) stays frozen while the rest scrolls. Rule 2.75 changed again: every answer saved the moment it is given; Close and ✕ ⛔ on every screen until 1 and 2 are answered; Skip and Next ⛔ on unanswered 1 and 2; screens 2 (button guide) and 3 (Tick Box). Help 248.
+- 2026-11-27: Rule 2.75 changed (OakBarn Brewery, his picture of the first screen, picked "A"): Welcome page first (blue phone note); steps now Units, Brewer Type, Brewery, Other Defaults, Recipe Defaults, Help Language; only steps 1 and 2 mandatory; Skip shows the 🚫 pointer on must questions. Help 248.
 - 2026-11-26: Rule 2.75 new (OakBarn Brewery: "Start the no Skynet settings interview first ... First question (that cannot be skipped) US or Metric"; Brewer Level "A and Mandatory"): the Setup Interview on a new installation and on ☰ Menu; questions kept as data; Brewer Level and Yeast Starter on Default settings. Help 248.
 - 2026-11-26: Rule 2.75 changed (Panel Update 17, OakBarn Brewery): 6 steps, Units, Help language (with the User Language) and Brewer Type must be answered; Brewer Type asks "Do you grind your own grain?" after All Grain; Brewery, Recipes and Other Defaults are branches with Skip for the whole branch; Brewer Level is in Brewery and may be skipped; Batch Size, Mash Profile and Boil Profile added in Recipes; Piped Manifold (a Switch, Default settings) added in Brewery; green answered questions, open and Next on the first not green; Close red pop-up until steps 1 to 3, then one blue pop-up and the answers so far saved; `when:` branching in a question row; Default settings sections (Mandatory, Your Brewery, Branch Manifold hidden while Piped Manifold is Off, New Build, Brewery Vessels questions, Yeast Starter in New User Recipes). Rule 2.42 changed: a branch may hide. Help 248 (and French).
 - 2026-11-25: Rule 16.11 changed (OakBarn Brewery: "I want it on the Manifold Tab ... By default it goes where it started but can be on a different tab (or we could just put a true Clone on the other Tab)"; picked Change the Rule): the fill's Override goes by default on the Tab where the fill starts, and may be on a different Tab or have a Clone there. Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")
