@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16506,7 +16506,7 @@ async function setupInterview({ first = false } = {}) {
         } else if (q.kind === 'yesno') {
           body.append(h('div', { class: 'setupPicks' }, ...[[true, 'Yes'], [false, 'No']].map(([k, t]) => h('button', { type: 'button', class: 'setupPick' + (a[q.id] === k ? ' cur' : ''), onclick: () => { a[q.id] = k; next(); } }, h('b', {}, t)))));
         } else {
-          const inp = h('input', { type: q.kind === 'num' ? 'number' : 'text', value: a[q.id] ?? '', oninput: e => { a[q.id] = e.target.value; }, onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); next(); } } });
+          const inp = h('input', { type: q.kind === 'num' ? 'number' : 'text', ...(q.min != null ? { min: q.min, max: q.max, step: 1 } : {}), value: a[q.id] ?? '', oninput: e => { a[q.id] = e.target.value; }, onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); next(); } } });
           body.append(inp);
           if (q.id === 'airport') {
             // Test: the same as on ☰ Menu > Default settings; it keeps the Airport typed (and the Elevation so far) and fetches the report now
@@ -16548,14 +16548,19 @@ async function setupInterview({ first = false } = {}) {
       const look = ([t, x]) => h('span', { class: 'setupLook' + (x === 'primary' ? ' primary' : '') + (x === true ? ' setupNo' : '') }, t);
       // a row of Tick Boxes (screen 3): the first row can be tried (a click ticks one), the second shows one ticked
       const ticks = (on, live) => { const row = h('div', { class: 'setupTicks' }, ...SETUP_TICK.boxes.map((t, i) => h('label', { class: 'setupTick' }, h('span', {}, t),
-        live ? h('input', { type: 'checkbox', onchange: e => { for (const c of row.querySelectorAll('input')) if (c !== e.target) c.checked = false; } })
+        live ? (b => i === SETUP_TICK.ticked ? h('span', { class: 'setupTickAt' }, b, clickPointer()) : b)(h('input', { type: 'checkbox', onchange: e => { for (const c of row.querySelectorAll('input')) if (c !== e.target) c.checked = false; } }))
           : h('span', { class: 'setupTickBox' }, i === on ? '✔' : ''))));
         return row; };
+      // the CLICK pointer, its tip inside the box it points at (OakBarn Brewery, 2026-11-27: "Click arrow needs to be in the box"); a
+      // click goes through it to the box
+      const clickPointer = (left = '50%', top = '45%') => { const p = h('span', { class: 'setupPointer', 'aria-hidden': 'true', style: `left:${left};top:${top}` }, h('b', {}, 'CLICK'));
+        p.insertAdjacentHTML('afterbegin', '<svg viewBox="0 0 16 24" width="22" height="33"><path d="M1 1 L1 19 L5.5 14.8 L8.6 22 L11.6 20.7 L8.6 13.6 L14.6 13.6 Z" fill="rgb(250,250,250)" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>');
+        return p; };
       // screen 4: the Drop Down list; the first one can be tried, then how it looks closed, open and picked
       const D = SETUP_DROP, said = h('p', { class: 'setupGuideIntro' });
       const tryIt = h('select', { class: 'setupDrop', onchange: e => { said.textContent = e.target.value ? `${e.target.value} was selected.` : ''; } },
         h('option', { value: '' }, D.ask), ...D.choices.map(c => h('option', { value: c }, c)));
-      const shut = (t, cls = '') => h('div', { class: 'setupDropLook ' + cls }, h('span', {}, t), h('span', { class: 'setupDropArrow' }, '▾'));
+      const shut = (t, cls = '', ptr) => h('div', { class: 'setupDropLook ' + cls }, h('span', {}, t), h('span', { class: 'setupDropArrow setupAt' }, '▾', ptr ? clickPointer('40%', '50%') : ''));
       // screen 5: the Hot Spots. A sample steps strip: a click lights that step and shows, under it, how its page looks (it does not
       // leave this screen; the real strip at the top does go there)
       const HS = SETUP_HOTSPOTS, sample = h('div', { class: 'setupSample' });
@@ -16566,19 +16571,19 @@ async function setupInterview({ first = false } = {}) {
           ...(first ? [h('p', { class: 'setupAsk' }, askOf(first, a)), h('p', { class: 'muted' }, first.why),
             ...(br ? [h('p', {}, 'It asks:'), h('ul', { class: 'setupBranch' }, ...qsOf.filter(x => x.kind !== 'branch').map(x => h('li', {}, askOf(x, a))))] : [])] : []));
       };
-      const sampleStrip = h('ol', { class: 'nsiSteps setupSampleStrip' }, ...SETUP_STEPS.map(st => h('li', { 'data-step': st, style: 'cursor:pointer', title: 'Try it: shows how this step looks', onclick: () => showStep(st) }, st)));
+      const sampleStrip = h('ol', { class: 'nsiSteps setupSampleStrip' }, ...SETUP_STEPS.map(st => h('li', { 'data-step': st, class: st === HS.sample ? 'setupAt' : '', style: 'cursor:pointer', title: 'Try it: shows how this step looks', onclick: () => showStep(st) }, st, st === HS.sample ? clickPointer('55%', '55%') : '')));
       if (page === 'start') body.replaceChildren(...SETUP_START.paras.map(t => h('p', { class: 'setupWelcomeText' }, t)),
         h('p', { class: 'setupProceed' }, h('b', {}, SETUP_START.proceed), ' ', h('button', { type: 'button', class: 'primary', onclick: start }, 'Next ▶')));
       else if (page === 'hot') { body.replaceChildren(h('p', { class: 'setupGuideIntro' }, HS.intro), h('p', { class: 'setupGuideIntro' }, HS.spots), h('p', { class: 'setupGuideIntro' }, HS.click),
-        sampleStrip, h('div', { class: 'setupClickSmall setupClickUnder' }, '↖ CLICK'), sample, proceed); showStep(HS.sample); }
+        sampleStrip, h('div', { class: 'setupClick' }), sample, proceed); showStep(HS.sample); }
       else if (page === 'drop') body.replaceChildren(...D.intro.map(t => h('p', { class: 'setupGuideIntro' }, t)), tryIt, said,
-        h('p', { class: 'setupGuideIntro' }, D.arrow), h('div', { class: 'setupDropRow' }, shut(D.ask), h('span', { class: 'setupClickSmall' }, '↖ CLICK')),
+        h('p', { class: 'setupGuideIntro' }, D.arrow), h('div', { class: 'setupDropRow setupPtrRoom' }, shut(D.ask, '', true)),
         h('p', { class: 'setupGuideIntro' }, D.pick),
         h('div', { class: 'setupDropRow' }, h('div', { class: 'setupDropOpen' }, h('div', { class: 'setupDropHead' }, D.ask),
-          ...D.choices.map((c, i) => h('div', { class: i === D.picked ? 'setupDropHi' : '' }, c))), h('span', { class: 'setupClickSmall' }, '↖ CLICK')),
+          ...D.choices.map((c, i) => i === D.picked ? h('div', { class: 'setupDropHi setupAt' }, c, clickPointer('82%', '50%')) : h('div', {}, c)))),
         h('p', { class: 'setupGuideIntro' }, D.done), shut(D.choices[D.picked], 'picked'), proceed);
       else if (page === 'tick') body.replaceChildren(h('p', { class: 'setupGuideIntro' }, SETUP_TICK.intro), h('p', { class: 'setupGuideIntro' }, SETUP_TICK.ask),
-        ticks(-1, true), h('div', { class: 'setupClick' }, '↖ CLICK'), ticks(SETUP_TICK.ticked, false), proceed);
+        ticks(-1, true), h('div', { class: 'setupClick' }), ticks(SETUP_TICK.ticked, false), proceed);
       else if (page === 'welcome') body.replaceChildren(h('div', { class: 'setupWelcomeNote' }, SETUP_WELCOME.note), ...SETUP_WELCOME.paras.map(t => h('p', { class: 'setupWelcomeText' }, t)), proceed);
       else body.replaceChildren(h('p', { class: 'setupGuideIntro' }, SETUP_GUIDE.intro),
         h('div', { class: 'setupGuide' }, ...SETUP_GUIDE.rows.flatMap(([btns, words]) => [
@@ -18560,7 +18565,7 @@ function renderDefaultTab(box) {
     // Brewer Level: "New Section of Brewery Vessels and with be questions not a DDLB": the same questions as the Setup Interview; the
     // Brewer Level is worked out from them (the line under them)
     ['_bv', 'Brewery Vessels', 'head'],
-    ['vesselCount', 'How many brewing vessels?', 'sel', VESSEL_COUNTS.map(([k, t]) => [k, t]), false, false, { tip: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the questions under it, it works out your Brewer Level: it picks the Level a new Brewing Tab starts on in the New Schema Interview.' }],
+    ['vesselCount', 'Number of Hot Side vessels (1 to 10)', 'num', null, false, false, { tip: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the questions under it, it works out your Brewer Level: it picks the Level a new Brewing Tab starts on in the New Schema Interview.' }],
     ['allInOne', 'An All In One?', 'bool', null, false, false, { tip: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).' }],
     ['kettleOutlet', 'Kettle has an outlet (a ball valve low on the side)', 'bool', null, false, false, { tip: 'Off: you pour or siphon.' }],
     ['kettlePump', 'A pump (whirlpool, transfer or chiller)', 'bool', null, false, false, { tip: 'A pump with your stove top kettle.' }],

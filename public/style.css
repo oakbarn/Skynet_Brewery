@@ -1928,16 +1928,23 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupTick .setupTickTip { font-weight: 400; font-size: .85em; }
 .setupDlg .setupTick input { width: 1.6em; height: 1.6em; min-width: 0; accent-color: var(--ok); cursor: pointer; }
 .setupDlg .setupTickBox { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border: 2px solid var(--muted); border-radius: 5px; color: var(--ok); font-weight: 900; }
-.setupDlg .setupClick { font-weight: 800; font-size: 1.6em; margin: 0 0 14px 4.4em; }
+.setupDlg .setupClick { height: 2.6em; }
+/* the CLICK pointer: its tip (the svg's top left) sits in the middle of the box; clicks go through it */
+.setupDlg .setupTickAt { position: relative; display: inline-flex; }
+.setupDlg .setupAt { position: relative; }
+.setupDlg .setupDropRow.setupPtrRoom { margin-bottom: 3.2em; }
+.setupDlg .setupPointer { position: absolute; left: 50%; top: 45%; display: flex; align-items: flex-end; gap: 4px; pointer-events: none; z-index: 1; }
+.setupDlg .setupPointer svg { display: block; filter: drop-shadow(1px 1px 1px rgba(0,0,0,.6)); }
+.setupDlg .setupPointer b { color: var(--text); font-size: 1.5em; font-weight: 800; line-height: 1; transform: translateY(1.1em); white-space: nowrap; }
 /* screen 4, a Drop Down list: one to try, then how it looks closed, open (Chocolate lit) and picked */
 .setupDlg select.setupDrop { min-width: 16em; font-weight: 700; margin: 2px 0 0 4px; }
 .setupDlg .setupDropRow { display: flex; align-items: flex-end; gap: 10px; margin: 4px 0 10px 4px; }
 .setupDlg .setupDropLook { display: inline-flex; justify-content: space-between; align-items: center; gap: 24px; min-width: 15em; padding: 5px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel2); font-weight: 700; }
 .setupDlg .setupDropLook.picked { background: #9ad7e6; color: #1f1f1f; margin-left: 4px; }
 .setupDlg .setupDropArrow { color: var(--muted); }
-.setupDlg .setupDropOpen { min-width: 11em; border: 2px solid var(--muted); border-radius: 10px; padding: 0 0 6px; background: var(--panel); font-weight: 700; overflow: hidden; }
+.setupDlg .setupDropOpen { min-width: 11em; border: 2px solid var(--muted); border-radius: 10px; padding: 0 0 6px; background: var(--panel); font-weight: 700; }
 .setupDlg .setupDropOpen > div { padding: 1px 10px; }
-.setupDlg .setupDropOpen .setupDropHead { background: #9ad7e6; color: #1f1f1f; }
+.setupDlg .setupDropOpen .setupDropHead { background: #9ad7e6; color: #1f1f1f; border-radius: 8px 8px 0 0; }
 .setupDlg .setupDropOpen .setupDropHi { background: var(--accent); color: #fafafa; }
 .setupDlg .setupClickSmall { font-weight: 800; font-size: 1.3em; }
 /* a step of the strip that is not available yet: the ⛔ before its name */

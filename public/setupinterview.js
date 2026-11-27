@@ -44,10 +44,16 @@ export const BREWER_LEVEL_DEFAULT = '7';
 // questions not a DDLB"): a few plain questions about the vessels work out the Brewer Level, kept as brewerLevel as before
 export const VESSEL_COUNTS = [['1', 'One vessel', 'One pot, or one All In One'], ['2', 'Two vessels', 'A Mash Tun (it may be a cooler) and a Kettle'], ['3', 'Three or more vessels', 'HLT, Mash Tun and Kettle']];
 export const PUMP_COUNTS = [['1', 'One pump (or none)'], ['2', 'Two pumps']];
+// Number of Hot Side vessels (OakBarn Brewery, 2026-11-27: "Number of Hot Side vessels needs to be a Box and you can enter a number.
+// The number can be from 1 - 10"; "Then Branch depending on the number entered"): a whole number 1 to 10 (null: not a good one).
+// The branches: 1, 2, and 3 or more (VESSELS_3UP)
+export const VESSELS_MIN = 1, VESSELS_MAX = 10;
+export const vesselCountOf = v => { const n = Number(String(v ?? '').trim()); return String(v ?? '').trim() !== '' && Number.isInteger(n) && n >= VESSELS_MIN && n <= VESSELS_MAX ? n : null; };
+export const VESSELS_3UP = Array.from({ length: VESSELS_MAX - 2 }, (_, i) => String(i + 3));
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
-  const n = String(v?.vesselCount ?? '');
+  const c = vesselCountOf(v?.vesselCount), n = c == null ? '' : c >= 3 ? '3' : String(c);
   if (n === '1') return v.allInOne ? '4' : v.kettlePump ? '3' : v.kettleOutlet ? '2' : '1';
   if (n === '2') return String(v.pumpCount) === '2' ? '6' : '5';
   if (n === '3') return v.allGrainPlus ? '9' : v.recirculate ? '8' : '7';
@@ -193,11 +199,12 @@ export const SETUP_QUESTIONS = [
   // Level to pick the Schema Template, the Level of a new Brewing Tab and the Brew Day steps that fit
   // the first Brewery question, for every Brewer Type (OakBarn Brewery, 2026-11-27: "Create the first brewery question which will be
   // for all brewers regardless of type. Number of Vessels"): Tick Boxes, like questions 1 and 2
-  { id: 'vesselCount', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults',
-    head: 'Number of Vessels',
-    ask: 'How many brewing vessels do you have (or are you building)?',
-    why: 'For every Brewer Type. Count the Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the next few questions it works out your Brewer Level, from one pot on the stove to All Grain Plus.',
-    choices: VESSEL_COUNTS, start: ctx => vesselStart(ctx.defaults, 'vesselCount') },
+  // (2026-11-27 later: a box to type a number in, 1 to 10, and the interview branches on it)
+  { id: 'vesselCount', step: 'Brewery', kind: 'num', save: 'defaults', min: VESSELS_MIN, max: VESSELS_MAX,
+    head: 'Number of Hot Side Vessels',
+    ask: 'How many Hot Side vessels do you have (or are you building)? Type a number from 1 to 10.',
+    why: 'For every Brewer Type. Count the Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. The next questions depend on the number.',
+    start: ctx => String(vesselStart(ctx.defaults, 'vesselCount')) },
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -213,11 +220,11 @@ export const SETUP_QUESTIONS = [
   { id: 'pumpCount', step: 'Brewery', held: true, kind: 'pick', save: 'defaults', when: { vesselCount: '2' },
     ask: 'How many pumps?', why: 'The pumps that move your wort and water between the two vessels.',
     choices: PUMP_COUNTS, start: ctx => String(vesselStart(ctx.defaults, 'pumpCount')) },
-  { id: 'recirculate', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+  { id: 'recirculate', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: VESSELS_3UP },
     ask: 'Do you recirculate the mash (HERMS or RIMS) with two pumps and motorized valves?',
     why: 'No: HLT, Mash Tun and Kettle with one pump, like the 3 Vessel sample.',
     start: ctx => vesselStart(ctx.defaults, 'recirculate') },
-  { id: 'allGrainPlus', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+  { id: 'allGrainPlus', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: VESSELS_3UP },
     ask: 'Do you also have controlled fermentors, motorized valves and a tap water Supply Manifold?',
     why: 'Yes: All Grain Plus, the top Brewer Level.',
     start: ctx => vesselStart(ctx.defaults, 'allGrainPlus') },
@@ -309,7 +316,9 @@ export const setupNeeded = config => !config?.brewDefaults?.setupDone && (!Objec
 export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
-export const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.includes(a?.[k]) : a?.[k] === v);
+// (a number answer, such as Number of Hot Side Vessels, matches its words: 3 is '3')
+const sameAns = (x, y) => typeof y === 'boolean' ? x === y : x != null && String(x) === String(y);
+export const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.some(y => sameAns(a?.[k], y)) : sameAns(a?.[k], v));
 // held: a question kept out of the interview for now (OakBarn Brewery, 2026-11-27: "Leave the brewery interview to the one question for
 // now"); it stays on Default settings, and comes back when its held is taken off
 export const shownQuestions = (a, ctx, list = SETUP_QUESTIONS) => list.filter(q => !q.held && whenOk(q, a) && (!q.show || q.show(a, ctx)));
@@ -329,6 +338,7 @@ export function answerWords(q, v, ctx) {
 // a typed answer that is no good (null: fine)
 export function answerError(q, v) {
   if (q.id === 'elevation' && v !== '' && v != null && !(Number.isFinite(+v) && +v >= -500 && +v <= 30000)) return 'Elevation must be a number (or empty).';
+  if (q.id === 'vesselCount' && vesselCountOf(v) == null) return `Type a whole number from ${VESSELS_MIN} to ${VESSELS_MAX}.`;
   if (q.id === 'batch' && v !== '' && v != null && !(Number.isFinite(+v) && +v > 0)) return 'The Batch Size must be more than 0 (or empty).';
   if (q.id === 'airport' && v && !/^[A-Za-z0-9]{3,4}$/.test(String(v).trim())) return 'An airport code is 4 letters, for example KDFW (or leave it empty).';
   if (q.kind === 'pick' && q.must && (v === '' || v == null)) return 'This one must be answered.';
@@ -348,6 +358,7 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
     if (q.save === 'defaults') {
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
+      else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
       // kept in liters (Rule 2.59), typed in gallons or liters
       else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;
