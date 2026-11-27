@@ -39,9 +39,9 @@ Les boutons, le titre et la bande d’étapes restent figés en haut : seule la 
     premières questions. **◀ Keep answering** revient ; **Close** enregistre les réponses données et ferme. Relancez-le depuis
     ☰ Menu pour répondre au reste.
 
-## Les trois premiers écrans {#the-first-three-screens}
+## Les quatre premiers écrans {#the-first-four-screens}
 
-Chaque passage commence par trois écrans avant la première question. **Next ▶** (en haut, ou après **Click to proceed:**) ou
+Chaque passage commence par quatre écrans avant la première question. **Next ▶** (en haut, ou après **Click to proceed:**) ou
 **Skip** continue ; **◀ Back** revient à l’écran précédent.
 
 1. **Welcome** (bienvenue) : voir plus bas.
@@ -49,6 +49,9 @@ Chaque passage commence par trois écrans avant la première question. **Next �
    1. Units et 2. Brewer Type tant qu’ils n’ont pas de réponse ; Close et ✕ tant que 1 et 2 n’ont pas de réponse).
 3. **Comment répondre** : on répond aux questions de deux façons. La première est une **case à cocher** (« Are you a morning
    person? »), montrée avant et après un clic ; vous pouvez essayer la première ligne.
+4. **Comment répondre, la deuxième façon** : une **liste déroulante** (« Favorite Ice Cream? »), montrée fermée, ouverte puis avec
+   Chocolate choisi ; vous pouvez essayer la première. Elle limite vos choix : il y a parfois un choix Other pour ce qui n’est pas
+   dans la liste ; sinon, choisissez la réponse la meilleure ou la plus proche.
 
 ## La page de bienvenue {#the-welcome-page}
 
@@ -57,7 +60,7 @@ les téléphones et les petits écrans : Skynet peut être commandé depuis pres
 connexion Internet, mais il est bien plus facile de concevoir sur un ordinateur, car les détails fins sont difficiles à voir sur un
 petit écran. En dessous, la page explique ce qu’est l’entretien : rien n’est gravé dans le marbre, chaque réponse peut être changée à
 tout moment dans **☰ Menu > Default settings**, et vous pouvez relancer l’entretien depuis ☰ Menu. Son **◀ Back** porte le ⛔ (rien n’est avant elle). **◀ Back** sur la
-première question revient à l’écran Comment répondre.
+première question revient à l’écran de la liste déroulante.
 
 ## Les questions {#the-questions}
 

@@ -1928,6 +1928,17 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupTick input { width: 1.6em; height: 1.6em; min-width: 0; accent-color: var(--ok); cursor: pointer; }
 .setupDlg .setupTickBox { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border: 2px solid var(--muted); border-radius: 5px; color: var(--ok); font-weight: 900; }
 .setupDlg .setupClick { font-weight: 800; font-size: 1.6em; margin: 0 0 14px 4.4em; }
+/* screen 4, a Drop Down list: one to try, then how it looks closed, open (Chocolate lit) and picked */
+.setupDlg select.setupDrop { min-width: 16em; font-weight: 700; margin: 2px 0 0 4px; }
+.setupDlg .setupDropRow { display: flex; align-items: flex-end; gap: 10px; margin: 4px 0 10px 4px; }
+.setupDlg .setupDropLook { display: inline-flex; justify-content: space-between; align-items: center; gap: 24px; min-width: 15em; padding: 5px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel2); font-weight: 700; }
+.setupDlg .setupDropLook.picked { background: #9ad7e6; color: #1f1f1f; margin-left: 4px; }
+.setupDlg .setupDropArrow { color: var(--muted); }
+.setupDlg .setupDropOpen { min-width: 11em; border: 2px solid var(--muted); border-radius: 10px; padding: 0 0 6px; background: var(--panel); font-weight: 700; overflow: hidden; }
+.setupDlg .setupDropOpen > div { padding: 1px 10px; }
+.setupDlg .setupDropOpen .setupDropHead { background: #9ad7e6; color: #1f1f1f; }
+.setupDlg .setupDropOpen .setupDropHi { background: var(--accent); color: #fafafa; }
+.setupDlg .setupClickSmall { font-weight: 800; font-size: 1.3em; }
 /* the Setup Interview's Welcome page (OakBarn Brewery, 2026-11-27): the blue phone and small screen note, then the text */
 .setupDlg .setupWelcomeNote { background: #0b8fd8; color: #fafafa; font-size: 1.35em; font-weight: 700; line-height: 1.3; border: 3px solid #fafafa; border-radius: 16px; padding: 10px 14px; margin: 6px 0 12px; }
 .setupDlg .setupWelcomeText { max-width: 46em; line-height: 1.4; }

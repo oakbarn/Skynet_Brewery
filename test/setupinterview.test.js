@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { brewerLevelOf, vesselAnswersOf, VESSEL_KEYS } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf } from '../public/setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf } from '../public/setupinterview.js';
 
 const ctx = (more = {}) => ({ defaults: {}, boil: null, patron: false, helpLang: null, brewerTypes: [['cankit', 'Extract Can Kit'], ['allgrain', 'All Grain'], ['allgrainmill', 'All Grain (own Grain Mill)']], brewerTypeDefault: 'allgrain',
   pipeSizes: [['0.5', '1/2"'], ['1', '1"']], hoseSizes: [['0.5', '1/2"']], helpLangs: [['en', 'English'], ['fr', 'Français']],
@@ -187,5 +187,9 @@ assert.doesNotMatch(JSON.stringify([SETUP_GUIDE, SETUP_TICK]), /aswered|avaiable
 {
   const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(appSrc, /const closeBtns = qs => mustMissing\(qs, answered\)\.length/);
-  assert.match(appSrc, /let at = -3, skipped = new Set\(\);/);
+  assert.match(appSrc, /let at = -4, skipped = new Set\(\);/);
 }
+// screen 4: the Drop Down list (Orange Sherbet, not "Sherbert"; no Other)
+assert.deepEqual(SETUP_DROP.choices, ['Vanilla', 'Chocolate', 'Strawberry', 'Mint', 'Cookie', 'Orange Sherbet']);
+assert.equal(SETUP_DROP.choices[SETUP_DROP.picked], 'Chocolate');
+assert.doesNotMatch(JSON.stringify(SETUP_DROP), /Some times|avaiable|Sherbert/);

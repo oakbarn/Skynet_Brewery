@@ -35,9 +35,9 @@ The buttons, the title and the steps strip are frozen at the top: only the page 
     on the answers to many of these questions to make it your own, but it will work with just the first 2 questions. **◀ Keep
     answering** goes back; **Close** saves the answers so far and closes. Run it again from ☰ Menu to answer the rest.
 
-## The first three screens
+## The first four screens
 
-Every run starts with three screens before the first question. **Next ▶** (at the top, or after **Click to proceed:**) or **Skip**
+Every run starts with four screens before the first question. **Next ▶** (at the top, or after **Click to proceed:**) or **Skip**
 goes on; **◀ Back** goes to the screen before.
 
 1. **Welcome**: see below.
@@ -45,6 +45,9 @@ goes on; **◀ Back** goes to the screen before.
    2. Brewer Type until answered; Close and ✕ until 1 and 2 are answered).
 3. **How to answer**: questions are answered in two methods. The first is a **Tick Box** ("Are you a morning person?"), shown before
    and after a click; you can try the first row.
+4. **How to answer, the second method**: a **Drop Down list** ("Favorite Ice Cream?"), shown closed, open and with Chocolate picked;
+   you can try the first one. It limits your choices: sometimes there is an Other choice for something not on the list; if not,
+   choose the best or closest answer.
 
 ## The Welcome page
 
@@ -53,7 +56,7 @@ screens: Skynet may be controlled from almost any device with a browser and inte
 on a computer, because finer details are hard to see on a small screen. Under it, the page says what the interview is: nothing is
 written in stone, every answer can be changed any time on **☰ Menu > Default settings**, and you can run the interview again from
 ☰ Menu. Its **◀ Back** has the ⛔ (nothing is before it). **◀ Back** on the first
-question comes back to the How to answer screen.
+question comes back to the Drop Down list screen.
 
 ## The questions
 

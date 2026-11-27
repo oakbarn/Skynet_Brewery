@@ -121,6 +121,19 @@ export const SETUP_TICK = {
   ticked: 1,
 };
 
+// Screen 4, how to answer (OakBarn Brewery, 2026-11-27, "next screen", his picture, spelling and grammar corrected): the second method is
+// a Drop Down list, shown closed, open and with Chocolate picked (the first one can be tried)
+export const SETUP_DROP = {
+  intro: ['The second method is a Drop Down list box that limits your choices. Sometimes there might be an Other choice that allows you to use something not on the list, but if it is not there, you need to choose the best or closest answer.',
+    'In the Ice Cream Question below, the Other is not available as the Skynet Shop only has these flavors available today.'],
+  ask: 'Favorite Ice Cream?',
+  choices: ['Vanilla', 'Chocolate', 'Strawberry', 'Mint', 'Cookie', 'Orange Sherbet'],
+  arrow: 'Click the little down arrow to see your choices:',
+  pick: 'Click to make your choice. Since my favorite is not available, I am choosing Chocolate.',
+  picked: 1,
+  done: 'Chocolate was selected.',
+};
+
 export const SETUP_QUESTIONS = [
   // ---- 1 and 2: must be answered (Skip shows 🚫 Not allowed)
   { id: 'units', step: 'Units', kind: 'pick', save: 'defaults', must: true,
