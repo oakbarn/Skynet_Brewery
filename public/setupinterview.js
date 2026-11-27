@@ -86,6 +86,35 @@ export const ONE_VESSEL_PICKS = { noboil: { head: 'Single Vessel Brewer', choice
   turkeyfryer: { head: 'Turkey Fryer Brewer', choices: TURKEY_FRYER_VESSELS },
   gasburner: { head: 'Brewery Gas Burner Brewer', choices: GAS_BURNER_VESSELS, adds: ['burner', 'igniter'] },
   element: { head: 'Internal Electric Element Brewer', choices: ELEMENT_VESSELS, adds: ['element', 'probe'] } };
+// The size of the one vessel (OakBarn Brewery, 2026-11-27: "ask the Height and Diameter of a Vessel so the brewery could be drawn
+// inside Skynet"; "also ask the Purported Volume and the Dead Space if Known. And in an electric vessel save Volume height so the
+// element is submerged"; "Apply this to all the previous ones as well"): asked after the vessel is picked, for every way to heat it.
+// The same field names as a Vessel's Properties (Rule 19.2), in the Units picked: Diameter and Height in inches or cm, the rest in
+// gallons or liters. Skynet works the Volume out from Diameter and Height (a cylinder) and draws the vessel by it.
+// [key, words, 'len' or 'vol', only for these heats]
+export const VESSEL_SIZE_FIELDS = [['diameter', 'Inside Diameter', 'len'], ['vheight', 'Inside Height', 'len'],
+  ['volume', 'Purported Volume (what it is sold as)', 'vol'], ['deadspace', 'Dead Space (if known: what stays in it)', 'vol'],
+  ['safeVolume', 'Least volume that covers the element', 'vol', ['element']]];
+export const sizeFieldsOf = a => VESSEL_SIZE_FIELDS.filter(f => !f[3] || f[3].includes(a?.vesselHeat));
+export const sizeUnit = (kind, units) => kind === 'len' ? (units === 'Metric' ? 'cm' : 'in') : (units === 'Metric' ? 'L' : 'gal');
+// the Volume worked out from Diameter and Height, in gallons or liters (0 when either is missing)
+export function sizeVolume(v, units) {
+  const k = units === 'Metric' ? 1 / 2.54 : 1, d = +v?.diameter * k, hh = +v?.vheight * k;
+  const gal = d > 0 && hh > 0 ? Math.PI / 4 * d * d * hh / 231 : 0;
+  return Math.round((units === 'Metric' ? gal * L_PER_GAL : gal) * 10) / 10;
+}
+// a saved size in other Units (the Units answer changed)
+export function sizeIn(v, units) {
+  if (!v || typeof v !== 'object') return {};
+  const from = v.units === 'Metric' ? 'Metric' : 'US';
+  if (from === units) return { ...v };
+  const out = { units };
+  for (const [k, , kind] of VESSEL_SIZE_FIELDS) if (v[k] !== undefined && v[k] !== '' && v[k] !== null) {
+    const f = kind === 'len' ? 2.54 : L_PER_GAL;
+    out[k] = Math.round((units === 'Metric' ? +v[k] * f : +v[k] / f) * 100) / 100;
+  }
+  return out;
+}
 // the words under the vessel pictures for what the build adds ('' when it adds nothing)
 export const addsNote = a => { const ad = ONE_VESSEL_PICKS[a?.vesselHeat]?.adds; return ad?.length ? `Your build also gets: ${ad.map(k => BUILD_ADDS[k]).join(' and ')}.` : ''; };
 const onePick = a => ONE_VESSEL_PICKS[a?.vesselHeat] || ONE_VESSEL_PICKS.noboil;
@@ -258,6 +287,10 @@ export const SETUP_QUESTIONS = [
     group: 'Vessel Widget', groupNote: 'One Skynet Template with every IP, a Temperature Probe (Front or Thermowell) and an Element Port, each with a Place slider. Slide off what your vessel does not have.',
     other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
     choices: (ctx, a) => onePick(a ?? ctx?.answers).choices, start: ctx => ctx.defaults?.vesselTemplate || '' },
+  { id: 'vesselSize', step: 'Brewery', kind: 'size', save: 'defaults', when: { vesselCount: '1', vesselHeat: Object.keys(ONE_VESSEL_PICKS) },
+    head: 'Size of your Vessel', ask: 'Measure the inside of your vessel:',
+    why: 'Type the inside Diameter and Height: Skynet works out the Volume and draws your vessel to size. The rest only if you know them. Skip keeps the Template\'s own size.',
+    start: (ctx, a) => sizeIn(ctx.defaults?.vesselSize, a?.units === 'Metric' ? 'Metric' : 'US') },
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -388,6 +421,14 @@ export function startAnswers(ctx, list = SETUP_QUESTIONS) {
 export function answerWords(q, v, ctx) {
   if (q.kind === 'branch') return '';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
+  if (q.kind === 'size') {
+    const u = v?.units === 'Metric' ? 'Metric' : 'US', L = sizeUnit('len', u), V = sizeUnit('vol', u), calc = sizeVolume(v, u), w = [];
+    if (+v?.diameter > 0 && +v?.vheight > 0) w.push(`${v.diameter} ${L} across, ${v.vheight} ${L} high, ≈ ${calc} ${V}`);
+    if (+v?.volume > 0) w.push(`sold as ${v.volume} ${V}`);
+    if (v?.deadspace !== undefined && v.deadspace !== '' && v.deadspace !== null) w.push(`Dead Space ${v.deadspace} ${V}`);
+    if (+v?.safeVolume > 0) w.push(`element covered at ${v.safeVolume} ${V}`);
+    return w.join(', ');
+  }
   if (q.kind === 'vessel') return (choicesOf(q, ctx, ctx?.answers).find(([k]) => k === v) || Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v))?.[1] ?? String(v ?? '');
   if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
@@ -395,6 +436,11 @@ export function answerWords(q, v, ctx) {
 // a typed answer that is no good (null: fine)
 export function answerError(q, v) {
   if (q.id === 'elevation' && v !== '' && v != null && !(Number.isFinite(+v) && +v >= -500 && +v <= 30000)) return 'Elevation must be a number (or empty).';
+  if (q.kind === 'size' && v && typeof v === 'object') {
+    const has = k => v[k] !== undefined && v[k] !== null && String(v[k]).trim() !== '';
+    for (const [k, w] of VESSEL_SIZE_FIELDS) if (has(k) && !(Number.isFinite(+v[k]) && +v[k] >= (k === 'deadspace' ? 0 : 0.01))) return `${w}: type a number${k === 'deadspace' ? ' (0 or more)' : ' more than 0'}, or leave it empty.`;
+    if (has('diameter') !== has('vheight')) return 'Type both the Inside Diameter and the Inside Height, or leave both empty.';
+  }
   if (q.id === 'vesselCount' && vesselCountOf(v) == null) return `Type a whole number from ${VESSELS_MIN} to ${VESSELS_MAX}.`;
   if (q.id === 'batch' && v !== '' && v != null && !(Number.isFinite(+v) && +v > 0)) return 'The Batch Size must be more than 0 (or empty).';
   if (q.id === 'airport' && v && !/^[A-Za-z0-9]{3,4}$/.test(String(v).trim())) return 'An airport code is 4 letters, for example KDFW (or leave it empty).';
@@ -406,6 +452,14 @@ export function answerError(q, v) {
 // onlyAnswered (OakBarn Brewery, 2026-11-27: "We have to save these like a gGlobal as they need to be persistent. No implicit save. Even
 // if a computer is shut, these stay."): each answer is saved the moment it is given; only the answered (green) questions are written,
 // the others keep what was saved before. setupDone is set only once the must questions (steps 1 and 2) are answered.
+// a typed vessel size kept: numbers only, in the Units picked, with the Volume Skynet works out (null when nothing was typed)
+export function sizeClean(v, unitsAns) {
+  const units = unitsAns === 'Metric' ? 'Metric' : 'US', out = { units };
+  for (const [k] of VESSEL_SIZE_FIELDS) { const x = v?.[k]; if (x !== undefined && x !== null && String(x).trim() !== '' && Number.isFinite(+x)) out[k] = +x; }
+  if (Object.keys(out).length === 1) return null;
+  const c = sizeVolume(out, units); if (c) out.calcVolume = c;
+  return out;
+}
 // the Brewery Build (OakBarn Brewery, 2026-11-27: "we have to store the answer on the Brewery Build because at the end we will either
 // have templates to choose from or build one from their answers"): every Brewery answer that fits the answers before it, kept
 // together with the Brewer Level they give, for the end of the interview to offer matching Templates or to build a Schema from them.
@@ -434,6 +488,7 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
       else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
       else if (q.id === 'vesselHeat' || q.id === 'vesselTemplate') { if (v) brewDefaults[q.id] = v; }      // not picked: not set
+      else if (q.id === 'vesselSize') { const z = sizeClean(v, a.units); if (z) brewDefaults.vesselSize = z; else delete brewDefaults.vesselSize; }
       // kept in liters (Rule 2.59), typed in gallons or liters
       else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;
