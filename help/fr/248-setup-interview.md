@@ -6,13 +6,16 @@ Schema d’exemple. Un Admin peut le relancer à tout moment depuis **☰ Menu >
 
 ## Comment ça marche {#how-it-works}
 
+Les boutons, le titre et la bande d’étapes restent figés en haut : seule la page dessous défile.
+
 - Une question par page, avec une courte explication dessous. La bande d’étapes en haut montre où vous en êtes, en 6 étapes :
   **1. Units · 2. Brewer Type · 3. Brewery · 4. Other Defaults · 5. Recipe Defaults · 6. Help Language**, puis Done.
 - **◀ Back** revient à la question précédente. **Next ▶** garde votre réponse et continue. Un choix de 6 ou moins est une case : un
   clic le choisit et continue. Un choix de plus de 6 est une liste déroulante (règle 2.6).
 - Il faut répondre seulement aux deux premières étapes : **US or Metric** (toujours la première question) et **Brewer Type**. Tant que l’une
-  d’elles n’a pas de réponse, son **Skip** montre le pointeur 🚫 sens interdit et ne fait rien ; une fois répondue, Skip garde votre
-  réponse et continue. **◀ Back** et **Close** marchent toujours.
+  d’elles n’a pas de réponse, son **Skip** et son **Next ▶** portent le signe ⛔ sens interdit et ne font rien : cliquez sur une
+  réponse. Une fois répondue, Skip garde votre réponse et continue. **◀ Back** marche toujours (sauf sur la page de bienvenue : rien
+  n’est avant elle).
 - Les étapes 3 **Brewery**, 4 **Other Defaults** et 5 **Recipe Defaults** sont des branches. Chacune s’ouvre sur une page qui liste ce
   qu’elle demande. **Next ▶** la commence. **Skip** sur cette page saute toute la branche et garde les réponses de Skynet. Dans une
   branche, chaque question a son propre **Skip**.
@@ -25,24 +28,36 @@ Schema d’exemple. Un Admin peut le relancer à tout moment depuis **☰ Menu >
   une.
 - Chaque page commence sur la réponse de Skynet (ou sur votre réponse enregistrée quand vous le relancez) : Next, Next, Next donne un
   panneau qui fonctionne.
+- **Chaque réponse est enregistrée dès que vous la donnez** (Next, ou un clic sur un choix), sur le Brain, comme un gGlobal : elle
+  reste même si votre ordinateur est éteint. Relancez l’entretien et il s’ouvre sur la première question sans réponse.
 - La dernière page, **Done**, montre toutes les réponses. **✎** revient à cette question. **✔ Finish** les enregistre toutes.
 - **Close** ou **✕** :
-  - tant que les étapes 1 et 2 n’ont pas toutes deux une réponse, une fenêtre **rouge** dit qu’elles doivent être remplies d’abord, et
-    l’entretien reste ouvert.
+  - sur chaque écran, la page de bienvenue aussi, ils portent le signe ⛔ sens interdit et ne font rien tant que 1. Units et
+    2. Brewer Type n’ont pas de réponse (Échap ne fait rien non plus).
   - ensuite, quand certaines questions ne sont pas encore vertes, une fenêtre **bleue** dit : elles ont besoin d’une réponse ; régler
     Skynet dépend des réponses à beaucoup de ces questions pour qu’il soit vraiment le vôtre, mais il fonctionne avec seulement les 2
     premières questions. **◀ Keep answering** revient ; **Close** enregistre les réponses données et ferme. Relancez-le depuis
     ☰ Menu pour répondre au reste.
 
+## Les trois premiers écrans {#the-first-three-screens}
+
+Chaque passage commence par trois écrans avant la première question. **Next ▶** (en haut, ou après **Click to proceed:**) ou
+**Skip** continue ; **◀ Back** revient à l’écran précédent.
+
+1. **Welcome** (bienvenue) : voir plus bas.
+2. **Le guide des boutons** : chaque bouton du haut, tel qu’il apparaît, et ce qu’il fait, avec ceux marqués ⛔ (Skip et Next ▶ sur
+   1. Units et 2. Brewer Type tant qu’ils n’ont pas de réponse ; Close et ✕ tant que 1 et 2 n’ont pas de réponse).
+3. **Comment répondre** : on répond aux questions de deux façons. La première est une **case à cocher** (« Are you a morning
+   person? »), montrée avant et après un clic ; vous pouvez essayer la première ligne.
+
 ## La page de bienvenue {#the-welcome-page}
 
-L’entretien s’ouvre toujours sur une page **Welcome** (bienvenue), avant la première question. Son encadré bleu est la seule note sur
+L’entretien s’ouvre toujours sur une page **Welcome** (bienvenue). Son encadré bleu est la seule note sur
 les téléphones et les petits écrans : Skynet peut être commandé depuis presque n’importe quel appareil doté d’un navigateur et d’une
 connexion Internet, mais il est bien plus facile de concevoir sur un ordinateur, car les détails fins sont difficiles à voir sur un
 petit écran. En dessous, la page explique ce qu’est l’entretien : rien n’est gravé dans le marbre, chaque réponse peut être changée à
-tout moment dans **☰ Menu > Default settings**, et vous pouvez relancer l’entretien depuis ☰ Menu. **Next ▶** (en haut, ou après
-**Click to proceed:**) ou **Skip** va à la première question qui n’est pas verte. **◀ Back** sur la première question revient à la page de
-bienvenue.
+tout moment dans **☰ Menu > Default settings**, et vous pouvez relancer l’entretien depuis ☰ Menu. Son **◀ Back** porte le ⛔ (rien n’est avant elle). **◀ Back** sur la
+première question revient à l’écran Comment répondre.
 
 ## Les questions {#the-questions}
 

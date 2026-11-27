@@ -97,6 +97,30 @@ export const SETUP_WELCOME = {
   proceed: 'Click to proceed:',
 };
 
+// Screen 2, the button guide (OakBarn Brewery, 2026-11-27, "Screen Interview 2", his picture, spelling and grammar corrected): after the
+// Welcome page. Each row: the buttons as they look (no: true = with the ⛔ Do Not Enter sign) and what they do
+export const SETUP_GUIDE = {
+  intro: 'The Setup Interview has a button selection at the top of every screen.',
+  rows: [
+    [[['? Help']], 'Brings up the Help for the question. If you do not understand that, I cannot help!'],
+    [[['◀ Back']], 'Returns to the previous screen.'],
+    [[['Skip']], 'Allows you to skip the question. You can return later. Next will also work.'],
+    [[['Skip', true], 'and', ['Next ▶', true]], 'are not available on 1. Units or 2. Brewer Type until the questions are answered.'],
+    [[['Next ▶', 'primary']], 'goes to the next question. Skip and Next do very similar actions.'],
+    [[['✖ Close'], ['✕']], 'Closes the interview.'],
+    [[['✖ Close', true], ['✕', true]], 'are not available until 1. Units and 2. Brewer Type are answered.'],
+  ],
+};
+
+// Screen 3, how to answer (OakBarn Brewery, 2026-11-27, "Screen 3", his picture, spelling and grammar corrected): the first method is a
+// Tick Box, shown before and after a click
+export const SETUP_TICK = {
+  intro: 'Questions are answered in two methods. The first method is to check a Tick Box:',
+  ask: 'Are you a morning person?',
+  boxes: ['Yes', 'If 11:59 = morning', 'No'],
+  ticked: 1,
+};
+
 export const SETUP_QUESTIONS = [
   // ---- 1 and 2: must be answered (Skip shows 🚫 Not allowed)
   { id: 'units', step: 'Units', kind: 'pick', save: 'defaults', must: true,
@@ -227,7 +251,9 @@ export const SETUP_QUESTIONS = [
 // Rule 2.6: more than 6 choices MUST be a dropdown; 6 or fewer are one-click boxes
 export const asDropdown = choices => (choices?.length || 0) > 6;
 // a new installation: no Skynet settings saved yet (and the Setup Interview not finished before)
-export const setupNeeded = config => !config?.brewDefaults?.setupDone && !Object.keys(config?.brewDefaults ?? {}).length;
+// (2026-11-27: every answer is saved as soon as it is given, so a first run left before steps 1 and 2 were answered has a green list
+// but no setupDone: the interview opens again)
+export const setupNeeded = config => !config?.brewDefaults?.setupDone && (!Object.keys(config?.brewDefaults ?? {}).length || Array.isArray(config?.brewDefaults?.setupAnswered));
 export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
@@ -256,10 +282,15 @@ export function answerError(q, v) {
 }
 // what Finish saves: the Default settings (merged into the ones there), the boil temperature place (in meters), and this browser's
 // Help language. A question left out (show false) saves nothing.
-export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null) {
+// onlyAnswered (OakBarn Brewery, 2026-11-27: "We have to save these like a gGlobal as they need to be persistent. No implicit save. Even
+// if a computer is shut, these stay."): each answer is saved the moment it is given; only the answered (green) questions are written,
+// the others keep what was saved before. setupDone is set only once the must questions (steps 1 and 2) are answered.
+export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyAnswered = false) {
   const brewDefaults = { ...(ctx.defaults || {}) }, out = { brewDefaults, boil: null, helpLang: null };
+  const did = id => !onlyAnswered || !!answered?.has(id);
   for (const q of shownQuestions(a, ctx, list)) {
     const v = a[q.id];
+    if (!did(q.id)) continue;
     if (q.save === 'defaults') {
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       // All Grain and "Grind your own grain?" Yes: All Grain (own Grain Mill)
@@ -270,14 +301,14 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null) {
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;
     } else if (q.save === 'browser' && q.id === 'helpLang') out.helpLang = v;
   }
-  const ap = String(a.airport ?? '').trim().toUpperCase(), el = a.elevation;
+  const ap = did('airport') ? String(a.airport ?? '').trim().toUpperCase() : (ctx.boil?.airport || ''), el = a.elevation;
   const metric = a.units === 'Metric';
-  const elevationM = el === '' || el == null ? null : Math.round((metric ? +el : +el * US_FT) * 10) / 10;
+  const elevationM = !did('elevation') ? (ctx.boil?.elevationM ?? null) : el === '' || el == null ? null : Math.round((metric ? +el : +el * US_FT) * 10) / 10;
   if (ap !== (ctx.boil?.airport || '') || elevationM !== (ctx.boil?.elevationM ?? null))
     out.boil = { airport: ap, elevationM, pressure: ctx.boil?.pressureHpa ?? null };
   // the Brewer Level from the Brewery Vessels answers (when they were asked)
-  if (shownQuestions(a, ctx, list).some(q => q.id === 'vesselCount')) { const l = brewerLevelOf(a); if (l) brewDefaults.brewerLevel = l; }
-  brewDefaults.setupDone = true;
+  if (shownQuestions(a, ctx, list).some(q => q.id === 'vesselCount') && did('vesselCount')) { const l = brewerLevelOf(a); if (l) brewDefaults.brewerLevel = l; }
+  if (!onlyAnswered || !mustMissing(shownQuestions(a, ctx, list), answered || new Set()).length) brewDefaults.setupDone = true;
   if (answered) brewDefaults.setupAnswered = list.filter(q => q.kind !== 'branch' && answered.has(q.id)).map(q => q.id);
   return out;
 }

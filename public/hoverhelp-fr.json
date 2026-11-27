@@ -1846,5 +1846,12 @@
  "Keep your answer and go on.": "Garder votre réponse et continuer.",
  "Stop the interview. Steps 1 and 2 must be answered first; the answers so far are saved.": "Arrêter l’entretien. Il faut d’abord répondre aux étapes 1 et 2 ; les réponses données sont enregistrées.",
  "This is the first page.": "C’est la première page.",
- "Go on to the first question that is not answered yet.": "Aller à la première question qui n’a pas encore de réponse."
+ "Go on to the first question that is not answered yet.": "Aller à la première question qui n’a pas encore de réponse.",
+ "Not available until 1. Units and 2. Brewer Type are answered.": "Pas disponible tant que 1. Units et 2. Brewer Type n’ont pas de réponse.",
+ "Stop the interview. The answers so far are saved.": "Arrêter l’entretien. Les réponses données sont enregistrées.",
+ "The button guide": "Le guide des boutons",
+ "Not available until this question is answered: click an answer.": "Pas disponible tant que cette question n’a pas de réponse : cliquez sur une réponse.",
+ "Go on, like Next ▶.": "Continuer, comme Next ▶.",
+ "How to answer": "Comment répondre",
+ "The page before": "La page précédente"
 }

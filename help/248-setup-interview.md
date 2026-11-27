@@ -6,13 +6,15 @@ again any time from **☰ Menu > 🧭 Setup Interview**.
 
 ## How it works
 
+The buttons, the title and the steps strip are frozen at the top: only the page under them scrolls.
+
 - One question per page, with a short explanation under it. The steps strip at the top shows where you are, in 6 steps:
   **1. Units · 2. Brewer Type · 3. Brewery · 4. Other Defaults · 5. Recipe Defaults · 6. Help Language**, then Done.
 - **◀ Back** goes to the question before. **Next ▶** keeps your answer and goes on. A choice of 6 or fewer is a box: one click picks
   it and goes on. A choice of more than 6 is a dropdown (Rule 2.6).
 - Only the first two steps must be answered: **US or Metric** (always the first question) and **Brewer Type**. Until one of them is
-  answered, its **Skip** shows the 🚫 Do Not Enter pointer and does nothing; once it is answered, Skip keeps your answer and goes
-  on. **◀ Back** and **Close** always work.
+  answered, its **Skip** and **Next ▶** have the ⛔ Do Not Enter sign and do nothing: click an answer. Once it is answered, Skip keeps
+  your answer and goes on. **◀ Back** always works (not on the Welcome page: nothing is before it).
 - Steps 3 **Brewery**, 4 **Other Defaults** and 5 **Recipe Defaults** are branches. Each one opens on a page that lists what it asks.
   **Next ▶** starts it. **Skip** on that page skips the whole branch and keeps Skynet's own answers. Inside a branch, each question
   has its own **Skip**.
@@ -23,21 +25,35 @@ again any time from **☰ Menu > 🧭 Setup Interview**.
 - The interview opens on the first question that is not green, and **Next ▶** goes on to the next one that is not green, in order.
   Answered (green) questions do not take your turn again; click their step, or **✎** on Done, to change one.
 - Every page starts on Skynet's own answer (or on your saved answer when you run it again), so Next, Next, Next gives a working panel.
+- **Every answer is saved the moment you give it** (Next, or a click on a choice), on the Brain, like a gGlobal: it stays even if
+  your computer is shut down. Run the interview again and it opens on the first question not answered yet.
 - The last page, **Done**, shows every answer. **✎** goes back to that question. **✔ Finish** saves them all.
 - **Close** or **✕**:
-  - while steps 1 and 2 are not both answered, a **red** pop-up says they must be completed first, and the interview stays open.
+  - on every screen, the Welcome page too, they have the ⛔ Do Not Enter sign and do nothing until 1. Units and 2. Brewer Type are
+    answered (Esc does nothing either).
   - after that, when some questions are not green yet, a **blue** pop-up says: they do need completing; setting up Skynet depends
     on the answers to many of these questions to make it your own, but it will work with just the first 2 questions. **◀ Keep
     answering** goes back; **Close** saves the answers so far and closes. Run it again from ☰ Menu to answer the rest.
 
+## The first three screens
+
+Every run starts with three screens before the first question. **Next ▶** (at the top, or after **Click to proceed:**) or **Skip**
+goes on; **◀ Back** goes to the screen before.
+
+1. **Welcome**: see below.
+2. **The button guide**: each button at the top, as it looks, and what it does, with the ⛔ ones (Skip and Next ▶ on 1. Units and
+   2. Brewer Type until answered; Close and ✕ until 1 and 2 are answered).
+3. **How to answer**: questions are answered in two methods. The first is a **Tick Box** ("Are you a morning person?"), shown before
+   and after a click; you can try the first row.
+
 ## The Welcome page
 
-The interview always opens on a **Welcome** page, before the first question. Its blue box is the one note about phones and small
+The interview always opens on a **Welcome** page. Its blue box is the one note about phones and small
 screens: Skynet may be controlled from almost any device with a browser and internet connection, but it is much easier to design
 on a computer, because finer details are hard to see on a small screen. Under it, the page says what the interview is: nothing is
 written in stone, every answer can be changed any time on **☰ Menu > Default settings**, and you can run the interview again from
-☰ Menu. **Next ▶** (at the top, or after **Click to proceed:**) or **Skip** goes to the first question that is not green. **◀ Back** on the
-first question comes back to the Welcome page.
+☰ Menu. Its **◀ Back** has the ⛔ (nothing is before it). **◀ Back** on the first
+question comes back to the How to answer screen.
 
 ## The questions
 

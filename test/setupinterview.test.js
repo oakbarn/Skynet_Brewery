@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { brewerLevelOf, vesselAnswersOf, VESSEL_KEYS } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf } from '../public/setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf } from '../public/setupinterview.js';
 
 const ctx = (more = {}) => ({ defaults: {}, boil: null, patron: false, helpLang: null, brewerTypes: [['cankit', 'Extract Can Kit'], ['allgrain', 'All Grain'], ['allgrainmill', 'All Grain (own Grain Mill)']], brewerTypeDefault: 'allgrain',
   pipeSizes: [['0.5', '1/2"'], ['1', '1"']], hoseSizes: [['0.5', '1/2"']], helpLangs: [['en', 'English'], ['fr', 'Français']],
@@ -161,3 +161,31 @@ assert.match(app, /setupPop\('blue', SETUP_OPEN_MSG/);
 // Help 248 in English and French
 for (const f of ['help/248-setup-interview.md', 'help/fr/248-setup-interview.md']) assert.ok(fs.existsSync(f), f);
 console.log('setupinterview tests passed');
+
+// every answer saved the moment it is given (OakBarn Brewery, 2026-11-27: "save these like a gGlobal ... Even if a computer is shut,
+// these stay"): only the answered ones are written; setupDone only once steps 1 and 2 are answered; a first run left early opens again
+{
+  const c = ctx({ defaults: {} }), a1 = startAnswers(c); a1.units = 'Metric';
+  const o1 = setupSave(a1, c, undefined, new Set(['units']), true).brewDefaults;
+  assert.equal(o1.units, 'Metric');
+  assert.equal(o1.brewerType, undefined, 'not answered yet: not written');
+  assert.equal(o1.setupDone, undefined);
+  assert.deepEqual(o1.setupAnswered, ['units']);
+  assert.equal(setupNeeded({ brewDefaults: o1 }), true, 'left before step 2: the interview opens again');
+  const o2 = setupSave({ ...a1, brewerType: 'cankit' }, ctx({ defaults: o1 }), undefined, new Set(['units', 'brewerType']), true);
+  assert.equal(o2.brewDefaults.brewerType, 'cankit');
+  assert.equal(o2.brewDefaults.setupDone, true);
+  assert.equal(o2.boil, null, 'Airport and Elevation not answered: the boil place is not touched');
+  assert.equal(setupNeeded({ brewDefaults: o2.brewDefaults }), false);
+}
+
+// screens 2 and 3 (OakBarn Brewery, 2026-11-27): the button guide and the Tick Box, spelling fixed; Close and ✕ ⛔ until 1 and 2
+assert.equal(SETUP_GUIDE.rows.length, 7);
+assert.ok(SETUP_GUIDE.rows.some(([b, t]) => b.some(x => Array.isArray(x) && x[0] === '✖ Close' && x[1] === true) && /until 1\. Units and 2\. Brewer Type are answered/.test(t)));
+assert.deepEqual(SETUP_TICK.boxes, ['Yes', 'If 11:59 = morning', 'No']);
+assert.doesNotMatch(JSON.stringify([SETUP_GUIDE, SETUP_TICK]), /aswered|avaiable|avialable|retun|unitl/);
+{
+  const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(appSrc, /const closeBtns = qs => mustMissing\(qs, answered\)\.length/);
+  assert.match(appSrc, /let at = -3, skipped = new Set\(\);/);
+}
