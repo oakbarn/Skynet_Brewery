@@ -1,4 +1,5 @@
 {
+  "tip": "A pot with a Tri-Clamp outlet, a thermowell and a side inlet that swirls the liquid.",
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
   "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Temperature_Tangential_Widget.svg",

@@ -1,4 +1,5 @@
 {
+  "tip": "A brew kettle.",
   "vesselType": "vessel", "units": "Metric",
   "vtype": "Brew Kettle",
   "image": "Images/Skynet/Vessels/boil_kettle.svg",

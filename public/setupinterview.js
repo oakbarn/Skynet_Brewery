@@ -44,10 +44,23 @@ export const BREWER_LEVEL_DEFAULT = '7';
 // questions not a DDLB"): a few plain questions about the vessels work out the Brewer Level, kept as brewerLevel as before
 export const VESSEL_COUNTS = [['1', 'One vessel', 'One pot, or one All In One'], ['2', 'Two vessels', 'A Mash Tun (it may be a cooler) and a Kettle'], ['3', 'Three or more vessels', 'HLT, Mash Tun and Kettle']];
 export const PUMP_COUNTS = [['1', 'One pump (or none)'], ['2', 'Two pumps']];
+// Number of Hot Side vessels (OakBarn Brewery, 2026-11-27: "Number of Hot Side vessels needs to be a Box and you can enter a number.
+// The number can be from 1 - 10"; "Then Branch depending on the number entered"): a whole number 1 to 10 (null: not a good one).
+// The branches: 1, 2, and 3 or more (VESSELS_3UP)
+export const VESSELS_MIN = 1, VESSELS_MAX = 10;
+export const vesselCountOf = v => { const n = Number(String(v ?? '').trim()); return String(v ?? '').trim() !== '' && Number.isInteger(n) && n >= VESSELS_MIN && n <= VESSELS_MAX ? n : null; };
+export const VESSELS_3UP = Array.from({ length: VESSELS_MAX - 2 }, (_, i) => String(i + 3));
+// how one vessel is heated (OakBarn Brewery, 2026-11-27): the Tick Boxes of the one vessel branch, and the list on Default settings
+export const VESSEL_HEATS = [['noboil', 'No Boil Brewer'], ['electricstove', 'Electric Stove Top'], ['gasstove', 'Gas Stove Top'], ['hotplate', 'Hot Plate'],
+  ['turkeyfryer', 'Turkey Fryer'], ['gasburner', 'Brewery Gas Burner'], ['element', 'Internal Electric Element']];
+// No Boil Brewer, one vessel: "Single Vessel Brewer. Choose the Vessel that matches yours" (OakBarn Brewery, 2026-11-27, his picture):
+// his three Skynet Vessel Templates with his words under them, and Other Skynet Template for any other one. [Template name, his words]
+export const SINGLE_VESSELS = [['Generic_Brew_Vessel_Widget', 'Plain Pot'], ['Brew_Vessel_Low_TC_Output_Widget', 'Pot with 1.5 TC Outlet'],
+  ['Brew_Vessel_Low_NPT_Output_Widget', 'Pot with NPT Outlet']];
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
-  const n = String(v?.vesselCount ?? '');
+  const c = vesselCountOf(v?.vesselCount), n = c == null ? '' : c >= 3 ? '3' : String(c);
   if (n === '1') return v.allInOne ? '4' : v.kettlePump ? '3' : v.kettleOutlet ? '2' : '1';
   if (n === '2') return String(v.pumpCount) === '2' ? '6' : '5';
   if (n === '3') return v.allGrainPlus ? '9' : v.recirculate ? '8' : '7';
@@ -64,7 +77,7 @@ export const vesselStart = (d, k) => d?.[k] !== undefined ? d[k] : vesselAnswers
 // the Level the New Schema Interview starts a Brewing Tab on (Rule 2.58), from the Brewer Level and the Brewer Type, when no Tab
 // Level was picked before
 export function nsiLevelOf(brewerLevel, brewerType) {
-  const n = +brewerLevel || 0, grain = brewerType === 'allgrain' || brewerType === 'allgrainmill';
+  const n = +brewerLevel || 0, grain = GRAIN_TYPES.includes(brewerType);
   if (!n) return null;
   if (n <= 4) return grain ? 'biab' : brewerType === 'partial' ? 'partial' : 'stove';
   return n <= 6 ? 'two' : 'mashtun';
@@ -81,9 +94,12 @@ const US_FT = 0.3048;      // feet to metres (the same factor the boil temperatu
 // get the Do Not Enter on the mandatory questions"): steps 1 and 2 must be answered; 3 to 5 are branches; 6 is one question with a Skip.
 export const SETUP_STEPS = ['Units', 'Brewer Type', 'Brewery', 'Other Defaults', 'Recipe Defaults', 'Help Language'];
 // the Brewer Types question 2 offers; All Grain Mill own Grain is All Grain (own Grain Mill)
-const MILL = 'allgrainmill', GRAIN = 'allgrain';
+const MILL = 'allgrainmill', GRAIN = 'allgrain', BIAB = 'biab', AIO = 'allinone';
+// the Brewer Types that mash their own grain (they get the Mash Profile question)
+export const GRAIN_TYPES = [BIAB, AIO, GRAIN, MILL];
 // question 2's Tick Boxes, in Fritz's words (2026-11-27), each a Brewer Type (public/recipecalc.js BREWER_TYPES)
-export const BREWER_TICKS = [['cankit', 'Extract Kit'], ['partial', 'Extract Brewer add Own Hops'], [GRAIN, 'All Grain'], [MILL, 'All Grain Mill own Grain']];
+// (2026-11-27 later: "Add All in One Brewer and BIAB to brewer types")
+export const BREWER_TICKS = [['cankit', 'Extract Kit'], ['partial', 'Extract Brewer add Own Hops'], [BIAB, 'BIAB (Brew in a Bag)'], [AIO, 'All In One Brewer'], [GRAIN, 'All Grain'], [MILL, 'All Grain Mill own Grain']];
 const L_PER_GAL = 3.785411784;
 const round2 = n => Math.round(n * 100) / 100;
 
@@ -193,11 +209,23 @@ export const SETUP_QUESTIONS = [
   // Level to pick the Schema Template, the Level of a new Brewing Tab and the Brew Day steps that fit
   // the first Brewery question, for every Brewer Type (OakBarn Brewery, 2026-11-27: "Create the first brewery question which will be
   // for all brewers regardless of type. Number of Vessels"): Tick Boxes, like questions 1 and 2
-  { id: 'vesselCount', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults',
-    head: 'Number of Vessels',
-    ask: 'How many brewing vessels do you have (or are you building)?',
-    why: 'For every Brewer Type. Count the Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the next few questions it works out your Brewer Level, from one pot on the stove to All Grain Plus.',
-    choices: VESSEL_COUNTS, start: ctx => vesselStart(ctx.defaults, 'vesselCount') },
+  // (2026-11-27 later: a box to type a number in, 1 to 10, and the interview branches on it)
+  { id: 'vesselCount', step: 'Brewery', kind: 'num', save: 'defaults', min: VESSELS_MIN, max: VESSELS_MAX,
+    head: 'Number of Hot Side Vessels',
+    ask: 'How many Hot Side vessels do you have (or are you building)? Type a number from 1 to 10.',
+    why: 'For every Brewer Type. Count the Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. The next questions depend on the number.',
+    start: ctx => String(vesselStart(ctx.defaults, 'vesselCount')) },
+  // one vessel: how is it heated? (OakBarn Brewery, 2026-11-27, his "1 vessel" page: "If one Vessel. Next question: How is the vessel
+  // heated? 7 Tick Boxes"), his seven in his order
+  { id: 'vesselHeat', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', when: { vesselCount: '1' },
+    ask: 'How is the vessel heated?', why: 'Tick the one that heats your vessel.',
+    choices: VESSEL_HEATS, start: ctx => VESSEL_HEATS.some(([k]) => k === ctx.defaults?.vesselHeat) ? ctx.defaults.vesselHeat : '' },
+  // No Boil Brewer (OakBarn Brewery, 2026-11-27: "no Boil Brewer next", his picture): pick the vessel (a Skynet Vessel Template)
+  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', when: { vesselCount: '1', vesselHeat: 'noboil' },
+    head: 'Single Vessel Brewer', ask: 'Choose the Vessel that matches yours:', why: 'Click the picture of your vessel, then Next ▶.',
+    group: 'Vessel Widget', groupNote: 'One Skynet Template with every IP, a Temperature Probe (Front or Thermowell) and an Element Port, each with a Place slider. Slide off what your vessel does not have.',
+    other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
+    choices: SINGLE_VESSELS, start: ctx => ctx.defaults?.vesselTemplate || '' },
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -213,11 +241,11 @@ export const SETUP_QUESTIONS = [
   { id: 'pumpCount', step: 'Brewery', held: true, kind: 'pick', save: 'defaults', when: { vesselCount: '2' },
     ask: 'How many pumps?', why: 'The pumps that move your wort and water between the two vessels.',
     choices: PUMP_COUNTS, start: ctx => String(vesselStart(ctx.defaults, 'pumpCount')) },
-  { id: 'recirculate', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+  { id: 'recirculate', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: VESSELS_3UP },
     ask: 'Do you recirculate the mash (HERMS or RIMS) with two pumps and motorized valves?',
     why: 'No: HLT, Mash Tun and Kettle with one pump, like the 3 Vessel sample.',
     start: ctx => vesselStart(ctx.defaults, 'recirculate') },
-  { id: 'allGrainPlus', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '3' },
+  { id: 'allGrainPlus', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: VESSELS_3UP },
     ask: 'Do you also have controlled fermentors, motorized valves and a tap water Supply Manifold?',
     why: 'Yes: All Grain Plus, the top Brewer Level.',
     start: ctx => vesselStart(ctx.defaults, 'allGrainPlus') },
@@ -274,7 +302,7 @@ export const SETUP_QUESTIONS = [
   { id: 'mashProfile', step: 'Recipe Defaults', kind: 'pick', tick: true, save: 'defaults',
     ask: 'Which Mash Profile does a new Recipe start with?',
     why: 'The mash steps (temperatures and times) of a new All Grain Recipe. ☰ Menu > Mash Profile adds and changes them.',
-    show: a => a.brewerType === GRAIN || a.brewerType === MILL,
+    show: a => GRAIN_TYPES.includes(a.brewerType),
     choices: ctx => ctx.mashProfiles || [],
     start: ctx => (ctx.mashProfiles || []).some(([k]) => k === (ctx.defaults?.mashProfile ?? ctx.mashDefault)) ? (ctx.defaults?.mashProfile ?? ctx.mashDefault) : '' },
   { id: 'boilProfile', step: 'Recipe Defaults', kind: 'pick', tick: true, save: 'defaults',
@@ -298,10 +326,12 @@ export const SETUP_QUESTIONS = [
 export const asDropdown = choices => (choices?.length || 0) > 6;
 // a Tick Box question (OakBarn Brewery, 2026-11-27: "Rebuild all the Interview Dialogs in Order After the Brewery interview using check
 // boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to up to 4 Lines for a check
-// Box if needed"): a row with tick, Yes/No or fewer than 6 choices, is Tick Boxes; 6 or more stay a Drop Down list
-export const TICK_MAX = 5;
+// Box if needed"): a row with tick, Yes/No or up to TICK_MAX (8) choices, is Tick Boxes; more is a Drop Down list
+export const TICK_MAX = 8;
 export const tickChoices = (q, ctx) => q.kind === 'yesno' ? [[true, 'Yes'], [false, 'No']] : choicesOf(q, ctx);
-export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= TICK_MAX;
+// (up to 8 Tick Boxes, OakBarn Brewery, 2026-11-27: "That will be a change that you can have up to 8 Tick Boxes"; Rule 2.6; a row
+// may set its own tickMax)
+export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= (q.tickMax ?? TICK_MAX);
 // a new installation: no Skynet settings saved yet (and the Setup Interview not finished before)
 // (2026-11-27: every answer is saved as soon as it is given, so a first run left before steps 1 and 2 were answered has a green list
 // but no setupDone: the interview opens again)
@@ -309,7 +339,9 @@ export const setupNeeded = config => !config?.brewDefaults?.setupDone && (!Objec
 export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
-export const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.includes(a?.[k]) : a?.[k] === v);
+// (a number answer, such as Number of Hot Side Vessels, matches its words: 3 is '3')
+const sameAns = (x, y) => typeof y === 'boolean' ? x === y : x != null && String(x) === String(y);
+export const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.some(y => sameAns(a?.[k], y)) : sameAns(a?.[k], v));
 // held: a question kept out of the interview for now (OakBarn Brewery, 2026-11-27: "Leave the brewery interview to the one question for
 // now"); it stays on Default settings, and comes back when its held is taken off
 export const shownQuestions = (a, ctx, list = SETUP_QUESTIONS) => list.filter(q => !q.held && whenOk(q, a) && (!q.show || q.show(a, ctx)));
@@ -323,12 +355,13 @@ export function startAnswers(ctx, list = SETUP_QUESTIONS) {
 export function answerWords(q, v, ctx) {
   if (q.kind === 'branch') return '';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
-  if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
+  if (q.kind === 'pick' || q.kind === 'vessel') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
 }
 // a typed answer that is no good (null: fine)
 export function answerError(q, v) {
   if (q.id === 'elevation' && v !== '' && v != null && !(Number.isFinite(+v) && +v >= -500 && +v <= 30000)) return 'Elevation must be a number (or empty).';
+  if (q.id === 'vesselCount' && vesselCountOf(v) == null) return `Type a whole number from ${VESSELS_MIN} to ${VESSELS_MAX}.`;
   if (q.id === 'batch' && v !== '' && v != null && !(Number.isFinite(+v) && +v > 0)) return 'The Batch Size must be more than 0 (or empty).';
   if (q.id === 'airport' && v && !/^[A-Za-z0-9]{3,4}$/.test(String(v).trim())) return 'An airport code is 4 letters, for example KDFW (or leave it empty).';
   if (q.kind === 'pick' && q.must && (v === '' || v == null)) return 'This one must be answered.';
@@ -348,6 +381,8 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
     if (q.save === 'defaults') {
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
+      else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
+      else if (q.id === 'vesselHeat' || q.id === 'vesselTemplate') { if (v) brewDefaults[q.id] = v; }      // not picked: not set
       // kept in liters (Rule 2.59), typed in gallons or liters
       else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;

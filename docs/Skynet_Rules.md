@@ -646,7 +646,10 @@ the Panel Updates sandbox to change one at a time. A list that can grow ("Add ne
 item 3: "Change Slider to DDLB"; on the Rule 2.6 question: "it is the normal way that DDLBs work. and It is actually sort of 3. Click
 Down Arrow to show choices, Slider if list is long. Click to Select. So any DDLB as a way to choose something works that way in any
 program, not just Skynet"; "The rule should be if desired. Not if always just allowed"; "Over 6 must be DDLB"):
-- **More than six choices:** a dropdown, always.
+- **More than six choices:** a dropdown, always. **CHANGED 2026-11-27 for Tick Boxes** (OakBarn Brewery: "Make the dialogs a little
+  wider so they can accept up to 8 Check Boxes. That will be a change that you can have up to 8 Tick Boxes"): **Tick Boxes** (a pick-one
+  shown as boxes to tick, as in the Setup Interview, Rule 2.75) may have **up to 8** on one line; more than 8 is a dropdown. One-click
+  boxes and other lists keep six. The Setup Interview dialog is 900 px wide so 8 fit, each label wrapping to up to 4 lines.
 - **Six or fewer, only one may be picked:** one-click boxes in a row (the short pick-one above), or a dropdown where it suits. The
   dropdown is allowed, never required. The first one is the Process Editor's Output pick, **Current Process / All Variables**
   (Rule 2.70). The short dropdowns listed in the Panel Updates sandbox may stay.
@@ -1848,20 +1851,47 @@ answers and changes nothing until **✔ Finish**.
 - **CHANGED 2026-11-27, Brewery held to one question** (OakBarn Brewery: "Leave the brewery interview to the one question for now but
   build all the rest"): the other Brewery questions (All In One, outlet, pump, pumps, HERMS or RIMS, All Grain Plus, Piped Manifold,
   Pipe size, Hose size) have `held: true`: not asked, still on Default settings. Taking `held` off brings one back.
+- **2026-11-27, one vessel: How is the vessel heated?** (OakBarn Brewery, his "1 vessel" page: "If one Vessel. Next question: How is the
+  vessel heated? 7 Tick Boxes"; "Adjust spacing so even between Tick Boxes if possible"): after Number of Hot Side Vessels **1**, seven
+  Tick Boxes in his order: No Boil Brewer, Electric Stove Top, Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal
+  Electric Element (`vesselHeat`, also on Default settings, Rule 2.42; not set until answered). Every Tick Box gets the same width,
+  so the spacing is even.
+- **CHANGED 2026-11-27, BIAB and All In One Brewer** (OakBarn Brewery: "Add All in One Brewer and BIAB to brewer types"): two new
+  Brewer Types, **BIAB (Brew in a Bag)** and **All In One Brewer**, both Level 4 (All Grain Recipes, the Mash Profile question).
+  Question 2 shows six Tick Boxes (Extract Kit, Extract Brewer add Own Hops, BIAB, All In One Brewer, All Grain, All Grain Mill own
+  Grain): up to 8 Tick Boxes are allowed (Rule 2.6 changed). Default settings and the No Recipe Found pop-up list them too.
+- **CHANGED 2026-11-27, Number of Hot Side Vessels** (OakBarn Brewery: "Number of Hot Side vessels needs to be a Box and you can enter
+  a number. The number can be from 1 - 10"; "Then Branch depending on the number entered"): this wins over the Tick Boxes of Number of
+  Vessels above. It is a box for a whole number from **1 to 10** (any other answer gets one red note); Default settings has the same box.
+  The questions after it branch on the number: **1**, **2**, or **3 to 10** (`VESSELS_3UP`); 3 or more works out the Brewer Level like
+  three vessels.
 - **CHANGED 2026-11-27, Tick Boxes after Brewery** (OakBarn Brewery: "Rebuild all the Interview Dialogs in Order After the Brewery
   interview using check boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to
   up to 4 Lines for a check Box if needed"): a row with `tick` is Tick Boxes when it is Yes/No or has **fewer than 6** choices
   (Yeast Starter, Mash Profile, Boil Profile, Help language); 6 or more is a Drop Down list (Rule 2.6 still holds: more than 6 MUST
-  be one). A non-must one shows what Skip keeps.
+  be one). A non-must one shows what Skip keeps. *Later the same day:* up to **8** Tick Boxes, more than 8 a Drop Down list
+  (Rule 2.6 changed).
 - **New questions** (OakBarn Brewery, 2026-11-27: "if you can add a selection to the Tick box, do not add followup questions but
   remember that things may need to be a new branch"): add a choice to a question's Tick Boxes instead of a follow-up question; when a
   choice needs more questions, they go in a new branch.
+- **CHANGED 2026-11-27, Single Vessel Brewer** (OakBarn Brewery, his picture "Single Vessel Brewer"; "Notice I put a much more plain
+  Label under the choices"): one vessel and **No Boil Brewer** asks **Choose the Vessel that matches yours:** with three Skynet Vessel
+  Templates as pictures (Generic_Brew_Vessel_Widget, Brew_Vessel_Low_TC_Output_Widget, Brew_Vessel_Low_NPT_Output_Widget) and his
+  plain words under them (Plain Pot, Pot with 1.5 TC Outlet, Pot with NPT Outlet). A click lights one; Next ▶ is ⛔ until one is
+  picked. **Other Skynet Template** opens every other Skynet Vessel Template. Saved as `vesselTemplate`, also on Default settings.
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
 this is frozen"; "And that should be a rule on any dialogs that have a selection or menu on the top"). The buttons, the title and the
 menu (steps strip, tabs, a selection) stay in place at the top of the dialog; only what is under them scrolls. First built in the
 Setup Interview (Rule 2.75); other dialogs follow it as they are changed.
+
+2.77 **Hover help is plain and short** (OakBarn Brewery, 2026-11-27: "Hover help ... violates 2 Rules: 1. Fritz 2. Too Technical, Plain
+Language. Do not cite rules in Hover Help. TMI"; "add that task to all Hover help and fix"). Every hover help balloon (a `title` or
+`data-help`, English and French) is plain language a brewer reads at a glance: **no personal name**, **no Rule numbers**, and no
+build notes. A Template's `notes` are for building it and are never hover help; a Skynet Vessel Template has a plain `tip` (English,
+French in hoverhelp-fr.json), shown as its hover help and under its picture in the vessel pickers. A test fails on a balloon with a
+personal name or a Rule number. Help 66.
 
 ## 3. Names and file names
 
@@ -7590,7 +7620,13 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-27: Rule 2.77 new: hover help is plain and short, no personal name, no Rule numbers (every balloon cleaned, English and French); Skynet Vessel Templates get a plain `tip`, shown under each picture in the wider Add a Vessel picker. Help 66.
+- 2026-11-27: Rule 2.75 changed: one vessel and No Boil Brewer asks Single Vessel Brewer: Choose the Vessel that matches yours (vesselTemplate, also on Default settings). Help 248.
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
+- 2026-11-27: Rule 2.75 changed: one vessel asks How is the vessel heated? (7 Tick Boxes, vesselHeat on Default settings); Tick Boxes evenly spaced. Help 248, 155.
+- 2026-11-27: Rule 2.6 changed: up to 8 Tick Boxes on one line (more is a dropdown); the Setup Interview dialog is wider (900 px). Help 248.
+- 2026-11-27: Rule 2.75 changed: new Brewer Types BIAB (Brew in a Bag) and All In One Brewer (Level 4); question 2 has six Tick Boxes. Help 248, 155, 100.
+- 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
 - 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
 - 2026-11-27: Rule 2.75 changed: question 2 Brewer Type is four Tick Boxes on one screen; the "Do you grind your own grain?" follow-up is gone. Help 248.

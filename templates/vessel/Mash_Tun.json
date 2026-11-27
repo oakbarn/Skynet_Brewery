@@ -1,4 +1,5 @@
 {
+  "tip": "A Mash Tun: the grain soaks in hot water here.",
   "vesselType": "vessel", "units": "Metric", "vtype": "Mash Tun", "image": "Images/Skynet/Vessels/mash_tun.svg", "heatKind": "unheated",
   "volume": 56.7812, "deadspace": 1.8927,
   "std": { "type": "TC", "size": 1.5 },

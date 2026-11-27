@@ -9,7 +9,7 @@ Ce que vous choisissez va d'abord sur le 🔨 [Build Tab](55-build-tab), et ses 
 
 ## Widget
 
-La fenêtre (**Skynet Vessel Templates (build on them)**) montre les **Skynet Vessel Widgets** en petites images. Cliquez sur l'un pour l'utiliser. Chacun est une image de cuve avec ses IP intégrés et rien d'autre : pas de Devices. Le Skynet Vessel Widget lui-même est fixé par Skynet et ne peut pas être changé, seulement cloné (☰ Menu > Vessel Templates > Clone).
+La fenêtre (**Skynet Vessel Templates (build on them)**) montre les **Skynet Vessel Widgets** en images, avec sous chacune des mots simples qui disent ce que c'est (par exemple *Une marmite avec une sortie Tri-Clamp de 1,5 pouce près du fond*). La fenêtre est large, vous en voyez donc beaucoup à la fois. Cliquez sur l'un pour l'utiliser. Chacun est une image de cuve avec ses IP intégrés et rien d'autre : pas de Devices. Le Skynet Vessel Widget lui-même est fixé par Skynet et ne peut pas être changé, seulement cloné (☰ Menu > Vessel Templates > Clone).
 
 L'image sur laquelle vous avez cliqué est au départ l'image du Widget, mais celui du Build Tab est à vous : ouvrez ses Properties et changez le **Graphic** comme sur tout autre Widget. Ses IP restent sur les ouvertures de l'image Skynet.
 

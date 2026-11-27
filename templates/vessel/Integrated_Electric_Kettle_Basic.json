@@ -1,4 +1,5 @@
 {
+  "tip": "An electric kettle with its temperature probe and heating element built in.",
   "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/Skynet/Vessels/Skynet_BasicElectricBrewKettle.svg", "size": [180, 235],
   "heatKind": "electric",
   "integrated": "device",

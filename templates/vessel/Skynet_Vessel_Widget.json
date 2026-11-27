@@ -1,4 +1,5 @@
 {
+  "tip": "A vessel with every port. Slide off what your vessel does not have.",
   "vesselType": "vessel", "units": "Metric",
   "vtype": "Brew Kettle",
   "vwidget": true,

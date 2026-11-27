@@ -1,4 +1,5 @@
 {
+  "tip": "A pot with a 1.5 inch Tri-Clamp outlet near the bottom.",
   "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_Low_TC_Output_Widget.svg", "size": [217, 235],
   "std": { "type": "TC", "size": 1.5 },
   "ports": { "outlet": { "installed": true, "position": "Center Bottom 1 in", "std": { "type": "TC", "size": 1.5 } } },

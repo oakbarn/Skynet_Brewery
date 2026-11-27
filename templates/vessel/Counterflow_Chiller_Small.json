@@ -1,4 +1,5 @@
 {
+  "tip": "A small counterflow chiller: wort and cold water flow opposite ways and never mix.",
   "vesselType": "pchiller",
   "vtype": "Counterflow",
   "image": "Images/Skynet/Chillers/Chiller_Counterflow_Small.svg",

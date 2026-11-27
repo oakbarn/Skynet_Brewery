@@ -1,4 +1,5 @@
 {
+  "tip": "A copper counterflow chiller: wort inside, cold water outside.",
   "vesselType": "pchiller",
   "vtype": "Counterflow",
   "image": "Images/Skynet/Chillers/Chiller_Copper_Counterflow.svg",

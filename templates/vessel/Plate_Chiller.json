@@ -1,4 +1,5 @@
 {
+  "tip": "A plate chiller: wort and cold water pass through thin plates and never mix.",
   "vesselType": "pchiller", "vtype": "Brazed plate 30", "image": "Images/Skynet/Chillers/plate_chiller.svg",
   "std": { "type": "MPT", "size": 0.5 },
   "ports": {

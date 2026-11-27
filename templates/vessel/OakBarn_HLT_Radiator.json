@@ -1,4 +1,5 @@
 {
+  "tip": "A 15 gallon Hot Liquor Tank with a side inlet.",
   "vesselType": "vessel",
   "vtype": "HLT",
   "heatKind": "electric",

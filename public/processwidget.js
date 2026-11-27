@@ -32,9 +32,9 @@ export const processButton = st => (st.running ? '■ ' + stopWord('Stop') : '�
 // The hover help of its Properties (Rule 2.38)
 export const PROCESS_TIPS = {
   label: 'What it is called on the Tab, for example Mash Steps. The ⬢ beside it sets its font, size and colors.',
-  name: 'Made by Skynet from the Label and the Tab (wgt_PSW_Label_TabID, Rule 3.14). It must be unique.',
+  name: 'Made by Skynet from the Label and the Tab (wgt_PSW_Label_TabID). It must be unique.',
   process: 'The Process it shows and starts. One click on the Widget starts it when it is stopped and stops it when it runs. If the Process gets a new name (✏ Change name), the Widget follows it.',
-  type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
+  type: 'A Widget lives only in the app: it has no Interface or Port.',
   imageOff: 'Optional. A picture drawn in it, between the Label and the button, for example a float switch. The ⬢ beside it holds the picture when on. Empty: no picture.',
   hideRunning: 'On: it hides (.visible = false) once its Process starts, and shows again when the Process stops. For a button that starts something, such as Start Brew Day. Off (the usual): it always shows, so one click can stop it too.',
   group: 'Optional. Process Widgets with the same Group word (for example Water) act together: one click on one greys out the Start of all the others. While the delay runs they all show Delay and the one pressed says Started; once the water flows the one pressed shows Running and the others go blank. A Process sets it with .phase on any one of them: wgt_PSW_X.phase = "running" when the water flows, wgt_PSW_X.phase = "stopped" when it is over; then every Start works again. Empty: it acts on its own.',

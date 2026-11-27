@@ -1,4 +1,5 @@
 {
+  "tip": "An immersion chiller with its in and out on the same side.",
   "vesselType": "ccoil", "vtype": "Immersion coil", "image": "Images/Skynet/Chillers/chill_coil.svg", "liquidPorts": 2,
   "std": { "type": "MPT", "size": 0.5 },
   "notes": "An immersion chiller with its In and Out on the same side (Panel Update 5 #9)",

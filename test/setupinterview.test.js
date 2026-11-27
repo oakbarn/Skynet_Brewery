@@ -2,7 +2,7 @@
 // Help language and Brewer Type must be answered (Panel Update 17), every other question has Skip; the questions are data in one list
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { brewerLevelOf, vesselAnswersOf, VESSEL_KEYS } from '../public/setupinterview.js';
+import { brewerLevelOf, vesselAnswersOf, VESSEL_KEYS, VESSELS_3UP } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
 import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf, asTicks, tickChoices } from '../public/setupinterview.js';
 
@@ -40,7 +40,11 @@ for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.a
 // Brewer Type (2026-11-27): one screen, four Tick Boxes in Fritz's words, no follow-up question
 const bt = SETUP_QUESTIONS.find(q => q.id === 'brewerType');
 assert.ok(bt.tick && !SETUP_QUESTIONS.some(q => q.id === 'grindOwn'));
-assert.deepEqual(choicesOf(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['allgrain'], ['allgrainmill']] })).map(c => c[1]), ['Extract Kit', 'Extract Brewer add Own Hops', 'All Grain', 'All Grain Mill own Grain']);
+assert.deepEqual(choicesOf(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['biab'], ['allinone'], ['allgrain'], ['allgrainmill']] })).map(c => c[1]), ['Extract Kit', 'Extract Brewer add Own Hops', 'BIAB (Brew in a Bag)', 'All In One Brewer', 'All Grain', 'All Grain Mill own Grain']);
+// six Tick Boxes on question 2 (up to 8 allowed), the Mash Profile question for every grain type, BIAB's Tab Level
+assert.ok(asTicks(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['biab'], ['allinone'], ['allgrain'], ['allgrainmill']] })));
+for (const t of ['biab', 'allinone']) assert.ok(shownQuestions({ brewerType: t }, ctx()).some(q => q.id === 'mashProfile'), t);
+assert.equal(nsiLevelOf('4', 'allinone'), 'biab');
 assert.equal(bt.start(ctx({ defaults: { brewerType: 'allgrainmill' } })), 'allgrainmill');
 assert.ok(shownQuestions({ brewerType: 'allgrainmill' }, ctx()).some(q => q.id === 'mashProfile'));
 // the Mash Profile only for All Grain
@@ -73,14 +77,23 @@ assert.deepEqual([a.units, a.helpLang, brewerLevelOf(a), a.brewerType, a.yeastSt
   ['US', 'en', '7', 'allgrain', false, '0.5', '0.5', 5, 'skynet-single-batch', 'skynet-boil-60']);
 assert.equal(startAnswers(ctx({ defaults: { units: 'Metric' } })).batch, 18.93);
 assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.kind === 'branch'), undefined, ctx()), '');
-assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), '2', ctx()), 'Two vessels');
+assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), '2', ctx()), '2');
+// Number of Hot Side Vessels (2026-11-27): a box, a whole number 1 to 10, and the questions branch on it: 1, 2, 3 or more
+{ const vc = SETUP_QUESTIONS.find(q => q.id === 'vesselCount');
+  assert.ok(vc.kind === 'num' && vc.min === 1 && vc.max === 10 && vc.head === 'Number of Hot Side Vessels');
+  for (const v of ['1', '10', 7, ' 3 ']) assert.equal(answerError(vc, v), null, String(v));
+  for (const v of ['', '0', '11', '2.5', 'x', null]) assert.match(answerError(vc, v), /whole number from 1 to 10/, String(v));
+  assert.deepEqual(VESSELS_3UP, ['3', '4', '5', '6', '7', '8', '9', '10']);
+  assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: ' 6 ' }, ctx(), undefined, new Set(['vesselCount'])).brewDefaults.vesselCount, '6');
+  for (const n of ['3', '7', 10]) assert.equal(brewerLevelOf({ vesselCount: n, recirculate: true }), '8');
+  assert.equal(brewerLevelOf({ vesselCount: 2, pumpCount: '2' }), '6'); assert.equal(brewerLevelOf({ vesselCount: '11' }), null); }
 // held (2026-11-27: "Leave the brewery interview to the one question for now"): Brewery asks only Number of Vessels; ALL is the list with
 // nothing held, for the branching tests below
 const ALL = SETUP_QUESTIONS.map(q => ({ ...q, held: false }));
 assert.deepEqual(shownQuestions({ ...a, vesselCount: '3', pipedManifold: true }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id), ['_brewery', 'vesselCount']);
 // Number of Vessels: the first Brewery question (after the branch page), for every Brewer Type, as Tick Boxes (2026-11-27)
 { const vc = SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), firstB = SETUP_QUESTIONS.find(q => q.step === 'Brewery' && q.kind !== 'branch');
-  assert.ok(vc.tick && vc.head === 'Number of Vessels' && firstB === vc && !vc.show && !vc.when);
+  assert.ok(firstB === vc && !vc.show && !vc.when);
   for (const t of ['cankit', 'partial', 'allgrain', 'allgrainmill']) assert.ok(shownQuestions({ ...a, brewerType: t }, ctx()).includes(vc)); }
 // Brewery Vessels: the questions give the Brewer Level, and a saved Level gives the answers back
 for (let l = 1; l <= 9; l++) assert.equal(brewerLevelOf(vesselAnswersOf(String(l))), String(l), 'level ' + l);
@@ -155,7 +168,7 @@ assert.equal(nsiLevelOf(undefined, 'allgrain'), null);
 const app = fs.readFileSync('public/app.js', 'utf8');
 assert.match(app, /if \(setupNeeded\(S\.config\)\) await setupInterview\(\{ first: true \}\);/);
 assert.match(app, /item\('🧭 Setup Interview'/);
-assert.match(app, /\['vesselCount', 'How many brewing vessels\?', 'sel'/);
+assert.match(app, /\['vesselCount', 'Number of Hot Side vessels \(1 to 10\)', 'num'/);
 assert.match(app, /\['_ub', 'Mandatory', 'head'\]/);
 assert.match(app, /\['_yb', 'Your Brewery', 'head'\]/);
 assert.match(app, /\['_nbh', 'New Build', 'head'\]/);
@@ -213,11 +226,38 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.doesNotMatch(JSON.stringify(u.lead), /perfer|limitaions|Temperatue|seances|eleasphed|caculations|a xml|thing go/);
   const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(appSrc, /const stepShut = \(st, qs\) => mustMissing\(qs, answered\)\.length > 0;/);
-  assert.match(appSrc, /\(asTicks\(q, ctx\) \? tickedOf\(q\) == null : q\.must && !answered\.has\(q\.id\)\)/);
-  // after Brewery: Yes/No and fewer than 6 choices are Tick Boxes; 6 or more a Drop Down list (2026-11-27)
+  assert.match(appSrc, /\(asTicks\(q, ctx\) \? tickedOf\(q\) == null : q\.kind === 'vessel' \? !tickedOf\(q\) : q\.must && !answered\.has\(q\.id\)\)/);
+  // after Brewery: Yes/No and up to 8 choices are Tick Boxes; more than 8 a Drop Down list (2026-11-27, Rule 2.6 changed)
   for (const id of ['yeastStarter', 'mashProfile', 'boilProfile', 'helpLang']) assert.ok(SETUP_QUESTIONS.find(q => q.id === id).tick, id);
   { const ys = SETUP_QUESTIONS.find(q => q.id === 'yeastStarter'), mp = SETUP_QUESTIONS.find(q => q.id === 'mashProfile');
     assert.deepEqual(tickChoices(ys, ctx()), [[true, 'Yes'], [false, 'No']]); assert.ok(asTicks(ys, ctx()));
     assert.ok(asTicks(mp, ctx({ mashProfiles: [['', '(none)'], ['a', 'A']] })));
-    assert.ok(!asTicks(mp, ctx({ mashProfiles: [1, 2, 3, 4, 5, 6].map(n => [String(n), 'P' + n]) })), '6 or more: Drop Down list'); }
+    assert.ok(asTicks(mp, ctx({ mashProfiles: [1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), 'P' + n]) })), '8: Tick Boxes');
+    assert.ok(!asTicks(mp, ctx({ mashProfiles: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => [String(n), 'P' + n]) })), '9: Drop Down list'); }
 }
+// screen 3: the CLICK pointer's tip is inside the box it points at (2026-11-27: "Click arrow needs to be in the box")
+{ const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(src, /i === SETUP_TICK\.ticked \? h\('span', \{ class: 'setupTickAt' \}, b, clickPointer\(\)\)/); }
+// screens 4 and 5: the pointer is on the ▾, on Chocolate, and on the sample step; no loose "↖ CLICK" text is left
+{ const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.ok(!src.includes("'↖ CLICK'"));
+  assert.match(src, /setupDropHi setupAt' \}, c, clickPointer\(/);
+  assert.match(src, /st === HS\.sample \? clickPointer\(/); }
+// one vessel: How is the vessel heated? (2026-11-27): his seven Tick Boxes, only after 1 vessel, saved to Default settings
+{ const vh = SETUP_QUESTIONS.find(q => q.id === 'vesselHeat');
+  assert.ok(vh && vh.tick && !vh.held && vh.step === 'Brewery' && asTicks(vh, ctx()));
+  assert.deepEqual(choicesOf(vh, ctx()).map(c => c[1]), ['No Boil Brewer', 'Electric Stove Top', 'Gas Stove Top', 'Hot Plate', 'Turkey Fryer', 'Brewery Gas Burner', 'Internal Electric Element']);
+  const brew = v => shownQuestions({ ...startAnswers(ctx()), vesselCount: v }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id);
+  assert.deepEqual(brew('1'), ['_brewery', 'vesselCount', 'vesselHeat']); assert.deepEqual(brew('2'), ['_brewery', 'vesselCount']); assert.deepEqual(brew(1), ['_brewery', 'vesselCount', 'vesselHeat']);
+  assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'turkeyfryer' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat'])).brewDefaults.vesselHeat, 'turkeyfryer');
+  const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(src, /\['vesselHeat', 'How is the vessel heated\? \(one vessel\)', 'sel'/); }
+// No Boil Brewer, one vessel: Single Vessel Brewer, his three Skynet Vessel Templates with his words (2026-11-27)
+{ const vt = SETUP_QUESTIONS.find(q => q.id === 'vesselTemplate');
+  assert.ok(vt && vt.kind === 'vessel' && vt.head === 'Single Vessel Brewer' && vt.ask === 'Choose the Vessel that matches yours:' && vt.otherBtn === 'Other Skynet Template');
+  assert.deepEqual(choicesOf(vt, ctx()).map(c => c[1]), ['Plain Pot', 'Pot with 1.5 TC Outlet', 'Pot with NPT Outlet']);
+  for (const [n] of choicesOf(vt, ctx())) assert.ok(fs.existsSync(new URL(`../templates/vessel/${n}.json`, import.meta.url)), n);
+  const brew = (heat) => shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: heat }, ctx()).map(q => q.id);
+  assert.ok(brew('noboil').includes('vesselTemplate')); assert.ok(!brew('gasstove').includes('vesselTemplate'));
+  assert.equal(answerWords(vt, 'Brew_Vessel_Low_TC_Output_Widget', ctx()), 'Pot with 1.5 TC Outlet');
+  assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'noboil', vesselTemplate: 'Generic_Brew_Vessel_Widget' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat', 'vesselTemplate'])).brewDefaults.vesselTemplate, 'Generic_Brew_Vessel_Widget'); }

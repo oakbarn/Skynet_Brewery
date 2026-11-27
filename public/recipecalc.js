@@ -192,6 +192,9 @@ export const RECIPE_LEVELS = [
 export const BREWER_TYPES = [
   { key: 'cankit', name: 'Extract Can Kit', level: 1 },
   { key: 'partial', name: 'Extract Partial Grain and Hops', level: 3 },
+  // OakBarn Brewery, 2026-11-27: "Add All in One Brewer and BIAB to brewer types": both mash their own grain (All Grain recipes)
+  { key: 'biab', name: 'BIAB (Brew in a Bag)', level: 4 },
+  { key: 'allinone', name: 'All In One Brewer', level: 4 },
   { key: 'allgrain', name: 'All Grain', level: 4 },
   { key: 'allgrainmill', name: 'All Grain (own Grain Mill)', level: 4 },
 ];

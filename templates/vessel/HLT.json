@@ -1,4 +1,5 @@
 {
+  "tip": "A Hot Liquor Tank: it heats the brewing water.",
   "vesselType": "vessel", "units": "Metric",
   "vtype": "HLT",
   "image": "Images/Skynet/Vessels/hlt.svg",

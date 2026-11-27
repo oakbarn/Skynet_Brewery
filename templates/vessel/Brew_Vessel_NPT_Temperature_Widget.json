@@ -1,4 +1,5 @@
 {
+  "tip": "A pot with a threaded (NPT) outlet and a thermowell.",
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
   "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_NPT_Temperature_Widget.svg",

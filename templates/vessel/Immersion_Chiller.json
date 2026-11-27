@@ -1,4 +1,5 @@
 {
+  "tip": "An immersion chiller: a coil you put in the hot wort.",
   "vesselType": "ccoil", "vtype": "Immersion coil", "image": "Images/Skynet/Chillers/chill_coil.svg", "liquidPorts": 2,
   "std": { "type": "MPT", "size": 0.5 },
   "ports": { "in": { "installed": true, "position": "Top Left" }, "out": { "installed": true, "position": "Top Right" } }

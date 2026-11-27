@@ -1,4 +1,5 @@
 {
+  "tip": "A plain pot with no holes. Build on it when no other one fits.",
   "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/Skynet/Vessels/Skynet_Generic_Brew_Vessel_Widget.svg", "size": [217, 235],
   "std": { "type": "TC", "size": 1.5 },
   "ports": { "outlet": { "installed": false } },
