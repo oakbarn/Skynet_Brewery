@@ -286,7 +286,7 @@ export const FERMENTOR_PICS = {
   corny: P('<path d="M20 16h20v60H20z"/><path d="M18 14h24v5H18zM18 73h24v5H18z"/><path d="M25 8h10v6H25z"/><path d="M22 14v-4M38 14v-4"/>'),
   other: P('<path d="M14 12h32v66H14z"/><path d="M24 34q0-8 6-8t6 8q0 5-6 8v6"/><circle cx="30" cy="56" r="1.5" fill="currentColor"/>'),
   ssconical: P('<path d="M14 12h32v38l-16 16-16-16z"/><path d="M12 12h36"/><path d="M14 12q16-9 32 0"/><path d="M30 66v6M16 48l-4 32M44 48l4 32M12 70h36"/>'),
-  pressureconical: P('<path d="M22 6h16v6H22z"/><path d="M16 14q14-6 28 0v38l-14 16-14-16z"/><path d="M16 26h28M16 38h28" stroke-dasharray="4 3"/><path d="M30 68v6M20 58l-6 22M40 58l6 22M14 80h32"/>') };
+  pressureconical: P('<path d="M23 6h14v6H23z"/><path d="M20 12h20q10 4 10 16v20q0 10-20 22-20-12-20-22V28q0-12 10-16z"/><circle cx="30" cy="76" r="4"/><path d="M14 56l-6 26M46 56l6 26"/>') };
 const upTo = n => Array.from({ length: FERMENTORS_MAX - n + 1 }, (_, i) => String(n + i));      // fermentor n shows when there are n or more
 // for each fermentor: what kind first ("Might ask Type first as that can limit how cooled"), then how it is cooled (only the ways that
 // fit that kind)
