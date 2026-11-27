@@ -1864,7 +1864,9 @@ answers and changes nothing until **✔ Finish**.
   a number. The number can be from 1 - 10"; "Then Branch depending on the number entered"): this wins over the Tick Boxes of Number of
   Vessels above. It is a box for a whole number from **1 to 10** (any other answer gets one red note); Default settings has the same box.
   The questions after it branch on the number: **1**, **2**, or **3 to 10** (`VESSELS_3UP`); 3 or more works out the Brewer Level like
-  three vessels.
+  three vessels. **CHANGED 2026-11-27 later** (OakBarn Brewery: "Maybe 7 vessels could fit on the entire screen of a Tab at the 1920 x
+  1440 resolution and still be able to read the Gauges, and no room for text and other widgets, so maybe limit Hot Side to 6 and
+  Fermentors to 6"): the box takes **1 to 6**, and 3 or more is 3 to 6. Fermentors are 1 to 6 too when that question comes.
 - **CHANGED 2026-11-27, Tick Boxes after Brewery** (OakBarn Brewery: "Rebuild all the Interview Dialogs in Order After the Brewery
   interview using check boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to
   up to 4 Lines for a check Box if needed"): a row with `tick` is Tick Boxes when it is Yes/No or has **fewer than 6** choices
@@ -1907,6 +1909,19 @@ answers and changes nothing until **✔ Finish**.
   (its `when`), held ones too, is kept together in `brewDefaults.breweryBuild` with the Brewer Level they give (`breweryBuildOf`).
   The Setup Interview and Default settings both make it from the saved answers, so they always agree. The end of the interview
   reads it to offer matching Templates or to build a Schema (not built yet).
+- **CHANGED 2026-11-27, Two vessels** (OakBarn Brewery: "start the two Vessel, First Vessel with How Heated. No Boil only for a 1
+  vessel system"; "and ask what the vessel is used for. BK, HLT, BK & HLT, MLT in the 2 vessel"; "And ask Tangential, Steam Slayer or
+  Sparge Arm, and Sight Glass so we can give the proper choice of vessels starting with 2 vessels"; "If you do in Tick Box format they
+  can pick more than 1 and ask where on vessel"): with 2 Hot Side Vessels, the same questions for Vessel 1, then Vessel 2
+  (`vesselRows`, kept for 3 or more): How heated (the 6 Tick Boxes without No Boil Brewer, and No Heat for a cooler Mash Tun: "Yes, Maybe a No Heat Tick Box"), Used for (BK, HLT, BK and HLT, MLT), the
+  parts (Tick Boxes that may tick more than one, each with where it is: his Vessel Layout picture, the same 10 places on the Front
+  and the Back in a Drop Down, and "Sight Glass left or Right only" as two boxes; 📐 Vessel Layout pops up a sample vessel with
+  every place, the ticked ones filled in: "Create a Vessel Sample for Layout that a User can Pop Up"), then the vessel (up to 6 Skynet Templates that fit the use, the heat and the parts, best match first; more under Other
+  Skynet Template), then its Size. **Narrowed** (OakBarn Brewery: "narrow the Vessel selections based on the answers to the new
+  questions"): only the vessels with every part ticked; when none has them all, the closest, and the note says so. **More parts**
+  ("Add Bottom Drain with skirt to questions"; "and Temperature Probe"): Bottom Drain with Skirt (always under the center, nothing
+  to pick) and Temperature Probe (Front or Back place). Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
+  with what its heat `adds`).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
@@ -7652,6 +7667,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-27: Rule 2.75 changed: Size of your Vessel (Inside Diameter and Height, Purported Volume, Dead Space, top of the element with the Safe Element Volume worked out plus 1 in) after the vessel for every way to heat one vessel. Help 248.
+- 2026-11-27: Rule 2.75 changed: Two vessels: Vessel 1 and Vessel 2 each asks how heated, used for, its parts and where they are, the vessel, its size. Help 248.
 - 2026-11-27: Rule 2.75 changed: every way to heat one vessel has its own vessel choices (Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal Electric Element); burner + igniter or element + probe kept in the Brewery Build as adds. Help 248.
 - 2026-11-27: Rule 2.75 changed: one vessel on an Electric Stove Top picks its vessel (Electric Stove Top Brewer, two kettle-on-a-stove Templates). Help 248.
 - 2026-11-27: Rule 2.75 changed: the Brewery answers are kept together as the Brewery Build (brewDefaults.breweryBuild), for the end of the interview to offer Templates or build one. Help 248.
@@ -7663,6 +7679,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-27: Rule 2.6 changed: up to 8 Tick Boxes on one line (more is a dropdown); the Setup Interview dialog is wider (900 px). Help 248.
 - 2026-11-27: Rule 2.75 changed: new Brewer Types BIAB (Brew in a Bag) and All In One Brewer (Level 4); question 2 has six Tick Boxes. Help 248, 155, 100.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.
+- 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is 1 to 6 (a Tab fits about 7 vessels with readable Gauges); Fermentors 1 to 6 when asked. Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
 - 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
 - 2026-11-27: Rule 2.75 changed: question 2 Brewer Type is four Tick Boxes on one screen; the "Do you grind your own grain?" follow-up is gone. Help 248.

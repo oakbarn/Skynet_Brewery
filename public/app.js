@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { breweryBuildOf, headOf, addsNote, sizeFieldsOf, sizeUnit, sizeVolume, sizeSafe, sizeIn, sizeClean, VESSEL_SIZE_FIELDS, ONE_VESSEL_PICKS, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { PART_SPOT, partsWords, partsClean, spotsOf, LAYOUT_SIDES, vesselLayoutSvg, VESSEL_PARTS, VESSEL_SPOTS, VESSEL_USES, MULTI_HEATS, VESSEL_POOL, breweryBuildOf, headOf, addsNote, sizeFieldsOf, sizeUnit, sizeVolume, sizeSafe, sizeIn, sizeClean, VESSEL_SIZE_FIELDS, ONE_VESSEL_PICKS, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16341,6 +16341,17 @@ function rqSummary(q, a, ctx, metric) {
 // saved, with one blue pop-up when some are not green yet.
 // the red and blue pop-ups of the Setup Interview's Close: on top of the interview; resolves with the value of the button pressed
 // (✕ and Esc: false)
+// the Vessel Layout sample (Rule 2.75, 2026-11-27: "Create a Vessel Sample for Layout that a User can Pop Up"): where each place is,
+// with the parts ticked so far filled in
+function vesselLayoutPop(parts) {
+  const p = h('dialog', { class: 'miniDlg vesselLayout', 'data-nomenu': '' }), end = () => { p.close(); p.remove(); };
+  const pic = h('div', { class: 'vesselLayoutPic' }); pic.innerHTML = vesselLayoutSvg(parts);
+  p.append(h('div', { class: 'bar' }, h('b', {}, 'Vessel Layout'), h('span', { class: 'spacer' }), h('span', { class: 'dlgBtnGroup' },
+      h('button', { type: 'button', class: 'primary', onclick: end }, 'Close'), h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: end }, '✕'))),
+    h('p', { class: 'muted' }, 'Where each place is on a vessel, as you look at it. The Front and the Back have the same places; a Sight Glass is on the Right or the Left only. The parts you ticked are filled in.'), pic);
+  p.addEventListener('cancel', ev => { ev.preventDefault(); end(); });
+  p._btnOrder = true; document.body.append(p); p.showModal();
+}
 function setupPop(color, text, buttons) {
   return new Promise(res => {
     const p = h('dialog', { class: 'miniDlg setupPop ' + color, 'data-nomenu': '' }), end = v => { p.close(); p.remove(); res(v); };
@@ -16513,10 +16524,28 @@ async function setupInterview({ first = false } = {}) {
             if (k !== undefined) pickIt(k);
           });
           body.append(h('p', { class: 'setupProceed' }, ' ', !on ? noNext() : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')),
-            h('p', { class: 'setupGroup' }, h('b', {}, q.group)), h('p', { class: 'muted' }, q.groupNote),
+            h('p', { class: 'setupGroup' }, h('b', {}, q.group)), h('p', { class: 'muted' }, typeof q.groupNote === 'function' ? q.groupNote(a) : q.groupNote),
             h('div', { class: 'setupVessels' }, ...mine.map(card), ...others.map(card)),
-            addsNote(a) ? h('p', { class: 'setupAdds' }, addsNote(a)) : '',
+            addsNote(a, q.heat) ? h('p', { class: 'setupAdds' }, addsNote(a, q.heat)) : '',
             h('p', { class: 'setupOther' }, h('b', {}, q.other), ' ', h('button', { type: 'button', onclick: other }, q.otherBtn)));
+        } else if (q.kind === 'multi') {
+          // Tick Boxes that may tick more than one (2026-11-27: "If you do in Tick Box format they can pick more than 1 and ask where on
+          // vessel"): each ticked one gets a Drop Down of where it is on the vessel (13 places: a Drop Down, Rule 2.6). None ticked is
+          // an answer too, so Next ▶ always works
+          const v = a[q.id] = { ...(a[q.id] || {}) };
+          body.append(h('div', { class: 'setupTicks setupMulti' }, ...q.choices.map(([k, t]) => h('div', { class: 'setupTick' },
+            h('label', { class: 'setupMultiTick' }, h('span', {}, t), h('input', { type: 'checkbox', ...(v[k] ? { checked: true } : {}), onchange: e => {
+              if (e.target.checked) v[k] = PART_SPOT[k] || spotsOf(k)[0][0]; else delete v[k];
+              draw(); } })),
+            // the Sight Glass: Left or Right only, two boxes (Rule 2.6); the rest: Front or Back, 20 places, a Drop Down
+            !v[k] || spotsOf(k).length < 2 ? '' : k === 'sight' ? h('div', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Which side?'),
+              h('span', { class: 'setupWhereBtns' }, ...spotsOf(k).map(([s, w]) => h('button', { type: 'button', class: 'setupPick' + (v[k] === s ? ' cur' : ''), onclick: () => { v[k] = s; draw(); } }, w))))
+            : h('label', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Where on the vessel?'),
+              h('select', { title: 'Where it is on the vessel', onchange: e => { v[k] = e.target.value; draw(); } }, ...LAYOUT_SIDES.map(([sd, sw]) => h('optgroup', { label: sw },
+                ...VESSEL_SPOTS.filter(([s]) => s.startsWith(sd)).map(([s, w]) => h('option', { value: s, ...(v[k] === s ? { selected: true } : {}) }, w))))))))),
+            h('p', { class: 'muted' }, `Ticked: ${partsWords(v)}.`),
+            h('p', {}, h('button', { type: 'button', title: 'Show the places on a sample vessel: Front, Back and Sight Glass', onclick: () => vesselLayoutPop(v) }, '📐 Vessel Layout')),
+            h('p', { class: 'setupProceed' }, h('b', {}, SETUP_WELCOME.proceed), ' ', h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')));
         } else if (q.kind === 'branch') {
           // the branch's first page: what it asks
           const its = qs.filter(x => x.step === q.step && x.kind !== 'branch');
@@ -16535,10 +16564,10 @@ async function setupInterview({ first = false } = {}) {
           // the size of the vessel: a box for each, its unit beside it, and the Volume Skynet works out from Diameter and Height
           const units = a.units === 'Metric' ? 'Metric' : 'US', v = a[q.id] = a[q.id]?.units ? sizeIn(a[q.id], units) : { ...(a[q.id] || {}), units };      // Units changed: the numbers follow
           const calc = h('p', { class: 'setupCalc' }), showCalc = () => { const c = sizeVolume(v, units);
-            const sf = sizeFieldsOf(a).some(([k]) => k === 'elementDepth') && sizeSafe(v, units);
+            const sf = sizeFieldsOf(a, q.heat).some(([k]) => k === 'elementDepth') && sizeSafe(v, units);
             calc.textContent = (c ? `Volume worked out from Diameter and Height: ≈ ${c} ${sizeUnit('vol', units)}` : 'Type the Inside Diameter and Inside Height: Skynet works out the Volume.')
               + (sf ? `. Safe Element Volume (covers the element, plus 1 in): ≈ ${sf} ${sizeUnit('vol', units)}` : ''); };
-          const rows = sizeFieldsOf(a).map(([k, w, kind], i) => h('label', { class: 'setupSizeRow' }, h('span', {}, w),
+          const rows = sizeFieldsOf(a, q.heat).map(([k, w, kind], i) => h('label', { class: 'setupSizeRow' }, h('span', {}, w),
             h('span', { class: 'setupSizeBox' }, h('input', { type: 'number', min: 0, step: 'any', value: v[k] ?? '', oninput: e => { v[k] = e.target.value; showCalc(); },
               onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); next(); } }, ...(i === 0 ? { 'data-first': '' } : {}) }),
             h('span', { class: 'muted' }, sizeUnit(kind, units)))));
@@ -18607,10 +18636,17 @@ function renderDefaultTab(box) {
     // Brewer Level: "New Section of Brewery Vessels and with be questions not a DDLB": the same questions as the Setup Interview; the
     // Brewer Level is worked out from them (the line under them)
     ['_bv', 'Brewery Vessels', 'head'],
-    ['vesselCount', 'Number of Hot Side vessels (1 to 10)', 'num', null, false, false, { tip: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the questions under it, it works out your Brewer Level: it picks the Level a new Brewing Tab starts on in the New Schema Interview.' }],
+    ['vesselCount', 'Number of Hot Side vessels (1 to 6)', 'num', null, false, false, { tip: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the questions under it, it works out your Brewer Level: it picks the Level a new Brewing Tab starts on in the New Schema Interview.' }],
     ['vesselHeat', 'How is the vessel heated? (one vessel)', 'sel', [['', '(not set)'], ...VESSEL_HEATS], false, false, { tip: 'Only for one vessel: what heats it. The Setup Interview asks it after Number of Hot Side vessels 1.' }],
     ['vesselTemplate', 'The vessel (one vessel)', 'sel', [['', '(not set)'], ...[...new Map(Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices)).entries()].map(([k, w]) => [k, `${w} (${k})`]), ...(S.config.brewDefaults?.vesselTemplate && !Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).some(([k]) => k === S.config.brewDefaults.vesselTemplate) ? [[S.config.brewDefaults.vesselTemplate, S.config.brewDefaults.vesselTemplate]] : [])], false, false, { tip: 'Only for one vessel: the Skynet Vessel Template that matches your vessel. The Setup Interview asks it after How is the vessel heated?' }],
     ...VESSEL_SIZE_FIELDS.map(([k, w, kind]) => ['_vs_' + k, `${w} (${sizeUnit(kind, shownUnits)})`, 'num', null, false, false, { tip: 'Only for one vessel: its inside size, as in the Setup Interview (Size of your Vessel). Diameter and Height draw it to size; Skynet works out the Volume from them.' }]),      // the Size of your Vessel (Rule 2.75), in the Units shown
+    // two vessels (Rule 2.75, 2026-11-27): the same questions as the Setup Interview, for Vessel 1 and Vessel 2, shown only for two vessels
+    ...[1, 2].flatMap(n => { const v = 'v' + n, of = `Vessel ${n} of 2`, was = S.config.brewDefaults?.[v + 'Template'];
+      return [[v + 'Heat', `${of}: how is it heated?`, 'sel', [['', '(not set)'], ...MULTI_HEATS], false, false, { tip: 'Only for two vessels: what heats this vessel.' }],
+        [v + 'Use', `${of}: used for`, 'sel', [['', '(not set)'], ...VESSEL_USES], false, false, { tip: 'Only for two vessels: what this vessel does on Brew Day.' }],
+        ...VESSEL_PARTS.map(([k, t]) => [`_vp${n}_${k}`, `${of}: ${t}`, 'sel', [['', '(none)'], ...spotsOf(k)], false, false, { tip: 'Only for two vessels: where this part is on the vessel, or none.' }]),
+        [v + 'Template', `${of}: the vessel`, 'sel', [['', '(not set)'], ...VESSEL_POOL.map(([k, w]) => [k, `${w} (${k})`]), ...(was && !VESSEL_POOL.some(([k]) => k === was) ? [[was, was]] : [])], false, false, { tip: 'Only for two vessels: the Skynet Vessel Template that matches this vessel.' }],
+        ...VESSEL_SIZE_FIELDS.map(([k, w, kind]) => [`_v${n}s_${k}`, `${of}: ${w} (${sizeUnit(kind, shownUnits)})`, 'num', null, false, false, { tip: 'Only for two vessels: its inside size, as in the Setup Interview. Diameter and Height draw it to size; Skynet works out the Volume from them.' }])]; }),
     ['allInOne', 'An All In One?', 'bool', null, false, false, { tip: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).' }],
     ['kettleOutlet', 'Kettle has an outlet (a ball valve low on the side)', 'bool', null, false, false, { tip: 'Off: you pour or siphon.' }],
     ['kettlePump', 'A pump (whirlpool, transfer or chiller)', 'bool', null, false, false, { tip: 'A pump with your stove top kettle.' }],
@@ -18667,6 +18703,11 @@ function renderDefaultTab(box) {
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   { const z = sizeIn(d.vesselSize, d.units === 'Metric' ? 'Metric' : 'US'); for (const [k] of VESSEL_SIZE_FIELDS) d['_vs_' + k] = z[k] ?? ''; }      // the vessel size, shown in the Units
+  for (const n of [1, 2]) {      // two vessels: the parts and the sizes in their own boxes
+    const p = partsClean(d[`v${n}Parts`]), z = sizeIn(d[`v${n}Size`], d.units === 'Metric' ? 'Metric' : 'US');
+    for (const [k] of VESSEL_PARTS) d[`_vp${n}_${k}`] = p[k] ?? '';
+    for (const [k] of VESSEL_SIZE_FIELDS) d[`_v${n}s_${k}`] = z[k] ?? '';
+  }
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
   d._grainLabel = grainWtLabel(d.units);
   // the boil temperature place (☰ Menu > Default settings > Boil temperature): kept in metres and hPa, shown per Units (Rule 2.59)
@@ -18686,11 +18727,15 @@ function renderDefaultTab(box) {
   // their saved values.
   const defBranch = () => {
     const el = k => f.box.querySelector(`[data-k="${k}"]`), val = k => { const e = el(k); return !e ? undefined : e.type === 'checkbox' ? e.checked : e.value; };
-    const a = Object.fromEntries([...VESSEL_KEYS, 'vesselHeat', 'pipedManifold'].map(k => [k, val(k)]));
+    const a = Object.fromEntries([...VESSEL_KEYS, 'vesselHeat', 'v1Heat', 'v2Heat', 'pipedManifold'].map(k => [k, val(k)]));
     const rowOf = e => { while (e?.parentElement && !e.parentElement.matches('.menuForm, .dlgBox')) e = e.parentElement; return e; };
-    for (const k of [...VESSEL_KEYS, 'vesselHeat', 'vesselTemplate', ...VESSEL_SIZE_FIELDS.map(([x]) => '_vs_' + x)]) {
-      const q = SETUP_QUESTIONS.find(x => x.id === (k.startsWith('_vs_') ? 'vesselSize' : k)), row = rowOf(el(k)),
-        on = (!q || whenOk(q, a)) && (!k.startsWith('_vs_') || sizeFieldsOf(a).some(([x]) => '_vs_' + x === k));      // the size rows: the same as Size of your Vessel
+    // [box, its question, the size field it is (the size rows: the same as Size of your Vessel)]
+    const boxes = [...VESSEL_KEYS, 'vesselHeat', 'vesselTemplate'].map(k => [k, k]).concat(VESSEL_SIZE_FIELDS.map(([x]) => ['_vs_' + x, 'vesselSize', x]),
+      ...[1, 2].map(n => [[`v${n}Heat`, `v${n}Heat`], [`v${n}Use`, `v${n}Use`], ...VESSEL_PARTS.map(([x]) => [`_vp${n}_${x}`, `v${n}Parts`]), [`v${n}Template`, `v${n}Template`],
+        ...VESSEL_SIZE_FIELDS.map(([x]) => [`_v${n}s_${x}`, `v${n}Size`, x])]));
+    for (const [k, id, sz] of boxes) {
+      const q = SETUP_QUESTIONS.find(x => x.id === id), row = rowOf(el(k)),
+        on = (!q || whenOk(q, a)) && (!sz || sizeFieldsOf(a, q?.heat).some(([x]) => x === sz));
       if (row) { row.classList.toggle('hidden', !on); row.previousElementSibling?.classList.toggle('hidden', !on); }
     }
     const lv = brewerLevelOf(a), note = f.box.querySelector('[data-note="_blv"]');
@@ -18715,7 +18760,6 @@ function renderDefaultTab(box) {
   const save = guard(async () => {
     f.read();
     { const lv = brewerLevelOf(d); if (lv) d.brewerLevel = lv; }      // the Brewer Level from the Brewery Vessels questions
-    d.breweryBuild = breweryBuildOf(d);      // the Brewery Build: the Brewery answers kept together (Rule 2.75)
     // the Panel settings boxes are here too (2026-11-21, Rule 2.42): empty = Skynet's own, as in ☰ Menu > Default settings
     for (const k of PANEL_SET_KEYS) if (d[k] === undefined || d[k] === '' || d[k] === null) delete d[k];
     if (typeof d.breweryName === 'string') d.breweryName = d.breweryName.trim();
@@ -18734,6 +18778,13 @@ function renderDefaultTab(box) {
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
     for (const [k] of HOP_STANDS) { delete d[`hs${k}TempC`]; delete d[`hs${k}Min`]; }      // no Hop Stand defaults (2026-11-19, Rule 17.14)
     { const z = sizeClean(Object.fromEntries(VESSEL_SIZE_FIELDS.map(([k]) => [k, d['_vs_' + k]])), shownUnits); if (z) d.vesselSize = z; else delete d.vesselSize; for (const [k] of VESSEL_SIZE_FIELDS) delete d['_vs_' + k]; }
+    for (const n of [1, 2]) {      // two vessels: the parts and the sizes back together
+      d[`v${n}Parts`] = partsClean(Object.fromEntries(VESSEL_PARTS.map(([k]) => [k, d[`_vp${n}_${k}`]]))); for (const [k] of VESSEL_PARTS) delete d[`_vp${n}_${k}`];
+      const z = sizeClean(Object.fromEntries(VESSEL_SIZE_FIELDS.map(([k]) => [k, d[`_v${n}s_${k}`]])), shownUnits); if (z) d[`v${n}Size`] = z; else delete d[`v${n}Size`];
+      for (const [k] of VESSEL_SIZE_FIELDS) delete d[`_v${n}s_${k}`];
+      for (const k of ['Heat', 'Use', 'Template']) if (d[`v${n}${k}`] === '') delete d[`v${n}${k}`];
+    }
+    d.breweryBuild = breweryBuildOf(d);      // the Brewery Build: the Brewery answers kept together (Rule 2.75), with the sizes as saved
     if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(shownUnits)) * 1000) / 1000;
     delete d._w2g; delete d._batch; delete d._tabPipe; delete d._tabHose; delete d._grainLabel; delete d.grainLabel;
     for (const k of ['batchSize', 'equipmentProfile', 'efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime']) delete d[k];      // not on this Tab any more (Default Tab 3)

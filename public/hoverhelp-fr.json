@@ -1922,5 +1922,12 @@
  "Only for one vessel: the Skynet Vessel Template that matches your vessel. The Setup Interview asks it after How is the vessel heated?": "Seulement pour une cuve : le Skynet Vessel Template qui ressemble à votre cuve. Le Setup Interview le demande après How is the vessel heated?",
  "One vessel.": "Une cuve.",
  "Only for one vessel: its inside size, as in the Setup Interview (Size of your Vessel). Diameter and Height draw it to size; Skynet works out the Volume from them.": "Seulement pour une cuve : sa taille intérieure, comme dans le Setup Interview (Size of your Vessel). Le diamètre et la hauteur la dessinent à la bonne taille ; Skynet en calcule le volume.",
- "If known: what stays in it.": "Si vous le savez : ce qui reste dedans."
+ "If known: what stays in it.": "Si vous le savez : ce qui reste dedans.",
+ "Where it is on the vessel": "Où elle se trouve sur la cuve",
+ "Only for two vessels: what heats this vessel.": "Seulement pour deux cuves : ce qui chauffe cette cuve.",
+ "Only for two vessels: what this vessel does on Brew Day.": "Seulement pour deux cuves : ce que fait cette cuve le jour du brassage.",
+ "Only for two vessels: where this part is on the vessel, or none.": "Seulement pour deux cuves : où cette pièce se trouve sur la cuve, ou aucune.",
+ "Only for two vessels: the Skynet Vessel Template that matches this vessel.": "Seulement pour deux cuves : le Skynet Vessel Template qui correspond à cette cuve.",
+ "Only for two vessels: its inside size, as in the Setup Interview. Diameter and Height draw it to size; Skynet works out the Volume from them.": "Seulement pour deux cuves : sa taille intérieure, comme dans le Setup Interview. Le diamètre et la hauteur la dessinent à la bonne taille ; Skynet en calcule le volume.",
+ "Show the places on a sample vessel: Front, Back and Sight Glass": "Montrer les emplacements sur une cuve exemple : avant, arrière et Sight Glass"
 }

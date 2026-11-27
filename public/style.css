@@ -1936,6 +1936,11 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupTick { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 700; text-align: center; flex: 1 1 0; max-width: 9em; min-width: 0; cursor: pointer; }
 .setupDlg .setupTick .setupTickTip { font-weight: 400; font-size: .85em; }
 .setupDlg .setupTick input { width: 1.6em; height: 1.6em; min-width: 0; accent-color: var(--ok); cursor: pointer; }
+.setupDlg .setupMulti { align-items: flex-start; }
+.setupDlg .setupMulti .setupTick { max-width: 12em; cursor: default; justify-content: flex-start; }
+.setupDlg .setupMultiTick, .setupDlg .setupWhere { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+.setupDlg .setupWhere { font-weight: 400; margin-top: 6px; }
+.setupDlg .setupWhere select { min-width: 10em; }
 .setupDlg .setupTickBox { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border: 2px solid var(--muted); border-radius: 5px; color: var(--ok); font-weight: 900; }
 .setupDlg .setupClick { height: 2.6em; }
 /* Single Vessel Brewer: his vessels, their pictures with his words under them */
@@ -2010,3 +2015,9 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupCalc { font-weight: 600; margin: 6px 0 10px 8px; }
 .setupDlg .setupSizeBox { display: flex; align-items: center; gap: 8px; }
 .setupDlg .setupSizeBox input { width: 8em; }
+/* the Vessel Layout sample (Rule 2.75) */
+.vesselLayout { width: min(1100px, 96vw); }
+.vesselLayout .vesselLayoutPic { color: var(--text); }
+.setupDlg .setupWhereBtns { display: flex; gap: 8px; }
+.setupDlg .setupWhereBtns .setupPick { padding: 4px 14px; min-width: 0; }
+.setupDlg .setupMultiTick > span:first-child { min-height: 2.5em; display: flex; align-items: flex-end; justify-content: center; }

@@ -47,7 +47,9 @@ export const PUMP_COUNTS = [['1', 'One pump (or none)'], ['2', 'Two pumps']];
 // Number of Hot Side vessels (OakBarn Brewery, 2026-11-27: "Number of Hot Side vessels needs to be a Box and you can enter a number.
 // The number can be from 1 - 10"; "Then Branch depending on the number entered"): a whole number 1 to 10 (null: not a good one).
 // The branches: 1, 2, and 3 or more (VESSELS_3UP)
-export const VESSELS_MIN = 1, VESSELS_MAX = 10;
+// (2026-11-27 later: "Maybe 7 vessels could fit on the entire screen of a Tab at the 1920 x 1440 resolution and still be able to read
+// the Gauges, and no room for text and other widgets, so maybe limit Hot Side to 6 and Fermentors to 6"): 1 to 6
+export const VESSELS_MIN = 1, VESSELS_MAX = 6;
 export const vesselCountOf = v => { const n = Number(String(v ?? '').trim()); return String(v ?? '').trim() !== '' && Number.isInteger(n) && n >= VESSELS_MIN && n <= VESSELS_MAX ? n : null; };
 export const VESSELS_3UP = Array.from({ length: VESSELS_MAX - 2 }, (_, i) => String(i + 3));
 // how one vessel is heated (OakBarn Brewery, 2026-11-27): the Tick Boxes of the one vessel branch, and the list on Default settings
@@ -99,7 +101,7 @@ export const VESSEL_SIZE_FIELDS = [['diameter', 'Inside Diameter', 'len'], ['vhe
 // "and add 1 in to give a buffer"): Skynet works out the Safe Element Volume (safeVolume, Rule 19.2) from the height of liquid that
 // covers the element, plus 1 inch (2.54 cm)
 export const ELEMENT_BUFFER_IN = 1;
-export const sizeFieldsOf = a => VESSEL_SIZE_FIELDS.filter(f => !f[3] || f[3].includes(a?.vesselHeat));
+export const sizeFieldsOf = (a, heatKey = 'vesselHeat') => VESSEL_SIZE_FIELDS.filter(f => !f[3] || f[3].includes(a?.[heatKey]));
 export const sizeUnit = (kind, units) => kind === 'len' ? (units === 'Metric' ? 'cm' : 'in') : (units === 'Metric' ? 'L' : 'gal');
 // the Volume worked out from Diameter and Height, in gallons or liters (0 when either is missing)
 export function sizeVolume(v, units) {
@@ -126,8 +128,127 @@ export function sizeIn(v, units) {
   return out;
 }
 // the words under the vessel pictures for what the build adds ('' when it adds nothing)
-export const addsNote = a => { const ad = ONE_VESSEL_PICKS[a?.vesselHeat]?.adds; return ad?.length ? `Your build also gets: ${ad.map(k => BUILD_ADDS[k]).join(' and ')}.` : ''; };
+export const addsNote = (a, heatKey = 'vesselHeat') => { const ad = ONE_VESSEL_PICKS[a?.[heatKey]]?.adds; return ad?.length ? `Your build also gets: ${ad.map(k => BUILD_ADDS[k]).join(' and ')}.` : ''; };
 const onePick = a => ONE_VESSEL_PICKS[a?.vesselHeat] || ONE_VESSEL_PICKS.noboil;
+
+// ---- Two vessels (OakBarn Brewery, 2026-11-27: "start the two Vessel, First Vessel with How Heated. No Boil only for a 1 vessel
+// system"; "and ask what the vessel is used for. BK, HLT, BK & HLT, MLT in the 2 vessel"; "And ask Tangential, Steam Slayer or Sparge
+// Arm, and Sight Glass so we can give the proper choice of vessels starting with 2 vessels"; "If you do in Tick Box format they can pick
+// more than 1 and ask where on vessel"). The same questions for each vessel, one after the other (vesselRows), so 3 or more can use
+// them later.
+// (2026-11-27: a two vessel Mash Tun is often a cooler: "Yes, Maybe a No Heat Tick Box")
+export const MULTI_HEATS = [...VESSEL_HEATS.filter(([k]) => k !== 'noboil'), ['noheat', 'No Heat']];
+export const VESSEL_USES = [['bk', 'Boil Kettle (BK)'], ['hlt', 'Hot Liquor Tank (HLT)'], ['bkhlt', 'BK and HLT'], ['mlt', 'Mash Tun (MLT)']];
+// the parts asked about, each with where it is on the vessel
+// (2026-11-27 later: "Add Bottom Drain with skirt to questions"; "and Temperature Probe")
+export const VESSEL_PARTS = [['tangential', 'Tangential Inlet'], ['steamSlayer', 'Steam Slayer'], ['sparge', 'Sparge Arm'], ['sight', 'Sight Glass'],
+  ['skirt', 'Bottom Drain with Skirt'], ['probe', 'Temperature Probe']];
+// where on the vessel (OakBarn Brewery, 2026-11-27, his Vessel Layout picture): the same 10 places on the Front and on the Back;
+// "Sight Glass left or Right only". [key, words, x, y] with x and y from 0 to 1 across and down the vessel, as on his picture (the
+// left of the drawing is Right, as he drew it)
+export const LAYOUT_PLACES = [['hr', 'High Right', 0.06, 0.07], ['hl', 'High Left', 0.94, 0.07], ['mr', 'Middle Right', 0.06, 0.5],
+  ['ml', 'Middle Left', 0.94, 0.5], ['mlr', 'Mid Low Right', 0.22, 0.72], ['mlc', 'Mid Low Center', 0.5, 0.79], ['mll', 'Mid Low Left', 0.8, 0.72],
+  ['lr', 'Low Right', 0.06, 0.95], ['lc', 'Low Center', 0.5, 0.95], ['ll', 'Low Left', 0.94, 0.95]];
+export const LAYOUT_SIDES = [['f', 'Front'], ['b', 'Back']];
+export const VESSEL_SPOTS = LAYOUT_SIDES.flatMap(([s, sw]) => LAYOUT_PLACES.map(([k, w]) => [s + k, `${sw} ${w}`]));
+export const SIGHT_SPOTS = [['right', 'Right'], ['left', 'Left']];
+// a Bottom Drain with Skirt is always under the vessel, in the center: nothing to pick
+export const SKIRT_SPOTS = [['bottom', 'Bottom Center']];
+export const spotsOf = part => part === 'sight' ? SIGHT_SPOTS : part === 'skirt' ? SKIRT_SPOTS : VESSEL_SPOTS;
+// where a part starts when it is ticked
+export const PART_SPOT = { tangential: 'fll', steamSlayer: 'fhr', sparge: 'fhl', sight: 'right', skirt: 'bottom', probe: 'fmlc' };
+export const partsClean = v => { const o = {}; for (const [k] of VESSEL_PARTS) if (v?.[k] && spotsOf(k).some(([s]) => s === v[k])) o[k] = v[k]; return o; };
+export const partsWords = v => { const o = partsClean(v), w = VESSEL_PARTS.filter(([k]) => o[k]).map(([k, t]) => `${t} (${spotsOf(k).find(([s]) => s === o[k])[1]})`); return w.length ? w.join(', ') : 'None of these'; };
+// the Vessel Layout sample (OakBarn Brewery, 2026-11-27: "Create a Vessel Sample for Layout that a User can Pop Up"): his picture drawn
+// by Skynet, the Front, the Back and the Sight Glass; the places of the parts ticked are filled in. An SVG string, colors from the page
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+export function vesselLayoutSvg(parts = {}) {
+  const on = partsClean(parts), used = new Map(VESSEL_PARTS.filter(([k]) => on[k]).map(([k, t]) => [on[k], t]));
+  const W = 220, Hh = 300, M = 120, PW = W + 2 * M, top = 50, out = [];
+  const panel = (i, title, color, spots) => {
+    const x0 = i * PW + M;
+    out.push(`<text x="${x0 + W / 2}" y="${top - 18}" text-anchor="middle" font-weight="700" font-size="16" fill="currentColor">${esc(title)}</text>`,
+      `<rect x="${x0}" y="${top}" width="${W}" height="${Hh}" fill="none" stroke="currentColor" stroke-width="3"/>`);
+    for (const [key, w, x, y, la] of spots) {
+      const cx = x0 + x * W, cy = top + y * Hh, part = used.get(key);
+      out.push(`<circle cx="${cx}" cy="${cy}" r="8" stroke="${color}" stroke-width="3" fill="${part ? color : 'none'}"><title>${esc(part ? `${part}: ${w}` : w)}</title></circle>`);
+      const [tx, ty, an] = la === 'none' ? [] : x < 0.15 ? [x0 - 12, cy + 4, 'end'] : x > 0.85 ? [x0 + W + 12, cy + 4, 'start'] : w.includes('Mid Low Center') ? [cx, cy + 24, 'middle'] : y > 0.9 ? [cx, top + Hh + 18, 'middle'] : [cx, cy - 14, 'middle'];
+      if (tx !== undefined) out.push(`<text x="${tx}" y="${ty}" text-anchor="${an}" font-size="12" fill="currentColor"${part ? ' font-weight="700"' : ''}>${esc(part ? `${w}: ${part}` : w)}</text>`);
+    }
+  };
+  LAYOUT_SIDES.forEach(([s, sw], i) => panel(i, sw, i ? '#a050c8' : '#e03c3c', LAYOUT_PLACES.map(([k, w, x, y]) => [s + k, w, x, y])));
+  // the Sight Glass: a tube from high to low, on the Right or the Left only
+  const x2 = 2 * PW + M;
+  for (const [k, w] of SIGHT_SPOTS) { const x = x2 + (k === 'right' ? 0.2 : 0.8) * W; out.push(`<line x1="${x}" y1="${top + 0.12 * Hh}" x2="${x}" y2="${top + 0.85 * Hh}" stroke="${on.sight === k ? '#e03c3c' : 'currentColor'}" stroke-opacity="${on.sight === k ? 1 : 0.35}" stroke-width="4"/>`); }
+  panel(2, 'Sight Glass: Left or Right only', '#e03c3c', SIGHT_SPOTS.flatMap(([k, w]) => [[k, w, k === 'right' ? 0.2 : 0.8, 0.12, 'none'], [k, w, k === 'right' ? 0.2 : 0.8, 0.85, 'none']]));
+  for (const [k, w] of SIGHT_SPOTS) out.push(`<text x="${x2 + (k === 'right' ? 0.2 : 0.8) * W}" y="${top + 0.5 * Hh}" text-anchor="middle" font-size="12" fill="currentColor"${on.sight === k ? ' font-weight="700"' : ''}>${esc(w)}</text>`);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${3 * PW} ${top + Hh + 30}" width="100%" role="img" aria-label="Vessel Layout">${out.join('')}</svg>`;
+}
+// the Skynet Vessel Templates a vessel of 2 or more is picked from: [Template, plain words, used for, parts it has, heat]
+// heat: 'element' (an Element Port), 'estove' or 'gstove' (on a stove), '' (heated from under it: a burner, a hot plate ...)
+const K = ['bk', 'bkhlt'], H = ['hlt', 'bkhlt'];
+export const VESSEL_POOL = [
+  ['Kettle_Basic', 'Basic Kettle', K, ['tangential', 'probe'], ''], ['Kettle_Tall', 'Tall Kettle', K, ['tangential', 'probe'], ''],
+  ['Kettle_Big_Fatty', 'Wide Kettle', K, ['tangential', 'probe'], ''], ['Kettle_Bottom_Drain', 'Kettle with Bottom Drain', K, ['probe'], ''],
+  ['Kettle_Bottom_Drain_2', 'Kettle with Bottom Drain and Tangential Inlet', K, ['tangential', 'probe'], ''],
+  ['Kettle_Tangential_Steam_Slayer', 'Kettle with Steam Slayer', K, ['tangential', 'steamSlayer', 'probe'], ''],
+  ['OakBarn_Stout_Kettle', 'Kettle with Sight Glass and Skirt Drain', K, ['tangential', 'sight', 'skirt', 'probe'], ''],
+  ['Kettle_5_Gal_Electric_Stove_Low_Drain', 'Kettle with a Ball Valve on an Electric Stove', K, [], 'estove'],
+  ['Kettle_5_Gal_Gas_Stove_Low_Drain', 'Kettle with a Ball Valve on a Gas Stove', K, [], 'gstove'],
+  ['Kettle_Basic_Electric', 'Basic Electric Kettle', K, ['tangential', 'probe'], 'element'], ['Kettle_Tall_Electric', 'Tall Electric Kettle', K, ['tangential', 'probe'], 'element'],
+  ['Kettle_Big_Fatty_Electric', 'Wide Electric Kettle', K, ['tangential', 'probe'], 'element'],
+  ['Kettle_Bottom_Drain_Electric', 'Electric Kettle with Bottom Drain', K, ['probe'], 'element'],
+  ['Kettle_Bottom_Drain_2_Electric', 'Electric Kettle with Bottom Drain and Tangential Inlet', K, ['tangential', 'probe'], 'element'],
+  ['Kettle_Tangential_Steam_Slayer_Electric', 'Electric Kettle with Steam Slayer', K, ['tangential', 'steamSlayer', 'probe'], 'element'],
+  ['Integrated_Electric_Kettle_Basic', 'Electric Kettle, Probe and Element Built In', K, ['probe'], 'element'],
+  ['HLT', 'Hot Liquor Tank with Sparge', H, ['tangential', 'sparge', 'probe'], 'element'],
+  ['OakBarn_Big_MAC_HLT', 'Hot Liquor Tank with Sight Glass', H, ['tangential', 'sight', 'probe'], 'element'],
+  ['OakBarn_HLT_Radiator', 'Hot Liquor Tank, Element at the Back', H, ['tangential', 'probe'], 'element'],
+  ['Brew_Vessel_Big_Mac_Widget', 'Big Vessel with Sparge and Tangential Inlet', ['bk', 'hlt', 'bkhlt', 'mlt'], ['tangential', 'sparge', 'probe'], 'element'],
+  ['Mash_Tun', 'Mash Tun with Sparge', ['mlt'], ['sparge', 'probe'], ''], ['OakBarn_MLT', 'Mash Tun with Sparge and Skirt Drain', ['mlt'], ['sparge', 'skirt', 'probe'], '']];
+export const POOL_MAX = 6;      // "Try to limit the choices to 6 or less in the upper selection but you can add more" (Other Skynet Template)
+// the vessels that fit what this one is used for, how it is heated and the parts ticked, the best match first (at most 6)
+export function poolPicks(use, heat, parts) {
+  const forUse = VESSEL_POOL.filter(p => !use || p[2].includes(use));
+  const fits = p => heat === 'element' ? p[4] === 'element' : heat === 'electricstove' ? p[4] === 'estove' || p[4] === ''
+    : heat === 'gasstove' ? p[4] === 'gstove' || p[4] === '' : p[4] === '';
+  let list = forUse.filter(fits); if (!list.length) list = forUse;      // none heated that way yet: every one for that use
+  const want = Object.keys(partsClean(parts));
+  // narrowed by the parts (2026-11-27: "narrow the Vessel selections based on the answers to the new questions"): only the vessels
+  // with every part ticked; when none has them all, the closest ones
+  const all = list.filter(p => want.every(k => p[3].includes(k))); if (all.length) list = all;
+  const score = p => want.filter(k => p[3].includes(k)).length * 2 - p[3].filter(k => !want.includes(k)).length * 0.5
+    + (heat === 'electricstove' && p[4] === 'estove' || heat === 'gasstove' && p[4] === 'gstove' ? 1 : 0);
+  return list.map((p, i) => [p, score(p), i]).sort((x, y) => y[1] - x[1] || x[2] - y[2]).slice(0, POOL_MAX).map(([p]) => [p[0], p[1]]);
+}
+// true when the vessels shown have every part ticked (false: none has them all, the closest are shown)
+export const poolExact = (use, heat, parts) => { const want = Object.keys(partsClean(parts)); return poolPicks(use, heat, parts).some(([k]) => want.every(x => VESSEL_POOL.find(p => p[0] === k)[3].includes(x))); };
+// the rows of vessel n of count: How heated, Used for, Parts, the vessel, its size
+export function vesselRows(n, count) {
+  const v = `v${n}`, when = { vesselCount: String(count) }, of = `Vessel ${n} of ${count}`, D = (ctx, k) => ctx.defaults?.[v + k];
+  const ok = (list, x) => list.some(([k]) => k === x) ? x : '';
+  return [
+    { id: v + 'Heat', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', ifSet: true, when, head: of,
+      ask: `How is Vessel ${n} heated?`, why: 'Tick the one that heats this vessel.', choices: MULTI_HEATS, start: ctx => ok(MULTI_HEATS, D(ctx, 'Heat')) },
+    { id: v + 'Use', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', ifSet: true, when, head: of,
+      ask: `What is Vessel ${n} used for?`, why: 'Tick what this vessel does on Brew Day.', choices: VESSEL_USES, start: ctx => ok(VESSEL_USES, D(ctx, 'Use')) },
+    { id: v + 'Parts', step: 'Brewery', kind: 'multi', save: 'defaults', when, head: of,
+      ask: `Does Vessel ${n} have any of these?`, why: 'Tick every one it has (or none), and pick where it is on the vessel. Skynet picks the vessels that match.',
+      choices: VESSEL_PARTS, start: ctx => partsClean(D(ctx, 'Parts')) },
+    { id: v + 'Template', step: 'Brewery', kind: 'vessel', save: 'defaults', ifSet: true, when, heat: v + 'Heat', head: of,
+      ask: `Choose the Vessel that matches Vessel ${n}:`, why: 'Click the picture of your vessel, then Next ▶. The best match is first.',
+      group: 'Vessel Widget', groupNote: a => poolExact(a?.[v + 'Use'], a?.[v + 'Heat'], a?.[v + 'Parts'])
+        ? `Only the Skynet Templates that fit what Vessel ${n} is used for, how it is heated and every part you ticked: ${partsWords(a?.[v + 'Parts'])}. Other Skynet Template has every one.`
+        : `No Skynet Template has every part you ticked yet (${partsWords(a?.[v + 'Parts'])}): these are the closest. Other Skynet Template has every one.`,
+      other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
+      choices: (ctx, a) => { const x = a ?? ctx?.answers; return poolPicks(x?.[v + 'Use'], x?.[v + 'Heat'], x?.[v + 'Parts']); },
+      start: ctx => D(ctx, 'Template') || '' },
+    { id: v + 'Size', step: 'Brewery', kind: 'size', save: 'defaults', when, heat: v + 'Heat', head: `Size of Vessel ${n}`,
+      ask: 'Measure the inside of this vessel:',
+      why: 'Type the inside Diameter and Height: Skynet works out the Volume and draws the vessel to size. The rest only if you know them. Skip keeps the Template\'s own size.',
+      start: (ctx, a) => sizeIn(D(ctx, 'Size'), a?.units === 'Metric' ? 'Metric' : 'US') }];
+}
+export const TWO_VESSEL_ROWS = [...vesselRows(1, 2), ...vesselRows(2, 2)];
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
@@ -283,24 +404,26 @@ export const SETUP_QUESTIONS = [
   // (2026-11-27 later: a box to type a number in, 1 to 10, and the interview branches on it)
   { id: 'vesselCount', step: 'Brewery', kind: 'num', save: 'defaults', min: VESSELS_MIN, max: VESSELS_MAX,
     head: 'Number of Hot Side Vessels',
-    ask: 'How many Hot Side vessels do you have (or are you building)? Type a number from 1 to 10.',
+    ask: 'How many Hot Side vessels do you have (or are you building)? Type a number from 1 to 6.',
     why: 'For every Brewer Type. Count the Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. The next questions depend on the number.',
     start: ctx => String(vesselStart(ctx.defaults, 'vesselCount')) },
   // one vessel: how is it heated? (OakBarn Brewery, 2026-11-27, his "1 vessel" page: "If one Vessel. Next question: How is the vessel
   // heated? 7 Tick Boxes"), his seven in his order
-  { id: 'vesselHeat', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', when: { vesselCount: '1' },
+  { id: 'vesselHeat', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', ifSet: true, when: { vesselCount: '1' },
     ask: 'How is the vessel heated?', why: 'Tick the one that heats your vessel.',
     choices: VESSEL_HEATS, start: ctx => VESSEL_HEATS.some(([k]) => k === ctx.defaults?.vesselHeat) ? ctx.defaults.vesselHeat : '' },
   // No Boil Brewer (OakBarn Brewery, 2026-11-27: "no Boil Brewer next", his picture): pick the vessel (a Skynet Vessel Template)
-  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', when: { vesselCount: '1', vesselHeat: Object.keys(ONE_VESSEL_PICKS) },
+  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', ifSet: true, heat: 'vesselHeat', when: { vesselCount: '1', vesselHeat: Object.keys(ONE_VESSEL_PICKS) },
     head: a => onePick(a).head, ask: 'Choose the Vessel that matches yours:', why: 'Click the picture of your vessel, then Next ▶.',
     group: 'Vessel Widget', groupNote: 'One Skynet Template with every IP, a Temperature Probe (Front or Thermowell) and an Element Port, each with a Place slider. Slide off what your vessel does not have.',
     other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
     choices: (ctx, a) => onePick(a ?? ctx?.answers).choices, start: ctx => ctx.defaults?.vesselTemplate || '' },
-  { id: 'vesselSize', step: 'Brewery', kind: 'size', save: 'defaults', when: { vesselCount: '1', vesselHeat: Object.keys(ONE_VESSEL_PICKS) },
+  { id: 'vesselSize', step: 'Brewery', kind: 'size', save: 'defaults', heat: 'vesselHeat', when: { vesselCount: '1', vesselHeat: Object.keys(ONE_VESSEL_PICKS) },
     head: 'Size of your Vessel', ask: 'Measure the inside of your vessel:',
     why: 'Type the inside Diameter and Height: Skynet works out the Volume and draws your vessel to size. The rest only if you know them. Skip keeps the Template\'s own size.',
     start: (ctx, a) => sizeIn(ctx.defaults?.vesselSize, a?.units === 'Metric' ? 'Metric' : 'US') },
+  // two vessels: the same questions for Vessel 1, then Vessel 2
+  ...TWO_VESSEL_ROWS,
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -439,7 +562,8 @@ export function answerWords(q, v, ctx) {
     { const sf = sizeSafe(v, u); if (sf) w.push(`element covered (plus 1 in) at ${sf} ${V}`); }
     return w.join(', ');
   }
-  if (q.kind === 'vessel') return (choicesOf(q, ctx, ctx?.answers).find(([k]) => k === v) || Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v))?.[1] ?? String(v ?? '');
+  if (q.kind === 'multi') return partsWords(v);
+  if (q.kind === 'vessel') return (choicesOf(q, ctx, ctx?.answers).find(([k]) => k === v) || Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v) || VESSEL_POOL.find(([k]) => k === v))?.[1] ?? String(v ?? '');
   if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
 }
@@ -487,6 +611,12 @@ export function breweryBuildOf(d, list = SETUP_QUESTIONS) {
   }
   const ad = String(vesselCountOf(d.vesselCount)) === '1' && ONE_VESSEL_PICKS[d.vesselHeat]?.adds;
   if (ad) b.adds = [...ad];      // the burner and igniter, or the element and probe, for the end build
+  // two vessels: each one together (how heated, used for, parts, the vessel, its size, and what its heat adds), for the end build
+  const n = vesselCountOf(d.vesselCount);
+  if (n === 2) b.vessels = [1, 2].map(i => { const v = `v${i}`, o = { n: i };
+    for (const [k, w] of [['Heat', 'heat'], ['Use', 'use'], ['Parts', 'parts'], ['Template', 'template'], ['Size', 'size']]) if (d[v + k] !== undefined && d[v + k] !== '' && d[v + k] !== null) o[w] = d[v + k];
+    const add = ONE_VESSEL_PICKS[o.heat]?.adds; if (add) o.adds = [...add];
+    return o; });
   const lv = brewerLevelOf(d); if (lv) b.brewerLevel = lv;
   return b;
 }
@@ -500,8 +630,9 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
       else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
-      else if (q.id === 'vesselHeat' || q.id === 'vesselTemplate') { if (v) brewDefaults[q.id] = v; }      // not picked: not set
-      else if (q.id === 'vesselSize') { const z = sizeClean(v, a.units); if (z) brewDefaults.vesselSize = z; else delete brewDefaults.vesselSize; }
+      else if (q.ifSet) { if (v) brewDefaults[q.id] = v; }      // not picked: not set (how heated, used for, the vessel)
+      else if (q.kind === 'size') { const z = sizeClean(v, a.units); if (z) brewDefaults[q.id] = z; else delete brewDefaults[q.id]; }
+      else if (q.kind === 'multi') brewDefaults[q.id] = partsClean(v);      // the parts ticked, each with where it is
       // kept in liters (Rule 2.59), typed in gallons or liters
       else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;
