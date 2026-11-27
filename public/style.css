@@ -1942,6 +1942,7 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 /* a step of the strip that is not available yet: the ⛔ before its name */
 .setupDlg .nsiSteps li.setupNoStep { opacity: .6; }
 .setupDlg .nsiSteps li.setupNoStep::after { content: ' ⛔'; }
+.setupDlg .setupHead2 { font-size: 1.5em; font-weight: 800; margin: 8px 0 4px; }
 /* screen 5, Hot Spots: a sample strip to try, and under it how the clicked step's page looks */
 .setupDlg .setupSampleStrip { margin: 6px 0 2px; }
 .setupDlg .setupClickUnder { margin: 0 0 8px 13em; }

@@ -35,7 +35,7 @@ assert.equal(SETUP_WELCOME.paras.length, 2);
 assert.doesNotMatch(JSON.stringify(SETUP_WELCOME), /scrren|controoled|breower|intreview|amswered/);
 // ids are unique, every row has what the screen needs
 assert.equal(new Set(SETUP_QUESTIONS.map(q => q.id)).size, SETUP_QUESTIONS.length);
-for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.ask && q.why && q.kind && (q.kind === 'branch' || typeof q.start === 'function') && q.save, q.id); }
+for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.ask && (q.why || q.lead) && q.kind && (q.kind === 'branch' || typeof q.start === 'function') && q.save, q.id); }
 
 // Brewer Type: the All Grain (own Grain Mill) choice is the follow up "Do you grind your own grain?", only after All Grain
 const bt = SETUP_QUESTIONS.find(q => q.id === 'brewerType');
@@ -200,3 +200,12 @@ assert.doesNotMatch(JSON.stringify(SETUP_HOTSPOTS), /avaiable|Navigate|jumped/);
 assert.deepEqual(SETUP_INTRO, ['welcome', 'guide', 'tick', 'drop', 'hot', 'start']);
 assert.equal(SETUP_START.paras.length, 4);
 assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfornately|take you best/);
+// question 1 (2026-11-27): words before it, Tick Boxes, Next ⛔ until ticked; every strip step ⛔ until 1 and 2 are answered
+{
+  const u = SETUP_QUESTIONS.find(q => q.id === 'units');
+  assert.ok(u.tick && u.lead.length === 5 && u.head === 'And now for that 1st Question:' && u.ask === 'US or Metric Units? Choose One.');
+  assert.doesNotMatch(JSON.stringify(u.lead), /perfer|limitaions|Temperatue|seances|eleasphed|caculations|a xml|thing go/);
+  const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(appSrc, /const stepShut = \(st, qs\) => mustMissing\(qs, answered\)\.length > 0;/);
+  assert.match(appSrc, /\(q\.tick \? !tickedOf\(q\) : q\.must && !answered\.has\(q\.id\)\)/);
+}

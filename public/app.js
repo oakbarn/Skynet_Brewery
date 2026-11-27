@@ -16398,11 +16398,15 @@ async function setupInterview({ first = false } = {}) {
     // Close and ✕ are not available (⛔, the 🚫 pointer) on every screen until 1. Units and 2. Brewer Type are answered (OakBarn Brewery,
     // 2026-11-27: "the close is Not Available until 1 and 2 are answered"; "and that applies to screen 1 as well"; "and every screen until
     // we get past the mandatory questions")
-    // the steps after the must ones are not available (⛔) in the strip until those are answered: a click there would skip them
-    // (recommended to Fritz 2026-11-27, waiting on his pick)
-    const lastMust = qs => Math.max(-1, ...qs.filter(x => x.must).map(x => SETUP_STEPS.indexOf(x.step)));
-    const stepShut = (st, qs) => mustMissing(qs, answered).length > 0 && SETUP_STEPS.indexOf(st) > lastMust(qs);
+    // the strip's steps are not available (⛔) until the must ones are answered: a click there would skip them
+    // (OakBarn Brewery, 2026-11-27: "a Click on any of the 1. Units 2. Brewer Type .. hot spots do not work"): every step of the strip
+    // has the ⛔ until 1 and 2 are answered
+    const stepShut = (st, qs) => mustMissing(qs, answered).length > 0;
     const STEP_SHUT = 'Not available until 1. Units and 2. Brewer Type are answered.';
+    // a Tick Box question: what is ticked now (null: nothing). An answered one starts ticked on its answer
+    const ticked = new Map();
+    const tickedOf = q => ticked.has(q.id) ? ticked.get(q.id) : answered.has(q.id) ? a[q.id] : null;
+    const noNext = () => h('button', { type: 'button', class: 'primary setupNoSkip setupNo', 'aria-disabled': 'true', title: 'Not available until this question is answered: click an answer.' }, 'Next ▶');
     const closeBtns = qs => mustMissing(qs, answered).length
       ? [h('button', { type: 'button', class: 'setupNoSkip setupNo', 'aria-disabled': 'true', title: 'Not available until 1. Units and 2. Brewer Type are answered.' }, '✖ Close'),
         h('button', { type: 'button', class: 'boxX setupNoSkip setupNo', 'aria-disabled': 'true', 'aria-label': 'Close', title: 'Not available until 1. Units and 2. Brewer Type are answered.' }, '✕')]
@@ -16451,8 +16455,8 @@ async function setupInterview({ first = false } = {}) {
         !done && !q.must ? h('button', { type: 'button', title: q.kind === 'branch' ? `Skip the whole ${q.step} step: keep Skynet's own answers. You can change each one any time on ☰ Menu > Default settings.` : 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
         h('span', { class: 'dlgBtnGroup' },
           // Next ▶ is not available either on a must question not answered yet (screen 2): a click on an answer answers it
-          done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : q.must && !answered.has(q.id)
-            ? h('button', { type: 'button', class: 'primary setupNoSkip setupNo', 'aria-disabled': 'true', title: 'Not available until this question is answered: click an answer.' }, 'Next ▶')
+          done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : (q.tick ? !tickedOf(q) : q.must && !answered.has(q.id))
+            ? noNext()
             : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶'),
           ...closeBtns(qs)));
       body.replaceChildren();
@@ -16465,10 +16469,24 @@ async function setupInterview({ first = false } = {}) {
               h('td', {}, h('button', { type: 'button', title: 'Change this answer', onclick: () => go(i) }, '✎')))])])));
       } else {
         if (q.note) body.append(h('p', { class: 'setupWarn' }, '⚠ ' + q.note));
-        body.append(h('p', { class: 'setupAsk' }, askOf(q, a)), h('p', { class: 'muted' }, q.why));
-        if (q.must) body.append(h('p', { class: 'muted' }, 'Steps 1 and 2 must be answered: click an answer (no Skip or Next until then).'));
+        // the words before the question (q.lead, his pictures), then a bigger heading over the question (q.head)
+        if (q.lead) body.append(...q.lead.map(t => h('p', { class: 'setupWelcomeText' }, t)));
+        if (q.head) body.append(h('p', { class: 'setupHead2' }, q.head));
+        body.append(h('p', { class: q.head ? 'setupHead2' : 'setupAsk' }, askOf(q, a)));
+        if (q.why) body.append(h('p', { class: 'muted' }, q.why));
+        if (q.must && !q.lead) body.append(h('p', { class: 'muted' }, 'Steps 1 and 2 must be answered: click an answer (no Skip or Next until then).'));
         const ch = choicesOf(q, ctx);
-        if (q.kind === 'branch') {
+        if (q.tick) {
+          // Tick Boxes (screen 3's method): a tick picks it but does not go on; Next ▶ (at the top and after Click to proceed) has the ⛔
+          // until one is ticked
+          const on = tickedOf(q);
+          body.append(h('div', { class: 'setupTicks' }, ...ch.map(([k, t, tip]) => h('label', { class: 'setupTick', title: tip || '' }, h('span', {}, t),
+            h('input', { type: 'checkbox', ...(on != null && String(on) === String(k) ? { checked: true } : {}), onchange: e => {
+              if (e.target.checked) { a[q.id] = k; ticked.set(q.id, k); if (q.id === 'units') for (const x of SETUP_QUESTIONS) if (x.byUnits) a[x.id] = x.start(ctx, a); }
+              else ticked.set(q.id, null);
+              draw(); } })))),
+            h('p', { class: 'setupProceed' }, h('b', {}, SETUP_WELCOME.proceed), ' ', tickedOf(q) == null ? noNext() : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')));
+        } else if (q.kind === 'branch') {
           // the branch's first page: what it asks
           const its = qs.filter(x => x.step === q.step && x.kind !== 'branch');
           body.append(h('p', {}, 'It asks:'), h('ul', { class: 'setupBranch' }, ...its.map(x => h('li', {}, askOf(x, a)))));

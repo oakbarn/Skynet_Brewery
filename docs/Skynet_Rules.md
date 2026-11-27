@@ -1788,8 +1788,11 @@ answers and changes nothing until **✔ Finish**.
   screen 1 as well"; "and every screen until we get past the mandatory questions"), this wins over "close at any time":** on
   **every** screen, the Welcome page too, **Close and ✕ are not available** (⛔ Do Not Enter sign, 🚫 pointer; Esc does nothing)
   until 1. Units and 2. Brewer Type are answered. On a must question not answered yet, **Skip and Next ▶** both have the ⛔: a click
-  on an answer answers it. ◀ Back always works, except on the Welcome page (⛔: nothing to go back to). Steps 3 to 6 of the strip
-  have the ⛔ too until 1 and 2 are answered (a click there would skip them; built on the recommended option, Fritz to confirm).
+  on an answer answers it. ◀ Back always works, except on the Welcome page (⛔: nothing to go back to). **Every step of the strip**
+  has the ⛔ too until 1 and 2 are answered ("a Click on any of the 1. Units 2. Brewer Type .. hot spots do not work").
+- **Question 1** (OakBarn Brewery, 2026-11-27, his picture; "Have all the Next Do Not Enter until a tick is made"): words about
+  Units first (row `lead`), then "And now for that 1st Question: US or Metric Units? Choose One." as **Tick Boxes** (row `tick: true`).
+  A tick does not go on; every Next ▶ (top and Click to proceed) has the ⛔ until one is ticked.
   **Every answer is saved the moment it is given** ("save these like a gGlobal as they need to be persistent. No implicit save. Even
   if a computer is shut, these stay"): only answered (green) questions are written; setupDone only once steps 1 and 2 are answered,
   so a first run left early opens again. The buttons, title and steps strip are **frozen** at the top ("Also this is frozen").

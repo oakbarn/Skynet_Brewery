@@ -28,12 +28,15 @@ Les boutons, le titre et la bande d’étapes restent figés en haut : seule la 
   une.
 - Chaque page commence sur la réponse de Skynet (ou sur votre réponse enregistrée quand vous le relancez) : Next, Next, Next donne un
   panneau qui fonctionne.
+- **La question 1, US or Metric**, commence par quelques mots sur les unités (toutes les données sont gardées en métrique à
+  l’intérieur ; seul ce que vous voyez ou saisissez change), puis « And now for that 1st Question: US or Metric Units? Choose One. »
+  avec deux **cases à cocher**. Cocher ne fait pas avancer : chaque **Next ▶** porte le ⛔ tant qu’aucune case n’est cochée.
 - **Chaque réponse est enregistrée dès que vous la donnez** (Next, ou un clic sur un choix), sur le Brain, comme un gGlobal : elle
   reste même si votre ordinateur est éteint. Relancez l’entretien et il s’ouvre sur la première question sans réponse.
 - La dernière page, **Done**, montre toutes les réponses. **✎** revient à cette question. **✔ Finish** les enregistre toutes.
 - **Close** ou **✕** :
   - sur chaque écran, la page de bienvenue aussi, ils portent le signe ⛔ sens interdit et ne font rien tant que 1. Units et
-    2. Brewer Type n’ont pas de réponse (Échap ne fait rien non plus). Les étapes 3 à 6 de la bande portent aussi le ⛔ jusque-là.
+    2. Brewer Type n’ont pas de réponse (Échap ne fait rien non plus). Chaque étape de la bande porte aussi le ⛔ jusque-là.
   - ensuite, quand certaines questions ne sont pas encore vertes, une fenêtre **bleue** dit : elles ont besoin d’une réponse ; régler
     Skynet dépend des réponses à beaucoup de ces questions pour qu’il soit vraiment le vôtre, mais il fonctionne avec seulement les 2
     premières questions. **◀ Keep answering** revient ; **Close** enregistre les réponses données et ferme. Relancez-le depuis

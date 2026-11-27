@@ -25,12 +25,15 @@ The buttons, the title and the steps strip are frozen at the top: only the page 
 - The interview opens on the first question that is not green, and **Next ▶** goes on to the next one that is not green, in order.
   Answered (green) questions do not take your turn again; click their step, or **✎** on Done, to change one.
 - Every page starts on Skynet's own answer (or on your saved answer when you run it again), so Next, Next, Next gives a working panel.
+- **Question 1, US or Metric**, starts with a few words about Units (all data is kept in metric inside; only what you see or
+  enter changes), then "And now for that 1st Question: US or Metric Units? Choose One." as two **Tick Boxes**. A tick does not go
+  on: every **Next ▶** has the ⛔ until one is ticked.
 - **Every answer is saved the moment you give it** (Next, or a click on a choice), on the Brain, like a gGlobal: it stays even if
   your computer is shut down. Run the interview again and it opens on the first question not answered yet.
 - The last page, **Done**, shows every answer. **✎** goes back to that question. **✔ Finish** saves them all.
 - **Close** or **✕**:
   - on every screen, the Welcome page too, they have the ⛔ Do Not Enter sign and do nothing until 1. Units and 2. Brewer Type are
-    answered (Esc does nothing either). Steps 3 to 6 of the strip have the ⛔ too until then.
+    answered (Esc does nothing either). Every step of the strip has the ⛔ too until then.
   - after that, when some questions are not green yet, a **blue** pop-up says: they do need completing; setting up Skynet depends
     on the answers to many of these questions to make it your own, but it will work with just the first 2 questions. **◀ Keep
     answering** goes back; **Close** saves the answers so far and closes. Run it again from ☰ Menu to answer the rest.

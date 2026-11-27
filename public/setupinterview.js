@@ -158,9 +158,18 @@ export const SETUP_INTRO = ['welcome', 'guide', 'tick', 'drop', 'hot', 'start'];
 
 export const SETUP_QUESTIONS = [
   // ---- 1 and 2: must be answered (Skip shows 🚫 Not allowed)
-  { id: 'units', step: 'Units', kind: 'pick', save: 'defaults', must: true,
-    ask: 'US or Metric?',
-    why: 'Every amount, temperature and Recipe on every screen shows in this. Skynet keeps every number in metric inside, so you can change it any time on ☰ Menu > Default settings and nothing you saved changes.',
+  // Question 1 (OakBarn Brewery, 2026-11-27, his picture, spelling and grammar corrected; "Have all the Next Do Not Enter until a tick
+  // is made"): the words before the question (lead), then the question as Tick Boxes (tick: true); every Next ▶ has the ⛔ until one
+  // is ticked
+  { id: 'units', step: 'Units', kind: 'pick', tick: true, save: 'defaults', must: true,
+    lead: ['What Units do you prefer to work in? There are only two choices: US or Metric. This is only how your data and entries are handled. One is not more precise than the other, as the limitations of precision are more based on the physical nature of the hardware, like a Temperature Probe.',
+      'All calculations and stored data are always kept as metric, and this choice only affects what you see or enter on the screen. There are a lot of things that go on behind the scenes that you cannot see or influence.',
+      'Two Examples:',
+      'newSec is a command that can change a time into seconds. That is needed to get an elapsed time into a seconds format for calculations. You do not need to see it or affect it other than providing the time (although in some cases Skynet has already decided what timer to use).',
+      'Skynet can import an XML file from BeerSmith (and others). All you need to do is supply the files, and Skynet does the rest. You can take a break and get a snack while things go on behind the screens, but be fast as it does not take much time.'],
+    head: 'And now for that 1st Question:',
+    ask: 'US or Metric Units? Choose One.',
+    why: '',
     choices: [['US', 'US', 'gallons, pounds, °F'], ['Metric', 'Metric', 'liters, kilograms, °C']],
     start: ctx => ctx.defaults?.units === 'Metric' ? 'Metric' : 'US' },
   // Panel Update 17, item 6: "The highest level you will brew now. This is just to get started. Skynet can grow with you. Needs to be
