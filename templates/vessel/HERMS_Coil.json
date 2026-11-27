@@ -1,4 +1,5 @@
 {
+  "tip": "A HERMS coil: wort runs through it inside the hot water.",
   "vesselType": "herms", "vtype": "Stainless 50 ft", "image": "Images/Skynet/Other_Equipment/herms_coil.svg", "liquidPorts": 2,
   "std": { "type": "TC", "size": 1.5 },
   "ports": { "wortIn": { "installed": true, "position": "Top Left" }, "wortOut": { "installed": true, "position": "Top Right" } }

@@ -53,6 +53,10 @@ export const VESSELS_3UP = Array.from({ length: VESSELS_MAX - 2 }, (_, i) => Str
 // how one vessel is heated (OakBarn Brewery, 2026-11-27): the Tick Boxes of the one vessel branch, and the list on Default settings
 export const VESSEL_HEATS = [['noboil', 'No Boil Brewer'], ['electricstove', 'Electric Stove Top'], ['gasstove', 'Gas Stove Top'], ['hotplate', 'Hot Plate'],
   ['turkeyfryer', 'Turkey Fryer'], ['gasburner', 'Brewery Gas Burner'], ['element', 'Internal Electric Element']];
+// No Boil Brewer, one vessel: "Single Vessel Brewer. Choose the Vessel that matches yours" (OakBarn Brewery, 2026-11-27, his picture):
+// his three Skynet Vessel Templates with his words under them, and Other Skynet Template for any other one. [Template name, his words]
+export const SINGLE_VESSELS = [['Generic_Brew_Vessel_Widget', 'Plain Pot'], ['Brew_Vessel_Low_TC_Output_Widget', 'Pot with 1.5 TC Outlet'],
+  ['Brew_Vessel_Low_NPT_Output_Widget', 'Pot with NPT Outlet']];
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
@@ -216,6 +220,12 @@ export const SETUP_QUESTIONS = [
   { id: 'vesselHeat', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', when: { vesselCount: '1' },
     ask: 'How is the vessel heated?', why: 'Tick the one that heats your vessel.',
     choices: VESSEL_HEATS, start: ctx => VESSEL_HEATS.some(([k]) => k === ctx.defaults?.vesselHeat) ? ctx.defaults.vesselHeat : '' },
+  // No Boil Brewer (OakBarn Brewery, 2026-11-27: "no Boil Brewer next", his picture): pick the vessel (a Skynet Vessel Template)
+  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', when: { vesselCount: '1', vesselHeat: 'noboil' },
+    head: 'Single Vessel Brewer', ask: 'Choose the Vessel that matches yours:', why: 'Click the picture of your vessel, then Next ▶.',
+    group: 'Vessel Widget', groupNote: 'One Skynet Template with every IP, a Temperature Probe (Front or Thermowell) and an Element Port, each with a Place slider. Slide off what your vessel does not have.',
+    other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
+    choices: SINGLE_VESSELS, start: ctx => ctx.defaults?.vesselTemplate || '' },
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -345,7 +355,7 @@ export function startAnswers(ctx, list = SETUP_QUESTIONS) {
 export function answerWords(q, v, ctx) {
   if (q.kind === 'branch') return '';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
-  if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
+  if (q.kind === 'pick' || q.kind === 'vessel') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
 }
 // a typed answer that is no good (null: fine)
@@ -372,7 +382,7 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
       else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
-      else if (q.id === 'vesselHeat') { if (v) brewDefaults.vesselHeat = v; }      // not ticked: not set
+      else if (q.id === 'vesselHeat' || q.id === 'vesselTemplate') { if (v) brewDefaults[q.id] = v; }      // not picked: not set
       // kept in liters (Rule 2.59), typed in gallons or liters
       else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;

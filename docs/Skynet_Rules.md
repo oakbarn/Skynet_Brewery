@@ -1874,12 +1874,24 @@ answers and changes nothing until **✔ Finish**.
 - **New questions** (OakBarn Brewery, 2026-11-27: "if you can add a selection to the Tick box, do not add followup questions but
   remember that things may need to be a new branch"): add a choice to a question's Tick Boxes instead of a follow-up question; when a
   choice needs more questions, they go in a new branch.
+- **CHANGED 2026-11-27, Single Vessel Brewer** (OakBarn Brewery, his picture "Single Vessel Brewer"; "Notice I put a much more plain
+  Label under the choices"): one vessel and **No Boil Brewer** asks **Choose the Vessel that matches yours:** with three Skynet Vessel
+  Templates as pictures (Generic_Brew_Vessel_Widget, Brew_Vessel_Low_TC_Output_Widget, Brew_Vessel_Low_NPT_Output_Widget) and his
+  plain words under them (Plain Pot, Pot with 1.5 TC Outlet, Pot with NPT Outlet). A click lights one; Next ▶ is ⛔ until one is
+  picked. **Other Skynet Template** opens every other Skynet Vessel Template. Saved as `vesselTemplate`, also on Default settings.
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
 this is frozen"; "And that should be a rule on any dialogs that have a selection or menu on the top"). The buttons, the title and the
 menu (steps strip, tabs, a selection) stay in place at the top of the dialog; only what is under them scrolls. First built in the
 Setup Interview (Rule 2.75); other dialogs follow it as they are changed.
+
+2.77 **Hover help is plain and short** (OakBarn Brewery, 2026-11-27: "Hover help ... violates 2 Rules: 1. Fritz 2. Too Technical, Plain
+Language. Do not cite rules in Hover Help. TMI"; "add that task to all Hover help and fix"). Every hover help balloon (a `title` or
+`data-help`, English and French) is plain language a brewer reads at a glance: **no personal name**, **no Rule numbers**, and no
+build notes. A Template's `notes` are for building it and are never hover help; a Skynet Vessel Template has a plain `tip` (English,
+French in hoverhelp-fr.json), shown as its hover help and under its picture in the vessel pickers. A test fails on a balloon with a
+personal name or a Rule number. Help 66.
 
 ## 3. Names and file names
 
@@ -7608,6 +7620,8 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-27: Rule 2.77 new: hover help is plain and short, no personal name, no Rule numbers (every balloon cleaned, English and French); Skynet Vessel Templates get a plain `tip`, shown under each picture in the wider Add a Vessel picker. Help 66.
+- 2026-11-27: Rule 2.75 changed: one vessel and No Boil Brewer asks Single Vessel Brewer: Choose the Vessel that matches yours (vesselTemplate, also on Default settings). Help 248.
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
 - 2026-11-27: Rule 2.75 changed: one vessel asks How is the vessel heated? (7 Tick Boxes, vesselHeat on Default settings); Tick Boxes evenly spaced. Help 248, 155.
 - 2026-11-27: Rule 2.6 changed: up to 8 Tick Boxes on one line (more is a dropdown); the Setup Interview dialog is wider (900 px). Help 248.

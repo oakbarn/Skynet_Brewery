@@ -1,4 +1,5 @@
 {
+  "tip": "A basic kettle: an outlet near the bottom, a thermowell and a side inlet.",
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
   "image": "Images/Skynet/Vessels/Vessel_Kettle_Basic.svg",

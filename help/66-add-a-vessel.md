@@ -9,7 +9,7 @@ Whatever you pick goes on the 🔨 [Build Tab](55-build-tab) first, and its Prop
 
 ## Widget
 
-The box (**Skynet Vessel Templates (build on them)**) shows the **Skynet Vessel Widgets** as small pictures. Click one to use it. Each is a vessel picture with its IPs built in and nothing else: no Devices. The Skynet Vessel Widget itself is set by Skynet and can't be changed, only cloned (☰ Menu > Vessel Templates > Clone).
+The box (**Skynet Vessel Templates (build on them)**) shows the **Skynet Vessel Widgets** as pictures, with plain words under each one that say what it is (for example *A pot with a 1.5 inch Tri-Clamp outlet near the bottom*). The box is wide, so you see many at once. Click one to use it. Each is a vessel picture with its IPs built in and nothing else: no Devices. The Skynet Vessel Widget itself is set by Skynet and can't be changed, only cloned (☰ Menu > Vessel Templates > Clone).
 
 The picture you clicked is the Widget's picture to start with, but the one on the Build Tab is yours: open its Properties and change the **Graphic** like on any other Widget. Its IPs stay on the openings of the Skynet picture.
 

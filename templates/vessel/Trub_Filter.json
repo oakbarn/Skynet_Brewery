@@ -1,4 +1,5 @@
 {
+  "tip": "A trub filter: it keeps the hop and grain bits out of the fermenter.",
   "vesselType": "trub", "vtype": "Inline filter", "image": "Images/Skynet/Other_Equipment/trub_filter.svg",
   "std": { "type": "TC", "size": 1.5 },
   "ports": { "inlet": { "installed": true, "position": "Top" }, "outlet": { "installed": true, "position": "Bottom" } }

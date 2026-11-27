@@ -14,7 +14,7 @@ assert.doesNotMatch(app, /Default \(Centered\)/, 'no Default (Centered) choice')
 assert.match(app, /const ALIGN_LCR = \[\['MiddleLeft', 'Left'\], \['', 'Centered', 'MiddleCenter'\], \['MiddleRight', 'Right'\]\]/);
 assert.match(app, /title: 'Label Attributes'/);
 assert.match(app, /nm\.style\.textAlign = \(nal \|\| 'Center'\)/, 'a Label is really Centered when nothing is set');
-assert.match(app, /How do you refer to this Pump\? Brewing Pump, Mash Pump, HLT Pump \.\.\.\? Use your name for the Pump as the Label\. OakBarn Brewery Sample Schema has several Pumps and they are Color Coded with a Cover\./, 'the Red Pump text word for word');
+assert.match(app, /How do you refer to this Pump\? Brewing Pump, Mash Pump, HLT Pump \.\.\.\? Use your name for the Pump as the Label\. The Sample Schema has several Pumps and they are Color Coded with a Cover\./, 'the Red Pump text word for word');
 assert.match(app, /⟪img:help_pictures\/Label_Visible_Switch\.png⟫/, 'with its pictures');
 assert.match(app, /⟪img:help_pictures\/Red_Pump_Label\.png⟫/);
 for (const f of ['Label_Visible_Switch.png', 'Red_Pump_Label.png']) assert.ok(fs.existsSync(new URL('../media/help_pictures/' + f, import.meta.url)), f);
@@ -77,7 +77,7 @@ assert.match(app, /\.\.\.\(pumpModelOf\(it\) \? \[\] : \[\['imageOff', 'Path', '
 assert.match(app, /const nameTip = e => isPumpDev\(e\) \? NAME_PUMP_TIP : (isMbvDev\(e\) \? NAME_VALVE_TIP : )?DEVICE_TIPS\.name;/);
 assert.match(app, /Type: BM_15_⟦DO@Pump⟧_Red~Pump_BH/);
 assert.doesNotMatch(app, /only an Admin can change it|It is exactly 2 letters/, 'Rule 3.2 (2026-11-15): a saved ID never changes, not even by an Admin');
-assert.match(app, /Tab IDs follow Rule 3\.2\. Our example Tab is: BH/);
+assert.match(app, /Our example Tab is: BH/);
 assert.match(fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), /el\.tap === 'hold' \|\| el\.tap === 'dual'/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.50 \*\*Dual Action click\*\*/m);
 // 🏷 Suggested Names (Rule 3.18): convert all names at once

@@ -83,3 +83,19 @@ for (const [e, f] of Object.entries(fr)) {
 }
 assert.deepEqual(bad, [], 'French balloons that lost something that is not words');
 console.log(`French balloons ok (${en.size} texts)`);
+
+// ---- hover help is plain (Rule 2.77, OakBarn Brewery, 2026-11-27: "Do not cite rules in Hover Help"): no personal name and no Rule
+// numbers in any balloon, English or French; a Skynet Vessel Template's plain tip is its hover help, never its build notes
+{
+  const NOT_PLAIN = /\bFritz\b|\bRules? \d|\bR[eè]gles? \d/;
+  const notPlain = [...en.keys()].filter(t => NOT_PLAIN.test(t) || NOT_PLAIN.test(fr[t] || ''));
+  assert.deepEqual(notPlain.map(t => `${en.get(t)[0]} ${JSON.stringify(t).slice(0, 80)}`), [], 'hover help with a name or a Rule number (Rule 2.77)');
+  const vdir = path.join(root, 'templates', 'vessel');
+  for (const f of fs.readdirSync(vdir).filter(f => f.endsWith('.json'))) {
+    const t = JSON.parse(fs.readFileSync(path.join(vdir, f), 'utf8'));
+    assert.ok(t.tip && !NOT_PLAIN.test(t.tip), `${f}: a plain tip`);
+    assert.ok(typeof fr[t.tip] === 'string' && fr[t.tip], `${f}: its tip has its French`);
+  }
+  const app = fs.readFileSync(path.join(root, 'public', 'app.js'), 'utf8');
+  assert.doesNotMatch(app, /title: [^,]*\.notes\b/, 'a Template\'s notes are never its hover help');
+}

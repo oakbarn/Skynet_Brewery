@@ -1,4 +1,5 @@
 {
+  "tip": "A fermenter.",
   "vesselType": "vessel", "units": "Metric", "vtype": "Fermenter", "image": "Images/Skynet/Vessels/kettle.svg",
   "maxVolume": 26.4979, "minVolume": 11.3562, "extraTrub": 1.8927,
   "std": { "type": "TC", "size": 1.5 },

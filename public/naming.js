@@ -20,10 +20,10 @@ const T = {
   TMP36: 'TMP36 analog temperature sensor',
   // heating
   PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DBand: 'Deadband', DO: 'Direct On / Off (relay, SSR, contactor)',
-  H_Element: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
+  H_Element: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
-  Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', Valve_E: 'Electric Valve (motorized ball or butterfly valve, open / closed)', M_H_Vlv: 'High Temperature Manual Valve',
+  Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis)', M_L_Vlv: 'Low Temperature Manual Valve', Valve_E: 'Electric Valve (motorized ball or butterfly valve, open / closed)', M_H_Vlv: 'High Temperature Manual Valve',
   Valve_E_H: 'High Temperature Electric Valve', Valve_Sgas: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
   Fan: 'Fan', Chill: 'Chiller / glycol / fridge compressor', HtPad: 'Fermenter heat wrap or pad', Ignit: 'Burner igniter',
   // direct input

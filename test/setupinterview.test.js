@@ -226,7 +226,7 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.doesNotMatch(JSON.stringify(u.lead), /perfer|limitaions|Temperatue|seances|eleasphed|caculations|a xml|thing go/);
   const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(appSrc, /const stepShut = \(st, qs\) => mustMissing\(qs, answered\)\.length > 0;/);
-  assert.match(appSrc, /\(asTicks\(q, ctx\) \? tickedOf\(q\) == null : q\.must && !answered\.has\(q\.id\)\)/);
+  assert.match(appSrc, /\(asTicks\(q, ctx\) \? tickedOf\(q\) == null : q\.kind === 'vessel' \? !tickedOf\(q\) : q\.must && !answered\.has\(q\.id\)\)/);
   // after Brewery: Yes/No and up to 8 choices are Tick Boxes; more than 8 a Drop Down list (2026-11-27, Rule 2.6 changed)
   for (const id of ['yeastStarter', 'mashProfile', 'boilProfile', 'helpLang']) assert.ok(SETUP_QUESTIONS.find(q => q.id === id).tick, id);
   { const ys = SETUP_QUESTIONS.find(q => q.id === 'yeastStarter'), mp = SETUP_QUESTIONS.find(q => q.id === 'mashProfile');
@@ -252,3 +252,12 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'turkeyfryer' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat'])).brewDefaults.vesselHeat, 'turkeyfryer');
   const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(src, /\['vesselHeat', 'How is the vessel heated\? \(one vessel\)', 'sel'/); }
+// No Boil Brewer, one vessel: Single Vessel Brewer, his three Skynet Vessel Templates with his words (2026-11-27)
+{ const vt = SETUP_QUESTIONS.find(q => q.id === 'vesselTemplate');
+  assert.ok(vt && vt.kind === 'vessel' && vt.head === 'Single Vessel Brewer' && vt.ask === 'Choose the Vessel that matches yours:' && vt.otherBtn === 'Other Skynet Template');
+  assert.deepEqual(choicesOf(vt, ctx()).map(c => c[1]), ['Plain Pot', 'Pot with 1.5 TC Outlet', 'Pot with NPT Outlet']);
+  for (const [n] of choicesOf(vt, ctx())) assert.ok(fs.existsSync(new URL(`../templates/vessel/${n}.json`, import.meta.url)), n);
+  const brew = (heat) => shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: heat }, ctx()).map(q => q.id);
+  assert.ok(brew('noboil').includes('vesselTemplate')); assert.ok(!brew('gasstove').includes('vesselTemplate'));
+  assert.equal(answerWords(vt, 'Brew_Vessel_Low_TC_Output_Widget', ctx()), 'Pot with 1.5 TC Outlet');
+  assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'noboil', vesselTemplate: 'Generic_Brew_Vessel_Widget' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat', 'vesselTemplate'])).brewDefaults.vesselTemplate, 'Generic_Brew_Vessel_Widget'); }

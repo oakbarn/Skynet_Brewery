@@ -1,4 +1,5 @@
 {
+  "tip": "A 50 gallon Hot Liquor Tank with a sight gauge.",
   "vesselType": "vessel",
   "vtype": "HLT",
   "heatKind": "electric",

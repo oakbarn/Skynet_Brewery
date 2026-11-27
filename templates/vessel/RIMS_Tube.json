@@ -1,4 +1,5 @@
 {
+  "tip": "A RIMS tube: it heats the wort as it flows through.",
   "vesselType": "rims", "vtype": "RIMS", "image": "Images/Skynet/Other_Equipment/Skynet_TC1_2_Rims_Device.svg", "size": [356, 50],
   "integrated": "device",
   "std": { "type": "TC", "size": 1.5 },

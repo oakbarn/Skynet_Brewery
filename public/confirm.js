@@ -28,4 +28,4 @@ export function byHandWords(el, on) {
   const valve = isManualValveThing(el);
   return { say: valve ? (on ? 'OPEN' : 'CLOSE') : (on ? 'TURN ON' : 'TURN OFF'), is: valve ? (on ? 'open' : 'closed') : (on ? 'on' : 'off') };
 }
-export const CONFIRM_TIP = 'On: a Confirmation Widget (Rule 1.28). It stands for something done by hand. A click on it, or a Process line such as Name.state = true, shows a pop-up asking you to do it by hand and press Done; only then does it show On or Off, and a Process waits for Done. Off: a click changes it at once.';
+export const CONFIRM_TIP = 'On: a Confirmation Widget. It stands for something done by hand. A click on it, or a Process line such as Name.state = true, shows a pop-up asking you to do it by hand and press Done; only then does it show On or Off, and a Process waits for Done. Off: a click changes it at once.';
