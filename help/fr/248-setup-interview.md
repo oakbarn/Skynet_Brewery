@@ -33,7 +33,7 @@ Les boutons, le titre et la bande d’étapes restent figés en haut : seule la 
 - La dernière page, **Done**, montre toutes les réponses. **✎** revient à cette question. **✔ Finish** les enregistre toutes.
 - **Close** ou **✕** :
   - sur chaque écran, la page de bienvenue aussi, ils portent le signe ⛔ sens interdit et ne font rien tant que 1. Units et
-    2. Brewer Type n’ont pas de réponse (Échap ne fait rien non plus).
+    2. Brewer Type n’ont pas de réponse (Échap ne fait rien non plus). Les étapes 3 à 6 de la bande portent aussi le ⛔ jusque-là.
   - ensuite, quand certaines questions ne sont pas encore vertes, une fenêtre **bleue** dit : elles ont besoin d’une réponse ; régler
     Skynet dépend des réponses à beaucoup de ces questions pour qu’il soit vraiment le vôtre, mais il fonctionne avec seulement les 2
     premières questions. **◀ Keep answering** revient ; **Close** enregistre les réponses données et ferme. Relancez-le depuis

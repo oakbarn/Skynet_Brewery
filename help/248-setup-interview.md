@@ -30,7 +30,7 @@ The buttons, the title and the steps strip are frozen at the top: only the page 
 - The last page, **Done**, shows every answer. **✎** goes back to that question. **✔ Finish** saves them all.
 - **Close** or **✕**:
   - on every screen, the Welcome page too, they have the ⛔ Do Not Enter sign and do nothing until 1. Units and 2. Brewer Type are
-    answered (Esc does nothing either).
+    answered (Esc does nothing either). Steps 3 to 6 of the strip have the ⛔ too until then.
   - after that, when some questions are not green yet, a **blue** pop-up says: they do need completing; setting up Skynet depends
     on the answers to many of these questions to make it your own, but it will work with just the first 2 questions. **◀ Keep
     answering** goes back; **Close** saves the answers so far and closes. Run it again from ☰ Menu to answer the rest.

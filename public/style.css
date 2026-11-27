@@ -1939,6 +1939,9 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupDropOpen .setupDropHead { background: #9ad7e6; color: #1f1f1f; }
 .setupDlg .setupDropOpen .setupDropHi { background: var(--accent); color: #fafafa; }
 .setupDlg .setupClickSmall { font-weight: 800; font-size: 1.3em; }
+/* a step of the strip that is not available yet: the ⛔ before its name */
+.setupDlg .nsiSteps li.setupNoStep { opacity: .6; }
+.setupDlg .nsiSteps li.setupNoStep::after { content: ' ⛔'; }
 /* screen 5, Hot Spots: a sample strip to try, and under it how the clicked step's page looks */
 .setupDlg .setupSampleStrip { margin: 6px 0 2px; }
 .setupDlg .setupClickUnder { margin: 0 0 8px 13em; }

@@ -16397,6 +16397,11 @@ async function setupInterview({ first = false } = {}) {
     // Close and ✕ are not available (⛔, the 🚫 pointer) on every screen until 1. Units and 2. Brewer Type are answered (OakBarn Brewery,
     // 2026-11-27: "the close is Not Available until 1 and 2 are answered"; "and that applies to screen 1 as well"; "and every screen until
     // we get past the mandatory questions")
+    // the steps after the must ones are not available (⛔) in the strip until those are answered: a click there would skip them
+    // (recommended to Fritz 2026-11-27, waiting on his pick)
+    const lastMust = qs => Math.max(-1, ...qs.filter(x => x.must).map(x => SETUP_STEPS.indexOf(x.step)));
+    const stepShut = (st, qs) => mustMissing(qs, answered).length > 0 && SETUP_STEPS.indexOf(st) > lastMust(qs);
+    const STEP_SHUT = 'Not available until 1. Units and 2. Brewer Type are answered.';
     const closeBtns = qs => mustMissing(qs, answered).length
       ? [h('button', { type: 'button', class: 'setupNoSkip setupNo', 'aria-disabled': 'true', title: 'Not available until 1. Units and 2. Brewer Type are answered.' }, '✖ Close'),
         h('button', { type: 'button', class: 'boxX setupNoSkip setupNo', 'aria-disabled': 'true', 'aria-label': 'Close', title: 'Not available until 1. Units and 2. Brewer Type are answered.' }, '✕')]
@@ -16412,7 +16417,8 @@ async function setupInterview({ first = false } = {}) {
       const go = n => { at = n; draw(); };
       // a step is green when every question in it is answered; a click goes to its first open question
       const firstOf = (s, open) => { const i = qs.findIndex(x => x.step === s && (!open || !isGreen(x, qs, answered))); return i < 0 ? (open ? firstOf(s, false) : qs.length) : i; };
-      const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => h('li', { class: i === now ? 'now' : (s === 'Done' ? false : stepGreen(s, qs, answered)) ? 'done' : '',
+      const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => stepShut(s, qs) ? h('li', { class: (i === now ? 'now ' : '') + 'setupNoSkip setupNoStep', title: STEP_SHUT }, s)
+        : h('li', { class: i === now ? 'now' : (s === 'Done' ? false : stepGreen(s, qs, answered)) ? 'done' : '',
         style: 'cursor:pointer', title: 'Go to this step', onclick: () => go(s === 'Done' ? qs.length : firstOf(s, true)) }, s)));
       const next = () => {
         const err = q && answerError(q, a[q.id]); if (err) return toast(err, true);
@@ -16503,8 +16509,8 @@ async function setupInterview({ first = false } = {}) {
       // Next ▶ has the focus, so Enter goes on
       const nextBtn = h('button', { type: 'button', class: 'primary', onclick: start }, 'Next ▶'); setTimeout(() => nextBtn.focus());
       const firstOf = s => { const i = qs.findIndex(x => x.step === s && !isGreen(x, qs, answered)); return i < 0 ? Math.max(0, qs.findIndex(x => x.step === s)) : i; };
-      stripBox.replaceChildren(h('ol', { class: 'nsiSteps' }, ...SETUP_STEPS.map(s => h('li', { class: stepGreen(s, qs, answered) ? 'done' : '',
-        style: 'cursor:pointer', title: 'Go to this step', onclick: () => go(s === 'Done' ? qs.length : firstOf(s)) }, s))));
+      stripBox.replaceChildren(h('ol', { class: 'nsiSteps' }, ...SETUP_STEPS.map(s => stepShut(s, qs) ? h('li', { class: 'setupNoSkip setupNoStep', title: STEP_SHUT }, s)
+        : h('li', { class: stepGreen(s, qs, answered) ? 'done' : '', style: 'cursor:pointer', title: 'Go to this step', onclick: () => go(s === 'Done' ? qs.length : firstOf(s)) }, s))));
       bar.replaceChildren(h('span', { class: 'spacer' }),
         h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
         // the same buttons as every page (his pictures); nothing is before the Welcome page, so its ◀ Back has the ⛔ ("the Back on
