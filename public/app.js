@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { breweryBuildOf, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { breweryBuildOf, headOf, ONE_VESSEL_PICKS, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16477,7 +16477,7 @@ async function setupInterview({ first = false } = {}) {
         if (q.note) body.append(h('p', { class: 'setupWarn' }, '⚠ ' + q.note));
         // the words before the question (q.lead, his pictures), then a bigger heading over the question (q.head)
         if (q.lead) body.append(...q.lead.map(t => h('p', { class: 'setupWelcomeText' }, t)));
-        if (q.head) body.append(h('p', { class: 'setupHead2' }, q.head));
+        if (q.head) body.append(h('p', { class: 'setupHead2' }, headOf(q, a)));
         // (a row with words before it and no heading: the words ask the question, as on his question 2)
         if (!q.lead || q.head) body.append(h('p', { class: q.head ? 'setupHead2' : 'setupAsk' }, askOf(q, a)));
         if (q.why) body.append(h('p', { class: 'muted' }, q.why));
@@ -16505,7 +16505,7 @@ async function setupInterview({ first = false } = {}) {
             h('button', { type: 'button', class: 'tplIcon' + (on === k ? ' cur' : ''), title: balloonText(t?.tip || k), onclick: () => pickIt(k) },
               h('img', { src: media(t ? tplIcon('vessel', t) : 'Images/Skynet/Vessels/kettle.svg'), alt: '' }), h('span', { class: 'tplName' }, k)),
             h('b', {}, words)); };
-          const mine = choicesOf(q, ctx), others = on && !mine.some(([k]) => k === on) ? [[on, on.replace(/_/g, ' ')]] : [];
+          const mine = choicesOf(q, ctx, a), others = on && !mine.some(([k]) => k === on) ? [[on, on.replace(/_/g, ' ')]] : [];
           const other = guard(async () => {
             const icon = t => vesselIcon(t);
             const k = await pickVessel('Other Skynet Template: pick the Skynet Vessel Template that matches yours', [
@@ -18594,7 +18594,7 @@ function renderDefaultTab(box) {
     ['_bv', 'Brewery Vessels', 'head'],
     ['vesselCount', 'Number of Hot Side vessels (1 to 10)', 'num', null, false, false, { tip: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the questions under it, it works out your Brewer Level: it picks the Level a new Brewing Tab starts on in the New Schema Interview.' }],
     ['vesselHeat', 'How is the vessel heated? (one vessel)', 'sel', [['', '(not set)'], ...VESSEL_HEATS], false, false, { tip: 'Only for one vessel: what heats it. The Setup Interview asks it after Number of Hot Side vessels 1.' }],
-    ['vesselTemplate', 'The vessel (one vessel, No Boil Brewer)', 'sel', [['', '(not set)'], ...SINGLE_VESSELS.map(([k, w]) => [k, `${w} (${k})`]), ...(S.config.brewDefaults?.vesselTemplate && !SINGLE_VESSELS.some(([k]) => k === S.config.brewDefaults.vesselTemplate) ? [[S.config.brewDefaults.vesselTemplate, S.config.brewDefaults.vesselTemplate]] : [])], false, false, { tip: 'Only for one vessel and No Boil Brewer: the Skynet Vessel Template that matches your vessel. The Setup Interview asks it as Single Vessel Brewer.' }],
+    ['vesselTemplate', 'The vessel (one vessel: No Boil Brewer or Electric Stove Top)', 'sel', [['', '(not set)'], ...Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).map(([k, w]) => [k, `${w} (${k})`]), ...(S.config.brewDefaults?.vesselTemplate && !Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).some(([k]) => k === S.config.brewDefaults.vesselTemplate) ? [[S.config.brewDefaults.vesselTemplate, S.config.brewDefaults.vesselTemplate]] : [])], false, false, { tip: 'Only for one vessel, No Boil Brewer or Electric Stove Top: the Skynet Vessel Template that matches your vessel. The Setup Interview asks it after How is the vessel heated?' }],
     ['allInOne', 'An All In One?', 'bool', null, false, false, { tip: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).' }],
     ['kettleOutlet', 'Kettle has an outlet (a ball valve low on the side)', 'bool', null, false, false, { tip: 'Off: you pour or siphon.' }],
     ['kettlePump', 'A pump (whirlpool, transfer or chiller)', 'bool', null, false, false, { tip: 'A pump with your stove top kettle.' }],

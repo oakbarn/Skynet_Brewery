@@ -57,6 +57,14 @@ export const VESSEL_HEATS = [['noboil', 'No Boil Brewer'], ['electricstove', 'El
 // his three Skynet Vessel Templates with his words under them, and Other Skynet Template for any other one. [Template name, his words]
 export const SINGLE_VESSELS = [['Generic_Brew_Vessel_Widget', 'Plain Pot'], ['Brew_Vessel_Low_TC_Output_Widget', 'Pot with 1.5 TC Outlet'],
   ['Brew_Vessel_Low_NPT_Output_Widget', 'Pot with NPT Outlet']];
+// Electric Stove Top, one vessel (OakBarn Brewery, 2026-11-27: "Build the Vessel choices for If 1 vessel Electric stove top"): the
+// Skynet Vessel Templates of a kettle on an electric stove, plain words under them
+export const STOVE_ELECTRIC_VESSELS = [['Kettle_5_Gal_Electric_Stove', 'Kettle on an Electric Stove'],
+  ['Kettle_5_Gal_Electric_Stove_Low_Drain', 'Kettle with a Ball Valve on an Electric Stove']];
+// the vessel choices and the heading by how the one vessel is heated
+export const ONE_VESSEL_PICKS = { noboil: { head: 'Single Vessel Brewer', choices: SINGLE_VESSELS },
+  electricstove: { head: 'Electric Stove Top Brewer', choices: STOVE_ELECTRIC_VESSELS } };
+const onePick = a => ONE_VESSEL_PICKS[a?.vesselHeat] || ONE_VESSEL_PICKS.noboil;
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
@@ -221,11 +229,11 @@ export const SETUP_QUESTIONS = [
     ask: 'How is the vessel heated?', why: 'Tick the one that heats your vessel.',
     choices: VESSEL_HEATS, start: ctx => VESSEL_HEATS.some(([k]) => k === ctx.defaults?.vesselHeat) ? ctx.defaults.vesselHeat : '' },
   // No Boil Brewer (OakBarn Brewery, 2026-11-27: "no Boil Brewer next", his picture): pick the vessel (a Skynet Vessel Template)
-  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', when: { vesselCount: '1', vesselHeat: 'noboil' },
-    head: 'Single Vessel Brewer', ask: 'Choose the Vessel that matches yours:', why: 'Click the picture of your vessel, then Next ▶.',
+  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', when: { vesselCount: '1', vesselHeat: Object.keys(ONE_VESSEL_PICKS) },
+    head: a => onePick(a).head, ask: 'Choose the Vessel that matches yours:', why: 'Click the picture of your vessel, then Next ▶.',
     group: 'Vessel Widget', groupNote: 'One Skynet Template with every IP, a Temperature Probe (Front or Thermowell) and an Element Port, each with a Place slider. Slide off what your vessel does not have.',
     other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
-    choices: SINGLE_VESSELS, start: ctx => ctx.defaults?.vesselTemplate || '' },
+    choices: (ctx, a) => onePick(a ?? ctx?.answers).choices, start: ctx => ctx.defaults?.vesselTemplate || '' },
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -336,7 +344,8 @@ export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= (q.
 // (2026-11-27: every answer is saved as soon as it is given, so a first run left before steps 1 and 2 were answered has a green list
 // but no setupDone: the interview opens again)
 export const setupNeeded = config => !config?.brewDefaults?.setupDone && (!Object.keys(config?.brewDefaults ?? {}).length || Array.isArray(config?.brewDefaults?.setupAnswered));
-export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
+export const choicesOf = (q, ctx, a) => typeof q.choices === 'function' ? q.choices(ctx, a) : (q.choices || []);
+export const headOf = (q, a) => typeof q.head === 'function' ? q.head(a) : q.head;
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
 // (a number answer, such as Number of Hot Side Vessels, matches its words: 3 is '3')
@@ -355,7 +364,8 @@ export function startAnswers(ctx, list = SETUP_QUESTIONS) {
 export function answerWords(q, v, ctx) {
   if (q.kind === 'branch') return '';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
-  if (q.kind === 'pick' || q.kind === 'vessel') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
+  if (q.kind === 'vessel') return Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v)?.[1] ?? String(v ?? '');
+  if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
 }
 // a typed answer that is no good (null: fine)
