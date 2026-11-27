@@ -80,13 +80,13 @@ assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.kind === 'branch'), undefin
 assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), '2', ctx()), '2');
 // Number of Hot Side Vessels (2026-11-27): a box, a whole number 1 to 10, and the questions branch on it: 1, 2, 3 or more
 { const vc = SETUP_QUESTIONS.find(q => q.id === 'vesselCount');
-  assert.ok(vc.kind === 'num' && vc.min === 1 && vc.max === 10 && vc.head === 'Number of Hot Side Vessels');
-  for (const v of ['1', '10', 7, ' 3 ']) assert.equal(answerError(vc, v), null, String(v));
-  for (const v of ['', '0', '11', '2.5', 'x', null]) assert.match(answerError(vc, v), /whole number from 1 to 10/, String(v));
-  assert.deepEqual(VESSELS_3UP, ['3', '4', '5', '6', '7', '8', '9', '10']);
+  assert.ok(vc.kind === 'num' && vc.min === 1 && vc.max === 6 && vc.head === 'Number of Hot Side Vessels');
+  for (const v of ['1', '6', 5, ' 3 ']) assert.equal(answerError(vc, v), null, String(v));
+  for (const v of ['', '0', '7', '10', '2.5', 'x', null]) assert.match(answerError(vc, v), /whole number from 1 to 6/, String(v));
+  assert.deepEqual(VESSELS_3UP, ['3', '4', '5', '6']);      // "limit Hot Side to 6"
   assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: ' 6 ' }, ctx(), undefined, new Set(['vesselCount'])).brewDefaults.vesselCount, '6');
-  for (const n of ['3', '7', 10]) assert.equal(brewerLevelOf({ vesselCount: n, recirculate: true }), '8');
-  assert.equal(brewerLevelOf({ vesselCount: 2, pumpCount: '2' }), '6'); assert.equal(brewerLevelOf({ vesselCount: '11' }), null); }
+  for (const n of ['3', '5', 6]) assert.equal(brewerLevelOf({ vesselCount: n, recirculate: true }), '8');
+  assert.equal(brewerLevelOf({ vesselCount: 2, pumpCount: '2' }), '6'); assert.equal(brewerLevelOf({ vesselCount: '7' }), null); }
 // held (2026-11-27: "Leave the brewery interview to the one question for now"): Brewery asks only Number of Vessels; ALL is the list with
 // nothing held, for the branching tests below
 const ALL = SETUP_QUESTIONS.map(q => ({ ...q, held: false }));
@@ -169,7 +169,7 @@ assert.equal(nsiLevelOf(undefined, 'allgrain'), null);
 const app = fs.readFileSync('public/app.js', 'utf8');
 assert.match(app, /if \(setupNeeded\(S\.config\)\) await setupInterview\(\{ first: true \}\);/);
 assert.match(app, /item\('🧭 Setup Interview'/);
-assert.match(app, /\['vesselCount', 'Number of Hot Side vessels \(1 to 10\)', 'num'/);
+assert.match(app, /\['vesselCount', 'Number of Hot Side vessels \(1 to 6\)', 'num'/);
 assert.match(app, /\['_ub', 'Mandatory', 'head'\]/);
 assert.match(app, /\['_yb', 'Your Brewery', 'head'\]/);
 assert.match(app, /\['_nbh', 'New Build', 'head'\]/);

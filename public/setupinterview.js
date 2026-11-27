@@ -47,7 +47,9 @@ export const PUMP_COUNTS = [['1', 'One pump (or none)'], ['2', 'Two pumps']];
 // Number of Hot Side vessels (OakBarn Brewery, 2026-11-27: "Number of Hot Side vessels needs to be a Box and you can enter a number.
 // The number can be from 1 - 10"; "Then Branch depending on the number entered"): a whole number 1 to 10 (null: not a good one).
 // The branches: 1, 2, and 3 or more (VESSELS_3UP)
-export const VESSELS_MIN = 1, VESSELS_MAX = 10;
+// (2026-11-27 later: "Maybe 7 vessels could fit on the entire screen of a Tab at the 1920 x 1440 resolution and still be able to read
+// the Gauges, and no room for text and other widgets, so maybe limit Hot Side to 6 and Fermentors to 6"): 1 to 6
+export const VESSELS_MIN = 1, VESSELS_MAX = 6;
 export const vesselCountOf = v => { const n = Number(String(v ?? '').trim()); return String(v ?? '').trim() !== '' && Number.isInteger(n) && n >= VESSELS_MIN && n <= VESSELS_MAX ? n : null; };
 export const VESSELS_3UP = Array.from({ length: VESSELS_MAX - 2 }, (_, i) => String(i + 3));
 // how one vessel is heated (OakBarn Brewery, 2026-11-27): the Tick Boxes of the one vessel branch, and the list on Default settings
@@ -391,7 +393,7 @@ export const SETUP_QUESTIONS = [
   // (2026-11-27 later: a box to type a number in, 1 to 10, and the interview branches on it)
   { id: 'vesselCount', step: 'Brewery', kind: 'num', save: 'defaults', min: VESSELS_MIN, max: VESSELS_MAX,
     head: 'Number of Hot Side Vessels',
-    ask: 'How many Hot Side vessels do you have (or are you building)? Type a number from 1 to 10.',
+    ask: 'How many Hot Side vessels do you have (or are you building)? Type a number from 1 to 6.',
     why: 'For every Brewer Type. Count the Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. The next questions depend on the number.',
     start: ctx => String(vesselStart(ctx.defaults, 'vesselCount')) },
   // one vessel: how is it heated? (OakBarn Brewery, 2026-11-27, his "1 vessel" page: "If one Vessel. Next question: How is the vessel

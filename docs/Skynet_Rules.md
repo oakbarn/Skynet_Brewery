@@ -1864,7 +1864,9 @@ answers and changes nothing until **✔ Finish**.
   a number. The number can be from 1 - 10"; "Then Branch depending on the number entered"): this wins over the Tick Boxes of Number of
   Vessels above. It is a box for a whole number from **1 to 10** (any other answer gets one red note); Default settings has the same box.
   The questions after it branch on the number: **1**, **2**, or **3 to 10** (`VESSELS_3UP`); 3 or more works out the Brewer Level like
-  three vessels.
+  three vessels. **CHANGED 2026-11-27 later** (OakBarn Brewery: "Maybe 7 vessels could fit on the entire screen of a Tab at the 1920 x
+  1440 resolution and still be able to read the Gauges, and no room for text and other widgets, so maybe limit Hot Side to 6 and
+  Fermentors to 6"): the box takes **1 to 6**, and 3 or more is 3 to 6. Fermentors are 1 to 6 too when that question comes.
 - **CHANGED 2026-11-27, Tick Boxes after Brewery** (OakBarn Brewery: "Rebuild all the Interview Dialogs in Order After the Brewery
   interview using check boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to
   up to 4 Lines for a check Box if needed"): a row with `tick` is Tick Boxes when it is Yes/No or has **fewer than 6** choices
@@ -7674,6 +7676,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-27: Rule 2.6 changed: up to 8 Tick Boxes on one line (more is a dropdown); the Setup Interview dialog is wider (900 px). Help 248.
 - 2026-11-27: Rule 2.75 changed: new Brewer Types BIAB (Brew in a Bag) and All In One Brewer (Level 4); question 2 has six Tick Boxes. Help 248, 155, 100.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.
+- 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is 1 to 6 (a Tab fits about 7 vessels with readable Gauges); Fermentors 1 to 6 when asked. Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
 - 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
 - 2026-11-27: Rule 2.75 changed: question 2 Brewer Type is four Tick Boxes on one screen; the "Do you grind your own grain?" follow-up is gone. Help 248.
