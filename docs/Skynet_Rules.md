@@ -1775,7 +1775,20 @@ answers and changes nothing until **✔ Finish**.
   Defaults"): steps 1 to 3 must be answered. Steps **4 Brewery** (the Brewery Equipment Interview), **5 Recipes** (the Recipe Default
   Interview) and **6 Other Defaults** (a catch all) are **branches**: each opens on a page that lists what it asks, and **Skip there
   skips the whole branch**; inside it each question has its own Skip. Then **Done**.
-- The first page carries the one big warning (red, Rule 6.20 look), shown to everyone: design on a computer, not a phone or tablet.
+- **CHANGED 2026-11-27** (OakBarn Brewery, his picture of the first screen, picked "A"; "Skip will get the Do Not Enter on the
+  mandatory questions"). This wins over the order and the "steps 1 to 3" in this Rule: the six steps are now **1 Units · 2 Brewer
+  Type · 3 Brewery · 4 Other Defaults · 5 Recipe Defaults · 6 Help Language**. **Only steps 1 and 2 must be answered** (Units, and
+  Brewer Type with its "Do you grind your own grain?"); Close's red pop-up and ✔ Finish check those two, and the blue pop-up says
+  it "will work with just the first 2 questions". Steps 3 to 5 are the branches. Step 6 Help Language is one question with its own
+  Skip (English). Skip always shows; on a must question **not answered yet** it has the **🚫 not-allowed pointer** and does nothing;
+  once answered (Next, or saved from an earlier run) Skip works and keeps the answer ("they cannot be skipped if unanswered. If
+  answered skip would work"). **◀ Back and Close always work** ("they can go back and close at any time"). The steps strip stays
+  active ("Leave all the Menu Items at the top active").
+- **The Welcome page** (OakBarn Brewery, 2026-11-27, his text word for word, spelling and grammar corrected) is the first page of
+  every run, before question 1: a **blue box**, the one note about phones and small screens ("While Skynet can do many things, it
+  cannot make a physical screen any larger ..."), then what the interview is, then "Click to proceed: Next ▶". It replaces the red
+  warning that was on question 1 (ONE WARNING ONLY). Skip there goes on like Next ▶; ◀ Back shows with the 🚫 pointer (nothing is before it); ◀ Back on question 1 comes back
+  to it. More pages come in Fritz's order.
 - Questions now: **1 Units** (must). **2 Help language** (must): English, Français, and the User Language once it is on this Brain
   (Rule 11.16; "But additional Language?"). **3 Brewer Type** (must; "The highest level you will brew now. This is just to get
   started. Skynet can grow with you"): Extract Can Kit, Extract Partial Grain and Hops, All Grain; **All Grain** asks next "Do you
@@ -7527,6 +7540,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
+- 2026-11-27: Rule 2.75 changed (OakBarn Brewery, his picture of the first screen, picked "A"): Welcome page first (blue phone note); steps now Units, Brewer Type, Brewery, Other Defaults, Recipe Defaults, Help Language; only steps 1 and 2 mandatory; Skip shows the 🚫 pointer on must questions. Help 248.
 - 2026-11-26: Rule 2.75 new (OakBarn Brewery: "Start the no Skynet settings interview first ... First question (that cannot be skipped) US or Metric"; Brewer Level "A and Mandatory"): the Setup Interview on a new installation and on ☰ Menu; questions kept as data; Brewer Level and Yeast Starter on Default settings. Help 248.
 - 2026-11-26: Rule 2.75 changed (Panel Update 17, OakBarn Brewery): 6 steps, Units, Help language (with the User Language) and Brewer Type must be answered; Brewer Type asks "Do you grind your own grain?" after All Grain; Brewery, Recipes and Other Defaults are branches with Skip for the whole branch; Brewer Level is in Brewery and may be skipped; Batch Size, Mash Profile and Boil Profile added in Recipes; Piped Manifold (a Switch, Default settings) added in Brewery; green answered questions, open and Next on the first not green; Close red pop-up until steps 1 to 3, then one blue pop-up and the answers so far saved; `when:` branching in a question row; Default settings sections (Mandatory, Your Brewery, Branch Manifold hidden while Piped Manifold is Off, New Build, Brewery Vessels questions, Yeast Starter in New User Recipes). Rule 2.42 changed: a branch may hide. Help 248 (and French).
 - 2026-11-25: Rule 16.11 changed (OakBarn Brewery: "I want it on the Manifold Tab ... By default it goes where it started but can be on a different tab (or we could just put a true Clone on the other Tab)"; picked Change the Rule): the fill's Override goes by default on the Tab where the fill starts, and may be on a different Tab or have a Clone there. Rule 16.5 extended (OakBarn Brewery, Water fills: "Popup a Message to set the manifold and click done when ready... Just Not Build!"): `ask_Tab "text"` is the ask as a bar on top, so the Tab can still be run; Edit layout waits until Done. Rule 16.11 note: Only while tap water flows also counts tap water moving through a pipe on the Tab, and a valve the button's own Process opened (valves after the Hose Bib with Tap Water off, and their Clones; since PR 618 the Water Override never showed). The 3 Vessel 1 Pump sample's Water Tab is for picking: its buttons go to the Brew House (`show "Brew House"`), where the message, Water delay, Water timer, warnings, Water Override and Float now are (renamed _BH; the Float shows only for a Float button). Help 239, 100, 22 (and French). Checked against both programs: the BruControl Import has no ask_Tab (only written in Skynet Processes). (thread "Run Water fills from the manifold Tab")

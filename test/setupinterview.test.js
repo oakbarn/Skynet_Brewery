@@ -4,31 +4,35 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { brewerLevelOf, vesselAnswersOf, VESSEL_KEYS } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf } from '../public/setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf } from '../public/setupinterview.js';
 
 const ctx = (more = {}) => ({ defaults: {}, boil: null, patron: false, helpLang: null, brewerTypes: [['cankit', 'Extract Can Kit'], ['allgrain', 'All Grain'], ['allgrainmill', 'All Grain (own Grain Mill)']], brewerTypeDefault: 'allgrain',
   pipeSizes: [['0.5', '1/2"'], ['1', '1"']], hoseSizes: [['0.5', '1/2"']], helpLangs: [['en', 'English'], ['fr', 'Français']],
   batchLDefault: 18.927, mashDefault: 'skynet-single-batch', boilDefault: 'skynet-boil-60',
   mashProfiles: [['', '(none)'], ['skynet-single-batch', 'Single Step, Batch Sparge']], boilProfiles: [['', '(none)'], ['skynet-boil-60', '60 Minute Boil']], ...more });
 
-// Panel Update 17: 6 steps; question 1 is US or Metric; steps 1 to 3 must be answered ("Skip Button Appears Not Available Before");
-// Brewery, Recipes and Other Defaults are branches that open on their own page; the rows are in step order
-assert.deepEqual(SETUP_STEPS, ['Units', 'Help language', 'Brewer Type', 'Brewery', 'Recipes', 'Other Defaults']);
+// Panel Update 17: 6 steps; question 1 is US or Metric. 2026-11-27 (his picture, "A"): the new order, and only steps 1 and 2 must be
+// answered; Brewery, Other Defaults and Recipe Defaults are branches that open on their own page; the rows are in step order
+assert.deepEqual(SETUP_STEPS, ['Units', 'Brewer Type', 'Brewery', 'Other Defaults', 'Recipe Defaults', 'Help Language']);
 assert.equal(SETUP_QUESTIONS[0].id, 'units');
 assert.equal(SETUP_QUESTIONS[0].must, true);
-assert.deepEqual(SETUP_QUESTIONS.filter(q => q.must).map(q => q.id), ['units', 'helpLang', 'brewerType', 'grindOwn']);
-for (const q of SETUP_QUESTIONS) assert.equal(!!q.must, SETUP_STEPS.indexOf(q.step) < 3, q.id);
+assert.deepEqual(SETUP_QUESTIONS.filter(q => q.must).map(q => q.id), ['units', 'brewerType', 'grindOwn']);
+for (const q of SETUP_QUESTIONS) assert.equal(!!q.must, SETUP_STEPS.indexOf(q.step) < 2, q.id);
 assert.deepEqual(SETUP_QUESTIONS.map(q => SETUP_STEPS.indexOf(q.step)), SETUP_QUESTIONS.map(q => SETUP_STEPS.indexOf(q.step)).sort((x, y) => x - y));
-assert.deepEqual(SETUP_QUESTIONS.filter(q => q.kind === 'branch').map(q => q.step), ['Brewery', 'Recipes', 'Other Defaults']);
-for (const st of ['Brewery', 'Recipes', 'Other Defaults']) assert.equal(SETUP_QUESTIONS.find(q => q.step === st).kind, 'branch', st);
+assert.deepEqual(SETUP_QUESTIONS.filter(q => q.kind === 'branch').map(q => q.step), ['Brewery', 'Other Defaults', 'Recipe Defaults']);
+assert.equal(SETUP_QUESTIONS.find(q => q.step === 'Help Language').id, 'helpLang');
+for (const st of ['Brewery', 'Other Defaults', 'Recipe Defaults']) assert.equal(SETUP_QUESTIONS.find(q => q.step === st).kind, 'branch', st);
 const stepOf = id => SETUP_QUESTIONS.find(q => q.id === id).step;
 assert.deepEqual(['vesselCount', 'pipedManifold', 'defPipeSize', 'defHoseSize'].map(stepOf), ['Brewery', 'Brewery', 'Brewery', 'Brewery']);
-assert.deepEqual(['yeastStarter', 'batch', 'mashProfile', 'boilProfile'].map(stepOf), ['Recipes', 'Recipes', 'Recipes', 'Recipes']);
+assert.deepEqual(['yeastStarter', 'batch', 'mashProfile', 'boilProfile'].map(stepOf), ['Recipe Defaults', 'Recipe Defaults', 'Recipe Defaults', 'Recipe Defaults']);
 assert.deepEqual(['breweryName', 'airport', 'elevation'].map(stepOf), ['Other Defaults', 'Other Defaults', 'Other Defaults']);
 assert.deepEqual(choicesOf(SETUP_QUESTIONS[0], ctx()).map(c => c[0]), ['US', 'Metric']);
 // the one big warning, on the first page only (one warning, Rule 6.20 look)
-assert.match(SETUP_QUESTIONS[0].note, /computer, not on a phone or tablet/);
-assert.equal(SETUP_QUESTIONS.filter(q => q.note).length, 1);
+// the one phone note is on the Welcome page now (OakBarn Brewery, 2026-11-27), not on a question
+assert.match(SETUP_WELCOME.note, /cannot make a physical screen any larger/);
+assert.equal(SETUP_QUESTIONS.filter(q => q.note).length, 0);
+assert.equal(SETUP_WELCOME.paras.length, 2);
+assert.doesNotMatch(JSON.stringify(SETUP_WELCOME), /scrren|controoled|breower|intreview|amswered/);
 // ids are unique, every row has what the screen needs
 assert.equal(new Set(SETUP_QUESTIONS.map(q => q.id)).size, SETUP_QUESTIONS.length);
 for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.ask && q.why && q.kind && (q.kind === 'branch' || typeof q.start === 'function') && q.save, q.id); }
@@ -109,23 +113,23 @@ assert.ok(!shownQuestions({ ...a, vesselCount: '1' }, ctx(), extra).some(q => q.
 const qs0 = shownQuestions(a, ctx());
 assert.equal(answeredAtStart(ctx()).size, 0);
 assert.equal(nextOpen(qs0, new Set()), 0);
-const g3 = new Set(['units', 'helpLang', 'brewerType', 'grindOwn']);
-assert.equal(qs0[nextOpen(qs0, g3)].id, '_brewery', 'steps 1 to 3 green: it opens on the Brewery branch page');
+const g3 = new Set(['units', 'brewerType', 'grindOwn']);
+assert.equal(qs0[nextOpen(qs0, g3)].id, '_brewery', 'steps 1 and 2 green: it opens on the Brewery branch page');
 assert.ok(stepGreen('Units', qs0, g3) && !stepGreen('Brewery', qs0, g3));
 const gB = new Set([...g3, 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
 assert.ok(isGreen(qs0.find(q => q.id === '_brewery'), qs0, gB) && stepGreen('Brewery', qs0, gB));
-assert.equal(qs0[nextOpen(qs0, gB)].id, '_recipes');
+assert.equal(qs0[nextOpen(qs0, gB)].id, '_other');
 assert.equal(nextOpen(qs0, new Set(qs0.map(q => q.id))), qs0.length, 'all green: Done');
 // saved and read back; an older finished install counts what it saved
 const saved = setupSave(a, ctx(), undefined, gB).brewDefaults;
-assert.deepEqual(saved.setupAnswered, ['units', 'helpLang', 'brewerType', 'grindOwn', 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
+assert.deepEqual(saved.setupAnswered, ['units', 'brewerType', 'grindOwn', 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
 assert.deepEqual([...answeredAtStart(ctx({ defaults: saved }))], saved.setupAnswered);
 assert.ok(answeredAtStart(ctx({ defaults: { setupDone: true, units: 'US', brewerType: 'allgrain', batchL: 20 } })).has('batch'));
-// Close: red until steps 1 to 3 are green, then the blue words
-assert.deepEqual(mustMissing(qs0, new Set(['units'])).map(q => q.id), ['helpLang', 'brewerType', 'grindOwn']);
+// Close: red until steps 1 and 2 are green, then the blue words
+assert.deepEqual(mustMissing(qs0, new Set(['units'])).map(q => q.id), ['brewerType', 'grindOwn']);
 assert.equal(mustMissing(qs0, g3).length, 0);
-assert.equal(setupMustMsg(qs0), 'Steps 1 to 3 (Units, Help language, Brewer Type) must be completed first.');
-assert.match(SETUP_OPEN_MSG, /work with just the first 3 questions/);
+assert.equal(setupMustMsg(qs0), 'Steps 1 and 2 (Units, Brewer Type) must be completed first.');
+assert.match(SETUP_OPEN_MSG, /work with just the first 2 questions/);
 
 // bad typing
 assert.ok(answerError(SETUP_QUESTIONS.find(q => q.id === 'elevation'), 'high'));

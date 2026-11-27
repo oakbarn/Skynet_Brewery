@@ -7,14 +7,16 @@ again any time from **☰ Menu > 🧭 Setup Interview**.
 ## How it works
 
 - One question per page, with a short explanation under it. The steps strip at the top shows where you are, in 6 steps:
-  **1. Units · 2. Help language · 3. Brewer Type · 4. Brewery · 5. Recipes · 6. Other Defaults**, then Done.
+  **1. Units · 2. Brewer Type · 3. Brewery · 4. Other Defaults · 5. Recipe Defaults · 6. Help Language**, then Done.
 - **◀ Back** goes to the question before. **Next ▶** keeps your answer and goes on. A choice of 6 or fewer is a box: one click picks
   it and goes on. A choice of more than 6 is a dropdown (Rule 2.6).
-- Steps 1 to 3 must be answered, so they have no Skip: **US or Metric** (always the first question), **Help language** and
-  **Brewer Type**.
-- Steps 4 **Brewery**, 5 **Recipes** and 6 **Other Defaults** are branches. Each one opens on a page that lists what it asks.
+- Only the first two steps must be answered: **US or Metric** (always the first question) and **Brewer Type**. Until one of them is
+  answered, its **Skip** shows the 🚫 Do Not Enter pointer and does nothing; once it is answered, Skip keeps your answer and goes
+  on. **◀ Back** and **Close** always work.
+- Steps 3 **Brewery**, 4 **Other Defaults** and 5 **Recipe Defaults** are branches. Each one opens on a page that lists what it asks.
   **Next ▶** starts it. **Skip** on that page skips the whole branch and keeps Skynet's own answers. Inside a branch, each question
   has its own **Skip**.
+- Step 6 **Help Language** is one question with its own **Skip** (English).
 - **Skip** keeps Skynet's own answer and goes on, and the question stays not green. Skynet does not remind you later.
 - A question turns **green** when you answer it (Next). A step turns green when every question in it is answered. Click a step to go
   to it.
@@ -23,33 +25,39 @@ again any time from **☰ Menu > 🧭 Setup Interview**.
 - Every page starts on Skynet's own answer (or on your saved answer when you run it again), so Next, Next, Next gives a working panel.
 - The last page, **Done**, shows every answer. **✎** goes back to that question. **✔ Finish** saves them all.
 - **Close** or **✕**:
-  - while steps 1 to 3 are not all answered, a **red** pop-up says they must be completed first, and the interview stays open.
+  - while steps 1 and 2 are not both answered, a **red** pop-up says they must be completed first, and the interview stays open.
   - after that, when some questions are not green yet, a **blue** pop-up says: they do need completing; setting up Skynet depends
-    on the answers to many of these questions to make it your own, but it will work with just the first 3 questions. **◀ Keep
+    on the answers to many of these questions to make it your own, but it will work with just the first 2 questions. **◀ Keep
     answering** goes back; **Close** saves the answers so far and closes. Run it again from ☰ Menu to answer the rest.
 
-The first page has one warning: design your brewery on a computer, not on a phone or tablet, because the screen is too small. A
-phone or tablet is fine for watching and running a brew day.
+## The Welcome page
+
+The interview always opens on a **Welcome** page, before the first question. Its blue box is the one note about phones and small
+screens: Skynet may be controlled from almost any device with a browser and internet connection, but it is much easier to design
+on a computer, because finer details are hard to see on a small screen. Under it, the page says what the interview is: nothing is
+written in stone, every answer can be changed any time on **☰ Menu > Default settings**, and you can run the interview again from
+☰ Menu. **Next ▶** (at the top, or after **Click to proceed:**) or **Skip** goes to the first question that is not green. **◀ Back** on the
+first question comes back to the Welcome page.
 
 ## The questions
 
 | Step | Question | What it sets | Skynet's answer |
 |---|---|---|---|
 | 1 | **US or Metric?** (must be answered) | Units: what every amount, temperature and Recipe shows in. Skynet keeps every number in metric inside (Rule 2.59), so changing it never changes a saved number | US |
-| 2 | **Help language** (must be answered) | English or French for the Help pages and balloons, in this browser. Once a User Language is on this Brain (? Help > 🌐 Languages), it is a choice too | English |
-| 3 | **What is the highest level you will brew now?** (must be answered) | Your Brewer Type: Extract Can Kit, Extract Partial Grain and Hops, or All Grain. This is just to get started: Skynet can grow with you. The No Recipe Found pop-up starts on it (Rule 16.14) | All Grain |
-| 3 | **Do you grind your own grain?** (only after All Grain) | Yes: All Grain (own Grain Mill) | No |
-| 4 Brewery | **Brewery Vessels**: how many brewing vessels, then (by the answer) All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus | They work out your **Brewer Level**, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
-| 4 Brewery | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. The **Piped Manifold** switch on Default settings | No |
-| 4 Brewery | **Pipe size** and **Hose size** (only after Piped Manifold Yes) | The size a new pipe or hose starts at | 1/2" |
-| 5 Recipes | **Yeast Starter** | Information only: PreBrew reminds you a day or two ahead | No |
-| 5 Recipes | **Batch Size** | How much beer a new Recipe makes, into the fermenter, in gallons (US) or liters (Metric); kept in liters | 5 gallons (18.9 liters) |
-| 5 Recipes | **Mash Profile** (All Grain only) and **Boil Profile** | The Profiles a new Recipe starts with | Single Step, Batch Sparge and Skynet's 60 minute Boil Profile |
-| 6 Other Defaults | **Brewery Name** (Patrons only) | The name at the top of every Tab | Skynet Panel |
-| 6 Other Defaults | **Airport** | The airport (ICAO code, for example KDFW) whose weather report gives the air pressure for the boil temperature. **Test** fetches it now | empty: standard air |
-| 6 Other Defaults | **Elevation** | How high your brewery is, in feet (US) or meters (Metric); kept in meters | empty |
+| 2 | **What is the highest level you will brew now?** (must be answered) | Your Brewer Type: Extract Can Kit, Extract Partial Grain and Hops, or All Grain. This is just to get started: Skynet can grow with you. The No Recipe Found pop-up starts on it (Rule 16.14) | All Grain |
+| 2 | **Do you grind your own grain?** (only after All Grain) | Yes: All Grain (own Grain Mill) | No |
+| 3 Brewery | **Brewery Vessels**: how many brewing vessels, then (by the answer) All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus | They work out your **Brewer Level**, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
+| 3 Brewery | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. The **Piped Manifold** switch on Default settings | No |
+| 3 Brewery | **Pipe size** and **Hose size** (only after Piped Manifold Yes) | The size a new pipe or hose starts at | 1/2" |
+| 4 Other Defaults | **Brewery Name** (Patrons only) | The name at the top of every Tab | Skynet Panel |
+| 4 Other Defaults | **Airport** | The airport (ICAO code, for example KDFW) whose weather report gives the air pressure for the boil temperature. **Test** fetches it now | empty: standard air |
+| 4 Other Defaults | **Elevation** | How high your brewery is, in feet (US) or meters (Metric); kept in meters | empty |
+| 5 Recipe Defaults | **Yeast Starter** | Information only: PreBrew reminds you a day or two ahead | No |
+| 5 Recipe Defaults | **Batch Size** | How much beer a new Recipe makes, into the fermenter, in gallons (US) or liters (Metric); kept in liters | 5 gallons (18.9 liters) |
+| 5 Recipe Defaults | **Mash Profile** (All Grain only) and **Boil Profile** | The Profiles a new Recipe starts with | Single Step, Batch Sparge and Skynet's 60 minute Boil Profile |
+| 6 Help Language | **Help language** | English or French for the Help pages and balloons, in this browser. Once a User Language is on this Brain (? Help > 🌐 Languages), it is a choice too | English |
 
-The Recipes step only sets what a new Recipe starts with. A Brew Day asks about its own Recipe in the **Recipe Interview**.
+The Recipe Defaults step only sets what a new Recipe starts with. A Brew Day asks about its own Recipe in the **Recipe Interview**.
 
 ## The Brewer Levels
 

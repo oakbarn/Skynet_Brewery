@@ -1906,6 +1906,13 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupBody { margin: 8px 0; }
 .setupDlg .setupAsk { font-size: 1.25em; font-weight: 600; margin: 6px 0; }
 .setupDlg .setupWarn { color: var(--bad, #d33); font-weight: 700; font-size: 1.1em; border: 2px solid currentColor; border-radius: 8px; padding: 8px 10px; }
+/* Skip (and Back on the Welcome page) where it is not allowed: the 🚫 Do Not Enter pointer (OakBarn Brewery, 2026-11-27) */
+.setupDlg .setupNoSkip { cursor: not-allowed; opacity: .45; }
+/* the Setup Interview's Welcome page (OakBarn Brewery, 2026-11-27): the blue phone and small screen note, then the text */
+.setupDlg .setupWelcomeNote { background: #0b8fd8; color: #fafafa; font-size: 1.35em; font-weight: 700; line-height: 1.3; border: 3px solid #fafafa; border-radius: 16px; padding: 10px 14px; margin: 6px 0 12px; }
+.setupDlg .setupWelcomeText { max-width: 46em; line-height: 1.4; }
+.setupDlg .setupProceed { font-size: 1.4em; margin-top: 14px; }
+.setupDlg .setupProceed button { font-size: .75em; margin-left: 8px; }
 .setupDlg .setupPicks { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
 .setupDlg .setupPick { text-align: left; padding: 10px 12px; }
 .setupDlg .setupPick.cur { outline: 2px solid var(--accent); }

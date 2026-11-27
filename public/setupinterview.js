@@ -74,30 +74,36 @@ const US_FT = 0.3048;      // feet to metres (the same factor the boil temperatu
 
 // the 6 steps of the strip (Panel Update 17, OakBarn Brewery, 2026-11-26: "1. Units 2. Help language 3. Brewer Type 4. Brewery
 // 5. Recipes 6. Other Defaults"; "Skip Button Appears Not Available Before"; "These only pertain to the Skynet Panel Settings Defaults").
-// Steps 1 to 3 must be answered. Steps 4 to 6 are branches: each opens on a page that says what it asks; Skip there skips the whole
+// (Before 2026-11-27: steps 1 to 3 must be answered.) Steps 3 to 5 are branches: each opens on a page that says what it asks; Skip there skips the whole
 // branch, and inside it each question has its own Skip.
-export const SETUP_STEPS = ['Units', 'Help language', 'Brewer Type', 'Brewery', 'Recipes', 'Other Defaults'];
+// The order and the mandatory steps changed (OakBarn Brewery, 2026-11-27, his picture of the first screen, picked "A": "1. Units 2. Brewer
+// Type 3. Brewery 4. Other Defaults 5. Recipe Defaults 6. Help Language"; "Only the first two simple questions are mandatory"; "Skip will
+// get the Do Not Enter on the mandatory questions"): steps 1 and 2 must be answered; 3 to 5 are branches; 6 is one question with a Skip.
+export const SETUP_STEPS = ['Units', 'Brewer Type', 'Brewery', 'Other Defaults', 'Recipe Defaults', 'Help Language'];
 // the Brewer Types the Setup Interview offers: All Grain asks "Grind your own grain?" next (Panel Update 17, item 6a), which picks
 // All Grain (own Grain Mill)
 const MILL = 'allgrainmill', GRAIN = 'allgrain';
 const L_PER_GAL = 3.785411784;
 const round2 = n => Math.round(n * 100) / 100;
 
+// the Welcome page: the first page of the interview, before question 1 (OakBarn Brewery, 2026-11-27, his picture of the first screen,
+// spelling and grammar corrected). The blue box is the one phone and small screen note (it replaces the warning that was on question 1)
+export const SETUP_WELCOME = {
+  note: 'While Skynet can do many things, it cannot make a physical screen any larger. It can fill a screen, but a phone\'s screen is not very big for precise work. Skynet is much easier to design and manipulate on a computer. Skynet may be controlled from almost any device with a browser and internet connection, but finer details are hard to see on a small screen.',
+  paras: [
+    'This is an interview with questions to aid you in setting up YOUR Brewery. And don\'t worry, nothing is written in stone. Any answers you give now will guide you into setting up Skynet the first time, but any of these can easily be changed at any time by accessing the Default settings from the ☰ Menu. You can even redo this interview if you want to. As you go into more complex brewing or buy that shiny new stainless pot, Skynet can grow with you. If you need to take a break or call it a night, Skynet will keep your answers and even store them if you shut down your computer.',
+    'Only the first two simple questions are mandatory. All other questions can be answered in any order. The longest (and most important) is your Brewery, where the physical brewery is duplicated on the Skynet screen as best it can. Skynet believes that a pump should look like a pump and not some odd icon. If your Brewery is simple, the questions are easy, but if you are an expert Brewer with a 3 Vessel piped Brewery, the questions take longer.',
+  ],
+  proceed: 'Click to proceed:',
+};
+
 export const SETUP_QUESTIONS = [
-  // ---- 1 to 3: must be answered (no Skip)
+  // ---- 1 and 2: must be answered (Skip shows 🚫 Not allowed)
   { id: 'units', step: 'Units', kind: 'pick', save: 'defaults', must: true,
     ask: 'US or Metric?',
     why: 'Every amount, temperature and Recipe on every screen shows in this. Skynet keeps every number in metric inside, so you can change it any time on ☰ Menu > Default settings and nothing you saved changes.',
-    note: 'Design your brewery on a computer, not on a phone or tablet: the screen is too small. A phone or tablet is fine for watching and running a brew day.',
     choices: [['US', 'US', 'gallons, pounds, °F'], ['Metric', 'Metric', 'liters, kilograms, °C']],
     start: ctx => ctx.defaults?.units === 'Metric' ? 'Metric' : 'US' },
-  // the additional language (Panel Update 17, item 2: "But additional Language?"): the User Language too, once it is on this Brain (Rule 11.16)
-  { id: 'helpLang', step: 'Help language', kind: 'pick', save: 'browser', must: true,
-    ask: 'Which language for the Help?',
-    why: 'The Help pages and the balloons can be English or French, or the User Language once one is on this Brain. The screens, buttons and labels stay English. It is kept in this browser; the ? Help window can change it any time.',
-    more: ctx => ctx.helpLangs?.some(([k]) => k === 'user') ? '' : 'Another language: after the interview, an Admin adds one on the ? Help window > 🌐 Languages (Help by AI translation). It then shows here and on ☰ Menu.',
-    choices: ctx => ctx.helpLangs?.length ? ctx.helpLangs : [['en', 'English'], ['fr', 'Français']],
-    start: ctx => (ctx.helpLangs?.length ? ctx.helpLangs : [['en'], ['fr']]).some(([k]) => k === ctx.helpLang) ? ctx.helpLang : 'en' },
   // Panel Update 17, item 6: "The highest level you will brew now. This is just to get started. Skynet can grow with you. Needs to be
   // 3 mandatory. Select All Grain and follow up question Grind your own grain?"
   { id: 'brewerType', step: 'Brewer Type', kind: 'pick', save: 'defaults', must: true,
@@ -111,7 +117,7 @@ export const SETUP_QUESTIONS = [
     show: a => a.brewerType === GRAIN,
     start: ctx => ctx.defaults?.brewerType === MILL },
 
-  // ---- 4 Brewery: the Brewery Equipment Interview (Panel Update 17, items 5, 8, 9: "Equipment in the Brewery you have or Building
+  // ---- 3 Brewery: the Brewery Equipment Interview (Panel Update 17, items 5, 8, 9: "Equipment in the Brewery you have or Building
   // and we will expand this to several questions"; "Can skip"; Pipe size and Hose size "Under the Equipment Branch")
   { id: '_brewery', step: 'Brewery', kind: 'branch', save: 'none',
     ask: 'The Brewery Equipment Interview',
@@ -162,33 +168,7 @@ export const SETUP_QUESTIONS = [
     choices: ctx => ctx.hoseSizes,
     start: ctx => ctx.defaults?.defHoseSize || '0.5' },
 
-  // ---- 5 Recipes: the Recipe Default Interview (Panel Update 17: "Opens the Recipe Default Interview"; item 7: "Yeast Starter goes to
-  // Recipe Interview"). The defaults of a new User Recipe (☰ Menu > Default settings > New User Recipes). The Recipe Interview of a
-  // Brew Day (Rule 17.22) is another interview.
-  { id: '_recipes', step: 'Recipes', kind: 'branch', save: 'none',
-    ask: 'The Recipe Default Interview',
-    why: 'What a new Recipe starts with. You can change each one in the Recipe. Next ▶ starts it. Skip keeps Skynet\'s own answers for all of them. (A Brew Day asks about its own Recipe in the Recipe Interview.)' },
-  { id: 'yeastStarter', step: 'Recipes', kind: 'yesno', save: 'defaults',
-    ask: 'Do you usually make a Yeast Starter?',
-    why: 'Information only: PreBrew reminds you a day or two ahead when it is Yes. It changes nothing else.',
-    start: ctx => ctx.defaults?.yeastStarter === true },
-  { id: 'batch', step: 'Recipes', kind: 'num', save: 'defaults', byUnits: true,
-    ask: a => `How much beer do you usually make, into the fermenter (${a.units === 'Metric' ? 'liters' : 'gallons'})?`,
-    why: 'The Batch Size a new Recipe starts with. Skynet keeps it in liters inside and shows it in your Units.',
-    start: (ctx, a) => { const l = ctx.defaults?.batchL ?? ctx.batchLDefault; return l == null ? '' : round2(a?.units === 'Metric' ? l : l / L_PER_GAL); } },
-  { id: 'mashProfile', step: 'Recipes', kind: 'pick', save: 'defaults',
-    ask: 'Which Mash Profile does a new Recipe start with?',
-    why: 'The mash steps (temperatures and times) of a new All Grain Recipe. ☰ Menu > Mash Profile adds and changes them.',
-    show: a => a.brewerType === GRAIN,
-    choices: ctx => ctx.mashProfiles || [],
-    start: ctx => (ctx.mashProfiles || []).some(([k]) => k === (ctx.defaults?.mashProfile ?? ctx.mashDefault)) ? (ctx.defaults?.mashProfile ?? ctx.mashDefault) : '' },
-  { id: 'boilProfile', step: 'Recipes', kind: 'pick', save: 'defaults',
-    ask: 'Which Boil Profile does a new Recipe start with?',
-    why: 'How long the boil is, and its boil off. ☰ Menu > Boil Profile adds and changes them.',
-    choices: ctx => ctx.boilProfiles || [],
-    start: ctx => (ctx.boilProfiles || []).some(([k]) => k === (ctx.defaults?.boilProfile ?? ctx.boilDefault)) ? (ctx.defaults?.boilProfile ?? ctx.boilDefault) : '' },
-
-  // ---- 6 Other Defaults: the catch all (Panel Update 17: "Opens a catch all"; items 3 and 4, Airport and Elevation: "Needs to be later
+  // ---- 4 Other Defaults: the catch all (Panel Update 17: "Opens a catch all"; items 3 and 4, Airport and Elevation: "Needs to be later
   // as you can Skip")
   { id: '_other', step: 'Other Defaults', kind: 'branch', save: 'none',
     ask: 'Other Defaults',
@@ -206,6 +186,42 @@ export const SETUP_QUESTIONS = [
     ask: a => `How high is your brewery above sea level (${a.units === 'Metric' ? 'meters' : 'feet'})?`,
     why: 'Water boils at a lower temperature up high. Skynet keeps it in meters inside and shows it in your Units.',
     start: (ctx, a) => ctx.boil?.elevationM == null ? '' : Math.round(a?.units === 'Metric' ? ctx.boil.elevationM : ctx.boil.elevationM / US_FT) },
+
+  // ---- 5 Recipe Defaults: the Recipe Default Interview (Panel Update 17: "Opens the Recipe Default Interview"; item 7: "Yeast Starter goes to
+  // Recipe Interview"). The defaults of a new User Recipe (☰ Menu > Default settings > New User Recipes). The Recipe Interview of a
+  // Brew Day (Rule 17.22) is another interview.
+  { id: '_recipes', step: 'Recipe Defaults', kind: 'branch', save: 'none',
+    ask: 'The Recipe Default Interview',
+    why: 'What a new Recipe starts with. You can change each one in the Recipe. Next ▶ starts it. Skip keeps Skynet\'s own answers for all of them. (A Brew Day asks about its own Recipe in the Recipe Interview.)' },
+  { id: 'yeastStarter', step: 'Recipe Defaults', kind: 'yesno', save: 'defaults',
+    ask: 'Do you usually make a Yeast Starter?',
+    why: 'Information only: PreBrew reminds you a day or two ahead when it is Yes. It changes nothing else.',
+    start: ctx => ctx.defaults?.yeastStarter === true },
+  { id: 'batch', step: 'Recipe Defaults', kind: 'num', save: 'defaults', byUnits: true,
+    ask: a => `How much beer do you usually make, into the fermenter (${a.units === 'Metric' ? 'liters' : 'gallons'})?`,
+    why: 'The Batch Size a new Recipe starts with. Skynet keeps it in liters inside and shows it in your Units.',
+    start: (ctx, a) => { const l = ctx.defaults?.batchL ?? ctx.batchLDefault; return l == null ? '' : round2(a?.units === 'Metric' ? l : l / L_PER_GAL); } },
+  { id: 'mashProfile', step: 'Recipe Defaults', kind: 'pick', save: 'defaults',
+    ask: 'Which Mash Profile does a new Recipe start with?',
+    why: 'The mash steps (temperatures and times) of a new All Grain Recipe. ☰ Menu > Mash Profile adds and changes them.',
+    show: a => a.brewerType === GRAIN,
+    choices: ctx => ctx.mashProfiles || [],
+    start: ctx => (ctx.mashProfiles || []).some(([k]) => k === (ctx.defaults?.mashProfile ?? ctx.mashDefault)) ? (ctx.defaults?.mashProfile ?? ctx.mashDefault) : '' },
+  { id: 'boilProfile', step: 'Recipe Defaults', kind: 'pick', save: 'defaults',
+    ask: 'Which Boil Profile does a new Recipe start with?',
+    why: 'How long the boil is, and its boil off. ☰ Menu > Boil Profile adds and changes them.',
+    choices: ctx => ctx.boilProfiles || [],
+    start: ctx => (ctx.boilProfiles || []).some(([k]) => k === (ctx.defaults?.boilProfile ?? ctx.boilDefault)) ? (ctx.defaults?.boilProfile ?? ctx.boilDefault) : '' },
+
+  // ---- 6 Help Language (OakBarn Brewery, 2026-11-27: his picture of the first screen moves it to the last step; not mandatory, it has
+  // a Skip that keeps English)
+  // the additional language (Panel Update 17, item 2: "But additional Language?"): the User Language too, once it is on this Brain (Rule 11.16)
+  { id: 'helpLang', step: 'Help Language', kind: 'pick', save: 'browser',
+    ask: 'Which language for the Help?',
+    why: 'The Help pages and the balloons can be English or French, or the User Language once one is on this Brain. The screens, buttons and labels stay English. It is kept in this browser; the ? Help window can change it any time.',
+    more: ctx => ctx.helpLangs?.some(([k]) => k === 'user') ? '' : 'Another language: after the interview, an Admin adds one on the ? Help window > 🌐 Languages (Help by AI translation). It then shows here and on ☰ Menu.',
+    choices: ctx => ctx.helpLangs?.length ? ctx.helpLangs : [['en', 'English'], ['fr', 'Français']],
+    start: ctx => (ctx.helpLangs?.length ? ctx.helpLangs : [['en'], ['fr']]).some(([k]) => k === ctx.helpLang) ? ctx.helpLang : 'en' },
 ];
 
 // Rule 2.6: more than 6 choices MUST be a dropdown; 6 or fewer are one-click boxes
@@ -289,13 +305,14 @@ export function nextOpen(qs, answered, from = 0) {
 }
 // a step of the strip is green when every question in it is
 export const stepGreen = (step, qs, answered) => qs.filter(q => q.step === step).every(q => isGreen(q, qs, answered));
-// the must questions (steps 1 to 3) that are not green yet
+// the must questions (steps 1 and 2) that are not green yet
 export const mustMissing = (qs, answered) => qs.filter(q => q.must && !answered.has(q.id));
 // Close (OakBarn Brewery, 2026-11-26, typos fixed): "Close Button 1 - 3: Red Popup that 1 - 3 must be completed first. After that if all
 // not green, Blue Pop up advising they do need completing and setting up Skynet depends on the answers to many of these questions to
 // make it their own but it will work with just the first 3 questions."
 export function setupMustMsg(qs) {
   const g = SETUP_STEPS.filter(x => qs.some(q => q.must && q.step === x)), n = g.map(x => SETUP_STEPS.indexOf(x) + 1);
-  return `${n.length > 1 ? `Steps ${n[0]} to ${n[n.length - 1]}` : `Step ${n[0]}`} (${g.join(', ')}) must be completed first.`;
+  return `${n.length > 2 ? `Steps ${n[0]} to ${n[n.length - 1]}` : n.length === 2 ? `Steps ${n[0]} and ${n[1]}` : `Step ${n[0]}`} (${g.join(', ')}) must be completed first.`;
 }
-export const SETUP_OPEN_MSG = 'The questions that are not green do need completing. Setting up Skynet depends on the answers to many of these questions to make it your own, but it will work with just the first 3 questions.';
+// (2026-11-27: "the first 2" now, since only steps 1 and 2 are mandatory)
+export const SETUP_OPEN_MSG = 'The questions that are not green do need completing. Setting up Skynet depends on the answers to many of these questions to make it your own, but it will work with just the first 2 questions.';

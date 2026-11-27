@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16331,7 +16331,7 @@ function rqSummary(q, a, ctx, metric) {
 // Panel Update 17 (OakBarn Brewery, 2026-11-26): 6 steps in the strip; steps 4 Brewery, 5 Recipes and 6 Other Defaults are branches
 // that open on a page saying what they ask, and Skip there skips the whole branch. A question is green once answered (Next); the
 // interview opens on the first one that is not green, and Next goes to the next one (OakBarn Brewery, 2026-11-26: "Complete do not get
-// focus on Open. Focus in Numeric Order."). Close: a red pop-up while steps 1 to 3 are not answered; after that the answers so far are
+// focus on Open. Focus in Numeric Order."). Close: a red pop-up while steps 1 and 2 (1 to 3 before 2026-11-27) are not answered; after that the answers so far are
 // saved, with one blue pop-up when some are not green yet.
 // the red and blue pop-ups of the Setup Interview's Close: on top of the interview; resolves with the value of the button pressed
 // (✕ and Esc: false)
@@ -16358,13 +16358,15 @@ async function setupInterview({ first = false } = {}) {
   if (!can('admin')) return;
   if (!S.boil) try { S.boil = await api('GET', '/ui/boiltemp'); } catch { }
   const ctx = setupCtx(), a = setupStart(ctx), answered = answeredAtStart(ctx);
-  let at = nextOpen(shownQuestions(a, ctx), answered), skipped = new Set();
+  // the interview always opens on the Welcome page (at -1, OakBarn Brewery, 2026-11-27); its Next ▶ goes to the first question that
+  // is not green
+  let at = -1, skipped = new Set();
   const d = h('dialog', { class: 'miniDlg ivDlg nsiDlg setupDlg', 'data-nomenu': '' }), body = h('div', { class: 'setupBody' });
   const bar = h('div', { class: 'bar nsiBar' }), title = h('h3'), stripBox = h('div');
   document.body.append(d);
   return new Promise(res => {
     const end = r => { d.close(); d.remove(); res(r); };
-    // save the answers so far (Finish, and Close once steps 1 to 3 are answered): each one is a Default setting (Rule 2.42)
+    // save the answers so far (Finish, and Close once steps 1 and 2 are answered): each one is a Default setting (Rule 2.42)
     const save = async () => {
       const out = setupSave(a, ctx, undefined, answered);
       if (out.boil) S.boil = await api('PUT', '/ui/boiltemp', out.boil);
@@ -16382,6 +16384,7 @@ async function setupInterview({ first = false } = {}) {
     d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
     const draw = () => {
       const qs = shownQuestions(a, ctx), done = at >= qs.length, q = qs[at];
+      if (at < 0) return drawWelcome(qs);
       // the 6 steps (Panel Update 17), then Done; a branch's step stays lit on every page of it
       const steps = [...SETUP_STEPS, 'Done'], now = done ? SETUP_STEPS.length : SETUP_STEPS.indexOf(q.step);
       const go = n => { at = n; draw(); };
@@ -16410,11 +16413,16 @@ async function setupInterview({ first = false } = {}) {
       // (the group is made here, so the dialog's own button order, Rule 2.54, is not added again when a page is drawn)
       bar.replaceChildren(h('span', { class: 'spacer' }),
         h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
-        at ? h('button', { type: 'button', onclick: () => go(at - 1) }, '◀ Back') : '',
+        h('button', { type: 'button', title: at ? 'The question before' : 'The Welcome page', onclick: () => go(at - 1) }, '◀ Back'),
+        // a must question not answered yet: Skip shows but is not allowed (🚫 pointer, OakBarn Brewery, 2026-11-27: "Skip will get the
+        // Do Not Enter on the mandatory questions"; "they cannot be skipped if unanswered. If answered skip would work"). ◀ Back and
+        // Close always work ("they can go back and close at any time")
+        !done && q.must && !answered.has(q.id) ? h('button', { type: 'button', class: 'setupNoSkip', 'aria-disabled': 'true', title: 'This question must be answered first: no Skip until it is.' }, 'Skip') : '',
+        !done && q.must && answered.has(q.id) ? h('button', { type: 'button', title: 'Keep your answer and go on.', onclick: () => go(nextOpen(qs, answered, at + 1)) }, 'Skip') : '',
         !done && !q.must ? h('button', { type: 'button', title: q.kind === 'branch' ? `Skip the whole ${q.step} step: keep Skynet's own answers. You can change each one any time on ☰ Menu > Default settings.` : 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
         h('span', { class: 'dlgBtnGroup' },
           done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶'),
-          h('button', { type: 'button', title: 'Stop the interview. Steps 1 to 3 must be answered first; the answers so far are saved.', onclick: close }, 'Close'),
+          h('button', { type: 'button', title: 'Stop the interview. Steps 1 and 2 must be answered first; the answers so far are saved.', onclick: close }, 'Close'),
           h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: close }, '✕')));
       body.replaceChildren();
       if (done) {
@@ -16427,7 +16435,7 @@ async function setupInterview({ first = false } = {}) {
       } else {
         if (q.note) body.append(h('p', { class: 'setupWarn' }, '⚠ ' + q.note));
         body.append(h('p', { class: 'setupAsk' }, askOf(q, a)), h('p', { class: 'muted' }, q.why));
-        if (q.must) body.append(h('p', { class: 'muted' }, 'Steps 1 to 3 must be answered (no Skip).'));
+        if (q.must) body.append(h('p', { class: 'muted' }, 'Steps 1 and 2 must be answered (no Skip until answered).'));
         const ch = choicesOf(q, ctx);
         if (q.kind === 'branch') {
           // the branch's first page: what it asks
@@ -16462,6 +16470,29 @@ async function setupInterview({ first = false } = {}) {
       }
       if (!done && q.more) { const m = q.more(ctx); if (m) body.append(h('p', { class: 'muted' }, m)); }
       title.textContent = 'Setup Interview: ' + (done ? 'Done' : q.step); stripBox.replaceChildren(strip);
+    };
+    // the Welcome page (SETUP_WELCOME): the blue phone and small screen note, what the interview is, and Next ▶ to the first question
+    // that is not green. No step is lit yet; a click on a step still goes to it
+    const drawWelcome = qs => {
+      const go = n => { at = n; draw(); }, start = () => go(nextOpen(qs, answered));
+      // Next ▶ has the focus, so Enter starts the interview
+      const nextBtn = h('button', { type: 'button', class: 'primary', onclick: start }, 'Next ▶'); setTimeout(() => nextBtn.focus());
+      const firstOf = s => { const i = qs.findIndex(x => x.step === s && !isGreen(x, qs, answered)); return i < 0 ? Math.max(0, qs.findIndex(x => x.step === s)) : i; };
+      stripBox.replaceChildren(h('ol', { class: 'nsiSteps' }, ...[...SETUP_STEPS, 'Done'].map(s => h('li', { class: s !== 'Done' && stepGreen(s, qs, answered) ? 'done' : '',
+        style: 'cursor:pointer', title: 'Go to this step', onclick: () => go(s === 'Done' ? qs.length : firstOf(s)) }, s))));
+      bar.replaceChildren(h('span', { class: 'spacer' }),
+        h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
+        // the same buttons as every page (his picture); nothing is before the Welcome page, so ◀ Back has the 🚫 pointer
+        h('button', { type: 'button', class: 'setupNoSkip', 'aria-disabled': 'true', title: 'This is the first page.' }, '◀ Back'),
+        // Skip works here: it goes on like Next ▶ (OakBarn Brewery, 2026-11-27: "Leave all the Menu Items at the top active")
+        h('button', { type: 'button', title: 'Go on to the first question that is not answered yet.', onclick: start }, 'Skip'),
+        h('span', { class: 'dlgBtnGroup' },
+          nextBtn,
+          h('button', { type: 'button', title: 'Stop the interview. Steps 1 and 2 must be answered first; the answers so far are saved.', onclick: close }, 'Close'),
+          h('button', { type: 'button', class: 'boxX', title: 'Close', 'aria-label': 'Close', onclick: close }, '✕')));
+      title.textContent = 'Setup Interview';
+      body.replaceChildren(h('div', { class: 'setupWelcomeNote' }, SETUP_WELCOME.note), ...SETUP_WELCOME.paras.map(t => h('p', { class: 'setupWelcomeText' }, t)),
+        h('p', { class: 'setupProceed' }, h('b', {}, SETUP_WELCOME.proceed), ' ', h('button', { type: 'button', class: 'primary', onclick: start }, 'Next ▶')));
     };
     d.append(bar, title, stripBox, body); d._btnOrder = true;
     draw(); d.showModal();
