@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -18566,6 +18566,7 @@ function renderDefaultTab(box) {
     // Brewer Level is worked out from them (the line under them)
     ['_bv', 'Brewery Vessels', 'head'],
     ['vesselCount', 'Number of Hot Side vessels (1 to 10)', 'num', null, false, false, { tip: 'Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. With the questions under it, it works out your Brewer Level: it picks the Level a new Brewing Tab starts on in the New Schema Interview.' }],
+    ['vesselHeat', 'How is the vessel heated? (one vessel)', 'sel', [['', '(not set)'], ...VESSEL_HEATS], false, false, { tip: 'Only for one vessel: what heats it. The Setup Interview asks it after Number of Hot Side vessels 1.' }],
     ['allInOne', 'An All In One?', 'bool', null, false, false, { tip: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).' }],
     ['kettleOutlet', 'Kettle has an outlet (a ball valve low on the side)', 'bool', null, false, false, { tip: 'Off: you pour or siphon.' }],
     ['kettlePump', 'A pump (whirlpool, transfer or chiller)', 'bool', null, false, false, { tip: 'A pump with your stove top kettle.' }],
@@ -18642,7 +18643,7 @@ function renderDefaultTab(box) {
     const el = k => f.box.querySelector(`[data-k="${k}"]`), val = k => { const e = el(k); return !e ? undefined : e.type === 'checkbox' ? e.checked : e.value; };
     const a = Object.fromEntries([...VESSEL_KEYS, 'pipedManifold'].map(k => [k, val(k)]));
     const rowOf = e => { while (e?.parentElement && !e.parentElement.matches('.menuForm, .dlgBox')) e = e.parentElement; return e; };
-    for (const k of VESSEL_KEYS) {
+    for (const k of [...VESSEL_KEYS, 'vesselHeat']) {
       const q = SETUP_QUESTIONS.find(x => x.id === k), row = rowOf(el(k)), on = !q || whenOk(q, a);
       if (row) { row.classList.toggle('hidden', !on); row.previousElementSibling?.classList.toggle('hidden', !on); }
     }

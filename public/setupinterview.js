@@ -50,6 +50,9 @@ export const PUMP_COUNTS = [['1', 'One pump (or none)'], ['2', 'Two pumps']];
 export const VESSELS_MIN = 1, VESSELS_MAX = 10;
 export const vesselCountOf = v => { const n = Number(String(v ?? '').trim()); return String(v ?? '').trim() !== '' && Number.isInteger(n) && n >= VESSELS_MIN && n <= VESSELS_MAX ? n : null; };
 export const VESSELS_3UP = Array.from({ length: VESSELS_MAX - 2 }, (_, i) => String(i + 3));
+// how one vessel is heated (OakBarn Brewery, 2026-11-27): the Tick Boxes of the one vessel branch, and the list on Default settings
+export const VESSEL_HEATS = [['noboil', 'No Boil Brewer'], ['electricstove', 'Electric Stove Top'], ['gasstove', 'Gas Stove Top'], ['hotplate', 'Hot Plate'],
+  ['turkeyfryer', 'Turkey Fryer'], ['gasburner', 'Brewery Gas Burner'], ['element', 'Internal Electric Element']];
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
@@ -208,6 +211,11 @@ export const SETUP_QUESTIONS = [
     ask: 'How many Hot Side vessels do you have (or are you building)? Type a number from 1 to 10.',
     why: 'For every Brewer Type. Count the Kettles, Mash Tuns and Hot Liquor Tanks (HLT), not the fermentors. The next questions depend on the number.',
     start: ctx => String(vesselStart(ctx.defaults, 'vesselCount')) },
+  // one vessel: how is it heated? (OakBarn Brewery, 2026-11-27, his "1 vessel" page: "If one Vessel. Next question: How is the vessel
+  // heated? 7 Tick Boxes"), his seven in his order
+  { id: 'vesselHeat', step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', when: { vesselCount: '1' },
+    ask: 'How is the vessel heated?', why: 'Tick the one that heats your vessel.',
+    choices: VESSEL_HEATS, start: ctx => VESSEL_HEATS.some(([k]) => k === ctx.defaults?.vesselHeat) ? ctx.defaults.vesselHeat : '' },
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -364,6 +372,7 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
       else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
+      else if (q.id === 'vesselHeat') { if (v) brewDefaults.vesselHeat = v; }      // not ticked: not set
       // kept in liters (Rule 2.59), typed in gallons or liters
       else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;

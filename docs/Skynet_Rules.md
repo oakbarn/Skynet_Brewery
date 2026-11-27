@@ -1851,6 +1851,11 @@ answers and changes nothing until **✔ Finish**.
 - **CHANGED 2026-11-27, Brewery held to one question** (OakBarn Brewery: "Leave the brewery interview to the one question for now but
   build all the rest"): the other Brewery questions (All In One, outlet, pump, pumps, HERMS or RIMS, All Grain Plus, Piped Manifold,
   Pipe size, Hose size) have `held: true`: not asked, still on Default settings. Taking `held` off brings one back.
+- **2026-11-27, one vessel: How is the vessel heated?** (OakBarn Brewery, his "1 vessel" page: "If one Vessel. Next question: How is the
+  vessel heated? 7 Tick Boxes"; "Adjust spacing so even between Tick Boxes if possible"): after Number of Hot Side Vessels **1**, seven
+  Tick Boxes in his order: No Boil Brewer, Electric Stove Top, Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal
+  Electric Element (`vesselHeat`, also on Default settings, Rule 2.42; not set until answered). Every Tick Box gets the same width,
+  so the spacing is even.
 - **CHANGED 2026-11-27, BIAB and All In One Brewer** (OakBarn Brewery: "Add All in One Brewer and BIAB to brewer types"): two new
   Brewer Types, **BIAB (Brew in a Bag)** and **All In One Brewer**, both Level 4 (All Grain Recipes, the Mash Profile question).
   Question 2 shows six Tick Boxes (Extract Kit, Extract Brewer add Own Hops, BIAB, All In One Brewer, All Grain, All Grain Mill own
@@ -7604,6 +7609,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
+- 2026-11-27: Rule 2.75 changed: one vessel asks How is the vessel heated? (7 Tick Boxes, vesselHeat on Default settings); Tick Boxes evenly spaced. Help 248, 155.
 - 2026-11-27: Rule 2.6 changed: up to 8 Tick Boxes on one line (more is a dropdown); the Setup Interview dialog is wider (900 px). Help 248.
 - 2026-11-27: Rule 2.75 changed: new Brewer Types BIAB (Brew in a Bag) and All In One Brewer (Level 4); question 2 has six Tick Boxes. Help 248, 155, 100.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.

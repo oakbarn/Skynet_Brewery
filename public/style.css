@@ -1925,9 +1925,10 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 /* screen 3, a Tick Box: the boxes with their words over them; the ticked one is green */
 .setupDlg .setupTicks { display: flex; gap: 14px; align-items: flex-end; margin: 10px 0 4px 12px; }
 /* up to 8 Tick Boxes on one line (OakBarn Brewery, 2026-11-27: "Make the dialogs a little wider so they can accept up to 8 Check
-   Boxes"): the Setup Interview is 900 px wide; each box shares the line, its words wrap to up to 4 lines */
+   Boxes"): the Setup Interview is 900 px wide; every box gets the same width, so the spacing is even ("Adjust spacing so even between
+   Tick Boxes"), and its words wrap to up to 4 lines */
 .miniDlg.setupDlg { max-width: min(900px, calc(100vw - 32px)); }
-.setupDlg .setupTick { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 700; text-align: center; flex: 0 1 9em; min-width: 0; cursor: pointer; }
+.setupDlg .setupTick { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 700; text-align: center; flex: 1 1 0; max-width: 9em; min-width: 0; cursor: pointer; }
 .setupDlg .setupTick .setupTickTip { font-weight: 400; font-size: .85em; }
 .setupDlg .setupTick input { width: 1.6em; height: 1.6em; min-width: 0; accent-color: var(--ok); cursor: pointer; }
 .setupDlg .setupTickBox { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border: 2px solid var(--muted); border-radius: 5px; color: var(--ok); font-weight: 900; }

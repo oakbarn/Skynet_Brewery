@@ -243,3 +243,12 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.ok(!src.includes("'↖ CLICK'"));
   assert.match(src, /setupDropHi setupAt' \}, c, clickPointer\(/);
   assert.match(src, /st === HS\.sample \? clickPointer\(/); }
+// one vessel: How is the vessel heated? (2026-11-27): his seven Tick Boxes, only after 1 vessel, saved to Default settings
+{ const vh = SETUP_QUESTIONS.find(q => q.id === 'vesselHeat');
+  assert.ok(vh && vh.tick && !vh.held && vh.step === 'Brewery' && asTicks(vh, ctx()));
+  assert.deepEqual(choicesOf(vh, ctx()).map(c => c[1]), ['No Boil Brewer', 'Electric Stove Top', 'Gas Stove Top', 'Hot Plate', 'Turkey Fryer', 'Brewery Gas Burner', 'Internal Electric Element']);
+  const brew = v => shownQuestions({ ...startAnswers(ctx()), vesselCount: v }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id);
+  assert.deepEqual(brew('1'), ['_brewery', 'vesselCount', 'vesselHeat']); assert.deepEqual(brew('2'), ['_brewery', 'vesselCount']); assert.deepEqual(brew(1), ['_brewery', 'vesselCount', 'vesselHeat']);
+  assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'turkeyfryer' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat'])).brewDefaults.vesselHeat, 'turkeyfryer');
+  const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(src, /\['vesselHeat', 'How is the vessel heated\? \(one vessel\)', 'sel'/); }
