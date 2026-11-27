@@ -1911,7 +1911,7 @@ answers and changes nothing until **✔ Finish**.
   vessel system"; "and ask what the vessel is used for. BK, HLT, BK & HLT, MLT in the 2 vessel"; "And ask Tangential, Steam Slayer or
   Sparge Arm, and Sight Glass so we can give the proper choice of vessels starting with 2 vessels"; "If you do in Tick Box format they
   can pick more than 1 and ask where on vessel"): with 2 Hot Side Vessels, the same questions for Vessel 1, then Vessel 2
-  (`vesselRows`, kept for 3 or more): How heated (the 6 Tick Boxes without No Boil Brewer), Used for (BK, HLT, BK and HLT, MLT), the
+  (`vesselRows`, kept for 3 or more): How heated (the 6 Tick Boxes without No Boil Brewer, and No Heat for a cooler Mash Tun: "Yes, Maybe a No Heat Tick Box"), Used for (BK, HLT, BK and HLT, MLT), the
   parts (Tick Boxes that may tick more than one, each with where it is: his Vessel Layout picture, the same 10 places on the Front
   and the Back in a Drop Down, and "Sight Glass left or Right only" as two boxes; 📐 Vessel Layout pops up a sample vessel with
   every place, the ticked ones filled in: "Create a Vessel Sample for Layout that a User can Pop Up"), then the vessel (up to 6 Skynet Templates that fit the use, the heat and the parts, best match first; more under Other

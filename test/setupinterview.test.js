@@ -344,7 +344,10 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   for (const n of ['1', '3']) assert.ok(!shownQuestions({ ...a0, vesselCount: n }, ctx()).some(q => q.id.startsWith('v1')), `${n} vessels: not the two vessel rows`);
   const heat = SETUP_QUESTIONS.find(q => q.id === 'v1Heat');
   assert.ok(!choicesOf(heat, ctx()).some(([k]) => k === 'noboil'), 'No Boil only for one vessel');
-  assert.equal(choicesOf(heat, ctx()).length, 6);
+  assert.equal(choicesOf(heat, ctx()).length, 7);
+  assert.deepEqual(choicesOf(heat, ctx()).at(-1), ['noheat', 'No Heat'], 'a cooler Mash Tun');
+  assert.ok(asTicks(heat, ctx()), 'still Tick Boxes (up to 8)');
+  assert.deepEqual(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'v2Template'), ctx(), { v2Use: 'mlt', v2Heat: 'noheat' }).map(([k]) => k), ['Mash_Tun', 'OakBarn_MLT']);
   assert.deepEqual(m.VESSEL_USES.map(([, w]) => w), ['Boil Kettle (BK)', 'Hot Liquor Tank (HLT)', 'BK and HLT', 'Mash Tun (MLT)']);
   assert.deepEqual(m.VESSEL_PARTS.map(([, w]) => w), ['Tangential Inlet', 'Steam Slayer', 'Sparge Arm', 'Sight Glass']);
   // his Vessel Layout picture: the same 10 places on the Front and the Back; "Sight Glass left or Right only"

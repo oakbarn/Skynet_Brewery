@@ -134,7 +134,8 @@ const onePick = a => ONE_VESSEL_PICKS[a?.vesselHeat] || ONE_VESSEL_PICKS.noboil;
 // Arm, and Sight Glass so we can give the proper choice of vessels starting with 2 vessels"; "If you do in Tick Box format they can pick
 // more than 1 and ask where on vessel"). The same questions for each vessel, one after the other (vesselRows), so 3 or more can use
 // them later.
-export const MULTI_HEATS = VESSEL_HEATS.filter(([k]) => k !== 'noboil');
+// (2026-11-27: a two vessel Mash Tun is often a cooler: "Yes, Maybe a No Heat Tick Box")
+export const MULTI_HEATS = [...VESSEL_HEATS.filter(([k]) => k !== 'noboil'), ['noheat', 'No Heat']];
 export const VESSEL_USES = [['bk', 'Boil Kettle (BK)'], ['hlt', 'Hot Liquor Tank (HLT)'], ['bkhlt', 'BK and HLT'], ['mlt', 'Mash Tun (MLT)']];
 // the parts asked about, each with where it is on the vessel
 export const VESSEL_PARTS = [['tangential', 'Tangential Inlet'], ['steamSlayer', 'Steam Slayer'], ['sparge', 'Sparge Arm'], ['sight', 'Sight Glass']];
