@@ -143,6 +143,19 @@ export const SETUP_HOTSPOTS = {
   click: 'Click 4. Other Defaults and you are taken to the Setup Interview: Other Defaults',
 };
 
+// Screen 6, the last one before question 1 (OakBarn Brewery, 2026-11-27, his picture, spelling and grammar corrected)
+export const SETUP_START = {
+  paras: [
+    'We are now going to start the interview with two easy questions, and depending on your answer to 2. Brewer Type, there may be a follow-up question.',
+    'Answer the questions to the best of your knowledge; there are no bad answers. You will not be graded. These are only an aid to you, and if you do not know the answer or it just doesn\'t matter... Try to use the best answer or just take your best guess. But the more accurate you are, the more the Brewery will match your existing Brewery. Skynet wants its screens to look like YOUR Brewery as much as the limitations of this program allow.',
+    'Skynet has some "canned" Processes that allow for the flow of the Brew Day to help you brew. It can be as simple as Step by Step coaching, or an automated Brewery that controls Pumps and delivers hop warnings to the Brewer. It can be as simple or complicated as you want to make it.',
+    'Unfortunately, there is some coding involved that has a learning curve. Hopefully, with the way it was designed, the "canned" samples, the error handling and the predictive text, the learning curve is a ladder and not a mountain.',
+  ],
+  proceed: 'Let\'s get to the Interview:',
+};
+// the screens before question 1, in Fritz's order (at -6 is the first)
+export const SETUP_INTRO = ['welcome', 'guide', 'tick', 'drop', 'hot', 'start'];
+
 export const SETUP_QUESTIONS = [
   // ---- 1 and 2: must be answered (Skip shows 🚫 Not allowed)
   { id: 'units', step: 'Units', kind: 'pick', save: 'defaults', must: true,

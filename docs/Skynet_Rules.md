@@ -1806,9 +1806,11 @@ answers and changes nothing until **✔ Finish**.
   Shop only has these flavors available today"), shown closed, open and with Chocolate picked (the first one can be tried). Screens
   1 to 4 come before question 1, every run; their Skip goes on like Next ▶. **Screen 5, Hot Spots** ("We are almost ready to start
   the interview, but one last option is available on some screens"): the steps strip is Hot Spots, click a step to go there; a
-  sample strip on the page can be tried and shows below how that step's page looks (4. Other Defaults to start). Screens 1 to 5 come
-  before question 1. The pages are data in public/setupinterview.js (SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP,
-  SETUP_HOTSPOTS). **No "7. Done" in the steps strip** ("remove 7. Done as while I like the
+  sample strip on the page can be tried and shows below how that step's page looks (4. Other Defaults to start). **Screen 6** ("We
+  are now going to start the interview with two easy questions"): no bad answers, "canned" Processes, "the learning curve is a
+  ladder and not a mountain", then "Let's get to the Interview: Next ▶". Screens 1 to 6 come before question 1, in the order of
+  SETUP_INTRO. The pages are data in public/setupinterview.js (SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS,
+  SETUP_START). **No "7. Done" in the steps strip** ("remove 7. Done as while I like the
   done screen it will be accessed differently which will be later"): the Done page still follows the last question for now.
 - Questions now: **1 Units** (must). **2 Help language** (must): English, Français, and the User Language once it is on this Brain
   (Rule 11.16; "But additional Language?"). **3 Brewer Type** (must; "The highest level you will brew now. This is just to get
