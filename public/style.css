@@ -2021,3 +2021,4 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupWhereBtns { display: flex; gap: 8px; }
 .setupDlg .setupWhereBtns .setupPick { padding: 4px 14px; min-width: 0; }
 .setupDlg .setupMultiTick > span:first-child { min-height: 2.5em; display: flex; align-items: flex-end; justify-content: center; }
+.setupDlg .setupTickPic { display: block; color: var(--text); line-height: 0; }

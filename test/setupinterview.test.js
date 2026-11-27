@@ -90,7 +90,7 @@ assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), '2',
 // held (2026-11-27: "Leave the brewery interview to the one question for now"): Brewery asks only Number of Vessels; ALL is the list with
 // nothing held, for the branching tests below
 const ALL = SETUP_QUESTIONS.map(q => ({ ...q, held: false }));
-assert.deepEqual(shownQuestions({ ...a, vesselCount: '3', pipedManifold: true }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id), ['_brewery', 'vesselCount']);
+assert.deepEqual(shownQuestions({ ...a, vesselCount: '3', pipedManifold: true }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id), ['_brewery', 'vesselCount', 'fermentorCount']);      // 3 or more: the Hot Side is next to come; the Cold Side is asked
 // Number of Vessels: the first Brewery question (after the branch page), for every Brewer Type, as Tick Boxes (2026-11-27)
 { const vc = SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), firstB = SETUP_QUESTIONS.find(q => q.step === 'Brewery' && q.kind !== 'branch');
   assert.ok(firstB === vc && !vc.show && !vc.when);
@@ -136,13 +136,13 @@ assert.equal(nextOpen(qs0, new Set()), 0);
 const g3 = new Set(['units', 'brewerType']);
 assert.equal(qs0[nextOpen(qs0, g3)].id, '_brewery', 'steps 1 and 2 green: it opens on the Brewery branch page');
 assert.ok(stepGreen('Units', qs0, g3) && !stepGreen('Brewery', qs0, g3));
-const gB = new Set([...g3, 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
+const gB = new Set([...g3, 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold', 'fermentorCount']);
 assert.ok(isGreen(qs0.find(q => q.id === '_brewery'), qs0, gB) && stepGreen('Brewery', qs0, gB));
 assert.equal(qs0[nextOpen(qs0, gB)].id, '_other');
 assert.equal(nextOpen(qs0, new Set(qs0.map(q => q.id))), qs0.length, 'all green: Done');
 // saved and read back; an older finished install counts what it saved
 const saved = setupSave(a, ctx(), ALL, gB).brewDefaults;
-assert.deepEqual(saved.setupAnswered, ['units', 'brewerType', 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
+assert.deepEqual(saved.setupAnswered, ['units', 'brewerType', 'vesselCount', 'fermentorCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
 assert.deepEqual([...answeredAtStart(ctx({ defaults: saved }))], saved.setupAnswered);
 assert.ok(answeredAtStart(ctx({ defaults: { setupDone: true, units: 'US', brewerType: 'allgrain', batchL: 20 } })).has('batch'));
 // Close: red until steps 1 and 2 are green, then the blue words
@@ -227,7 +227,7 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.doesNotMatch(JSON.stringify(u.lead), /perfer|limitaions|Temperatue|seances|eleasphed|caculations|a xml|thing go/);
   const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(appSrc, /const stepShut = \(st, qs\) => mustMissing\(qs, answered\)\.length > 0;/);
-  assert.match(appSrc, /\(asTicks\(q, ctx\) \? tickedOf\(q\) == null : q\.kind === 'vessel' \? !tickedOf\(q\) : q\.must && !answered\.has\(q\.id\)\)/);
+  assert.match(appSrc, /\(asTicks\(q, ctx, a\) \? tickedOf\(q\) == null : q\.kind === 'vessel' \? !tickedOf\(q\) : q\.must && !answered\.has\(q\.id\)\)/);
   // after Brewery: Yes/No and up to 8 choices are Tick Boxes; more than 8 a Drop Down list (2026-11-27, Rule 2.6 changed)
   for (const id of ['yeastStarter', 'mashProfile', 'boilProfile', 'helpLang']) assert.ok(SETUP_QUESTIONS.find(q => q.id === id).tick, id);
   { const ys = SETUP_QUESTIONS.find(q => q.id === 'yeastStarter'), mp = SETUP_QUESTIONS.find(q => q.id === 'mashProfile');
@@ -249,7 +249,7 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.ok(vh && vh.tick && !vh.held && vh.step === 'Brewery' && asTicks(vh, ctx()));
   assert.deepEqual(choicesOf(vh, ctx()).map(c => c[1]), ['No Boil Brewer', 'Electric Stove Top', 'Gas Stove Top', 'Hot Plate', 'Turkey Fryer', 'Brewery Gas Burner', 'Internal Electric Element']);
   const brew = v => shownQuestions({ ...startAnswers(ctx()), vesselCount: v }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id);
-  assert.deepEqual(brew('1'), ['_brewery', 'vesselCount', 'vesselHeat']); assert.deepEqual(brew('2').slice(0, 3), ['_brewery', 'vesselCount', 'v1Heat']); assert.ok(!brew('2').includes('vesselHeat')); assert.deepEqual(brew(1), ['_brewery', 'vesselCount', 'vesselHeat']);
+  assert.deepEqual(brew('1'), ['_brewery', 'vesselCount', 'vesselHeat', 'fermentorCount']); assert.deepEqual(brew('2').slice(0, 3), ['_brewery', 'vesselCount', 'v1Heat']); assert.ok(!brew('2').includes('vesselHeat')); assert.deepEqual(brew(1), ['_brewery', 'vesselCount', 'vesselHeat', 'fermentorCount']);
   assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'turkeyfryer' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat'])).brewDefaults.vesselHeat, 'turkeyfryer');
   const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(src, /\['vesselHeat', 'How is the vessel heated\? \(one vessel\)', 'sel'/); }
@@ -340,7 +340,7 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   const m = await import('../public/setupinterview.js');
   const a0 = { ...startAnswers(ctx()), vesselCount: '2' };
   const ids = shownQuestions(a0, ctx()).filter(q => q.step === 'Brewery').map(q => q.id);
-  assert.deepEqual(ids, ['_brewery', 'vesselCount', 'v1Heat', 'v1Use', 'v1Parts', 'v1Template', 'v1Size', 'v2Heat', 'v2Use', 'v2Parts', 'v2Template', 'v2Size']);
+  assert.deepEqual(ids, ['_brewery', 'vesselCount', 'v1Heat', 'v1Use', 'v1Parts', 'v1Template', 'v1Size', 'v2Heat', 'v2Use', 'v2Parts', 'v2Template', 'v2Size', 'fermentorCount']);
   for (const n of ['1', '3']) assert.ok(!shownQuestions({ ...a0, vesselCount: n }, ctx()).some(q => q.id.startsWith('v1')), `${n} vessels: not the two vessel rows`);
   const heat = SETUP_QUESTIONS.find(q => q.id === 'v1Heat');
   assert.ok(!choicesOf(heat, ctx()).some(([k]) => k === 'noboil'), 'No Boil only for one vessel');
@@ -402,4 +402,41 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.equal(out.breweryBuild.adds, undefined, 'the one vessel adds: only for one vessel');
   assert.equal(addsNote(a, 'v2Heat'), 'Your build also gets: Gas Burner and Burner Igniter.');
   assert.equal(breweryBuildOf({ vesselCount: '1', vesselHeat: 'gasstove' }).vessels, undefined);
+}
+
+// ---- The Cold Side (2026-11-27: "next PR Cold side, and Change to 9 Fermentors"; "How cooled or Not. One Option is always a
+// Fermentation Chamber for cooling. Peltier is another option for cooling, Manual Ice Bath also, Glycol")
+{
+  const m = await import('../public/setupinterview.js');
+  const fc = SETUP_QUESTIONS.find(q => q.id === 'fermentorCount');
+  assert.ok(fc.kind === 'num' && fc.min === 1 && fc.max === 9 && !fc.held && fc.step === 'Brewery');
+  for (const v of ['1', '9', ' 4 ']) assert.equal(answerError(fc, v), null, String(v));
+  for (const v of ['', '0', '10', '2.5', 'x']) assert.match(answerError(fc, v), /whole number from 1 to 9/, String(v));
+  assert.deepEqual(m.FERMENTOR_COOLS.map(([, w]) => w), ['Not Cooled', 'Fermentation Chamber', 'Peltier', 'Manual Ice Bath', 'Glycol Coil', 'Glycol Jacket']);
+  // what kind first, with a picture each; it limits how it is cooled, and a Fermentation Chamber is always one of them
+  for (const [k] of m.FERMENTOR_TYPES) { assert.ok(m.coolsFor(k).some(([c]) => c === 'chamber'), k); assert.match(m.FERMENTOR_PICS[k], /^<svg /, k); assert.ok(!/#fff\b|white/i.test(m.FERMENTOR_PICS[k])); }
+  assert.deepEqual(m.coolsFor('glasscarboy').map(([k]) => k), ['none', 'chamber', 'icebath']);
+  assert.ok(m.coolsFor('unitank').some(([k]) => k === 'glycoljacket') && !m.coolsFor('bucket').some(([k]) => k.startsWith('glycol')));
+  assert.equal(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'f1Cool'), ctx(), { f1Type: 'corny' }).length, 4);
+  assert.equal(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'f1Cool'), ctx()).length, 6, 'no kind yet: every way');
+  const ids = n => shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', fermentorCount: n }, ctx()).map(q => q.id).filter(x => /^f\d(Cool|Type)$|^fermentorCount$/.test(x));
+  assert.deepEqual(ids('3'), ['fermentorCount', 'f1Type', 'f1Cool', 'f2Type', 'f2Cool', 'f3Type', 'f3Cool']);
+  assert.equal(ids('9').length, 19);
+  assert.deepEqual(m.FERMENTOR_TYPES.map(([, w]) => w), ['Conical', 'Unitank', 'Stainless Bucket', 'Plastic Bucket', 'Glass Carboy', 'Plastic Carboy', 'Corny Keg', 'Other']);
+  assert.ok(asTicks(SETUP_QUESTIONS.find(q => q.id === 'f1Type'), ctx()), '8 Tick Boxes');
+  for (const v of ['1', '2', '3']) { const all = shownQuestions({ ...startAnswers(ctx()), vesselCount: v, fermentorCount: '1' }, ctx()).map(q => q.id);
+    assert.ok(all.indexOf('fermentorCount') > all.indexOf('vesselCount') && all.includes('f1Type'), `${v} vessels: the Cold Side after the Hot Side`); }
+  const f2 = SETUP_QUESTIONS.find(q => q.id === 'f2Cool');
+  assert.ok(asTicks(f2, ctx()));
+  assert.equal(headOf(f2, { fermentorCount: '4' }), 'Cold Side: Fermentor 2 of 4');
+  const a = { ...startAnswers(ctx()), vesselCount: '1', fermentorCount: ' 2 ', f1Cool: 'glycoljacket', f1Type: 'conical', f2Cool: 'chamber', f2Type: 'glasscarboy', f3Type: 'bucket' };
+  const out = setupSave(a, ctx(), undefined, new Set(shownQuestions(a, ctx()).map(q => q.id)), true).brewDefaults;
+  assert.equal(out.fermentorCount, '2');
+  assert.deepEqual(out.breweryBuild.fermentors, [{ n: 1, cool: 'glycoljacket', type: 'conical' }, { n: 2, cool: 'chamber', type: 'glasscarboy' }]);
+  assert.equal(out.breweryBuild.f3Cool, undefined);
+  // a way to cool that does not fit the kind is not kept
+  const b2 = { ...a, f2Cool: 'glycoljacket' };
+  assert.equal(setupSave(b2, ctx(), undefined, new Set(shownQuestions(b2, ctx()).map(q => q.id)), true).brewDefaults.f2Cool, undefined);
+  const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(src, /\['fermentorCount', `Number of Fermentors/);
 }

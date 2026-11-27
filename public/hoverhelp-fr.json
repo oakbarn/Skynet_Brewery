@@ -1929,5 +1929,8 @@
  "Only for two vessels: where this part is on the vessel, or none.": "Seulement pour deux cuves : où cette pièce se trouve sur la cuve, ou aucune.",
  "Only for two vessels: the Skynet Vessel Template that matches this vessel.": "Seulement pour deux cuves : le Skynet Vessel Template qui correspond à cette cuve.",
  "Only for two vessels: its inside size, as in the Setup Interview. Diameter and Height draw it to size; Skynet works out the Volume from them.": "Seulement pour deux cuves : sa taille intérieure, comme dans le Setup Interview. Le diamètre et la hauteur la dessinent à la bonne taille ; Skynet en calcule le volume.",
- "Show the places on a sample vessel: Front, Back and Sight Glass": "Montrer les emplacements sur une cuve exemple : avant, arrière et Sight Glass"
+ "Show the places on a sample vessel: Front, Back and Sight Glass": "Montrer les emplacements sur une cuve exemple : avant, arrière et Sight Glass",
+ "What cools this fermentor, or Not Cooled.": "Ce qui refroidit ce fermenteur, ou Not Cooled.",
+ "The kind of fermentor it is most like.": "Le type de fermenteur auquel il ressemble le plus.",
+ "The fermentors you brew into. Each one then asks what kind it is and how it is cooled.": "Les fermenteurs dans lesquels vous brassez. Pour chacun, Skynet demande ensuite son type et comment il est refroidi."
 }

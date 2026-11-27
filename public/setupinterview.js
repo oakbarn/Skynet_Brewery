@@ -249,6 +249,48 @@ export function vesselRows(n, count) {
       start: (ctx, a) => sizeIn(D(ctx, 'Size'), a?.units === 'Metric' ? 'Metric' : 'US') }];
 }
 export const TWO_VESSEL_ROWS = [...vesselRows(1, 2), ...vesselRows(2, 2)];
+// ---- The Cold Side (OakBarn Brewery, 2026-11-27: "next PR Cold side, and Change to 9 Fermentors as the Manifolds are easier on the
+// cold side"; "How cooled or Not. One Option is always a Fermentation Chamber for cooling. Peltier is another option for cooling,
+// Manual Ice Bath also, Glycol"): Number of Fermentors, 1 to 9, then How is it cooled? for each fermentor
+export const FERMENTORS_MIN = 1, FERMENTORS_MAX = 9;
+export const fermentorCountOf = v => { const n = Number(String(v ?? '').trim()); return String(v ?? '').trim() !== '' && Number.isInteger(n) && n >= FERMENTORS_MIN && n <= FERMENTORS_MAX ? n : null; };
+// how it is cooled ("Glycol can be Coil or Jacket")
+export const FERMENTOR_COOLS = [['none', 'Not Cooled'], ['chamber', 'Fermentation Chamber'], ['peltier', 'Peltier'], ['icebath', 'Manual Ice Bath'],
+  ['glycolcoil', 'Glycol Coil'], ['glycoljacket', 'Glycol Jacket']];
+// what kind (2026-11-27: "Type Conicals, Brew Bucket, Carboy, common fermentors sold" by a homebrew shop, "similar to what they sell as
+// graphics"; "carboys can be glass or plastic and a Corny Keg is an option as I have fermented in them"). No shop or maker names.
+// [key, words, the ways it can be cooled ("Might ask Type first as that can limit how cooled"; "One option is always a Fermentation
+// Chamber")]
+export const FERMENTOR_TYPES = [['conical', 'Conical', ['none', 'chamber', 'peltier', 'glycolcoil', 'glycoljacket']],
+  ['unitank', 'Unitank', ['none', 'chamber', 'glycolcoil', 'glycoljacket']],
+  ['brewbucket', 'Stainless Bucket', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
+  ['bucket', 'Plastic Bucket', ['none', 'chamber', 'icebath']], ['glasscarboy', 'Glass Carboy', ['none', 'chamber', 'icebath']],
+  ['plasticcarboy', 'Plastic Carboy', ['none', 'chamber', 'icebath']], ['corny', 'Corny Keg', ['none', 'chamber', 'icebath', 'glycolcoil']],
+  ['other', 'Other', FERMENTOR_COOLS.map(([k]) => k)]];
+export const coolsFor = type => { const t = FERMENTOR_TYPES.find(([k]) => k === type); return t ? FERMENTOR_COOLS.filter(([k]) => t[2].includes(k)) : FERMENTOR_COOLS; };
+// the pictures over the Tick Boxes: simple drawings by Skynet (no shop pictures), colors from the page
+const P = (body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 90" width="60" height="90" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">${body}</svg>`;
+export const FERMENTOR_PICS = {
+  conical: P('<path d="M12 8h36v42l-18 22-18-22z"/><path d="M30 72v8M24 80h12M14 52l-6 30M46 52l6 30"/><path d="M12 8q18-6 36 0"/>'),
+  unitank: P('<path d="M12 10h36v44l-18 18-18-18z"/><path d="M12 10q18-7 36 0"/><path d="M12 18h36M12 28h36M12 38h36" stroke-dasharray="3 3"/><path d="M30 72v8M14 56l-6 26M46 56l6 26"/>'),
+  brewbucket: P('<path d="M14 14h32l-3 60H17z"/><path d="M12 14h36"/><path d="M14 14q16-10 32 0"/><circle cx="30" cy="62" r="3"/><path d="M33 62h6"/>'),
+  bucket: P('<path d="M12 20h36l-4 58H16z"/><path d="M10 20h40"/><path d="M12 20q18-22 36 0"/><path d="M26 14h8v6h-8z"/>'),
+  glasscarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M16 44h28" opacity=".5"/>'),
+  plasticcarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M10 46h40M10 58h40M10 70h40" stroke-dasharray="4 3"/>'),
+  corny: P('<path d="M14 16h32v58H14z"/><path d="M14 16q16-6 32 0M14 74q16 6 32 0"/><path d="M22 6h16v8H22z"/><path d="M20 16v-4M40 16v-4"/>'),
+  other: P('<path d="M14 12h32v66H14z"/><path d="M24 34q0-8 6-8t6 8q0 5-6 8v6"/><circle cx="30" cy="56" r="1.5" fill="currentColor"/>') };
+const upTo = n => Array.from({ length: FERMENTORS_MAX - n + 1 }, (_, i) => String(n + i));      // fermentor n shows when there are n or more
+// for each fermentor: what kind first ("Might ask Type first as that can limit how cooled"), then how it is cooled (only the ways that
+// fit that kind)
+export const FERMENTOR_ROWS = Array.from({ length: FERMENTORS_MAX }, (_, i) => { const n = i + 1, when = { fermentorCount: upTo(n) },
+    head = a => `Cold Side: Fermentor ${n} of ${fermentorCountOf(a?.fermentorCount) ?? n}`, typeId = `f${n}Type`, coolId = `f${n}Cool`;
+  return [{ id: typeId, step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', ifSet: true, when, head, pics: FERMENTOR_PICS,
+      ask: `What kind of fermentor is Fermentor ${n}?`, why: 'Tick the one that is most like it.', choices: FERMENTOR_TYPES.map(([k, w]) => [k, w]),
+      start: ctx => FERMENTOR_TYPES.some(([k]) => k === ctx.defaults?.[typeId]) ? ctx.defaults[typeId] : '' },
+    { id: coolId, step: 'Brewery', kind: 'pick', tick: true, save: 'defaults', ifSet: true, when, head,
+      ask: `How is Fermentor ${n} cooled?`, why: 'Tick the one that cools this fermentor, or Not Cooled. Only the ways that fit its kind are here.',
+      choices: (ctx, a) => a ? coolsFor(a[typeId]) : FERMENTOR_COOLS,
+      start: ctx => FERMENTOR_COOLS.some(([k]) => k === ctx.defaults?.[coolId]) ? ctx.defaults[coolId] : '' }]; }).flat();
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
@@ -424,6 +466,13 @@ export const SETUP_QUESTIONS = [
     start: (ctx, a) => sizeIn(ctx.defaults?.vesselSize, a?.units === 'Metric' ? 'Metric' : 'US') },
   // two vessels: the same questions for Vessel 1, then Vessel 2
   ...TWO_VESSEL_ROWS,
+  // the Cold Side: for every Brewer Type, after the Hot Side
+  { id: 'fermentorCount', step: 'Brewery', kind: 'num', save: 'defaults', min: FERMENTORS_MIN, max: FERMENTORS_MAX,
+    head: 'Cold Side: Number of Fermentors',
+    ask: `How many fermentors do you have (or are you building)? Type a number from ${FERMENTORS_MIN} to ${FERMENTORS_MAX}.`,
+    why: 'Count the fermentors you brew into. The next questions ask about each one.',
+    start: ctx => fermentorCountOf(ctx.defaults?.fermentorCount) ? String(ctx.defaults.fermentorCount) : '' },
+  ...FERMENTOR_ROWS,
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -526,10 +575,10 @@ export const asDropdown = choices => (choices?.length || 0) > 6;
 // boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to up to 4 Lines for a check
 // Box if needed"): a row with tick, Yes/No or up to TICK_MAX (8) choices, is Tick Boxes; more is a Drop Down list
 export const TICK_MAX = 8;
-export const tickChoices = (q, ctx) => q.kind === 'yesno' ? [[true, 'Yes'], [false, 'No']] : choicesOf(q, ctx);
+export const tickChoices = (q, ctx, a) => q.kind === 'yesno' ? [[true, 'Yes'], [false, 'No']] : choicesOf(q, ctx, a);
 // (up to 8 Tick Boxes, OakBarn Brewery, 2026-11-27: "That will be a change that you can have up to 8 Tick Boxes"; Rule 2.6; a row
 // may set its own tickMax)
-export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= (q.tickMax ?? TICK_MAX);
+export const asTicks = (q, ctx, a) => !!q.tick && tickChoices(q, ctx, a).length <= (q.tickMax ?? TICK_MAX);
 // a new installation: no Skynet settings saved yet (and the Setup Interview not finished before)
 // (2026-11-27: every answer is saved as soon as it is given, so a first run left before steps 1 and 2 were answered has a green list
 // but no setupDone: the interview opens again)
@@ -539,7 +588,7 @@ export const headOf = (q, a) => typeof q.head === 'function' ? q.head(a) : q.hea
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
 // (a number answer, such as Number of Hot Side Vessels, matches its words: 3 is '3')
-const sameAns = (x, y) => typeof y === 'boolean' ? x === y : x != null && String(x) === String(y);
+const sameAns = (x, y) => typeof y === 'boolean' ? x === y : x != null && String(x).trim() === String(y);
 export const whenOk = (q, a) => !q.when || Object.entries(q.when).every(([k, v]) => Array.isArray(v) ? v.some(y => sameAns(a?.[k], y)) : sameAns(a?.[k], v));
 // held: a question kept out of the interview for now (OakBarn Brewery, 2026-11-27: "Leave the brewery interview to the one question for
 // now"); it stays on Default settings, and comes back when its held is taken off
@@ -578,6 +627,7 @@ export function answerError(q, v) {
     if (has('elementDepth') && +v.elementDepth >= +v.vheight) return 'The top of the element must be lower than the Inside Height.';
   }
   if (q.id === 'vesselCount' && vesselCountOf(v) == null) return `Type a whole number from ${VESSELS_MIN} to ${VESSELS_MAX}.`;
+  if (q.id === 'fermentorCount' && fermentorCountOf(v) == null) return `Type a whole number from ${FERMENTORS_MIN} to ${FERMENTORS_MAX}.`;
   if (q.id === 'batch' && v !== '' && v != null && !(Number.isFinite(+v) && +v > 0)) return 'The Batch Size must be more than 0 (or empty).';
   if (q.id === 'airport' && v && !/^[A-Za-z0-9]{3,4}$/.test(String(v).trim())) return 'An airport code is 4 letters, for example KDFW (or leave it empty).';
   if (q.kind === 'pick' && q.must && (v === '' || v == null)) return 'This one must be answered.';
@@ -607,7 +657,7 @@ export function breweryBuildOf(d, list = SETUP_QUESTIONS) {
     if (q.step !== 'Brewery' || q.kind === 'branch' || !whenOk(q, d)) continue;
     const v = d[q.id];
     if (v === undefined || v === null || v === '') continue;
-    b[q.id] = q.id === 'vesselCount' ? vesselCountOf(v) : q.kind === 'yesno' ? !!v : v;
+    b[q.id] = q.id === 'vesselCount' ? vesselCountOf(v) : q.id === 'fermentorCount' ? fermentorCountOf(v) : q.kind === 'yesno' ? !!v : v;
   }
   const ad = String(vesselCountOf(d.vesselCount)) === '1' && ONE_VESSEL_PICKS[d.vesselHeat]?.adds;
   if (ad) b.adds = [...ad];      // the burner and igniter, or the element and probe, for the end build
@@ -617,6 +667,9 @@ export function breweryBuildOf(d, list = SETUP_QUESTIONS) {
     for (const [k, w] of [['Heat', 'heat'], ['Use', 'use'], ['Parts', 'parts'], ['Template', 'template'], ['Size', 'size']]) if (d[v + k] !== undefined && d[v + k] !== '' && d[v + k] !== null) o[w] = d[v + k];
     const add = ONE_VESSEL_PICKS[o.heat]?.adds; if (add) o.adds = [...add];
     return o; });
+  // the Cold Side: each fermentor and how it is cooled
+  const fc = fermentorCountOf(d.fermentorCount);
+  if (fc) b.fermentors = Array.from({ length: fc }, (_, i) => { const o = { n: i + 1 }, c = d[`f${i + 1}Cool`], t = d[`f${i + 1}Type`]; if (t) o.type = t; if (c && coolsFor(t).some(([k]) => k === c)) o.cool = c; return o; });
   const lv = brewerLevelOf(d); if (lv) b.brewerLevel = lv;
   return b;
 }
@@ -630,7 +683,8 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
       else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
-      else if (q.ifSet) { if (v) brewDefaults[q.id] = v; }      // not picked: not set (how heated, used for, the vessel)
+      else if (q.id === 'fermentorCount') { if (fermentorCountOf(v)) brewDefaults.fermentorCount = String(fermentorCountOf(v)); }      // not typed: not set
+      else if (q.ifSet) { if (v && (typeof q.choices !== 'function' || q.kind !== 'pick' || choicesOf(q, ctx, a).some(([k]) => k === v))) brewDefaults[q.id] = v; }      // not picked (or no longer one of its choices): not set
       else if (q.kind === 'size') { const z = sizeClean(v, a.units); if (z) brewDefaults[q.id] = z; else delete brewDefaults[q.id]; }
       else if (q.kind === 'multi') brewDefaults[q.id] = partsClean(v);      // the parts ticked, each with where it is
       // kept in liters (Rule 2.59), typed in gallons or liters
