@@ -1907,6 +1907,15 @@ answers and changes nothing until **✔ Finish**.
   (its `when`), held ones too, is kept together in `brewDefaults.breweryBuild` with the Brewer Level they give (`breweryBuildOf`).
   The Setup Interview and Default settings both make it from the saved answers, so they always agree. The end of the interview
   reads it to offer matching Templates or to build a Schema (not built yet).
+- **CHANGED 2026-11-27, Two vessels** (OakBarn Brewery: "start the two Vessel, First Vessel with How Heated. No Boil only for a 1
+  vessel system"; "and ask what the vessel is used for. BK, HLT, BK & HLT, MLT in the 2 vessel"; "And ask Tangential, Steam Slayer or
+  Sparge Arm, and Sight Glass so we can give the proper choice of vessels starting with 2 vessels"; "If you do in Tick Box format they
+  can pick more than 1 and ask where on vessel"): with 2 Hot Side Vessels, the same questions for Vessel 1, then Vessel 2
+  (`vesselRows`, kept for 3 or more): How heated (the 6 Tick Boxes without No Boil Brewer), Used for (BK, HLT, BK and HLT, MLT), the
+  parts (Tick Boxes that may tick more than one, each with a Drop Down of where it is: his 13 places from High Right to Low Back
+  Left), then the vessel (up to 6 Skynet Templates that fit the use, the heat and the parts, best match first; more under Other
+  Skynet Template), then its Size. Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
+  with what its heat `adds`).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
@@ -7652,6 +7661,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-27: Rule 2.75 changed: Size of your Vessel (Inside Diameter and Height, Purported Volume, Dead Space, top of the element with the Safe Element Volume worked out plus 1 in) after the vessel for every way to heat one vessel. Help 248.
+- 2026-11-27: Rule 2.75 changed: Two vessels: Vessel 1 and Vessel 2 each asks how heated, used for, its parts and where they are, the vessel, its size. Help 248.
 - 2026-11-27: Rule 2.75 changed: every way to heat one vessel has its own vessel choices (Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal Electric Element); burner + igniter or element + probe kept in the Brewery Build as adds. Help 248.
 - 2026-11-27: Rule 2.75 changed: one vessel on an Electric Stove Top picks its vessel (Electric Stove Top Brewer, two kettle-on-a-stove Templates). Help 248.
 - 2026-11-27: Rule 2.75 changed: the Brewery answers are kept together as the Brewery Build (brewDefaults.breweryBuild), for the end of the interview to offer Templates or build one. Help 248.
