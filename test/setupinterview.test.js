@@ -2,7 +2,7 @@
 // Help language and Brewer Type must be answered (Panel Update 17), every other question has Skip; the questions are data in one list
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { brewerLevelOf, vesselAnswersOf, VESSEL_KEYS, VESSELS_3UP } from '../public/setupinterview.js';
+import { breweryBuildOf, headOf, STOVE_ELECTRIC_VESSELS, brewerLevelOf, vesselAnswersOf, VESSEL_KEYS, VESSELS_3UP } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
 import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf, asTicks, tickChoices } from '../public/setupinterview.js';
 
@@ -108,7 +108,8 @@ assert.ok(shownQuestions({ ...a, pipedManifold: true }, ctx(), ALL).some(q => q.
 // Finish: every answer is a default (Rule 2.42), merged into what was there; the Elevation is kept in meters (Rule 2.59)
 let out = setupSave({ ...a, units: 'US', elevation: 663, airport: 'kdfw', vesselCount: '1', allInOne: false, kettlePump: true, pipedManifold: true, yeastStarter: true, batch: 10 }, ctx({ defaults: { tabStyle: 'x' } }), ALL);
 assert.deepEqual(out.brewDefaults, { tabStyle: 'x', units: 'US', brewerType: 'allgrain', vesselCount: '1', allInOne: false, kettleOutlet: false, kettlePump: true, pipedManifold: true, defPipeSize: '0.5', defHoseSize: '0.5',
-  yeastStarter: true, batchL: 37.854, mashProfile: 'skynet-single-batch', boilProfile: 'skynet-boil-60', brewerLevel: '3', setupDone: true });
+  yeastStarter: true, batchL: 37.854, mashProfile: 'skynet-single-batch', boilProfile: 'skynet-boil-60', brewerLevel: '3',
+  breweryBuild: { vesselCount: 1, allInOne: false, kettleOutlet: false, kettlePump: true, pipedManifold: true, defPipeSize: '0.5', defHoseSize: '0.5', brewerLevel: '3' }, setupDone: true });
 assert.ok(!('_brewery' in out.brewDefaults));
 assert.equal(setupSave({ ...a, brewerType: 'allgrainmill' }, ctx()).brewDefaults.brewerType, 'allgrainmill');
 assert.equal(setupSave({ ...a, units: 'Metric', batch: '20' }, ctx()).brewDefaults.batchL, 20);
@@ -254,10 +255,28 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.match(src, /\['vesselHeat', 'How is the vessel heated\? \(one vessel\)', 'sel'/); }
 // No Boil Brewer, one vessel: Single Vessel Brewer, his three Skynet Vessel Templates with his words (2026-11-27)
 { const vt = SETUP_QUESTIONS.find(q => q.id === 'vesselTemplate');
-  assert.ok(vt && vt.kind === 'vessel' && vt.head === 'Single Vessel Brewer' && vt.ask === 'Choose the Vessel that matches yours:' && vt.otherBtn === 'Other Skynet Template');
+  assert.ok(vt && vt.kind === 'vessel' && headOf(vt, { vesselHeat: 'noboil' }) === 'Single Vessel Brewer' && vt.ask === 'Choose the Vessel that matches yours:' && vt.otherBtn === 'Other Skynet Template');
   assert.deepEqual(choicesOf(vt, ctx()).map(c => c[1]), ['Plain Pot', 'Pot with 1.5 TC Outlet', 'Pot with NPT Outlet']);
   for (const [n] of choicesOf(vt, ctx())) assert.ok(fs.existsSync(new URL(`../templates/vessel/${n}.json`, import.meta.url)), n);
   const brew = (heat) => shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: heat }, ctx()).map(q => q.id);
   assert.ok(brew('noboil').includes('vesselTemplate')); assert.ok(!brew('gasstove').includes('vesselTemplate'));
+  // Electric Stove Top (2026-11-27): its own heading and its kettle-on-a-stove Templates
+  assert.ok(brew('electricstove').includes('vesselTemplate'));
+  assert.equal(headOf(vt, { vesselHeat: 'electricstove' }), 'Electric Stove Top Brewer');
+  assert.deepEqual(choicesOf(vt, ctx(), { vesselHeat: 'electricstove' }), STOVE_ELECTRIC_VESSELS);
+  for (const [n] of STOVE_ELECTRIC_VESSELS) assert.ok(fs.existsSync(new URL(`../templates/vessel/${n}.json`, import.meta.url)), n);
+  assert.equal(answerWords(vt, 'Kettle_5_Gal_Electric_Stove_Low_Drain', ctx()), 'Kettle with a Ball Valve on an Electric Stove');
   assert.equal(answerWords(vt, 'Brew_Vessel_Low_TC_Output_Widget', ctx()), 'Pot with 1.5 TC Outlet');
   assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'noboil', vesselTemplate: 'Generic_Brew_Vessel_Widget' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat', 'vesselTemplate'])).brewDefaults.vesselTemplate, 'Generic_Brew_Vessel_Widget'); }
+
+// ---- the Brewery Build (2026-11-27: "we have to store the answer on the Brewery Build"): the Brewery answers kept together
+{
+  const out = setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'noboil', vesselTemplate: 'Generic_Brew_Vessel_Widget' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat', 'vesselTemplate']), true);
+  const bb = out.brewDefaults.breweryBuild;
+  assert.equal(bb.vesselCount, 1); assert.equal(bb.vesselHeat, 'noboil'); assert.equal(bb.vesselTemplate, 'Generic_Brew_Vessel_Widget');
+  assert.ok(bb.brewerLevel, 'with the Brewer Level the answers give');
+  // an answer that no longer fits (three vessels) drops out: How is it heated is only for one vessel
+  const b3 = breweryBuildOf({ vesselCount: '3', vesselHeat: 'noboil', vesselTemplate: 'x', recirculate: true });
+  assert.equal(b3.vesselCount, 3); assert.equal(b3.vesselHeat, undefined); assert.equal(b3.vesselTemplate, undefined); assert.equal(b3.recirculate, true);
+  assert.match(fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), /d\.breweryBuild = breweryBuildOf\(d\)/, 'Default settings keeps the same Brewery Build');
+}

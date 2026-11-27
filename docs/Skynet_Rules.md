@@ -1879,6 +1879,16 @@ answers and changes nothing until **✔ Finish**.
   Templates as pictures (Generic_Brew_Vessel_Widget, Brew_Vessel_Low_TC_Output_Widget, Brew_Vessel_Low_NPT_Output_Widget) and his
   plain words under them (Plain Pot, Pot with 1.5 TC Outlet, Pot with NPT Outlet). A click lights one; Next ▶ is ⛔ until one is
   picked. **Other Skynet Template** opens every other Skynet Vessel Template. Saved as `vesselTemplate`, also on Default settings.
+- **CHANGED 2026-11-27, Electric Stove Top Brewer** (OakBarn Brewery: "Build the Vessel choices for If 1 vessel Electric stove top"):
+  one vessel and **Electric Stove Top** asks the same question under the heading **Electric Stove Top Brewer**, with the Skynet
+  Vessel Templates Kettle_5_Gal_Electric_Stove (Kettle on an Electric Stove) and Kettle_5_Gal_Electric_Stove_Low_Drain (Kettle with a
+  Ball Valve on an Electric Stove). The choices and heading by how the vessel is heated are in `ONE_VESSEL_PICKS`; the answer is the
+  same `vesselTemplate`.
+- **CHANGED 2026-11-27, the Brewery Build** (OakBarn Brewery: "we have to store the answer on the Brewery Build because at the end we
+  will either have templates to choose from or build one from their answers"): every Brewery answer that fits the answers before it
+  (its `when`), held ones too, is kept together in `brewDefaults.breweryBuild` with the Brewer Level they give (`breweryBuildOf`).
+  The Setup Interview and Default settings both make it from the saved answers, so they always agree. The end of the interview
+  reads it to offer matching Templates or to build a Schema (not built yet).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
@@ -7623,6 +7633,8 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
+- 2026-11-27: Rule 2.75 changed: one vessel on an Electric Stove Top picks its vessel (Electric Stove Top Brewer, two kettle-on-a-stove Templates). Help 248.
+- 2026-11-27: Rule 2.75 changed: the Brewery answers are kept together as the Brewery Build (brewDefaults.breweryBuild), for the end of the interview to offer Templates or build one. Help 248.
 - 2026-11-27: Rule 15.4 changed (OakBarn Brewery: "Remove the option to install the BruControl Importer which will become a standalone exe and only for Windows as it needs to be on the same machine as the BruControl Program"): the Skynet Setup no longer asks the Importer question or adds its shortcuts (an earlier Setup's are taken away on update); the last Setup page has only Start Skynet Brewer now. The Importer will be its own Windows Setup .exe (on hold). Rule 9 "Both programs" notes say so. Help 143.
 - 2026-11-27: Rule 2.77 new: hover help is plain and short, no personal name, no Rule numbers (every balloon cleaned, English and French); Skynet Vessel Templates get a plain `tip`, shown under each picture in the wider Add a Vessel picker. Help 66.
 - 2026-11-27: Rule 2.75 changed: one vessel and No Boil Brewer asks Single Vessel Brewer: Choose the Vessel that matches yours (vesselTemplate, also on Default settings). Help 248.

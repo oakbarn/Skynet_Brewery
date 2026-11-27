@@ -76,6 +76,7 @@ question comes back to the Let's get to the Interview screen.
 | 3 Brewery | **Number of Hot Side Vessels** (the first Brewery question, for every Brewer Type): a box where you type a whole number from **1 to 10**. Count the Kettles, Mash Tuns and HLT, not the fermentors. The questions after it branch on the number: 1, 2, or 3 or more. For now the only other Brewery question is **How is the vessel heated?** (below); the rest (All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus) are on Default settings | With the Default settings answers it works out your **Brewer Level**, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
 | 3 Brewery | **How is the vessel heated?** (only with 1 vessel) | Seven **Tick Boxes**: No Boil Brewer, Electric Stove Top, Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal Electric Element. Also on Default settings | not set |
 | 3 Brewery | **Single Vessel Brewer: Choose the Vessel that matches yours:** (only with 1 vessel and **No Boil Brewer**) | Three pictures of Skynet Vessel Templates, each with plain words under it: **Plain Pot**, **Pot with 1.5 TC Outlet**, **Pot with NPT Outlet**. Click the one like yours (it lights up), then **Next ▶**. **Other Skynet Template** opens every other Skynet Vessel Template, each with its plain words under it. Also on Default settings | not set |
+| 3 Brewery | **Electric Stove Top Brewer: Choose the Vessel that matches yours:** (only with 1 vessel and **Electric Stove Top**) | Two pictures of Skynet Vessel Templates with plain words under them: **Kettle on an Electric Stove** and **Kettle with a Ball Valve on an Electric Stove**. Click the one like yours, then **Next ▶**. **Other Skynet Template** opens every other one. Also on Default settings | not set |
 | Default settings (not asked for now) | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. The **Piped Manifold** switch on Default settings | No |
 | Default settings (not asked for now) | **Pipe size** and **Hose size** (only after Piped Manifold Yes) | The size a new pipe or hose starts at | 1/2" |
 | 4 Other Defaults | **Brewery Name** (Patrons only) | The name at the top of every Tab | Skynet Panel |
@@ -111,3 +112,9 @@ The New Schema Interview starts a new Brewing Tab on the Level that fits your Br
 Every answer is on **☰ Menu > Default settings** too (Rule 2.42), the same saved value: change it there any time. The Help language
 is also on the **?** Help window. Running the Setup Interview again starts on your saved answers and on the first question that is
 not green; it changes nothing until ✔ Finish (or Close, which saves the answers so far).
+
+**The Brewery Build.** The Brewery answers (Number of Hot Side Vessels, How is the vessel heated?, Single Vessel Brewer and the ones
+after them) are also kept together as your **Brewery Build**, with the Brewer Level they give. Only the answers that fit go in: with
+three vessels, How is the vessel heated? (a one vessel question) is left out. At the end of the interview the Brewery Build is used
+to offer the Templates that match your brewery, or to build one from your answers. Changing a Brewery answer on Default settings
+changes the Brewery Build too.

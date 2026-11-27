@@ -57,6 +57,14 @@ export const VESSEL_HEATS = [['noboil', 'No Boil Brewer'], ['electricstove', 'El
 // his three Skynet Vessel Templates with his words under them, and Other Skynet Template for any other one. [Template name, his words]
 export const SINGLE_VESSELS = [['Generic_Brew_Vessel_Widget', 'Plain Pot'], ['Brew_Vessel_Low_TC_Output_Widget', 'Pot with 1.5 TC Outlet'],
   ['Brew_Vessel_Low_NPT_Output_Widget', 'Pot with NPT Outlet']];
+// Electric Stove Top, one vessel (OakBarn Brewery, 2026-11-27: "Build the Vessel choices for If 1 vessel Electric stove top"): the
+// Skynet Vessel Templates of a kettle on an electric stove, plain words under them
+export const STOVE_ELECTRIC_VESSELS = [['Kettle_5_Gal_Electric_Stove', 'Kettle on an Electric Stove'],
+  ['Kettle_5_Gal_Electric_Stove_Low_Drain', 'Kettle with a Ball Valve on an Electric Stove']];
+// the vessel choices and the heading by how the one vessel is heated
+export const ONE_VESSEL_PICKS = { noboil: { head: 'Single Vessel Brewer', choices: SINGLE_VESSELS },
+  electricstove: { head: 'Electric Stove Top Brewer', choices: STOVE_ELECTRIC_VESSELS } };
+const onePick = a => ONE_VESSEL_PICKS[a?.vesselHeat] || ONE_VESSEL_PICKS.noboil;
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
 export function brewerLevelOf(v) {
@@ -221,11 +229,11 @@ export const SETUP_QUESTIONS = [
     ask: 'How is the vessel heated?', why: 'Tick the one that heats your vessel.',
     choices: VESSEL_HEATS, start: ctx => VESSEL_HEATS.some(([k]) => k === ctx.defaults?.vesselHeat) ? ctx.defaults.vesselHeat : '' },
   // No Boil Brewer (OakBarn Brewery, 2026-11-27: "no Boil Brewer next", his picture): pick the vessel (a Skynet Vessel Template)
-  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', when: { vesselCount: '1', vesselHeat: 'noboil' },
-    head: 'Single Vessel Brewer', ask: 'Choose the Vessel that matches yours:', why: 'Click the picture of your vessel, then Next ▶.',
+  { id: 'vesselTemplate', step: 'Brewery', kind: 'vessel', save: 'defaults', when: { vesselCount: '1', vesselHeat: Object.keys(ONE_VESSEL_PICKS) },
+    head: a => onePick(a).head, ask: 'Choose the Vessel that matches yours:', why: 'Click the picture of your vessel, then Next ▶.',
     group: 'Vessel Widget', groupNote: 'One Skynet Template with every IP, a Temperature Probe (Front or Thermowell) and an Element Port, each with a Place slider. Slide off what your vessel does not have.',
     other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
-    choices: SINGLE_VESSELS, start: ctx => ctx.defaults?.vesselTemplate || '' },
+    choices: (ctx, a) => onePick(a ?? ctx?.answers).choices, start: ctx => ctx.defaults?.vesselTemplate || '' },
   { id: 'allInOne', step: 'Brewery', held: true, kind: 'yesno', save: 'defaults', when: { vesselCount: '1' },
     ask: 'Is it an All In One?',
     why: 'One electric vessel with a basket and a pump built in (BrewZilla, Grainfather, Foundry ...).',
@@ -336,7 +344,8 @@ export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= (q.
 // (2026-11-27: every answer is saved as soon as it is given, so a first run left before steps 1 and 2 were answered has a green list
 // but no setupDone: the interview opens again)
 export const setupNeeded = config => !config?.brewDefaults?.setupDone && (!Object.keys(config?.brewDefaults ?? {}).length || Array.isArray(config?.brewDefaults?.setupAnswered));
-export const choicesOf = (q, ctx) => typeof q.choices === 'function' ? q.choices(ctx) : (q.choices || []);
+export const choicesOf = (q, ctx, a) => typeof q.choices === 'function' ? q.choices(ctx, a) : (q.choices || []);
+export const headOf = (q, a) => typeof q.head === 'function' ? q.head(a) : q.head;
 export const askOf = (q, a) => typeof q.ask === 'function' ? q.ask(a) : q.ask;
 // the questions shown, in order, for the answers so far
 // (a number answer, such as Number of Hot Side Vessels, matches its words: 3 is '3')
@@ -355,7 +364,8 @@ export function startAnswers(ctx, list = SETUP_QUESTIONS) {
 export function answerWords(q, v, ctx) {
   if (q.kind === 'branch') return '';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
-  if (q.kind === 'pick' || q.kind === 'vessel') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
+  if (q.kind === 'vessel') return Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v)?.[1] ?? String(v ?? '');
+  if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
 }
 // a typed answer that is no good (null: fine)
@@ -372,6 +382,21 @@ export function answerError(q, v) {
 // onlyAnswered (OakBarn Brewery, 2026-11-27: "We have to save these like a gGlobal as they need to be persistent. No implicit save. Even
 // if a computer is shut, these stay."): each answer is saved the moment it is given; only the answered (green) questions are written,
 // the others keep what was saved before. setupDone is set only once the must questions (steps 1 and 2) are answered.
+// the Brewery Build (OakBarn Brewery, 2026-11-27: "we have to store the answer on the Brewery Build because at the end we will either
+// have templates to choose from or build one from their answers"): every Brewery answer that fits the answers before it, kept
+// together with the Brewer Level they give, for the end of the interview to offer matching Templates or to build a Schema from them.
+// Made from the saved Default settings, so the Setup Interview and Default settings always give the same Brewery Build.
+export function breweryBuildOf(d, list = SETUP_QUESTIONS) {
+  const b = {};
+  for (const q of list) {
+    if (q.step !== 'Brewery' || q.kind === 'branch' || !whenOk(q, d)) continue;
+    const v = d[q.id];
+    if (v === undefined || v === null || v === '') continue;
+    b[q.id] = q.id === 'vesselCount' ? vesselCountOf(v) : q.kind === 'yesno' ? !!v : v;
+  }
+  const lv = brewerLevelOf(d); if (lv) b.brewerLevel = lv;
+  return b;
+}
 export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyAnswered = false) {
   const brewDefaults = { ...(ctx.defaults || {}) }, out = { brewDefaults, boil: null, helpLang: null };
   const did = id => !onlyAnswered || !!answered?.has(id);
@@ -395,6 +420,8 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
     out.boil = { airport: ap, elevationM, pressure: ctx.boil?.pressureHpa ?? null };
   // the Brewer Level from the Brewery Vessels answers (when they were asked)
   if (shownQuestions(a, ctx, list).some(q => q.id === 'vesselCount') && did('vesselCount')) { const l = brewerLevelOf(a); if (l) brewDefaults.brewerLevel = l; }
+  // the Brewery Build: every Brewery answer kept together (breweryBuildOf below)
+  if (SETUP_QUESTIONS.some(q => q.step === 'Brewery' && brewDefaults[q.id] !== undefined)) brewDefaults.breweryBuild = breweryBuildOf(brewDefaults);
   if (!onlyAnswered || !mustMissing(shownQuestions(a, ctx, list), answered || new Set()).length) brewDefaults.setupDone = true;
   if (answered) brewDefaults.setupAnswered = list.filter(q => q.kind !== 'branch' && answered.has(q.id)).map(q => q.id);
   return out;
