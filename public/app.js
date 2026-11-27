@@ -16524,7 +16524,7 @@ async function setupInterview({ first = false } = {}) {
             if (k !== undefined) pickIt(k);
           });
           body.append(h('p', { class: 'setupProceed' }, ' ', !on ? noNext() : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')),
-            h('p', { class: 'setupGroup' }, h('b', {}, q.group)), h('p', { class: 'muted' }, q.groupNote),
+            h('p', { class: 'setupGroup' }, h('b', {}, q.group)), h('p', { class: 'muted' }, typeof q.groupNote === 'function' ? q.groupNote(a) : q.groupNote),
             h('div', { class: 'setupVessels' }, ...mine.map(card), ...others.map(card)),
             addsNote(a, q.heat) ? h('p', { class: 'setupAdds' }, addsNote(a, q.heat)) : '',
             h('p', { class: 'setupOther' }, h('b', {}, q.other), ' ', h('button', { type: 'button', onclick: other }, q.otherBtn)));
@@ -16538,7 +16538,7 @@ async function setupInterview({ first = false } = {}) {
               if (e.target.checked) v[k] = PART_SPOT[k] || spotsOf(k)[0][0]; else delete v[k];
               draw(); } })),
             // the Sight Glass: Left or Right only, two boxes (Rule 2.6); the rest: Front or Back, 20 places, a Drop Down
-            !v[k] ? '' : k === 'sight' ? h('div', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Which side?'),
+            !v[k] || spotsOf(k).length < 2 ? '' : k === 'sight' ? h('div', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Which side?'),
               h('span', { class: 'setupWhereBtns' }, ...spotsOf(k).map(([s, w]) => h('button', { type: 'button', class: 'setupPick' + (v[k] === s ? ' cur' : ''), onclick: () => { v[k] = s; draw(); } }, w))))
             : h('label', { class: 'setupWhere' }, h('span', { class: 'muted' }, 'Where on the vessel?'),
               h('select', { title: 'Where it is on the vessel', onchange: e => { v[k] = e.target.value; draw(); } }, ...LAYOUT_SIDES.map(([sd, sw]) => h('optgroup', { label: sw },

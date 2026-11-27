@@ -1917,7 +1917,10 @@ answers and changes nothing until **✔ Finish**.
   parts (Tick Boxes that may tick more than one, each with where it is: his Vessel Layout picture, the same 10 places on the Front
   and the Back in a Drop Down, and "Sight Glass left or Right only" as two boxes; 📐 Vessel Layout pops up a sample vessel with
   every place, the ticked ones filled in: "Create a Vessel Sample for Layout that a User can Pop Up"), then the vessel (up to 6 Skynet Templates that fit the use, the heat and the parts, best match first; more under Other
-  Skynet Template), then its Size. Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
+  Skynet Template), then its Size. **Narrowed** (OakBarn Brewery: "narrow the Vessel selections based on the answers to the new
+  questions"): only the vessels with every part ticked; when none has them all, the closest, and the note says so. **More parts**
+  ("Add Bottom Drain with skirt to questions"; "and Temperature Probe"): Bottom Drain with Skirt (always under the center, nothing
+  to pick) and Temperature Probe (Front or Back place). Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
   with what its heat `adds`).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 

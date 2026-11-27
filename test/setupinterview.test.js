@@ -349,7 +349,9 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.ok(asTicks(heat, ctx()), 'still Tick Boxes (up to 8)');
   assert.deepEqual(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'v2Template'), ctx(), { v2Use: 'mlt', v2Heat: 'noheat' }).map(([k]) => k), ['Mash_Tun', 'OakBarn_MLT']);
   assert.deepEqual(m.VESSEL_USES.map(([, w]) => w), ['Boil Kettle (BK)', 'Hot Liquor Tank (HLT)', 'BK and HLT', 'Mash Tun (MLT)']);
-  assert.deepEqual(m.VESSEL_PARTS.map(([, w]) => w), ['Tangential Inlet', 'Steam Slayer', 'Sparge Arm', 'Sight Glass']);
+  assert.deepEqual(m.VESSEL_PARTS.map(([, w]) => w), ['Tangential Inlet', 'Steam Slayer', 'Sparge Arm', 'Sight Glass', 'Bottom Drain with Skirt', 'Temperature Probe']);
+  assert.deepEqual(m.spotsOf('skirt'), [['bottom', 'Bottom Center']], 'a skirt drain: nothing to pick');
+  assert.deepEqual(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'v2Template'), ctx(), { v2Use: 'mlt', v2Heat: 'noheat', v2Parts: { skirt: 'bottom' } }).map(([k]) => k), ['OakBarn_MLT']);
   // his Vessel Layout picture: the same 10 places on the Front and the Back; "Sight Glass left or Right only"
   assert.deepEqual(m.LAYOUT_PLACES.map(([, w]) => w), ['High Right', 'High Left', 'Middle Right', 'Middle Left', 'Mid Low Right', 'Mid Low Center', 'Mid Low Left', 'Low Right', 'Low Center', 'Low Left']);
   assert.equal(m.VESSEL_SPOTS.length, 20);
@@ -368,6 +370,14 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   const tpl = SETUP_QUESTIONS.find(q => q.id === 'v1Template');
   assert.equal(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'gasburner', v1Parts: { steamSlayer: 'fhr' } })[0][0], 'Kettle_Tangential_Steam_Slayer');
   assert.equal(choicesOf(tpl, ctx(), { v1Use: 'hlt', v1Heat: 'element', v1Parts: { sight: 'left' } })[0][0], 'OakBarn_Big_MAC_HLT');
+  // narrowed: only the vessels with every part ticked
+  assert.deepEqual(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'gasburner', v1Parts: { steamSlayer: 'fhr' } }).map(([k]) => k), ['Kettle_Tangential_Steam_Slayer']);
+  assert.deepEqual(choicesOf(tpl, ctx(), { v1Use: 'hlt', v1Heat: 'element', v1Parts: { sight: 'left' } }).map(([k]) => k), ['OakBarn_Big_MAC_HLT']);
+  assert.equal(m.poolExact('bk', 'gasburner', { steamSlayer: 'fhr' }), true);
+  // none has them all: the closest, and the note says so
+  assert.equal(m.poolExact('bk', 'gasburner', { steamSlayer: 'fhr', sight: 'left' }), false);
+  assert.ok(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'gasburner', v1Parts: { steamSlayer: 'fhr', sight: 'left' } }).length > 1);
+  assert.match(tpl.groupNote({ v1Use: 'bk', v1Heat: 'gasburner', v1Parts: { steamSlayer: 'fhr', sight: 'left' } }), /^No Skynet Template has every part/);
   assert.ok(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'element' }).every(([k]) => m.VESSEL_POOL.find(p => p[0] === k)[4] === 'element'), 'electric: only Templates with an element');
   assert.ok(choicesOf(tpl, ctx(), { v1Use: 'mlt', v1Heat: 'gasburner' }).every(([k]) => m.VESSEL_POOL.find(p => p[0] === k)[2].includes('mlt')));
   for (const [h] of m.MULTI_HEATS) for (const [u] of m.VESSEL_USES) {
@@ -377,7 +387,8 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   for (const [k] of m.VESSEL_POOL) assert.ok(fs.existsSync(`templates/vessel/${k}.json`), k);
   // the parts each pool vessel says it has are on its Template
   for (const [k, , , has] of m.VESSEL_POOL) { const p = JSON.parse(fs.readFileSync(`templates/vessel/${k}.json`, 'utf8')).ports || {};
-    for (const x of has) assert.ok(p[x === 'sight' ? 'sightTop' : x], `${k} has ${x}`); }
+    for (const x of has) assert.ok(x === 'skirt' ? /Skirt/.test(p.outlet?.position) : x === 'probe' ? p.thermowell : p[x === 'sight' ? 'sightTop' : x], `${k} has ${x}`);
+    if (p.thermowell && p.thermowell.installed !== false) assert.ok(has.includes('probe'), `${k}: a thermowell is a Temperature Probe`); }
   // the size of each: the element row only for an electric one
   assert.ok(sizeFieldsOf({ v2Heat: 'element' }, 'v2Heat').some(([k]) => k === 'elementDepth'));
   assert.ok(!sizeFieldsOf({ v2Heat: 'gasburner' }, 'v2Heat').some(([k]) => k === 'elementDepth'));

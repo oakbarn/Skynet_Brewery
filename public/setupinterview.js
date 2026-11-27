@@ -140,7 +140,9 @@ const onePick = a => ONE_VESSEL_PICKS[a?.vesselHeat] || ONE_VESSEL_PICKS.noboil;
 export const MULTI_HEATS = [...VESSEL_HEATS.filter(([k]) => k !== 'noboil'), ['noheat', 'No Heat']];
 export const VESSEL_USES = [['bk', 'Boil Kettle (BK)'], ['hlt', 'Hot Liquor Tank (HLT)'], ['bkhlt', 'BK and HLT'], ['mlt', 'Mash Tun (MLT)']];
 // the parts asked about, each with where it is on the vessel
-export const VESSEL_PARTS = [['tangential', 'Tangential Inlet'], ['steamSlayer', 'Steam Slayer'], ['sparge', 'Sparge Arm'], ['sight', 'Sight Glass']];
+// (2026-11-27 later: "Add Bottom Drain with skirt to questions"; "and Temperature Probe")
+export const VESSEL_PARTS = [['tangential', 'Tangential Inlet'], ['steamSlayer', 'Steam Slayer'], ['sparge', 'Sparge Arm'], ['sight', 'Sight Glass'],
+  ['skirt', 'Bottom Drain with Skirt'], ['probe', 'Temperature Probe']];
 // where on the vessel (OakBarn Brewery, 2026-11-27, his Vessel Layout picture): the same 10 places on the Front and on the Back;
 // "Sight Glass left or Right only". [key, words, x, y] with x and y from 0 to 1 across and down the vessel, as on his picture (the
 // left of the drawing is Right, as he drew it)
@@ -150,9 +152,11 @@ export const LAYOUT_PLACES = [['hr', 'High Right', 0.06, 0.07], ['hl', 'High Lef
 export const LAYOUT_SIDES = [['f', 'Front'], ['b', 'Back']];
 export const VESSEL_SPOTS = LAYOUT_SIDES.flatMap(([s, sw]) => LAYOUT_PLACES.map(([k, w]) => [s + k, `${sw} ${w}`]));
 export const SIGHT_SPOTS = [['right', 'Right'], ['left', 'Left']];
-export const spotsOf = part => part === 'sight' ? SIGHT_SPOTS : VESSEL_SPOTS;
+// a Bottom Drain with Skirt is always under the vessel, in the center: nothing to pick
+export const SKIRT_SPOTS = [['bottom', 'Bottom Center']];
+export const spotsOf = part => part === 'sight' ? SIGHT_SPOTS : part === 'skirt' ? SKIRT_SPOTS : VESSEL_SPOTS;
 // where a part starts when it is ticked
-export const PART_SPOT = { tangential: 'fll', steamSlayer: 'fhr', sparge: 'fhl', sight: 'right' };
+export const PART_SPOT = { tangential: 'fll', steamSlayer: 'fhr', sparge: 'fhl', sight: 'right', skirt: 'bottom', probe: 'fmlc' };
 export const partsClean = v => { const o = {}; for (const [k] of VESSEL_PARTS) if (v?.[k] && spotsOf(k).some(([s]) => s === v[k])) o[k] = v[k]; return o; };
 export const partsWords = v => { const o = partsClean(v), w = VESSEL_PARTS.filter(([k]) => o[k]).map(([k, t]) => `${t} (${spotsOf(k).find(([s]) => s === o[k])[1]})`); return w.length ? w.join(', ') : 'None of these'; };
 // the Vessel Layout sample (OakBarn Brewery, 2026-11-27: "Create a Vessel Sample for Layout that a User can Pop Up"): his picture drawn
@@ -184,24 +188,24 @@ export function vesselLayoutSvg(parts = {}) {
 // heat: 'element' (an Element Port), 'estove' or 'gstove' (on a stove), '' (heated from under it: a burner, a hot plate ...)
 const K = ['bk', 'bkhlt'], H = ['hlt', 'bkhlt'];
 export const VESSEL_POOL = [
-  ['Kettle_Basic', 'Basic Kettle', K, ['tangential'], ''], ['Kettle_Tall', 'Tall Kettle', K, ['tangential'], ''],
-  ['Kettle_Big_Fatty', 'Wide Kettle', K, ['tangential'], ''], ['Kettle_Bottom_Drain', 'Kettle with Bottom Drain', K, [], ''],
-  ['Kettle_Bottom_Drain_2', 'Kettle with Bottom Drain and Tangential Inlet', K, ['tangential'], ''],
-  ['Kettle_Tangential_Steam_Slayer', 'Kettle with Steam Slayer', K, ['tangential', 'steamSlayer'], ''],
-  ['OakBarn_Stout_Kettle', 'Kettle with Sight Glass', K, ['tangential', 'sight'], ''],
+  ['Kettle_Basic', 'Basic Kettle', K, ['tangential', 'probe'], ''], ['Kettle_Tall', 'Tall Kettle', K, ['tangential', 'probe'], ''],
+  ['Kettle_Big_Fatty', 'Wide Kettle', K, ['tangential', 'probe'], ''], ['Kettle_Bottom_Drain', 'Kettle with Bottom Drain', K, ['probe'], ''],
+  ['Kettle_Bottom_Drain_2', 'Kettle with Bottom Drain and Tangential Inlet', K, ['tangential', 'probe'], ''],
+  ['Kettle_Tangential_Steam_Slayer', 'Kettle with Steam Slayer', K, ['tangential', 'steamSlayer', 'probe'], ''],
+  ['OakBarn_Stout_Kettle', 'Kettle with Sight Glass and Skirt Drain', K, ['tangential', 'sight', 'skirt', 'probe'], ''],
   ['Kettle_5_Gal_Electric_Stove_Low_Drain', 'Kettle with a Ball Valve on an Electric Stove', K, [], 'estove'],
   ['Kettle_5_Gal_Gas_Stove_Low_Drain', 'Kettle with a Ball Valve on a Gas Stove', K, [], 'gstove'],
-  ['Kettle_Basic_Electric', 'Basic Electric Kettle', K, ['tangential'], 'element'], ['Kettle_Tall_Electric', 'Tall Electric Kettle', K, ['tangential'], 'element'],
-  ['Kettle_Big_Fatty_Electric', 'Wide Electric Kettle', K, ['tangential'], 'element'],
-  ['Kettle_Bottom_Drain_Electric', 'Electric Kettle with Bottom Drain', K, [], 'element'],
-  ['Kettle_Bottom_Drain_2_Electric', 'Electric Kettle with Bottom Drain and Tangential Inlet', K, ['tangential'], 'element'],
-  ['Kettle_Tangential_Steam_Slayer_Electric', 'Electric Kettle with Steam Slayer', K, ['tangential', 'steamSlayer'], 'element'],
-  ['Integrated_Electric_Kettle_Basic', 'Electric Kettle, Probe and Element Built In', K, [], 'element'],
-  ['HLT', 'Hot Liquor Tank with Sparge', H, ['tangential', 'sparge'], 'element'],
-  ['OakBarn_Big_MAC_HLT', 'Hot Liquor Tank with Sight Glass', H, ['tangential', 'sight'], 'element'],
-  ['OakBarn_HLT_Radiator', 'Hot Liquor Tank, Element at the Back', H, ['tangential'], 'element'],
-  ['Brew_Vessel_Big_Mac_Widget', 'Big Vessel with Sparge and Tangential Inlet', ['bk', 'hlt', 'bkhlt', 'mlt'], ['tangential', 'sparge'], 'element'],
-  ['Mash_Tun', 'Mash Tun with Sparge', ['mlt'], ['sparge'], ''], ['OakBarn_MLT', 'Mash Tun with Sparge and Thermowell', ['mlt'], ['sparge'], '']];
+  ['Kettle_Basic_Electric', 'Basic Electric Kettle', K, ['tangential', 'probe'], 'element'], ['Kettle_Tall_Electric', 'Tall Electric Kettle', K, ['tangential', 'probe'], 'element'],
+  ['Kettle_Big_Fatty_Electric', 'Wide Electric Kettle', K, ['tangential', 'probe'], 'element'],
+  ['Kettle_Bottom_Drain_Electric', 'Electric Kettle with Bottom Drain', K, ['probe'], 'element'],
+  ['Kettle_Bottom_Drain_2_Electric', 'Electric Kettle with Bottom Drain and Tangential Inlet', K, ['tangential', 'probe'], 'element'],
+  ['Kettle_Tangential_Steam_Slayer_Electric', 'Electric Kettle with Steam Slayer', K, ['tangential', 'steamSlayer', 'probe'], 'element'],
+  ['Integrated_Electric_Kettle_Basic', 'Electric Kettle, Probe and Element Built In', K, ['probe'], 'element'],
+  ['HLT', 'Hot Liquor Tank with Sparge', H, ['tangential', 'sparge', 'probe'], 'element'],
+  ['OakBarn_Big_MAC_HLT', 'Hot Liquor Tank with Sight Glass', H, ['tangential', 'sight', 'probe'], 'element'],
+  ['OakBarn_HLT_Radiator', 'Hot Liquor Tank, Element at the Back', H, ['tangential', 'probe'], 'element'],
+  ['Brew_Vessel_Big_Mac_Widget', 'Big Vessel with Sparge and Tangential Inlet', ['bk', 'hlt', 'bkhlt', 'mlt'], ['tangential', 'sparge', 'probe'], 'element'],
+  ['Mash_Tun', 'Mash Tun with Sparge', ['mlt'], ['sparge', 'probe'], ''], ['OakBarn_MLT', 'Mash Tun with Sparge and Skirt Drain', ['mlt'], ['sparge', 'skirt', 'probe'], '']];
 export const POOL_MAX = 6;      // "Try to limit the choices to 6 or less in the upper selection but you can add more" (Other Skynet Template)
 // the vessels that fit what this one is used for, how it is heated and the parts ticked, the best match first (at most 6)
 export function poolPicks(use, heat, parts) {
@@ -210,10 +214,15 @@ export function poolPicks(use, heat, parts) {
     : heat === 'gasstove' ? p[4] === 'gstove' || p[4] === '' : p[4] === '';
   let list = forUse.filter(fits); if (!list.length) list = forUse;      // none heated that way yet: every one for that use
   const want = Object.keys(partsClean(parts));
+  // narrowed by the parts (2026-11-27: "narrow the Vessel selections based on the answers to the new questions"): only the vessels
+  // with every part ticked; when none has them all, the closest ones
+  const all = list.filter(p => want.every(k => p[3].includes(k))); if (all.length) list = all;
   const score = p => want.filter(k => p[3].includes(k)).length * 2 - p[3].filter(k => !want.includes(k)).length * 0.5
     + (heat === 'electricstove' && p[4] === 'estove' || heat === 'gasstove' && p[4] === 'gstove' ? 1 : 0);
   return list.map((p, i) => [p, score(p), i]).sort((x, y) => y[1] - x[1] || x[2] - y[2]).slice(0, POOL_MAX).map(([p]) => [p[0], p[1]]);
 }
+// true when the vessels shown have every part ticked (false: none has them all, the closest are shown)
+export const poolExact = (use, heat, parts) => { const want = Object.keys(partsClean(parts)); return poolPicks(use, heat, parts).some(([k]) => want.every(x => VESSEL_POOL.find(p => p[0] === k)[3].includes(x))); };
 // the rows of vessel n of count: How heated, Used for, Parts, the vessel, its size
 export function vesselRows(n, count) {
   const v = `v${n}`, when = { vesselCount: String(count) }, of = `Vessel ${n} of ${count}`, D = (ctx, k) => ctx.defaults?.[v + k];
@@ -228,7 +237,9 @@ export function vesselRows(n, count) {
       choices: VESSEL_PARTS, start: ctx => partsClean(D(ctx, 'Parts')) },
     { id: v + 'Template', step: 'Brewery', kind: 'vessel', save: 'defaults', ifSet: true, when, heat: v + 'Heat', head: of,
       ask: `Choose the Vessel that matches Vessel ${n}:`, why: 'Click the picture of your vessel, then Next ▶. The best match is first.',
-      group: 'Vessel Widget', groupNote: 'Skynet Templates that fit what you ticked. Other Skynet Template has every one.',
+      group: 'Vessel Widget', groupNote: a => poolExact(a?.[v + 'Use'], a?.[v + 'Heat'], a?.[v + 'Parts'])
+        ? `Only the Skynet Templates that fit what Vessel ${n} is used for, how it is heated and every part you ticked: ${partsWords(a?.[v + 'Parts'])}. Other Skynet Template has every one.`
+        : `No Skynet Template has every part you ticked yet (${partsWords(a?.[v + 'Parts'])}): these are the closest. Other Skynet Template has every one.`,
       other: 'Skynet Vessel Templates', otherBtn: 'Other Skynet Template',
       choices: (ctx, a) => { const x = a ?? ctx?.answers; return poolPicks(x?.[v + 'Use'], x?.[v + 'Heat'], x?.[v + 'Parts']); },
       start: ctx => D(ctx, 'Template') || '' },
