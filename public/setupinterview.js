@@ -271,7 +271,8 @@ export const FERMENTOR_TYPES = [['bucket', 'Plastic Bucket', ['none', 'chamber',
   // a second row (2026-11-27: "On the Type add a second row (I know this violates the rule but here it makes sense). For a Conical
   // Stainless Bucket and the" plastic pressure fermentor "looking thing"): the one exception to 8 Tick Boxes on a line (Rule 2.6)
   ['ssconical', 'Stainless Conical Bucket', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
-  ['pressureconical', 'Plastic Pressure Conical', ['none', 'chamber', 'icebath', 'glycolcoil']]];
+  ['pressureconical', 'Plastic Pressure Conical', ['none', 'chamber', 'icebath', 'glycolcoil']],
+  ['crock', 'Ceramic Crock', ['none', 'chamber', 'icebath']]];      // 2026-11-27: "Ceramic Crock Fermentation Vessel"
 export const FERMENTOR_TYPE_ROW = 8;      // the first row has 8, the second row the rest
 export const coolsFor = type => { const t = FERMENTOR_TYPES.find(([k]) => k === type); return t ? FERMENTOR_COOLS.filter(([k]) => t[2].includes(k)) : FERMENTOR_COOLS; };
 // the pictures over the Tick Boxes: simple drawings by Skynet (no shop pictures), colors from the page
@@ -281,6 +282,7 @@ export const FERMENTOR_PICS = {
   unitank: P('<path d="M12 10h36v44l-18 18-18-18z"/><path d="M12 10q18-7 36 0"/><path d="M12 18h36M12 28h36M12 38h36" stroke-dasharray="3 3"/><path d="M30 72v8M14 56l-6 26M46 56l6 26"/>'),
   brewbucket: P('<path d="M14 14h32l-3 60H17z"/><path d="M12 14h36"/><path d="M14 14q16-10 32 0"/><circle cx="30" cy="62" r="3"/><path d="M33 62h6"/>'),
   bucket: P('<path d="M13 24h34l-4 54H17z"/><path d="M11 18h38v6H11z"/><path d="M13 32h34M14 40h32"/><path d="M11 21q19-26 38 0"/><path d="M26 4h8" stroke-width="4"/>'),
+  crock: P('<path d="M14 22q-4 6-4 26t4 28q16 6 32 0 4-8 4-28t-4-26z"/><path d="M12 16h36v6H12z"/><path d="M24 10h12v6H24z"/><path d="M27 6h6v4h-6z"/><path d="M10 34h-4v12h4M50 34h4v12h-4"/><path d="M11 56h38" opacity=".5"/>'),
   glasscarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M16 44h28" opacity=".5"/>'),
   plasticcarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M10 46h40M10 58h40M10 70h40" stroke-dasharray="4 3"/>'),
   corny: P('<path d="M20 16h20v60H20z"/><path d="M18 14h24v5H18zM18 73h24v5H18z"/><path d="M25 8h10v6H25z"/><path d="M22 14v-4M38 14v-4"/>'),

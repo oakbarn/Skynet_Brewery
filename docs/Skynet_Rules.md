@@ -1928,8 +1928,8 @@ answers and changes nothing until **✔ Finish**.
   after the other ("Might ask Type first as that can limit how cooled"): What kind of fermentor? (Tick Boxes with a picture drawn by
   Skynet over each, "similar to what they sell as graphics", "just similar profiles": Plastic Bucket first ("most people start there"),
   Conical, Unitank, Stainless Bucket, Glass Carboy,
-  Plastic Carboy, Corny Keg ("I have fermented in them"), Other, and a **second row**: Stainless Conical Bucket and Plastic Pressure
-  Conical: "On the Type add a second row (I know this violates the rule but here it makes sense)", the one exception to Rule 2.6's 8
+  Plastic Carboy, Corny Keg ("I have fermented in them"), Other, and a **second row**: Stainless Conical Bucket, Plastic Pressure
+  Conical and Ceramic Crock ("Ceramic Crock Fermentation Vessel"): "On the Type add a second row (I know this violates the rule but here it makes sense)", the one exception to Rule 2.6's 8
   Tick Boxes on a line; no shop or maker names), then How is it cooled? with only the ways
   that fit that kind (Not Cooled, Fermentation Chamber, Peltier, Manual Ice Bath, Glycol Coil, Glycol Jacket: "Glycol can be Coil or
   Jacket"); a Fermentation Chamber is always one. A way to cool that no longer fits the kind is not kept. Saved as `fermentorCount`,
@@ -7694,6 +7694,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is 1 to 6 (a Tab fits about 7 vessels with readable Gauges); Fermentors 1 to 6 when asked. Help 248.
 - 2026-11-27: Rule 2.75 changed: the Cold Side: Number of Fermentors 1 to 9, then how each is cooled and what kind it is. Help 248.
+- 2026-11-27: Rule 2.75 changed: Ceramic Crock added to What kind of fermentor? (second row; Not Cooled, Fermentation Chamber or Manual Ice Bath). Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
 - 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
 - 2026-11-27: Rule 2.75 changed: question 2 Brewer Type is four Tick Boxes on one screen; the "Do you grind your own grain?" follow-up is gone. Help 248.
