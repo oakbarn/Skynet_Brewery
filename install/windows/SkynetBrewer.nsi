@@ -139,10 +139,7 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
   Page custom UpdateChoicePage UpdateChoiceLeave
 !endif
 !insertmacro MUI_PAGE_INSTFILES
-; Finish page: "Start the BruControl Importer now" beside "Start Skynet Brewer now", only when the Importer was added.
-; Only one of the two can be ticked; Start Skynet Brewer is ticked to begin with (OakBarn Brewery, 2026-11-08)
-!define MUI_PAGE_CUSTOMFUNCTION_SHOW FinishShow
-!define MUI_PAGE_CUSTOMFUNCTION_LEAVE FinishLeave
+; Finish page: Start Skynet Brewer now (ticked). The Importer is no longer in this Setup (Rule 15.4, OakBarn Brewery 2026-11-27).
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -160,8 +157,6 @@ Var Choice
 Var OldPanel
 Var Stamp
 Var BrewDir
-Var ImporterAdded
-Var OpenImporter
 Var StopScript
 !ifdef MEDIA_SRC
   Var FullBackup
@@ -647,7 +642,7 @@ Section "Skynet Brew Panel" SecMain
   ; Opens the panel window (Rule 6.32): Desktop and Start menu > Skynet Panel. Starts the Brain first if it is not running.
   CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Panel.bat" "$INSTDIR\Skynet_Panel.bat"
   ; The Import folder, always made (Fritz, 2026-11-06): the Brewing folder's Import subfolder (C:\Brewing\Import when the
-  ; panel is in C:\Brewing\BrewPanel). The BruControl Importer saves its Schema files there, and later BeerSmith or other
+  ; panel is in C:\Brewing\BrewPanel). The Importer (its own Windows Setup, Rule 15.4) saves its Schema files there, and BeerSmith or other
   ; programs can save their files there too. Never deleted by an uninstall: it holds your files.
   Call FindBrewDir
   CreateDirectory "$BrewDir\Import"
@@ -661,7 +656,7 @@ Section "Skynet Brew Panel" SecMain
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Panel.lnk" "$INSTDIR\Skynet_Panel.bat" "" "$INSTDIR\install\windows\skynet.ico" 0 SW_SHOWMINIMIZED
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Stop the Skynet Brain.lnk" "$INSTDIR\Skynet_Stop_Brain.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
-  Call AskImporter
+  Call RemoveOldImporter
   Call AskStartWithWindows
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Panel folder.lnk" "$INSTDIR"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Uninstall Skynet Brewer.lnk" "$INSTDIR\Uninstall Skynet Brewer.exe"
@@ -688,29 +683,14 @@ Section "Skynet Brew Panel" SecMain
   WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
 SectionEnd
 
-; The BruControl Importer, the second door of the same program (Rule 15.4), is a choice (Fritz, 2026-11-06). Its program
-; files are always there (they are the Panel's own); Yes adds its start file and shortcuts, No leaves them out (and takes
-; away the shortcuts of an earlier install). On an update, the answer you gave last time is the default.
-Function AskImporter
-  ${If} ${FileExists} "$INSTDIR\Skynet_Importer.bat"
-    MessageBox MB_YESNO|MB_ICONQUESTION "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nIf you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No.$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDYES IDYES add IDNO leave
-  ${Else}
-    MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nIf you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No.$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDNO IDYES add IDNO leave
-  ${EndIf}
-  add:
-    CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
-    CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\importer.ico" 0
-    CreateShortCut "$DESKTOP\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\importer.ico" 0
-    ; and one in the Import folder, where its Schema files go (Fritz, 2026-11-06)
-    CreateShortCut "$BrewDir\Import\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\importer.ico" 0
-    DetailPrint "Added the Skynet BruControl Importer"
-    StrCpy $ImporterAdded 1
-    Return
-  leave:
-    Delete "$INSTDIR\Skynet_Importer.bat"
-    Delete "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk"
-    Delete "$DESKTOP\Skynet BruControl Importer.lnk"
-    Delete "$BrewDir\Import\Skynet BruControl Importer.lnk"
+; The Importer is not installed by this Setup (OakBarn Brewery, 2026-11-27: it "will become a standalone exe and only for Windows
+; as it needs to be on the same machine as the BruControl program", Rule 15.4). No question is asked. An earlier Setup may have
+; added its start file and shortcuts: they are taken away quietly, so nothing points at an Importer this Setup does not install.
+Function RemoveOldImporter
+  Delete "$INSTDIR\Skynet_Importer.bat"
+  Delete "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk"
+  Delete "$DESKTOP\Skynet BruControl Importer.lnk"
+  Delete "$BrewDir\Import\Skynet BruControl Importer.lnk"
 FunctionEnd
 
 ; Official Skynet (Rule 9.14, lib/official.js): the core program files (the same list as CORE there) lose their Read-only mark.
@@ -762,55 +742,13 @@ Function StartPanel
   ExecShell "open" "$INSTDIR\Skynet_Brewer.bat"
 FunctionEnd
 
-; The Finish page's "Start the BruControl Importer now" tick box. It sits under "Show the install notes" (130u = the
-; Modern UI's 110u for that box + 20u) and is only there when you answered Yes to the BruControl question.
-; It and "Start Skynet Brewer now" are one or the other: ticking one unticks the other, so only one program starts.
-Function FinishShow
-  StrCpy $OpenImporter ""
-  ${If} $ImporterAdded == 1
-    ${NSD_CreateCheckbox} 120u 130u 195u 10u "Start the BruControl Importer now"
-    Pop $OpenImporter
-    SetCtlColors $OpenImporter "${MUI_TEXTCOLOR}" "${MUI_BGCOLOR}"
-    ${NSD_OnClick} $OpenImporter FinishImporterClick
-    ${NSD_OnClick} $mui.FinishPage.Run FinishRunClick
-  ${EndIf}
-FunctionEnd
-
-Function FinishImporterClick
-  Pop $0
-  ${NSD_GetState} $OpenImporter $0
-  ${If} $0 == ${BST_CHECKED}
-    ${NSD_Uncheck} $mui.FinishPage.Run
-  ${EndIf}
-FunctionEnd
-
-Function FinishRunClick
-  Pop $0
-  ${NSD_GetState} $mui.FinishPage.Run $0
-  ${If} $0 == ${BST_CHECKED}
-  ${AndIf} $OpenImporter != ""
-    ${NSD_Uncheck} $OpenImporter
-  ${EndIf}
-FunctionEnd
-
-Function FinishLeave
-  ${If} $OpenImporter != ""
-    ${NSD_GetState} $OpenImporter $0
-    ${If} $0 == ${BST_CHECKED}
-      ; the Importer only: make sure Skynet Brewer does not start too
-      ${NSD_Uncheck} $mui.FinishPage.Run
-      ExecShell "open" "$INSTDIR\Skynet_Importer.bat"
-    ${EndIf}
-  ${EndIf}
-FunctionEnd
-
 ; ---------------------------------------------------------------- Uninstall
 ; Uninstall deletes everything, like Start Fresh (Rule 9.19, OakBarn Brewery 2026-11-13: an uninstall left the Import folder,
 ; its BruControl test files and the brew log behind). One red warning first; No cancels and nothing is deleted. The panel
-; and the BruControl Importer must be stopped first, or Windows can't delete the files they have open (the brew log).
+; (and an Importer an earlier Setup added) must be stopped first, or Windows can't delete the files they have open (the brew log).
 Section "Uninstall"
   Call un.FindBrewDir
-  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: UNINSTALL DELETES EVERYTHING.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - Skynet Brewer and the BruControl Importer ($INSTDIR)$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe$\r$\n   - every user, password and sign-in, the brew log and saved values$\r$\n   - every Process and the backups folders$\r$\n   - every picture and sound, your own and the Skynet ones$\r$\n   - everything in the Import folder ($BrewDir\Import), your BruControl files too$\r$\n$\r$\nNot removed: helper programs you installed, like Node.js or Tailscale. Remove them in Settings > Apps if you no longer want them.$\r$\n$\r$\nTo keep something, click No, copy it somewhere else, then uninstall again.$\r$\n$\r$\nYes: delete it all.$\r$\nNo: stop. Nothing is deleted." /SD IDYES IDYES go
+  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: UNINSTALL DELETES EVERYTHING.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - Skynet Brewer ($INSTDIR)$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe$\r$\n   - every user, password and sign-in, the brew log and saved values$\r$\n   - every Process and the backups folders$\r$\n   - every picture and sound, your own and the Skynet ones$\r$\n   - everything in the Import folder ($BrewDir\Import), your BruControl files too$\r$\n$\r$\nNot removed: helper programs you installed, like Node.js or Tailscale. Remove them in Settings > Apps if you no longer want them.$\r$\n$\r$\nTo keep something, click No, copy it somewhere else, then uninstall again.$\r$\n$\r$\nYes: delete it all.$\r$\nNo: stop. Nothing is deleted." /SD IDYES IDYES go
     Abort "Stopped. Nothing was deleted."
   go:
   Call un.WaitForPanelStopped

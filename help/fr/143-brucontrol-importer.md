@@ -10,8 +10,8 @@ crée est exactement ce que crée le panneau.
 
 ## Le démarrer {#starting-it}
 
-Double-cliquez sur **Skynet BruControl Importer** sur le Bureau ou dans le menu Démarrer (dossier Skynet Brewer). Le Setup .exe l'y
-met. Une fenêtre de commande noire s'ouvre et reste ouverte pendant que vous utilisez l'Importer ; **✖ Close Importer** en haut à droite l'arrête.
+Double-cliquez sur **Skynet BruControl Importer** sur le Bureau ou dans le menu Démarrer. Le propre Setup .exe de l'Importer
+l'y mettra (voir Installer l'Importer). Une fenêtre de commande noire s'ouvre et reste ouverte pendant que vous utilisez l'Importer ; **✖ Close Importer** en haut à droite l'arrête.
 
 ## Page 1 : Bienvenue {#page-1-welcome}
 
@@ -306,10 +306,10 @@ Ensuite, dans le **Skynet Panel**, ouvrez **Schema.json** et cliquez sur **Open 
 
 ## Installer l'Importer {#installing-the-importer}
 
-Le Setup Windows demande **"Will you import a BruControl configuration on this computer?"** (allez-vous importer une configuration BruControl sur cet ordinateur ?) Sous la question, il dit : « If you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No. » (si vous êtes un brasseur BruControl et voulez importer un fichier de configuration .brucfg, répondez Oui ; sinon, répondez Non). Oui ajoute le raccourci **Skynet BruControl
-Importer** sur votre Bureau, dans le menu Démarrer et dans le dossier Import (`C:\Brewing\Import`) ; Non le laisse de côté, et vous pouvez relancer le Setup pour l'ajouter plus tard. Si vous avez répondu Oui, la dernière page du Setup a deux cases à cocher, **Start Skynet Brewer now** (cochée) et **Start the BruControl
-Importer now** : une seule peut être cochée, donc un seul programme démarre. Le Setup n'efface jamais les réponses de l'Importer : utilisez **Restart Fresh**
-dans l'Importer. Le Setup
+L'Importer n'est **pas** dans le Setup Skynet. Il aura son **propre Setup .exe Windows**, à lancer sur l'ordinateur qui a
+BruControl (il doit être sur le même ordinateur que BruControl). Ce Setup n'est pas encore prêt. Le Setup Skynet ne pose aucune question
+sur l'Importer, et une mise à jour enlève les raccourcis de l'Importer qu'un Setup plus ancien avait ajoutés. Le Setup n'efface jamais les
+réponses de l'Importer : utilisez **Restart Fresh** dans l'Importer. Le Setup Skynet
 crée toujours le dossier Import, car BeerSmith ou d'autres programmes peuvent aussi y enregistrer leurs fichiers.
 
 ## Prochaines étapes (en construction) {#next-steps-being-built}
