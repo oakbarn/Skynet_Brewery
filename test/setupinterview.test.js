@@ -2,7 +2,7 @@
 // Help language and Brewer Type must be answered (Panel Update 17), every other question has Skip; the questions are data in one list
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { sizeVolume, sizeIn, sizeClean, sizeFieldsOf, breweryBuildOf, headOf, STOVE_ELECTRIC_VESSELS, ONE_VESSEL_PICKS, VESSEL_HEATS, addsNote, brewerLevelOf, vesselAnswersOf, VESSEL_KEYS, VESSELS_3UP } from '../public/setupinterview.js';
+import { sizeVolume, sizeSafe, sizeIn, sizeClean, sizeFieldsOf, breweryBuildOf, headOf, STOVE_ELECTRIC_VESSELS, ONE_VESSEL_PICKS, VESSEL_HEATS, addsNote, brewerLevelOf, vesselAnswersOf, VESSEL_KEYS, VESSELS_3UP } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
 import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf, asTicks, tickChoices } from '../public/setupinterview.js';
 
@@ -312,17 +312,23 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
     const ids = shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: heat }, ctx()).map(q => q.id);
     assert.ok(ids.indexOf('vesselSize') === ids.indexOf('vesselTemplate') + 1, `${heat}: the size right after the vessel`);
   }
-  assert.ok(!sizeFieldsOf({ vesselHeat: 'gasstove' }).some(([k]) => k === 'safeVolume'));
-  assert.ok(sizeFieldsOf({ vesselHeat: 'element' }).some(([k]) => k === 'safeVolume'), 'the element covered: only an electric vessel');
+  assert.ok(!sizeFieldsOf({ vesselHeat: 'gasstove' }).some(([k]) => k === 'elementDepth'));
+  assert.ok(sizeFieldsOf({ vesselHeat: 'element' }).some(([k]) => k === 'elementDepth'), 'down to the top of the element: only an electric vessel');
+  // "Height from Top to Top of Element so we can calculate the safe volume"; "and add 1 in to give a buffer": 12 in high, element top
+  // 9 in down = 3 in up, plus 1 in = 4 in of liquid in 12 in across: 2.0 gal
+  assert.equal(sizeSafe({ diameter: 12, vheight: 12, elementDepth: 9 }, 'US'), 2);
+  assert.equal(sizeSafe({ diameter: 30.48, vheight: 30.48, elementDepth: 22.86 }, 'Metric'), 7.4, 'the same in cm and liters');
+  assert.equal(sizeSafe({ diameter: 12, vheight: 12 }, 'US'), 0, 'no element depth: none');
+  assert.match(answerError(sz, { diameter: 12, vheight: 12, elementDepth: 12 }), /lower than the Inside Height/);
   assert.equal(sizeVolume({ diameter: 12, vheight: 12 }, 'US'), 5.9);      // 12 x 12 in: 5.9 gal
   assert.equal(sizeVolume({ diameter: 30, vheight: 30 }, 'Metric'), 21.2);  // 30 x 30 cm: 21.2 L
   assert.deepEqual(sizeIn({ units: 'US', diameter: 10, volume: 5 }, 'Metric'), { units: 'Metric', diameter: 25.4, volume: 18.93 });
   assert.equal(answerError(sz, { diameter: 12 }), 'Type both the Inside Diameter and the Inside Height, or leave both empty.');
   assert.match(answerError(sz, { diameter: -1, vheight: 2 }), /Inside Diameter/);
   assert.equal(answerError(sz, { diameter: 12, vheight: 12, deadspace: 0 }), null);
-  const out = setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'element', vesselSize: { diameter: '12', vheight: '12', volume: '5', deadspace: '0.5', safeVolume: '1.5' } }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat', 'vesselSize']), true);
-  assert.deepEqual(out.brewDefaults.vesselSize, { units: 'US', diameter: 12, vheight: 12, volume: 5, deadspace: 0.5, safeVolume: 1.5, calcVolume: 5.9 });
+  const out = setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'element', vesselSize: { diameter: '12', vheight: '12', volume: '5', deadspace: '0.5', elementDepth: '9' } }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat', 'vesselSize']), true);
+  assert.deepEqual(out.brewDefaults.vesselSize, { units: 'US', diameter: 12, vheight: 12, volume: 5, deadspace: 0.5, elementDepth: 9, calcVolume: 5.9, safeVolume: 2 });
   assert.deepEqual(out.brewDefaults.breweryBuild.vesselSize, out.brewDefaults.vesselSize, 'in the Brewery Build');
   assert.equal(sizeClean({ diameter: '' }, 'US'), null, 'nothing typed: nothing kept');
-  assert.equal(answerWords(sz, out.brewDefaults.vesselSize, ctx()), '12 in across, 12 in high, ≈ 5.9 gal, sold as 5 gal, Dead Space 0.5 gal, element covered at 1.5 gal');
+  assert.equal(answerWords(sz, out.brewDefaults.vesselSize, ctx()), '12 in across, 12 in high, ≈ 5.9 gal, sold as 5 gal, Dead Space 0.5 gal, element covered (plus 1 in) at 2 gal');
 }

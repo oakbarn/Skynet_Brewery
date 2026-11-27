@@ -94,7 +94,11 @@ export const ONE_VESSEL_PICKS = { noboil: { head: 'Single Vessel Brewer', choice
 // [key, words, 'len' or 'vol', only for these heats]
 export const VESSEL_SIZE_FIELDS = [['diameter', 'Inside Diameter', 'len'], ['vheight', 'Inside Height', 'len'],
   ['volume', 'Purported Volume (what it is sold as)', 'vol'], ['deadspace', 'Dead Space (if known: what stays in it)', 'vol'],
-  ['safeVolume', 'Least volume that covers the element', 'vol', ['element']]];
+  ['elementDepth', 'Top of the vessel down to the top of the element', 'len', ['element']]];
+// the element (OakBarn Brewery, 2026-11-27: "rather than Volume, Height from Top to Top of Element so we can calculate the safe volume";
+// "and add 1 in to give a buffer"): Skynet works out the Safe Element Volume (safeVolume, Rule 19.2) from the height of liquid that
+// covers the element, plus 1 inch (2.54 cm)
+export const ELEMENT_BUFFER_IN = 1;
 export const sizeFieldsOf = a => VESSEL_SIZE_FIELDS.filter(f => !f[3] || f[3].includes(a?.vesselHeat));
 export const sizeUnit = (kind, units) => kind === 'len' ? (units === 'Metric' ? 'cm' : 'in') : (units === 'Metric' ? 'L' : 'gal');
 // the Volume worked out from Diameter and Height, in gallons or liters (0 when either is missing)
@@ -102,6 +106,12 @@ export function sizeVolume(v, units) {
   const k = units === 'Metric' ? 1 / 2.54 : 1, d = +v?.diameter * k, hh = +v?.vheight * k;
   const gal = d > 0 && hh > 0 ? Math.PI / 4 * d * d * hh / 231 : 0;
   return Math.round((units === 'Metric' ? gal * L_PER_GAL : gal) * 10) / 10;
+}
+// the Safe Element Volume: the liquid up to the top of the element plus the buffer, in gallons or liters (0 when it cannot be worked out)
+export function sizeSafe(v, units) {
+  const k = units === 'Metric' ? 2.54 : 1, top = +v?.vheight - +v?.elementDepth;
+  if (!(+v?.diameter > 0 && +v?.vheight > 0) || v?.elementDepth === undefined || v?.elementDepth === '' || v?.elementDepth === null || !(top >= 0)) return 0;
+  return sizeVolume({ diameter: v.diameter, vheight: Math.min(+v.vheight, top + ELEMENT_BUFFER_IN * k) }, units);
 }
 // a saved size in other Units (the Units answer changed)
 export function sizeIn(v, units) {
@@ -426,7 +436,7 @@ export function answerWords(q, v, ctx) {
     if (+v?.diameter > 0 && +v?.vheight > 0) w.push(`${v.diameter} ${L} across, ${v.vheight} ${L} high, ≈ ${calc} ${V}`);
     if (+v?.volume > 0) w.push(`sold as ${v.volume} ${V}`);
     if (v?.deadspace !== undefined && v.deadspace !== '' && v.deadspace !== null) w.push(`Dead Space ${v.deadspace} ${V}`);
-    if (+v?.safeVolume > 0) w.push(`element covered at ${v.safeVolume} ${V}`);
+    { const sf = sizeSafe(v, u); if (sf) w.push(`element covered (plus 1 in) at ${sf} ${V}`); }
     return w.join(', ');
   }
   if (q.kind === 'vessel') return (choicesOf(q, ctx, ctx?.answers).find(([k]) => k === v) || Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v))?.[1] ?? String(v ?? '');
@@ -440,6 +450,8 @@ export function answerError(q, v) {
     const has = k => v[k] !== undefined && v[k] !== null && String(v[k]).trim() !== '';
     for (const [k, w] of VESSEL_SIZE_FIELDS) if (has(k) && !(Number.isFinite(+v[k]) && +v[k] >= (k === 'deadspace' ? 0 : 0.01))) return `${w}: type a number${k === 'deadspace' ? ' (0 or more)' : ' more than 0'}, or leave it empty.`;
     if (has('diameter') !== has('vheight')) return 'Type both the Inside Diameter and the Inside Height, or leave both empty.';
+    if (has('elementDepth') && !has('vheight')) return 'Type the Inside Diameter and Inside Height too: Skynet needs them to work out the Safe Element Volume.';
+    if (has('elementDepth') && +v.elementDepth >= +v.vheight) return 'The top of the element must be lower than the Inside Height.';
   }
   if (q.id === 'vesselCount' && vesselCountOf(v) == null) return `Type a whole number from ${VESSELS_MIN} to ${VESSELS_MAX}.`;
   if (q.id === 'batch' && v !== '' && v != null && !(Number.isFinite(+v) && +v > 0)) return 'The Batch Size must be more than 0 (or empty).';
@@ -458,6 +470,7 @@ export function sizeClean(v, unitsAns) {
   for (const [k] of VESSEL_SIZE_FIELDS) { const x = v?.[k]; if (x !== undefined && x !== null && String(x).trim() !== '' && Number.isFinite(+x)) out[k] = +x; }
   if (Object.keys(out).length === 1) return null;
   const c = sizeVolume(out, units); if (c) out.calcVolume = c;
+  const sf = sizeSafe(out, units); if (sf) out.safeVolume = sf;      // the Safe Element Volume (Rule 19.2)
   return out;
 }
 // the Brewery Build (OakBarn Brewery, 2026-11-27: "we have to store the answer on the Brewery Build because at the end we will either

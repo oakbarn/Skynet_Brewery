@@ -1897,7 +1897,9 @@ answers and changes nothing until **✔ Finish**.
   inside Skynet"; "Yes Build it and also ask the Purported Volume and the Dead Space if Known. And in an electric vessel save Volume
   height so the element is submerged"; "Apply this to all the previous ones as well"): after the vessel, for every way to heat one
   vessel, one screen asks the Inside Diameter and Inside Height (both or neither), the Purported Volume and the Dead Space; an
-  Internal Electric Element vessel also the least volume that covers the element (`safeVolume`). The same field names as a Vessel's
+  Internal Electric Element vessel also the Top of the vessel down to the top of the element (`elementDepth`; OakBarn Brewery: "rather
+  than Volume, Height from Top to Top of Element so we can calculate the safe volume"; "and add 1 in to give a buffer"): Skynet works
+  out the Safe Element Volume (`safeVolume`) as the liquid up to the top of the element plus 1 inch (2.54 cm). The same field names as a Vessel's
   Properties (Rule 19.2), in the Units picked, with the Volume Skynet works out (a cylinder) as `calcVolume`. Saved as `vesselSize`,
   also on Default settings and in the Brewery Build.
 - **CHANGED 2026-11-27, the Brewery Build** (OakBarn Brewery: "we have to store the answer on the Brewery Build because at the end we
@@ -7649,7 +7651,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 ## Change log
 
-- 2026-11-27: Rule 2.75 changed: Size of your Vessel (Inside Diameter and Height, Purported Volume, Dead Space, element covered) after the vessel for every way to heat one vessel. Help 248.
+- 2026-11-27: Rule 2.75 changed: Size of your Vessel (Inside Diameter and Height, Purported Volume, Dead Space, top of the element with the Safe Element Volume worked out plus 1 in) after the vessel for every way to heat one vessel. Help 248.
 - 2026-11-27: Rule 2.75 changed: every way to heat one vessel has its own vessel choices (Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal Electric Element); burner + igniter or element + probe kept in the Brewery Build as adds. Help 248.
 - 2026-11-27: Rule 2.75 changed: one vessel on an Electric Stove Top picks its vessel (Electric Stove Top Brewer, two kettle-on-a-stove Templates). Help 248.
 - 2026-11-27: Rule 2.75 changed: the Brewery answers are kept together as the Brewery Build (brewDefaults.breweryBuild), for the end of the interview to offer Templates or build one. Help 248.
