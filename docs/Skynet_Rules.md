@@ -1778,7 +1778,7 @@ answers and changes nothing until **✔ Finish**.
 - **CHANGED 2026-11-27** (OakBarn Brewery, his picture of the first screen, picked "A"; "Skip will get the Do Not Enter on the
   mandatory questions"). This wins over the order and the "steps 1 to 3" in this Rule: the six steps are now **1 Units · 2 Brewer
   Type · 3 Brewery · 4 Other Defaults · 5 Recipe Defaults · 6 Help Language**. **Only steps 1 and 2 must be answered** (Units, and
-  Brewer Type with its "Do you grind your own grain?"); Close's red pop-up and ✔ Finish check those two, and the blue pop-up says
+  Brewer Type); Close's red pop-up and ✔ Finish check those two, and the blue pop-up says
   it "will work with just the first 2 questions". Steps 3 to 5 are the branches. Step 6 Help Language is one question with its own
   Skip (English). Skip always shows; on a must question **not answered yet** it has the **🚫 not-allowed pointer** and does nothing;
   once answered (Next, or saved from an earlier run) Skip works and keeps the answer ("they cannot be skipped if unanswered. If
@@ -1836,6 +1836,26 @@ answers and changes nothing until **✔ Finish**.
 - **The questions are data** (public/setupinterview.js `SETUP_QUESTIONS`): the order, which are **must**, and new questions are
   changed there, one row each, with nothing else to change.
 - The New Schema Interview (Rule 2.58) starts a Brewing Tab's Level from the Brewer Level when no Level was picked before.
+- **CHANGED 2026-11-27, question 2** (OakBarn Brewery, his picture: "All on one screen so get rid of reference to any follow-up
+  question above as there are none. So it does become two simple questions"): **2 Brewer Type** is one screen of lead text and four
+  **Tick Boxes**: Extract Kit, Extract Brewer add Own Hops, All Grain, All Grain Mill own Grain (All Grain (own Grain Mill)). Every
+  Next has the ⛔ until a box is ticked. *Replaced:* "What is the highest level you will brew now?" with three choices and the
+  follow-up "Do you grind your own grain?" after All Grain.
+- **CHANGED 2026-11-27, Number of Vessels** (OakBarn Brewery: "Create the first brewery question which will be for all brewers
+  regardless of type. Number of Vessels"): the first question of **3 Brewery** (after its branch page) is **Number of Vessels**,
+  asked of every Brewer Type, as three **Tick Boxes** (One vessel, Two vessels, Three or more vessels, each with a short line under
+  it). Next has the ⛔ until a box is ticked; Skip works (not a must).
+- **CHANGED 2026-11-27, Brewery held to one question** (OakBarn Brewery: "Leave the brewery interview to the one question for now but
+  build all the rest"): the other Brewery questions (All In One, outlet, pump, pumps, HERMS or RIMS, All Grain Plus, Piped Manifold,
+  Pipe size, Hose size) have `held: true`: not asked, still on Default settings. Taking `held` off brings one back.
+- **CHANGED 2026-11-27, Tick Boxes after Brewery** (OakBarn Brewery: "Rebuild all the Interview Dialogs in Order After the Brewery
+  interview using check boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to
+  up to 4 Lines for a check Box if needed"): a row with `tick` is Tick Boxes when it is Yes/No or has **fewer than 6** choices
+  (Yeast Starter, Mash Profile, Boil Profile, Help language); 6 or more is a Drop Down list (Rule 2.6 still holds: more than 6 MUST
+  be one). A non-must one shows what Skip keeps.
+- **New questions** (OakBarn Brewery, 2026-11-27: "if you can add a selection to the Tick box, do not add followup questions but
+  remember that things may need to be a new branch"): add a choice to a question's Tick Boxes instead of a follow-up question; when a
+  choice needs more questions, they go in a new branch.
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
@@ -7571,6 +7591,9 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
+- 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
+- 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
+- 2026-11-27: Rule 2.75 changed: question 2 Brewer Type is four Tick Boxes on one screen; the "Do you grind your own grain?" follow-up is gone. Help 248.
 - 2026-11-27: Rule 2.76 new (OakBarn Brewery: "that should be a rule on any dialogs that have a selection or menu on the top"): a dialog's top (buttons, title, menu) stays frozen while the rest scrolls. Rule 2.75 changed again: every answer saved the moment it is given; Close and ✕ ⛔ on every screen until 1 and 2 are answered; Skip and Next ⛔ on unanswered 1 and 2; screens 2 (button guide) and 3 (Tick Box). Help 248.
 - 2026-11-27: Rule 2.75 changed (OakBarn Brewery, his picture of the first screen, picked "A"): Welcome page first (blue phone note); steps now Units, Brewer Type, Brewery, Other Defaults, Recipe Defaults, Help Language; only steps 1 and 2 mandatory; Skip shows the 🚫 pointer on must questions. Help 248.
 - 2026-11-26: Rule 2.75 new (OakBarn Brewery: "Start the no Skynet settings interview first ... First question (that cannot be skipped) US or Metric"; Brewer Level "A and Mandatory"): the Setup Interview on a new installation and on ☰ Menu; questions kept as data; Brewer Level and Yeast Starter on Default settings. Help 248.

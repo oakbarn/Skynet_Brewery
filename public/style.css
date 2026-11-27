@@ -1924,7 +1924,8 @@ dialog.errLogDlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh
 .setupDlg .setupGuideAnd { color: var(--muted); }
 /* screen 3, a Tick Box: the boxes with their words over them; the ticked one is green */
 .setupDlg .setupTicks { display: flex; gap: 28px; align-items: flex-end; margin: 10px 0 4px 12px; }
-.setupDlg .setupTick { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 700; text-align: center; max-width: 7em; cursor: pointer; }
+.setupDlg .setupTick { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 700; text-align: center; max-width: 9em; cursor: pointer; }
+.setupDlg .setupTick .setupTickTip { font-weight: 400; font-size: .85em; }
 .setupDlg .setupTick input { width: 1.6em; height: 1.6em; min-width: 0; accent-color: var(--ok); cursor: pointer; }
 .setupDlg .setupTickBox { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border: 2px solid var(--muted); border-radius: 5px; color: var(--ok); font-weight: 900; }
 .setupDlg .setupClick { font-weight: 800; font-size: 1.6em; margin: 0 0 14px 4.4em; }

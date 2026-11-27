@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { brewerLevelOf, vesselAnswersOf, VESSEL_KEYS } from '../public/setupinterview.js';
 import { answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from '../public/setupinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf } from '../public/setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers, answerWords, answerError, setupSave, asDropdown, choicesOf, asTicks, tickChoices } from '../public/setupinterview.js';
 
 const ctx = (more = {}) => ({ defaults: {}, boil: null, patron: false, helpLang: null, brewerTypes: [['cankit', 'Extract Can Kit'], ['allgrain', 'All Grain'], ['allgrainmill', 'All Grain (own Grain Mill)']], brewerTypeDefault: 'allgrain',
   pipeSizes: [['0.5', '1/2"'], ['1', '1"']], hoseSizes: [['0.5', '1/2"']], helpLangs: [['en', 'English'], ['fr', 'Français']],
@@ -16,7 +16,7 @@ const ctx = (more = {}) => ({ defaults: {}, boil: null, patron: false, helpLang:
 assert.deepEqual(SETUP_STEPS, ['Units', 'Brewer Type', 'Brewery', 'Other Defaults', 'Recipe Defaults', 'Help Language']);
 assert.equal(SETUP_QUESTIONS[0].id, 'units');
 assert.equal(SETUP_QUESTIONS[0].must, true);
-assert.deepEqual(SETUP_QUESTIONS.filter(q => q.must).map(q => q.id), ['units', 'brewerType', 'grindOwn']);
+assert.deepEqual(SETUP_QUESTIONS.filter(q => q.must).map(q => q.id), ['units', 'brewerType']);
 for (const q of SETUP_QUESTIONS) assert.equal(!!q.must, SETUP_STEPS.indexOf(q.step) < 2, q.id);
 assert.deepEqual(SETUP_QUESTIONS.map(q => SETUP_STEPS.indexOf(q.step)), SETUP_QUESTIONS.map(q => SETUP_STEPS.indexOf(q.step)).sort((x, y) => x - y));
 assert.deepEqual(SETUP_QUESTIONS.filter(q => q.kind === 'branch').map(q => q.step), ['Brewery', 'Other Defaults', 'Recipe Defaults']);
@@ -37,13 +37,12 @@ assert.doesNotMatch(JSON.stringify(SETUP_WELCOME), /scrren|controoled|breower|in
 assert.equal(new Set(SETUP_QUESTIONS.map(q => q.id)).size, SETUP_QUESTIONS.length);
 for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.ask && (q.why || q.lead) && q.kind && (q.kind === 'branch' || typeof q.start === 'function') && q.save, q.id); }
 
-// Brewer Type: the All Grain (own Grain Mill) choice is the follow up "Do you grind your own grain?", only after All Grain
+// Brewer Type (2026-11-27): one screen, four Tick Boxes in Fritz's words, no follow-up question
 const bt = SETUP_QUESTIONS.find(q => q.id === 'brewerType');
-assert.deepEqual(choicesOf(bt, ctx()).map(c => c[0]), ['cankit', 'allgrain']);
-assert.ok(shownQuestions({ brewerType: 'allgrain' }, ctx()).some(q => q.id === 'grindOwn'));
-assert.ok(!shownQuestions({ brewerType: 'cankit' }, ctx()).some(q => q.id === 'grindOwn'));
-assert.equal(bt.start(ctx({ defaults: { brewerType: 'allgrainmill' } })), 'allgrain');
-assert.equal(startAnswers(ctx({ defaults: { brewerType: 'allgrainmill' } })).grindOwn, true);
+assert.ok(bt.tick && !SETUP_QUESTIONS.some(q => q.id === 'grindOwn'));
+assert.deepEqual(choicesOf(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['allgrain'], ['allgrainmill']] })).map(c => c[1]), ['Extract Kit', 'Extract Brewer add Own Hops', 'All Grain', 'All Grain Mill own Grain']);
+assert.equal(bt.start(ctx({ defaults: { brewerType: 'allgrainmill' } })), 'allgrainmill');
+assert.ok(shownQuestions({ brewerType: 'allgrainmill' }, ctx()).some(q => q.id === 'mashProfile'));
 // the Mash Profile only for All Grain
 assert.ok(!shownQuestions({ brewerType: 'cankit' }, ctx()).some(q => q.id === 'mashProfile'));
 // Help language: the User Language once it is on this Brain
@@ -70,39 +69,46 @@ assert.ok(shownQuestions({}, ctx({ patron: true })).some(q => q.id === 'breweryN
 
 // Skynet's answers to start: US, English, Level 7, All Grain (not milled), no Yeast Starter, 1/2" pipe and hose, 5 gallons
 const a = startAnswers(ctx());
-assert.deepEqual([a.units, a.helpLang, brewerLevelOf(a), a.brewerType, a.grindOwn, a.yeastStarter, a.defPipeSize, a.defHoseSize, a.batch, a.mashProfile, a.boilProfile],
-  ['US', 'en', '7', 'allgrain', false, false, '0.5', '0.5', 5, 'skynet-single-batch', 'skynet-boil-60']);
+assert.deepEqual([a.units, a.helpLang, brewerLevelOf(a), a.brewerType, a.yeastStarter, a.defPipeSize, a.defHoseSize, a.batch, a.mashProfile, a.boilProfile],
+  ['US', 'en', '7', 'allgrain', false, '0.5', '0.5', 5, 'skynet-single-batch', 'skynet-boil-60']);
 assert.equal(startAnswers(ctx({ defaults: { units: 'Metric' } })).batch, 18.93);
 assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.kind === 'branch'), undefined, ctx()), '');
 assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), '2', ctx()), 'Two vessels');
+// held (2026-11-27: "Leave the brewery interview to the one question for now"): Brewery asks only Number of Vessels; ALL is the list with
+// nothing held, for the branching tests below
+const ALL = SETUP_QUESTIONS.map(q => ({ ...q, held: false }));
+assert.deepEqual(shownQuestions({ ...a, vesselCount: '3', pipedManifold: true }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id), ['_brewery', 'vesselCount']);
+// Number of Vessels: the first Brewery question (after the branch page), for every Brewer Type, as Tick Boxes (2026-11-27)
+{ const vc = SETUP_QUESTIONS.find(q => q.id === 'vesselCount'), firstB = SETUP_QUESTIONS.find(q => q.step === 'Brewery' && q.kind !== 'branch');
+  assert.ok(vc.tick && vc.head === 'Number of Vessels' && firstB === vc && !vc.show && !vc.when);
+  for (const t of ['cankit', 'partial', 'allgrain', 'allgrainmill']) assert.ok(shownQuestions({ ...a, brewerType: t }, ctx()).includes(vc)); }
 // Brewery Vessels: the questions give the Brewer Level, and a saved Level gives the answers back
 for (let l = 1; l <= 9; l++) assert.equal(brewerLevelOf(vesselAnswersOf(String(l))), String(l), 'level ' + l);
-assert.deepEqual(shownQuestions({ ...a, vesselCount: '1', allInOne: false }, ctx()).filter(q => VESSEL_KEYS.includes(q.id)).map(q => q.id), ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump']);
-assert.deepEqual(shownQuestions({ ...a, vesselCount: '1', allInOne: true }, ctx()).filter(q => VESSEL_KEYS.includes(q.id)).map(q => q.id), ['vesselCount', 'allInOne']);
-assert.deepEqual(shownQuestions({ ...a, vesselCount: '2' }, ctx()).filter(q => VESSEL_KEYS.includes(q.id)).map(q => q.id), ['vesselCount', 'pumpCount']);
+assert.deepEqual(shownQuestions({ ...a, vesselCount: '1', allInOne: false }, ctx(), ALL).filter(q => VESSEL_KEYS.includes(q.id)).map(q => q.id), ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump']);
+assert.deepEqual(shownQuestions({ ...a, vesselCount: '1', allInOne: true }, ctx(), ALL).filter(q => VESSEL_KEYS.includes(q.id)).map(q => q.id), ['vesselCount', 'allInOne']);
+assert.deepEqual(shownQuestions({ ...a, vesselCount: '2' }, ctx(), ALL).filter(q => VESSEL_KEYS.includes(q.id)).map(q => q.id), ['vesselCount', 'pumpCount']);
 assert.equal(startAnswers(ctx({ defaults: { brewerLevel: '3' } })).vesselCount, '1');
 // Pipe and Hose size only after Piped Manifold Yes (the Branch Manifold)
-assert.ok(!shownQuestions({ ...a, pipedManifold: false }, ctx()).some(q => q.id === 'defPipeSize'));
-assert.ok(shownQuestions({ ...a, pipedManifold: true }, ctx()).some(q => q.id === 'defHoseSize'));
+assert.ok(!shownQuestions({ ...a, pipedManifold: false }, ctx(), ALL).some(q => q.id === 'defPipeSize'));
+assert.ok(shownQuestions({ ...a, pipedManifold: true }, ctx(), ALL).some(q => q.id === 'defHoseSize'));
 
 // Finish: every answer is a default (Rule 2.42), merged into what was there; the Elevation is kept in meters (Rule 2.59)
-let out = setupSave({ ...a, units: 'US', elevation: 663, airport: 'kdfw', vesselCount: '1', allInOne: false, kettlePump: true, pipedManifold: true, yeastStarter: true, batch: 10 }, ctx({ defaults: { tabStyle: 'x' } }));
+let out = setupSave({ ...a, units: 'US', elevation: 663, airport: 'kdfw', vesselCount: '1', allInOne: false, kettlePump: true, pipedManifold: true, yeastStarter: true, batch: 10 }, ctx({ defaults: { tabStyle: 'x' } }), ALL);
 assert.deepEqual(out.brewDefaults, { tabStyle: 'x', units: 'US', brewerType: 'allgrain', vesselCount: '1', allInOne: false, kettleOutlet: false, kettlePump: true, pipedManifold: true, defPipeSize: '0.5', defHoseSize: '0.5',
   yeastStarter: true, batchL: 37.854, mashProfile: 'skynet-single-batch', boilProfile: 'skynet-boil-60', brewerLevel: '3', setupDone: true });
-assert.ok(!('grindOwn' in out.brewDefaults) && !('_brewery' in out.brewDefaults));
-assert.equal(setupSave({ ...a, grindOwn: true }, ctx()).brewDefaults.brewerType, 'allgrainmill');
-assert.equal(setupSave({ ...a, brewerType: 'cankit', grindOwn: true }, ctx()).brewDefaults.brewerType, 'cankit');
+assert.ok(!('_brewery' in out.brewDefaults));
+assert.equal(setupSave({ ...a, brewerType: 'allgrainmill' }, ctx()).brewDefaults.brewerType, 'allgrainmill');
 assert.equal(setupSave({ ...a, units: 'Metric', batch: '20' }, ctx()).brewDefaults.batchL, 20);
 assert.deepEqual(out.boil, { airport: 'KDFW', elevationM: 202.1, pressure: null });
 assert.equal(out.helpLang, 'en');
 assert.equal(a.pipedManifold, false);
-assert.equal(setupSave({ ...a, pipedManifold: true }, ctx()).brewDefaults.pipedManifold, true);
+assert.equal(setupSave({ ...a, pipedManifold: true }, ctx(), ALL).brewDefaults.pipedManifold, true);
 out = setupSave({ ...a, units: 'Metric', elevation: '202' }, ctx());
 assert.equal(out.boil.elevationM, 202);
 assert.equal(setupSave(a, ctx()).boil, null, 'nothing typed for the boil place: nothing sent');
 
 // branching on an answer (when:): a row shows only when the answers match
-const extra = [...SETUP_QUESTIONS, { id: 'xManifoldValves', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { pipedManifold: true }, ask: 'x', why: 'x', start: () => false },
+const extra = [...ALL, { id: 'xManifoldValves', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { pipedManifold: true }, ask: 'x', why: 'x', start: () => false },
   { id: 'xAny', step: 'Brewery', kind: 'yesno', save: 'defaults', when: { vesselCount: ['2', '3'] }, ask: 'x', why: 'x', start: () => false }];
 assert.ok(!shownQuestions({ ...a, pipedManifold: false }, ctx(), extra).some(q => q.id === 'xManifoldValves'));
 assert.ok(shownQuestions({ ...a, pipedManifold: true }, ctx(), extra).some(q => q.id === 'xManifoldValves'));
@@ -110,10 +116,10 @@ assert.ok(shownQuestions({ ...a, vesselCount: '3' }, ctx(), extra).some(q => q.i
 assert.ok(!shownQuestions({ ...a, vesselCount: '1' }, ctx(), extra).some(q => q.id === 'xAny'));
 
 // green and focus ("Complete do not get focus on Open. Focus in Numeric Order.")
-const qs0 = shownQuestions(a, ctx());
+const qs0 = shownQuestions(a, ctx(), ALL);
 assert.equal(answeredAtStart(ctx()).size, 0);
 assert.equal(nextOpen(qs0, new Set()), 0);
-const g3 = new Set(['units', 'brewerType', 'grindOwn']);
+const g3 = new Set(['units', 'brewerType']);
 assert.equal(qs0[nextOpen(qs0, g3)].id, '_brewery', 'steps 1 and 2 green: it opens on the Brewery branch page');
 assert.ok(stepGreen('Units', qs0, g3) && !stepGreen('Brewery', qs0, g3));
 const gB = new Set([...g3, 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
@@ -121,12 +127,12 @@ assert.ok(isGreen(qs0.find(q => q.id === '_brewery'), qs0, gB) && stepGreen('Bre
 assert.equal(qs0[nextOpen(qs0, gB)].id, '_other');
 assert.equal(nextOpen(qs0, new Set(qs0.map(q => q.id))), qs0.length, 'all green: Done');
 // saved and read back; an older finished install counts what it saved
-const saved = setupSave(a, ctx(), undefined, gB).brewDefaults;
-assert.deepEqual(saved.setupAnswered, ['units', 'brewerType', 'grindOwn', 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
+const saved = setupSave(a, ctx(), ALL, gB).brewDefaults;
+assert.deepEqual(saved.setupAnswered, ['units', 'brewerType', 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold']);
 assert.deepEqual([...answeredAtStart(ctx({ defaults: saved }))], saved.setupAnswered);
 assert.ok(answeredAtStart(ctx({ defaults: { setupDone: true, units: 'US', brewerType: 'allgrain', batchL: 20 } })).has('batch'));
 // Close: red until steps 1 and 2 are green, then the blue words
-assert.deepEqual(mustMissing(qs0, new Set(['units'])).map(q => q.id), ['brewerType', 'grindOwn']);
+assert.deepEqual(mustMissing(qs0, new Set(['units'])).map(q => q.id), ['brewerType']);
 assert.equal(mustMissing(qs0, g3).length, 0);
 assert.equal(setupMustMsg(qs0), 'Steps 1 and 2 (Units, Brewer Type) must be completed first.');
 assert.match(SETUP_OPEN_MSG, /work with just the first 2 questions/);
@@ -207,5 +213,11 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.doesNotMatch(JSON.stringify(u.lead), /perfer|limitaions|Temperatue|seances|eleasphed|caculations|a xml|thing go/);
   const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(appSrc, /const stepShut = \(st, qs\) => mustMissing\(qs, answered\)\.length > 0;/);
-  assert.match(appSrc, /\(q\.tick \? !tickedOf\(q\) : q\.must && !answered\.has\(q\.id\)\)/);
+  assert.match(appSrc, /\(asTicks\(q, ctx\) \? tickedOf\(q\) == null : q\.must && !answered\.has\(q\.id\)\)/);
+  // after Brewery: Yes/No and fewer than 6 choices are Tick Boxes; 6 or more a Drop Down list (2026-11-27)
+  for (const id of ['yeastStarter', 'mashProfile', 'boilProfile', 'helpLang']) assert.ok(SETUP_QUESTIONS.find(q => q.id === id).tick, id);
+  { const ys = SETUP_QUESTIONS.find(q => q.id === 'yeastStarter'), mp = SETUP_QUESTIONS.find(q => q.id === 'mashProfile');
+    assert.deepEqual(tickChoices(ys, ctx()), [[true, 'Yes'], [false, 'No']]); assert.ok(asTicks(ys, ctx()));
+    assert.ok(asTicks(mp, ctx({ mashProfiles: [['', '(none)'], ['a', 'A']] })));
+    assert.ok(!asTicks(mp, ctx({ mashProfiles: [1, 2, 3, 4, 5, 6].map(n => [String(n), 'P' + n]) })), '6 or more: Drop Down list'); }
 }

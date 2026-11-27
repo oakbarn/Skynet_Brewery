@@ -59,8 +59,7 @@ Chaque passage commence par six écrans avant la première question. **Next ▶*
 5. **Hot Spots** (zones cliquables) : la bande d’étapes en haut n’est faite que de zones cliquables : cliquez sur une étape pour y
    aller. La bande d’exemple de cet écran peut être essayée : cliquez sur une étape (elle commence sur 4. Other Defaults) et l’écran
    montre dessous à quoi ressemble la page de cette étape.
-6. **Let's get to the Interview** (passons à l’entretien) : l’entretien commence par deux questions faciles (et une question de
-   suite après certains Brewer Types). Il n’y a pas de mauvaise réponse : donnez votre meilleure estimation, mais plus vous êtes
+6. **Let's get to the Interview** (passons à l’entretien) : l’entretien commence par deux questions faciles. Il n’y a pas de mauvaise réponse : donnez votre meilleure estimation, mais plus vous êtes
    précis, plus les écrans de Skynet ressemblent à VOTRE brasserie. L’écran dit aussi que Skynet a des Processes « tout faits » pour
    le jour de brassage, du coaching pas à pas à une brasserie automatisée, et que le code qu’ils demandent doit être une échelle, pas
    une montagne.
@@ -79,11 +78,10 @@ première question revient à l’écran Let's get to the Interview.
 | Étape | Question | Ce qu’elle règle | Réponse de Skynet |
 |---|---|---|---|
 | 1 | **US or Metric?** (réponse obligatoire) | Units : l’unité de chaque quantité, température et Recipe affichée. Skynet garde tous les nombres en métrique (règle 2.59) : changer ne modifie jamais un nombre enregistré | US |
-| 2 | **What is the highest level you will brew now?** (réponse obligatoire) | Votre Brewer Type : Extract Can Kit, Extract Partial Grain and Hops ou All Grain. C’est juste pour commencer : Skynet grandit avec vous. La fenêtre No Recipe Found commence sur lui (règle 16.14) | All Grain |
-| 2 | **Do you grind your own grain?** (seulement après All Grain) | Oui : All Grain (own Grain Mill) | No |
-| 3 Brewery | **Brewery Vessels** : combien de cuves de brassage, puis (selon la réponse) All In One, sortie, pompe, combien de pompes, HERMS ou RIMS, All Grain Plus | Elles calculent votre **Brewer Level**, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
-| 3 Brewery | **Is your brewery a Piped Manifold?** | Oui : vos cuves et pompes sont reliées par des tuyaux fixes et des vannes, comme dans l’exemple 3 Vessel. Non : vous déplacez des tuyaux souples à la main. L’interrupteur **Piped Manifold** de Default settings | No |
-| 3 Brewery | **Pipe size** et **Hose size** (seulement après Piped Manifold Oui) | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
+| 2 | **What type of Brewer are you now?** (réponse obligatoire) | Quatre **cases à cocher** sur un seul écran : Extract Kit, Extract Brewer add Own Hops, All Grain, All Grain Mill own Grain. C’est votre Brewer Type. C’est simplement une aide pour que le Panel ressemble à VOTRE brasserie, et il ne limite aucun outil : même un brasseur débutant peut construire un système automatisé compliqué. Choisissez celui qui vous correspond le mieux, ou le niveau suivant si vous êtes prêt. Chaque Next porte le ⛔ tant qu’aucune case n’est cochée. La fenêtre No Recipe Found commence sur lui (règle 16.14) | All Grain |
+| 3 Brewery | **Number of Vessels** (nombre de cuves ; la première question Brewery, pour tous les Brewer Types) : trois **cases à cocher**, One vessel, Two vessels, Three or more vessels. Comptez les Kettles, Mash Tuns et HLT, pas les fermenteurs. Pour l’instant c’est la **seule** question Brewery : les autres (All In One, sortie, pompe, combien de pompes, HERMS ou RIMS, All Grain Plus) sont dans Default settings | Avec les réponses de Default settings, elle calcule votre **Brewer Level**, de 1 Stove Top, One Pot, No Outlet jusqu’à 9 All Grain Plus | 7 Three Vessel |
+| Default settings (pas demandée pour l’instant) | **Is your brewery a Piped Manifold?** | Oui : vos cuves et pompes sont reliées par des tuyaux fixes et des vannes, comme dans l’exemple 3 Vessel. Non : vous déplacez des tuyaux souples à la main. L’interrupteur **Piped Manifold** de Default settings | No |
+| Default settings (pas demandée pour l’instant) | **Pipe size** et **Hose size** (seulement après Piped Manifold Oui) | La taille d’un nouveau tuyau rigide ou souple | 1/2" |
 | 4 Other Defaults | **Brewery Name** (Patrons seulement) | Le nom en haut de chaque Tab | Skynet Panel |
 | 4 Other Defaults | **Airport** | L’aéroport (code OACI, par exemple KDFW) dont le bulletin météo donne la pression de l’air pour la température d’ébullition. **Test** le récupère tout de suite | vide : air standard |
 | 4 Other Defaults | **Elevation** | L’altitude de votre brasserie, en pieds (US) ou en mètres (Metric) ; gardée en mètres | vide |
@@ -91,6 +89,8 @@ première question revient à l’écran Let's get to the Interview.
 | 5 Recipe Defaults | **Batch Size** | La quantité de bière d’une nouvelle Recipe, dans le fermenteur, en gallons (US) ou en litres (Metric) ; gardée en litres | 5 gallons (18,9 litres) |
 | 5 Recipe Defaults | **Mash Profile** (All Grain seulement) et **Boil Profile** | Les Profiles avec lesquels une nouvelle Recipe commence | Single Step, Batch Sparge et le Boil Profile de 60 minutes de Skynet |
 | 6 Help Language | **Help language** | Anglais ou français pour les pages d’aide et les bulles, dans ce navigateur. Dès qu’une User Language est sur ce Brain (? Help > 🌐 Languages), elle est aussi un choix | English |
+
+**Cases à cocher après Brewery** : chaque question à partir de 4 Other Defaults avec Oui/Non ou moins de six choix est en **cases à cocher** (Yeast Starter, Boil Profile, Help language, et Mash Profile tant qu’il a moins de six choix) ; six ou plus restent une **liste déroulante**. Un libellé peut aller jusqu’à 4 lignes. Cocher ne fait pas avancer : Next ▶ (ou Click to proceed) le fait, et il porte le ⛔ tant qu’aucune case n’est cochée. Ces questions ne sont pas obligatoires, donc **Skip** fonctionne, et la ligne « Skip keeps Skynet's answer » sous les cases dit ce que Skip garde. Les réponses tapées (Airport, Elevation, Batch Size) restent des champs à remplir.
 
 L’étape Recipe Defaults règle seulement ce avec quoi une nouvelle Recipe commence. Un jour de brassage demande sa propre Recipe dans le
 **Recipe Interview**.

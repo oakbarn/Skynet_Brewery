@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, VESSEL_COUNTS, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16455,7 +16455,7 @@ async function setupInterview({ first = false } = {}) {
         !done && !q.must ? h('button', { type: 'button', title: q.kind === 'branch' ? `Skip the whole ${q.step} step: keep Skynet's own answers. You can change each one any time on ☰ Menu > Default settings.` : 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
         h('span', { class: 'dlgBtnGroup' },
           // Next ▶ is not available either on a must question not answered yet (screen 2): a click on an answer answers it
-          done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : (q.tick ? !tickedOf(q) : q.must && !answered.has(q.id))
+          done ? h('button', { type: 'button', class: 'primary', onclick: finish }, '✔ Finish') : (asTicks(q, ctx) ? tickedOf(q) == null : q.must && !answered.has(q.id))
             ? noNext()
             : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶'),
           ...closeBtns(qs)));
@@ -16472,19 +16472,22 @@ async function setupInterview({ first = false } = {}) {
         // the words before the question (q.lead, his pictures), then a bigger heading over the question (q.head)
         if (q.lead) body.append(...q.lead.map(t => h('p', { class: 'setupWelcomeText' }, t)));
         if (q.head) body.append(h('p', { class: 'setupHead2' }, q.head));
-        body.append(h('p', { class: q.head ? 'setupHead2' : 'setupAsk' }, askOf(q, a)));
+        // (a row with words before it and no heading: the words ask the question, as on his question 2)
+        if (!q.lead || q.head) body.append(h('p', { class: q.head ? 'setupHead2' : 'setupAsk' }, askOf(q, a)));
         if (q.why) body.append(h('p', { class: 'muted' }, q.why));
         if (q.must && !q.lead) body.append(h('p', { class: 'muted' }, 'Steps 1 and 2 must be answered: click an answer (no Skip or Next until then).'));
-        const ch = choicesOf(q, ctx);
-        if (q.tick) {
+        const ch = asTicks(q, ctx) ? tickChoices(q, ctx) : choicesOf(q, ctx);
+        if (asTicks(q, ctx)) {
           // Tick Boxes (screen 3's method): a tick picks it but does not go on; Next ▶ (at the top and after Click to proceed) has the ⛔
           // until one is ticked
           const on = tickedOf(q);
-          body.append(h('div', { class: 'setupTicks' }, ...ch.map(([k, t, tip]) => h('label', { class: 'setupTick', title: tip || '' }, h('span', {}, t),
+          body.append(h('div', { class: 'setupTicks' }, ...ch.map(([k, t, tip]) => h('label', { class: 'setupTick' }, h('span', {}, t), tip ? h('span', { class: 'muted setupTickTip' }, tip) : '',
             h('input', { type: 'checkbox', ...(on != null && String(on) === String(k) ? { checked: true } : {}), onchange: e => {
               if (e.target.checked) { a[q.id] = k; ticked.set(q.id, k); if (q.id === 'units') for (const x of SETUP_QUESTIONS) if (x.byUnits) a[x.id] = x.start(ctx, a); }
               else ticked.set(q.id, null);
               draw(); } })))),
+            // not a must one: Skip keeps Skynet's own answer, said here
+            !q.must && q.start ? h('p', { class: 'muted' }, `Skip keeps Skynet's answer: ${answerWords(q, q.start(ctx, a), ctx) || '(none)'}.`) : '',
             h('p', { class: 'setupProceed' }, h('b', {}, SETUP_WELCOME.proceed), ' ', tickedOf(q) == null ? noNext() : h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')));
         } else if (q.kind === 'branch') {
           // the branch's first page: what it asks

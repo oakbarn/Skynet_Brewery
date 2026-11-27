@@ -53,7 +53,7 @@ goes on; **◀ Back** goes to the screen before.
    choose the best or closest answer. Both samples are also in [Getting started](01-getting-started).
 5. **Hot Spots**: the steps strip at the top is all Hot Spots: click a step to go to it. The sample strip on this screen can be
    tried: click a step (it starts on 4. Other Defaults) and the screen shows below how that step's page looks.
-6. **Let's get to the Interview**: the interview starts with two easy questions (and a follow-up after some Brewer Types). There
+6. **Let's get to the Interview**: the interview starts with two easy questions. There
    are no bad answers: take your best guess, but the more accurate you are, the more Skynet's screens look like YOUR Brewery. It
    also says that Skynet has "canned" Processes for the Brew Day, from Step by Step coaching to an automated Brewery, and that the
    coding they need is meant to be a ladder, not a mountain.
@@ -72,11 +72,10 @@ question comes back to the Let's get to the Interview screen.
 | Step | Question | What it sets | Skynet's answer |
 |---|---|---|---|
 | 1 | **US or Metric?** (must be answered) | Units: what every amount, temperature and Recipe shows in. Skynet keeps every number in metric inside (Rule 2.59), so changing it never changes a saved number | US |
-| 2 | **What is the highest level you will brew now?** (must be answered) | Your Brewer Type: Extract Can Kit, Extract Partial Grain and Hops, or All Grain. This is just to get started: Skynet can grow with you. The No Recipe Found pop-up starts on it (Rule 16.14) | All Grain |
-| 2 | **Do you grind your own grain?** (only after All Grain) | Yes: All Grain (own Grain Mill) | No |
-| 3 Brewery | **Brewery Vessels**: how many brewing vessels, then (by the answer) All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus | They work out your **Brewer Level**, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
-| 3 Brewery | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. The **Piped Manifold** switch on Default settings | No |
-| 3 Brewery | **Pipe size** and **Hose size** (only after Piped Manifold Yes) | The size a new pipe or hose starts at | 1/2" |
+| 2 | **What type of Brewer are you now?** (must be answered) | Four **Tick Boxes** on one screen: Extract Kit, Extract Brewer add Own Hops, All Grain, All Grain Mill own Grain. This is your Brewer Type. It is simply an aid to make the Panel look like YOUR Brewery, and it does not restrict any tool: even a novice brewer can build a complicated automated system. Choose the one that best fits you, or the next level if you are ready. Every Next has the ⛔ until a box is ticked. The No Recipe Found pop-up starts on it (Rule 16.14) | All Grain |
+| 3 Brewery | **Number of Vessels** (the first Brewery question, for every Brewer Type): three **Tick Boxes**, One vessel, Two vessels, Three or more vessels. Count the Kettles, Mash Tuns and HLT, not the fermentors. For now it is the **only** Brewery question: the rest (All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus) are on Default settings | With the Default settings answers it works out your **Brewer Level**, from 1 Stove Top, One Pot, No Outlet up to 9 All Grain Plus | 7 Three Vessel |
+| Default settings (not asked for now) | **Is your brewery a Piped Manifold?** | Yes: your vessels and pumps are joined by fixed pipes and valves, like the 3 Vessel sample. No: you move hoses by hand. The **Piped Manifold** switch on Default settings | No |
+| Default settings (not asked for now) | **Pipe size** and **Hose size** (only after Piped Manifold Yes) | The size a new pipe or hose starts at | 1/2" |
 | 4 Other Defaults | **Brewery Name** (Patrons only) | The name at the top of every Tab | Skynet Panel |
 | 4 Other Defaults | **Airport** | The airport (ICAO code, for example KDFW) whose weather report gives the air pressure for the boil temperature. **Test** fetches it now | empty: standard air |
 | 4 Other Defaults | **Elevation** | How high your brewery is, in feet (US) or meters (Metric); kept in meters | empty |
@@ -84,6 +83,8 @@ question comes back to the Let's get to the Interview screen.
 | 5 Recipe Defaults | **Batch Size** | How much beer a new Recipe makes, into the fermenter, in gallons (US) or liters (Metric); kept in liters | 5 gallons (18.9 liters) |
 | 5 Recipe Defaults | **Mash Profile** (All Grain only) and **Boil Profile** | The Profiles a new Recipe starts with | Single Step, Batch Sparge and Skynet's 60 minute Boil Profile |
 | 6 Help Language | **Help language** | English or French for the Help pages and balloons, in this browser. Once a User Language is on this Brain (? Help > 🌐 Languages), it is a choice too | English |
+
+**Tick Boxes after Brewery**: every question from 4 Other Defaults on with Yes/No or fewer than six choices is **Tick Boxes** (Yeast Starter, Boil Profile, Help language, and Mash Profile while it has fewer than six); six or more stay a **Drop Down list**. A label may wrap to up to 4 lines. A tick does not go on: Next ▶ (or Click to proceed) does, and it has the ⛔ until a box is ticked. These questions are not a must, so **Skip** works, and the line "Skip keeps Skynet's answer" under the boxes says what Skip keeps. Typed answers (Airport, Elevation, Batch Size) stay boxes you type in.
 
 The Recipe Defaults step only sets what a new Recipe starts with. A Brew Day asks about its own Recipe in the **Recipe Interview**.
 
