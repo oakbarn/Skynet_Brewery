@@ -41,7 +41,7 @@ for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.a
 const bt = SETUP_QUESTIONS.find(q => q.id === 'brewerType');
 assert.ok(bt.tick && !SETUP_QUESTIONS.some(q => q.id === 'grindOwn'));
 assert.deepEqual(choicesOf(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['biab'], ['allinone'], ['allgrain'], ['allgrainmill']] })).map(c => c[1]), ['Extract Kit', 'Extract Brewer add Own Hops', 'BIAB (Brew in a Bag)', 'All In One Brewer', 'All Grain', 'All Grain Mill own Grain']);
-// six Tick Boxes on question 2 (tickMax), the Mash Profile question for every grain type, BIAB's Tab Level
+// six Tick Boxes on question 2 (up to 8 allowed), the Mash Profile question for every grain type, BIAB's Tab Level
 assert.ok(asTicks(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['biab'], ['allinone'], ['allgrain'], ['allgrainmill']] })));
 for (const t of ['biab', 'allinone']) assert.ok(shownQuestions({ brewerType: t }, ctx()).some(q => q.id === 'mashProfile'), t);
 assert.equal(nsiLevelOf('4', 'allinone'), 'biab');
@@ -227,12 +227,13 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(appSrc, /const stepShut = \(st, qs\) => mustMissing\(qs, answered\)\.length > 0;/);
   assert.match(appSrc, /\(asTicks\(q, ctx\) \? tickedOf\(q\) == null : q\.must && !answered\.has\(q\.id\)\)/);
-  // after Brewery: Yes/No and fewer than 6 choices are Tick Boxes; 6 or more a Drop Down list (2026-11-27)
+  // after Brewery: Yes/No and up to 8 choices are Tick Boxes; more than 8 a Drop Down list (2026-11-27, Rule 2.6 changed)
   for (const id of ['yeastStarter', 'mashProfile', 'boilProfile', 'helpLang']) assert.ok(SETUP_QUESTIONS.find(q => q.id === id).tick, id);
   { const ys = SETUP_QUESTIONS.find(q => q.id === 'yeastStarter'), mp = SETUP_QUESTIONS.find(q => q.id === 'mashProfile');
     assert.deepEqual(tickChoices(ys, ctx()), [[true, 'Yes'], [false, 'No']]); assert.ok(asTicks(ys, ctx()));
     assert.ok(asTicks(mp, ctx({ mashProfiles: [['', '(none)'], ['a', 'A']] })));
-    assert.ok(!asTicks(mp, ctx({ mashProfiles: [1, 2, 3, 4, 5, 6].map(n => [String(n), 'P' + n]) })), '6 or more: Drop Down list'); }
+    assert.ok(asTicks(mp, ctx({ mashProfiles: [1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), 'P' + n]) })), '8: Tick Boxes');
+    assert.ok(!asTicks(mp, ctx({ mashProfiles: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => [String(n), 'P' + n]) })), '9: Drop Down list'); }
 }
 // screen 3: the CLICK pointer's tip is inside the box it points at (2026-11-27: "Click arrow needs to be in the box")
 { const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');

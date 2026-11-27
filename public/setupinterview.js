@@ -185,7 +185,7 @@ export const SETUP_QUESTIONS = [
   // Question 2 (OakBarn Brewery, 2026-11-27, his picture, spelling and grammar corrected; "All on one screen so get rid of reference to
   // any follow-up question above as there are none. So it does become two simple questions"): the four Brewer Types as Tick Boxes, in
   // his words; All Grain, Mill own Grain is All Grain (own Grain Mill). (Before: a follow-up "Do you grind your own grain?" after All Grain.)
-  { id: 'brewerType', step: 'Brewer Type', kind: 'pick', tick: true, tickMax: 6, save: 'defaults', must: true,
+  { id: 'brewerType', step: 'Brewer Type', kind: 'pick', tick: true, save: 'defaults', must: true,
     lead: ['What type of Brewer are you now? Skynet can grow as you do when you step up to more complex brewing, and can aid you in doing that, but even a novice brewer could build a complicated automated system on Skynet, as tools are not restricted by brewer type. This is simply an aid to get the Skynet Panel to look like YOUR Brewery as much as possible. This will help steer the interview.',
       'Again, there is no wrong answer. Choose the one you think best fits you (or choose the next level if you are ready and want Skynet to be at that level).'],
     ask: 'What type of Brewer are you now?',
@@ -308,10 +308,11 @@ export const SETUP_QUESTIONS = [
 export const asDropdown = choices => (choices?.length || 0) > 6;
 // a Tick Box question (OakBarn Brewery, 2026-11-27: "Rebuild all the Interview Dialogs in Order After the Brewery interview using check
 // boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to up to 4 Lines for a check
-// Box if needed"): a row with tick, Yes/No or fewer than 6 choices, is Tick Boxes; 6 or more stay a Drop Down list
-export const TICK_MAX = 5;
+// Box if needed"): a row with tick, Yes/No or up to TICK_MAX (8) choices, is Tick Boxes; more is a Drop Down list
+export const TICK_MAX = 8;
 export const tickChoices = (q, ctx) => q.kind === 'yesno' ? [[true, 'Yes'], [false, 'No']] : choicesOf(q, ctx);
-// (a row may allow more: tickMax, as question 2's six Brewer Types)
+// (up to 8 Tick Boxes, OakBarn Brewery, 2026-11-27: "That will be a change that you can have up to 8 Tick Boxes"; Rule 2.6; a row
+// may set its own tickMax)
 export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= (q.tickMax ?? TICK_MAX);
 // a new installation: no Skynet settings saved yet (and the Setup Interview not finished before)
 // (2026-11-27: every answer is saved as soon as it is given, so a first run left before steps 1 and 2 were answered has a green list

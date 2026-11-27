@@ -646,7 +646,10 @@ the Panel Updates sandbox to change one at a time. A list that can grow ("Add ne
 item 3: "Change Slider to DDLB"; on the Rule 2.6 question: "it is the normal way that DDLBs work. and It is actually sort of 3. Click
 Down Arrow to show choices, Slider if list is long. Click to Select. So any DDLB as a way to choose something works that way in any
 program, not just Skynet"; "The rule should be if desired. Not if always just allowed"; "Over 6 must be DDLB"):
-- **More than six choices:** a dropdown, always.
+- **More than six choices:** a dropdown, always. **CHANGED 2026-11-27 for Tick Boxes** (OakBarn Brewery: "Make the dialogs a little
+  wider so they can accept up to 8 Check Boxes. That will be a change that you can have up to 8 Tick Boxes"): **Tick Boxes** (a pick-one
+  shown as boxes to tick, as in the Setup Interview, Rule 2.75) may have **up to 8** on one line; more than 8 is a dropdown. One-click
+  boxes and other lists keep six. The Setup Interview dialog is 900 px wide so 8 fit, each label wrapping to up to 4 lines.
 - **Six or fewer, only one may be picked:** one-click boxes in a row (the short pick-one above), or a dropdown where it suits. The
   dropdown is allowed, never required. The first one is the Process Editor's Output pick, **Current Process / All Variables**
   (Rule 2.70). The short dropdowns listed in the Panel Updates sandbox may stay.
@@ -1851,7 +1854,7 @@ answers and changes nothing until **✔ Finish**.
 - **CHANGED 2026-11-27, BIAB and All In One Brewer** (OakBarn Brewery: "Add All in One Brewer and BIAB to brewer types"): two new
   Brewer Types, **BIAB (Brew in a Bag)** and **All In One Brewer**, both Level 4 (All Grain Recipes, the Mash Profile question).
   Question 2 shows six Tick Boxes (Extract Kit, Extract Brewer add Own Hops, BIAB, All In One Brewer, All Grain, All Grain Mill own
-  Grain): a row may allow more than 5 Tick Boxes with `tickMax`. Default settings and the No Recipe Found pop-up list them too.
+  Grain): up to 8 Tick Boxes are allowed (Rule 2.6 changed). Default settings and the No Recipe Found pop-up list them too.
 - **CHANGED 2026-11-27, Number of Hot Side Vessels** (OakBarn Brewery: "Number of Hot Side vessels needs to be a Box and you can enter
   a number. The number can be from 1 - 10"; "Then Branch depending on the number entered"): this wins over the Tick Boxes of Number of
   Vessels above. It is a box for a whole number from **1 to 10** (any other answer gets one red note); Default settings has the same box.
@@ -1861,7 +1864,8 @@ answers and changes nothing until **✔ Finish**.
   interview using check boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to
   up to 4 Lines for a check Box if needed"): a row with `tick` is Tick Boxes when it is Yes/No or has **fewer than 6** choices
   (Yeast Starter, Mash Profile, Boil Profile, Help language); 6 or more is a Drop Down list (Rule 2.6 still holds: more than 6 MUST
-  be one). A non-must one shows what Skip keeps.
+  be one). A non-must one shows what Skip keeps. *Later the same day:* up to **8** Tick Boxes, more than 8 a Drop Down list
+  (Rule 2.6 changed).
 - **New questions** (OakBarn Brewery, 2026-11-27: "if you can add a selection to the Tick box, do not add followup questions but
   remember that things may need to be a new branch"): add a choice to a question's Tick Boxes instead of a follow-up question; when a
   choice needs more questions, they go in a new branch.
@@ -7600,6 +7604,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
+- 2026-11-27: Rule 2.6 changed: up to 8 Tick Boxes on one line (more is a dropdown); the Setup Interview dialog is wider (900 px). Help 248.
 - 2026-11-27: Rule 2.75 changed: new Brewer Types BIAB (Brew in a Bag) and All In One Brewer (Level 4); question 2 has six Tick Boxes. Help 248, 155, 100.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
