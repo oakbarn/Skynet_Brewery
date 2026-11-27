@@ -9,7 +9,7 @@ again any time from **☰ Menu > 🧭 Setup Interview**.
 The buttons, the title and the steps strip are frozen at the top: only the page under them scrolls.
 
 - One question per page, with a short explanation under it. The steps strip at the top shows where you are, in 6 steps:
-  **1. Units · 2. Brewer Type · 3. Brewery · 4. Other Defaults · 5. Recipe Defaults · 6. Help Language**, then Done.
+  **1. Units · 2. Brewer Type · 3. Brewery · 4. Other Defaults · 5. Recipe Defaults · 6. Help Language**. The Done page comes after the last question; it is not in the strip.
 - **◀ Back** goes to the question before. **Next ▶** keeps your answer and goes on. A choice of 6 or fewer is a box: one click picks
   it and goes on. A choice of more than 6 is a dropdown (Rule 2.6).
 - Only the first two steps must be answered: **US or Metric** (always the first question) and **Brewer Type**. Until one of them is
@@ -47,7 +47,7 @@ goes on; **◀ Back** goes to the screen before.
    and after a click; you can try the first row.
 4. **How to answer, the second method**: a **Drop Down list** ("Favorite Ice Cream?"), shown closed, open and with Chocolate picked;
    you can try the first one. It limits your choices: sometimes there is an Other choice for something not on the list; if not,
-   choose the best or closest answer.
+   choose the best or closest answer. Both samples are also in [Getting started](01-getting-started).
 
 ## The Welcome page
 

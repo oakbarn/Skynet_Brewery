@@ -40,6 +40,36 @@ Ce que vous voyez dépend de votre rôle. Un **Admin** voit tout ; un **Operator
 - Changer l'image ou la couleur de fond d'un Tab : [Image et couleur de fond d'un Tab](26-tab-background).
 - Mettre vos propres images et sons sur le Pi : [Media (images et sons)](07-media).
 
+## Répondre à une question : case à cocher et liste déroulante {#answering-a-question-tick-box-and-drop-down-list}
+
+Dans Skynet (le Setup Interview, règle 2.75, et les autres entretiens), on répond aux questions de deux façons. Ce sont les mêmes
+exemples que le Setup Interview montre avant sa première question.
+
+**1. Une case à cocher (Tick Box).** Cliquez sur la case de votre réponse ; un ✔ vert montre qu’elle est cochée.
+
+*Are you a morning person?* (Êtes-vous du matin ?)
+
+| Yes | If 11:59 = morning | No |
+|:---:|:---:|:---:|
+| ☐ | ☐ | ☐ |
+
+Cliquez sur la case du milieu, et elle est cochée :
+
+| Yes | If 11:59 = morning | No |
+|:---:|:---:|:---:|
+| ☐ | ✔ | ☐ |
+
+**2. Une liste déroulante (Drop Down list)** qui limite vos choix. Il y a parfois un choix **Other** (autre) qui permet d’utiliser
+quelque chose qui n’est pas dans la liste ; s’il n’y est pas, il faut choisir la réponse la meilleure ou la plus proche. Dans la
+question sur la glace ci-dessous, Other n’est pas disponible, car la boutique Skynet n’a que ces parfums aujourd’hui.
+
+- Cliquez sur la petite flèche ▼ de **Favorite Ice Cream?** (votre glace préférée) pour voir les choix : Vanilla, Chocolate,
+  Strawberry, Mint, Cookie, Orange Sherbet.
+- Cliquez pour faire votre choix. Mon parfum préféré n’y est pas, alors je choisis **Chocolate**.
+- **Chocolate** est choisi : la case montre maintenant Chocolate.
+
+Plus sur les listes déroulantes (taper une lettre pour sauter, ➕ Add new ...) : [List Boxes (Dropdowns)](189-list-boxes).
+
 ## Les mots de ce manuel {#words-used-in-this-manual}
 
 Le [Glossaire](13-glossary) explique chaque mot particulier. Les trois que vous verrez le plus :

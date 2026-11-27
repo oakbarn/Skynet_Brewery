@@ -9,7 +9,7 @@ Schema d’exemple. Un Admin peut le relancer à tout moment depuis **☰ Menu >
 Les boutons, le titre et la bande d’étapes restent figés en haut : seule la page dessous défile.
 
 - Une question par page, avec une courte explication dessous. La bande d’étapes en haut montre où vous en êtes, en 6 étapes :
-  **1. Units · 2. Brewer Type · 3. Brewery · 4. Other Defaults · 5. Recipe Defaults · 6. Help Language**, puis Done.
+  **1. Units · 2. Brewer Type · 3. Brewery · 4. Other Defaults · 5. Recipe Defaults · 6. Help Language**. La page Done vient après la dernière question ; elle n’est pas dans la bande.
 - **◀ Back** revient à la question précédente. **Next ▶** garde votre réponse et continue. Un choix de 6 ou moins est une case : un
   clic le choisit et continue. Un choix de plus de 6 est une liste déroulante (règle 2.6).
 - Il faut répondre seulement aux deux premières étapes : **US or Metric** (toujours la première question) et **Brewer Type**. Tant que l’une
@@ -51,7 +51,8 @@ Chaque passage commence par quatre écrans avant la première question. **Next �
    person? »), montrée avant et après un clic ; vous pouvez essayer la première ligne.
 4. **Comment répondre, la deuxième façon** : une **liste déroulante** (« Favorite Ice Cream? »), montrée fermée, ouverte puis avec
    Chocolate choisi ; vous pouvez essayer la première. Elle limite vos choix : il y a parfois un choix Other pour ce qui n’est pas
-   dans la liste ; sinon, choisissez la réponse la meilleure ou la plus proche.
+   dans la liste ; sinon, choisissez la réponse la meilleure ou la plus proche. Les deux exemples sont aussi dans
+   [Getting started](01-getting-started).
 
 ## La page de bienvenue {#the-welcome-page}
 

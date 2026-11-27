@@ -1804,7 +1804,8 @@ answers and changes nothing until **✔ Finish**.
   **Drop Down list** ("Favorite Ice Cream?": Vanilla, Chocolate, Strawberry, Mint, Cookie, Orange Sherbet; no Other "as the Skynet
   Shop only has these flavors available today"), shown closed, open and with Chocolate picked (the first one can be tried). Screens
   1 to 4 come before question 1, every run; their Skip goes on like Next ▶. The pages are data in public/setupinterview.js
-  (SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP).
+  (SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP). **No "7. Done" in the steps strip** ("remove 7. Done as while I like the
+  done screen it will be accessed differently which will be later"): the Done page still follows the last question for now.
 - Questions now: **1 Units** (must). **2 Help language** (must): English, Français, and the User Language once it is on this Brain
   (Rule 11.16; "But additional Language?"). **3 Brewer Type** (must; "The highest level you will brew now. This is just to get
   started. Skynet can grow with you"): Extract Can Kit, Extract Partial Grain and Hops, All Grain; **All Grain** asks next "Do you

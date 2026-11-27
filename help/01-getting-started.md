@@ -40,6 +40,36 @@ What you can see depends on your role. An **Admin** sees everything; an **Operat
 - Change a tab's background picture or color: [Tab background picture and color](26-tab-background).
 - Put your own pictures and sounds on the Pi: [Media](07-media).
 
+## Answering a question: Tick Box and Drop Down list
+
+Questions in Skynet (the Setup Interview, Rule 2.75, and other interviews) are answered in two methods. These are the same
+samples the Setup Interview shows before its first question.
+
+**1. A Tick Box.** Click the box of your answer; a green ✔ shows it is checked.
+
+*Are you a morning person?*
+
+| Yes | If 11:59 = morning | No |
+|:---:|:---:|:---:|
+| ☐ | ☐ | ☐ |
+
+Click the middle box, and it is checked:
+
+| Yes | If 11:59 = morning | No |
+|:---:|:---:|:---:|
+| ☐ | ✔ | ☐ |
+
+**2. A Drop Down list box** that limits your choices. Sometimes there might be an **Other** choice that allows you to use
+something not on the list, but if it is not there, you need to choose the best or closest answer. In the Ice Cream question below,
+Other is not available as the Skynet Shop only has these flavors available today.
+
+- Click the little down arrow ▼ of **Favorite Ice Cream?** to see your choices: Vanilla, Chocolate, Strawberry, Mint, Cookie,
+  Orange Sherbet.
+- Click to make your choice. Since my favorite is not available, I am choosing **Chocolate**.
+- **Chocolate** was selected: the box now shows Chocolate.
+
+More about Drop Down lists (typing a letter to jump, ➕ Add new ...): [List Boxes (Dropdowns)](189-list-boxes).
+
 ## Words used in this manual
 
 The [Glossary](13-glossary) explains every special word. The three you will meet most:

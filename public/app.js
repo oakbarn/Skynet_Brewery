@@ -16406,7 +16406,9 @@ async function setupInterview({ first = false } = {}) {
       const qs = shownQuestions(a, ctx), done = at >= qs.length, q = qs[at];
       if (at < 0) return drawIntro(qs);
       // the 6 steps (Panel Update 17), then Done; a branch's step stays lit on every page of it
-      const steps = [...SETUP_STEPS, 'Done'], now = done ? SETUP_STEPS.length : SETUP_STEPS.indexOf(q.step);
+      // no Done in the strip (OakBarn Brewery, 2026-11-27: "remove 7. Done as while I like the done screen it will be accessed
+      // differently which will be later"); the Done page still follows the last question
+      const steps = SETUP_STEPS, now = done ? SETUP_STEPS.length : SETUP_STEPS.indexOf(q.step);
       const go = n => { at = n; draw(); };
       // a step is green when every question in it is answered; a click goes to its first open question
       const firstOf = (s, open) => { const i = qs.findIndex(x => x.step === s && (!open || !isGreen(x, qs, answered))); return i < 0 ? (open ? firstOf(s, false) : qs.length) : i; };
@@ -16501,7 +16503,7 @@ async function setupInterview({ first = false } = {}) {
       // Next ▶ has the focus, so Enter goes on
       const nextBtn = h('button', { type: 'button', class: 'primary', onclick: start }, 'Next ▶'); setTimeout(() => nextBtn.focus());
       const firstOf = s => { const i = qs.findIndex(x => x.step === s && !isGreen(x, qs, answered)); return i < 0 ? Math.max(0, qs.findIndex(x => x.step === s)) : i; };
-      stripBox.replaceChildren(h('ol', { class: 'nsiSteps' }, ...[...SETUP_STEPS, 'Done'].map(s => h('li', { class: s !== 'Done' && stepGreen(s, qs, answered) ? 'done' : '',
+      stripBox.replaceChildren(h('ol', { class: 'nsiSteps' }, ...SETUP_STEPS.map(s => h('li', { class: stepGreen(s, qs, answered) ? 'done' : '',
         style: 'cursor:pointer', title: 'Go to this step', onclick: () => go(s === 'Done' ? qs.length : firstOf(s)) }, s))));
       bar.replaceChildren(h('span', { class: 'spacer' }),
         h('button', { type: 'button', title: 'Open the Help page of the Setup Interview', onclick: () => openHelp('248-setup-interview') }, '? Help'),
