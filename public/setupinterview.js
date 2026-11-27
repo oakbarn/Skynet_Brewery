@@ -61,9 +61,33 @@ export const SINGLE_VESSELS = [['Generic_Brew_Vessel_Widget', 'Plain Pot'], ['Br
 // Skynet Vessel Templates of a kettle on an electric stove, plain words under them
 export const STOVE_ELECTRIC_VESSELS = [['Kettle_5_Gal_Electric_Stove', 'Kettle on an Electric Stove'],
   ['Kettle_5_Gal_Electric_Stove_Low_Drain', 'Kettle with a Ball Valve on an Electric Stove']];
-// the vessel choices and the heading by how the one vessel is heated
+// The other ways to heat one vessel (OakBarn Brewery, 2026-11-27: "Create all the branches for a 1 vessel system, Pot on Gas Stove top,
+// all the way to Internal Electric element. The goal in the end of the interview is to find the best match from a sample brewery"):
+// the Skynet Vessel Templates that fit each one, plain words under them
+export const STOVE_GAS_VESSELS = [['Kettle_5_Gal_Gas_Stove', 'Kettle on a Gas Stove'],
+  ['Kettle_5_Gal_Gas_Stove_Low_Drain', 'Kettle with a Ball Valve on a Gas Stove']];
+export const HOT_PLATE_VESSELS = SINGLE_VESSELS;      // a pot on a hot plate: the same pots as No Boil
+export const TURKEY_FRYER_VESSELS = [...SINGLE_VESSELS, ['Kettle_Basic', 'Kettle with Outlet, Thermowell and Side Inlet']];
+export const GAS_BURNER_VESSELS = [['Kettle_Basic', 'Basic Kettle'], ['Kettle_Tall', 'Tall Kettle'], ['Kettle_Big_Fatty', 'Wide Kettle'],
+  ['Kettle_Bottom_Drain', 'Kettle with Bottom Drain'], ['Kettle_Tangential_Steam_Slayer', 'Kettle with Steam Slayer']];
+// Internal Electric Element (2026-11-27: "Internal Electric would use a vessel template with an element and a Probe"): only the
+// Templates with an Element Port and a Thermowell
+export const ELEMENT_VESSELS = [['Kettle_Basic_Electric', 'Basic Electric Kettle'], ['Kettle_Tall_Electric', 'Tall Electric Kettle'],
+  ['Kettle_Big_Fatty_Electric', 'Wide Electric Kettle'], ['Kettle_Bottom_Drain_Electric', 'Electric Kettle with Bottom Drain'],
+  ['Kettle_Tangential_Steam_Slayer_Electric', 'Electric Kettle with Steam Slayer'], ['Integrated_Electric_Kettle_Basic', 'Electric Kettle, Probe and Element Built In']];
+// what the end build adds for the way it is heated (2026-11-27: "on something like a Brewery Gas Burner it would add the burner and
+// ignition to the end build"); kept in the Brewery Build as `adds`
+export const BUILD_ADDS = { burner: 'Gas Burner', igniter: 'Burner Igniter', element: 'Heating Element', probe: 'Temperature Probe' };
+// the vessel choices and the heading by how the one vessel is heated (every VESSEL_HEATS answer has its own branch)
 export const ONE_VESSEL_PICKS = { noboil: { head: 'Single Vessel Brewer', choices: SINGLE_VESSELS },
-  electricstove: { head: 'Electric Stove Top Brewer', choices: STOVE_ELECTRIC_VESSELS } };
+  electricstove: { head: 'Electric Stove Top Brewer', choices: STOVE_ELECTRIC_VESSELS },
+  gasstove: { head: 'Gas Stove Top Brewer', choices: STOVE_GAS_VESSELS },
+  hotplate: { head: 'Hot Plate Brewer', choices: HOT_PLATE_VESSELS },
+  turkeyfryer: { head: 'Turkey Fryer Brewer', choices: TURKEY_FRYER_VESSELS },
+  gasburner: { head: 'Brewery Gas Burner Brewer', choices: GAS_BURNER_VESSELS, adds: ['burner', 'igniter'] },
+  element: { head: 'Internal Electric Element Brewer', choices: ELEMENT_VESSELS, adds: ['element', 'probe'] } };
+// the words under the vessel pictures for what the build adds ('' when it adds nothing)
+export const addsNote = a => { const ad = ONE_VESSEL_PICKS[a?.vesselHeat]?.adds; return ad?.length ? `Your build also gets: ${ad.map(k => BUILD_ADDS[k]).join(' and ')}.` : ''; };
 const onePick = a => ONE_VESSEL_PICKS[a?.vesselHeat] || ONE_VESSEL_PICKS.noboil;
 export const VESSEL_KEYS = ['vesselCount', 'allInOne', 'kettleOutlet', 'kettlePump', 'pumpCount', 'recirculate', 'allGrainPlus'];
 // the Brewer Level (1 to 9) from the answers
@@ -364,7 +388,7 @@ export function startAnswers(ctx, list = SETUP_QUESTIONS) {
 export function answerWords(q, v, ctx) {
   if (q.kind === 'branch') return '';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
-  if (q.kind === 'vessel') return Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v)?.[1] ?? String(v ?? '');
+  if (q.kind === 'vessel') return (choicesOf(q, ctx, ctx?.answers).find(([k]) => k === v) || Object.values(ONE_VESSEL_PICKS).flatMap(p => p.choices).find(([k]) => k === v))?.[1] ?? String(v ?? '');
   if (q.kind === 'pick') return choicesOf(q, ctx).find(([k]) => String(k) === String(v))?.[1] ?? String(v ?? '');
   return v === '' || v == null ? '(empty)' : String(v);
 }
@@ -394,6 +418,8 @@ export function breweryBuildOf(d, list = SETUP_QUESTIONS) {
     if (v === undefined || v === null || v === '') continue;
     b[q.id] = q.id === 'vesselCount' ? vesselCountOf(v) : q.kind === 'yesno' ? !!v : v;
   }
+  const ad = String(vesselCountOf(d.vesselCount)) === '1' && ONE_VESSEL_PICKS[d.vesselHeat]?.adds;
+  if (ad) b.adds = [...ad];      // the burner and igniter, or the element and probe, for the end build
   const lv = brewerLevelOf(d); if (lv) b.brewerLevel = lv;
   return b;
 }
