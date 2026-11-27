@@ -1460,7 +1460,7 @@ Testers are not programmers, so:
      **support@oakbarnbrewery.com** (as Rule 11.10's broken link). Nothing is sent until the tester presses Send.
   5. The Brain gives its version to a signed-in browser only (`/auth/status`). No person is named in the forms or Help
      (Rule 11.5); the forms are not announced to testers until OakBarn Brewery releases them.
-Help 205. **Both programs:** the BruControl Import ships in the same Setup and uses the Panel's Help window, so 🐞 Report is on its
+Help 205. **Both programs:** the BruControl Import uses the Panel's Help window (it will have its own Windows Setup, Rule 15.4), so 🐞 Report is on its
 Help pages too; its own screens have no ☰ Menu > About.
 
 2.62 **Templates and Equipment Profiles are only for placing on a Tab: a Tab keeps ZERO link to them** (OakBarn Brewery, 2026-11-19:
@@ -4131,7 +4131,7 @@ never stops a brew. On every Brain (Windows, Mac, Linux, Pi):
    never changes Windows settings itself; Help 190 says how to set Active hours, sign-in after an update, the laptop lid and power
    return.
 6. **Both programs:** the Panel does all of this; the BruControl Import controls nothing, so it needs none of it (its Build page
-   runs no board and shows no notice). The same Setup asks the question for both. Help 190.
+   runs no board and shows no notice). The Skynet Setup asks the question; the Importer is not in it (Rule 15.4). Help 190.
 
 6.32 **The Brain runs in the Background; Standby** (OakBarn Brewery, 2026-11-14: "Windows PowerShell remains open after Skynet Panel
 is closed"; "Maybe Change that the Brain is in the Back ground and somewhat separate on a Computer ... the Skynet Panel acts like a
@@ -4847,7 +4847,7 @@ its Details filled in (company, description, a version number that goes up with 
 .bat start files never use PowerShell's `-ExecutionPolicy Bypass` (not needed for a one-line command) and download only
 into the user's own TEMP folder, never the shared Public folder. What Setup and the start files do for the brewer does not
 change. Signing (Rule 9.10) is the real cure; until it is on, a scanner may still guess wrong, and the file can be
-restored and reported to the scanner's maker as a false positive. Both programs (the Importer ships in the same Setup).
+restored and reported to the scanner's maker as a false positive. Both programs (the Importer will have its own Windows Setup, Rule 15.4; it follows this too).
 (thread "Stop antivirus flagging the Setup")
 Virus check (OakBarn Brewery, 2026-11-12: "Can a exe be sent to the virus check within github"): after every Release is
 made, a Windows computer at GitHub scans every .exe on it with Microsoft Defender (first proving the scanner works on the
@@ -4881,7 +4881,7 @@ License 2.0) stays, with its credit in the README's Media credits.
 Every picture or sound that is not Skynet's own has a row in
 [Media_Licenses.csv](Media_Licenses.csv) with its source, license and what the license asks for. A questionable file is replaced by one OakBarn Brewery makes, or by a free one OakBarn Brewery approves.
 *2026-11-17 (OakBarn Brewery: "Every thing with a possible copywrite violation needs to be listed and changed to a Non copywrite version"):* the pictures that might be copyrighted (the Riptide-style Pump_<color>_Rip pictures, BurnerFlame, the Burner No Flame and BigMacRElement PNGs, brewery_main.png, the Help 180 Bob screenshot and Musketeers clip art, and the valve photos in Delete/) were taken out of the public repo and replaced by Skynet drawings; the list is in docs/Image_Library.md, Removed for copyright. They are still in the Git history. Every picture Skynet ships has a row in docs/Image_Library.md. AlarmBitter stays (OakBarn Brewery's own).
-Both programs (the Importer ships in the same Setup; it already copies imported pictures and sounds into User folders).
+Both programs (the Importer will have its own Windows Setup, Rule 15.4; it already copies imported pictures and sounds into User folders).
 **Exception** (OakBarn Brewery, 2026-11-10, "Keep the Beep", "Song and clip also with the brain"): the three fallback sounds,
 sounds/alarm_beep.wav, sounds/Skynet/Alarm_Sound_Missing.mp3 and sounds/Skynet/Find_The_File_Connecting.mp3, also stay in the
 panel zip and the Skynet Brewer Setup (in defaults/media, copied in only when missing), so an Alarm or Sound Player can always
@@ -4905,8 +4905,8 @@ already in `samples/configs` wins. **A Schema from another brewer** goes in the 
 (two-vessel-one-pump, brewzilla-brew-day, oakbarn-brucontrol) are **moved, never deleted**, to `backups/old_samples_<date>` on an
 update; nothing else is touched (a user's own Schemas are in `config/schemas`, never in `samples`). **Videos:** Help 83 links
 "How to use the 3 Vessel sample, step by step" and "How to add another Pump and edit the manifold in the 3 Vessel sample" (marked
-coming soon until the YouTube links exist); the ReadMe names them. Both programs: the BruControl Import ships in the same Setup
-and does not use Sample Schemas; nothing changes there. **The 3 Vessel sample always stays in the Skynet Panel** (OakBarn Brewery,
+coming soon until the YouTube links exist); the ReadMe names them. Both programs: the BruControl Import (its own Windows Setup, Rule 15.4)
+does not use Sample Schemas; nothing changes there. **The 3 Vessel sample always stays in the Skynet Panel** (OakBarn Brewery,
 2026-11-12: "3 Vessel Schema always stays with the Skynet Panel it is not moved to the sample Schema exe. That will be for
 additional samples. The 3 Vessel one will always be available in the Skynet Panel as a Sample"): it is never moved to the Sample
 Schemas Setup, which is only for additional samples. **Tick boxes, no All, never delete** (OakBarn Brewery, 2026-11-12, README markup "Skynet Brew Panel 1 a": "In that
@@ -4959,7 +4959,7 @@ non official updates", "Explain the Offical Updates in the Help"). Skynet stays 
 `$`, `%` and quotes in the folder name never stop an install, an update or the panel. Every path is kept whole (in quotes), and
 each file the installer writes (the start file, the Skynet Brewer menu entry and Desktop icon, the start-by-itself service) gets the
 path in that file's own way of quoting. Applies to the Linux, Raspberry Pi and Mac installers and to the panel itself. Both
-programs: the BruControl Import is Windows only and is installed by the same Setup .exe; nothing changes there.
+programs: the BruControl Import is Windows only and will have its own Setup .exe (Rule 15.4); nothing changes there.
 
 9.16 **Every pull request runs the Skynet tests** (OakBarn Brewery, 2026-11-13: "do that on 369"). GitHub runs the whole test suite
 (`npm test`) on every pull request to the default branch and after every merge (`.github/workflows/tests.yml`). It shows on the pull
@@ -5008,7 +5008,7 @@ works like Start Fresh (Rule 9.8), with nothing saved:
 5. **Helper programs are not removed** (OakBarn Brewery, 2026-11-14: "Add a Comment about not removing auxiliary programs like
    Tailscale if you installed them"): Node.js, Tailscale and any other program the user installed stay, because other programs
    may use them. The red warning, Help 19 and install/ReadMe.txt say so and point to Settings > Apps.
-Both programs (the Importer is in the same Setup). The Mac and Linux / Pi installers have no uninstall.
+Both programs (the Importer will have its own Windows Setup and Uninstall, Rule 15.4). The Mac and Linux / Pi installers have no uninstall.
 
 9.20 **A Full Setup with the pictures and sounds inside** (OakBarn Brewery, 2026-11-14: "Set GitHub to have 2 different Skynet
 Panel Installs. The ones we have now but a new one that is a Full install that also has the media embedded so a new install does
@@ -5021,7 +5021,7 @@ Never Take Away; the Media Setup and zip are made new only when media changed, R
 (`-DMEDIA_SRC`); signed the same way when signing is set up (Rule 9.10); scanned by Microsoft Defender and VirusTotal like every
 .exe on the Release (Rule 9.11). Size: about 12 MB (the plain Setup about 5 MB); GitHub allows up to 2 GB per Release file, and
 VirusTotal takes files over 32 MB through its large-file upload. Ships only the media already in Media_Licenses.csv (no new
-media). Both programs (the Importer is in the same Setup; nothing changes there). (thread "Add a Full Setup with media included",
+media). Both programs (the Importer is not in this Setup, Rule 15.4; nothing changes there). (thread "Add a Full Setup with media included",
 Help 19 and 183)
 **No choices: the Full Setup always overwrites everything** (OakBarn Brewery, 2026-11-17, Panel Updates Sandbox entry 10, word for
 word: "Somewhere in a sandbox we had about a full install not having any options always a full install and will overwrite any
@@ -5056,7 +5056,7 @@ any change means new media. The Media Setup and zip are still on every Release, 
 Never Take Away). The plain Skynet Brewer Setup and the Full Setup are made on every merge as before, and the Full Setup always
 carries every picture and sound (Rule 9.20). OakBarn Brewery can force a new Media Setup with **Actions > Panel version > Run
 workflow > rebuild media** (for example once signing is set up, Rule 9.10, so the Media Setup gets signed). If the last one cannot be
-found or downloaded, it is made new, so a Release is never missing it. Both programs (the Importer is in the same Setup; nothing
+found or downloaded, it is made new, so a Release is never missing it. Both programs (the Importer is not in this Setup, Rule 15.4; nothing
 changes there). (thread "Rebuild Media Setup only when media changes", Help 183)
 *2026-11-17 (Rule 9.22):* there is no Media Setup .exe any more; this Rule now decides only whether the Media zip is made new.
 
@@ -5072,7 +5072,7 @@ media already in docs/Media_Licenses.csv is ever in `media/`, so nothing copyrig
 Skynet picture, sound and Sample Schema. So the **Skynet Media Setup .exe and the Skynet Sample Schemas Setup .exe are retired**
 (allowed before the first Public Production, Rule Old Ways; their scripts are in Delete/install_windows/). The **Media zip**
 and **Sample Schemas zip** stay on every Release for Mac, Linux, Raspberry Pi and by hand; the Media zip is still made new only when
-media changed (Rule 9.21). Both programs (the Importer is in the same Setup; nothing changes there). (Help 183, 184)
+media changed (Rule 9.21). Both programs (the Importer is not in this Setup, Rule 15.4; nothing changes there). (Help 183, 184)
 
 9.23 **Only the newest two Releases stay on GitHub** (OakBarn Brewery, 2026-11-18: "we need to clean that every 25"; "Ok if it can
 do that only keep the last one and the new one"). After every merge, once the new Release is made and virus checked, the release
@@ -5080,7 +5080,7 @@ workflow (.github/workflows/panel-version.yml, job keep-newest) deletes every ol
 new one and the one before it. Only published Releases count: a Release the Virus check hid as a Draft (Rule 9.11) is never counted
 or deleted, so the last good one always stays. The **tags stay**, so the Official Skynet check (Rule 9.14) still works for an older
 install; only the Release pages and their downloads go. The Skynet-Sounds Release (Rule 7.20) is never touched. The number kept is
-KEEP in that job. Both programs (the Importer is in the same Setup; nothing changes there). (Help 19)
+KEEP in that job. Both programs (the Importer is not in this Setup, Rule 15.4; nothing changes there). (Help 19)
 
 9.24 **The Skynet Language Fonts: an add-only Setup of their own** (OakBarn Brewery, 2026-11-20, Panel Updates entry 45: "if you
 clone the checked install and only add the font package, the second exe has been checked already"; "Ok then add Chinese, Japanesse,
@@ -5689,16 +5689,19 @@ BruControl's files and never changes them. **It shares everything with the Panel
 same code, Skynet Templates, pictures, sounds, Rules and Importing Norms, so a valve from the Importer is exactly a valve from
 the Panel. A Template or Rule is written for both the Panel and the Importer, and the other way round (Fritz: "a Template or
 Rules must be written to both the Skynet Panel or the Import BruControl Program and vice versus"). It is a second shortcut,
-**Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
+**Skynet BruControl Importer**, and opens in its own clean window (Rule 2.36) with no Brain,
 boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7), as a file the Panel opens.
-- **It is a choice when installing** (Fritz, 2026-11-06). The Windows Setup asks "Will you import a BruControl configuration
-  on this computer?" with this under it (Fritz, 2026-11-07): "If you are a BruControl Brewer and want to import a BruControl
-  .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the Importer's shortcuts (Desktop, Start menu and the Import folder); No leaves them out (Setup can be run again to add it). On an update the
-  last answer is the default. When the answer was Yes, the last Setup page has **Start Skynet Brewer now** (ticked) and **Start the
-  BruControl Importer now**: only one can be ticked, so only one program starts (OakBarn Brewery, 2026-11-08: "only one Skynet or Importer start").
-  Setup never clears the Importer's kept answers (Start Fresh never touches the Import folder): that is done in the Importer itself,
-  with **Clear Page** and **Restart Fresh** (OakBarn Brewery, 2026-11-09: "In the Fresh start of the importer, that is not the [way] it
-  should be done").
+- **Not in the Skynet Setup; its own Windows Setup .exe** (OakBarn Brewery, 2026-11-27: "Remove the option to install the
+  BruControl Importer which will become a standalone exe and only for Windows as it needs to be on the same machine as the
+  BruControl Program"). The Skynet Setup (Update and Full) asks **no** Importer question and puts in no Importer start file or
+  shortcuts; its last page has only **Start Skynet Brewer now**. An earlier Setup's Importer start file and shortcuts (Desktop,
+  Start menu, Import folder) are taken away quietly on the next update. The Mac and Linux / Pi installers never had it. The
+  Importer will be a **standalone Windows Setup .exe** of its own, installed on the BruControl computer; building it is on hold
+  with the rest of the Importer. Its code stays in this repo, made from the same code, Templates and Rules as above.
+  *Replaces (2026-11-27):* "It is a choice when installing": the Windows Setup asked "Will you import a BruControl configuration
+  on this computer?", Yes added the shortcuts, and the last page had Start Skynet Brewer now / Start the BruControl Importer now
+  (only one ticked). Setup still never clears the Importer's kept answers: that is done in the Importer itself, with **Clear
+  Page** and **Restart Fresh** (OakBarn Brewery, 2026-11-09).
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
   their files there too. An uninstall deletes it with everything in it, after its warning (Rule 9.19).
@@ -7632,6 +7635,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 
 - 2026-11-27: Rule 2.75 changed: one vessel on an Electric Stove Top picks its vessel (Electric Stove Top Brewer, two kettle-on-a-stove Templates). Help 248.
 - 2026-11-27: Rule 2.75 changed: the Brewery answers are kept together as the Brewery Build (brewDefaults.breweryBuild), for the end of the interview to offer Templates or build one. Help 248.
+- 2026-11-27: Rule 15.4 changed (OakBarn Brewery: "Remove the option to install the BruControl Importer which will become a standalone exe and only for Windows as it needs to be on the same machine as the BruControl Program"): the Skynet Setup no longer asks the Importer question or adds its shortcuts (an earlier Setup's are taken away on update); the last Setup page has only Start Skynet Brewer now. The Importer will be its own Windows Setup .exe (on hold). Rule 9 "Both programs" notes say so. Help 143.
 - 2026-11-27: Rule 2.77 new: hover help is plain and short, no personal name, no Rule numbers (every balloon cleaned, English and French); Skynet Vessel Templates get a plain `tip`, shown under each picture in the wider Add a Vessel picker. Help 66.
 - 2026-11-27: Rule 2.75 changed: one vessel and No Boil Brewer asks Single Vessel Brewer: Choose the Vessel that matches yours (vesselTemplate, also on Default settings). Help 248.
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
