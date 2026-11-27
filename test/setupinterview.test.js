@@ -40,7 +40,11 @@ for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.a
 // Brewer Type (2026-11-27): one screen, four Tick Boxes in Fritz's words, no follow-up question
 const bt = SETUP_QUESTIONS.find(q => q.id === 'brewerType');
 assert.ok(bt.tick && !SETUP_QUESTIONS.some(q => q.id === 'grindOwn'));
-assert.deepEqual(choicesOf(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['allgrain'], ['allgrainmill']] })).map(c => c[1]), ['Extract Kit', 'Extract Brewer add Own Hops', 'All Grain', 'All Grain Mill own Grain']);
+assert.deepEqual(choicesOf(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['biab'], ['allinone'], ['allgrain'], ['allgrainmill']] })).map(c => c[1]), ['Extract Kit', 'Extract Brewer add Own Hops', 'BIAB (Brew in a Bag)', 'All In One Brewer', 'All Grain', 'All Grain Mill own Grain']);
+// six Tick Boxes on question 2 (tickMax), the Mash Profile question for every grain type, BIAB's Tab Level
+assert.ok(asTicks(bt, ctx({ brewerTypes: [['cankit'], ['partial'], ['biab'], ['allinone'], ['allgrain'], ['allgrainmill']] })));
+for (const t of ['biab', 'allinone']) assert.ok(shownQuestions({ brewerType: t }, ctx()).some(q => q.id === 'mashProfile'), t);
+assert.equal(nsiLevelOf('4', 'allinone'), 'biab');
 assert.equal(bt.start(ctx({ defaults: { brewerType: 'allgrainmill' } })), 'allgrainmill');
 assert.ok(shownQuestions({ brewerType: 'allgrainmill' }, ctx()).some(q => q.id === 'mashProfile'));
 // the Mash Profile only for All Grain

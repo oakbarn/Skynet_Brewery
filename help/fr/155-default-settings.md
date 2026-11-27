@@ -89,7 +89,7 @@ sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6
 
 ## Brewer Type {#brewer-type}
 
-Ce que cette brasserie brasse d'habitude : **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** (au départ) ou **All Grain (own Grain Mill)**. Quand un jour de brassage ne trouve aucune recette, la fenêtre **No Recipe Found** commence sur ce choix, et vous pouvez en choisir un autre. Voir [Aucune recette trouvée](100-brew-process#no-recipe-found).
+Ce que cette brasserie brasse d'habitude : **Extract Can Kit**, **Extract Partial Grain and Hops**, **BIAB (Brew in a Bag)**, **All In One Brewer** (tous deux des recettes All Grain, niveau 4), **All Grain** (au départ) ou **All Grain (own Grain Mill)**. Quand un jour de brassage ne trouve aucune recette, la fenêtre **No Recipe Found** commence sur ce choix, et vous pouvez en choisir un autre. Voir [Aucune recette trouvée](100-brew-process#no-recipe-found).
 
 **Brewery Vessels** : quelques questions (combien de cuves de brassage ; puis All In One, sortie, pompe, combien de pompes, HERMS ou RIMS, All Grain Plus, seulement celles qui vont avec les réponses) calculent votre **Brewer Level**, de **1 Stove Top, One Pot, No Outlet** jusqu’à **9 All Grain Plus**, affiché dessous. Un nouveau Tab de brassage dans le New Schema Interview commence sur le Level qui lui correspond. **Piped Manifold** (dans Your Brewery) : On quand vos cuves et pompes sont reliées par des tuyaux fixes et des vannes. **Yeast Starter usually** (dans New User Recipes) : pour information ; PreBrew vous le rappelle un jour ou deux avant. Tous sont demandés par le [Setup Interview](248-setup-interview).
 

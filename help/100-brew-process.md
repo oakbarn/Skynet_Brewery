@@ -86,7 +86,7 @@ On a Brew Day, there is ALWAYS a Recipe, from the simplest to the most complex. 
 So PreBrew starts with `ask_recipe`. With a Recipe loaded it goes straight on. With none, the **No Recipe Found** pop-up shows on every screen. Pick one in its dropdown, then **Open ▶**:
 
 - **Saved Recipe**: pick it from the Recipe library. It opens at once, and the Brew Day goes on.
-- **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** or **All Grain (own Grain Mill)**: a NEW Recipe at that Level opens on the Recipe tab. Fill it in (or IMPORT a recipe file there) and press **Save**. A bar at the top says the Brew Day is waiting; once the Recipe is saved, it goes on.
+- **Extract Can Kit**, **Extract Partial Grain and Hops**, **BIAB (Brew in a Bag)**, **All In One Brewer**, **All Grain** or **All Grain (own Grain Mill)**: a NEW Recipe at that Level opens on the Recipe tab. Fill it in (or IMPORT a recipe file there) and press **Save**. A bar at the top says the Brew Day is waiting; once the Recipe is saved, it goes on.
 
 The dropdown starts on your **Brewer Type** (☰ Menu > Default settings). You can make the Recipe well before Brew Day on ☰ Menu > Recipe, and save it to the Recipe library to use again.
 

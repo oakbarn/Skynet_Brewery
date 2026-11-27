@@ -86,7 +86,7 @@ Un jour de brassage, il y a TOUJOURS une recette, de la plus simple à la plus c
 PreBrew commence donc par `ask_recipe`. Avec une recette chargée, il continue tout de suite. Sans recette, la fenêtre **No Recipe Found** s'affiche sur chaque écran. Choisissez dans sa liste, puis **Open ▶** :
 
 - **Saved Recipe** : choisissez-la dans la bibliothèque de recettes. Elle s'ouvre tout de suite et le jour de brassage continue.
-- **Extract Can Kit**, **Extract Partial Grain and Hops**, **All Grain** ou **All Grain (own Grain Mill)** : une NOUVELLE recette à ce niveau s'ouvre sur le Tab Recipe. Remplissez-la (ou importez-y un fichier de recette avec IMPORT) et appuyez sur **Save**. Une barre en haut indique que le jour de brassage attend ; dès que la recette est enregistrée, il continue.
+- **Extract Can Kit**, **Extract Partial Grain and Hops**, **BIAB (Brew in a Bag)**, **All In One Brewer**, **All Grain** ou **All Grain (own Grain Mill)** : une NOUVELLE recette à ce niveau s'ouvre sur le Tab Recipe. Remplissez-la (ou importez-y un fichier de recette avec IMPORT) et appuyez sur **Save**. Une barre en haut indique que le jour de brassage attend ; dès que la recette est enregistrée, il continue.
 
 La liste commence sur votre **Brewer Type** (☰ Menu > Default settings). Vous pouvez préparer la recette bien avant le jour de brassage dans ☰ Menu > Recipe, et l'enregistrer dans la bibliothèque de recettes pour la réutiliser.
 

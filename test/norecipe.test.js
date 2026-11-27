@@ -16,8 +16,9 @@ assert.ok(SKYNET_SPECIAL.includes('ask_recipe') && commandText('ask_recipe') ===
 for (const f of ['templates/process/PreBrew/Skynet_PreBrew.txt', 'processes/BrewDay_Flow.txt', 'samples/configs/three-vessel-one-pump/processes/BrewDay_Flow.txt'])
   assert.match(fs.readFileSync(f, 'utf8'), /^ask_recipe$/m, `${f} starts the Brew Day with ask_recipe`);
 
-// the Brewer Type: his four kinds, All Grain unless changed
-assert.deepEqual(BREWER_TYPES.map(t => t.name), ['Extract Can Kit', 'Extract Partial Grain and Hops', 'All Grain', 'All Grain (own Grain Mill)']);
+// the Brewer Type: his six kinds (BIAB and All In One Brewer added 2026-11-27, both Level 4), All Grain unless changed
+assert.deepEqual(BREWER_TYPES.map(t => t.name), ['Extract Can Kit', 'Extract Partial Grain and Hops', 'BIAB (Brew in a Bag)', 'All In One Brewer', 'All Grain', 'All Grain (own Grain Mill)']);
+assert.equal(brewerTypeOf({ brewerType: 'biab' }).level, 4); assert.equal(brewerTypeOf({ brewerType: 'allinone' }).level, 4);
 assert.equal(brewerTypeOf({}).key, 'allgrain'); assert.equal(brewerTypeOf({ brewerType: 'cankit' }).level, 1);
 
 // Save this Recipe: "Name yyyy:mm:dd", then (2), (3) ... on the same date; a date already on the name is taken off; Actual AAU 0

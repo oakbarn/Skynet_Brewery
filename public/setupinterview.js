@@ -70,7 +70,7 @@ export const vesselStart = (d, k) => d?.[k] !== undefined ? d[k] : vesselAnswers
 // the Level the New Schema Interview starts a Brewing Tab on (Rule 2.58), from the Brewer Level and the Brewer Type, when no Tab
 // Level was picked before
 export function nsiLevelOf(brewerLevel, brewerType) {
-  const n = +brewerLevel || 0, grain = brewerType === 'allgrain' || brewerType === 'allgrainmill';
+  const n = +brewerLevel || 0, grain = GRAIN_TYPES.includes(brewerType);
   if (!n) return null;
   if (n <= 4) return grain ? 'biab' : brewerType === 'partial' ? 'partial' : 'stove';
   return n <= 6 ? 'two' : 'mashtun';
@@ -87,9 +87,12 @@ const US_FT = 0.3048;      // feet to metres (the same factor the boil temperatu
 // get the Do Not Enter on the mandatory questions"): steps 1 and 2 must be answered; 3 to 5 are branches; 6 is one question with a Skip.
 export const SETUP_STEPS = ['Units', 'Brewer Type', 'Brewery', 'Other Defaults', 'Recipe Defaults', 'Help Language'];
 // the Brewer Types question 2 offers; All Grain Mill own Grain is All Grain (own Grain Mill)
-const MILL = 'allgrainmill', GRAIN = 'allgrain';
+const MILL = 'allgrainmill', GRAIN = 'allgrain', BIAB = 'biab', AIO = 'allinone';
+// the Brewer Types that mash their own grain (they get the Mash Profile question)
+export const GRAIN_TYPES = [BIAB, AIO, GRAIN, MILL];
 // question 2's Tick Boxes, in Fritz's words (2026-11-27), each a Brewer Type (public/recipecalc.js BREWER_TYPES)
-export const BREWER_TICKS = [['cankit', 'Extract Kit'], ['partial', 'Extract Brewer add Own Hops'], [GRAIN, 'All Grain'], [MILL, 'All Grain Mill own Grain']];
+// (2026-11-27 later: "Add All in One Brewer and BIAB to brewer types")
+export const BREWER_TICKS = [['cankit', 'Extract Kit'], ['partial', 'Extract Brewer add Own Hops'], [BIAB, 'BIAB (Brew in a Bag)'], [AIO, 'All In One Brewer'], [GRAIN, 'All Grain'], [MILL, 'All Grain Mill own Grain']];
 const L_PER_GAL = 3.785411784;
 const round2 = n => Math.round(n * 100) / 100;
 
@@ -182,7 +185,7 @@ export const SETUP_QUESTIONS = [
   // Question 2 (OakBarn Brewery, 2026-11-27, his picture, spelling and grammar corrected; "All on one screen so get rid of reference to
   // any follow-up question above as there are none. So it does become two simple questions"): the four Brewer Types as Tick Boxes, in
   // his words; All Grain, Mill own Grain is All Grain (own Grain Mill). (Before: a follow-up "Do you grind your own grain?" after All Grain.)
-  { id: 'brewerType', step: 'Brewer Type', kind: 'pick', tick: true, save: 'defaults', must: true,
+  { id: 'brewerType', step: 'Brewer Type', kind: 'pick', tick: true, tickMax: 6, save: 'defaults', must: true,
     lead: ['What type of Brewer are you now? Skynet can grow as you do when you step up to more complex brewing, and can aid you in doing that, but even a novice brewer could build a complicated automated system on Skynet, as tools are not restricted by brewer type. This is simply an aid to get the Skynet Panel to look like YOUR Brewery as much as possible. This will help steer the interview.',
       'Again, there is no wrong answer. Choose the one you think best fits you (or choose the next level if you are ready and want Skynet to be at that level).'],
     ask: 'What type of Brewer are you now?',
@@ -281,7 +284,7 @@ export const SETUP_QUESTIONS = [
   { id: 'mashProfile', step: 'Recipe Defaults', kind: 'pick', tick: true, save: 'defaults',
     ask: 'Which Mash Profile does a new Recipe start with?',
     why: 'The mash steps (temperatures and times) of a new All Grain Recipe. ☰ Menu > Mash Profile adds and changes them.',
-    show: a => a.brewerType === GRAIN || a.brewerType === MILL,
+    show: a => GRAIN_TYPES.includes(a.brewerType),
     choices: ctx => ctx.mashProfiles || [],
     start: ctx => (ctx.mashProfiles || []).some(([k]) => k === (ctx.defaults?.mashProfile ?? ctx.mashDefault)) ? (ctx.defaults?.mashProfile ?? ctx.mashDefault) : '' },
   { id: 'boilProfile', step: 'Recipe Defaults', kind: 'pick', tick: true, save: 'defaults',
@@ -308,7 +311,8 @@ export const asDropdown = choices => (choices?.length || 0) > 6;
 // Box if needed"): a row with tick, Yes/No or fewer than 6 choices, is Tick Boxes; 6 or more stay a Drop Down list
 export const TICK_MAX = 5;
 export const tickChoices = (q, ctx) => q.kind === 'yesno' ? [[true, 'Yes'], [false, 'No']] : choicesOf(q, ctx);
-export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= TICK_MAX;
+// (a row may allow more: tickMax, as question 2's six Brewer Types)
+export const asTicks = (q, ctx) => !!q.tick && tickChoices(q, ctx).length <= (q.tickMax ?? TICK_MAX);
 // a new installation: no Skynet settings saved yet (and the Setup Interview not finished before)
 // (2026-11-27: every answer is saved as soon as it is given, so a first run left before steps 1 and 2 were answered has a green list
 // but no setupDone: the interview opens again)

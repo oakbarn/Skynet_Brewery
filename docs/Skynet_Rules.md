@@ -1848,6 +1848,10 @@ answers and changes nothing until **✔ Finish**.
 - **CHANGED 2026-11-27, Brewery held to one question** (OakBarn Brewery: "Leave the brewery interview to the one question for now but
   build all the rest"): the other Brewery questions (All In One, outlet, pump, pumps, HERMS or RIMS, All Grain Plus, Piped Manifold,
   Pipe size, Hose size) have `held: true`: not asked, still on Default settings. Taking `held` off brings one back.
+- **CHANGED 2026-11-27, BIAB and All In One Brewer** (OakBarn Brewery: "Add All in One Brewer and BIAB to brewer types"): two new
+  Brewer Types, **BIAB (Brew in a Bag)** and **All In One Brewer**, both Level 4 (All Grain Recipes, the Mash Profile question).
+  Question 2 shows six Tick Boxes (Extract Kit, Extract Brewer add Own Hops, BIAB, All In One Brewer, All Grain, All Grain Mill own
+  Grain): a row may allow more than 5 Tick Boxes with `tickMax`. Default settings and the No Recipe Found pop-up list them too.
 - **CHANGED 2026-11-27, Number of Hot Side Vessels** (OakBarn Brewery: "Number of Hot Side vessels needs to be a Box and you can enter
   a number. The number can be from 1 - 10"; "Then Branch depending on the number entered"): this wins over the Tick Boxes of Number of
   Vessels above. It is a box for a whole number from **1 to 10** (any other answer gets one red note); Default settings has the same box.
@@ -7596,6 +7600,7 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 ## Change log
 
 - 2026-11-26: Rule 17.22 new (OakBarn Brewery, plan 5.3: "The first question should be do you have a Recipe XML you want to Import ..."): the Recipe Interview (Import / Extract Kit / All Grain / Other Brews, then Ferment, Package, Brew Day); questions as data; answers with no Recipe box kept in recipe.interview. Help 249; Help 99 points to it.
+- 2026-11-27: Rule 2.75 changed: new Brewer Types BIAB (Brew in a Bag) and All In One Brewer (Level 4); question 2 has six Tick Boxes. Help 248, 155, 100.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
 - 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
