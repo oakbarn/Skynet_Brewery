@@ -22,8 +22,8 @@ The buttons, the title and the steps strip are frozen at the top: only the page 
 - **Skip** keeps Skynet's own answer and goes on, and the question stays not green. Skynet does not remind you later.
 - A question turns **green** when you answer it (Next). A step turns green when every question in it is answered. Click a step to go
   to it.
-- The interview opens on the first question that is not green, and **Next ▶** goes on to the next one that is not green, in order.
-  Answered (green) questions do not take your turn again; click their step, or **✎** on Done, to change one.
+- The interview opens on the first question that is not green. **Next ▶** and **Skip** always go to the very next question, in
+  order, even one already answered (green): no question is ever skipped for you.
 - Every page starts on Skynet's own answer (or on your saved answer when you run it again), so Next, Next, Next gives a working panel.
 - **Question 1, US or Metric**, starts with a few words about Units (all data is kept in metric inside; only what you see or
   enter changes), then "And now for that 1st Question: US or Metric Units? Choose One." as two **Tick Boxes**. A tick does not go
