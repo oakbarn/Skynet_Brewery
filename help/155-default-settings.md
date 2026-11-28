@@ -92,6 +92,8 @@ What this brewery usually brews: **Extract Can Kit**, **Extract Partial Grain an
 
 **Brewery Vessels**: a few questions (Number of Hot Side vessels, a number from 1 to 10; with one vessel, **How is the vessel heated?**: No Boil Brewer, Electric Stove Top, Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner or Internal Electric Element; then All In One, outlet, pump, how many pumps, HERMS or RIMS, All Grain Plus, only the ones that fit the answers) work out your **Brewer Level**, from **1 Stove Top, One Pot, No Outlet** up to **9 All Grain Plus**, shown under them. A new Brewing Tab in the New Schema Interview starts on the Level that fits it. **Piped Manifold** (in Your Brewery): On when your vessels and pumps are joined by fixed pipes and valves. **Yeast Starter usually** (in New User Recipes): information only; PreBrew reminds you a day or two ahead. All are asked by the [Setup Interview](248-setup-interview).
 
+**How automated is your brewery?** and **How many Interfaces** (in New Build): No Automation, New to IoT Arduino, Know IoT Brewery not Wired or Brewery Wired, and the number of boards (1 to 9) you have or plan to have. The [Setup Interview](248-setup-interview) asks them in its Interface step, right after the Brewery.
+
 ## New User Recipes
 
 What a new Recipe starts with when you press **NEW** on the Recipe tab. You can change each one in the Recipe. **Units** (US or Metric) is at the top of this tab (see **Units and your brewery**).

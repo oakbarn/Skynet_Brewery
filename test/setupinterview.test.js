@@ -13,7 +13,7 @@ const ctx = (more = {}) => ({ defaults: {}, boil: null, patron: false, helpLang:
 
 // Panel Update 17: 6 steps; question 1 is US or Metric. 2026-11-27 (his picture, "A"): the new order, and only steps 1 and 2 must be
 // answered; Brewery, Other Defaults and Recipe Defaults are branches that open on their own page; the rows are in step order
-assert.deepEqual(SETUP_STEPS, ['Units', 'Brewer Type', 'Brewery', 'Other Defaults', 'Recipe Defaults', 'Help Language']);
+assert.deepEqual(SETUP_STEPS, ['Units', 'Brewer Type', 'Brewery', 'Interface', 'Other Defaults', 'Recipe Defaults', 'Help Language']);      // the Interface step right after the Brewery (2026-11-28)
 assert.equal(SETUP_QUESTIONS[0].id, 'units');
 assert.equal(SETUP_QUESTIONS[0].must, true);
 assert.deepEqual(SETUP_QUESTIONS.filter(q => q.must).map(q => q.id), ['units', 'brewerType']);
@@ -35,7 +35,7 @@ assert.equal(SETUP_WELCOME.paras.length, 2);
 assert.doesNotMatch(JSON.stringify(SETUP_WELCOME), /scrren|controoled|breower|intreview|amswered/);
 // ids are unique, every row has what the screen needs
 assert.equal(new Set(SETUP_QUESTIONS.map(q => q.id)).size, SETUP_QUESTIONS.length);
-for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.ask && (q.why || q.lead) && q.kind && (q.kind === 'branch' || typeof q.start === 'function') && q.save, q.id); }
+for (const q of SETUP_QUESTIONS) { assert.ok(SETUP_STEPS.includes(q.step) && q.ask && (q.why || q.lead) && q.kind && (q.kind === 'branch' || q.kind === 'info' || typeof q.start === 'function') && q.save, q.id); }
 
 // Brewer Type (2026-11-27): one screen, four Tick Boxes in Fritz's words, no follow-up question
 const bt = SETUP_QUESTIONS.find(q => q.id === 'brewerType');
@@ -138,7 +138,8 @@ assert.equal(qs0[nextOpen(qs0, g3)].id, '_brewery', 'steps 1 and 2 green: it ope
 assert.ok(stepGreen('Units', qs0, g3) && !stepGreen('Brewery', qs0, g3));
 const gB = new Set([...g3, 'vesselCount', 'recirculate', 'allGrainPlus', 'pipedManifold', 'fermentorCount']);
 assert.ok(isGreen(qs0.find(q => q.id === '_brewery'), qs0, gB) && stepGreen('Brewery', qs0, gB));
-assert.equal(qs0[nextOpen(qs0, gB)].id, '_other');
+assert.equal(qs0[nextOpen(qs0, gB)].id, 'automation', 'then the Interface step');
+assert.equal(qs0[nextOpen(qs0, new Set([...gB, 'automation']))].id, '_other');
 assert.equal(nextOpen(qs0, new Set(qs0.map(q => q.id))), qs0.length, 'all green: Done');
 // saved and read back; an older finished install counts what it saved
 const saved = setupSave(a, ctx(), ALL, gB).brewDefaults;
@@ -417,9 +418,10 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.deepEqual(m.FERMENTOR_COOLS.map(([, w]) => w), ['Not Cooled', 'Fermentation Chamber', 'Peltier', 'Manual Ice Bath', 'Glycol Coil', 'Glycol Jacket']);
   // what kind first, with a picture each; it limits how it is cooled, and a Fermentation Chamber is always one of them
   for (const [k] of m.FERMENTOR_TYPES) { assert.ok(m.coolsFor(k).some(([c]) => c === 'chamber'), k); assert.match(m.FERMENTOR_PICS[k], /^<svg /, k); assert.ok(!/#fff\b|white/i.test(m.FERMENTOR_PICS[k])); }
-  assert.deepEqual(m.coolsFor('glasscarboy').map(([k]) => k), ['none', 'chamber', 'icebath']);
+  assert.deepEqual(m.coolsFor('glasscarboy').map(([k]) => k), ['none', 'chamber', 'peltier', 'icebath']);
+  for (const [k] of m.FERMENTOR_TYPES) assert.ok(m.coolsFor(k).some(([c]) => c === 'peltier'), 'Peltier on every kind: ' + k);
   assert.ok(m.coolsFor('unitank').some(([k]) => k === 'glycoljacket') && !m.coolsFor('bucket').some(([k]) => k.startsWith('glycol')));
-  assert.equal(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'f1Cool'), ctx(), { f1Type: 'corny' }).length, 4);
+  assert.equal(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'f1Cool'), ctx(), { f1Type: 'corny' }).length, 5);
   assert.equal(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'f1Cool'), ctx()).length, 6, 'no kind yet: every way');
   const ids = n => shownQuestions({ ...startAnswers(ctx()), vesselCount: '1', fermentorCount: n }, ctx()).map(q => q.id).filter(x => /^f\d(Cool|Type)$|^fermentorCount$/.test(x));
   assert.deepEqual(ids('3'), ['fermentorCount', 'f1Type', 'f1Cool', 'f2Type', 'f2Cool', 'f3Type', 'f3Cool']);
@@ -454,3 +456,25 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.equal((app.match(/nextOpen\(/g) || []).length, 1, 'nextOpen only where the interview opens');
   assert.match(app, /answered\.add\(q\.id\); persist\(\); go\(at \+ 1\);/);
 }
+
+// the Interface step (2026-11-28): first question Fritz's 4 Tick Boxes; No Automation skips the rest; New to IoT: Read Me then Plan;
+// Know IoT: Plan; Brewery Wired straight to How many Interfaces; every IoT answer gets to How many Interfaces
+{ const { AUTOMATION_KINDS, interfaceCountOf } = await import('../public/setupinterview.js');
+  assert.deepEqual(AUTOMATION_KINDS.map(([, w]) => w), ['No Automation', 'New to IoT Arduino', 'Know IoT Brewery not Wired', 'Brewery Wired']);
+  const first = SETUP_QUESTIONS.find(q => q.step === 'Interface');
+  assert.ok(first.id === 'automation' && first.tick && asTicks(first, ctx(), startAnswers(ctx())) && !first.must);
+  assert.equal(SETUP_QUESTIONS.findIndex(q => q.step === 'Interface'), SETUP_QUESTIONS.findLastIndex(q => q.step === 'Brewery') + 1, 'right after the Brewery');
+  const ifc = auto => shownQuestions({ ...startAnswers(ctx()), automation: auto }, ctx()).filter(q => q.step === 'Interface').map(q => q.id);
+  assert.deepEqual(ifc('none'), ['automation']);
+  assert.deepEqual(ifc('newiot'), ['automation', 'ifaceReadMe', 'ifacePlan', 'interfaceCount']);
+  assert.deepEqual(ifc('knowiot'), ['automation', 'ifacePlan', 'interfaceCount']);
+  assert.deepEqual(ifc('wired'), ['automation', 'interfaceCount']);
+  assert.equal(interfaceCountOf('3'), 3); assert.equal(interfaceCountOf('0'), null); assert.equal(interfaceCountOf('10'), null); assert.equal(interfaceCountOf(''), null);
+  const ic = SETUP_QUESTIONS.find(q => q.id === 'interfaceCount');
+  assert.ok(answerError(ic, '12') && !answerError(ic, '2'));
+  const out = setupSave({ ...startAnswers(ctx()), automation: 'wired', interfaceCount: '2' }, ctx(), undefined, new Set(['automation', 'interfaceCount']), true).brewDefaults;
+  assert.equal(out.automation, 'wired'); assert.equal(out.interfaceCount, '2');
+  assert.equal(answerWords(SETUP_QUESTIONS.find(q => q.id === 'ifacePlan'), undefined), 'Read');
+  const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(src, /\['automation', 'How automated is your brewery\?', 'sel'/); assert.match(src, /\['interfaceCount', `How many Interfaces/); }
+console.log('setup interview: Interface step ok');

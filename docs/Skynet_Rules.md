@@ -1938,6 +1938,18 @@ answers and changes nothing until **✔ Finish**.
   `f1Cool`, `f1Type` ..., on Default settings, and in the Brewery Build as `fermentors`. Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
   with what its heat `adds`).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
+- **CHANGED 2026-11-28, the Interface step** (OakBarn Brewery: "For the Interview some need to wait until an Interface is added. So we
+  need the Interface Section Right after the Brewery Section"; "Interface First question", his picture; "Branch from Answer"): the
+  steps are now **1 Units · 2 Brewer Type · 3 Brewery · 4 Interface · 5 Other Defaults · 6 Recipe Defaults · 7 Help Language**. The
+  first Interface question is four **Tick Boxes** on one row, his words: **No Automation**, **New to IoT Arduino**, **Know IoT Brewery
+  not Wired**, **Brewery Wired**. Each answer is its own branch: **No Automation** skips the rest of the Interface step ("No
+  Automation, Skip Interface Interview"); **New to IoT Arduino** gets the **Read Me**, then the **Plan** ("Read Me File and then Plan
+  File"); **Know IoT Brewery not Wired** gets the **Plan** ("Know IoT: Plan"); **Brewery Wired** goes straight on ("Just wired gets to
+  skip earlier interview"). Every IoT answer then gets **How many Interfaces** ("all IoT get to how many interfaces eventually"), a box
+  for a whole number from **1 to 9**. The Read Me and the Plan are pages to read (Next ▶ goes on). Saved as `automation` and
+  `interfaceCount`, both on Default settings (New Build). Help 248, Help 155.
+- **CHANGED 2026-11-28, Peltier** (OakBarn Brewery: "Missing Peltier on Fermenter Cooling Types"): **Peltier** is one of the ways to
+  cool **every** kind of fermentor on the Cold Side, like the Fermentation Chamber.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
 this is frozen"; "And that should be a rule on any dialogs that have a selection or menu on the top"). The buttons, the title and the
@@ -7714,6 +7726,7 @@ with graphic proportional to the H & D"). The Vessel Device Builder (Rule 19.5, 
 
 ## Change log
 
+- 2026-11-28: Rule 2.75 changed: the Interface step right after the Brewery (7 steps); first question No Automation / New to IoT Arduino / Know IoT Brewery not Wired / Brewery Wired, each its own branch (Read Me, Plan, How many Interfaces 1 to 9). Help 248, Help 155. Peltier offered for every kind of fermentor.
 - 2026-11-27: Rule 2.75 changed: Size of your Vessel (Inside Diameter and Height, Purported Volume, Dead Space, top of the element with the Safe Element Volume worked out plus 1 in) after the vessel for every way to heat one vessel. Help 248.
 - 2026-11-27: Rule 2.75 changed: Two vessels: Vessel 1 and Vessel 2 each asks how heated, used for, its parts and where they are, the vessel, its size. Help 248.
 - 2026-11-27: Rule 2.75 changed: every way to heat one vessel has its own vessel choices (Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal Electric Element); burner + igniter or element + probe kept in the Brewery Build as adds. Help 248.

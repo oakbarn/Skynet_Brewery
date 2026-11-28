@@ -93,6 +93,8 @@ Ce que cette brasserie brasse d'habitude : **Extract Can Kit**, **Extract Partia
 
 **Brewery Vessels** : quelques questions (Number of Hot Side vessels, un nombre de 1 à 10 ; avec une seule cuve, **How is the vessel heated?** (comment la cuve est chauffée) : No Boil Brewer, Electric Stove Top, Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner ou Internal Electric Element ; puis All In One, sortie, pompe, combien de pompes, HERMS ou RIMS, All Grain Plus, seulement celles qui vont avec les réponses) calculent votre **Brewer Level**, de **1 Stove Top, One Pot, No Outlet** jusqu’à **9 All Grain Plus**, affiché dessous. Un nouveau Tab de brassage dans le New Schema Interview commence sur le Level qui lui correspond. **Piped Manifold** (dans Your Brewery) : On quand vos cuves et pompes sont reliées par des tuyaux fixes et des vannes. **Yeast Starter usually** (dans New User Recipes) : pour information ; PreBrew vous le rappelle un jour ou deux avant. Tous sont demandés par le [Setup Interview](248-setup-interview).
 
+**How automated is your brewery?** et **How many Interfaces** (dans New Build) : No Automation, New to IoT Arduino, Know IoT Brewery not Wired ou Brewery Wired, et le nombre de cartes (1 à 9) que vous avez ou prévoyez d’avoir. Le [Setup Interview](248-setup-interview) les demande à son étape Interface, juste après la Brewery.
+
 ## New User Recipes {#new-user-recipes}
 
 Ce avec quoi commence une nouvelle Recette quand vous appuyez sur **NEW** sur le Tab Recipe. Vous pouvez changer chaque chose dans la Recette. **Units** (US ou Métrique) est en haut de ce Tab (voir **Unités et votre brasserie**).
