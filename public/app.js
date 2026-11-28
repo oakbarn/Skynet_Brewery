@@ -35,7 +35,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { RECIPE_QUESTIONS, RECIPE_START, questionById, recipePath, choicesOf as rqChoices, unitOf as rqUnit, interviewRecipe } from './recipeinterview.js';
-import { FERMENTOR_ROWS, FERMENTOR_COOLS, FERMENTOR_TYPES, FERMENTORS_MIN, FERMENTORS_MAX, fermentorCountOf, PART_SPOT, partsWords, partsClean, spotsOf, LAYOUT_SIDES, vesselLayoutSvg, VESSEL_PARTS, VESSEL_SPOTS, VESSEL_USES, MULTI_HEATS, VESSEL_POOL, breweryBuildOf, headOf, addsNote, sizeFieldsOf, sizeUnit, sizeVolume, sizeSafe, sizeIn, sizeClean, VESSEL_SIZE_FIELDS, ONE_VESSEL_PICKS, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
+import { FERMENTOR_ROWS, FERMENTOR_COOLS, FERMENTOR_TYPES, FERMENTORS_MIN, FERMENTORS_MAX, fermentorCountOf, PART_SPOT, partsWords, partsClean, spotsOf, LAYOUT_SIDES, vesselLayoutSvg, VESSEL_PARTS, VESSEL_SPOTS, VESSEL_USES, MULTI_HEATS, VESSEL_POOL, breweryBuildOf, headOf, addsNote, sizeFieldsOf, sizeUnit, sizeVolume, sizeSafe, sizeIn, sizeClean, VESSEL_SIZE_FIELDS, ONE_VESSEL_PICKS, SETUP_QUESTIONS, SETUP_STEPS, SETUP_WELCOME, SETUP_GUIDE, SETUP_TICK, SETUP_DROP, SETUP_HOTSPOTS, SETUP_START, SETUP_INTRO, BREWER_LEVELS, BREWER_LEVEL_DEFAULT, nsiLevelOf, setupNeeded, shownQuestions, startAnswers as setupStart, answerWords, answerError, setupSave, choicesOf, askOf, asDropdown, asTicks, tickChoices, whenOk, PUMP_COUNTS, VESSEL_KEYS, brewerLevelOf, vesselStart, VESSEL_HEATS, SINGLE_VESSELS, AUTOMATION_KINDS, INTERFACES_MIN, INTERFACES_MAX, interfaceCountOf, answeredAtStart, isGreen, nextOpen, stepGreen, mustMissing, setupMustMsg, SETUP_OPEN_MSG } from './setupinterview.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -16719,7 +16719,7 @@ async function setupInterview({ first = false } = {}) {
           // vessel"): each ticked one gets a Drop Down of where it is on the vessel (13 places: a Drop Down, Rule 2.6). None ticked is
           // an answer too, so Next ▶ always works
           const v = a[q.id] = { ...(a[q.id] || {}) };
-          body.append(h('div', { class: 'setupTicks setupMulti' }, ...q.choices.map(([k, t]) => h('div', { class: 'setupTick' },
+          body.append(h('div', { class: 'setupTicks setupMulti' }, ...choicesOf(q, ctx, a).map(([k, t]) => h('div', { class: 'setupTick' },
             h('label', { class: 'setupMultiTick' }, h('span', {}, t), h('input', { type: 'checkbox', ...(v[k] ? { checked: true } : {}), onchange: e => {
               if (e.target.checked) v[k] = PART_SPOT[k] || spotsOf(k)[0][0]; else delete v[k];
               draw(); } })),
@@ -16760,6 +16760,9 @@ async function setupInterview({ first = false } = {}) {
           showCalc();
           body.append(h('div', { class: 'setupSize' }, ...rows), calc);
           queueMicrotask(() => body.querySelector('[data-first]')?.focus());
+        } else if (q.kind === 'info') {
+          // a page to read (the Interface Read Me and Plan): nothing to answer, Next ▶ goes on
+          body.append(h('p', { class: 'setupProceed' }, h('b', {}, SETUP_WELCOME.proceed), ' ', h('button', { type: 'button', class: 'primary', onclick: next }, 'Next ▶')));
         } else if (q.kind === 'yesno') {
           body.append(h('div', { class: 'setupPicks' }, ...[[true, 'Yes'], [false, 'No']].map(([k, t]) => h('button', { type: 'button', class: 'setupPick' + (a[q.id] === k ? ' cur' : ''), onclick: () => { a[q.id] = k; next(); } }, h('b', {}, t)))));
         } else {
@@ -18819,6 +18822,9 @@ function renderDefaultTab(box) {
     ['buildIface', 'Default Interface', 'sel', [['', '(the last one used)'], ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return [id, `${id}: ${x.name}`]; })], false, false, { tip: 'The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used.' }],
     ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID.' }],
     ['_bde', '', 'boxend'],
+    // the Interface step of the Setup Interview (Rule 2.75, 2026-11-28): its first question
+    ['automation', 'How automated is your brewery?', 'sel', [['', '(not set)'], ...AUTOMATION_KINDS], false, false, { tip: 'No Automation, New to IoT Arduino, Know IoT Brewery not Wired or Brewery Wired. The Setup Interview asks it first in the Interface step, right after the Brewery.' }],
+    ['interfaceCount', `How many Interfaces (${INTERFACES_MIN} to ${INTERFACES_MAX})`, 'num', null, false, false, { tip: 'The boards (such as an Arduino Mega, an ESP32 or a Raspberry Pi) you have, or plan to have. Not asked with No Automation.' }],
     // Brewer Level: "New Section of Brewery Vessels and with be questions not a DDLB": the same questions as the Setup Interview; the
     // Brewer Level is worked out from them (the line under them)
     ['_bv', 'Brewery Vessels', 'head'],
@@ -18980,6 +18986,10 @@ function renderDefaultTab(box) {
     else if (fermentorCountOf(d.fermentorCount) == null) throw new Error(`Number of Fermentors must be a whole number from ${FERMENTORS_MIN} to ${FERMENTORS_MAX} (or empty)`);
     else d.fermentorCount = String(fermentorCountOf(d.fermentorCount));
     for (const q of FERMENTOR_ROWS) if (d[q.id] === '') delete d[q.id];
+    if (d.automation === '') delete d.automation;      // the Interface step's first question: not set
+    if (d.interfaceCount === '' || d.interfaceCount == null) delete d.interfaceCount;
+    else if (interfaceCountOf(d.interfaceCount) == null) throw new Error(`How many Interfaces must be a whole number from ${INTERFACES_MIN} to ${INTERFACES_MAX} (or empty)`);
+    else d.interfaceCount = String(interfaceCountOf(d.interfaceCount));
     d.breweryBuild = breweryBuildOf(d);      // the Brewery Build: the Brewery answers kept together (Rule 2.75), with the sizes as saved
     if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(shownUnits)) * 1000) / 1000;
     delete d._w2g; delete d._batch; delete d._tabPipe; delete d._tabHose; delete d._grainLabel; delete d.grainLabel;

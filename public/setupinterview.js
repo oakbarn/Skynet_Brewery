@@ -11,9 +11,10 @@
 // a row. Nothing else needs to change. public/app.js only shows them; test/setupinterview.test.js checks them.
 //
 // A row:  id     the answer's name (and the saved default's name when `save` is 'defaults')
-//         step   which of the 6 steps (SETUP_STEPS) the row is in: the word lit in the steps strip at the top
+//         step   which of the 7 steps (SETUP_STEPS) the row is in: the word lit in the steps strip at the top
 //         ask    the question, plain English; why  the explanation under it
 //         kind   'pick' (one click, a dropdown when there are more than 6 choices, Rule 2.6) · 'text' · 'num' · 'yesno' ·
+//                'info' (a page to read, nothing to answer: Next ▶ goes on) ·
 //                'branch' (the first page of a branch: it says what the branch asks; its Skip skips the whole branch)
 //         choices  [[value, words, explanation?], ...] or ctx => that list
 //         start  ctx => Skynet's own answer (what Skip keeps, and what the box starts on)
@@ -54,7 +55,9 @@ export const vesselCountOf = v => { const n = Number(String(v ?? '').trim()); re
 export const VESSELS_3UP = Array.from({ length: VESSELS_MAX - 2 }, (_, i) => String(i + 3));
 // how one vessel is heated (OakBarn Brewery, 2026-11-27): the Tick Boxes of the one vessel branch, and the list on Default settings
 export const VESSEL_HEATS = [['noboil', 'No Boil Brewer'], ['electricstove', 'Electric Stove Top'], ['gasstove', 'Gas Stove Top'], ['hotplate', 'Hot Plate'],
-  ['turkeyfryer', 'Turkey Fryer'], ['gasburner', 'Brewery Gas Burner'], ['element', 'Internal Electric Element']];
+  ['turkeyfryer', 'Turkey Fryer'], ['gasburner', 'Brewery Gas Burner'], ['element', 'Internal Electric Element'],
+  // (OakBarn Brewery, 2026-11-28: "add Bottom Heater", an element under the floor of the vessel, out of the wort)
+  ['bottom', 'Bottom Heater']];
 // No Boil Brewer, one vessel: "Single Vessel Brewer. Choose the Vessel that matches yours" (OakBarn Brewery, 2026-11-27, his picture):
 // his three Skynet Vessel Templates with his words under them, and Other Skynet Template for any other one. [Template name, his words]
 export const SINGLE_VESSELS = [['Generic_Brew_Vessel_Widget', 'Plain Pot'], ['Brew_Vessel_Low_TC_Output_Widget', 'Pot with 1.5 TC Outlet'],
@@ -77,6 +80,8 @@ export const GAS_BURNER_VESSELS = [['Kettle_Basic', 'Basic Kettle'], ['Kettle_Ta
 export const ELEMENT_VESSELS = [['Kettle_Basic_Electric', 'Basic Electric Kettle'], ['Kettle_Tall_Electric', 'Tall Electric Kettle'],
   ['Kettle_Big_Fatty_Electric', 'Wide Electric Kettle'], ['Kettle_Bottom_Drain_Electric', 'Electric Kettle with Bottom Drain'],
   ['Kettle_Tangential_Steam_Slayer_Electric', 'Electric Kettle with Steam Slayer'], ['Integrated_Electric_Kettle_Basic', 'Electric Kettle, Probe and Element Built In']];
+// Bottom Heater (2026-11-28): the electric Templates with the element and probe built in, the closest to a heater under the floor
+export const BOTTOM_HEAT_VESSELS = [['Integrated_Electric_Kettle_Basic', 'Electric Kettle, Probe and Element Built In'], ['Kettle_Bottom_Drain_Electric', 'Electric Kettle with Bottom Drain']];
 // what the end build adds for the way it is heated (2026-11-27: "on something like a Brewery Gas Burner it would add the burner and
 // ignition to the end build"); kept in the Brewery Build as `adds`
 export const BUILD_ADDS = { burner: 'Gas Burner', igniter: 'Burner Igniter', element: 'Heating Element', probe: 'Temperature Probe' };
@@ -87,7 +92,8 @@ export const ONE_VESSEL_PICKS = { noboil: { head: 'Single Vessel Brewer', choice
   hotplate: { head: 'Hot Plate Brewer', choices: HOT_PLATE_VESSELS },
   turkeyfryer: { head: 'Turkey Fryer Brewer', choices: TURKEY_FRYER_VESSELS },
   gasburner: { head: 'Brewery Gas Burner Brewer', choices: GAS_BURNER_VESSELS, adds: ['burner', 'igniter'] },
-  element: { head: 'Internal Electric Element Brewer', choices: ELEMENT_VESSELS, adds: ['element', 'probe'] } };
+  element: { head: 'Internal Electric Element Brewer', choices: ELEMENT_VESSELS, adds: ['element', 'probe'] },
+  bottom: { head: 'Bottom Heater Brewer', choices: BOTTOM_HEAT_VESSELS, adds: ['element', 'probe'] } };
 // The size of the one vessel (OakBarn Brewery, 2026-11-27: "ask the Height and Diameter of a Vessel so the brewery could be drawn
 // inside Skynet"; "also ask the Purported Volume and the Dead Space if Known. And in an electric vessel save Volume height so the
 // element is submerged"; "Apply this to all the previous ones as well"): asked after the vessel is picked, for every way to heat it.
@@ -142,7 +148,13 @@ export const VESSEL_USES = [['bk', 'Boil Kettle (BK)'], ['hlt', 'Hot Liquor Tank
 // the parts asked about, each with where it is on the vessel
 // (2026-11-27 later: "Add Bottom Drain with skirt to questions"; "and Temperature Probe")
 export const VESSEL_PARTS = [['tangential', 'Tangential Inlet'], ['steamSlayer', 'Steam Slayer'], ['sparge', 'Sparge Arm'], ['sight', 'Sight Glass'],
-  ['skirt', 'Bottom Drain with Skirt'], ['probe', 'Temperature Probe']];
+  ['skirt', 'Bottom Drain with Skirt'], ['probe', 'Temperature Probe'],
+  // where the element is (OakBarn Brewery, 2026-11-28: "Where is the Internal Heater Located?"): only asked of an Internal Electric Element
+  ['element', 'Heating Element']];
+// the parts asked of a vessel heated this way (the Heating Element only with an Internal Electric Element)
+export const partsFor = heat => VESSEL_PARTS.filter(([k]) => k !== 'element' || heat === 'element');
+// the parts the Skynet Templates are matched on (where the element is, is not)
+const MATCH_PARTS = new Set(VESSEL_PARTS.map(([k]) => k).filter(k => k !== 'element'));
 // where on the vessel (OakBarn Brewery, 2026-11-27, his Vessel Layout picture): the same 10 places on the Front and on the Back;
 // "Sight Glass left or Right only". [key, words, x, y] with x and y from 0 to 1 across and down the vessel, as on his picture (the
 // left of the drawing is Right, as he drew it)
@@ -157,7 +169,7 @@ export const SIGHT_SPOTS = [['left', 'Left'], ['right', 'Right']];
 export const SKIRT_SPOTS = [['bottom', 'Bottom Center']];
 export const spotsOf = part => part === 'sight' ? SIGHT_SPOTS : part === 'skirt' ? SKIRT_SPOTS : VESSEL_SPOTS;
 // where a part starts when it is ticked
-export const PART_SPOT = { tangential: 'fll', steamSlayer: 'fhr', sparge: 'fhl', sight: 'left', skirt: 'bottom', probe: 'fmlc' };
+export const PART_SPOT = { tangential: 'fll', steamSlayer: 'fhr', sparge: 'fhl', sight: 'left', skirt: 'bottom', probe: 'fmlc', element: 'bmlr' };
 export const partsClean = v => { const o = {}; for (const [k] of VESSEL_PARTS) if (v?.[k] && spotsOf(k).some(([s]) => s === v[k])) o[k] = v[k]; return o; };
 export const partsWords = v => { const o = partsClean(v), w = VESSEL_PARTS.filter(([k]) => o[k]).map(([k, t]) => `${t} (${spotsOf(k).find(([s]) => s === o[k])[1]})`); return w.length ? w.join(', ') : 'None of these'; };
 // the Vessel Layout sample (OakBarn Brewery, 2026-11-27: "Create a Vessel Sample for Layout that a User can Pop Up"): his picture drawn
@@ -211,10 +223,10 @@ export const POOL_MAX = 6;      // "Try to limit the choices to 6 or less in the
 // the vessels that fit what this one is used for, how it is heated and the parts ticked, the best match first (at most 6)
 export function poolPicks(use, heat, parts) {
   const forUse = VESSEL_POOL.filter(p => !use || p[2].includes(use));
-  const fits = p => heat === 'element' ? p[4] === 'element' : heat === 'electricstove' ? p[4] === 'estove' || p[4] === ''
+  const fits = p => heat === 'element' || heat === 'bottom' ? p[4] === 'element' : heat === 'electricstove' ? p[4] === 'estove' || p[4] === ''
     : heat === 'gasstove' ? p[4] === 'gstove' || p[4] === '' : p[4] === '';
   let list = forUse.filter(fits); if (!list.length) list = forUse;      // none heated that way yet: every one for that use
-  const want = Object.keys(partsClean(parts));
+  const want = Object.keys(partsClean(parts)).filter(k => MATCH_PARTS.has(k));
   // narrowed by the parts (2026-11-27: "narrow the Vessel selections based on the answers to the new questions"): only the vessels
   // with every part ticked; when none has them all, the closest ones
   const all = list.filter(p => want.every(k => p[3].includes(k))); if (all.length) list = all;
@@ -223,7 +235,7 @@ export function poolPicks(use, heat, parts) {
   return list.map((p, i) => [p, score(p), i]).sort((x, y) => y[1] - x[1] || x[2] - y[2]).slice(0, POOL_MAX).map(([p]) => [p[0], p[1]]);
 }
 // true when the vessels shown have every part ticked (false: none has them all, the closest are shown)
-export const poolExact = (use, heat, parts) => { const want = Object.keys(partsClean(parts)); return poolPicks(use, heat, parts).some(([k]) => want.every(x => VESSEL_POOL.find(p => p[0] === k)[3].includes(x))); };
+export const poolExact = (use, heat, parts) => { const want = Object.keys(partsClean(parts)).filter(k => MATCH_PARTS.has(k)); return poolPicks(use, heat, parts).some(([k]) => want.every(x => VESSEL_POOL.find(p => p[0] === k)[3].includes(x))); };
 // the rows of vessel n of count: How heated, Used for, Parts, the vessel, its size
 export function vesselRows(n, count) {
   const v = `v${n}`, when = { vesselCount: String(count) }, of = `Vessel ${n} of ${count}`, D = (ctx, k) => ctx.defaults?.[v + k];
@@ -235,7 +247,7 @@ export function vesselRows(n, count) {
       ask: `What is Vessel ${n} used for?`, why: 'Tick what this vessel does on Brew Day.', choices: VESSEL_USES, start: ctx => ok(VESSEL_USES, D(ctx, 'Use')) },
     { id: v + 'Parts', step: 'Brewery', kind: 'multi', save: 'defaults', when, head: of,
       ask: `Does Vessel ${n} have any of these?`, why: 'Tick every one it has (or none), and pick where it is on the vessel. Skynet picks the vessels that match.',
-      choices: VESSEL_PARTS, start: ctx => partsClean(D(ctx, 'Parts')) },
+      choices: (ctx, a) => partsFor((a ?? ctx?.answers)?.[v + 'Heat']), start: ctx => partsClean(D(ctx, 'Parts')) },
     { id: v + 'Template', step: 'Brewery', kind: 'vessel', save: 'defaults', ifSet: true, when, heat: v + 'Heat', head: of,
       ask: `Choose the Vessel that matches Vessel ${n}:`, why: 'Click the picture of your vessel, then Next ▶. The best match is first.',
       group: 'Vessel Widget', groupNote: a => poolExact(a?.[v + 'Use'], a?.[v + 'Heat'], a?.[v + 'Parts'])
@@ -262,21 +274,22 @@ export const FERMENTOR_COOLS = [['none', 'Not Cooled'], ['chamber', 'Fermentatio
 // graphics"; "carboys can be glass or plastic and a Corny Keg is an option as I have fermented in them"). No shop or maker names.
 // [key, words, the ways it can be cooled ("Might ask Type first as that can limit how cooled"; "One option is always a Fermentation
 // Chamber")]
-export const FERMENTOR_TYPES = [['bucket', 'Plastic Bucket', ['none', 'chamber', 'icebath']],      // "Plastic Bucket: most people start there"
+export const FERMENTOR_TYPES = [['bucket', 'Plastic Bucket', ['none', 'chamber', 'peltier', 'icebath']],      // "Plastic Bucket: most people start there"
   ['conical', 'Conical', ['none', 'chamber', 'peltier', 'glycolcoil', 'glycoljacket']],
-  ['unitank', 'Unitank', ['none', 'chamber', 'glycolcoil', 'glycoljacket']],
+  ['unitank', 'Unitank', ['none', 'chamber', 'peltier', 'glycolcoil', 'glycoljacket']],
   ['brewbucket', 'Stainless Bucket', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
-  ['glasscarboy', 'Glass Carboy', ['none', 'chamber', 'icebath']],
-  ['plasticcarboy', 'Plastic Carboy', ['none', 'chamber', 'icebath']], ['corny', 'Corny Keg', ['none', 'chamber', 'icebath', 'glycolcoil']],
+  ['glasscarboy', 'Glass Carboy', ['none', 'chamber', 'peltier', 'icebath']],
+  ['plasticcarboy', 'Plastic Carboy', ['none', 'chamber', 'peltier', 'icebath']], ['corny', 'Corny Keg', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
   ['other', 'Other', FERMENTOR_COOLS.map(([k]) => k)],
   // a second row (2026-11-27: "On the Type add a second row (I know this violates the rule but here it makes sense). For a Conical
   // Stainless Bucket and the" plastic pressure fermentor "looking thing"): the one exception to 8 Tick Boxes on a line (Rule 2.6)
   ['ssconical', 'Stainless Conical Bucket', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
-  ['pressureconical', 'Plastic Pressure Conical', ['none', 'chamber', 'icebath', 'glycolcoil']],
-  ['pressurefermentor', 'Plastic Pressure Fermentor', ['none', 'chamber', 'icebath', 'glycolcoil']],      // the rounder one, no cone
-  ['crock', 'Ceramic Crock', ['none', 'chamber', 'icebath']],
-  ['plasticjug', 'Plastic Jug with Tap', ['none', 'chamber', 'icebath']]];      // round jug, big screw cap with a carry handle      // 2026-11-27: "Ceramic Crock Fermentation Vessel"
+  ['pressureconical', 'Plastic Pressure Conical', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
+  ['pressurefermentor', 'Plastic Pressure Fermentor', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],      // the rounder one, no cone
+  ['crock', 'Ceramic Crock', ['none', 'chamber', 'peltier', 'icebath']],
+  ['plasticjug', 'Plastic Jug with Tap', ['none', 'chamber', 'peltier', 'icebath']]];      // round jug, big screw cap with a carry handle      // 2026-11-27: "Ceramic Crock Fermentation Vessel"
 export const FERMENTOR_TYPE_ROW = 8;      // the first row has 8, the second row the rest
+// Peltier on every kind (OakBarn Brewery, 2026-11-28: "Missing Peltier on Fermenter Cooling Types")
 export const coolsFor = type => { const t = FERMENTOR_TYPES.find(([k]) => k === type); return t ? FERMENTOR_COOLS.filter(([k]) => t[2].includes(k)) : FERMENTOR_COOLS; };
 // the pictures over the Tick Boxes: simple drawings by Skynet (no shop pictures), colors from the page
 const P = (body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 90" width="60" height="90" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">${body}</svg>`;
@@ -346,7 +359,20 @@ const US_FT = 0.3048;      // feet to metres (the same factor the boil temperatu
 // The order and the mandatory steps changed (OakBarn Brewery, 2026-11-27, his picture of the first screen, picked "A": "1. Units 2. Brewer
 // Type 3. Brewery 4. Other Defaults 5. Recipe Defaults 6. Help Language"; "Only the first two simple questions are mandatory"; "Skip will
 // get the Do Not Enter on the mandatory questions"): steps 1 and 2 must be answered; 3 to 5 are branches; 6 is one question with a Skip.
-export const SETUP_STEPS = ['Units', 'Brewer Type', 'Brewery', 'Other Defaults', 'Recipe Defaults', 'Help Language'];
+// The Interface step (OakBarn Brewery, 2026-11-28: "we need the Interface Section Right after the Brewery Section"): 7 steps, 1 Units
+// 2 Brewer Type 3 Brewery 4 Interface 5 Other Defaults 6 Recipe Defaults 7 Help Language
+export const SETUP_STEPS = ['Units', 'Brewer Type', 'Brewery', 'Interface', 'Other Defaults', 'Recipe Defaults', 'Help Language'];
+// the first Interface question (OakBarn Brewery, 2026-11-28, his picture: "Interface First question", four Tick Boxes on one row;
+// "Branch from Answer"; "No Automation, Skip Interface Interview"): every answer opens its own branch of Interface questions; No
+// Automation skips the rest of the Interface Interview. [value, his words]
+export const AUTOMATION_KINDS = [['none', 'No Automation'], ['newiot', 'New to IoT Arduino'], ['knowiot', 'Know IoT Brewery not Wired'], ['wired', 'Brewery Wired']];
+// the answers that go on to more Interface questions (each its own branch, the questions still to come)
+export const AUTOMATION_BRANCHES = AUTOMATION_KINDS.map(([k]) => k).filter(k => k !== 'none');
+// the branches (OakBarn Brewery, 2026-11-28): "New to IoT: Read Me File and then Plan File"; "Know IoT: Plan"; "Wired Brewery: How many
+// interfaces"; "all IoT get to how many interfaces eventually"; "Just wired gets to skip earlier interview"
+// How many Interfaces: a whole number 1 to 9 (null: not a good one)
+export const INTERFACES_MIN = 1, INTERFACES_MAX = 9;
+export const interfaceCountOf = v => { const t = String(v ?? '').trim(), n = Number(t); return t !== '' && Number.isInteger(n) && n >= INTERFACES_MIN && n <= INTERFACES_MAX ? n : null; };
 // the Brewer Types question 2 offers; All Grain Mill own Grain is All Grain (own Grain Mill)
 const MILL = 'allgrainmill', GRAIN = 'allgrain', BIAB = 'biab', AIO = 'allinone';
 // the Brewer Types that mash their own grain (they get the Mash Profile question)
@@ -411,7 +437,7 @@ export const SETUP_HOTSPOTS = {
   intro: 'We are almost ready to start the interview, but one last option is available on some screens.',
   spots: 'These are all Hot Spots. You can click them to navigate.',
   sample: 'Other Defaults',
-  click: 'Click 4. Other Defaults and you are taken to the Setup Interview: Other Defaults',
+  click: 'Click 5. Other Defaults and you are taken to the Setup Interview: Other Defaults',
 };
 
 // Screen 6, the last one before question 1 (OakBarn Brewery, 2026-11-27, his picture, spelling and grammar corrected)
@@ -533,7 +559,27 @@ export const SETUP_QUESTIONS = [
     choices: ctx => ctx.hoseSizes,
     start: ctx => ctx.defaults?.defHoseSize || '0.5' },
 
-  // ---- 4 Other Defaults: the catch all (Panel Update 17: "Opens a catch all"; items 3 and 4, Airport and Elevation: "Needs to be later
+  // ---- 4 Interface: right after the Brewery (some Brewery parts need an Interface and a Port first; a user can add most of the
+  // information now and change it after the Interface is set). First question: Fritz's four Tick Boxes; each answer branches
+  { id: 'automation', step: 'Interface', kind: 'pick', tick: true, save: 'defaults', ifSet: true,
+    head: 'Interface', ask: 'How automated is your brewery?',
+    why: 'Tick the one that fits you. No Automation skips the rest of the Interface questions. Each of the others goes on to its own questions.',
+    choices: AUTOMATION_KINDS, start: ctx => AUTOMATION_KINDS.some(([k]) => k === ctx.defaults?.automation) ? ctx.defaults.automation : '' },
+  // New to IoT Arduino: the Read Me, then the Plan (pages to read: Next ▶ goes on)
+  { id: 'ifaceReadMe', step: 'Interface', kind: 'info', save: 'none', when: { automation: 'newiot' },
+    head: 'Read Me', ask: 'New to IoT and Arduino? Read this first.',
+    why: 'What an Interface (a board such as an Arduino) is, and what it does in your brewery. Next ▶ goes on to the Plan.' },
+  // New to IoT Arduino and Know IoT Brewery not Wired: the Plan
+  { id: 'ifacePlan', step: 'Interface', kind: 'info', save: 'none', when: { automation: ['newiot', 'knowiot'] },
+    head: 'Plan', ask: 'Plan the Interfaces of your brewery.',
+    why: 'Which boards you need, and which parts of your brewery each one runs. Next ▶ goes on to How many Interfaces.' },
+  // every IoT answer gets here; Brewery Wired comes straight here
+  { id: 'interfaceCount', step: 'Interface', kind: 'num', save: 'defaults', min: INTERFACES_MIN, max: INTERFACES_MAX, when: { automation: AUTOMATION_BRANCHES },
+    head: 'How many Interfaces', ask: `How many Interfaces (boards) do you have, or plan to have? Type a number from ${INTERFACES_MIN} to ${INTERFACES_MAX}.`,
+    why: 'An Interface is a board, such as an Arduino Mega, an ESP32 or a Raspberry Pi, that runs the Devices of your brewery.',
+    start: ctx => interfaceCountOf(ctx.defaults?.interfaceCount) ? String(ctx.defaults.interfaceCount) : '' },
+
+  // ---- 5 Other Defaults: the catch all (Panel Update 17: "Opens a catch all"; items 3 and 4, Airport and Elevation: "Needs to be later
   // as you can Skip")
   { id: '_other', step: 'Other Defaults', kind: 'branch', save: 'none',
     ask: 'Other Defaults',
@@ -552,7 +598,7 @@ export const SETUP_QUESTIONS = [
     why: 'Water boils at a lower temperature up high. Skynet keeps it in meters inside and shows it in your Units.',
     start: (ctx, a) => ctx.boil?.elevationM == null ? '' : Math.round(a?.units === 'Metric' ? ctx.boil.elevationM : ctx.boil.elevationM / US_FT) },
 
-  // ---- 5 Recipe Defaults: the Recipe Default Interview (Panel Update 17: "Opens the Recipe Default Interview"; item 7: "Yeast Starter goes to
+  // ---- 6 Recipe Defaults: the Recipe Default Interview (Panel Update 17: "Opens the Recipe Default Interview"; item 7: "Yeast Starter goes to
   // Recipe Interview"). The defaults of a new User Recipe (☰ Menu > Default settings > New User Recipes). The Recipe Interview of a
   // Brew Day (Rule 17.22) is another interview.
   { id: '_recipes', step: 'Recipe Defaults', kind: 'branch', save: 'none',
@@ -578,7 +624,7 @@ export const SETUP_QUESTIONS = [
     choices: ctx => ctx.boilProfiles || [],
     start: ctx => (ctx.boilProfiles || []).some(([k]) => k === (ctx.defaults?.boilProfile ?? ctx.boilDefault)) ? (ctx.defaults?.boilProfile ?? ctx.boilDefault) : '' },
 
-  // ---- 6 Help Language (OakBarn Brewery, 2026-11-27: his picture of the first screen moves it to the last step; not mandatory, it has
+  // ---- 7 Help Language (OakBarn Brewery, 2026-11-27: his picture of the first screen moves it to the last step; not mandatory, it has
   // a Skip that keeps English)
   // the additional language (Panel Update 17, item 2: "But additional Language?"): the User Language too, once it is on this Brain (Rule 11.16)
   { id: 'helpLang', step: 'Help Language', kind: 'pick', tick: true, save: 'browser',
@@ -622,6 +668,7 @@ export function startAnswers(ctx, list = SETUP_QUESTIONS) {
 // the words of an answer, for the summary page
 export function answerWords(q, v, ctx) {
   if (q.kind === 'branch') return '';
+  if (q.kind === 'info') return 'Read';
   if (q.kind === 'yesno') return v ? 'Yes' : 'No';
   if (q.kind === 'size') {
     const u = v?.units === 'Metric' ? 'Metric' : 'US', L = sizeUnit('len', u), V = sizeUnit('vol', u), calc = sizeVolume(v, u), w = [];
@@ -647,6 +694,7 @@ export function answerError(q, v) {
     if (has('elementDepth') && +v.elementDepth >= +v.vheight) return 'The top of the element must be lower than the Inside Height.';
   }
   if (q.id === 'vesselCount' && vesselCountOf(v) == null) return `Type a whole number from ${VESSELS_MIN} to ${VESSELS_MAX}.`;
+  if (q.id === 'interfaceCount' && interfaceCountOf(v) == null) return `Type a whole number from ${INTERFACES_MIN} to ${INTERFACES_MAX}.`;
   if (q.id === 'fermentorCount' && fermentorCountOf(v) == null) return `Type a whole number from ${FERMENTORS_MIN} to ${FERMENTORS_MAX}.`;
   if (q.id === 'batch' && v !== '' && v != null && !(Number.isFinite(+v) && +v > 0)) return 'The Batch Size must be more than 0 (or empty).';
   if (q.id === 'airport' && v && !/^[A-Za-z0-9]{3,4}$/.test(String(v).trim())) return 'An airport code is 4 letters, for example KDFW (or leave it empty).';
@@ -703,10 +751,11 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
       if (q.id === 'breweryName') { const t = String(v ?? '').trim(); if (t) brewDefaults.breweryName = t; else delete brewDefaults.breweryName; }
       else if (q.id === 'brewerType') brewDefaults.brewerType = v;
       else if (q.id === 'vesselCount') brewDefaults.vesselCount = String(vesselCountOf(v));
+      else if (q.id === 'interfaceCount') { if (interfaceCountOf(v)) brewDefaults.interfaceCount = String(interfaceCountOf(v)); }      // not typed: not set
       else if (q.id === 'fermentorCount') { if (fermentorCountOf(v)) brewDefaults.fermentorCount = String(fermentorCountOf(v)); }      // not typed: not set
       else if (q.ifSet) { if (v && (typeof q.choices !== 'function' || q.kind !== 'pick' || choicesOf(q, ctx, a).some(([k]) => k === v))) brewDefaults[q.id] = v; }      // not picked (or no longer one of its choices): not set
       else if (q.kind === 'size') { const z = sizeClean(v, a.units); if (z) brewDefaults[q.id] = z; else delete brewDefaults[q.id]; }
-      else if (q.kind === 'multi') brewDefaults[q.id] = partsClean(v);      // the parts ticked, each with where it is
+      else if (q.kind === 'multi') { const o = partsClean(v); if (a[q.id.replace(/Parts$/, 'Heat')] !== 'element') delete o.element; brewDefaults[q.id] = o; }      // the element's place only with an Internal Electric Element      // the parts ticked, each with where it is
       // kept in liters (Rule 2.59), typed in gallons or liters
       else if (q.id === 'batch') brewDefaults.batchL = v === '' || v == null ? null : Math.round((a.units === 'Metric' ? +v : +v * L_PER_GAL) * 1000) / 1000;
       else brewDefaults[q.id] = q.kind === 'yesno' ? !!v : v;

@@ -1735,6 +1735,8 @@
  "The page before": "La page précédente",
  "The Hot Spots page": "La page des zones cliquables (Hot Spots)",
  "Try it: shows how this step looks": "Essayez : montre à quoi ressemble cette étape",
+ "No Automation, New to IoT Arduino, Know IoT Brewery not Wired or Brewery Wired. The Setup Interview asks it first in the Interface step, right after the Brewery.": "No Automation, New to IoT Arduino, Know IoT Brewery not Wired ou Brewery Wired. Le Setup Interview la demande en premier à l’étape Interface, juste après la Brasserie.",
+ "The boards (such as an Arduino Mega, an ESP32 or a Raspberry Pi) you have, or plan to have. Not asked with No Automation.": "Les cartes (comme un Arduino Mega, un ESP32 ou un Raspberry Pi) que vous avez, ou prévoyez d’avoir. Pas demandé avec No Automation.",
  "Only for one vessel: what heats it. The Setup Interview asks it after Number of Hot Side vessels 1.": "Seulement pour une cuve : ce qui la chauffe. Le Setup Interview la demande après Number of Hot Side vessels 1.",
  "Manual: turned by hand; a Process shows a pop-up and waits for Done. Motorized: switched by its Port. The number is the one shown on the valve in Edit layout.": "Manual : tournée à la main ; un Process affiche une fenêtre et attend Done. Motorized : commutée par son Port. Le numéro est celui affiché sur la vanne dans Edit layout.",
  "The free pins on the Interface. Two valves can't share a Port. Once saved it is greyed out (it is wiring).": "Les broches libres de l'Interface. Deux vannes ne peuvent pas partager un Port. Une fois enregistré il est grisé (c'est du câblage).",
