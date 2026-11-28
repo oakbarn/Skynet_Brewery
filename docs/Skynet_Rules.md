@@ -1765,8 +1765,7 @@ answers and changes nothing until **✔ Finish**.
 - **Green and focus** (OakBarn Brewery, 2026-11-26, typos fixed: "Complete do not get focus on Open. Focus in Numeric Order."): a
   question is **green** once Next was pressed on it (Skip leaves it not green); a step of the strip is green when every question in
   it is. The green list is kept (brewDefaults.setupAnswered). The interview **opens on the first question that is not green**, and
-  Next goes to the very next question, in numeric order, green or not (2026-11-27, typos fixed: "No skipping of any question in
-  the interview, answered or not. Skip only with the Next or Skip button. No auto skip"); a click on a step goes to it.
+  Next goes to the next one that is not green, in numeric order; a click on a step goes to it.
 - **Close · ✕** (OakBarn Brewery, 2026-11-26, typos fixed: "Close Button 1 - 3: Red Popup that 1 - 3 must be completed first. After
   that if all not green, Blue Pop up advising they do need completing and setting up Skynet depends on the answers to many of these
   questions to make it their own but it will work with just the first 3 questions"): while steps 1 to 3 are not all green, a **red
@@ -7697,7 +7696,6 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is 1 to 6 (a Tab fits about 7 vessels with readable Gauges); Fermentors 1 to 6 when asked. Help 248.
 - 2026-11-27: Rule 2.75 changed: the Cold Side: Number of Fermentors 1 to 9, then how each is cooled and what kind it is. Help 248.
 - 2026-11-27: Rule 2.75 changed: Ceramic Crock added to What kind of fermentor? (second row; Not Cooled, Fermentation Chamber or Manual Ice Bath). Help 248.
-- 2026-11-27: Rule 2.75 changed: no auto skip: Next and Skip always go to the very next question, even one already answered. Help 248.
 - 2026-11-27: Rule 2.75 changed: Plastic Pressure Fermentor and Plastic Jug with Tap added to What kind of fermentor? (second row); plastic pictures redrawn after the photos sent. Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
 - 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.

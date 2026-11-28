@@ -16444,17 +16444,15 @@ async function setupInterview({ first = false } = {}) {
         style: 'cursor:pointer', title: 'Go to this step', onclick: () => go(s === 'Done' ? qs.length : firstOf(s, true)) }, s)));
       const next = () => {
         const err = q && answerError(q, a[q.id]); if (err) return toast(err, true);
-        // no auto skip (OakBarn Brewery, 2026-11-27: "No skipping of any question in the interview, answered or not. Skip only with the
-        // Next or Skip button. No auto skip"): Next always goes to the very next question, even one already answered
-        if (q.kind === 'branch') return go(at + 1);
-        skipped.delete(q.id); answered.add(q.id); persist(); go(at + 1);
+        if (q.kind === 'branch') return go(nextOpen(qs, answered, at + 1) < qs.length && qs[nextOpen(qs, answered, at + 1)].step === q.step ? nextOpen(qs, answered, at + 1) : at + 1);
+        skipped.delete(q.id); answered.add(q.id); persist(); go(nextOpen(qs, answered, at + 1));
       };
       const keep = x => { if (x.start) { a[x.id] = x.start(ctx, a); skipped.add(x.id); if (answered.delete(x.id)) persist(); } };
       // Skip on a branch's first page skips every question of the branch; inside it, Skip skips that question
       const skip = () => {
-        if (q.kind !== 'branch') { keep(q); return go(at + 1); }
+        if (q.kind !== 'branch') { keep(q); return go(nextOpen(qs, answered, at + 1)); }
         let n = at + 1; while (n < qs.length && qs[n].step === q.step) keep(qs[n++]);
-        go(n);
+        go(nextOpen(qs, answered, n));
       };
       const finish = guard(async () => {
         if (mustMissing(qs, answered).length) return setupPop('red', setupMustMsg(qs), [['OK', true]]);
@@ -16470,7 +16468,7 @@ async function setupInterview({ first = false } = {}) {
         // Do Not Enter on the mandatory questions"; "they cannot be skipped if unanswered. If answered skip would work"). ◀ Back and
         // Close always work ("they can go back and close at any time")
         !done && q.must && !answered.has(q.id) ? h('button', { type: 'button', class: 'setupNoSkip setupNo', 'aria-disabled': 'true', title: 'This question must be answered first: no Skip until it is.' }, 'Skip') : '',
-        !done && q.must && answered.has(q.id) ? h('button', { type: 'button', title: 'Keep your answer and go on.', onclick: () => go(at + 1) }, 'Skip') : '',
+        !done && q.must && answered.has(q.id) ? h('button', { type: 'button', title: 'Keep your answer and go on.', onclick: () => go(nextOpen(qs, answered, at + 1)) }, 'Skip') : '',
         !done && !q.must ? h('button', { type: 'button', title: q.kind === 'branch' ? `Skip the whole ${q.step} step: keep Skynet's own answers. You can change each one any time on ☰ Menu > Default settings.` : 'Keep Skynet\'s own answer and go on. You can change it any time on ☰ Menu > Default settings.', onclick: skip }, 'Skip') : '',
         h('span', { class: 'dlgBtnGroup' },
           // Next ▶ is not available either on a must question not answered yet (screen 2): a click on an answer answers it
