@@ -23,9 +23,8 @@ Les boutons, le titre et la bande d’étapes restent figés en haut : seule la 
 - **Skip** garde la réponse de Skynet et continue, et la question ne devient pas verte. Skynet ne vous le rappelle pas plus tard.
 - Une question devient **verte** quand vous y répondez (Next). Une étape devient verte quand chacune de ses questions a une réponse.
   Cliquez sur une étape pour y aller.
-- L’entretien s’ouvre sur la première question qui n’est pas verte, et **Next ▶** passe à la suivante qui n’est pas verte, dans
-  l’ordre. Les questions déjà répondues (vertes) ne reviennent pas ; cliquez sur leur étape, ou sur **✎** dans Done, pour en changer
-  une.
+- L’entretien s’ouvre sur la première question qui n’est pas verte. **Next ▶** et **Skip** passent toujours à la question
+  suivante, dans l’ordre, même si elle est déjà répondue (verte) : aucune question n’est jamais sautée à votre place.
 - Chaque page commence sur la réponse de Skynet (ou sur votre réponse enregistrée quand vous le relancez) : Next, Next, Next donne un
   panneau qui fonctionne.
 - **La question 1, US or Metric**, commence par quelques mots sur les unités (toutes les données sont gardées en métrique à
