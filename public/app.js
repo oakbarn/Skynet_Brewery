@@ -9009,8 +9009,9 @@ function potBuild(t, w) {
     // the valves: a Manual one is made at once; a Motorized one is picked or added beside it (its Interface and Port)
     for (const [k, q] of [['outlet', 'outletValve'], ['tangential', 'tangentialValve']]) {
       if (!openings[k] || !POT_MV[w[q]]) continue;
-      const elbow = /Elbow$/.test(w[q]) && !g.ports[k]?.label?.startsWith('Outlet') ? ['elbow', 'valve'] : ['valve'];
-      vbChainBuild(g, k, elbow, elbow.map(p => p === 'valve' ? { mv: POT_MV[w[q]] } : null));
+      // the Outlet: its front view valve, its elbow facing down; a side opening: an Elbow (turning the run down), then a level picture turned
+      const side = k !== 'outlet', elbow = /Elbow$/.test(w[q]) && side ? ['elbow', 'valve'] : ['valve'], pic = side && /Elbow$/.test(w[q]) ? POT_MV[w[q].replace('Elbow', '')] : POT_MV[w[q]];
+      vbChainBuild(g, k, elbow, elbow.map(p => p === 'valve' ? { mv: pic } : null));
       (g.vbChains ||= {})[k] = elbow;
     }
     if (openings.sparge && w.spargeShut === 'mball') { vbChainBuild(g, 'sparge', ['valve'], [{ mv: POT_MV.mball }]); (g.vbChains ||= {}).sparge = ['valve']; (g.vbSparge ||= {}).sparge = 'arm'; }
@@ -9309,7 +9310,7 @@ function vbPlaceValve(v, ws, at, D, join) {
     const w = Math.round(5 * pipeSize(ws) * (+v.size || 1.5) / 0.5);
     const m = { id: newId(), kind: 'ip', fitting: 'manualValve', workspace: ws, x: 0, y: 0, w, h: w, color: '#8a8f96', confirmation: true };
     if (v.mv) m.image = v.mv;
-    if (D[1]) m.rotate = 90;
+    if (D[1] && !/_Front(_Elbow)?_(Open|Closed)\.svg$/.test(v.mv || '')) m.rotate = 90;      // a front view is never turned: its elbow faces down (OakBarn Brewery, 2026-11-27)
     draft.graphics.push(m); giveName(m, draft.graphics);
     ends = () => mvEnds(m); move = (dx, dy) => { m.x = Math.round(m.x + dx); m.y = Math.round(m.y + dy); };
   } else {
