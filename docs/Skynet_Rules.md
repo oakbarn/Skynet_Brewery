@@ -7706,6 +7706,11 @@ with graphic proportional to the H & D"). The Vessel Device Builder (Rule 19.5, 
    Valve on the Sparge Return, and the Sight Glass standing between the Sight Gauge IPs. A Motorized Valve, the Heaters, the Probe and the
    Level or Float switches are picked or added beside it in the Vessel Builder panel, as in Rule 19.5. The Sparge Tee with its probe, the
    Steam Slayer with its Reducer and the Gas Burner with its Igniter are listed there and come in the next update.
+8. **🔌 Interface, Ports and Names** (OakBarn Brewery, 2026-11-27: "on the Builder Tab it might need a second tab to popup about the
+   interface and Port then save"; "and Suggest Name"): right after 🔨 Build, a second pop-up asks the Interface and each part's Port
+   (or 1-Wire Index) for the Temperature probe, Heaters and Level or Float switches; Save makes them all, built in, each with its
+   Suggested Name (Rule 3.1). Close leaves them for the panel. With no Interface yet it is not shown: the user adds most of the
+   information and sets the Interface later.
 
 ## Change log
 
@@ -8530,3 +8535,4 @@ with graphic proportional to the H & D"). The Vessel Device Builder (Rule 19.5, 
 - 2026-11-26: Added Rule 1.36 (OakBarn Brewery: "tap to type"): the Text Widget Tap to type switch; on for the 3 Vessel sample's Notes. Help 91 (and French), Widget Library.
 - 2026-11-26: Rule 2.7 changed (OakBarn Brewery, his picture): White in the color picker is renamed White (Opaque) (250,250,250) and White (Transparent) (255,255,255 see-through, like None) is added; all white text on the screen is 250,250,250 (dark Look text, Skynet Tab Styles, Override, new Vessel labels, timer digits and titles). Help 90, 187 updated (English + French). Checked against both programs: one shared color list; the Importer brings no text colors. (thread "Make White text White (Opaque)")
 - 2026-11-27: Added Rule 19.13 (OakBarn Brewery: "build the Vessel from a very generic One. Just ask the questions and it gets made and Bundled"; "build from a single stainless pot with graphic proportional to the H & D"): every vessel is built from the plain Skynet Stainless Pot drawn to its Height and Diameter, each part at its measured height off the bottom (Temperature, Level or Float, False Bottom, Gas Burner and its warning). Rule 19.5's Build a Vessel Device now asks these questions. Rule 2.75: the Vessel Layout's Left and Right are as you face the vessel ("Left as you face it"). Help 166 (and French). Checked against both programs: the BruControl Import's Build page opens the same builder with its heater and probe picked first.
+- 2026-11-27: Rule 19.13 changed (OakBarn Brewery: "a second tab to popup about the interface and Port then save"; "and Suggest Name"): item 8, the Interface, Ports and Names pop-up after 🔨 Build; a Level or Float Switch can be built into a vessel IP. Help 166 (and French).

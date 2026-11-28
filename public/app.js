@@ -884,7 +884,7 @@ const EQ_VW = { ...EQ.vessel, ports: { ...VW_IPS, ...EQ.vessel.ports,
 // put on one of its IPs is an integral part of it (its Port is set in the Vessel's Properties; integratedIn = the Vessel), locked
 // to that IP. A HERMS coil goes on the Left or Right HERMS In and Out, as a layer under them; the two IPs then pass flow through the
 // coil. Once it is built and saved on a Tab, its IPs, parts and HERMS coil can't be changed: there is no way back.
-const VP_KINDS = [['', 'Nothing: an open IP'], ['element', 'Heating Element'], ['probe', 'Temperature Probe'], ['thermowell', 'Thermowell with its Temperature Probe'], ['valve', 'Motorized Valve']];
+const VP_KINDS = [['', 'Nothing: an open IP'], ['element', 'Heating Element'], ['probe', 'Temperature Probe'], ['thermowell', 'Thermowell with its Temperature Probe'], ['valve', 'Motorized Valve'], ['float', 'Level or Float Switch']];
 const VP_PICS = { element: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg',
   front: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Front.svg', valveH: 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg',
   valveF: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedFront.svg' };
@@ -918,7 +918,8 @@ function vpWork(g) {
   out.vpIface ??= devs.length === 1 ? devs[0].name : '';
   return out;
 }
-const vpProto = (kind, ptk) => kind === 'probe' || kind === 'thermowell' ? { type: 'temperature', ...tempKindOf(ptk) } : { type: 'digitalOut', subtype: kind === 'valve' ? 'valve' : 'element' };
+const vpProto = (kind, ptk) => kind === 'probe' || kind === 'thermowell' ? { type: 'temperature', ...tempKindOf(ptk) } : kind === 'float' ? { type: VB_FLOAT[0], ...VB_FLOAT[2] }
+  : { type: 'digitalOut', subtype: kind === 'valve' ? 'valve' : 'element' };
 function vpFields(it, k, d) {
   if (vpLocked(it)) return vpEl(it, k, draft.elements) || vpHermsOn(it, k) ? [[k + '_pnote', `${it.ports?.[k]?.label || d.name}: ${vpText(it, k)} (built in, locked)`, 'note']] : [];
   if (vpHermsOn(it.vHerms !== undefined ? { ...it, herms: it.vHerms } : it, k)) return [[k + '_pnote', `${d.name}: the HERMS coil is on it`, 'note']];
@@ -1004,7 +1005,7 @@ function hermsCoilCross(w, hh, yl, yr, s) {
 }
 // A Properties hotspot (Fritz, 2026-11-07, Rule 5.38, Help 154): a small ⚙ in Edit layout; ONE click opens the Properties
 // (a double-click still works too, Rule 2.9). It never starts a drag, so a click on it can't move the vessel or its pipes.
-const VP_WHAT = { element: 'Heating Element', probe: 'Temperature Probe', thermowell: 'Temperature Probe (in its Thermowell)', valve: 'Valve' };
+const VP_WHAT = { element: 'Heating Element', probe: 'Temperature Probe', thermowell: 'Temperature Probe (in its Thermowell)', valve: 'Valve', float: 'Level or Float Switch' };
 function propsHotspot(cls, tip, open, style = '') {
   const stop = ev => ev.stopPropagation();
   return h('div', { class: 'propsHot ' + cls, title: tip, style, onpointerdown: stop, ondblclick: stop,
@@ -9018,6 +9019,7 @@ function potBuild(t, w) {
     sel = { kind: 'gfx', id: g.id };
     renderTabs(); renderWs();
     toast(`${g.label} is on the 🔨 Build Tab. Finish it with the Vessel Builder beside it.`, false, 8000);
+    setTimeout(() => potPortsDlg(g), 0);      // then its Interface, Ports and Names (a second pop-up)
     return true;
   } catch (err) {
     Object.assign(draft, keep); wsName = keepWs; sel = null; renderTabs(); renderWs();
@@ -9033,7 +9035,7 @@ function potSightGlass(g, w) {
   const inches = +w.vheight / (w.units === 'Metric' ? 2.54 : 1) - 2;      // 1 in off the bottom and 1 in off the top
   const u = placeTabFitting(t, g.workspace, tcName(t, draft.graphics), null);
   u.label = sgLabel(draft.graphics.filter(x => x !== u)); u.sgLength = sgLength(inches); u.labelVisible = false;
-  const hh = Math.max(14, Math.round(long / sgRatio(u.sgLength)));
+  const hh = Math.min(24, Math.max(14, Math.round(long / sgRatio(u.sgLength))));      // as thick as a pipe
   Object.assign(u, { w: long, h: hh, rot: 90, x: Math.round((a[0] + b[0]) / 2 - long / 2), y: Math.round((a[1] + b[1]) / 2 - hh / 2), onVessel: g.id, onPort: 'sightTop' });
   u.ports = {}; syncVesselPorts(u, null);      // its ends sit on the two IPs: no IPs of its own
 }
@@ -9045,6 +9047,53 @@ function potLater(g) {
   if (w.steam !== 'none') out.push(`Steam Slayer${w.steamReducer === 'reducer' ? ' and its 2 in to 1.5 in Reducer' : ''}: its drawing comes in the next update`);
   if (w.heat === 'gas') out.push(`Gas Burner (${word(POT_GAS, w.gas)}) and Igniter (${word(POT_IGNITER, w.igniter)}): come in the next update`);
   return out;
+}
+// 🔌 Interface, Ports and Names (OakBarn Brewery, 2026-11-27: "on the Builder Tab it might need a second tab to popup about the interface
+// and Port then save"; "and Suggest Name"): right after 🔨 Build, one pop-up for every part that needs a Port (its Temperature probe,
+// Heaters, Level or Float switches): the Interface, each part's Port (or 1-Wire Index), then Save makes them all, each with its
+// Suggested Name (Rule 3.1). Close leaves them to pick one at a time in the Vessel Builder panel. With no Interface yet, nothing is asked.
+const POT_PORT_KINDS = ['probe', 'thermowell', 'element', 'float'];
+async function potPortsDlg(g) {
+  const want = Object.entries(g.vbWant || {}).filter(([, kind]) => POT_PORT_KINDS.includes(kind)), devs = S.config.devices || [];
+  if (!want.length || !devs.length) return false;
+  const rows = amGroup('Devices: temperature'), o = { vpIface: devs.length === 1 ? devs[0].name : '' };
+  for (const [k, kind] of want) {
+    const row = rows.find(r => r[0] === g.vbKinds?.[k]);
+    Object.assign(o, { [k + '_part']: kind, [k + '_ptk']: row ? tempKey(row[3]) : tempKinds()[0][0], [k + '_pin']: '', [k + '_pidx']: '' });
+  }
+  const spot = k => g.ports?.[k]?.label || vpName(k);
+  const fields = w => [['_pn', 'Pick the Interface these parts are wired to, then each part\'s Port. Save makes them all, built into the vessel, each named with its Suggested Name. ✖ Close leaves them to pick one at a time in the Vessel Builder panel.', 'note'],
+    ['vpIface', 'Interface the parts are wired to', 'dev'],
+    ...want.map(([k, kind]) => { const n = spot(k) + (kind === 'thermowell' ? ' (in its Thermowell)' : '');
+      return (kind === 'probe' || kind === 'thermowell') && isOneWire(vpProto(kind, w[k + '_ptk'])) ? [k + '_pidx', `${n}: 1-Wire Index`, 'probe'] : [k + '_pin', `${n}: Available Ports / Pins`, 'pin', 'vp_' + k]; })];
+  const refresh = () => { const x = { ...o }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, g); };
+  vpPinLists(o, g); $('#dlgBody').addEventListener('change', refresh);
+  try {
+    for (;;) {
+      const r = await dialog(`🔌 ${g.label || g.name}: Interface, Ports and Names`, fields, o, false, ['vessel-device-builder']);
+      if (r !== 'ok') return false;
+      readFields(o, $('#dlgBody'));
+      try { potPortsMake(g, o, want); return true; } catch (err) { toast(err.message, true, 9000); }
+    }
+  } finally { $('#dlgBody').removeEventListener('change', refresh); }
+}
+// make the parts from the pop-up: applyVParts builds them into their IPs with their Suggested Names; then each is finished like a picked one
+function potPortsMake(g, o, want) {
+  const before = new Set(draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)).map(e => e.name));
+  const vp = { vpIface: o.vpIface };
+  for (const k of Object.keys(vwClassOf(g).ports)) { const e = vpEl(g, k, draft.elements); if (e) Object.assign(vp, { [k + '_part']: e.vpKind, [k + '_pin']: e.channel ?? '', [k + '_ptk']: e.type === 'temperature' ? tempKey(e) : '', [k + '_pidx']: e.probeIndex ?? '' }); }
+  for (const [k] of want) for (const x of ['_part', '_ptk', '_pin', '_pidx']) vp[k + x] = o[k + x];
+  applyVParts(g, vp, g.workspace, g.label || 'Vessel');
+  const made = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e) && !before.has(e.name));
+  for (const e of made) {
+    const k = e.integratedAs.slice(3), kind = g.vbWant?.[k] || e.vpKind;
+    if (kind === 'float') e.activeLow = g.vbKinds?.[k] !== 'no';      // Normally Closed or Normally Open, as answered
+    vbAttach(g, k, kind, e);
+  }
+  // their readouts one under the other (made together, so each counts the others when it is attached)
+  for (const [kind, top, step] of [['element', 0.36, 70], ['float', 0.7, 60]]) made.filter(e => e.vpKind === kind).forEach((e, i) => { e.y = Math.round(g.y + g.h * top + i * step); });
+  renderWs();
+  toast(`Made: ${made.map(e => e.name).join(', ')}`, false, 8000);
 }
 // the answers kept on the vessel (the Vessel Builder panel shows what is still to do from them)
 const potKeep = w => Object.fromEntries(Object.entries(w).filter(([k]) => !/^x[pt]\d$/.test(k) && k !== 'userIps'));

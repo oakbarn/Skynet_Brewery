@@ -43,6 +43,13 @@ When **Gas Burner** is picked, a big red warning shows:
 Press **🔨 Build**. A Manual Valve on the Outlet, the Tangential Inlet or the Sparge Return is put on at once, and so is the
 **Sight Glass**, standing between the two Sight Gauge IPs.
 
+### 🔌 Interface, Ports and Names
+
+Right after **🔨 Build**, a second pop-up asks for every part that needs a Port: the Temperature probe, the Heaters and the Level or
+Float switches. Pick the **Interface** they are wired to, then each part's **Port** (or its 1-Wire Index). **💾 Save** makes them
+all, built into the vessel, each with its **Suggested Name**. **✖ Close** leaves them to pick one at a time in the Vessel Builder
+panel. With no Interface yet, the pop-up is not shown: add the parts later, once the Interface is set up.
+
 ## 2. Finish it on the Build Tab
 
 The vessel is on the left of the **🔨 Build Tab**, showing its Heating Element, Thermowell and HERMS coil, and the openings of its
