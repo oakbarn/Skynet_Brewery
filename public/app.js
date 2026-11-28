@@ -16719,7 +16719,7 @@ async function setupInterview({ first = false } = {}) {
           // vessel"): each ticked one gets a Drop Down of where it is on the vessel (13 places: a Drop Down, Rule 2.6). None ticked is
           // an answer too, so Next ▶ always works
           const v = a[q.id] = { ...(a[q.id] || {}) };
-          body.append(h('div', { class: 'setupTicks setupMulti' }, ...q.choices.map(([k, t]) => h('div', { class: 'setupTick' },
+          body.append(h('div', { class: 'setupTicks setupMulti' }, ...choicesOf(q, ctx, a).map(([k, t]) => h('div', { class: 'setupTick' },
             h('label', { class: 'setupMultiTick' }, h('span', {}, t), h('input', { type: 'checkbox', ...(v[k] ? { checked: true } : {}), onchange: e => {
               if (e.target.checked) v[k] = PART_SPOT[k] || spotsOf(k)[0][0]; else delete v[k];
               draw(); } })),

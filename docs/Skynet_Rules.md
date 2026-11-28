@@ -1950,6 +1950,11 @@ Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so 
   `interfaceCount`, both on Default settings (New Build). Help 248, Help 155.
 - **CHANGED 2026-11-28, Peltier** (OakBarn Brewery: "Missing Peltier on Fermenter Cooling Types"): **Peltier** is one of the ways to
   cool **every** kind of fermentor on the Cold Side, like the Fermentation Chamber.
+- **CHANGED 2026-11-28, Bottom Heater and where the element is** (OakBarn Brewery: "Where is the Internal Heater Located? And add
+  Bottom Heater"): **Bottom Heater** (an element under the floor of the vessel, out of the wort) is a way to heat one vessel and each
+  of two vessels, after Internal Electric Element; like it, it adds an element and a probe and shows the electric Templates. With an
+  **Internal Electric Element**, the parts question of a vessel also has **Heating Element** with where it is (Front or Back, the same
+  places; it starts on Back Mid Low Right). Where the element is does not narrow the Templates.
 
 2.76 **A dialog with a selection or menu at the top keeps its top frozen** (OakBarn Brewery, 2026-11-27, of the Setup Interview: "Also
 this is frozen"; "And that should be a rule on any dialogs that have a selection or menu on the top"). The buttons, the title and the
@@ -7726,7 +7731,7 @@ with graphic proportional to the H & D"). The Vessel Device Builder (Rule 19.5, 
 
 ## Change log
 
-- 2026-11-28: Rule 2.75 changed: the Interface step right after the Brewery (7 steps); first question No Automation / New to IoT Arduino / Know IoT Brewery not Wired / Brewery Wired, each its own branch (Read Me, Plan, How many Interfaces 1 to 9). Help 248, Help 155. Peltier offered for every kind of fermentor.
+- 2026-11-28: Rule 2.75 changed: the Interface step right after the Brewery (7 steps); first question No Automation / New to IoT Arduino / Know IoT Brewery not Wired / Brewery Wired, each its own branch (Read Me, Plan, How many Interfaces 1 to 9). Help 248, Help 155. Peltier offered for every kind of fermentor. Bottom Heater added; the Heating Element's place asked with an Internal Electric Element.
 - 2026-11-27: Rule 2.75 changed: Size of your Vessel (Inside Diameter and Height, Purported Volume, Dead Space, top of the element with the Safe Element Volume worked out plus 1 in) after the vessel for every way to heat one vessel. Help 248.
 - 2026-11-27: Rule 2.75 changed: Two vessels: Vessel 1 and Vessel 2 each asks how heated, used for, its parts and where they are, the vessel, its size. Help 248.
 - 2026-11-27: Rule 2.75 changed: every way to heat one vessel has its own vessel choices (Gas Stove Top, Hot Plate, Turkey Fryer, Brewery Gas Burner, Internal Electric Element); burner + igniter or element + probe kept in the Brewery Build as adds. Help 248.

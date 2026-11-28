@@ -248,7 +248,7 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
 // one vessel: How is the vessel heated? (2026-11-27): his seven Tick Boxes, only after 1 vessel, saved to Default settings
 { const vh = SETUP_QUESTIONS.find(q => q.id === 'vesselHeat');
   assert.ok(vh && vh.tick && !vh.held && vh.step === 'Brewery' && asTicks(vh, ctx()));
-  assert.deepEqual(choicesOf(vh, ctx()).map(c => c[1]), ['No Boil Brewer', 'Electric Stove Top', 'Gas Stove Top', 'Hot Plate', 'Turkey Fryer', 'Brewery Gas Burner', 'Internal Electric Element']);
+  assert.deepEqual(choicesOf(vh, ctx()).map(c => c[1]), ['No Boil Brewer', 'Electric Stove Top', 'Gas Stove Top', 'Hot Plate', 'Turkey Fryer', 'Brewery Gas Burner', 'Internal Electric Element', 'Bottom Heater']);
   const brew = v => shownQuestions({ ...startAnswers(ctx()), vesselCount: v }, ctx()).filter(q => q.step === 'Brewery').map(q => q.id);
   assert.deepEqual(brew('1'), ['_brewery', 'vesselCount', 'vesselHeat', 'fermentorCount']); assert.deepEqual(brew('2').slice(0, 3), ['_brewery', 'vesselCount', 'v1Heat']); assert.ok(!brew('2').includes('vesselHeat')); assert.deepEqual(brew(1), ['_brewery', 'vesselCount', 'vesselHeat', 'fermentorCount']);
   assert.equal(setupSave({ ...startAnswers(ctx()), vesselCount: '1', vesselHeat: 'turkeyfryer' }, ctx(), undefined, new Set(['vesselCount', 'vesselHeat'])).brewDefaults.vesselHeat, 'turkeyfryer');
@@ -345,12 +345,12 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   for (const n of ['1', '3']) assert.ok(!shownQuestions({ ...a0, vesselCount: n }, ctx()).some(q => q.id.startsWith('v1')), `${n} vessels: not the two vessel rows`);
   const heat = SETUP_QUESTIONS.find(q => q.id === 'v1Heat');
   assert.ok(!choicesOf(heat, ctx()).some(([k]) => k === 'noboil'), 'No Boil only for one vessel');
-  assert.equal(choicesOf(heat, ctx()).length, 7);
+  assert.equal(choicesOf(heat, ctx()).length, 8);      // with Bottom Heater (2026-11-28)
   assert.deepEqual(choicesOf(heat, ctx()).at(-1), ['noheat', 'No Heat'], 'a cooler Mash Tun');
   assert.ok(asTicks(heat, ctx()), 'still Tick Boxes (up to 8)');
   assert.deepEqual(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'v2Template'), ctx(), { v2Use: 'mlt', v2Heat: 'noheat' }).map(([k]) => k), ['Mash_Tun', 'OakBarn_MLT']);
   assert.deepEqual(m.VESSEL_USES.map(([, w]) => w), ['Boil Kettle (BK)', 'Hot Liquor Tank (HLT)', 'BK and HLT', 'Mash Tun (MLT)']);
-  assert.deepEqual(m.VESSEL_PARTS.map(([, w]) => w), ['Tangential Inlet', 'Steam Slayer', 'Sparge Arm', 'Sight Glass', 'Bottom Drain with Skirt', 'Temperature Probe']);
+  assert.deepEqual(m.VESSEL_PARTS.map(([, w]) => w), ['Tangential Inlet', 'Steam Slayer', 'Sparge Arm', 'Sight Glass', 'Bottom Drain with Skirt', 'Temperature Probe', 'Heating Element']);
   assert.deepEqual(m.spotsOf('skirt'), [['bottom', 'Bottom Center']], 'a skirt drain: nothing to pick');
   assert.deepEqual(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'v2Template'), ctx(), { v2Use: 'mlt', v2Heat: 'noheat', v2Parts: { skirt: 'bottom' } }).map(([k]) => k), ['OakBarn_MLT']);
   // his Vessel Layout picture: the same 10 places on the Front and the Back; "Sight Glass left or Right only"
@@ -478,3 +478,19 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(src, /\['automation', 'How automated is your brewery\?', 'sel'/); assert.match(src, /\['interfaceCount', `How many Interfaces/); }
 console.log('setup interview: Interface step ok');
+
+// 2026-11-28: Bottom Heater (a heat of its own, one and two vessels); where the Internal Electric Element is (a part, only for that heat)
+{ const m = await import('../public/setupinterview.js');
+  assert.ok(m.VESSEL_HEATS.some(([k, w]) => k === 'bottom' && w === 'Bottom Heater') && m.MULTI_HEATS.some(([k]) => k === 'bottom'));
+  assert.ok(m.MULTI_HEATS.length <= 8 && m.VESSEL_HEATS.length <= 8, 'Tick Boxes: up to 8');
+  const parts = SETUP_QUESTIONS.find(q => q.id === 'v1Parts');
+  assert.ok(choicesOf(parts, ctx(), { v1Heat: 'element' }).some(([k]) => k === 'element'));
+  assert.ok(!choicesOf(parts, ctx(), { v1Heat: 'bottom' }).some(([k]) => k === 'element') && !choicesOf(parts, ctx(), { v1Heat: 'gasburner' }).some(([k]) => k === 'element'));
+  assert.equal(m.PART_SPOT.element, 'bmlr');
+  const tpl = SETUP_QUESTIONS.find(q => q.id === 'v1Template');
+  assert.ok(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'bottom' }).every(([k]) => m.VESSEL_POOL.find(p => p[0] === k)[4] === 'element'));
+  assert.deepEqual(choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'element', v1Parts: { element: 'bmll' } }), choicesOf(tpl, ctx(), { v1Use: 'bk', v1Heat: 'element' }), 'the element place does not narrow the Templates');
+  const save = (heat) => setupSave({ ...startAnswers(ctx()), vesselCount: '2', v1Heat: heat, v1Parts: { element: 'bmll', probe: 'fmlc' } }, ctx(), undefined, new Set(['vesselCount', 'v1Heat', 'v1Parts']), true).brewDefaults.v1Parts;
+  assert.deepEqual(save('element'), { probe: 'fmlc', element: 'bmll' }); assert.deepEqual(save('gasburner'), { probe: 'fmlc' });
+  assert.deepEqual(m.ONE_VESSEL_PICKS.bottom.adds, ['element', 'probe']); }
+console.log('setup interview: Bottom Heater and element place ok');
