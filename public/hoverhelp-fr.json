@@ -1932,5 +1932,11 @@
  "Show the places on a sample vessel: Front, Back and Sight Glass": "Montrer les emplacements sur une cuve exemple : avant, arrière et Sight Glass",
  "What cools this fermentor, or Not Cooled.": "Ce qui refroidit ce fermenteur, ou Not Cooled.",
  "The kind of fermentor it is most like.": "Le type de fermenteur auquel il ressemble le plus.",
- "The fermentors you brew into. Each one then asks what kind it is and how it is cooled.": "Les fermenteurs dans lesquels vous brassez. Pour chacun, Skynet demande ensuite son type et comment il est refroidi."
+ "The fermentors you brew into. Each one then asks what kind it is and how it is cooled.": "Les fermenteurs dans lesquels vous brassez. Pour chacun, Skynet demande ensuite son type et comment il est refroidi.",
+ "Put the vessel on the 🔨 Build Tab, every part on it, with what is left to pick beside it": "Met la cuve sur le 🔨 Build Tab, chaque pièce dessus, avec ce qui reste à choisir à côté",
+ "Every vessel starts as a plain stainless pot, drawn to its Height and Diameter. Each part goes at its usual height off the bottom (measured on real kettles, whatever their size). 🔨 Build puts it on the 🔨 Build Tab with every part on it.": "Chaque cuve part d'une simple marmite inox, dessinée à sa Hauteur et à son Diamètre. Chaque pièce va à sa hauteur habituelle au-dessus du fond (mesurée sur de vraies cuves, quelle que soit leur taille). 🔨 Build la met sur le 🔨 Build Tab avec chaque pièce dessus.",
+ "Its Bottom IP 1 in off the bottom, its Top IP directly above, 1 in off the top.": "Son IP du bas à 1 po du fond, son IP du haut juste au-dessus, à 1 po du haut.",
+ "Needs an Electronic Temperature probe.": "Il faut une sonde de température Electronic.",
+ "13. Additional IPs: any place of the Vessel Layout no part above has taken, each with its IP Type.": "13. IP supplémentaires : tout endroit du Vessel Layout qu'aucune pièce ci-dessus n'a pris, chacun avec son type d'IP.",
+ "A plain stainless pot. The Vessel Builder adds every part from your answers.": "Une simple marmite inox. Le Vessel Builder ajoute chaque pièce selon vos réponses."
 }

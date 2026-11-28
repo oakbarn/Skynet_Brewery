@@ -6,38 +6,43 @@ seules.
 
 ## Où le trouver {#where-to-find-it}
 
-En **Edit layout**, ouvrez **Vessel** sur la barre Edit layout et choisissez **🔨 Build a Vessel Device (step by step)**. Il est aussi sous
-**Add Widget > Vessels**.
+En **Edit layout**, ouvrez **Vessel** sur la barre Edit layout et choisissez **🔨 Build a Vessel (a plain stainless pot, then its parts)**.
+Il est aussi sous **Add Widget > Vessels**.
 
 ## 1. Les questions {#1-the-questions}
 
+Chaque cuve part d'une **simple marmite inox**, dessinée à sa propre Hauteur et à son propre Diamètre. Chaque pièce va à sa hauteur
+habituelle au-dessus du fond intérieur, mesurée sur de vraies cuves, quelle que soit leur taille. Gauche et Droite se lisent face à la cuve.
+
 | Question | Choix |
 | --- | --- |
+| Units | US (gallons, pouces) ou Metric (litres, cm) |
+| 1. Hauteur, 2. Diamètre | intérieurs, en premier. La marmite est dessinée selon eux et son volume en découle. |
 | Label | par exemple HLT (il ne peut pas être vide) |
-| General Type | HLT, Mash Tun, Brew Kettle, All In One, Whirlpool, Fermentor, Bright Tank. **Other** vous demande d'en taper un, et il est gardé dans la liste comme **USER: Hop Pot Strainer**. |
+| General Type | HLT, Mash Tun, Brew Kettle, All In One, Whirlpool, Fermentor, Bright Tank. **Other** vous demande d'en taper un. |
 | Tab | le Tab où elle va quand le Build est enregistré |
-| Units, Volume | Gallons (Liters en Metric). Commence à 10. |
-| Height, Diameter | tapez les deux pour sa forme, ou laissez les deux vides pour la forme de cuve simple |
-| Bottom Drain | None, Center Low, Center Bottom Drain, Pick |
-| Tangential Inlet | None, Left, Right, Pick |
-| Sparge Arm / Steam Slayer | None, Right (High), Left (High), Pick |
-| Thermowell / Probe | None, Center, Left, Right, Back Left, Back Center, Back Right, Pick |
-| Heating Element | None, Left, Right, Back Left, Back Center, Back Right, Pick (une seconde peut être ajoutée) |
-| HERMS Coil | None, Left, Right, Outlet Right & Inlet Left, Outlet Left & Inlet Right (un serpentin croisé, dessiné à travers la cuve). Pas de Pick. |
+| 3. Sortie | Center Low (environ 2 po au-dessus du fond), Center Bottom Drain (dans une jupe de 6 po, la vidange au centre), None. Sa vanne : Manual Ball Valve with Elbow, Motorized Ball Valve with Elbow, Manual Butterfly Valve with Elbow, Manual Ball Valve, Motorized Ball Valve, Manual Butterfly Valve |
+| 3b. Faux fond (Mash Tun seulement) | sa Hauteur au-dessus du fond, vide s'il n'y en a pas. Il est dessiné en pointillés. La Sortie reste en dessous, à sa hauteur habituelle. |
+| 4. Température | Electronic (puis son Probe Type) ou Analog Gauge, None. Puis Thermowell ou Direct, puis l'endroit : Center above the Outlet (environ 5,5 po au-dessus du fond), Left, Right, Back Left, Back Center, Back Right |
+| 5. Entrée tangentielle | Left Low (environ 1,5 po au-dessus du fond), Right Low, None. Sa vanne : les mêmes 6 que la Sortie. |
+| 6. Indicateur de niveau | Left, Right, None. Son IP du bas est à 1 po du fond, son IP du haut juste au-dessus, à 1 po du haut. |
+| 7. Capteur de volume par pression | Right Side, Left Side, Back Centered, None (1 po au-dessus du fond) |
+| 7a, 7b. Niveau ou flotteur 1 et 2 | Left, Right, Front, Back, None ; sa Hauteur depuis le fond ; Normally Closed ou Normally Open |
+| 8. Chauffage | Résistance(s) électrique(s) : Heater 1 et Heater 2, Back Right ou Back Left (TC 2 po), chacune avec sa Hauteur au-dessus du fond. Brûleur à gaz : Natural Gas, High Pressure Propane ou Low Pressure Propane, et son allumeur : (none), Flat Plate (no Safety), Pilot with Valve Control, Pilot (no Safety). Pas chauffée. |
+| 9. Retour de rinçage | High Right, High Left, None. Son arrêt : (none), Manual Ball Valve, Motorized Ball Valve. Son té avec sonde de température : (none), Instrument Tee, Long Tee. |
+| 10. Steam Slayer 2 po | High Right, High Left, None. Réduction : (None), 2 in to 1.5 in Reducer |
+| 11. Serpentin HERMS (immersion) | Inlet Left, Outlet Right ; Inlet Right, Outlet Left ; Inlet Right, Outlet Right ; Inlet Left, Outlet Left (d'un seul côté : Inlet High ou Inlet Low). Cuivre ou inox. |
+| 12. Contrôle de fermenteur | Chauffage et refroidissement tenus par une seule consigne (il faut une sonde de température Electronic) |
+| 13. IP supplémentaires | jusqu'à 4, sur tout endroit du Vessel Layout qu'aucune pièce ci-dessus n'a pris : 1.5 TC, 2.0 TC, 3/4 TC, 1/2 TC, 1/2 BSP, 1/2 MPT, 1/2 FPT |
 
-Un Thermowell, une sonde ou une résistance n'a **pas d'IP à lui**. Sur une ouverture, il la ferme, comme un End Cap. Deux d'entre eux ne peuvent pas aller
-au même endroit. Appuyez sur **🔨 Build**.
+Quand **Gas Burner** est choisi, un grand avertissement rouge s'affiche :
 
-### Pick (double-cliquez sur l'endroit) {#pick-double-click-the-spot}
+> ⚠ Le gaz peut tuer ou provoquer un incendie. Suivez toutes les précautions de sécurité pour le gaz. Vous êtes responsable de toute la
+> sécurité quand vous utilisez du gaz. OakBarn Brewery et Skynet ne sont ni électriciens, ni plombiers, ni experts en chauffage et
+> climatisation. Consultez un électricien, un plombier ou un professionnel du chauffage et de la climatisation agréé.
 
-Quand votre cuve a une pièce là où aucun des choix ne tombe, choisissez **Pick (double-click the spot on the vessel)**. Une cuve vide
-s'ouvre avec de petits points aux endroits habituels (IP préréglés). **Double-cliquez** là où est la pièce sur votre cuve :
-
-- Près d'un petit point, elle prend cet endroit habituel.
-- Ailleurs, elle crée une nouvelle ouverture (un **User IP**) sur cette seule cuve, par exemple **Picked Drain**.
-
-**↶ Undo** enlève la marque, **💾 Save** la garde, **✖ Cancel** laisse la question comme elle était. Pick ne marche **que pendant la première
-construction de la cuve**. Une fois construite et enregistrée, aucune ouverture ne peut être ajoutée ni déplacée.
+Appuyez sur **🔨 Build**. Une vanne manuelle sur la Sortie, l'Entrée tangentielle ou le Retour de rinçage est posée tout de suite, ainsi
+que le **Sight Glass**, debout entre les deux IP de l'indicateur de niveau.
 
 ## 2. La finir sur le Build Tab {#2-finish-it-on-the-build-tab}
 
@@ -58,7 +63,7 @@ Le panneau **Vessel Builder** est à droite. Il a une ligne pour chaque chose qu
 - **Quelle vanne :** une vanne motorisée que vous avez déjà (une qui n'est pas encore sur un tuyau), **➕ Add New Motorized Ball Valve** (les cases
   d'ajout habituelles), ou **➕ Add Manual Valve Widget** : Plain, Manual Ball Valve (vue de côté) ou Manual Butterfly Valve. Une Manual Valve est
   tournée pour aller sur un parcours vertical, et vous la confirmez à la main (Confirmation Widget).
-- Le **Sparge Arm** est dessiné dans la cuve, depuis son ouverture vers l'autre côté. Le **Steam Slayer** arrive dans la prochaine
+- Le **Sparge Arm** est dessiné dans la cuve, depuis son ouverture vers l'autre côté. Le **Sparge Tee**, le **Steam Slayer** et le **Gas Burner** arrivent dans la prochaine
   mise à jour.
 
 Double-cliquez sur l'image d'une pièce sur la cuve pour ouvrir ses propres Properties (une image pâle ouvre son choix). Les Properties de la cuve
