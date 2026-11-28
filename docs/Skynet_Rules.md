@@ -1866,7 +1866,7 @@ answers and changes nothing until **✔ Finish**.
   The questions after it branch on the number: **1**, **2**, or **3 to 10** (`VESSELS_3UP`); 3 or more works out the Brewer Level like
   three vessels. **CHANGED 2026-11-27 later** (OakBarn Brewery: "Maybe 7 vessels could fit on the entire screen of a Tab at the 1920 x
   1440 resolution and still be able to read the Gauges, and no room for text and other widgets, so maybe limit Hot Side to 6 and
-  Fermentors to 6"): the box takes **1 to 6**, and 3 or more is 3 to 6. Fermentors are 1 to 6 too when that question comes.
+  Fermentors to 6"): the box takes **1 to 6**, and 3 or more is 3 to 6. Fermentors: see the Cold Side below (1 to 9).
 - **CHANGED 2026-11-27, Tick Boxes after Brewery** (OakBarn Brewery: "Rebuild all the Interview Dialogs in Order After the Brewery
   interview using check boxes if the choice is less than six instead of a DDLB if they can fit on a line. You can expand the label to
   up to 4 Lines for a check Box if needed"): a row with `tick` is Tick Boxes when it is Yes/No or has **fewer than 6** choices
@@ -1920,7 +1920,21 @@ answers and changes nothing until **✔ Finish**.
   Skynet Template), then its Size. **Narrowed** (OakBarn Brewery: "narrow the Vessel selections based on the answers to the new
   questions"): only the vessels with every part ticked; when none has them all, the closest, and the note says so. **More parts**
   ("Add Bottom Drain with skirt to questions"; "and Temperature Probe"): Bottom Drain with Skirt (always under the center, nothing
-  to pick) and Temperature Probe (Front or Back place). Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
+  to pick) and Temperature Probe (Front or Back place).
+- **CHANGED 2026-11-27, the Cold Side** (OakBarn Brewery: "next PR Cold side, and Change to 9 Fermentors as the Manifolds are easier on
+  the cold side"; "How cooled or Not. One Option is always a Fermentation Chamber for cooling. Peltier is another option for cooling,
+  Manual Ice Bath also, Glycol"; "Type Conicals, Brew Bucket, Carboy, common fermentors"): after the Hot Side, for every Brewer Type,
+  **Cold Side: Number of Fermentors**, a box for a whole number from **1 to 9** (not set until typed). Then for each fermentor, one
+  after the other ("Might ask Type first as that can limit how cooled"): What kind of fermentor? (Tick Boxes with a picture drawn by
+  Skynet over each, "similar to what they sell as graphics", "just similar profiles": Plastic Bucket first ("most people start there"),
+  Conical, Unitank, Stainless Bucket, Glass Carboy,
+  Plastic Carboy, Corny Keg ("I have fermented in them"), Other, and a **second row**: Stainless Conical Bucket, Plastic Pressure
+  Conical, Plastic Pressure Fermentor, Ceramic Crock ("Ceramic Crock Fermentation Vessel") and Plastic Jug with Tap ("plastic
+  fermentors, 2 are" pressure fermentors, "create line drawing similar"): "On the Type add a second row (I know this violates the rule but here it makes sense)", the one exception to Rule 2.6's 8
+  Tick Boxes on a line; no shop or maker names), then How is it cooled? with only the ways
+  that fit that kind (Not Cooled, Fermentation Chamber, Peltier, Manual Ice Bath, Glycol Coil, Glycol Jacket: "Glycol can be Coil or
+  Jacket"); a Fermentation Chamber is always one. A way to cool that no longer fits the kind is not kept. Saved as `fermentorCount`,
+  `f1Cool`, `f1Type` ..., on Default settings, and in the Brewery Build as `fermentors`. Saved as `v1Heat` ... `v2Size`, on Default settings, and in the Brewery Build as `vessels` (each
   with what its heat `adds`).
 Help 248. **Both programs:** the BruControl Import makes no Skynet settings, so nothing changes there.
 
@@ -7680,6 +7694,9 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-27: Rule 2.75 changed: new Brewer Types BIAB (Brew in a Bag) and All In One Brewer (Level 4); question 2 has six Tick Boxes. Help 248, 155, 100.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is a box for 1 to 10, and the Brewery questions branch on it (1, 2, 3 or more). Help 248.
 - 2026-11-27: Rule 2.75 changed: Number of Hot Side Vessels is 1 to 6 (a Tab fits about 7 vessels with readable Gauges); Fermentors 1 to 6 when asked. Help 248.
+- 2026-11-27: Rule 2.75 changed: the Cold Side: Number of Fermentors 1 to 9, then how each is cooled and what kind it is. Help 248.
+- 2026-11-27: Rule 2.75 changed: Ceramic Crock added to What kind of fermentor? (second row; Not Cooled, Fermentation Chamber or Manual Ice Bath). Help 248.
+- 2026-11-27: Rule 2.75 changed: Plastic Pressure Fermentor and Plastic Jug with Tap added to What kind of fermentor? (second row); plastic pictures redrawn after the photos sent. Help 248.
 - 2026-11-27: Rule 2.75 changed: Brewery held to Number of Vessels for now; Tick Boxes after Brewery (fewer than 6 choices); add a choice, not a follow-up question. Help 248.
 - 2026-11-27: Rule 2.75 changed: the first Brewery question is Number of Vessels, for every Brewer Type, as Tick Boxes. Help 248.
 - 2026-11-27: Rule 2.75 changed: question 2 Brewer Type is four Tick Boxes on one screen; the "Do you grind your own grain?" follow-up is gone. Help 248.
