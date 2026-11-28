@@ -727,7 +727,8 @@ export function setupSave(a, ctx, list = SETUP_QUESTIONS, answered = null, onlyA
 
 // ---- green (answered) questions (OakBarn Brewery, 2026-11-26: "Complete do not get focus on Open. Focus in Numeric Order."). A question
 // is green once Next was pressed on it (Skip leaves it not green). The green ones are kept in brewDefaults.setupAnswered, so the
-// interview opens again on the first question that is not green, and Next goes on to the next one that is not green. A branch's
+// interview opens again on the first question that is not green; Next and Skip always go to the very next question (2026-11-27: "No auto
+// skip"), green or not. A branch's
 // first page is green when every question of the branch is.
 export function answeredAtStart(ctx, list = SETUP_QUESTIONS) {
   const bd = ctx.defaults || {};

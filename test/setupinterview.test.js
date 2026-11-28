@@ -444,3 +444,11 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(src, /\['fermentorCount', `Number of Fermentors/);
 }
+
+// no auto skip (2026-11-27: "No skipping of any question in the interview, answered or not. Skip only with the Next or Skip button"):
+// Next and Skip go to the very next question; only opening the interview goes to the first one not green
+{
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.equal((app.match(/nextOpen\(/g) || []).length, 1, 'nextOpen only where the interview opens');
+  assert.match(app, /answered\.add\(q\.id\); persist\(\); go\(at \+ 1\);/);
+}
