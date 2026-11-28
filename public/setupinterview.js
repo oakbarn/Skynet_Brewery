@@ -272,7 +272,9 @@ export const FERMENTOR_TYPES = [['bucket', 'Plastic Bucket', ['none', 'chamber',
   // Stainless Bucket and the" plastic pressure fermentor "looking thing"): the one exception to 8 Tick Boxes on a line (Rule 2.6)
   ['ssconical', 'Stainless Conical Bucket', ['none', 'chamber', 'peltier', 'icebath', 'glycolcoil']],
   ['pressureconical', 'Plastic Pressure Conical', ['none', 'chamber', 'icebath', 'glycolcoil']],
-  ['crock', 'Ceramic Crock', ['none', 'chamber', 'icebath']]];      // 2026-11-27: "Ceramic Crock Fermentation Vessel"
+  ['pressurefermentor', 'Plastic Pressure Fermentor', ['none', 'chamber', 'icebath', 'glycolcoil']],      // the rounder one, no cone
+  ['crock', 'Ceramic Crock', ['none', 'chamber', 'icebath']],
+  ['plasticjug', 'Plastic Jug with Tap', ['none', 'chamber', 'icebath']]];      // round jug, big screw cap with a carry handle      // 2026-11-27: "Ceramic Crock Fermentation Vessel"
 export const FERMENTOR_TYPE_ROW = 8;      // the first row has 8, the second row the rest
 export const coolsFor = type => { const t = FERMENTOR_TYPES.find(([k]) => k === type); return t ? FERMENTOR_COOLS.filter(([k]) => t[2].includes(k)) : FERMENTOR_COOLS; };
 // the pictures over the Tick Boxes: simple drawings by Skynet (no shop pictures), colors from the page
@@ -284,11 +286,17 @@ export const FERMENTOR_PICS = {
   bucket: P('<path d="M13 24h34l-4 54H17z"/><path d="M11 18h38v6H11z"/><path d="M13 32h34M14 40h32"/><path d="M11 21q19-26 38 0"/><path d="M26 4h8" stroke-width="4"/>'),
   crock: P('<path d="M14 22q-4 6-4 26t4 28q16 6 32 0 4-8 4-28t-4-26z"/><path d="M12 16h36v6H12z"/><path d="M24 10h12v6H24z"/><path d="M27 6h6v4h-6z"/><path d="M10 34h-4v12h4M50 34h4v12h-4"/><path d="M11 56h38" opacity=".5"/>'),
   glasscarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M16 44h28" opacity=".5"/>'),
-  plasticcarboy: P('<path d="M24 6h12v10q14 6 14 22v34q0 8-8 8H18q-8 0-8-8V38q0-16 14-22z"/><path d="M10 46h40M10 58h40M10 70h40" stroke-dasharray="4 3"/>'),
+  plasticcarboy: P('<path d="M25 6h10v8q12 4 12 16v44q0 6-6 6H19q-6 0-6-6V30q0-12 12-16z"/><path d="M13 40h34M13 52h34M13 64h34" stroke-dasharray="4 3"/><path d="M30 74v6M26 80h8"/>'),      // with a tap low on the front
   corny: P('<path d="M20 16h20v60H20z"/><path d="M18 14h24v5H18zM18 73h24v5H18z"/><path d="M25 8h10v6H25z"/><path d="M22 14v-4M38 14v-4"/>'),
   other: P('<path d="M14 12h32v66H14z"/><path d="M24 34q0-8 6-8t6 8q0 5-6 8v6"/><circle cx="30" cy="56" r="1.5" fill="currentColor"/>'),
   ssconical: P('<path d="M14 12h32v38l-16 16-16-16z"/><path d="M12 12h36"/><path d="M14 12q16-9 32 0"/><path d="M30 66v6M16 48l-4 32M44 48l4 32M12 70h36"/>'),
-  pressureconical: P('<path d="M23 6h14v6H23z"/><path d="M20 12h20q10 4 10 16v20q0 10-20 22-20-12-20-22V28q0-12 10-16z"/><circle cx="30" cy="76" r="4"/><path d="M14 56l-6 26M46 56l6 26"/>') };
+  // 2026-11-27 ("plastic fermentors, 2 are" plastic pressure fermentors, "create line drawing similar"): the conical one on a ring stand
+  // with a round collection jar under the cone
+  pressureconical: P('<path d="M27 4h6v4h-6z"/><path d="M22 8h16q8 3 8 12v22l-12 14h-8L14 42V20q0-9 8-12z"/><path d="M30 56v4"/><circle cx="30" cy="66" r="6"/><path d="M12 42h36"/><path d="M14 42l-4 42M46 42l4 42M11 72h38"/>'),
+  // the rounder one: a tall capsule standing in a ring stand
+  pressurefermentor: P('<path d="M27 4h6v5h-6z"/><path d="M24 9h12q8 2 8 12v40q0 10-14 13-14-3-14-13V21q0-10 8-12z"/><path d="M16 60h28"/><path d="M18 64l-4 22M42 64l4 22M15 80h30"/>'),
+  // a round plastic jug with a big screw cap, a carry handle over it and a tap low on the front
+  plasticjug: P('<path d="M20 14h20v6H20z"/><path d="M18 14q0-10 12-10t12 10"/><path d="M20 20q-10 4-10 18v32q0 10 20 10t20-10V38q0-14-10-18"/><path d="M30 70v6M26 76h8"/>') };
 const upTo = n => Array.from({ length: FERMENTORS_MAX - n + 1 }, (_, i) => String(n + i));      // fermentor n shows when there are n or more
 // for each fermentor: what kind first ("Might ask Type first as that can limit how cooled"), then how it is cooled (only the ways that
 // fit that kind)
