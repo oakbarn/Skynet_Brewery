@@ -1487,6 +1487,7 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .vbPanel { position: fixed; right: 16px; top: 190px; width: 340px; max-width: calc(100vw - 32px); max-height: calc(100vh - 220px); overflow: auto; z-index: 40;
   background: var(--panel, #222); color: var(--fg, #fafafa); border: 2px solid #1D56B0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
 .vbPanel h3 { margin: 0 0 8px; font-size: 16px; }
+.fieldWarn { color: #e03c3c; font-weight: 700; font-size: 17px; border: 2px solid #e03c3c; border-radius: 8px; padding: 8px 10px; margin: 4px 0; }
 .vbPanel .vbRow { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 6px 8px; border-radius: 8px; }
 .vbPanel .vbTodo { border: 2px solid #e8a33a; }
 .vwPart.vbWait { opacity: .45; }

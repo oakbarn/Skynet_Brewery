@@ -6,38 +6,42 @@ their own.
 
 ## Where to find it
 
-In **Edit layout**, open **Vessel** on the Edit layout bar and pick **🔨 Build a Vessel Device (step by step)**. It is also under
-**Add Widget > Vessels**.
+In **Edit layout**, open **Vessel** on the Edit layout bar and pick **🔨 Build a Vessel (a plain stainless pot, then its parts)**.
+It is also under **Add Widget > Vessels**.
 
 ## 1. The questions
 
+Every vessel starts as a **plain stainless pot**, drawn to its own Height and Diameter. Each part goes at its usual height off the
+inside bottom, measured on real kettles, whatever their size. Left and Right are as you face the vessel.
+
 | Question | Choices |
 | --- | --- |
+| Units | US (gallons, inches) or Metric (liters, cm) |
+| 1. Height, 2. Diameter | inside, first. The pot is drawn to them and its volume comes from them. |
 | Label | for example HLT (it can't be blank) |
-| General Type | HLT, Mash Tun, Brew Kettle, All In One, Whirlpool, Fermentor, Bright Tank. **Other** asks you to type one, and it is kept in the list as **USER: Hop Pot Strainer**. |
+| General Type | HLT, Mash Tun, Brew Kettle, All In One, Whirlpool, Fermentor, Bright Tank. **Other** asks you to type one. |
 | Tab | the Tab it goes on when the Build is saved |
-| Units, Volume | Gallons (Liters when Metric). It starts at 10. |
-| Height, Diameter | type both for its shape, or leave both empty for the plain vessel shape |
-| Bottom Drain | None, Center Low, Center Bottom Drain, Pick |
-| Tangential Inlet | None, Left, Right, Pick |
-| Sparge Arm / Steam Slayer | None, Right (High), Left (High), Pick |
-| Thermowell / Probe | None, Center, Left, Right, Back Left, Back Center, Back Right, Pick |
-| Heating Element | None, Left, Right, Back Left, Back Center, Back Right, Pick (a second one can be added) |
-| HERMS Coil | None, Left, Right, Outlet Right & Inlet Left, Outlet Left & Inlet Right (a crossed coil, drawn across the vessel). No Pick. |
+| 3. Outlet | Center Low (about 2 in off the bottom), Center Bottom Drain (in a 6 in skirt, the drain centered in it), None. Its valve: Manual Ball Valve with Elbow, Motorized Ball Valve with Elbow, Manual Butterfly Valve with Elbow, Manual Ball Valve, Motorized Ball Valve, Manual Butterfly Valve |
+| 3b. False Bottom (Mash Tun only) | its Height above the Bottom, blank for none. It is drawn as a dashed line. The Outlet stays below it at its usual height. |
+| 4. Temperature | Electronic (then its Probe Type) or Analog Gauge, None. Then Thermowell or Direct, then where: Center above the Outlet (about 5.5 in off the bottom), Left, Right, Back Left, Back Center, Back Right |
+| 5. Tangential Inlet | Left Low (about 1.5 in off the bottom), Right Low, None. Its valve: the same 6 as the Outlet. |
+| 6. Sight Gauge | Left, Right, None. Its Bottom IP is 1 in off the bottom, its Top IP directly above, 1 in off the top. |
+| 7. Volume Pressure Sensor | Right Side, Left Side, Back Centered, None (1 in off the bottom) |
+| 7a, 7b. Level or Float 1 and 2 | Left, Right, Front, Back, None; its Height from the Bottom; Normally Closed or Normally Open |
+| 8. How is it heated | Electric Heating Element(s): Heater 1 and Heater 2, Back Right or Back Left (2 in TC), each with its Height above the Bottom. Gas Burner: Natural Gas, High Pressure Propane or Low Pressure Propane, and its Igniter: (none), Flat Plate (no Safety), Pilot with Valve Control, Pilot (no Safety). Not heated. |
+| 9. Sparge Return | High Right, High Left, None. Its Shutoff: (none), Manual Ball Valve, Motorized Ball Valve. Its Tee with Temperature Probe: (none), Instrument Tee, Long Tee. |
+| 10. Steam Slayer 2 in | High Right, High Left, None. Reducer: (None), 2 in to 1.5 in Reducer |
+| 11. HERMS Coil (Immersion) | Inlet Left, Outlet Right; Inlet Right, Outlet Left; Inlet Right, Outlet Right; Inlet Left, Outlet Left (on one side: Inlet High or Inlet Low). Copper or Stainless. |
+| 12. Fermentor Control | Heat and Cooling held by one Setpoint (it needs an Electronic Temperature probe) |
+| 13. Additional IPs | up to 4, on any place of the Vessel Layout no part above has taken: 1.5 TC, 2.0 TC, 3/4 TC, 1/2 TC, 1/2 BSP, 1/2 MPT, 1/2 FPT |
 
-A Thermowell, Probe or Heating Element has **no IP of its own**. On an opening it closes it, like an End Cap. Two of them can't go
-on the same spot. Press **🔨 Build**.
+When **Gas Burner** is picked, a big red warning shows:
 
-### Pick (double-click the spot)
+> ⚠ Gas can kill or cause a fire. Follow every gas safety precaution. You are responsible for all safety when using gas. OakBarn
+> Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional.
 
-When your vessel has a part where none of the choices are, pick **Pick (double-click the spot on the vessel)**. A blank vessel
-opens with small dots on the usual spots (preset IPs). **Double-click** where the part is on your vessel:
-
-- Near a small dot, it takes that usual spot.
-- Anywhere else, it makes a new opening (a **User IP**) on this one vessel, for example **Picked Drain**.
-
-**↶ Undo** takes the mark off, **💾 Save** keeps it, **✖ Cancel** leaves the question as it was. Pick works **only while you first
-build the vessel**. Once it is built and saved, no opening can be added or moved.
+Press **🔨 Build**. A Manual Valve on the Outlet, the Tangential Inlet or the Sparge Return is put on at once, and so is the
+**Sight Glass**, standing between the two Sight Gauge IPs.
 
 ## 2. Finish it on the Build Tab
 
@@ -58,7 +62,7 @@ The **Vessel Builder** panel is on the right. It has a line for each thing you s
 - **Which Valve:** a Motorized valve you already have (one not on a pipe yet), **➕ Add New Motorized Ball Valve** (the usual Add
   dialogs), or **➕ Add Manual Valve Widget**: Plain, Manual Ball Valve (side view) or Manual Butterfly Valve. A Manual Valve is
   turned to fit an up and down run, and you confirm it by hand (Confirmation Widget).
-- The **Sparge Arm** is drawn inside the vessel, from its opening toward the other side. The **Steam Slayer** comes in the next
+- The **Sparge Arm** is drawn inside the vessel, from its opening toward the other side. The **Sparge Tee**, the **Steam Slayer** and the **Gas Burner** come in the next
   update.
 
 Double-click a part's picture on the vessel to open its own Properties (a faint one opens its picker). The vessel's Properties

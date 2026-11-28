@@ -67,6 +67,7 @@ import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANI
 import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
 import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
+import { POT_TEMPLATE, POT_VALVES, POT_OUTLET, POT_PROBE, POT_TANGENTIAL, POT_SIGHT, POT_VOLSENSOR, POT_HEAT, POT_HEATER, POT_GAS, POT_IGNITER, POT_GAS_WARNING, POT_SPARGE, POT_SPARGE_SHUT, POT_HERMS, POT_HERMS_MAT, POT_HERMS_IN, potHermsKeys, POT_SPARGE_TEE, POT_STEAM, POT_REDUCER, POT_IP_TYPES, POT_TEMP, POT_TEMP_MOUNT, POT_FLOAT_LOC, POT_FLOAT_NC, potIsMash, potStart, potSpots, potFreePlaces, potProblems, potSvg, potAspect, potSummary } from './vesselpot.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
 import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
@@ -889,7 +890,10 @@ const VP_PICS = { element: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg'
   valveF: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedFront.svg' };
 // [inlet, outlet]. Crossed coils (OakBarn Brewery, 2026-11-09, Rule 5.31: "there are Cross Herms out there"): in on one side, out the other
 const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'], crossRL: ['lHermsIn', 'rHermsOut'], crossLR: ['rHermsIn', 'lHermsOut'] };
-const HERMS_WORDS = { left: 'Left', right: 'Right', crossRL: 'Outlet Right and Inlet Left', crossLR: 'Outlet Left and Inlet Right' };
+// the Stainless Pot's coil (Rule 19.13): its Inlet side and Outlet side, on its own IPs (vesselpot.js potHermsKeys)
+for (const v of ['lr', 'rl', 'rr', 'll']) HERMS_SIDES[v] = potHermsKeys(v);
+const HERMS_WORDS = { left: 'Left', right: 'Right', crossRL: 'Outlet Right and Inlet Left', crossLR: 'Outlet Left and Inlet Right',
+  lr: 'Inlet Left, Outlet Right', rl: 'Inlet Right, Outlet Left', rr: 'Inlet Right, Outlet Right', ll: 'Inlet Left, Outlet Left' };
 const HERMS_PICKS = [['', 'None'], ['left', 'Left: on Left HERMS In and Left HERMS Out'], ['right', 'Right: on Right HERMS In and Right HERMS Out'],
   ['crossRL', 'Outlet Right and Inlet Left (crossed: in at Left HERMS In, out at Right HERMS Out)'], ['crossLR', 'Outlet Left and Inlet Right (crossed: in at Right HERMS In, out at Left HERMS Out)']];
 const VP_KEYS = /_(part|pin|ptk|pidx|pidxCircuit)$/;
@@ -1780,6 +1784,7 @@ function buildVessel(g) {
   else if (g.image && t === 'bfit' && +g.turn) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:rotate(${+g.turn}deg)` }));   // a turned Tab_Fitting
   else if (!g.image && isIceCan(g)) { n.classList.add('has-img'); n.style.backgroundImage = `url("${iceCanPic(g.w, g.h)}")`; }     // the Ice Water Can: drawn for its own box (Rule 19.8)
   else if (!g.image && isStove(g)) { n.classList.add('has-img'); n.style.backgroundImage = `url("${stovePic(g.w, g.h, stoveOutType(g))}")`; }     // a Stove Top Vessel: drawn for its own box (Rule 19.7)
+  else if (g.pot) { n.classList.add('has-img'); n.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(potSvg({ ...g.pot, vtype: g.vtype, falseBottom: g.pot.answers?.falseBottom, vheight: g.vheight ?? g.pot.vheight, diameter: g.diameter ?? g.pot.diameter, units: g.units || g.pot.units }))}")`; }     // the Stainless Pot: drawn to its Height and Diameter (Rule 19.13)
   else if (g.image && !isUnit({ ...g, loose: false })) n.style.backgroundImage = `url("${hasMaterial(g) ? matPic(g.image, g.material) : media(g.image)}")`;     // a Skynet Fitting is drawn once only, by its .bfImg above (not a second time, unturned, behind it)
   if (g.vwidget && isSkyV(g)) n.append(...vwParts(g));       // a Vessel Widget draws its Probe and Element, and in Edit layout what is not Placed
   for (const [k, d] of Object.entries(eqClass(g)?.ports || {})) {    // ports that are not IPs (thermowells) show as a mark
@@ -1842,6 +1847,7 @@ const isSized = g => isVW(g) || isStove(g);
 const vDia = g => (g.sizeMethod === 'diameter' || isStove(g)) && +g.diameter > 0 && +g.vheight > 0;       // drawn by its real size
 const vGal = g => { const v = +(g.volume ?? g.maxVolume) > 0 ? +(g.volume ?? g.maxVolume) : 10; return g.units === 'Metric' ? v / 3.78541 : v; };
 function vAspect(g) {        // its shape: Height / Width of its box
+  if (g.pot) return potAspect({ ...g.pot, vheight: g.vheight ?? g.pot.vheight, diameter: g.diameter ?? g.pot.diameter, units: g.units || g.pot.units });      // the Stainless Pot (Rule 19.13): rim, handles and skirt in its box
   if (isStove(g)) return stoveAspect(g.vheight, g.diameter, g.vesselType === 'stoveTopOut');        // its handles and rim are in the box too
   if (vDia(g)) return +g.vheight / +g.diameter;
   return V1_GAL[1] / V1_GAL[0];
@@ -7355,7 +7361,7 @@ const WGT_TYPES = () => [
   ['fittings', 'IPs, couplings and caps', FIT_ROWS()],
   ['gGlobal', 'gGlobal variables', amGroup('gGlobal').map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
 ];
-const VESSEL_ROWS = [['🔨 Build a Vessel Device (step by step) ...', () => vesselBuilder()], ['Skynet Vessel Templates (build on them) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
+const VESSEL_ROWS = [['🔨 Build a Vessel (a plain stainless pot, then its parts) ...', () => vesselBuilder()], ['Skynet Vessel Templates (build on them) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
 // pipe fittings are TC Pipe Fittings now (Rule 5.25). Each row shows its plain name (it showed the hidden key, and did nothing, before)
 const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel' && !['eqTee', 'eqElbow90', 'eqElbow45', 'eqCross'].includes(k)).map(([k, t]) => [t, () => addEquipment(k)]);
@@ -8827,7 +8833,9 @@ function vesselToBuild(t) {
 // same in the Importer). First the Question Dialog; 🔨 Build then puts the vessel on the 🔨 Build Tab with its Heating Element,
 // Thermowell and HERMS coil shown (and the IPs of its Drain, Tangential, Sparge and HERMS), and the Vessel Builder panel on the other
 // side holds the dialogs for what was chosen. A Heating Element or a Thermowell waiting to be picked closes its IP like an End Cap.
-const VB_WHAT = { element: 'Heating Element', thermowell: 'Thermowell', probe: 'Probe' };
+const VB_WHAT = { element: 'Heating Element', thermowell: 'Thermowell', probe: 'Probe', float: 'Level or Float Switch' };
+// a new Level or Float Switch (the Add menu's Float / level switch); Normally Closed is active low
+const VB_FLOAT = ['digitalIn', 'Float', { mode: 'switch', onText: 'FULL', offText: 'LOW', onDelay: 2, offDelay: 2 }];
 const vbFields = w => {
   const metric = w.units === 'Metric', unit = metric ? 'cm' : 'inches';
   // a Picked spot shows as its own choice; picking Pick again opens the vessel again
@@ -8896,35 +8904,150 @@ function vbFromHash() {
 // pre: answers to start from (the BruControl Import's Vessels step: vbFromImport), with heaterPart / probePart, the imported ones
 async function vesselBuilder(pre = null) {
   if (!TPL) await loadTemplates();
-  const t = tplOf('vessel', VB_TEMPLATE); if (!t) return toast(`The Skynet Template ${VB_TEMPLATE} is missing`, true);
+  const t = tplOf('vessel', POT_TEMPLATE); if (!t) return toast(`The Skynet Template ${POT_TEMPLATE} is missing`, true);
   if (menuTab) leaveMenuTab();
   if (!editing) setEditing(true);
   const tabs = vbTabs(), part = pre && draft.elements.find(e => e.name === pre.heaterPart || e.name === pre.probePart);
   const from = part?.workspace && tabs.some(([n]) => n === part.workspace) ? part.workspace : buildWs()?.name === wsName ? buildWs().from || wsName : wsName;      // an imported vessel goes on its Heater's or Probe's Tab
-  const w = vbStart({ ...(pre || {}), workspace: tabs.some(([n]) => n === from) ? from : tabs[0]?.[0] || '' });
-  const oks = $$('#dlg button[value="ok"]'), tips = oks.map(b => b.title), body = $('#dlgBody');
-  const onPick = async ev => {
-    const k = ev.target.dataset?.k; if (!VB_PICKABLE[k] || ev.target.value !== 'pick') return;
-    const was = w[k]; try { readFields(w, body); } catch { }
-    const ip = await vbPickSpot(t, w, k), v = ip ? 'ip:' + ip : was === 'pick' ? 'none' : was;
-    w[k] = v;
-    const sel = body.querySelector(`[data-k="${k}"]`); if (!sel) return;
-    if (ip && ![...sel.options].some(o => o.value === v)) sel.append(h('option', { value: v }, `Picked: ${vbSpotName(w, ip)}`));
-    sel.value = v;
-  };
-  body.addEventListener('change', onPick);
+  const w = potStart({ probeType: tempKinds()[0]?.[1] || '', ...potFromVb(pre || {}), workspace: tabs.some(([n]) => n === from) ? from : tabs[0]?.[0] || '' });
+  const oks = $$('#dlg button[value="ok"]'), tips = oks.map(b => b.title);
   try {
     for (;;) {
-      for (const b of oks) { b.textContent = '🔨 Build'; b.title = 'Put the vessel on the 🔨 Build Tab, with the dialogs for what you picked beside it'; }
-      const r = await dialog('🔨 Build a Vessel Device: the questions', vbFields, w, false, ['vessel-device-builder']);
+      for (const b of oks) { b.textContent = '🔨 Build'; b.title = 'Put the vessel on the 🔨 Build Tab, every part on it, with what is left to pick beside it'; }
+      const r = await dialog('🔨 Build a Vessel: the questions', potFields, w, false, ['vessel-device-builder']);
       if (r !== 'ok') return;
-      try { readFields(w, $('#dlgBody')); } catch (err) { toast(err.message, true); continue; }
-      if (w.heater === 'none') w.heater2 = 'none';
-      const bad = vbProblems(w); if (bad.length) { toast(bad.join(' '), true, 9000); continue; }
-      if (vbBuild(t, w)) return;
+      try { readFields(w, $('#dlgBody')); potExtrasRead(w); } catch (err) { toast(err.message, true); continue; }
+      const bad = potProblems(w); if (bad.length) { toast(bad.join(' '), true, 9000); continue; }
+      if (potBuild(t, w)) return;
     }
-  } finally { body.removeEventListener('change', onPick); oks.forEach((b, n) => { b.textContent = 'Save'; b.title = tips[n]; }); }
+  } finally { oks.forEach((b, n) => { b.textContent = 'Save'; b.title = tips[n]; }); }
 }
+// ---- The Stainless Pot questions (2026-11-27, Rule 19.13; public/vesselpot.js): the Height and Diameter first, then each part in the
+// order given, its first choice the usual one. A choice that has more to ask shows its rows under it.
+const POT_EXTRA_ROWS = 4;
+function potFields(w) {
+  const u = w.units === 'Metric' ? 'cm' : 'inches', on = k => w[k] && w[k] !== 'none', free = potFreePlaces(w);
+  const xs = []; for (let i = 0; i < POT_EXTRA_ROWS; i++) { if (i && !w['xp' + (i - 1)]) break;
+    xs.push(['xp' + i, `13${'abcd'[i]}. Additional IP ${i + 1}: where`, 'sel', [['', '(none)'], ...free], true], ...(w['xp' + i] ? [['xt' + i, `13${'abcd'[i]}. Additional IP ${i + 1}: its IP Type`, 'sel', POT_IP_TYPES.filter(([k]) => k)]] : [])); }
+  return [['_pq', 'Every vessel starts as a plain stainless pot, drawn to its Height and Diameter. Each part goes at its usual height off the bottom (measured on real kettles, whatever their size). 🔨 Build puts it on the 🔨 Build Tab with every part on it.', 'note'],
+    ['units', 'Units', 'sel', [['US', 'US (gallons, inches)'], ['Metric', 'Metric (liters, cm)']], true],
+    ['vheight', `1. Height (${u}): inside, from the bottom to the top`, 'num'], ['diameter', `2. Diameter (${u}): inside`, 'num'],
+    ['label', 'Label (shown on the Tab, for example HLT; never blank)', 'text'], ['vtype', 'General Type (Other lets you type your own)', 'vlist', 'vbTypes', true],
+    ['workspace', 'Tab it goes on (when the Build is saved)', 'sel', vbTabs()],
+    ['outlet', '3. Outlet', 'sel', POT_OUTLET, true], ...(on('outlet') ? [['outletValve', '3a. Outlet Valve', 'sel', POT_VALVES]] : []),
+    ...(potIsMash(w) ? [['falseBottom', `3b. False Bottom: Height above the Bottom (${u}; blank: none). The Outlet stays below it at its usual height`, 'num']] : []),
+    ['tempKind', '4. Temperature', 'sel', POT_TEMP, true],
+    ...(w.tempKind === 'electronic' ? [['probeType', '4a. Probe Type', 'sel', tempKinds().map(([, l]) => [l, l])]] : []),
+    ...(w.tempKind !== 'none' ? [['tempMount', `4${w.tempKind === 'electronic' ? 'b' : 'a'}. Thermowell or Direct`, 'sel', POT_TEMP_MOUNT],
+      ['probe', `4${w.tempKind === 'electronic' ? 'c' : 'b'}. Where it is`, 'sel', POT_PROBE.filter(([k]) => k !== 'none')]] : []),
+    ['tangential', '5. Tangential Inlet', 'sel', POT_TANGENTIAL, true], ...(on('tangential') ? [['tangentialValve', '5a. Tangential Inlet Valve', 'sel', POT_VALVES]] : []),
+    ['sight', '6. Sight Gauge (its Bottom IP 1 in off the bottom, its Top IP directly above, 1 in off the top)', 'sel', POT_SIGHT],
+    ['volSensor', '7. Volume Pressure Sensor (1 in off the bottom)', 'sel', POT_VOLSENSOR],
+    ...[1, 2].flatMap(n => [['float' + n, `7${'ab'[n - 1]}. Level or Float ${n}: Location`, 'sel', POT_FLOAT_LOC, true],
+      ...(on('float' + n) ? [[`float${n}Ht`, `7${'ab'[n - 1]}. Level or Float ${n}: Height from the Bottom (${u})`, 'num'], [`float${n}Nc`, `7${'ab'[n - 1]}. Level or Float ${n}`, 'sel', POT_FLOAT_NC]] : [])]),
+    ['heat', '8. How is it heated', 'sel', POT_HEAT, true],
+    ...(w.heat === 'element' ? [['heater', '8a. Heater 1', 'sel', POT_HEATER, true], ...(on('heater') ? [['heaterHt', `8a. Heater 1: Height above the Bottom (${u})`, 'num'],
+      ['heater2', '8b. Heater 2', 'sel', POT_HEATER, true], ...(on('heater2') ? [['heater2Ht', `8b. Heater 2: Height above the Bottom (${u})`, 'num']] : [])] : [])] : []),
+    ...(w.heat === 'gas' ? [['_gas', POT_GAS_WARNING, 'warn'], ['gas', '8a. Gas', 'sel', POT_GAS], ['igniter', '8b. Igniter', 'sel', POT_IGNITER]] : []),
+    ['sparge', '9. Sparge Return', 'sel', POT_SPARGE, true], ...(on('sparge') ? [['spargeShut', '9a. Sparge Return Inlet Shutoff', 'sel', POT_SPARGE_SHUT], ['spargeTee', '9b. Tee with Temperature Probe', 'sel', POT_SPARGE_TEE]] : []),
+    ['steam', '10. Steam Slayer 2 in', 'sel', POT_STEAM, true], ...(on('steam') ? [['steamReducer', '10a. Reducer', 'sel', POT_REDUCER]] : []),
+    ['herms', '11. HERMS Coil (Immersion)', 'sel', POT_HERMS, true], ...(on('herms') ? [['hermsMat', '11a. HERMS Coil: its metal', 'sel', POT_HERMS_MAT],
+      ...(w.herms[0] === w.herms[1] ? [['hermsIn', '11b. HERMS Coil: the Inlet', 'sel', POT_HERMS_IN]] : [])] : []),
+    ['fctl', '12. Fermentor Control: Heat and Cooling held by one Setpoint (needs an Electronic Temperature probe)', 'sel', VB_FERM],
+    ['_px', '13. Additional IPs: any place of the Vessel Layout no part above has taken, each with its IP Type.', 'note'], ...xs];
+}
+// the Additional IP rows into w.extras { place: IP Type }
+function potExtrasRead(w) {
+  const x = {}; for (let i = 0; i < POT_EXTRA_ROWS; i++) if (w['xp' + i]) x[w['xp' + i]] = w['xt' + i] || 'TC 1.5';
+  const free = new Set(potFreePlaces(w).map(([k]) => k)); w.extras = Object.fromEntries(Object.entries(x).filter(([k]) => free.has(k)));
+}
+// the old builder's answers (the BruControl Import's Vessels step) as the Stainless Pot's
+function potFromVb(v) {
+  const o = { ...v }; delete o.drain; delete o.probe; delete o.heater; delete o.heater2; delete o.tangential; delete o.sparge;
+  if (v.drain) o.outlet = v.drain === 'cBottomOutlet' ? 'bottom' : v.drain === 'none' ? 'none' : 'low';
+  if (v.tangential) o.tangential = v.tangential === 'right' ? 'right' : v.tangential === 'none' ? 'none' : 'left';
+  if (v.sparge) o.sparge = v.sparge === 'left' ? 'left' : v.sparge === 'right' ? 'right' : 'none';
+  if (v.heaterPart || (v.heater && v.heater !== 'none')) Object.assign(o, { heat: 'element', heater: 'backRight' });
+  if (v.probe === 'none') o.probe = 'none';
+  return o;
+}
+// 🔨 Build the Stainless Pot: the vessel on the 🔨 Build Tab, an IP for each part at its height (User IPs, Rule 5.31), its Heaters and
+// Probe to pick or add beside it, its valves made at once (a Motorized one is picked or added beside it). Nothing is left behind when
+// something is wrong.
+const POT_MV = { mballElbow: 'Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', bflyElbow: 'Images/Skynet/Valves/Manual_Butterfly_Valve_Front_Elbow_Closed.svg',
+  mball: 'Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', bfly: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg' };
+function potBuild(t, w) {
+  const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
+  try {
+    const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean).map(x => String(x).toLowerCase());
+    const base = plainLetters(String(w.label).trim()).replace(/\s+/g, '~').replace(/[^\w~]/g, '') + '_Vessel';
+    let name = base; for (let n = 2; taken.includes(name.toLowerCase()); n++) name = `${base}_${n}`;
+    addTemplateToTab('vessel', t, w.workspace, name);
+    const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
+    if (!g || !isVDev(g)) throw new Error('The vessel could not be made');
+    const old = clone(g), spots = potSpots(w), std = stdShort(g.std || t.std);
+    g.userIps = spots.map(p => ({ key: p.key, name: p.name, x: p.x, y: p.y }));
+    for (const [k, d] of Object.entries(EQ_VW.ports)) if (g.ports[k]) g.ports[k].installed = false;      // the Vessel Widget's own spots are not used: every part is on its own IP
+    for (const p of spots) g.ports[p.key] = { installed: true, position: 'VW User ' + p.key, standard: p.std || std, label: p.name };
+    const want = {}; for (const p of spots) { if (p.part === 'probe') want[p.key] = p.mount === 'direct' ? 'probe' : 'thermowell'; if (p.part === 'element') want[p.key] = 'element'; if (p.part === 'float') want[p.key] = 'float'; }
+    const kinds = {}; if (want.probe && w.probeType) kinds.probe = w.probeType;      // its Probe Type: ➕ Add new makes that type
+    for (const p of spots) if (p.part === 'float') kinds[p.key] = p.nc ? 'nc' : 'no';      // a Level or Float: Normally Closed or Open
+    if (Object.keys(kinds).length) g.vbKinds = kinds; else delete g.vbKinds;
+    const openings = {}; for (const p of spots) if (['outlet', 'tangential', 'sparge'].includes(p.part)) openings[p.key] = p.part === 'outlet' ? 'drain' : p.part;
+    const pre = {}; if (w.heaterPart && want.element1) pre.element1 = w.heaterPart; if (w.probePart && want.probe) pre.probe = w.probePart;
+    if (Object.keys(pre).length) g.vbPre = pre; else delete g.vbPre;
+    g.pot = { vheight: +w.vheight, diameter: +w.diameter, units: w.units, outlet: w.outlet, answers: potKeep(w) };
+    Object.assign(g, { label: String(w.label).trim(), vtype: w.vtype, units: w.units, x: 240, y: 60, vbOpen: true, vbBuilt: true, vbWant: want, vbOpenings: openings, probeStyle: 'front',
+      sizeMethod: 'diameter', diameter: +w.diameter, vheight: +w.vheight });
+    g.volume = +vbRealGallons(w.diameter, w.vheight, w.units === 'Metric').toFixed(2) * (w.units === 'Metric' ? 3.78541 : 1);
+    [g.w, g.h] = vBox(g, vScaleFor(w.workspace));
+    if (w.herms !== 'none') Object.assign(g, { herms: w.herms, hermsMat: w.hermsMat }); else { delete g.herms; delete g.hermsMat; }
+    if (w.fctl && w.fctl !== 'none') Object.assign(g, { vbFerm: w.fctl, vbFermWant: vbFermWant(w) }); else { delete g.vbFerm; delete g.vbFermWant; }      // Rule 6.30
+    if (w.heat === 'gas') g.vbGas = { gas: w.gas, igniter: w.igniter }; else delete g.vbGas;
+    shiftVesselParts(g, g.x - old.x, g.y - old.y); syncVesselPorts(g, old);      // moved first: the new IPs are placed where the pot now is
+    // the valves: a Manual one is made at once; a Motorized one is picked or added beside it (its Interface and Port)
+    for (const [k, q] of [['outlet', 'outletValve'], ['tangential', 'tangentialValve']]) {
+      if (!openings[k] || !POT_MV[w[q]]) continue;
+      const elbow = /Elbow$/.test(w[q]) && !g.ports[k]?.label?.startsWith('Outlet') ? ['elbow', 'valve'] : ['valve'];
+      vbChainBuild(g, k, elbow, elbow.map(p => p === 'valve' ? { mv: POT_MV[w[q]] } : null));
+      (g.vbChains ||= {})[k] = elbow;
+    }
+    if (openings.sparge && w.spargeShut === 'mball') { vbChainBuild(g, 'sparge', ['valve'], [{ mv: POT_MV.mball }]); (g.vbChains ||= {}).sparge = ['valve']; (g.vbSparge ||= {}).sparge = 'arm'; }
+    if (openings.sparge && w.spargeShut === 'none' && w.spargeTee === 'none') { (g.vbChains ||= {}).sparge = []; (g.vbSparge ||= {}).sparge = 'arm'; }
+    if (w.sight !== 'none') potSightGlass(g, w);
+    sel = { kind: 'gfx', id: g.id };
+    renderTabs(); renderWs();
+    toast(`${g.label} is on the 🔨 Build Tab. Finish it with the Vessel Builder beside it.`, false, 8000);
+    return true;
+  } catch (err) {
+    Object.assign(draft, keep); wsName = keepWs; sel = null; renderTabs(); renderWs();
+    toast(err.message, true, 9000);
+    return false;
+  }
+}
+// the Sight Glass bundled on (Rule 5.32): a TC 1.5 Sight Glass standing up between the Sight Gauge Top and Bottom IPs, on the vessel (it
+// moves with it). Its Length is the real one, the Height less 1 in at each end; it is drawn from IP to IP.
+function potSightGlass(g, w) {
+  const top = vbIpOf(g, 'sightTop'), bot = vbIpOf(g, 'sightBottom'), t = tplOf('fitting', 'Sight_Glass'); if (!top || !bot || !t) return;
+  const a = ipCenter(top), b = ipCenter(bot), long = Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]));
+  const inches = +w.vheight / (w.units === 'Metric' ? 2.54 : 1) - 2;      // 1 in off the bottom and 1 in off the top
+  const u = placeTabFitting(t, g.workspace, tcName(t, draft.graphics), null);
+  u.label = sgLabel(draft.graphics.filter(x => x !== u)); u.sgLength = sgLength(inches); u.labelVisible = false;
+  const hh = Math.max(14, Math.round(long / sgRatio(u.sgLength)));
+  Object.assign(u, { w: long, h: hh, rot: 90, x: Math.round((a[0] + b[0]) / 2 - long / 2), y: Math.round((a[1] + b[1]) / 2 - hh / 2), onVessel: g.id, onPort: 'sightTop' });
+  u.ports = {}; syncVesselPorts(u, null);      // its ends sit on the two IPs: no IPs of its own
+}
+// what the Stainless Pot's answers asked for that is bundled on in the next update (its IP is there already)
+function potLater(g) {
+  const w = g.pot?.answers; if (!w) return [];
+  const word = (list, k) => list.find(([x]) => x === k)?.[1] || k, out = [];
+  if (w.sparge !== 'none' && w.spargeTee !== 'none') out.push(`Sparge Return: the ${word(POT_SPARGE_TEE, w.spargeTee)} with its Temperature Probe comes in the next update`);
+  if (w.steam !== 'none') out.push(`Steam Slayer${w.steamReducer === 'reducer' ? ' and its 2 in to 1.5 in Reducer' : ''}: its drawing comes in the next update`);
+  if (w.heat === 'gas') out.push(`Gas Burner (${word(POT_GAS, w.gas)}) and Igniter (${word(POT_IGNITER, w.igniter)}): come in the next update`);
+  return out;
+}
+// the answers kept on the vessel (the Vessel Builder panel shows what is still to do from them)
+const potKeep = w => Object.fromEntries(Object.entries(w).filter(([k]) => !/^x[pt]\d$/.test(k) && k !== 'userIps'));
 // 🔨 Build: the vessel on the left of the 🔨 Build Tab. Nothing is left behind when something is wrong.
 function vbBuild(t, w) {
   const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
@@ -8976,9 +9099,12 @@ function makeInstance(g, src) {
 }
 function vbAttach(g, k, kind, e) {
   const n = draft.elements.filter(x => x.integratedIn === g.id && isVPart(x) && x.vpKind === 'element').length;
-  Object.assign(e, { integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind, workspace: g.workspace }, VB_LOOK[kind === 'element' ? 'element' : 'probe']);
-  e.x = Math.round(g.x + g.w * 0.17); e.y = Math.round(g.y + (kind === 'element' ? g.h * 0.36 + n * 70 : g.h * 0.12));
-  delete g.vbWant[k]; if (g.vbPre) { delete g.vbPre[k]; if (!Object.keys(g.vbPre).length) delete g.vbPre; }
+  const nf = draft.elements.filter(x => x.integratedIn === g.id && isVPart(x) && x.vpKind === 'float').length;
+  Object.assign(e, { integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind, workspace: g.workspace }, kind === 'float' ? {} : VB_LOOK[kind === 'element' ? 'element' : 'probe']);
+  if (kind === 'float' && g.vbKinds?.[k]) e.activeLow = g.vbKinds[k] !== 'no';      // Normally Closed or Normally Open, as answered
+  e.x = Math.round(g.x + g.w * 0.17); e.y = Math.round(g.y + (kind === 'element' ? g.h * 0.36 + n * 70 : kind === 'float' ? g.h * 0.7 + nf * 60 : g.h * 0.12));
+  delete g.vbWant[k]; if (g.vbKinds) { delete g.vbKinds[k]; if (!Object.keys(g.vbKinds).length) delete g.vbKinds; }
+  if (g.vbPre) { delete g.vbPre[k]; if (!Object.keys(g.vbPre).length) delete g.vbPre; }
   const parts = draft.elements.filter(x => x.integratedIn === g.id && isVPart(x)), probe = parts.find(x => x.type === 'temperature');
   if (probe) for (const x of parts) if (x.vpKind === 'element' && !x.input) x.input = probe.name;      // its Heating Element holds the temperature of its probe
   vbFermMake(g);
@@ -8989,7 +9115,7 @@ function vbAttach(g, k, kind, e) {
 let vbAfterAdd = null;
 async function vbPickPart(g, k) {
   const kind = g.vbWant?.[k]; if (!kind) return;
-  const what = VB_WHAT[kind], fits = e => !e.integratedIn && !isMfPart(e) && (kind === 'element' ? isHeatElem(e) : e.type === 'temperature');
+  const what = VB_WHAT[kind], fits = e => !e.integratedIn && !isMfPart(e) && (kind === 'element' ? isHeatElem(e) : kind === 'float' ? e.type === 'digitalIn' && e.mode !== 'analog' : e.type === 'temperature');
   const have = draft.elements.filter(fits), NEW = '\0new';
   const o = { pick: have.find(e => e.name === g.vbPre?.[k])?.name ?? have[0]?.name ?? NEW };      // the imported one first (BruControl Import)
   const r = await dialog(`${g.label || g.name}: the ${what} on the ${g.ports?.[k]?.label || vpName(k)}`, () => [
@@ -9002,9 +9128,10 @@ async function vbPickPart(g, k) {
   vbAfterAdd = e => { sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); vbAttach(g, k, kind, e); };      // back on the 🔨 Build Tab with its vessel
   try {
     if (kind === 'element') await addThing(...ELEMENT.slice(1));
+    else if (kind === 'float') await addThing(VB_FLOAT[0], VB_FLOAT[1], { ...VB_FLOAT[2], activeLow: g.vbKinds?.[k] !== 'no' });
     else {
-      const rows = amGroup('Devices: temperature');
-      const i = await choose('Pick the probe type', rows.map((r, n) => [r[0], n])); if (i === undefined) return;
+      const rows = amGroup('Devices: temperature'), had = rows.findIndex(r => r[0] === g.vbKinds?.[k]);      // the Probe Type answered in the questions
+      const i = had >= 0 ? had : await choose('Pick the probe type', rows.map((r, n) => [r[0], n])); if (i === undefined) return;
       await addThing(...rows[i].slice(1));
     }
   } finally { vbAfterAdd = null; }
@@ -9085,7 +9212,7 @@ function renderVbPanel() {
     ? h('div', { class: 'vbRow vbDone' }, `✓ ${VB_OPENING_WORD[o]} on the ${spot(k)}: ${done[k].length ? done[k].map(vbPieceWord).join(', ') : 'nothing on it'}`)
     : h('button', { type: 'button', class: 'vbRow vbTodo', onclick: () => vbChainDlg(g, k, o) }, `⚠ ${VB_OPENING_WORD[o]} on the ${spot(k)}: pick its pieces ▸`));
   document.body.append(h('div', { id: 'vbPanel', class: 'vbPanel' }, h('h3', {}, `🔨 Vessel Builder: ${g.label || g.name}`, ' ', helpIcon(['vessel-device-builder'])),
-    ...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nothing to pick.')]), ...later,
+    ...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nothing to pick.')]), ...later, ...potLater(g).map(t => h('div', { class: 'vbRow vbTodo' }, '⏳ ' + t)),
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Close the Vessel Builder. The vessel stays on the 🔨 Build Tab; its Properties change it.',
       onclick: () => { if ((Object.keys(g.vbWant || {}).length || Object.keys(g.vbFermWant || {}).length || Object.keys(g.vbOpenings || {}).some(k => !g.vbChains?.[k])) && !confirm('Something is still not picked. Close the Vessel Builder anyway? Its spot stays closed until you pick it in the vessel\'s Properties.')) return; delete g.vbOpen; renderVbPanel(); } }, '✔ Done'))));
 }
@@ -9146,12 +9273,16 @@ function vbPlaceValve(v, ws, at, D, join) {
   align(); join(sorted()[0].id, at); align();
   const [i, o] = sorted(); return { outId: o.id, outC: o.c, inId: i.id };
 }
+// a point on a run going along D, moved on until it is clear of the vessel's box by the gap
+const vbClear = (g, at, D) => [D[0] < 0 ? Math.min(at[0], g.x - VB_GAP) : D[0] > 0 ? Math.max(at[0], g.x + g.w + VB_GAP) : at[0],
+  D[1] > 0 ? Math.max(at[1], g.y + g.h + VB_GAP) : D[1] < 0 ? Math.min(at[1], g.y - VB_GAP) : at[1]];
 function vbChainBuild(g, k, pieces, valves) {
   const ws = g.workspace, ip = vbIpOf(g, k); if (!ip) throw new Error('Its IP is not on the vessel');
   let D = vbDirOf(g, k), prevId = ip.id, prevC = ipCenter(ip);
   const fx = (prevC[0] - g.x) / (g.w || 1), size = g.std?.size || 1.5;       // its pipes are the size of the vessel's opening
   pieces.forEach((p, i) => {
-    const at = [prevC[0] + D[0] * VB_GAP, prevC[1] + D[1] * VB_GAP];
+    let at = [prevC[0] + D[0] * VB_GAP, prevC[1] + D[1] * VB_GAP];
+    if (!i) at = vbClear(g, at, D);      // the first piece sits outside the vessel (an IP on its face runs out past its wall or bottom)
     const from = prevId, fromC = prevC, join = (id, c) => vbPipe(ws, from, id, fromC, c, size);
     if (p === 'valve') { const r = vbPlaceValve({ ...valves[i], size }, ws, at, D, join); prevId = r.outId; prevC = r.outC; return; }
     const turn = D[1] ? [fx < 0.45 ? -1 : 1, 0] : [0, 1];      // a level run turns down; a downward one turns away from the middle (from the middle: Right)
@@ -12277,7 +12408,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
-    input = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': opts }, ...os.map(o => h('option', { value: o, ...(o === (v ?? os[0]) ? { selected: true } : {}) }, o)), h('option', { value: '__add__' }, opts === 'vbTypes' ? 'Other (type its General Type) ...' : 'Add new ...'));
+    input = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': opts, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...os.map(o => h('option', { value: o, ...(o === (v ?? os[0]) ? { selected: true } : {}) }, o)), h('option', { value: '__add__' }, opts === 'vbTypes' ? 'Other (type its General Type) ...' : 'Add new ...'));
   }
   else if (kind === 'numsel') {    // a number picked from a list (the Offset): saved as a number
     input = h('select', { 'data-k': key, 'data-kind': 'numsel' }, ...opts.map(([o, l]) => h('option', { value: o, ...(String(v ?? opts[0][0]) === o ? { selected: true } : {}) }, l)));
@@ -12291,6 +12422,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => o?.group ? h('optgroup', { label: o.group }, ...o.items.map(i => opt(pair(i)))) : opt(pair(o))));
   }
   else if (kind === 'note') return [h('div', { class: 'full muted', 'data-note': key }, label)];
+  else if (kind === 'warn') return [h('div', { class: 'full fieldWarn', 'data-note': key }, label)];      // a big red warning (the Gas Burner, Rule 19.13)
   else if (kind === 'go') return [h('div', { class: 'full' }, h('button', { type: 'button', class: 'vpGo', onclick: opts }, label))];      // a button to another dialog
   else if (kind === 'showall') {     // 👁 Show All (Vessel Rules, Fritz 2026-11-05): a button that shows what is hidden, pressed again hides it
     const cb = h('input', { type: 'checkbox', class: 'hidden', 'data-k': key, 'data-kind': 'bool', 'data-rerender': '1' }); cb.checked = !!v;

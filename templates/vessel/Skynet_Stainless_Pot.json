@@ -1,0 +1,97 @@
+{
+  "tip": "A plain stainless pot. The Vessel Builder adds every part from your answers.",
+  "vesselType": "vessel",
+  "units": "US",
+  "vtype": "Brew Kettle",
+  "vwidget": true,
+  "probeStyle": "front",
+  "image": "Images/Skynet/Vessels/Skynet_Stainless_Pot.svg",
+  "size": [
+    240,
+    276
+  ],
+  "sizeMethod": "proportional",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "ports": {
+    "rSparge": {
+      "installed": true,
+      "position": "VW R Sparge"
+    },
+    "rHermsIn": {
+      "installed": true,
+      "position": "VW R HERMS In"
+    },
+    "rHermsOut": {
+      "installed": true,
+      "position": "VW R HERMS Out"
+    },
+    "rElement": {
+      "installed": true,
+      "position": "VW R Element"
+    },
+    "lSparge": {
+      "installed": true,
+      "position": "VW L Sparge"
+    },
+    "lHermsIn": {
+      "installed": true,
+      "position": "VW L HERMS In"
+    },
+    "lHermsOut": {
+      "installed": true,
+      "position": "VW L HERMS Out"
+    },
+    "lElement": {
+      "installed": true,
+      "position": "VW L Element"
+    },
+    "lBackElement": {
+      "installed": true,
+      "position": "VW L Back Element"
+    },
+    "rBackElement": {
+      "installed": true,
+      "position": "VW R Back Element"
+    },
+    "cBackElement": {
+      "installed": true,
+      "position": "VW C Back Element"
+    },
+    "cProbe": {
+      "installed": true,
+      "position": "VW C Probe"
+    },
+    "lTangential": {
+      "installed": true,
+      "position": "VW L Tangential"
+    },
+    "rTangential": {
+      "installed": true,
+      "position": "VW R Tangential"
+    },
+    "cOutlet": {
+      "installed": true,
+      "position": "VW C Outlet"
+    },
+    "cBottomOutlet": {
+      "installed": true,
+      "position": "VW C Bottom Outlet"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "VW Center Probe"
+    },
+    "element": {
+      "installed": true,
+      "position": "VW R Element",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    }
+  },
+  "notes": "The plain stainless pot every vessel is built from (2026-11-27, Rule 19.13): \"build from a single stainless pot with graphic proportional to the H & D\". The Vessel Builder draws it to the Height and Diameter typed and adds each part (as a User IP) at its height off the bottom. Its own fixed ports are the Vessel Widget ones, used only for a HERMS coil."
+}

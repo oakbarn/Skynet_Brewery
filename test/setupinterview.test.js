@@ -353,10 +353,12 @@ assert.doesNotMatch(JSON.stringify(SETUP_START), /Answser|knowlege|Brewerey|Unfo
   assert.deepEqual(m.spotsOf('skirt'), [['bottom', 'Bottom Center']], 'a skirt drain: nothing to pick');
   assert.deepEqual(choicesOf(SETUP_QUESTIONS.find(q => q.id === 'v2Template'), ctx(), { v2Use: 'mlt', v2Heat: 'noheat', v2Parts: { skirt: 'bottom' } }).map(([k]) => k), ['OakBarn_MLT']);
   // his Vessel Layout picture: the same 10 places on the Front and the Back; "Sight Glass left or Right only"
-  assert.deepEqual(m.LAYOUT_PLACES.map(([, w]) => w), ['High Right', 'High Left', 'Middle Right', 'Middle Left', 'Mid Low Right', 'Mid Low Center', 'Mid Low Left', 'Low Right', 'Low Center', 'Low Left']);
+  // Left and Right as you face the vessel (2026-11-27: "Left as you face it"): every Left place on the left of the picture
+  assert.deepEqual(m.LAYOUT_PLACES.map(([, w]) => w), ['High Left', 'High Right', 'Middle Left', 'Middle Right', 'Mid Low Left', 'Mid Low Center', 'Mid Low Right', 'Low Left', 'Low Center', 'Low Right']);
+  for (const [, w, x] of m.LAYOUT_PLACES) assert.ok(/Left/.test(w) ? x < 0.5 : /Right/.test(w) ? x > 0.5 : x === 0.5, `${w} as you face it`);
   assert.equal(m.VESSEL_SPOTS.length, 20);
-  assert.deepEqual([m.VESSEL_SPOTS[0][1], m.VESSEL_SPOTS[10][1]], ['Front High Right', 'Back High Right']);
-  assert.deepEqual(m.spotsOf('sight').map(([, w]) => w), ['Right', 'Left']);
+  assert.deepEqual([m.VESSEL_SPOTS[0][1], m.VESSEL_SPOTS[10][1]], ['Front High Left', 'Back High Left']);
+  assert.deepEqual(m.spotsOf('sight').map(([, w]) => w), ['Left', 'Right']);
   // the Vessel Layout sample: the places ticked are filled in
   const svg = m.vesselLayoutSvg({ sparge: 'fhl', sight: 'left' });
   assert.match(svg, /^<svg /); assert.match(svg, /High Left: Sparge Arm/); assert.equal((svg.match(/<circle/g) || []).length, 24);

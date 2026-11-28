@@ -7679,6 +7679,34 @@ gallons (stored 56.78 L), in its own box (positions named Radiator ...): a **Tan
 on the Front, the **Heating element** TC 2 at the Center Back, between the Outlet and the Temperature Probe, and the **Thermowell** TC
 1.5 (the temperature probe) on the Front above it. Both programs show the same Templates and ports.
 
+19.13 **Every vessel is built from one plain Stainless Pot** (OakBarn Brewery, 2026-11-27: "build the Vessel from a very generic One. Just
+ask the questions and it gets made and Bundled"; "And the same process when adding a vessel in the build tab"; "make it a plain vessel and
+we will add every IP and Other Devices. The real first question needs to be the Height and Diameter"; "build from a single stainless pot
+with graphic proportional to the H & D"). The Vessel Device Builder (Rule 19.5, Help 166) starts from the Skynet Stainless Pot
+(templates/vessel/Skynet_Stainless_Pot.json, Skynet picture 255). The questions and where each part goes are in public/vesselpot.js:
+1. **Height** and **Diameter** come first (inside, inches or cm). The pot is drawn to them, with its rim and a handle each side; its volume
+   comes from them. A Center Bottom Drain adds a 6 in skirt under it.
+2. Each part has an IP at its **height off the inside bottom**, measured on real kettles, whatever their size: Outlet Center Low 2 in (or a
+   Center Bottom Drain, centered in the skirt); Temperature 5.5 in, centered above the Outlet first ("99% correct"); Tangential Inlet
+   1.5 in, Left first; Sight Gauge Bottom 1 in off the bottom and Top 1 in off the top, directly above; Volume Pressure Sensor 1 in;
+   Heater 1 and 2 Back Right or Back Left, 2 in TC, at their typed Height above the Bottom; Sparge Return and Steam Slayer 2 in High,
+   Right or Left; HERMS Coil Inlet and Outlet (Copper or Stainless; on one side, Inlet High or Low); Level or Float 1 and 2 (Left, Right,
+   Front or Back, at a typed Height from the Bottom, Normally Closed or Normally Open); Additional IPs on any place of the Vessel Layout
+   not already taken (1.5, 2.0, 3/4 or 1/2 TC, 1/2 BSP, 1/2 MPT, 1/2 FPT).
+3. **Temperature:** Electronic (its Probe Type from the list of every Temperature probe type) or an Analog Gauge, each in a Thermowell or
+   Direct. An Analog Gauge has no Device.
+4. **Left and Right are as you face the vessel** (OakBarn Brewery, 2026-11-27: "Left as you face it").
+5. A **Mash Tun** asks its **False Bottom** height (blank: none), drawn as a dashed line. The Outlet stays below it at its usual height
+   ("the Outlet is below the false bottom so the standard height is probably correct").
+6. **Gas Burner** (Natural Gas, High Pressure Propane, Low Pressure Propane) with its **Igniter** ((none), Flat Plate (no Safety), Pilot
+   with Valve Control, Pilot (no Safety)) shows one big warning as soon as it is picked: "⚠ Gas can kill or cause a fire. Follow every gas
+   safety precaution. You are responsible for all safety when using gas. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC
+   experts. Consult a Licensed Electrician, Plumber or HVAC professional."
+7. **Bundled at once:** a Manual Valve on the Outlet and the Tangential Inlet (Ball or Butterfly, with an Elbow or not), a Manual Ball
+   Valve on the Sparge Return, and the Sight Glass standing between the Sight Gauge IPs. A Motorized Valve, the Heaters, the Probe and the
+   Level or Float switches are picked or added beside it in the Vessel Builder panel, as in Rule 19.5. The Sparge Tee with its probe, the
+   Steam Slayer with its Reducer and the Gas Burner with its Igniter are listed there and come in the next update.
+
 ## Change log
 
 - 2026-11-27: Rule 2.75 changed: Size of your Vessel (Inside Diameter and Height, Purported Volume, Dead Space, top of the element with the Safe Element Volume worked out plus 1 in) after the vessel for every way to heat one vessel. Help 248.
@@ -8501,3 +8529,4 @@ on the Front, the **Heating element** TC 2 at the Center Back, between the Outle
 - 2026-11-26: Rule 1.24 changed (OakBarn Brewery, gGlobal rules PDF and "text is gblS_ as a string"): the gGlobal prefixes and short words are gblS_ / gblS (String, shown as Text), gblV_ / gblV, gblT_ / gblT, gblDT_ / gblDT and gblB_ / gblB (were gS_ gV_ gT_ gD_ gB_). The suggested names on the gGlobal screen and the ➕ sample gGlobals follow. The Kind names (gS_Global_String ...) are unchanged. Help 145 and the pages with gGlobal examples (and French).
 - 2026-11-26: Added Rule 1.36 (OakBarn Brewery: "tap to type"): the Text Widget Tap to type switch; on for the 3 Vessel sample's Notes. Help 91 (and French), Widget Library.
 - 2026-11-26: Rule 2.7 changed (OakBarn Brewery, his picture): White in the color picker is renamed White (Opaque) (250,250,250) and White (Transparent) (255,255,255 see-through, like None) is added; all white text on the screen is 250,250,250 (dark Look text, Skynet Tab Styles, Override, new Vessel labels, timer digits and titles). Help 90, 187 updated (English + French). Checked against both programs: one shared color list; the Importer brings no text colors. (thread "Make White text White (Opaque)")
+- 2026-11-27: Added Rule 19.13 (OakBarn Brewery: "build the Vessel from a very generic One. Just ask the questions and it gets made and Bundled"; "build from a single stainless pot with graphic proportional to the H & D"): every vessel is built from the plain Skynet Stainless Pot drawn to its Height and Diameter, each part at its measured height off the bottom (Temperature, Level or Float, False Bottom, Gas Burner and its warning). Rule 19.5's Build a Vessel Device now asks these questions. Rule 2.75: the Vessel Layout's Left and Right are as you face the vessel ("Left as you face it"). Help 166 (and French). Checked against both programs: the BruControl Import's Build page opens the same builder with its heater and probe picked first.
