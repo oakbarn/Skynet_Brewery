@@ -1938,5 +1938,6 @@
  "Its Bottom IP 1 in off the bottom, its Top IP directly above, 1 in off the top.": "Son IP du bas à 1 po du fond, son IP du haut juste au-dessus, à 1 po du haut.",
  "Needs an Electronic Temperature probe.": "Il faut une sonde de température Electronic.",
  "13. Additional IPs: any place of the Vessel Layout no part above has taken, each with its IP Type.": "13. IP supplémentaires : tout endroit du Vessel Layout qu'aucune pièce ci-dessus n'a pris, chacun avec son type d'IP.",
- "A plain stainless pot. The Vessel Builder adds every part from your answers.": "Une simple marmite inox. Le Vessel Builder ajoute chaque pièce selon vos réponses."
+ "A plain stainless pot. The Vessel Builder adds every part from your answers.": "Une simple marmite inox. Le Vessel Builder ajoute chaque pièce selon vos réponses.",
+ "Pick the Interface these parts are wired to, then each part's Port. Save makes them all, built into the vessel, each named with its Suggested Name. ✖ Close leaves them to pick one at a time in the Vessel Builder panel.": "Choisissez l'Interface à laquelle ces pièces sont câblées, puis le Port de chaque pièce. Save les crée toutes, intégrées à la cuve, chacune avec son Suggested Name. ✖ Close les laisse à choisir une par une dans le panneau Vessel Builder."
 }

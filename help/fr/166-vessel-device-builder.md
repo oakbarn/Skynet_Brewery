@@ -44,6 +44,14 @@ Quand **Gas Burner** est choisi, un grand avertissement rouge s'affiche :
 Appuyez sur **🔨 Build**. Une vanne manuelle sur la Sortie, l'Entrée tangentielle ou le Retour de rinçage est posée tout de suite, ainsi
 que le **Sight Glass**, debout entre les deux IP de l'indicateur de niveau.
 
+### 🔌 Interface, ports et noms {#interface-ports-and-names}
+
+Juste après **🔨 Build**, une deuxième fenêtre demande chaque pièce qui a besoin d'un port : la sonde de température, les résistances et
+les interrupteurs de niveau ou flotteurs. Choisissez l'**Interface** à laquelle ils sont câblés, puis le **Port** de chaque pièce (ou
+son 1-Wire Index). **💾 Save** les crée toutes, intégrées à la cuve, chacune avec son **Suggested Name**. **✖ Close** les laisse à
+choisir une par une dans le panneau Vessel Builder. Sans Interface pour l'instant, la fenêtre n'apparaît pas : ajoutez les pièces plus
+tard, une fois l'Interface configurée.
+
 ## 2. La finir sur le Build Tab {#2-finish-it-on-the-build-tab}
 
 La cuve est à gauche du **🔨 Build Tab**, avec sa résistance, son Thermowell et son serpentin HERMS, et les ouvertures de sa

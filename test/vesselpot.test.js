@@ -57,3 +57,14 @@ assert.equal(spot({ ...w, extras: { bhl: 'TC 1.5' } }, 'xbhl').std, 'TC 1.5');
 assert.ok(!/#fff\b|#ffffff/i.test(potSvg(w))); assert.ok(potSvg(w).includes('preserveAspectRatio="none"'));
 assert.ok(potSummary(fl).some(t => /Level or Float 2: Back, 4 in from the bottom, Normally Open/.test(t)));
 console.log('vesselpot ok');
+// the Interface, Ports and Names pop-up right after 🔨 Build (2026-11-27: "a second tab to popup about the interface and Port then save";
+// "and Suggest Name"): every part needing a Port, then the parts made built in, with their Suggested Names (applyVParts)
+{
+  const app = fs.readFileSync('public/app.js', 'utf8');
+  assert.ok(app.includes('setTimeout(() => potPortsDlg(g), 0);'), 'the pop-up opens after Build');
+  assert.ok(app.includes("const POT_PORT_KINDS = ['probe', 'thermowell', 'element', 'float'];"));
+  assert.ok(app.includes('applyVParts(g, vp, g.workspace, g.label || \'Vessel\');'), 'made with Suggested Names');
+  assert.ok(app.includes("if (!want.length || !devs.length) return false;"), 'no Interface yet: nothing asked, set later');
+  assert.ok(app.includes("['float', 'Level or Float Switch']"), 'a Level or Float Switch can be built into an IP');
+  console.log('vesselpot pop-up ok');
+}
