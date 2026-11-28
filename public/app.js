@@ -8975,8 +8975,11 @@ function potFromVb(v) {
 // 🔨 Build the Stainless Pot: the vessel on the 🔨 Build Tab, an IP for each part at its height (User IPs, Rule 5.31), its Heaters and
 // Probe to pick or add beside it, its valves made at once (a Motorized one is picked or added beside it). Nothing is left behind when
 // something is wrong.
+// the Outlet's and Tangential Inlet's Manual Valve: seen face on, on its IP, its handle on top (OakBarn Brewery, 2026-11-27: "a tangential come
+// out the left front and the IP Face On with the handle on top"; "Outlet Elbow should face down")
 const POT_MV = { mballElbow: 'Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', bflyElbow: 'Images/Skynet/Valves/Manual_Butterfly_Valve_Front_Elbow_Closed.svg',
-  mball: 'Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', bfly: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg' };
+  mball: 'Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', bfly: 'Images/Skynet/Valves/Manual_Butterfly_Valve_Front_Closed.svg' };
+const POT_MV_SIDE = 'Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg';      // the Sparge Return's shutoff, out the side
 function potBuild(t, w) {
   const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
   try {
@@ -9009,12 +9012,10 @@ function potBuild(t, w) {
     // the valves: a Manual one is made at once; a Motorized one is picked or added beside it (its Interface and Port)
     for (const [k, q] of [['outlet', 'outletValve'], ['tangential', 'tangentialValve']]) {
       if (!openings[k] || !POT_MV[w[q]]) continue;
-      // the Outlet: its front view valve, its elbow facing down; a side opening: an Elbow (turning the run down), then a level picture turned
-      const side = k !== 'outlet', elbow = /Elbow$/.test(w[q]) && side ? ['elbow', 'valve'] : ['valve'], pic = side && /Elbow$/.test(w[q]) ? POT_MV[w[q].replace('Elbow', '')] : POT_MV[w[q]];
-      vbChainBuild(g, k, elbow, elbow.map(p => p === 'valve' ? { mv: pic } : null));
-      (g.vbChains ||= {})[k] = elbow;
+      vbChainBuild(g, k, ['valve'], [{ mv: POT_MV[w[q]] }]);      // face on, right on its IP; an elbow faces down
+      (g.vbChains ||= {})[k] = ['valve'];
     }
-    if (openings.sparge && w.spargeShut === 'mball') { vbChainBuild(g, 'sparge', ['valve'], [{ mv: POT_MV.mball }]); (g.vbChains ||= {}).sparge = ['valve']; (g.vbSparge ||= {}).sparge = 'arm'; }
+    if (openings.sparge && w.spargeShut === 'mball') { vbChainBuild(g, 'sparge', ['valve'], [{ mv: POT_MV_SIDE }]); (g.vbChains ||= {}).sparge = ['valve']; (g.vbSparge ||= {}).sparge = 'arm'; }
     if (openings.sparge && w.spargeShut === 'none' && w.spargeTee === 'none') { (g.vbChains ||= {}).sparge = []; (g.vbSparge ||= {}).sparge = 'arm'; }
     if (w.sight !== 'none') potSightGlass(g, w);
     sel = { kind: 'gfx', id: g.id };
@@ -9331,9 +9332,10 @@ function vbChainBuild(g, k, pieces, valves) {
   let D = vbDirOf(g, k), prevId = ip.id, prevC = ipCenter(ip);
   const fx = (prevC[0] - g.x) / (g.w || 1), size = g.std?.size || 1.5;       // its pipes are the size of the vessel's opening
   pieces.forEach((p, i) => {
+    const face = !i && p === 'valve' && /_Front(_Elbow)?_(Open|Closed)\.svg$/.test(valves[i]?.mv || '');      // a valve seen face on sits right on its IP
     let at = [prevC[0] + D[0] * VB_GAP, prevC[1] + D[1] * VB_GAP];
-    if (!i) at = vbClear(g, at, D);      // the first piece sits outside the vessel (an IP on its face runs out past its wall or bottom)
-    const from = prevId, fromC = prevC, join = (id, c) => vbPipe(ws, from, id, fromC, c, size);
+    if (face) at = [...prevC]; else if (!i) at = vbClear(g, at, D);      // the first piece sits outside the vessel (an IP on its face runs out past its wall or bottom)
+    const from = prevId, fromC = prevC, join = face ? id => directJoin(from, id, ws) : (id, c) => vbPipe(ws, from, id, fromC, c, size);
     if (p === 'valve') { const r = vbPlaceValve({ ...valves[i], size }, ws, at, D, join); prevId = r.outId; prevC = r.outC; return; }
     const turn = D[1] ? [fx < 0.45 ? -1 : 1, 0] : [0, 1];      // a level run turns down; a downward one turns away from the middle (from the middle: Right)
     const r = vbPlaceFit(p, ws, at, D, turn, join);
